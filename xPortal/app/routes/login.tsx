@@ -22,11 +22,11 @@ export const action: ActionFunction = async ({ request }) => {
     let lastName = form.get('lastName')
 
     if (typeof action !== 'string' || typeof email !== 'string' || typeof password !== 'string') {
-        return Response.json({ error: `Invalid Form Data` }, { status: 400 })
+        return Response.json({ error: `Invalid Form Data`, form: action }, { status: 400 })
     }
 
     if (action === 'register' && (typeof firstName !== 'string' || typeof lastName !== 'string')) {
-        return Response.json({ error: `Invalid Form Data` }, { status: 400 })
+        return Response.json({ error: `Invalid Form Data`, form: action }, { status: 400 })
     }
 
     const errors = {
@@ -41,7 +41,7 @@ export const action: ActionFunction = async ({ request }) => {
     }
 
     if (Object.values(errors).some(Boolean))
-        return Response.json({ errors, fields: { email, password, firstName, lastName } }, { status: 400 })
+        return Response.json({ errors, fields: { email, password, firstName, lastName }, form: action }, { status: 400 })
 
 
     switch (action) {
@@ -111,12 +111,12 @@ export default function Login() {
         {signActive ? <p className="font-semibold text-slate-300">Log In To Give Some Praise!</p> : <p className="font-semibold text-slate-300">Sign Up To Give Some Praise!</p>}
 
         <div className="border-red-700 flex justify-between text-black font-extrabold">
-            <div className='shadow-red-500 shadow-sm border-red-500 border-2 rounded bg-red-500 hover:cursor-pointer p-1 m-1' onClick={() => {setSignActive(!signActive);}}>{!signActive ? 'Sign In' : 'Sign Up'}</div>
+            <div className='shadow-red-500 shadow-sm border-red-500 border-2 rounded bg-red-500 hover:cursor-pointer p-1 m-1' onClick={() => setSignActive(!signActive)}>{!signActive ? 'Sign In' : 'Sign Up'}</div>
             {/* <div className='shadow-yellow-300 shadow-sm border-yellow-300 border-2 rounded bg-yellow-300 hover:cursor-pointer p-1 m-1 display' onClick={() => setSignActive(false)}>Sign Up</div> */}
         </div>
         {
             signActive ? 
-            <form method="POST" className="rounded-2xl bg-gray-200 p-6 w-96">
+            <form method="POST" className="rounded-2xl bg-gray-200 p-6 w-96" encType='application/json'>
                 <div className="text-xs font-semibold text-center tracking-wide text-red-500 w-full">{formError}</div>
                 <FormField
                     htmlFor="email"
@@ -135,7 +135,7 @@ export default function Login() {
                 />
                 <button className="w-full text-center rounded-xl mt-2 bg-yellow-300 px-3 py-2 text-blue-600 font-semibold hover:bg-yellow-400 hover:cursor-pointer" name='_action' value='login'>Login</button>
             </form> : 
-            <form method="POST" className="rounded-2xl bg-gray-200 p-6 w-96">
+            <form method="POST" className="rounded-2xl bg-gray-200 p-6 w-96" encType='application/json'>
                 <div className="text-xs font-semibold text-center tracking-wide text-red-500 w-full">{formError}</div>
                 <FormField
                     htmlFor="email"
