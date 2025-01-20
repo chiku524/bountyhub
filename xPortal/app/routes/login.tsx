@@ -22,11 +22,13 @@ export const action: ActionFunction = async ({ request }) => {
     let lastName = form.get('lastName')
 
     if (typeof action !== 'string' || typeof email !== 'string' || typeof password !== 'string') {
-        return Response.json({ error: `Invalid Form Data`, form: action }, { status: 400 })
+        // return Response.json({ error: `Invalid Form Data`, form: action }, { status: 400 })
+        return new Response("Invalid Form Data", {status: 400});
     }
 
     if (action === 'register' && (typeof firstName !== 'string' || typeof lastName !== 'string')) {
-        return Response.json({ error: `Invalid Form Data`, form: action }, { status: 400 })
+        // return Response.json({ error: `Invalid Form Data`, form: action }, { status: 400 })
+        return new Response("Invalid Form Data", {status: 400});
     }
 
     const errors = {
@@ -40,8 +42,13 @@ export const action: ActionFunction = async ({ request }) => {
         : {}),
     }
 
-    if (Object.values(errors).some(Boolean))
-        return Response.json({ errors, fields: { email, password, firstName, lastName }, form: action }, { status: 400 })
+    if (Object.values(errors).some(Boolean)) {
+        if(errors.email) return new Response(errors.email, {status: 400});
+        if(errors.password) return new Response(errors.password, {status: 400});
+        if(errors.firstName) return new Response(errors.firstName, {status: 400});
+        if(errors.lastName) return new Response(errors.lastName, {status: 400});
+    }
+        // return Response.json({ errors, fields: { email, password, firstName, lastName }, form: action }, { status: 400 })
 
 
     switch (action) {
@@ -54,7 +61,8 @@ export const action: ActionFunction = async ({ request }) => {
             return await register({ email, password, firstName, lastName })
         }
         default:
-            return Response.json({ error: `Invalid Form Data` }, { status: 400 });
+            // return Response.json({ error: `Invalid Form Data` }, { status: 400 });
+            return new Response("Invalid Form Data", {status: 400});
       }
 }
 
@@ -116,7 +124,7 @@ export default function Login() {
         </div>
         {
             signActive ? 
-            <form method="POST" className="rounded-2xl bg-gray-200 p-6 w-96" encType='application/json'>
+            <form method="POST" className="rounded-2xl bg-gray-200 p-6 w-96">
                 <div className="text-xs font-semibold text-center tracking-wide text-red-500 w-full">{formError}</div>
                 <FormField
                     htmlFor="email"
@@ -135,7 +143,7 @@ export default function Login() {
                 />
                 <button className="w-full text-center rounded-xl mt-2 bg-yellow-300 px-3 py-2 text-blue-600 font-semibold hover:bg-yellow-400 hover:cursor-pointer" name='_action' value='login'>Login</button>
             </form> : 
-            <form method="POST" className="rounded-2xl bg-gray-200 p-6 w-96" encType='application/json'>
+            <form method="POST" className="rounded-2xl bg-gray-200 p-6 w-96">
                 <div className="text-xs font-semibold text-center tracking-wide text-red-500 w-full">{formError}</div>
                 <FormField
                     htmlFor="email"
