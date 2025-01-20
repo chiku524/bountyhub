@@ -9,7 +9,7 @@ import { login, register, getUser } from '~/utils/auth.server'
 
 
 export const loader: LoaderFunction = async ({ request }) => {
-    // If there's already a user in the session, redirect to the home page
+    // If there's already a user in the session, redirect to the profile page
     return (await getUser(request)) ? redirect('/profile') : null
 }
 
