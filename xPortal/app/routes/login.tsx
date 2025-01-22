@@ -22,21 +22,11 @@ export const action: ActionFunction = async ({ request }) => {
     let lastName = form.get('lastName')
 
     if (typeof action !== 'string' || typeof email !== 'string' || typeof password !== 'string') {
-        return new Response(JSON.stringify({ error: `Invalid Form Data`, form: action }), {
-            status: 400,
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
+        return { error: `Invalid Form Data`, form: action }
     }
 
     if (action === 'register' && (typeof firstName !== 'string' || typeof lastName !== 'string')) {
-        return new Response(JSON.stringify({ error: `Invalid Form Data`, form: action }), {
-            status: 400,
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
+        return { error: `Invalid Form Data`, form: action }
     }
 
     const errors = {
@@ -51,12 +41,7 @@ export const action: ActionFunction = async ({ request }) => {
     }
 
     if (Object.values(errors).some(Boolean))
-        return new Response(JSON.stringify({ errors, fields: { email, password, firstName, lastName }, form: action }), { 
-            status: 400, 
-            headers: {
-                'Content-Type': 'application/json'
-            }, 
-        })
+        return { errors, fields: { email, password, firstName, lastName }, form: action }
 
 
     switch (action) {
@@ -69,12 +54,7 @@ export const action: ActionFunction = async ({ request }) => {
             return await register({ email, password, firstName, lastName })
         }
         default:
-            return new Response(JSON.stringify({ error: `Invalid Form Data`, form: action }), {
-                status: 400,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
+            return { error: `Invalid Form Data`, form: action }
       }
 }
 
