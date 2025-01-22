@@ -37,18 +37,12 @@ export async function createUserSession(userId: string, redirectTo: string) {
 export async function register(user: RegisterForm) {
   const exists = await prisma.user.count({ where: { email: user.email } })
   if (exists) {
-    return Response.json({ error: `User already exists with that email` }, { status: 400 })
+    return { error: `User already exists with that email` }
   }
 
   const newUser = await createUser(user)
   if (!newUser) {
-    return Response.json(
-      {
-        error: `Something went wrong trying to create a new user.`,
-        fields: { email: user.email, password: user.password },
-      },
-      { status: 400 },
-    )
+    return { error: `Something went wrong trying to create a new user.`, fields: { email: user.email, password: user.password }}
   }
 
   return createUserSession(newUser.id, '/profile');
@@ -62,7 +56,7 @@ export async function login({ email, password }: LoginForm) {
   
     // 3
     if (!user || !(await bcrypt.compare(password, user.password)))
-      return Response.json({ error: `Incorrect login` }, { status: 400 })
+      return { error: `Incorrect login` }
   
     // 4
     return createUserSession(user.id, "/profile");
