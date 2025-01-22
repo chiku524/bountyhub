@@ -22,13 +22,21 @@ export const action: ActionFunction = async ({ request }) => {
     let lastName = form.get('lastName')
 
     if (typeof action !== 'string' || typeof email !== 'string' || typeof password !== 'string') {
-        // return Response.json({ error: `Invalid Form Data`, form: action }, { status: 400 })
-        return new Response("Invalid Form Data", {status: 400});
+        return new Response(JSON.stringify({ error: `Invalid Form Data`, form: action }), {
+            status: 400,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
     }
 
     if (action === 'register' && (typeof firstName !== 'string' || typeof lastName !== 'string')) {
-        // return Response.json({ error: `Invalid Form Data`, form: action }, { status: 400 })
-        return new Response("Invalid Form Data", {status: 400});
+        return new Response(JSON.stringify({ error: `Invalid Form Data`, form: action }), {
+            status: 400,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
     }
 
     const errors = {
@@ -42,13 +50,13 @@ export const action: ActionFunction = async ({ request }) => {
         : {}),
     }
 
-    if (Object.values(errors).some(Boolean)) {
-        if(errors.email) return new Response(errors.email, {status: 400});
-        if(errors.password) return new Response(errors.password, {status: 400});
-        if(errors.firstName) return new Response(errors.firstName, {status: 400});
-        if(errors.lastName) return new Response(errors.lastName, {status: 400});
-    }
-        // return Response.json({ errors, fields: { email, password, firstName, lastName }, form: action }, { status: 400 })
+    if (Object.values(errors).some(Boolean))
+        return new Response(JSON.stringify({ errors, fields: { email, password, firstName, lastName }, form: action }), { 
+            status: 400, 
+            headers: {
+                'Content-Type': 'application/json'
+            }, 
+        })
 
 
     switch (action) {
@@ -61,8 +69,12 @@ export const action: ActionFunction = async ({ request }) => {
             return await register({ email, password, firstName, lastName })
         }
         default:
-            // return Response.json({ error: `Invalid Form Data` }, { status: 400 });
-            return new Response("Invalid Form Data", {status: 400});
+            return new Response(JSON.stringify({ error: `Invalid Form Data`, form: action }), {
+                status: 400,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
       }
 }
 
