@@ -19,9 +19,12 @@ export default {
       boxShadow: {
         "custom": '0 0 0.4rem crimson',
         "custom-slate": '0 0 0.4rem #334155',
+        "custom-blue": '0 0 0.4rem #3b82f6',
+        "custom-green": '0 0 0.4rem #22c55e ',
       },
       dropShadow: {
         "custom": '0 0 0.4rem #fcd34d',
+        "custom-green": '0 0 0.4rem #22c55e ',
       },
       animation: {
         "fly": 'fly 4s ease infinite'

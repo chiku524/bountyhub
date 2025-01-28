@@ -4,7 +4,7 @@ import Logo from '../images/corki-logo.png'
 import { gsap } from 'gsap'
 
 
-export function Nav({}) {
+export function Nav() {
     const [bubArray] = useState<number[]>([]);
     const [bubArray1] = useState<number[]>([]);
     const [bubArray2] = useState<number[]>([]);
@@ -85,10 +85,12 @@ export function Nav({}) {
               </div>
             </Link>
             <Link to="/profile" className='w-full py-5 mt-24 flex justify-center items-center hover:cursor-pointer hover:bg-indigo-900 hover:bg-opacity-50'>
-                <span>Profile</span>
+                <span>Dashboard</span>
             </Link>
             <hr className='border-b border-gray-500 w-4/6'/>
-            <div className='w-full py-5 flex justify-center items-center hover:cursor-pointer hover:bg-indigo-900 hover:bg-opacity-50'><span>Dashboard</span></div>
+            <Link to="/marketplace" className='w-full py-5 flex justify-center items-center hover:cursor-pointer hover:bg-indigo-900 hover:bg-opacity-50'>
+                <span>Marketplace</span>
+            </Link>            
             <hr className='border-b border-gray-500 w-4/6'/>
             <div className='w-full py-5 flex justify-center items-center hover:cursor-pointer hover:bg-indigo-900 hover:bg-opacity-50'><span>Dashboard</span></div>
             <hr className='border-b border-gray-500 w-4/6'/>

@@ -25,11 +25,13 @@ model User {
 type Profile {
   firstName String
   lastName  String
+  username  String?
   profession String?
   avatar    String?
   website   String?
   bio       String?
   socials   Socials?
+  posts Posts?
 }
 
 type Socials {
@@ -38,4 +40,18 @@ type Socials {
   instagram String?
   linkedin  String?
   github    String?
+}
+
+type Posts {
+  header String
+  body  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  comments Comments?
+}
+
+type Comments {
+  comment String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }

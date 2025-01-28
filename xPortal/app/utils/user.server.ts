@@ -26,6 +26,7 @@ interface UserUpdate {
     lastName?: string | undefined;
     profession?: string | undefined;
     avatar?: string | undefined;
+    username?: string | undefined;
     website?: string | undefined;
     bio?: string | undefined;
     socials: {
@@ -40,7 +41,7 @@ interface UserUpdate {
 
 export const editUser = async (user: Partial<User>, request: Request) => {
   const userId = await getUser(request);
-  const { email, profile: { firstName, lastName, profession, avatar, website, bio, socials: { facebook, twitter, instagram, linkedin, github }}} = user as UserUpdate;
+  const { email, profile: { firstName, lastName, profession, avatar, username, website, bio, socials: { facebook, twitter, instagram, linkedin, github }}} = user as UserUpdate;
   
 
   const updatedUserEmail = await prisma.user.update({
@@ -54,6 +55,7 @@ export const editUser = async (user: Partial<User>, request: Request) => {
             profession: profession || undefined,
             avatar: avatar || undefined,
             website: website || undefined,
+            username: username || undefined,
             bio: bio || undefined,
             socials: {
               facebook: facebook || undefined,
