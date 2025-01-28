@@ -105,9 +105,9 @@ export default function Login() {
     }, [firstLoad])
 
   return (
-    <Layout>
+    <Layout backgroundColor="bg-neutral-900">
       <div className="h-full justify-center items-center flex flex-col gap-y-4">
-        <h2 className="text-5xl font-extrabold text-yellow-300">Welcome to Kudos!</h2>
+        <h2 className="text-5xl font-extrabold text-yellow-300">Welcome to Flexithe!</h2>
         {signActive ? <p className="font-semibold text-slate-300">Log In To Give Some Praise!</p> : <p className="font-semibold text-slate-300">Sign Up To Give Some Praise!</p>}
 
         <div className="border-red-700 flex justify-between text-black font-extrabold">

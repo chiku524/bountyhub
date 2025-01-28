@@ -25,4 +25,17 @@ model User {
 type Profile {
   firstName String
   lastName  String
+  profession String?
+  avatar    String?
+  website   String?
+  bio       String?
+  socials   Socials?
+}
+
+type Socials {
+  facebook  String?
+  twitter   String?
+  instagram String?
+  linkedin  String?
+  github    String?
 }

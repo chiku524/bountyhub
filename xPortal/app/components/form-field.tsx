@@ -8,9 +8,10 @@ interface FormFieldProps {
     value: any
     onChange?: (...args: any) => any,
     error?: string
+    onClick?: (...args: any) => any
   }
   
-  export function FormField({ htmlFor, label, type = 'text', value, onChange = () => {}, error = "" }: FormFieldProps) {
+  export function FormField({ htmlFor, label, type = 'text', value, onChange = () => {}, error = "", onClick = () => {} }: FormFieldProps) {
     const [errorText, setErrorText] = useState(error);
 
     useEffect(() => {
@@ -25,7 +26,7 @@ interface FormFieldProps {
         <input onChange={e => {
             onChange(e)
             setErrorText('')
-        }} type={type} id={htmlFor} name={htmlFor} className="w-full p-2 rounded-xl my-2" value={value} />
+        }} type={type} id={htmlFor} name={htmlFor} className="w-full p-2 rounded-xl my-2" value={value} onClick={() => onClick()}/>
         <div className="text-xs font-semibold text-center tracking-wide text-red-500 w-full">
             {errorText || ''}
         </div>

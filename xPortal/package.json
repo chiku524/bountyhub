@@ -1,5 +1,5 @@
 {
-  "name": "xportal",
+  "name": "portal",
   "private": true,
   "sideEffects": false,
   "type": "module",
@@ -17,6 +17,7 @@
     "@remix-run/react": "^2.15.2",
     "@remix-run/serve": "^2.15.2",
     "bcryptjs": "^2.4.3",
+    "gsap": "^3.12.7",
     "isbot": "^4.1.0",
     "mongodb": "^6.12.0",
     "react": "^18.2.0",

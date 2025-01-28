@@ -14,7 +14,7 @@ if (!sessionSecret) {
 
 const storage = createCookieSessionStorage({
   cookie: {
-    name: 'xPortal-session',
+    name: 'portal-session',
     secure: process.env.NODE_ENV === 'production',
     secrets: [sessionSecret],
     sameSite: 'lax',

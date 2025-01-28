@@ -1,4 +1,8 @@
-// app/components/layout.tsx
-export function Layout({ children }: { children: React.ReactNode }) {
-    return <div className="h-screen w-full bg-neutral-900 font-mono">{children}</div>
-}
+export function Layout({ children, backgroundColor }: { children: React.ReactNode, backgroundColor?: string }) {
+    return (
+      <div className={`h-screen w-full ${backgroundColor} font-mono`}>
+        {children}
+      </div>
+    );
+  }
+  
