@@ -4,6 +4,7 @@ export type RegisterForm = {
     password: string
     firstName: string
     lastName: string
+    username: string
 }
   
 export type LoginForm = {
@@ -29,4 +30,37 @@ export type User = {
             github: string | undefined
         }
     }
+}
+
+export type Post = {
+    id: string | undefined
+    author: string
+    title: string
+    content: string
+    createdAt: string | undefined
+    updatedAt: string | undefined
+    comments: {
+        postedBy: string | undefined
+        content: string | undefined
+        createdAt: string | undefined
+        updatedAt: string | undefined
+    }[] | undefined
+    answers: {
+        postedBy: string | undefined
+        content: string | undefined
+        createdAt: string | undefined
+        updatedAt: string | undefined
+        comments: {
+            postedBy: string | undefined
+            content: string | undefined
+            createdAt: string | undefined
+            updatedAt: string | undefined
+        }[] | undefined
+    }[] | undefined
+}
+
+export type PostForm = {
+    author: string
+    title: string
+    content: string
 }

@@ -16,22 +16,23 @@ datasource db {
 model User {
   id String @id @map("_id") @default(auto()) @db.ObjectId
   email String @unique
+  username String @unique
   password String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   profile Profile
+  postIDs   String[]  @db.ObjectId  // Add this field first
+  posts Posts[]
 }
 
 type Profile {
   firstName String
   lastName  String
-  username  String?
   profession String?
   avatar    String?
   website   String?
   bio       String?
   socials   Socials?
-  posts Posts?
 }
 
 type Socials {
@@ -42,16 +43,29 @@ type Socials {
   github    String?
 }
 
-type Posts {
-  header String
-  body  String
+model Posts {
+  id String   @id @map("_id") @default(auto()) @db.ObjectId
+  authorId  String
+  author    User      @relation(fields: [authorId], references: [username])
+  title String
+  content  String
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
   comments Comments?
+  answers Answers?
 }
 
 type Comments {
-  comment String
+  postedBy String
+  content  String
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
+}
+
+type Answers {
+  postedBy String
+  content  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  comments Comments?
 }

@@ -18,6 +18,7 @@ export const action: ActionFunction = async ({ request }) => {
     const action = form.get('_action')
     const email = form.get('email')
     const password = form.get('password')
+    const username = form.get('username')
     let firstName = form.get('firstName')
     let lastName = form.get('lastName')
 
@@ -41,7 +42,7 @@ export const action: ActionFunction = async ({ request }) => {
     }
 
     if (Object.values(errors).some(Boolean))
-        return { errors, fields: { email, password, firstName, lastName }, form: action }
+        return { errors, fields: { email, password, firstName, lastName, username }, form: action }
 
 
     switch (action) {
@@ -49,9 +50,16 @@ export const action: ActionFunction = async ({ request }) => {
             return await login({ email, password })
         }
         case 'register': {
-            firstName = firstName as string
-            lastName = lastName as string
-            return await register({ email, password, firstName, lastName })
+            if (!firstName || !lastName || !email || !password || !username || 
+                typeof firstName !== 'string' || 
+                typeof lastName !== 'string' ||
+                typeof email !== 'string' ||
+                typeof password !== 'string' ||
+                typeof username !== 'string') {
+                throw new Response('All fields are required', { status: 400 });
+            }
+            
+            return await register({ email, password, firstName, lastName, username });
         }
         default:
             return { error: `Invalid Form Data`, form: action }
@@ -65,6 +73,7 @@ export default function Login() {
         password: '',
         firstName: '',
         lastName: '',
+        username: '',
     })
     const [signActive, setSignActive] = useState(true);
     const actionData = useActionData<typeof action>()
@@ -84,6 +93,7 @@ export default function Login() {
             password: '',
             firstName: '',
             lastName: '',
+            username: '',
           }
           setErrors(newState)
           setFormError('')
@@ -119,6 +129,7 @@ export default function Login() {
             <form method="POST" className="rounded-2xl bg-gray-200 p-6 w-96">
                 <div className="text-xs font-semibold text-center tracking-wide text-red-500 w-full">{formError}</div>
                 <FormField
+                    textarea={false}
                     htmlFor="email"
                     label="Email"
                     value={formData.email}
@@ -126,6 +137,7 @@ export default function Login() {
                     error={errors?.email}
                 />
                 <FormField
+                    textarea={false}
                     htmlFor="password"
                     type="password"
                     label="Password"
@@ -138,6 +150,7 @@ export default function Login() {
             <form method="POST" className="rounded-2xl bg-gray-200 p-6 w-96">
                 <div className="text-xs font-semibold text-center tracking-wide text-red-500 w-full">{formError}</div>
                 <FormField
+                    textarea={false}
                     htmlFor="email"
                     label="Email"
                     value={formData.email}
@@ -145,6 +158,7 @@ export default function Login() {
                     error={errors?.email}
                 />
                 <FormField
+                    textarea={false}
                     htmlFor="password"
                     type="password"
                     label="Password"
@@ -153,6 +167,7 @@ export default function Login() {
                     error={errors?.password}
                 />
                 <FormField
+                    textarea={false}
                     htmlFor="firstName"
                     label="First Name"
                     value={formData.firstName}
@@ -160,11 +175,20 @@ export default function Login() {
                     error={errors?.firstName}
                 />
                 <FormField
+                    textarea={false}
                     htmlFor="lastName"
                     label="Last Name"
                     value={formData.lastName}
                     onChange={e => handleInputChange(e, 'lastName')}
                     error={errors?.lastName}
+                />
+                <FormField
+                    textarea={false}
+                    htmlFor="username"
+                    label="Username"
+                    value={formData.username}
+                    onChange={e => handleInputChange(e, 'username')}
+                    error={errors?.username}
                 />
                 <button className="w-full text-center rounded-xl mt-2 bg-red-300 px-3 py-2 text-blue-600 font-semibold hover:bg-red-400 hover:cursor-pointer" name='_action' value='register'>Register</button>
             </form>

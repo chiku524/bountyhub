@@ -1,6 +1,6 @@
 // app/utils/user.server.ts
 import bcrypt from 'bcryptjs'
-import type { RegisterForm, User } from './types.server'
+import type { RegisterForm, User, Post, PostForm } from './types.server'
 import { getUser } from './auth.server'
 import { prisma } from './prisma.server'
 
@@ -10,6 +10,7 @@ export const createUser = async (user: RegisterForm) => {
     data: {
       email: user.email,
       password: passwordHash,
+      username: user.username,
       profile: {
         firstName: user.firstName,
         lastName: user.lastName,
@@ -48,6 +49,7 @@ export const editUser = async (user: Partial<User>, request: Request) => {
     where: { id: userId?.id },
     data: { 
         email: email || undefined, 
+        username: username || undefined,
         profile: {
           update: {
             firstName: firstName || undefined,
@@ -55,7 +57,6 @@ export const editUser = async (user: Partial<User>, request: Request) => {
             profession: profession || undefined,
             avatar: avatar || undefined,
             website: website || undefined,
-            username: username || undefined,
             bio: bio || undefined,
             socials: {
               facebook: facebook || undefined,
@@ -70,4 +71,27 @@ export const editUser = async (user: Partial<User>, request: Request) => {
   });
 
   return updatedUserEmail;
+}
+
+export const getUserPosts = async (username: string) => {
+
+  const userPosts = await prisma.posts.findMany({
+    where: { 
+      authorId: username 
+    }
+  });
+
+  return userPosts;
+}
+
+export const createPost = async (post: PostForm) => {
+
+  const newPost = await prisma.posts.create({
+    data: {
+      authorId: post.author,
+      title: post.title,
+      content: post.content,
+    },
+  });
+  return newPost;
 }
