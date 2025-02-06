@@ -1,10 +1,10 @@
 // app/routes/login.tsx
 import { useState, useRef, useEffect } from 'react'
-import { useActionData } from '@remix-run/react'
+import { Form, useActionData } from '@remix-run/react'
 import { Layout } from '~/components/layout'
 import { FormField } from '~/components/form-field'
 import { ActionFunction, LoaderFunction, redirect } from '@remix-run/node'
-import { validateEmail, validateName, validatePassword } from '~/utils/validators.server'
+import { validateEmail, validateName, validatePassword, validateUsername } from '~/utils/validators.server'
 import { login, register, getUser } from '~/utils/auth.server'
 
 
@@ -37,6 +37,7 @@ export const action: ActionFunction = async ({ request }) => {
         ? {
             firstName: validateName((firstName as string) || ''),
             lastName: validateName((lastName as string) || ''),
+            username: validateUsername((username as string) || ''),
             }
         : {}),
     }
@@ -126,7 +127,7 @@ export default function Login() {
         </div>
         {
             signActive ? 
-            <form method="POST" className="rounded-2xl bg-gray-200 p-6 w-96">
+            <Form method="POST" className="rounded-2xl bg-gray-200 p-6 w-96">
                 <div className="text-xs font-semibold text-center tracking-wide text-red-500 w-full">{formError}</div>
                 <FormField
                     textarea={false}
@@ -146,8 +147,8 @@ export default function Login() {
                     error={errors?.password}
                 />
                 <button className="w-full text-center rounded-xl mt-2 bg-yellow-300 px-3 py-2 text-blue-600 font-semibold hover:bg-yellow-400 hover:cursor-pointer" name='_action' value='login'>Login</button>
-            </form> : 
-            <form method="POST" className="rounded-2xl bg-gray-200 p-6 w-96">
+            </Form> : 
+            <Form method="POST" className="rounded-2xl bg-gray-200 p-6 w-96">
                 <div className="text-xs font-semibold text-center tracking-wide text-red-500 w-full">{formError}</div>
                 <FormField
                     textarea={false}
@@ -191,7 +192,7 @@ export default function Login() {
                     error={errors?.username}
                 />
                 <button className="w-full text-center rounded-xl mt-2 bg-red-300 px-3 py-2 text-blue-600 font-semibold hover:bg-red-400 hover:cursor-pointer" name='_action' value='register'>Register</button>
-            </form>
+            </Form>
         }
         
       </div>

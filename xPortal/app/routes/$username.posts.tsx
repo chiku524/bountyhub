@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { Form, useLoaderData, Link  } from "@remix-run/react"
 import { FormField } from '~/components/form-field'
 import { LoaderFunction, ActionFunction } from '@remix-run/node'
-import { logout, getUser } from '~/utils/auth.server'
+import { getUser } from '~/utils/auth.server'
 import { getUserPosts, createPost } from '~/utils/user.server'
 import { Nav } from '../components/nav'
 
@@ -61,36 +61,20 @@ export default function UserPosts() {
   return (
     <div className="h-screen w-full bg-neutral-900 flex flex-row">
       <Nav />
-      <div className='h-full w-full flex flex-col'>
-        <div className="flex flex-col bg-slate-700 bg-opacity-50 h-fit p-5 rounded border border-amber-950 m-auto shadow-custom-slate">
-          <Form method="post" className=''>
-            <FormField
-                textarea={false}
-                htmlFor="title"
-                label="Title"
-                value={formData.title}
-                onChange={e => handleInputChange(e, 'title')}
-                // error={errors?.email}
-            />
-            <FormField
-                textarea
-                htmlFor="content"
-                label="Content"
-                value={formData.content}
-                onChange={e => handleInputChange(e, 'content')}
-                // error={errors?.password}
-            />
-            <button className="w-full text-center rounded-xl mt-2 bg-yellow-300 px-3 py-2 text-blue-600 font-semibold hover:bg-yellow-400 hover:cursor-pointer" name='_action' value='createPost'>Create</button>
-          </Form>
-        </div>
-        <div className='flex flex-row flex-wrap bg-slate-700 bg-opacity-50 h-fit p-5 rounded border border-amber-950 m-auto shadow-custom-slate mx-10'>
+      <div className='h-full w-full block'>
+        <div className='flex flex-row flex-wrap bg-slate-700 bg-opacity-50 h-fit p-5 rounded border border-amber-950 mt-40 shadow-custom-slate mx-10'>
           {userData.map((post:any) => (
             <div key={post.id} className='flex flex-col bg-slate-700 bg-opacity-50 w-1/4 overflow-hidden h-fit p-5 rounded border border-green-700 m-auto shadow-custom-slate'>
               <h1>{post.title}</h1>
               <p>{post.content}</p>
-              </div>
+            </div>
           ))}
         </div>
+        <Link to={'/posts/create'} className='absolute top-10 right-10'>
+          <div className=''>
+            <span className='text-white'>Create</span>
+          </div>    
+        </Link>
       </div>
       
     </div>
