@@ -115,7 +115,7 @@ export default function Create() {
     <div className="h-screen w-full bg-neutral-900 flex flex-row">
         <Nav />
         <div className='flex flex-col justify-center items-center w-full h-full overflow-y-scroll' style={{'msOverflowStyle': 'none', 'scrollbarWidth': 'none'}}>
-          <div className="flex flex-col bg-slate-700 bg-opacity-50 h-fit p-5 rounded border border-amber-950 m-auto shadow-custom-slate">
+          <div className="flex flex-col bg-slate-700 bg-opacity-50 h-fit p-5 rounded border border-amber-950 m-auto shadow-custom-slate w-3/4">
               <Form method="post" className=''>
                   {/* <div className="text-xs font-semibold text-center tracking-wide text-red-500 w-full">{formError}</div> */}
                   <FormField
@@ -140,7 +140,7 @@ export default function Create() {
               <button onClick={() => test()}>Start Recording</button>
           </div>
           <div className="flex flex-col bg-slate-700 bg-opacity-50 h-fit p-5 rounded border border-amber-950 m-auto shadow-custom-slate">
-             <h2 className='text-center font-bold text-yellow-300 tracking-widest'>Clips</h2>
+             <h2 className='text-center font-bold text-yellow-300 tracking-widest underline'>Clips</h2>
             <article className='hidden' id='clip-container'>
               <p id='clip-label'>
 
