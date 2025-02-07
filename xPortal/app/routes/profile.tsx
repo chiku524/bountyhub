@@ -35,14 +35,14 @@ export default function Profile() {
       <div className='flex flex-row flex-wrap w-full h-full pt-32 pl-20 overflow-y-scroll' style={{'msOverflowStyle': 'none', 'scrollbarWidth': 'none'}}>
         <Link to={`/${userData.username}/posts`} className='w-1/4 h-1/3 bg-slate-100 bg-opacity-50 m-10 rounded p-3 border-green-500 border shadow-custom-green flex justify-center items-center hover:cursor-pointer hover:-translate-y-2 duration-100' >
           <div>
-            <h1 className='text-2xl font-bold text-amber-900 drop-shadow-custom'>Posts</h1>
+            <h1 className='font-bold text-amber-900 drop-shadow-custom'>Posts</h1>
           </div>
         </Link>
         <div className='w-1/4 h-1/3 bg-slate-100 bg-opacity-50 m-10 rounded p-3 border-green-500 border shadow-custom-green flex justify-center items-center hover:cursor-pointer hover:-translate-y-2 duration-100'>
-          <h1 className='text-2xl font-bold text-amber-900 drop-shadow-custom'>Reputation</h1>
+          <h1 className='font-bold text-amber-900 drop-shadow-custom'>Reputation</h1>
         </div>
         <div className='w-1/4 h-1/3 bg-slate-100 bg-opacity-50 m-10 rounded p-3 border-green-500 border shadow-custom-green flex justify-center items-center hover:cursor-pointer hover:-translate-y-2 duration-100'>
-          <h1 className='text-2xl font-bold text-amber-900 drop-shadow-custom'>Responses</h1>
+          <h1 className='font-bold text-amber-900 drop-shadow-custom'>Responses</h1>
         </div>
         <div className='w-1/4 h-1/3 bg-slate-100 bg-opacity-50 m-10 rounded p-3 border-green-500 border shadow-custom-green flex justify-center items-center hover:cursor-pointer hover:-translate-y-2 duration-100'>
 

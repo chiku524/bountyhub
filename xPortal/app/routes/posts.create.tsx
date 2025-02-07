@@ -75,32 +75,27 @@ export default function Create() {
         mediaRecorder.start();
 
         mediaRecorder.onstop = (e) => {
-          console.log("data available after MediaRecorder.stop() called.");
   
-          const clipName = prompt("Enter a name for your sound clip");
+          const clipName = prompt("Enter a name for your video clip");
   
-          const clipContainer = document.createElement("article");
-          const clipLabel = document.createElement("p");
-          const audio = document.createElement("audio");
-          const deleteButton = document.createElement("button");
-          const mainContainer = document.querySelector("body");
+          const clipLabel = document.querySelector("#clip-label");
+          const video = document.querySelector("#clip-video");
+          const deleteButton = document.querySelector("#clip-delete-button");
+          const mainContainer = document.querySelector("#clip-container");
+          
+          video?.setAttribute("controls", "");
+          deleteButton!.textContent = "Delete";
+          clipLabel!.textContent = clipName;
   
-          clipContainer.classList.add("clip");
-          audio.setAttribute("controls", "");
-          deleteButton.textContent = "Delete";
-          clipLabel.textContent = clipName;
-  
-          clipContainer.appendChild(audio);
-          clipContainer.appendChild(clipLabel);
-          clipContainer.appendChild(deleteButton);
-          mainContainer?.appendChild(clipContainer);
-  
-          audio.controls = true;
-          const blob = new Blob(chunks, { type: "audio/ogg; codecs=opus" });
+          const blob = new Blob(chunks, { type: "video" });
           chunks = [];
-          const audioURL = URL.createObjectURL(blob);
-          audio.src = audioURL;
-          console.log("recorder stopped");
+          const videoURL = URL.createObjectURL(blob);
+          video?.setAttribute('src', videoURL);
+          mainContainer?.classList.remove('hidden');
+
+          deleteButton!.addEventListener('click', (e) => {
+            mainContainer!.remove();
+          })
         };
   
         mediaRecorder.ondataavailable = (e) => {
@@ -119,32 +114,47 @@ export default function Create() {
   return (
     <div className="h-screen w-full bg-neutral-900 flex flex-row">
         <Nav />
-        <div className="flex flex-col bg-slate-700 bg-opacity-50 h-fit p-5 rounded border border-amber-950 m-auto shadow-custom-slate">
-            <Form method="post" className=''>
-                {/* <button onClick={stopRecording}>Stop Recording</button> */}
-                {/* <div className="text-xs font-semibold text-center tracking-wide text-red-500 w-full">{formError}</div> */}
-                <FormField
-                    textarea={false}
-                    htmlFor="title"
-                    label="Title"
-                    value={formData.title}
-                    onChange={e => handleInputChange(e, 'title')}
-                    // error={errors?.title}
-                />
-                {/* <div className="text-xs font-semibold text-center tracking-wide text-red-500 w-full">{formError}</div> */}
-                <FormField
-                    textarea
-                    htmlFor="content"
-                    label="Content"
-                    value={formData.content}
-                    onChange={e => handleInputChange(e, 'content')}
-                    // error={errors?.content}
-                />
-                <button className="w-full text-center rounded-xl mt-2 bg-yellow-300 px-3 py-2 text-blue-600 font-semibold hover:bg-yellow-400 hover:cursor-pointer" name='_action' value='createPost'>Create</button>
-            </Form>
-            <button onClick={() => test()}>Start Recording</button>
+        <div className='flex flex-col justify-center items-center w-full h-full overflow-y-scroll' style={{'msOverflowStyle': 'none', 'scrollbarWidth': 'none'}}>
+          <div className="flex flex-col bg-slate-700 bg-opacity-50 h-fit p-5 rounded border border-amber-950 m-auto shadow-custom-slate">
+              <Form method="post" className=''>
+                  {/* <div className="text-xs font-semibold text-center tracking-wide text-red-500 w-full">{formError}</div> */}
+                  <FormField
+                      textarea={false}
+                      htmlFor="title"
+                      label="Title"
+                      value={formData.title}
+                      onChange={e => handleInputChange(e, 'title')}
+                      // error={errors?.title}
+                  />
+                  {/* <div className="text-xs font-semibold text-center tracking-wide text-red-500 w-full">{formError}</div> */}
+                  <FormField
+                      textarea
+                      htmlFor="content"
+                      label="Content"
+                      value={formData.content}
+                      onChange={e => handleInputChange(e, 'content')}
+                      // error={errors?.content}
+                  />
+                  <button className="w-full text-center rounded-xl mt-2 bg-yellow-300 px-3 py-2 text-blue-600 font-semibold hover:bg-yellow-400 hover:cursor-pointer" name='_action' value='createPost'>Create</button>
+              </Form>
+              <button onClick={() => test()}>Start Recording</button>
+          </div>
+          <div className="flex flex-col bg-slate-700 bg-opacity-50 h-fit p-5 rounded border border-amber-950 m-auto shadow-custom-slate">
+             <h2 className='text-center font-bold text-yellow-300 tracking-widest'>Clips</h2>
+            <article className='hidden' id='clip-container'>
+              <p id='clip-label'>
+
+              </p>
+              <video id='clip-video' controls className='max-h-40 max-w-72'>
+                
+              </video>
+              <button id='clip-delete-button'>
+
+              </button>
+            </article>
+          </div>
         </div>
-      
+        
     </div>
   )
 }

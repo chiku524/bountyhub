@@ -20,6 +20,14 @@ export const links: LinksFunction = () => [
     rel: "stylesheet",
     href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
   },
+  {
+    rel: "stylesheet",
+    href: "https://fonts.googleapis.com/css?family=Tangerine",
+  },
+  {
+    rel: "stylesheet",
+    href: "https://fonts.cdnfonts.com/css/self-deception",
+  }
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -31,7 +39,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className="text-4xl" style={{'fontFamily': 'Tangerine'}}>
         {children}
         <ScrollRestoration />
         <Scripts />

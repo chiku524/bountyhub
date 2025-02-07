@@ -80,7 +80,7 @@ export function Nav() {
                 {bubArray1 && bubArray1.map((x:any, index:any) => <div key={index} id="bubble1" className={`bubble-${index} aspect-square rounded-full bg-white bg-opacity-50 absolute -top-10 left-0 w-0.5`}><p className='hidden'>{x}</p></div>)}
                 {bubArray2 && bubArray2.map((x:any, index:any) => <div key={index} id="bubble2" className={`bubble-${index} aspect-square rounded-full bg-white bg-opacity-50 absolute -top-10 left-0 w-0.5`}><p className='hidden'>{x}</p></div>)}
                 <div className='flex items-end h-full justify-center'>
-                  <h1 className='text-center text-white font-bold text-lg drop-shadow-custom animate-pulse'>portal.ask</h1>
+                  <h1 className='text-center text-white font-bold drop-shadow-custom animate-pulse tracking-widest text-4xl' style={{'fontFamily': 'Tangerine'}}>portal.ask</h1>
                 </div>
               </div>
             </Link>

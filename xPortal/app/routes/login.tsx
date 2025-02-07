@@ -118,7 +118,7 @@ export default function Login() {
   return (
     <Layout backgroundColor="bg-neutral-900">
       <div className="h-full justify-center items-center flex flex-col gap-y-4">
-        <h2 className="text-5xl font-extrabold text-yellow-300">Welcome to Flexithe!</h2>
+        <h2 className="text-5xl font-extrabold text-yellow-300">Welcome to portal.ask!</h2>
         {signActive ? <p className="font-semibold text-slate-300">Log In To Give Some Praise!</p> : <p className="font-semibold text-slate-300">Sign Up To Give Some Praise!</p>}
 
         <div className="border-red-700 flex justify-between text-black font-extrabold">
@@ -127,7 +127,7 @@ export default function Login() {
         </div>
         {
             signActive ? 
-            <Form method="POST" className="rounded-2xl bg-gray-200 p-6 w-96">
+            <Form method="POST" className="rounded-2xl bg-gray-200 p-6 w-96 text-base">
                 <div className="text-xs font-semibold text-center tracking-wide text-red-500 w-full">{formError}</div>
                 <FormField
                     textarea={false}

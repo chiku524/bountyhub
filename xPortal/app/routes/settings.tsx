@@ -189,6 +189,7 @@ export default function Profile() {
                 value={formData[editData as keyof FormData]}
                 onChange={e => handleInputChange(e, editData['github'])}
                 onClick={() => setEditData('socials.github')}
+                textarea={false}
               />
               <FormField 
                 htmlFor='facebook'
@@ -197,6 +198,7 @@ export default function Profile() {
                 value={formData[editData as keyof FormData]}
                 onChange={e => handleInputChange(e, editData['facebook'])}
                 onClick={() => setEditData('socials.facebook')}
+                textarea={false}
               />
               <FormField 
                 htmlFor='twitter'
@@ -205,6 +207,7 @@ export default function Profile() {
                 value={formData[editData as keyof FormData]}
                 onChange={e => handleInputChange(e, editData['twitter'])}
                 onClick={() => setEditData('socials.twitter')}
+                textarea={false}
               />
               <FormField 
                 htmlFor='instagram'
@@ -213,6 +216,7 @@ export default function Profile() {
                 value={formData[editData as keyof FormData]}
                 onChange={e => handleInputChange(e, editData['instagram'])}
                 onClick={() => setEditData('socials.instagram')}
+                textarea={false}
               />
               <FormField 
                 htmlFor='linkedin'
@@ -221,6 +225,7 @@ export default function Profile() {
                 value={formData[editData as keyof FormData]}
                 onChange={e => handleInputChange(e, editData['linkedin'])}
                 onClick={() => setEditData('socials.linkedin')}
+                textarea={false}
               />
               <button id='save-button' className='' value='update' name='_action'>Save Changes</button>
             </Form>
@@ -232,6 +237,7 @@ export default function Profile() {
                 label={editData}
                 value={formData[editData as keyof FormData]}
                 onChange={e => handleInputChange(e, editData)}
+                textarea={false}
             />
             <button id='save-button' className='' value='update' name='_action'>Save Changes</button>
           </Form>}
