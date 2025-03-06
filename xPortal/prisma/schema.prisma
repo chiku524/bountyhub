@@ -49,6 +49,7 @@ model Posts {
   author    User      @relation(fields: [authorId], references: [username])
   title String
   content  String
+  blobVideoURL String?
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
   comments Comments?

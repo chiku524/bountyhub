@@ -17,11 +17,13 @@ export const loader: LoaderFunction = async ({ request: Request }) => {
 export const action: ActionFunction = async ({ request }) => {
     const form = await request.formData()
     const action = form.get('_action')
+    console.log(form);
 
     switch (action) {
         case 'createPost': {
           const title = form.get('title');
           const content = form.get('content');
+          const blobVideoURL = form.get('blobVideoURL') as string || null;
 
           const errors = {
             title: validateTitle((title as string) || ''),
@@ -43,7 +45,7 @@ export const action: ActionFunction = async ({ request }) => {
             throw new Response('User profile is incomplete', { status: 400 });
           }
           
-          return await createPost({title, content, author: user.username});
+          return await createPost({title, content, blobVideoURL, author: user.username});
         }
         default:
             return { error: `Invalid Form Data`, form: action }
@@ -52,11 +54,11 @@ export const action: ActionFunction = async ({ request }) => {
 
 export default function Create() {
   const userData = useLoaderData<typeof loader>();
-  const [formData, setFormData] = useState({ title: '', content: '' })
+  const [formData, setFormData] = useState({ title: '', content: '', blobVideoURL: '' })
 
   useEffect(() => {
-      // console.log('user data', userData);
-  }, [userData])
+      console.log('user data', formData);
+  }, [formData])
 
   
   // Updates the form data when an input changes
@@ -90,11 +92,14 @@ export default function Create() {
           const blob = new Blob(chunks, { type: "video" });
           chunks = [];
           const videoURL = URL.createObjectURL(blob);
+          setFormData({...formData, blobVideoURL: videoURL});
           video?.setAttribute('src', videoURL);
           mainContainer?.classList.remove('hidden');
 
           deleteButton!.addEventListener('click', (e) => {
-            mainContainer!.remove();
+            mainContainer!.classList.add("hidden");
+            video?.setAttribute('src', '');
+            setFormData({...formData, blobVideoURL: ''});
           })
         };
   
@@ -108,8 +113,6 @@ export default function Create() {
 
     return stream;
   }
-
-  const stopRecording = async () => {}
 
   return (
     <div className="h-screen w-full bg-neutral-900 flex flex-row">
@@ -135,6 +138,14 @@ export default function Create() {
                       onChange={e => handleInputChange(e, 'content')}
                       // error={errors?.content}
                   />
+                  <FormField
+                      textarea={false}
+                      htmlFor="blobVideoURL"
+                      label="BlobVideoURL"
+                      value={formData.blobVideoURL}
+                      onChange={e => handleInputChange(e, 'blobVideoURL')}
+                      // error={errors?.content}
+                    />
                   <button className="w-full text-center rounded-xl mt-2 bg-yellow-300 px-3 py-2 text-blue-600 font-semibold hover:bg-yellow-400 hover:cursor-pointer" name='_action' value='createPost'>Create</button>
               </Form>
               <button onClick={() => test()}>Start Recording</button>

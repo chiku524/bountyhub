@@ -37,6 +37,7 @@ export type Post = {
     author: string
     title: string
     content: string
+    blobVideoURL: string | undefined
     createdAt: string | undefined
     updatedAt: string | undefined
     comments: {
@@ -63,4 +64,5 @@ export type PostForm = {
     author: string
     title: string
     content: string
+    blobVideoURL: string | null
 }

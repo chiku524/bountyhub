@@ -91,7 +91,16 @@ export const createPost = async (post: PostForm) => {
       authorId: post.author,
       title: post.title,
       content: post.content,
+      blobVideoURL: post.blobVideoURL,
     },
   });
   return newPost;
+}
+
+export const deletePost = async (postId: string) => {
+  const deletedPost = await prisma.posts.delete({
+    where: { id: postId },
+    select: { id: true },
+    });
+  return deletedPost;
 }
