@@ -34,12 +34,12 @@ export const action: ActionFunction = async ({ request }) => {
     const action = form.get('_action')
     const actionData = {
       email: form.get('email'),
+      username: form.get('username'),
       profile: {
         firstName: form.get('firstName'),
         lastName: form.get('lastName'),
         avatar: form.get('avatar'),
         website: form.get('website'),
-        username: form.get('username'),
         profession: form.get('profession'),
         bio: form.get('bio'),
         socials: {
@@ -60,12 +60,12 @@ export const action: ActionFunction = async ({ request }) => {
 
           const updateData = {
             email: actionData.email?.toString() || undefined,
+            username: actionData.username?.toString() || undefined,
             profile: { 
               firstName: actionData.profile.firstName?.toString() || undefined,
               lastName: actionData.profile.lastName?.toString() || undefined,
               avatar: actionData.profile.avatar?.toString() || undefined,
               website: actionData.profile.website?.toString() || undefined,
-              username: actionData.profile.username?.toString() || undefined,
               profession: actionData.profile.profession?.toString() || undefined,
               bio: actionData.profile.bio?.toString() || undefined,
               socials: { 
@@ -78,7 +78,7 @@ export const action: ActionFunction = async ({ request }) => {
             }
           }
 
-          console.log('action data', actionData);
+          // console.log('action data', actionData);
           // Check if any value in the object is truthy
           return await editUser(updateData, request)
         }
@@ -97,7 +97,7 @@ export default function Profile() {
     // Updates the form data when an input changes
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>, field: string) => {
       setFormData(form => ({ ...form, [field]: event.target.value }))
-      console.log(editData);
+      // console.log(editData);
     }
     
     // useEffect(() => {
@@ -155,7 +155,7 @@ export default function Profile() {
         </div>
         <div className='block mx-10 my-5 bg-gray-100 rounded shadow-custom-slate relative'>
           <div className='font-bold w-fit bg-gray-100 p-2 rounded border-b border-slate-700'>Username</div>
-          <div className='bg-gray-100 rounded w-fit p-2'>{userData.profile.username ? userData.profile.username : 'N/A'}</div>
+          <div className='bg-gray-100 rounded w-fit p-2'>{userData.username ? userData.username : 'N/A'}</div>
           <span className='text-blue-500 absolute top-0 right-0 m-5' onClick={() => {setEditModalOpen(true); setEditData('username')}}>Edit</span>
         </div>
         <div className='block mx-10 my-5 bg-gray-100 rounded shadow-custom-slate relative'>

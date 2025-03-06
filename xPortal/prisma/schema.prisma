@@ -32,7 +32,7 @@ type Profile {
   avatar    String?
   website   String?
   bio       String?
-  socials   Socials?
+  socials   Socials
 }
 
 type Socials {
