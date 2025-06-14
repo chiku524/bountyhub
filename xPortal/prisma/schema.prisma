@@ -14,59 +14,124 @@ datasource db {
 }
 
 model User {
-  id String @id @map("_id") @default(auto()) @db.ObjectId
-  email String @unique
-  username String @unique
-  password String
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  username  String   @unique
+  password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  profile Profile
-  postIDs   String[]  @db.ObjectId  // Add this field first
-  posts Posts[]
+  profile   Profile?
+  posts     Posts[]
+  comments  Comment[]
+  answers   Answer[]
+  votes     Vote[]
+  qualityVotes QualityVote[]
 }
 
-type Profile {
-  firstName String
-  lastName  String
-  profession String?
-  avatar    String?
-  website   String?
-  bio       String?
-  socials   Socials
-}
-
-type Socials {
-  facebook  String?
-  twitter   String?
-  instagram String?
-  linkedin  String?
-  github    String?
+model Profile {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String   @unique @db.ObjectId
+  firstName     String?  @db.String
+  lastName      String?  @db.String
+  profilePicture String? @db.String
+  bio           String?  @db.String
+  location      String?  @db.String
+  website       String?  @db.String
+  twitter       String?  @db.String
+  github        String?  @db.String
+  linkedin      String?  @db.String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Posts {
   id String   @id @map("_id") @default(auto()) @db.ObjectId
-  authorId  String
-  author    User      @relation(fields: [authorId], references: [username])
+  authorId  String @db.ObjectId
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   title String
   content  String
   blobVideoURL String?
+  codeBlocks CodeBlock[]
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
-  comments Comments?
-  answers Answers?
+  comments Comment[]
+  answers Answer[]
+  votes Vote[]
+  qualityVotes QualityVote[]
+  visibilityVotes Int @default(0) // For community visibility
+  upvotes Int @default(0) // For quality assurance
+  downvotes Int @default(0) // For quality assurance
 }
 
-type Comments {
-  postedBy String
-  content  String
+model Comment {
+  id String @id @map("_id") @default(auto()) @db.ObjectId
+  content String
+  authorId String @db.ObjectId
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  postId String @db.ObjectId
+  post Posts @relation(fields: [postId], references: [id], onDelete: Cascade)
+  answerId String? @db.ObjectId
+  answer Answer? @relation(fields: [answerId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  votes Vote[]
+  upvotes Int @default(0)
+  downvotes Int @default(0)
 }
 
-type Answers {
-  postedBy String
-  content  String
+model Answer {
+  id String @id @map("_id") @default(auto()) @db.ObjectId
+  content String
+  authorId String @db.ObjectId
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  postId String @db.ObjectId
+  post Posts @relation(fields: [postId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-  comments Comments?
+  updatedAt DateTime @updatedAt
+  comments Comment[]
+  votes Vote[]
+  upvotes Int @default(0)
+  downvotes Int @default(0)
+  isAccepted Boolean @default(false)
+}
+
+model Vote {
+  id String @id @map("_id") @default(auto()) @db.ObjectId
+  userId String @db.ObjectId
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  value Int // 1 for upvote, -1 for downvote
+  postId String? @db.ObjectId
+  post Posts? @relation(fields: [postId], references: [id], onDelete: Cascade)
+  commentId String? @db.ObjectId
+  comment Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  answerId String? @db.ObjectId
+  answer Answer? @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+  @@unique([userId, commentId])
+  @@unique([userId, answerId])
+}
+
+model CodeBlock {
+  id String @id @map("_id") @default(auto()) @db.ObjectId
+  language String
+  code String
+  postId String @db.ObjectId
+  post Posts @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model QualityVote {
+  id String @id @map("_id") @default(auto()) @db.ObjectId
+  userId String @db.ObjectId
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  value Int // 1 for upvote, -1 for downvote
+  postId String @db.ObjectId
+  post Posts @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
 }

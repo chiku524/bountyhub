@@ -27,7 +27,8 @@ export const links: LinksFunction = () => [
   {
     rel: "stylesheet",
     href: "https://fonts.cdnfonts.com/css/self-deception",
-  }
+  },
+  { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -48,6 +49,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function App() {
+export default function Root() {
   return <Outlet />;
 }

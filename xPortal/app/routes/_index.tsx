@@ -1,3 +1,5 @@
+import { LoaderFunction, redirect } from "@remix-run/node";
+import { getUser } from "~/utils/auth.server";
 import type { MetaFunction } from "@remix-run/node";
 
 export const meta: MetaFunction = () => {
@@ -7,49 +9,16 @@ export const meta: MetaFunction = () => {
   ];
 };
 
+export const loader: LoaderFunction = async ({ request }) => {
+  const user = await getUser(request);
+  if (user) {
+    return redirect("/profile");
+  }
+  return redirect("/login");
+};
+
 export default function Index() {
-  return (
-    <div className="flex h-screen items-center justify-center">
-      <div className="flex flex-col items-center gap-16">
-        <header className="flex flex-col items-center gap-9">
-          <h1 className="leading font-bold text-gray-800 dark:text-gray-100">
-            Welcome to portal&nbsp;.&nbsp;ask<span className="sr-only">portal&nbsp;.&nbsp;ask</span>
-          </h1>
-          <div className="h-[144px] w-[434px]">
-            <img
-              src="/logo-light.png"
-              alt="Flexithe"
-              className="block w-full dark:hidden"
-            />
-            <img
-              src="/logo-dark.png"
-              alt="Flexithe"
-              className="hidden w-full dark:block"
-            />
-          </div>
-        </header>
-        <nav className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-gray-200 p-6 dark:border-gray-700 bg-black">
-          <p className="leading-6 text-gray-700 dark:text-gray-200">
-            What&apos;s next?
-          </p>
-          <ul>
-            {resources.map(({ href, text, icon }) => (
-              <li key={href}>
-                <a
-                  className="group flex items-center gap-3 self-stretch p-3 leading-normal text-blue-700 hover:underline dark:text-blue-500"
-                  href={href}
-                  rel="noreferrer"
-                >
-                  {icon}
-                  {text}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </div>
-    </div>
-  );
+  return null;
 }
 
 const resources = [

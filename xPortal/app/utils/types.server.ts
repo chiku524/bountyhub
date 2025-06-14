@@ -18,18 +18,28 @@ export type User = {
     profile: {
         firstName: string | undefined
         lastName: string | undefined
-        profession: string | undefined
-        avatar: string | undefined
-        website: string | undefined
+        profilePicture: string | undefined
         bio: string | undefined
-        socials: {
-            facebook: string | undefined
-            twitter: string | undefined
-            instagram: string | undefined
-            linkedin: string | undefined
-            github: string | undefined
-        }
+        location: string | undefined
+        website: string | undefined
+        twitter: string | undefined
+        github: string | undefined
+        linkedin: string | undefined
     }
+}
+
+export type CodeBlock = {
+    id: string;
+    language: string;
+    code: string;
+    postId: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export type CodeBlockForm = {
+    language: string;
+    code: string;
 }
 
 export type Post = {
@@ -40,6 +50,7 @@ export type Post = {
     blobVideoURL: string | undefined
     createdAt: string | undefined
     updatedAt: string | undefined
+    codeBlocks: CodeBlock[] | undefined
     comments: {
         postedBy: string | undefined
         content: string | undefined
@@ -65,4 +76,17 @@ export type PostForm = {
     title: string
     content: string
     blobVideoURL: string | null
+    codeBlocks: CodeBlockForm[]
+}
+
+export interface Profile {
+    firstName?: string | null;
+    lastName?: string | null;
+    profilePicture?: string | null;
+    bio?: string | null;
+    location?: string | null;
+    website?: string | null;
+    twitter?: string | null;
+    github?: string | null;
+    linkedin?: string | null;
 }

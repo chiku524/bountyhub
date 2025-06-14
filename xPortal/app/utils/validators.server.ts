@@ -34,3 +34,13 @@ export const validateEmail = (email: string): string | undefined => {
   export const validateContent = (content: string): string | undefined => {
     if (!content.length) return `Please enter a value`
   }
+
+  export const validateUrl = (url: string | null | undefined): string | undefined => {
+    if (!url) return undefined; // Allow null/undefined/empty URLs
+    try {
+        new URL(url);
+        return undefined;
+    } catch {
+        return "Please enter a valid URL (e.g., https://example.com)";
+    }
+  }

@@ -81,24 +81,27 @@ export default function Login() {
     const firstLoad = useRef(true)
     const [errors, setErrors] = useState(actionData?.errors || {})
     const [formError, setFormError] = useState(actionData?.error || '')
+    const [isLoading, setIsLoading] = useState(false)
 
     // Updates the form data when an input changes
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>, field: string) => {
         setFormData(form => ({ ...form, [field]: event.target.value }))
+        setFormError('') // Clear form error when user types
     }
 
     useEffect(() => {
         if (!firstLoad.current) {
-          const newState = {
-            email: '',
-            password: '',
-            firstName: '',
-            lastName: '',
-            username: '',
-          }
-          setErrors(newState)
-          setFormError('')
-          setFormData(newState)
+            const newState = {
+                email: '',
+                password: '',
+                firstName: '',
+                lastName: '',
+                username: '',
+            }
+            setErrors(newState)
+            setFormError('')
+            setFormData(newState)
+            setIsLoading(false)
         }
     }, [actionData])
     
@@ -108,94 +111,124 @@ export default function Login() {
         }
     }, [formData])
     
-    useEffect(() => { errors ? firstLoad.current = true : firstLoad.current = false }, [actionData])
-
-    useEffect(() => {
-        // console.log('action data', actionData);
-        // console.log('first load', firstLoad);
-    }, [firstLoad])
-
-  return (
-    <Layout backgroundColor="bg-neutral-900">
-      <div className="h-full justify-center items-center flex flex-col gap-y-4">
-        <h2 className="text-5xl font-extrabold text-yellow-300">Welcome to portal.ask!</h2>
-        {signActive ? <p className="font-semibold text-slate-300">Log In To Give Some Praise!</p> : <p className="font-semibold text-slate-300">Sign Up To Give Some Praise!</p>}
-
-        <div className="border-red-700 flex justify-between text-black font-extrabold">
-            <div className='shadow-red-500 shadow-sm border-red-500 border-2 rounded bg-red-500 hover:cursor-pointer p-1 m-1' onClick={() => setSignActive(!signActive)}>{!signActive ? 'Sign In' : 'Sign Up'}</div>
-            {/* <div className='shadow-yellow-300 shadow-sm border-yellow-300 border-2 rounded bg-yellow-300 hover:cursor-pointer p-1 m-1 display' onClick={() => setSignActive(false)}>Sign Up</div> */}
-        </div>
-        {
-            signActive ? 
-            <Form method="POST" className="rounded-2xl bg-gray-200 p-6 w-96 text-base">
-                <div className="text-xs font-semibold text-center tracking-wide text-red-500 w-full">{formError}</div>
-                <FormField
-                    textarea={false}
-                    htmlFor="email"
-                    label="Email"
-                    value={formData.email}
-                    onChange={e => handleInputChange(e, 'email')}
-                    error={errors?.email}
-                />
-                <FormField
-                    textarea={false}
-                    htmlFor="password"
-                    type="password"
-                    label="Password"
-                    value={formData.password}
-                    onChange={e => handleInputChange(e, 'password')}
-                    error={errors?.password}
-                />
-                <button className="w-full text-center rounded-xl mt-2 bg-yellow-300 px-3 py-2 text-blue-600 font-semibold hover:bg-yellow-400 hover:cursor-pointer" name='_action' value='login'>Login</button>
-            </Form> : 
-            <Form method="POST" className="rounded-2xl bg-gray-200 p-6 w-96">
-                <div className="text-xs font-semibold text-center tracking-wide text-red-500 w-full">{formError}</div>
-                <FormField
-                    textarea={false}
-                    htmlFor="email"
-                    label="Email"
-                    value={formData.email}
-                    onChange={e => handleInputChange(e, 'email')}
-                    error={errors?.email}
-                />
-                <FormField
-                    textarea={false}
-                    htmlFor="password"
-                    type="password"
-                    label="Password"
-                    value={formData.password}
-                    onChange={e => handleInputChange(e, 'password')}
-                    error={errors?.password}
-                />
-                <FormField
-                    textarea={false}
-                    htmlFor="firstName"
-                    label="First Name"
-                    value={formData.firstName}
-                    onChange={e => handleInputChange(e, 'firstName')}
-                    error={errors?.firstName}
-                />
-                <FormField
-                    textarea={false}
-                    htmlFor="lastName"
-                    label="Last Name"
-                    value={formData.lastName}
-                    onChange={e => handleInputChange(e, 'lastName')}
-                    error={errors?.lastName}
-                />
-                <FormField
-                    textarea={false}
-                    htmlFor="username"
-                    label="Username"
-                    value={formData.username}
-                    onChange={e => handleInputChange(e, 'username')}
-                    error={errors?.username}
-                />
-                <button className="w-full text-center rounded-xl mt-2 bg-red-300 px-3 py-2 text-blue-600 font-semibold hover:bg-red-400 hover:cursor-pointer" name='_action' value='register'>Register</button>
-            </Form>
+    useEffect(() => { 
+        if (actionData?.error) {
+            setIsLoading(false)
+            setFormError(actionData.error)
         }
-        
-      </div>
-    </Layout>
-  )
+        errors ? firstLoad.current = true : firstLoad.current = false 
+    }, [actionData, errors])
+
+    const handleSubmit = () => {
+        setIsLoading(true)
+        setFormError('')
+    }
+
+    return (
+        <Layout backgroundColor="bg-neutral-900">
+            <div className="h-full justify-center items-center flex flex-col gap-y-4">
+                <h2 className="text-5xl font-extrabold text-yellow-300">Welcome to portal.ask!</h2>
+                {signActive ? <p className="font-semibold text-slate-300">Log In To Give Some Praise!</p> : <p className="font-semibold text-slate-300">Sign Up To Give Some Praise!</p>}
+
+                <div className="border-red-700 flex justify-between text-black font-extrabold">
+                    <div className='shadow-red-500 shadow-sm border-red-500 border-2 rounded bg-red-500 hover:cursor-pointer p-1 m-1' onClick={() => {
+                        setSignActive(!signActive)
+                        setIsLoading(false)
+                        setFormError('')
+                    }}>{!signActive ? 'Sign In' : 'Sign Up'}</div>
+                </div>
+                
+                {signActive ? 
+                <Form method="POST" className="rounded-2xl bg-gray-200 p-6 w-96 text-base" onSubmit={handleSubmit}>
+                    {formError && (
+                        <div className="text-sm font-semibold text-center tracking-wide text-red-500 w-full mb-4 p-2 bg-red-100 rounded">
+                            {formError}
+                        </div>
+                    )}
+                    <FormField
+                        textarea={false}
+                        htmlFor="email"
+                        label="Email"
+                        value={formData.email}
+                        onChange={e => handleInputChange(e, 'email')}
+                        error={errors?.email}
+                    />
+                    <FormField
+                        textarea={false}
+                        htmlFor="password"
+                        type="password"
+                        label="Password"
+                        value={formData.password}
+                        onChange={e => handleInputChange(e, 'password')}
+                        error={errors?.password}
+                    />
+                    <button 
+                        className={`w-full text-center rounded-xl mt-2 ${isLoading ? 'bg-yellow-400' : 'bg-yellow-300 hover:bg-yellow-400'} px-3 py-2 text-blue-600 font-semibold transition-colors duration-200`} 
+                        name='_action' 
+                        value='login'
+                        disabled={isLoading}
+                    >
+                        {isLoading ? 'Logging in...' : 'Login'}
+                    </button>
+                </Form> :
+                <Form method="POST" className="rounded-2xl bg-gray-200 p-6 w-96" onSubmit={handleSubmit}>
+                    {formError && (
+                        <div className="text-sm font-semibold text-center tracking-wide text-red-500 w-full mb-4 p-2 bg-red-100 rounded">
+                            {formError}
+                        </div>
+                    )}
+                    <FormField
+                        textarea={false}
+                        htmlFor="email"
+                        label="Email"
+                        value={formData.email}
+                        onChange={e => handleInputChange(e, 'email')}
+                        error={errors?.email}
+                    />
+                    <FormField
+                        textarea={false}
+                        htmlFor="password"
+                        type="password"
+                        label="Password"
+                        value={formData.password}
+                        onChange={e => handleInputChange(e, 'password')}
+                        error={errors?.password}
+                    />
+                    <FormField
+                        textarea={false}
+                        htmlFor="firstName"
+                        label="First Name"
+                        value={formData.firstName}
+                        onChange={e => handleInputChange(e, 'firstName')}
+                        error={errors?.firstName}
+                    />
+                    <FormField
+                        textarea={false}
+                        htmlFor="lastName"
+                        label="Last Name"
+                        value={formData.lastName}
+                        onChange={e => handleInputChange(e, 'lastName')}
+                        error={errors?.lastName}
+                    />
+                    <FormField
+                        textarea={false}
+                        htmlFor="username"
+                        label="Username"
+                        value={formData.username}
+                        onChange={e => handleInputChange(e, 'username')}
+                        error={errors?.username}
+                    />
+                    <button 
+                        className={`w-full text-center rounded-xl mt-2 ${isLoading ? 'bg-yellow-400' : 'bg-yellow-300 hover:bg-yellow-400'} px-3 py-2 text-blue-600 font-semibold transition-colors duration-200`} 
+                        name='_action' 
+                        value='register'
+                        disabled={isLoading}
+                    >
+                        {isLoading ? 'Creating account...' : 'Sign Up'}
+                    </button>
+                </Form>
+                }
+            </div>
+        </Layout>
+    )
 }

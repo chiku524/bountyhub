@@ -41,7 +41,7 @@ export async function register(user: RegisterForm) {
   }
 
   const newUser = await createUser(user)
-  if (!newUser) {
+  if (!newUser || !newUser.id) {
     return { error: `Something went wrong trying to create a new user.`, fields: { email: user.email, password: user.password }}
   }
 
@@ -49,16 +49,18 @@ export async function register(user: RegisterForm) {
 }
 
 export async function login({ email, password }: LoginForm) {
-    // 2
     const user = await prisma.user.findUnique({
       where: { email },
     })
   
-    // 3
-    if (!user || !(await bcrypt.compare(password, user.password)))
-      return { error: `Incorrect login` }
+    if (!user) {
+      return { error: `No account found with that email address` }
+    }
+
+    if (!(await bcrypt.compare(password, user.password))) {
+      return { error: `Incorrect password` }
+    }
   
-    // 4
     return createUserSession(user.id, "/profile");
 }
 
@@ -76,7 +78,7 @@ function getUserSession(request: Request) {
   return storage.getSession(request.headers.get('Cookie'))
 }
 
-async function getUserId(request: Request) {
+async function getUserId(request: Request): Promise<string | null> {
   const session = await getUserSession(request)
   const userId = session.get('userId')
   if (!userId || typeof userId !== 'string') return null
@@ -85,14 +87,14 @@ async function getUserId(request: Request) {
 
 export async function getUser(request: Request) {
   const userId = await getUserId(request)
-  if (typeof userId !== 'string') {
+  if (!userId || typeof userId !== 'string') {
     return null
   }
 
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, email: true, username: true, profile: true },
+      include: { profile: true },
     })
     return user
   } catch {

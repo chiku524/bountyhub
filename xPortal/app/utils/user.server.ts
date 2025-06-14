@@ -3,24 +3,47 @@ import bcrypt from 'bcryptjs'
 import type { RegisterForm, User, Post, PostForm } from './types.server'
 import { getUser } from './auth.server'
 import { prisma } from './prisma.server'
+import { initGridFS, getVideo } from './gridfs'
+import mongoose from 'mongoose'
+import { GridFSBucket } from 'mongodb'
 
 export const createUser = async (user: RegisterForm) => {
-  const passwordHash = await bcrypt.hash(user.password, 10)
+  const { email, password, username } = user
+  const existingUser = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { email },
+        { username }
+      ]
+    }
+  })
+
+  if (existingUser) {
+    return { error: 'User already exists' }
+  }
+
   const newUser = await prisma.user.create({
     data: {
-      email: user.email,
-      password: passwordHash,
-      username: user.username,
+      email,
+      username,
+      password: await bcrypt.hash(password, 10),
       profile: {
-        firstName: user.firstName,
-        lastName: user.lastName,
-        socials: {
-          
+        create: {
+          firstName: '',
+          lastName: '',
+          profilePicture: null,
+          bio: '',
+          location: '',
+          website: '',
+          twitter: null,
+          github: null,
+          linkedin: null
         }
-      },
-    },
+      }
+    }
   })
-  return { id: newUser.id, email: user.email }
+
+  return { id: newUser.id, email }
 }
 
 interface UserUpdate {
@@ -45,46 +68,65 @@ interface UserUpdate {
 
 export const editUser = async (user: Partial<User>, request: Request) => {
   const userId = await getUser(request);
-  const { email, profile: { firstName, lastName, profession, avatar, username, website, bio, socials: { facebook, twitter, instagram, linkedin, github }}} = user as UserUpdate;
-  
+  if (!userId) {
+    throw new Error('User not authenticated');
+  }
 
-  const updatedUserEmail = await prisma.user.update({
-    where: { id: userId?.id },
-    data: { 
-        email: email || undefined, 
-        username: username || undefined,
-        profile: {
-          update: {
-            firstName: firstName || undefined,
-            lastName: lastName || undefined,
-            profession: profession || undefined,
-            avatar: avatar || undefined,
-            website: website || undefined,
-            bio: bio || undefined,
-            socials: {
-              facebook: facebook || undefined,
-              twitter: twitter || undefined,
-              instagram: instagram || undefined,
-              linkedin: linkedin || undefined,
-              github: github || undefined,
-            },
-          },
-        },
-    },
-  });
+  const { email, profile } = user;
 
-  return updatedUserEmail;
-}
+  const updateData: any = {};
+  if (email) updateData.email = email;
+  if (user.hasOwnProperty('username') && (user as any).username) updateData.username = (user as any).username;
+  if (profile) {
+    updateData.profile = {
+      update: {
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        profilePicture: profile.profilePicture,
+        bio: profile.bio,
+        location: profile.location,
+        website: profile.website,
+        twitter: profile.twitter,
+        github: profile.github,
+        linkedin: profile.linkedin
+      }
+    };
+  }
 
-export const getUserPosts = async (username: string) => {
-
-  const userPosts = await prisma.posts.findMany({
-    where: { 
-      authorId: username 
+  const updatedUser = await prisma.user.update({
+    where: { id: userId.id },
+    data: updateData,
+    include: {
+      profile: true
     }
   });
 
-  return userPosts;
+  return updatedUser;
+}
+
+export const getUserPosts = async (username: string) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { username },
+      select: {
+        id: true,
+        posts: {
+          orderBy: {
+            createdAt: 'desc'
+          }
+        }
+      }
+    });
+
+    if (!user) {
+      return [];
+    }
+
+    return user.posts;
+  } catch (error) {
+    console.error('Error in getUserPosts:', error);
+    return [];
+  }
 }
 
 export const createPost = async (post: PostForm) => {
@@ -100,10 +142,39 @@ export const createPost = async (post: PostForm) => {
   return newPost;
 }
 
-export const deletePost = async (postId: string) => {
-  const deletedPost = await prisma.posts.delete({
-    where: { id: postId },
-    select: { id: true },
-    });
-  return deletedPost;
+export async function deletePost(postId: string) {
+    try {
+        const post = await prisma.posts.findUnique({
+            where: { id: postId },
+            select: { blobVideoURL: true }
+        });
+
+        if (!post) {
+            throw new Error('Post not found');
+        }
+
+        if (post.blobVideoURL) {
+            try {
+                await initGridFS();
+                const file = await getVideo(post.blobVideoURL);
+                if (file) {
+                    const bucket = new GridFSBucket(mongoose.connection.db as any, {
+                        bucketName: 'videos'
+                    });
+                    await bucket.delete(file._id);
+                }
+            } catch (error) {
+                console.error('Error deleting video from GridFS:', error);
+            }
+        }
+
+        await prisma.posts.delete({
+            where: { id: postId }
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error('Error in deletePost:', error);
+        throw error;
+    }
 }

@@ -1,171 +1,279 @@
 // app/routes/profile.tsx
-import { useEffect, useState, useRef } from 'react'
-import { Form, useLoaderData, Link, useActionData  } from "@remix-run/react"
+import { useEffect, useState } from 'react'
+import { Form, useLoaderData, Link, useActionData, redirect, useNavigate } from "@remix-run/react"
 import { FormField } from '~/components/form-field'
-import { LoaderFunction, ActionFunction } from '@remix-run/node'
+import { LoaderFunction, ActionFunction, json } from '@remix-run/node'
 import { getUser } from '~/utils/auth.server'
-import { getUserPosts, createPost } from '~/utils/user.server'
-import { Nav } from '../components/nav'
+import { prisma } from '~/utils/prisma.server'
+import { Nav } from '~/components/nav'
 import { validateTitle, validateContent } from '~/utils/validators.server'
+import type { VideoFile } from '~/types/video'
+import type { CodeBlockForm } from '~/utils/types.server'
+import VideoUpload from '~/components/VideoUpload'
 
+interface LoaderData {
+  user: {
+    id: string;
+    username: string;
+  } | null;
+}
 
-export const loader: LoaderFunction = async ({ request: Request }) => {
-  
-  return await null;
+interface ActionData {
+  errors?: {
+    title?: string;
+    content?: string;
+  };
+  fields?: {
+    title?: string;
+    content?: string;
+  };
+}
+
+export const loader: LoaderFunction = async ({ request }) => {
+  const user = await getUser(request);
+  return json<LoaderData>({ user });
 }
 
 export const action: ActionFunction = async ({ request }) => {
-    const form = await request.formData()
-    const action = form.get('_action')
-    console.log(form);
-
-    switch (action) {
-        case 'createPost': {
-          const title = form.get('title');
-          const content = form.get('content');
-          const blobVideoURL = form.get('blobVideoURL') as string || null;
-
-          const errors = {
-            title: validateTitle((title as string) || ''),
-            content: validateContent((content as string) || '')
-          }
-      
-          if (Object.values(errors).some(Boolean))
-            return { errors, fields: { title, content }, form: action }
-          
-          if (!title || !content || typeof title !== 'string' || typeof content !== 'string') {
-              throw new Response('Title and content are required', { status: 400 });
-          }
-
-          const user = await getUser(request);
-          if (!user) {
-              throw new Response('Not authenticated', { status: 401 });
-          }
-          if (!user.username) {
-            throw new Response('User profile is incomplete', { status: 400 });
-          }
-          
-          return await createPost({title, content, blobVideoURL, author: user.username});
-        }
-        default:
-            return { error: `Invalid Form Data`, form: action }
-    }
-}
-
-export default function Create() {
-  const userData = useLoaderData<typeof loader>();
-  const [formData, setFormData] = useState({ title: '', content: '', blobVideoURL: '' })
-
-  useEffect(() => {
-      console.log('user data', formData);
-  }, [formData])
-
-  
-  // Updates the form data when an input changes
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>, field: string) => {
-    setFormData(form => ({ ...form, [field]: event.target.value }))
+  const user = await getUser(request);
+  if (!user) {
+    return redirect('/login');
   }
 
+  const formData = await request.formData();
+  const title = formData.get('title') as string;
+  const content = formData.get('content') as string;
+  const videoFilename = formData.get('videoFilename') as string;
+  const codeBlocks = JSON.parse(formData.get('codeBlocks') as string) as CodeBlockForm[];
 
-  const test = async () => {
-    let stream;
-    let chunks:any = [];
-    
-    try {
-      await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true }).then((stream) => {
-        const mediaRecorder = new MediaRecorder(stream);
-        mediaRecorder.start();
+  const errors: ActionData['errors'] = {};
+  if (!title) errors.title = 'Title is required';
+  if (!content) errors.content = 'Content is required';
 
-        mediaRecorder.onstop = (e) => {
-  
-          const clipName = prompt("Enter a name for your video clip");
-  
-          const clipLabel = document.querySelector("#clip-label");
-          const video = document.querySelector("#clip-video");
-          const deleteButton = document.querySelector("#clip-delete-button");
-          const mainContainer = document.querySelector("#clip-container");
-          
-          video?.setAttribute("controls", "");
-          deleteButton!.textContent = "Delete";
-          clipLabel!.textContent = clipName;
-  
-          const blob = new Blob(chunks, { type: "video" });
-          chunks = [];
-          const videoURL = URL.createObjectURL(blob);
-          setFormData({...formData, blobVideoURL: videoURL});
-          video?.setAttribute('src', videoURL);
-          mainContainer?.classList.remove('hidden');
+  if (Object.keys(errors).length > 0) {
+    return json<ActionData>({ errors, fields: { title, content } });
+  }
 
-          deleteButton!.addEventListener('click', (e) => {
-            mainContainer!.classList.add("hidden");
-            video?.setAttribute('src', '');
-            setFormData({...formData, blobVideoURL: ''});
-          })
-        };
-  
-        mediaRecorder.ondataavailable = (e) => {
-          chunks.push(e.data);
-        };
-      });
-    } catch (err) {
-      console.error("Error accessing media devices.", err);
-    }
+  try {
+    const post = await prisma.posts.create({
+      data: {
+        title,
+        content,
+        authorId: user.id,
+        blobVideoURL: videoFilename || null,
+        codeBlocks: {
+          create: codeBlocks
+        }
+      },
+    });
 
-    return stream;
+    return redirect(`/${user.username}/posts`);
+  } catch (error) {
+    console.error('Error creating post:', error);
+    return json<ActionData>({
+      errors: { title: 'Failed to create post' },
+      fields: { title, content },
+    });
+  }
+}
+
+export default function CreatePost() {
+  const { user } = useLoaderData<LoaderData>();
+  const actionData = useActionData<ActionData>();
+  const [videoFile, setVideoFile] = useState<VideoFile | null>(null);
+  const [isClient, setIsClient] = useState(false);
+  const [codeBlocks, setCodeBlocks] = useState<CodeBlockForm[]>([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  const addCodeBlock = () => {
+    setCodeBlocks([...codeBlocks, { language: 'javascript', code: '' }]);
+  };
+
+  const updateCodeBlock = (index: number, field: keyof CodeBlockForm, value: string) => {
+    const newBlocks = [...codeBlocks];
+    newBlocks[index] = { ...newBlocks[index], [field]: value };
+    setCodeBlocks(newBlocks);
+  };
+
+  const removeCodeBlock = (index: number) => {
+    setCodeBlocks(codeBlocks.filter((_, i) => i !== index));
+  };
+
+  if (!user) {
+    return (
+      <div className="h-screen w-full bg-neutral-900 flex flex-row">
+        <Nav />
+        <div className='flex flex-col justify-center items-center w-full h-full'>
+          <h1 className="text-white text-2xl">Please log in to create a post</h1>
+          <Link to="/login" className="mt-4 text-indigo-400 hover:text-indigo-300">Go to Login</Link>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="h-screen w-full bg-neutral-900 flex flex-row">
-        <Nav />
-        <div className='flex flex-col justify-center items-center w-full h-full overflow-y-scroll' style={{'msOverflowStyle': 'none', 'scrollbarWidth': 'none'}}>
-          <div className="flex flex-col bg-slate-700 bg-opacity-50 h-fit p-5 rounded border border-amber-950 m-auto shadow-custom-slate w-3/4">
-              <Form method="post" className=''>
-                  {/* <div className="text-xs font-semibold text-center tracking-wide text-red-500 w-full">{formError}</div> */}
-                  <FormField
-                      textarea={false}
-                      htmlFor="title"
-                      label="Title"
-                      value={formData.title}
-                      onChange={e => handleInputChange(e, 'title')}
-                      // error={errors?.title}
-                  />
-                  {/* <div className="text-xs font-semibold text-center tracking-wide text-red-500 w-full">{formError}</div> */}
-                  <FormField
-                      textarea
-                      htmlFor="content"
-                      label="Content"
-                      value={formData.content}
-                      onChange={e => handleInputChange(e, 'content')}
-                      // error={errors?.content}
-                  />
-                  <FormField
-                      textarea={false}
-                      htmlFor="blobVideoURL"
-                      label="BlobVideoURL"
-                      value={formData.blobVideoURL}
-                      onChange={e => handleInputChange(e, 'blobVideoURL')}
-                      // error={errors?.content}
-                    />
-                  <button className="w-full text-center rounded-xl mt-2 bg-yellow-300 px-3 py-2 text-blue-600 font-semibold hover:bg-yellow-400 hover:cursor-pointer" name='_action' value='createPost'>Create</button>
-              </Form>
-              <button onClick={() => test()}>Start Recording</button>
-          </div>
-          <div className="flex flex-col bg-slate-700 bg-opacity-50 h-fit p-5 rounded border border-amber-950 m-auto shadow-custom-slate">
-             <h2 className='text-center font-bold text-yellow-300 tracking-widest underline'>Clips</h2>
-            <article className='hidden' id='clip-container'>
-              <p id='clip-label'>
+      <Nav />
+      <div className="flex-1 p-8 overflow-y-auto">
+        <div className="max-w-2xl mx-auto">
+          <h1 className="text-2xl font-bold text-white mb-6">Create New Post</h1>
+          
+          <Form method="post" className="space-y-6 p-8 rounded-lg border-2 border-violet-500 shadow-[0_0_15px_rgba(139,92,246,0.3)] bg-neutral-800/50 backdrop-blur-sm">
+            <input type="hidden" name="videoFilename" value={videoFile?.filename || ''} />
+            <input type="hidden" name="codeBlocks" value={JSON.stringify(codeBlocks)} />
+            
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-300">
+                Title
+              </label>
+              <input
+                type="text"
+                name="title"
+                defaultValue={actionData?.fields?.title}
+                className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+                required
+              />
+              {actionData?.errors?.title && (
+                <p className="text-red-500 text-sm">{actionData.errors.title}</p>
+              )}
+            </div>
 
-              </p>
-              <video id='clip-video' controls className='max-h-40 max-w-72'>
-                
-              </video>
-              <button id='clip-delete-button'>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-300">
+                Content
+              </label>
+              <textarea
+                name="content"
+                defaultValue={actionData?.fields?.content}
+                rows={4}
+                className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+                required
+              />
+              {actionData?.errors?.content && (
+                <p className="text-red-500 text-sm">{actionData.errors.content}</p>
+              )}
+            </div>
 
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <label className="block text-sm font-medium text-gray-300">
+                  Code Blocks
+                </label>
+                <button
+                  type="button"
+                  onClick={addCodeBlock}
+                  className="px-3 py-1 bg-violet-600 text-white rounded-md hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 transition-colors duration-200"
+                >
+                  Add Code Block
+                </button>
+              </div>
+              
+              {codeBlocks.map((block, index) => (
+                <div key={index} className="space-y-2 p-4 bg-neutral-800/50 rounded-lg border border-neutral-700">
+                  <div className="flex justify-between items-center">
+                    <select
+                      value={block.language}
+                      onChange={(e) => updateCodeBlock(index, 'language', e.target.value)}
+                      className="px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+                    >
+                      <option value="javascript">JavaScript</option>
+                      <option value="typescript">TypeScript</option>
+                      <option value="python">Python</option>
+                      <option value="java">Java</option>
+                      <option value="cpp">C++</option>
+                      <option value="csharp">C#</option>
+                      <option value="php">PHP</option>
+                      <option value="ruby">Ruby</option>
+                      <option value="go">Go</option>
+                      <option value="rust">Rust</option>
+                      <option value="swift">Swift</option>
+                      <option value="kotlin">Kotlin</option>
+                      <option value="scala">Scala</option>
+                      <option value="r">R</option>
+                      <option value="matlab">MATLAB</option>
+                      <option value="sql">SQL</option>
+                      <option value="html">HTML</option>
+                      <option value="css">CSS</option>
+                      <option value="bash">Bash</option>
+                      <option value="powershell">PowerShell</option>
+                      <option value="plaintext">Plain Text</option>
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => removeCodeBlock(index)}
+                      className="text-red-500 hover:text-red-600 focus:outline-none"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  <textarea
+                    value={block.code}
+                    onChange={(e) => updateCodeBlock(index, 'code', e.target.value)}
+                    rows={6}
+                    className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md text-white font-mono focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+                    placeholder="Enter your code here..."
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-300">
+                Video Upload
+              </label>
+              <div className="mt-1">
+                {isClient ? (
+                  <VideoUpload
+                    onUploadComplete={(file: VideoFile) => {
+                      setVideoFile(file);
+                    }}
+                    onError={(errorMessage: string) => {
+                      console.error('Video upload error:', errorMessage);
+                    }}
+                  />
+                ) : (
+                  <div className="w-full max-w-xl mx-auto">
+                    <div className="border-2 border-dashed rounded-lg p-6 text-center">
+                      <p className="mt-2 text-sm text-gray-600">Loading video upload...</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {videoFile && (
+              <div className="mt-4">
+                <h3 className="text-sm font-medium text-gray-300 mb-2">Video Preview</h3>
+                <div className="relative aspect-video w-full max-w-2xl mx-auto bg-neutral-800 rounded-lg overflow-hidden border border-violet-500/30">
+                  <video
+                    src={`/api/upload/video?filename=${encodeURIComponent(videoFile.filename)}`}
+                    controls
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                      console.error('Error loading video preview:', e);
+                    }}
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                className="px-4 py-2 bg-violet-600 text-white rounded-md hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 transition-colors duration-200"
+              >
+                Create Post
               </button>
-            </article>
-          </div>
+            </div>
+          </Form>
         </div>
-        
+      </div>
     </div>
-  )
+  );
 }
