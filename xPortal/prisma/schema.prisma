@@ -54,10 +54,11 @@ model Posts {
   blobVideoURL String?
   codeBlocks CodeBlock[]
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   comments Comment[]
   answers Answer[]
   votes Vote[]
+  qualityVotes QualityVote[]
   visibilityVotes Int @default(0) // For community visibility
   qualityUpvotes Int @default(0) // For quality assurance
   qualityDownvotes Int @default(0) // For quality assurance
@@ -124,4 +125,19 @@ model CodeBlock {
   post Posts @relation(fields: [postId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model QualityVote {
+  id String @id @map("_id") @default(auto()) @db.ObjectId
+  userId String @db.ObjectId
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId String @db.ObjectId
+  post Posts @relation(fields: [postId], references: [id], onDelete: Cascade)
+  value Int // 1 for upvote, -1 for downvote
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, postId])
+  @@index([userId])
+  @@index([postId])
 }
