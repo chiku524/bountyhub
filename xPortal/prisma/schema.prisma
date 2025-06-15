@@ -112,9 +112,9 @@ model Vote {
   isQualityVote Boolean @default(false) // Indicates if this is a quality vote
 
   @@index([userId, voteType])
-  @@unique([userId, postId, isQualityVote], map: "vote_post_unique")
-  @@unique([userId, commentId], map: "vote_comment_unique")
-  @@unique([userId, answerId], map: "vote_answer_unique")
+  @@unique([userId, postId, voteType, isQualityVote], map: "vote_post_unique")
+  @@unique([userId, commentId, voteType], map: "vote_comment_unique")
+  @@unique([userId, answerId, voteType], map: "vote_answer_unique")
 }
 
 model CodeBlock {
