@@ -114,15 +114,24 @@ export default function Profile() {
             </div>
             <div className="bg-neutral-800/80 rounded-lg shadow-lg p-6 mb-8">
               <div className="flex items-center space-x-4">
-                <div className="w-20 h-20 bg-indigo-500 rounded-full flex items-center justify-center">
-                  <span className="text-2xl text-white">
-                    {user.profile?.firstName?.[0] || user.username[0]}
-                  </span>
+                <div className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center bg-indigo-500">
+                  {user.profile?.profilePicture ? (
+                    <img 
+                      src={user.profile.profilePicture} 
+                      alt="Profile" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-2xl text-white">
+                      {user.profile?.firstName?.[0] || user.username[0]}
+                    </span>
+                  )}
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-white">
                     {user.profile?.firstName} {user.profile?.lastName}
                   </h2>
+                  <p className="text-gray-400">@{user.username}</p>
                 </div>
               </div>
               {user.profile?.bio && (
@@ -162,7 +171,9 @@ export default function Profile() {
                 {posts.slice(0, 4).map((post: { id: string; title: string; content: string; blobVideoURL: string | null; createdAt: string; comments: { id: string }[]; }) => (
                   <div key={post.id} className="bg-neutral-700 rounded-lg p-4">
                     <Link to={`/posts/${post.id}`} className="block">
-                      <h3 className="text-lg font-medium text-white mb-2">{post.title}</h3>
+                      <h3 className="text-lg font-medium text-white mb-2">
+                        {post.title.length > 50 ? `${post.title.substring(0, 50)}...` : post.title}
+                      </h3>
                       <p className="text-gray-300 text-sm line-clamp-2">{post.content}</p>
                       <div className="mt-2 flex items-center text-sm text-gray-400">
                         <span>{new Date(post.createdAt).toLocaleDateString()}</span>

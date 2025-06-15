@@ -58,10 +58,9 @@ model Posts {
   comments Comment[]
   answers Answer[]
   votes Vote[]
-  qualityVotes QualityVote[]
   visibilityVotes Int @default(0) // For community visibility
-  upvotes Int @default(0) // For quality assurance
-  downvotes Int @default(0) // For quality assurance
+  qualityUpvotes Int @default(0) // For quality assurance
+  qualityDownvotes Int @default(0) // For quality assurance
 }
 
 model Comment {
@@ -108,10 +107,13 @@ model Vote {
   answerId String? @db.ObjectId
   answer Answer? @relation(fields: [answerId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+  voteType String @db.String // 'POST', 'COMMENT', or 'ANSWER'
+  isQualityVote Boolean @default(false) // Indicates if this is a quality vote
 
-  @@unique([userId, postId])
-  @@unique([userId, commentId])
-  @@unique([userId, answerId])
+  @@index([userId, voteType])
+  @@unique([userId, postId, isQualityVote], map: "vote_post_unique")
+  @@unique([userId, commentId], map: "vote_comment_unique")
+  @@unique([userId, answerId], map: "vote_answer_unique")
 }
 
 model CodeBlock {
@@ -122,16 +124,4 @@ model CodeBlock {
   post Posts @relation(fields: [postId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
-
-model QualityVote {
-  id String @id @map("_id") @default(auto()) @db.ObjectId
-  userId String @db.ObjectId
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  value Int // 1 for upvote, -1 for downvote
-  postId String @db.ObjectId
-  post Posts @relation(fields: [postId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-
-  @@unique([userId, postId])
 }

@@ -4,8 +4,10 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLocation,
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
+import { useEffect, useState } from "react";
 
 import "./tailwind.css";
 
@@ -50,5 +52,25 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function Root() {
+  const location = useLocation();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (isClient) {
+      // Clear any existing storage access errors
+      const originalOnError = window.onerror;
+      window.onerror = (event) => {
+        if (event.toString().includes("access to storage is not allowed")) {
+          return true; // Prevent the error from being logged
+        }
+        return originalOnError ? originalOnError(event) : false;
+      };
+    }
+  }, [isClient, location]);
+
   return <Outlet />;
 }

@@ -149,10 +149,14 @@ export const action: ActionFunction = async ({ request, params }) => {
           return json({ error: 'Invalid vote parameters' }, { status: 400 });
         }
 
+        // Set voteType string for the Vote model
+        const voteType = targetType.toUpperCase();
+
         // Check if user has already voted
         const existingVote = await prisma.vote.findFirst({
           where: {
             userId: user.id,
+            voteType,
             ...(targetType === 'post' ? { postId: targetId } :
                 targetType === 'comment' ? { commentId: targetId } :
                 { answerId: targetId }),
@@ -171,6 +175,7 @@ export const action: ActionFunction = async ({ request, params }) => {
             data: {
               userId: user.id,
               value,
+              voteType,
               ...(targetType === 'post' ? { postId: targetId } :
                   targetType === 'comment' ? { commentId: targetId } :
                   { answerId: targetId }),
@@ -182,6 +187,7 @@ export const action: ActionFunction = async ({ request, params }) => {
         const voteCounts = await prisma.vote.groupBy({
           by: ['value'],
           where: {
+            voteType,
             ...(targetType === 'post' ? { postId: targetId } :
                 targetType === 'comment' ? { commentId: targetId } :
                 { answerId: targetId }),

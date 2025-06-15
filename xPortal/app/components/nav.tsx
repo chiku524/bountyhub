@@ -12,14 +12,14 @@ export function Nav() {
         // Dynamically import seedrandom
         import('seedrandom').then(({ default: seedrandom }) => {
             const rng = seedrandom('fixed-seed');
-            const aa = document.querySelector("#tank");
-            let tankWidth = aa?.clientWidth ?? 375;
-            let tankHeight = aa?.clientHeight ?? 500;
-            tankHeight += 100;
+            const nav = document.querySelector(".nav-container");
+            let navWidth = nav?.clientWidth ?? 375;
+            let navHeight = nav?.clientHeight ?? 500;
 
+            // Set initial positions for all bubbles
             bubArray.forEach((el: any) => {
-                let randomX = (gsap.utils.random as any)(0, tankWidth, false, rng);
-                let randomY = (gsap.utils.random as any)(-500, 0, false, rng);
+                let randomX = (gsap.utils.random as any)(0, navWidth, false, rng);
+                let randomY = (gsap.utils.random as any)(-navHeight, 0, false, rng);
                 gsap.set(`.bubble-${el}`, {
                     x: randomX,
                     y: randomY,
@@ -27,39 +27,52 @@ export function Nav() {
             });
 
             bubArray1.forEach((el: any) => {
-                let randomX = (gsap.utils.random as any)(0, tankWidth, false, rng);
-                let randomY = (gsap.utils.random as any)(-500, 0, false, rng);
-                gsap.set(`.bubble-${el}`, {
+                let randomX = (gsap.utils.random as any)(0, navWidth, false, rng);
+                let randomY = (gsap.utils.random as any)(-navHeight, 0, false, rng);
+                gsap.set(`.bubble-1-${el}`, {
                     x: randomX,
                     y: randomY,
                 });
             });
 
             bubArray2.forEach((el: any) => {
-                let randomX = (gsap.utils.random as any)(0, tankWidth, false, rng);
-                let randomY = (gsap.utils.random as any)(-500, 0, false, rng);
-                gsap.set(`.bubble-${el}`, {
+                let randomX = (gsap.utils.random as any)(0, navWidth, false, rng);
+                let randomY = (gsap.utils.random as any)(-navHeight, 0, false, rng);
+                gsap.set(`.bubble-2-${el}`, {
                     x: randomX,
                     y: randomY,
                 });
             });
 
-            gsap.to(".bubble-0", {
-                y: tankHeight,
-                repeat: -1,
-                duration: 3.5,
+            // Create animations for each bubble
+            bubArray.forEach((el: any) => {
+                gsap.to(`.bubble-${el}`, {
+                    y: navHeight,
+                    repeat: -1,
+                    duration: 3.5 + (rng() * 2),
+                    delay: rng() * 2,
+                    ease: "none"
+                });
             });
-            gsap.to(".bubble-1", {
-                y: tankHeight,
-                repeat: -1,
-                duration: 3.5,
-                delay: 2.25
+
+            bubArray1.forEach((el: any) => {
+                gsap.to(`.bubble-1-${el}`, {
+                    y: navHeight,
+                    repeat: -1,
+                    duration: 4 + (rng() * 2),
+                    delay: rng() * 2,
+                    ease: "none"
+                });
             });
-            gsap.to(".bubble-2", {
-                y: tankHeight,
-                repeat: -1,
-                duration: 3.5,
-                delay: 1.25
+
+            bubArray2.forEach((el: any) => {
+                gsap.to(`.bubble-2-${el}`, {
+                    y: navHeight,
+                    repeat: -1,
+                    duration: 4.5 + (rng() * 2),
+                    delay: rng() * 2,
+                    ease: "none"
+                });
             });
 
             // Store random values for JSX
@@ -73,39 +86,33 @@ export function Nav() {
     }, []);
 
     return (
-        <div className='group fixed left-0 top-0 h-screen w-20 bg-neutral-800 flex flex-col items-center transition-all duration-300 ease-in-out hover:w-64 overflow-hidden z-[9999]'>
+        <div className='group fixed left-0 top-0 h-screen w-20 bg-neutral-800 flex flex-col items-center transition-all duration-300 ease-in-out hover:w-64 overflow-hidden z-[9999] nav-container'>
             {/* Bubble Animation Container */}
-            <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute inset-0 overflow-hidden">
                 {bubArray.map((el, index) => (
                     <div
                         key={el}
-                        className={`bubble-${el} absolute w-2 h-2 rounded-full bg-indigo-500/20 animate-float`}
+                        className={`bubble-${el} absolute w-2 h-2 rounded-full bg-indigo-500/20`}
                         style={{
                             left: `${randomValues[index]?.left ?? 0}%`,
-                            animationDelay: `${randomValues[index]?.delay ?? 0}s`,
-                            animationDuration: `${randomValues[index]?.duration ?? 8}s`
                         }}
                     />
                 ))}
                 {bubArray1.map((el, index) => (
                     <div
                         key={`1-${el}`}
-                        className={`bubble-${el} absolute w-1.5 h-1.5 rounded-full bg-indigo-400/20 animate-float`}
+                        className={`bubble-1-${el} absolute w-1.5 h-1.5 rounded-full bg-indigo-400/20`}
                         style={{
                             left: `${randomValues[index]?.left ?? 0}%`,
-                            animationDelay: `${randomValues[index]?.delay ?? 0}s`,
-                            animationDuration: `${randomValues[index]?.duration ?? 8}s`
                         }}
                     />
                 ))}
                 {bubArray2.map((el, index) => (
                     <div
                         key={`2-${el}`}
-                        className={`bubble-${el} absolute w-1 h-1 rounded-full bg-indigo-300/20 animate-float`}
+                        className={`bubble-2-${el} absolute w-1 h-1 rounded-full bg-indigo-300/20`}
                         style={{
                             left: `${randomValues[index]?.left ?? 0}%`,
-                            animationDelay: `${randomValues[index]?.delay ?? 0}s`,
-                            animationDuration: `${randomValues[index]?.duration ?? 8}s`
                         }}
                     />
                 ))}

@@ -77,20 +77,44 @@ export const editUser = async (user: Partial<User>, request: Request) => {
   const updateData: any = {};
   if (email) updateData.email = email;
   if (user.hasOwnProperty('username') && (user as any).username) updateData.username = (user as any).username;
+  
   if (profile) {
-    updateData.profile = {
-      update: {
-        firstName: profile.firstName,
-        lastName: profile.lastName,
-        profilePicture: profile.profilePicture,
-        bio: profile.bio,
-        location: profile.location,
-        website: profile.website,
-        twitter: profile.twitter,
-        github: profile.github,
-        linkedin: profile.linkedin
-      }
-    };
+    // First check if profile exists
+    const existingProfile = await prisma.profile.findUnique({
+      where: { userId: userId.id }
+    });
+
+    if (existingProfile) {
+      // Update existing profile
+      updateData.profile = {
+        update: {
+          firstName: profile.firstName || '',
+          lastName: profile.lastName || '',
+          profilePicture: profile.profilePicture,
+          bio: profile.bio || '',
+          location: profile.location || '',
+          website: profile.website || '',
+          twitter: profile.twitter,
+          github: profile.github,
+          linkedin: profile.linkedin
+        }
+      };
+    } else {
+      // Create new profile
+      updateData.profile = {
+        create: {
+          firstName: profile.firstName || '',
+          lastName: profile.lastName || '',
+          profilePicture: profile.profilePicture,
+          bio: profile.bio || '',
+          location: profile.location || '',
+          website: profile.website || '',
+          twitter: profile.twitter,
+          github: profile.github,
+          linkedin: profile.linkedin
+        }
+      };
+    }
   }
 
   const updatedUser = await prisma.user.update({

@@ -41,17 +41,14 @@ type PostWithRelations = {
 };
 
 export const loader: LoaderFunction = async ({ request, params }) => {
-  const user = await getUser(request);
-  const { postId } = params;
-
-  if (!postId) {
-    throw new Response('Post ID is required', { status: 400 });
-  }
-
   try {
-    console.log('Prisma client:', prisma);
-    console.log('Fetching post with ID:', postId);
-    
+    const user = await getUser(request);
+    const { postId } = params;
+
+    if (!postId) {
+      throw new Response('Post ID is required', { status: 400 });
+    }
+
     const post = await prisma.posts.findUnique({
       where: { id: postId },
       include: {
@@ -64,7 +61,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
                 profilePicture: true
               }
             }
-          },
+          }
         },
         comments: {
           include: {
@@ -77,12 +74,12 @@ export const loader: LoaderFunction = async ({ request, params }) => {
                     profilePicture: true
                   }
                 }
-              },
-            },
+              }
+            }
           },
           orderBy: {
-            createdAt: 'desc',
-          },
+            createdAt: 'desc'
+          }
         },
         answers: {
           include: {
@@ -95,84 +92,54 @@ export const loader: LoaderFunction = async ({ request, params }) => {
                     profilePicture: true
                   }
                 }
-              },
-            },
-            comments: {
-              include: {
-                author: {
-                  select: {
-                    id: true,
-                    username: true,
-                    profile: {
-                      select: {
-                        profilePicture: true
-                      }
-                    }
-                  },
-                },
-              },
-            },
+              }
+            }
           },
           orderBy: {
-            createdAt: 'desc',
-          },
-        },
-        codeBlocks: true,
-      },
+            createdAt: 'desc'
+          }
+        }
+      }
     });
-
-    console.log('Post found:', post ? 'yes' : 'no');
 
     if (!post) {
       throw new Response('Post not found', { status: 404 });
     }
 
-    // Get user's quality vote if they're logged in
+    // Get user's votes if they're logged in
     let userQualityVote = 0;
+    let userVisibilityVote = false;
     if (user) {
-      try {
-        const userVote = await prisma.qualityVote.findFirst({
+      const [qualityVote, visibilityVote] = await Promise.all([
+        prisma.vote.findFirst({
           where: {
             userId: user.id,
-            postId: post.id
-          },
-          select: {
-            value: true
+            postId,
+            voteType: 'POST',
+            isQualityVote: true
           }
-        });
-        userQualityVote = userVote?.value || 0;
-      } catch (error) {
-        console.error('Error fetching user quality vote:', error);
-        // Continue with default vote value if there's an error
-        userQualityVote = 0;
-      }
-    }
-
-    // Calculate quality vote counts
-    let upvotes = 0;
-    let downvotes = 0;
-    try {
-      const qualityVoteCounts = await prisma.qualityVote.groupBy({
-        by: ['value'],
-        where: {
-          postId: post.id
-        },
-        _count: true
-      });
-
-      upvotes = qualityVoteCounts.find(v => v.value === 1)?._count || 0;
-      downvotes = qualityVoteCounts.find(v => v.value === -1)?._count || 0;
-    } catch (error) {
-      console.error('Error calculating quality vote counts:', error);
-      // Continue with default vote counts if there's an error
+        }),
+        prisma.vote.findFirst({
+          where: {
+            userId: user.id,
+            postId,
+            voteType: 'POST',
+            isQualityVote: false
+          }
+        })
+      ]);
+      userQualityVote = qualityVote?.value || 0;
+      userVisibilityVote = !!visibilityVote;
     }
 
     // Transform the post data to include vote information
     const transformedPost = {
       ...post,
-      upvotes,
-      downvotes,
+      qualityUpvotes: post.qualityUpvotes,
+      qualityDownvotes: post.qualityDownvotes,
+      visibilityVotes: post.visibilityVotes,
       userQualityVote,
+      userVisibilityVote,
       author: {
         ...post.author,
         profilePicture: post.author.profile?.profilePicture || null
@@ -193,24 +160,9 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       }))
     };
 
-    console.log('Transformed post:', {
-      id: transformedPost.id,
-      title: transformedPost.title,
-      upvotes,
-      downvotes,
-      userQualityVote
-    });
-
-    return json({
-      post: transformedPost,
-      currentUser: user,
-    });
+    return json({ post: transformedPost, currentUser: user });
   } catch (error) {
-    console.error('Error in post detail loader:', error);
-    if (error instanceof Response) {
-      throw error;
-    }
-    throw new Response('Failed to fetch post', { status: 500 });
+    throw new Response('Failed to load post', { status: 500 });
   }
 };
 
@@ -231,78 +183,146 @@ export const action: ActionFunction = async ({ request, params }) => {
 
     if (action === 'qualityVote') {
       const value = parseInt(formData.get('value') as string);
-      // Check if user has already voted
-      const existingVote = await prisma.qualityVote.findFirst({
-        where: {
-          userId: user.id,
-          postId
-        }
-      });
-
-      console.log('Existing vote:', existingVote);
-
-      if (existingVote) {
-        if (existingVote.value === value) {
-          // If clicking the same vote button, remove the vote
-          await prisma.qualityVote.delete({
-            where: {
-              id: existingVote.id
-            }
-          });
-        } else {
-          // If clicking the opposite vote button, update the vote
-          await prisma.qualityVote.update({
-            where: {
-              id: existingVote.id
-            },
-            data: {
-              value
-            }
-          });
-        }
-      } else {
-        // Create new vote
-        await prisma.qualityVote.create({
-          data: {
-            userId: user.id,
-            postId,
-            value
-          }
-        });
+      if (![-1, 0, 1].includes(value)) {
+        return json({ error: 'Invalid vote value' }, { status: 400 });
       }
 
-      // Get updated vote counts
-      const voteCounts = await prisma.qualityVote.groupBy({
-        by: ['value'],
-        where: {
-          postId
-        },
-        _count: true
-      });
+      // Use a transaction to ensure atomic operations
+      const result = await prisma.$transaction(async (tx) => {
+        // Get current vote state
+        const existingVote = await tx.vote.findFirst({
+          where: {
+            userId: user.id,
+            postId,
+            voteType: 'POST',
+            isQualityVote: true
+          }
+        });
 
-      console.log('Vote counts:', voteCounts);
-
-      const upvotes = voteCounts.find(v => v.value === 1)?._count || 0;
-      const downvotes = voteCounts.find(v => v.value === -1)?._count || 0;
-
-      // Get user's current vote
-      const userVote = await prisma.qualityVote.findFirst({
-        where: {
-          userId: user.id,
-          postId
-        },
-        select: {
-          value: true
+        // Update vote record
+        if (value === 0) {
+          // Remove vote
+          if (existingVote) {
+            await tx.vote.delete({
+              where: { id: existingVote.id }
+            });
+          }
+        } else {
+          // Update or create vote
+          if (existingVote) {
+            await tx.vote.update({
+              where: { id: existingVote.id },
+              data: { value }
+            });
+          } else {
+            await tx.vote.create({
+              data: {
+                userId: user.id,
+                postId,
+                value,
+                voteType: 'POST',
+                isQualityVote: true
+              }
+            });
+          }
         }
+
+        // Update post vote counts
+        const voteCounts = await tx.vote.groupBy({
+          by: ['value'],
+          where: {
+            postId,
+            voteType: 'POST',
+            isQualityVote: true
+          },
+          _count: true
+        });
+
+        const upvotes = voteCounts.find(v => v.value === 1)?._count || 0;
+        const downvotes = voteCounts.find(v => v.value === -1)?._count || 0;
+
+        const updatedPost = await tx.posts.update({
+          where: { id: postId },
+          data: {
+            qualityUpvotes: upvotes,
+            qualityDownvotes: downvotes
+          }
+        });
+
+        return {
+          post: updatedPost,
+          userQualityVote: value
+        };
       });
 
-      console.log('User vote after update:', userVote);
-
-      return json({ 
+      return json({
         success: true,
-        upvotes,
-        downvotes,
-        userQualityVote: userVote?.value || 0
+        qualityUpvotes: result.post.qualityUpvotes,
+        qualityDownvotes: result.post.qualityDownvotes,
+        userQualityVote: result.userQualityVote
+      });
+    } else if (action === 'visibilityVote') {
+      const isVoting = formData.get('isVoting') === 'true';
+
+      // Use a transaction to ensure atomic operations
+      const result = await prisma.$transaction(async (tx) => {
+        // Get current vote state
+        const existingVote = await tx.vote.findFirst({
+          where: {
+            userId: user.id,
+            postId,
+            voteType: 'POST',
+            isQualityVote: false
+          }
+        });
+
+        // Update vote record
+        if (isVoting) {
+          if (!existingVote) {
+            await tx.vote.create({
+              data: {
+                userId: user.id,
+                postId,
+                value: 1,
+                voteType: 'POST',
+                isQualityVote: false
+              }
+            });
+          }
+        } else {
+          if (existingVote) {
+            await tx.vote.delete({
+              where: { id: existingVote.id }
+            });
+          }
+        }
+
+        // Update post visibility votes
+        const visibilityVotes = await tx.vote.count({
+          where: {
+            postId,
+            voteType: 'POST',
+            isQualityVote: false
+          }
+        });
+
+        const updatedPost = await tx.posts.update({
+          where: { id: postId },
+          data: {
+            visibilityVotes
+          }
+        });
+
+        return {
+          post: updatedPost,
+          userVisibilityVote: isVoting
+        };
+      });
+
+      return json({
+        success: true,
+        visibilityVotes: result.post.visibilityVotes,
+        userVisibilityVote: result.userVisibilityVote
       });
     } else if (action === 'comment') {
       const content = formData.get('content') as string;
@@ -341,15 +361,95 @@ export const action: ActionFunction = async ({ request, params }) => {
           }
         }
       });
+    } else if (action === 'answer') {
+      const content = formData.get('content') as string;
+      if (!content?.trim()) {
+        return json({ error: 'Answer content is required' }, { status: 400 });
+      }
+
+      const answer = await prisma.answer.create({
+        data: {
+          content: content.trim(),
+          authorId: user.id,
+          postId,
+          isAccepted: false
+        },
+        include: {
+          author: {
+            select: {
+              id: true,
+              username: true,
+              profile: {
+                select: {
+                  profilePicture: true
+                }
+              }
+            }
+          }
+        }
+      });
+
+      return json({ 
+        success: true,
+        answer: {
+          ...answer,
+          author: {
+            ...answer.author,
+            profilePicture: answer.author.profile?.profilePicture || null
+          }
+        }
+      });
+    } else if (action === 'accept-answer') {
+      const answerId = formData.get('answerId') as string;
+      if (!answerId) {
+        return json({ error: 'Answer ID is required' }, { status: 400 });
+      }
+
+      // Check if user is the post author
+      const post = await prisma.posts.findUnique({
+        where: { id: postId },
+        select: { authorId: true }
+      });
+
+      if (!post || post.authorId !== user.id) {
+        return json({ error: 'Only the post author can accept answers' }, { status: 403 });
+      }
+
+      // Update answer to mark it as accepted
+      const answer = await prisma.answer.update({
+        where: { id: answerId },
+        data: { isAccepted: true },
+        include: {
+          author: {
+            select: {
+              id: true,
+              username: true,
+              profile: {
+                select: {
+                  profilePicture: true
+                }
+              }
+            }
+          }
+        }
+      });
+
+      return json({ 
+        success: true, 
+        answer: {
+          ...answer,
+          author: {
+            ...answer.author,
+            profilePicture: answer.author.profile?.profilePicture || null
+          }
+        }
+      });
     }
 
     return json({ error: 'Invalid action' }, { status: 400 });
   } catch (error) {
     console.error('Error in action:', error);
-    if (error instanceof Error) {
-      return json({ error: error.message }, { status: 500 });
-    }
-    return json({ error: 'An unexpected error occurred' }, { status: 500 });
+    return json({ error: 'Failed to process action' }, { status: 500 });
   }
 };
 
@@ -392,6 +492,7 @@ export default function PostDetail() {
   const [videoError, setVideoError] = useState<string | null>(null);
   const [newComment, setNewComment] = useState('');
   const [comments, setComments] = useState(post.comments);
+  const [answers, setAnswers] = useState(post.answers);
   const [voteState, setVoteState] = useState({
     upvotes: post.upvotes || 0,
     downvotes: post.downvotes || 0,
@@ -419,30 +520,9 @@ export default function PostDetail() {
     formData.append('value', value.toString());
 
     try {
-      const response = await fetch(`/posts/${post.id}`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to submit vote');
-      }
-      
-      const data = await response.json();
-      if (data.success) {
-        setVoteState(prev => ({
-          ...prev,
-          upvotes: data.upvotes,
-          downvotes: data.downvotes,
-          userQualityVote: data.userQualityVote
-        }));
-      } else {
-        setError(data.error || 'Failed to submit vote');
-      }
+      await submit(formData, { method: 'post' });
+      // The loader will be revalidated automatically by Remix
+      // and the UI will update with the new data
     } catch (error) {
       console.error('Error voting:', error);
       setError(error instanceof Error ? error.message : 'Failed to submit vote. Please try again.');
@@ -474,18 +554,38 @@ export default function PostDetail() {
         }
       });
 
+      const contentType = response.headers.get('content-type');
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to post comment');
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to post comment');
+        } else {
+          const text = await response.text();
+          throw new Error(text || 'Failed to post comment');
+        }
       }
 
-      const data = await response.json();
-      if (data.success) {
-        setComments(prev => [...prev, data.comment]);
-        setNewComment('');
-        setError(null);
-      } else {
-        setError(data.error || 'Failed to post comment');
+      if (contentType && contentType.includes('application/json')) {
+        const data = await response.json();
+        if (data.success && data.comment) {
+          // Add the new comment to the state
+          setComments((prev: CommentWithAuthor[]) => [...prev, {
+            id: data.comment.id,
+            content: data.comment.content,
+            createdAt: data.comment.createdAt,
+            author: {
+              id: data.comment.author.id,
+              username: data.comment.author.username,
+              profile: {
+                profilePicture: data.comment.author.profilePicture
+              }
+            }
+          }]);
+          setNewComment('');
+          setError(null);
+        } else {
+          setError(data.error || 'Failed to post comment');
+        }
       }
     } catch (error) {
       console.error('Error posting comment:', error);
@@ -500,7 +600,47 @@ export default function PostDetail() {
     formData.append('postId', post.id);
 
     try {
-      await submit(formData, { method: 'post' });
+      const response = await fetch(`/posts/${post.id}`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      const contentType = response.headers.get('content-type');
+      if (!response.ok) {
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to post answer');
+        } else {
+          const text = await response.text();
+          throw new Error(text || 'Failed to post answer');
+        }
+      }
+
+      if (contentType && contentType.includes('application/json')) {
+        const data = await response.json();
+        if (data.success && data.answer) {
+          // Add the new answer to the state
+          setAnswers((prev: AnswerWithAuthor[]) => [...prev, {
+            id: data.answer.id,
+            content: data.answer.content,
+            createdAt: data.answer.createdAt,
+            isAccepted: data.answer.isAccepted,
+            author: {
+              id: data.answer.author.id,
+              username: data.answer.author.username,
+              profile: {
+                profilePicture: data.answer.author.profilePicture
+              }
+            }
+          }]);
+          setError(null);
+        } else {
+          setError(data.error || 'Failed to post answer');
+        }
+      }
     } catch (error) {
       setError('Failed to post answer');
       console.error('Error posting answer:', error);
@@ -514,7 +654,41 @@ export default function PostDetail() {
     formData.append('postId', post.id);
 
     try {
-      await submit(formData, { method: 'post' });
+      const response = await fetch(`/posts/${post.id}`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      const contentType = response.headers.get('content-type');
+      if (!response.ok) {
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to accept answer');
+        } else {
+          const text = await response.text();
+          throw new Error(text || 'Failed to accept answer');
+        }
+      }
+
+      if (contentType && contentType.includes('application/json')) {
+        const data = await response.json();
+        if (data.success) {
+          // Update the answers list to reflect the accepted status
+          setAnswers((prev: AnswerWithAuthor[]) =>
+            prev.map(answer =>
+              answer.id === answerId
+                ? { ...answer, isAccepted: true }
+                : answer
+            )
+          );
+          setError(null);
+        } else {
+          setError(data.error || 'Failed to accept answer');
+        }
+      }
     } catch (error) {
       setError('Failed to accept answer');
       console.error('Error accepting answer:', error);
@@ -652,7 +826,7 @@ export default function PostDetail() {
 
             {/* Comments Section */}
             <div className="mt-8">
-              <h2 className="text-xl font-semibold text-white mb-4">Comments</h2>
+              <h2 className="text-xl font-semibold text-white mb-4">Comments ({comments.length})</h2>
               
               {/* Comment Form */}
               <form onSubmit={handleComment} className="mb-6">
@@ -671,78 +845,125 @@ export default function PostDetail() {
                 </button>
               </form>
 
-              {/* Comments List */}
-              <div className="space-y-4">
-                {comments.map((comment) => (
-                  <div key={comment.id} className="bg-neutral-700/30 rounded-lg p-4">
-                    <div className="flex items-center gap-3 mb-2">
-                      <img
-                        src={comment.author.profilePicture || '/default-avatar.png'}
-                        alt={comment.author.username}
-                        className="w-8 h-8 rounded-full"
-                      />
-                      <div>
-                        <span className="text-white font-medium">
-                          {comment.author.username}
-                        </span>
-                        <span className="text-gray-400 text-sm ml-2">
-                          {new Date(comment.createdAt).toLocaleDateString()}
-                        </span>
+              {/* Comments List with fixed height and scrolling */}
+              <div className="relative">
+                <div className="max-h-[400px] overflow-y-auto pr-2 space-y-4 custom-scrollbar">
+                  {comments.map((comment: CommentWithAuthor) => (
+                    <div key={comment.id} className="bg-neutral-700/30 rounded-lg p-4">
+                      <div className="flex items-center gap-3 mb-2">
+                        <img
+                          src={comment.author.profile?.profilePicture || '/default-avatar.png'}
+                          alt={comment.author.username}
+                          className="w-8 h-8 rounded-full"
+                        />
+                        <div>
+                          <span className="text-white font-medium">
+                            {comment.author.username}
+                          </span>
+                          <span className="text-gray-400 text-sm ml-2">
+                            {new Date(comment.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
                       </div>
+                      <p className="text-gray-300 whitespace-pre-wrap">{comment.content}</p>
                     </div>
-                    <p className="text-gray-300 whitespace-pre-wrap">{comment.content}</p>
-                  </div>
-                ))}
+                  ))}
+                </div>
+                {comments.length > 5 && (
+                  <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-neutral-800/80 to-transparent pointer-events-none" />
+                )}
               </div>
             </div>
 
-            {/* Answers */}
+            {/* Answers Section */}
             <div className="mt-8">
-              <h2 className="text-xl font-semibold text-white mb-4">Answers</h2>
-              {post.answers.map((answer: AnswerWithAuthor) => (
-                <div key={answer.id} className="bg-neutral-700/50 rounded-lg p-4 mb-4">
-                  <div className="flex items-center mb-2">
-                    <img
-                      src={answer.author.profile?.profilePicture || '/default-avatar.png'}
-                      alt={answer.author.username}
-                      className="w-8 h-8 rounded-full mr-2"
-                    />
-                    <span className="text-white font-medium">{answer.author.username}</span>
-                    {answer.isAccepted && (
-                      <span className="ml-2 bg-green-500 text-white px-2 py-1 rounded text-sm">
-                        Accepted
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-gray-300">{answer.content}</p>
-                  {currentUser?.id === post.author.id && !answer.isAccepted && (
-                    <button
-                      onClick={() => handleAcceptAnswer(answer.id)}
-                      className="mt-2 bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-                    >
-                      Accept Answer
-                    </button>
-                  )}
+              <h2 className="text-xl font-semibold text-white mb-4">Answers ({answers.length})</h2>
+              
+              {/* Answer Form */}
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                const form = e.target as HTMLFormElement;
+                const textarea = form.querySelector('textarea') as HTMLTextAreaElement;
+                if (textarea.value.trim()) {
+                  handleAnswer(textarea.value);
+                  textarea.value = ''; // Clear the textarea after posting
+                }
+              }} className="mb-6">
+                <textarea
+                  placeholder="Write an answer..."
+                  className="w-full p-3 bg-neutral-700/50 border border-neutral-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-violet-500"
+                  rows={4}
+                />
+                <button
+                  type="submit"
+                  className="mt-2 px-4 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-colors"
+                >
+                  Post Answer
+                </button>
+              </form>
+
+              {/* Answers List with fixed height and scrolling */}
+              <div className="relative">
+                <div className="max-h-[400px] overflow-y-auto pr-2 space-y-4 custom-scrollbar">
+                  {answers.map((answer: AnswerWithAuthor) => (
+                    <div key={answer.id} className="bg-neutral-700/30 rounded-lg p-4">
+                      <div className="flex items-center gap-3 mb-2">
+                        <img
+                          src={answer.author.profile?.profilePicture || '/default-avatar.png'}
+                          alt={answer.author.username}
+                          className="w-8 h-8 rounded-full"
+                        />
+                        <div>
+                          <span className="text-white font-medium">
+                            {answer.author.username}
+                          </span>
+                          <span className="text-gray-400 text-sm ml-2">
+                            {new Date(answer.createdAt).toLocaleDateString()}
+                          </span>
+                          {answer.isAccepted && (
+                            <span className="ml-2 bg-green-500 text-white px-2 py-1 rounded text-sm">
+                              Accepted
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <p className="text-gray-300 whitespace-pre-wrap">{answer.content}</p>
+                      {currentUser?.id === post.author.id && !answer.isAccepted && (
+                        <button
+                          onClick={() => handleAcceptAnswer(answer.id)}
+                          className="mt-2 bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                        >
+                          Accept Answer
+                        </button>
+                      )}
+                    </div>
+                  ))}
                 </div>
-              ))}
-              {currentUser && (
-                <Form method="post" className="mt-4">
-                  <input type="hidden" name="action" value="answer" />
-                  <textarea
-                    name="content"
-                    className="w-full bg-neutral-700 text-white rounded-lg p-2 mb-2"
-                    placeholder="Write an answer..."
-                    rows={4}
-                  />
-                  <button
-                    type="submit"
-                    className="bg-violet-500 text-white px-4 py-2 rounded-lg hover:bg-violet-600"
-                  >
-                    Post Answer
-                  </button>
-                </Form>
-              )}
+                {answers.length > 5 && (
+                  <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-neutral-800/80 to-transparent pointer-events-none" />
+                )}
+              </div>
             </div>
+
+            {/* Add custom scrollbar styles */}
+            <style>
+              {`
+                .custom-scrollbar::-webkit-scrollbar {
+                  width: 6px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-track {
+                  background: rgba(0, 0, 0, 0.1);
+                  border-radius: 3px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                  background: rgba(139, 92, 246, 0.3);
+                  border-radius: 3px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                  background: rgba(139, 92, 246, 0.5);
+                }
+              `}
+            </style>
           </div>
         </div>
       </div>

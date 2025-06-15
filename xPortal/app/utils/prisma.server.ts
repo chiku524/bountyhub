@@ -14,7 +14,7 @@ if (process.env.NODE_ENV === 'production') {
 } else {
   if (!global.__db) {
     global.__db = new PrismaClient({
-      log: ['query', 'error', 'warn'],
+      log: ['error', 'warn'],
     })
   }
   prisma = global.__db

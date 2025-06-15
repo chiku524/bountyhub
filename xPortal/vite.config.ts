@@ -18,6 +18,7 @@ export default defineConfig({
         v3_relativeSplatPath: true,
         v3_throwAbortReason: true,
       },
+      serverModuleFormat: "esm",
     }),
     tsconfigPaths(),
   ],
@@ -27,6 +28,19 @@ export default defineConfig({
         tailwindcss,
         autoprefixer,
       ],
+    },
+  },
+  build: {
+    target: "esnext",
+    minify: "terser",
+    sourcemap: true,
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom'],
+  },
+  server: {
+    fs: {
+      strict: true,
     },
   },
 });

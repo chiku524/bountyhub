@@ -1,6 +1,6 @@
 import { json, type ActionFunctionArgs } from "@remix-run/node";
 import { requireUserId } from "~/utils/auth.server";
-import { prisma } from "~/utils/db.server";
+import { prisma } from "~/utils/prisma.server";
 import { uploadImage } from "~/utils/upload.server";
 
 export async function action({ request }: ActionFunctionArgs) {

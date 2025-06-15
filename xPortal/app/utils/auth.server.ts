@@ -6,7 +6,6 @@ import { prisma } from './prisma.server'
 import { redirect, createCookieSessionStorage } from '@remix-run/node'
 import { createUser } from './user.server'
 
-
 const sessionSecret = process.env.SESSION_SECRET
 if (!sessionSecret) {
   throw new Error('SESSION_SECRET must be set')
@@ -25,13 +24,13 @@ const storage = createCookieSessionStorage({
 })
 
 export async function createUserSession(userId: string, redirectTo: string) {
-    const session = await storage.getSession()
-    session.set('userId', userId)
-    return redirect(redirectTo, {
-      headers: {
-        'Set-Cookie': await storage.commitSession(session),
-      },
-    })
+  const session = await storage.getSession()
+  session.set('userId', userId)
+  return redirect(redirectTo, {
+    headers: {
+      'Set-Cookie': await storage.commitSession(session),
+    },
+  })
 }
 
 export async function register(user: RegisterForm) {
@@ -49,19 +48,19 @@ export async function register(user: RegisterForm) {
 }
 
 export async function login({ email, password }: LoginForm) {
-    const user = await prisma.user.findUnique({
-      where: { email },
-    })
-  
-    if (!user) {
-      return { error: `No account found with that email address` }
-    }
+  const user = await prisma.user.findUnique({
+    where: { email },
+  })
 
-    if (!(await bcrypt.compare(password, user.password))) {
-      return { error: `Incorrect password` }
-    }
-  
-    return createUserSession(user.id, "/profile");
+  if (!user) {
+    return { error: `No account found with that email address` }
+  }
+
+  if (!(await bcrypt.compare(password, user.password))) {
+    return { error: `Incorrect password` }
+  }
+
+  return createUserSession(user.id, "/profile");
 }
 
 export async function requireUserId(request: Request, redirectTo: string = new URL(request.url).pathname) {

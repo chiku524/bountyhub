@@ -5,12 +5,15 @@ import { FiThumbsUp, FiThumbsDown, FiMessageSquare, FiCheck } from 'react-icons/
 interface PostInteractionsProps {
   postId: string;
   isAuthor: boolean;
-  initialUpvotes: number;
-  initialDownvotes: number;
+  initialQualityUpvotes: number;
+  initialQualityDownvotes: number;
+  initialVisibilityVotes: number;
   userQualityVote: number;
+  userVisibilityVote: boolean;
   comments: any[];
   answers: any[];
-  onVote: (value: number) => Promise<void>;
+  onQualityVote: (value: number) => Promise<void>;
+  onVisibilityVote: (isVoting: boolean) => Promise<void>;
   onComment: (content: string) => Promise<void>;
   onAnswer: (content: string) => Promise<void>;
   onAcceptAnswer: (answerId: string) => Promise<void>;
@@ -19,53 +22,68 @@ interface PostInteractionsProps {
 export default function PostInteractions({
   postId,
   isAuthor,
-  initialUpvotes,
-  initialDownvotes,
+  initialQualityUpvotes,
+  initialQualityDownvotes,
+  initialVisibilityVotes,
   userQualityVote,
+  userVisibilityVote,
   comments,
   answers,
-  onVote,
+  onQualityVote,
+  onVisibilityVote,
   onComment,
   onAnswer,
   onAcceptAnswer,
 }: PostInteractionsProps) {
-  const [upvotes, setUpvotes] = useState(initialUpvotes);
-  const [downvotes, setDownvotes] = useState(initialDownvotes);
-  const [currentVote, setCurrentVote] = useState(userQualityVote);
+  const [qualityUpvotes, setQualityUpvotes] = useState(initialQualityUpvotes);
+  const [qualityDownvotes, setQualityDownvotes] = useState(initialQualityDownvotes);
+  const [visibilityVotes, setVisibilityVotes] = useState(initialVisibilityVotes);
+  const [currentQualityVote, setCurrentQualityVote] = useState(userQualityVote);
+  const [currentVisibilityVote, setCurrentVisibilityVote] = useState(userVisibilityVote);
   const [commentContent, setCommentContent] = useState('');
   const [answerContent, setAnswerContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleVote = async (value: number) => {
+  const handleQualityVote = async (value: number) => {
     try {
-      await onVote(value);
-      if (currentVote === value) {
+      await onQualityVote(value);
+      if (currentQualityVote === value) {
         // If clicking the same vote button, remove the vote
-        setCurrentVote(0);
+        setCurrentQualityVote(0);
         if (value === 1) {
-          setUpvotes(prev => prev - 1);
+          setQualityUpvotes(prev => prev - 1);
         } else {
-          setDownvotes(prev => prev - 1);
+          setQualityDownvotes(prev => prev - 1);
         }
-      } else if (currentVote === -value) {
+      } else if (currentQualityVote === -value) {
         // If clicking the opposite vote button, switch the vote
-        setCurrentVote(value);
+        setCurrentQualityVote(value);
         if (value === 1) {
-          setUpvotes(prev => prev + 1);
-          setDownvotes(prev => prev - 1);
+          setQualityUpvotes(prev => prev + 1);
+          setQualityDownvotes(prev => prev - 1);
         } else {
-          setUpvotes(prev => prev - 1);
-          setDownvotes(prev => prev + 1);
+          setQualityUpvotes(prev => prev - 1);
+          setQualityDownvotes(prev => prev + 1);
         }
       } else {
         // If no previous vote, add the vote
-        setCurrentVote(value);
+        setCurrentQualityVote(value);
         if (value === 1) {
-          setUpvotes(prev => prev + 1);
+          setQualityUpvotes(prev => prev + 1);
         } else {
-          setDownvotes(prev => prev + 1);
+          setQualityDownvotes(prev => prev + 1);
         }
       }
+    } catch (error) {
+      console.error('Error voting:', error);
+    }
+  };
+
+  const handleVisibilityVote = async (isVoting: boolean) => {
+    try {
+      await onVisibilityVote(isVoting);
+      setCurrentVisibilityVote(isVoting);
+      setVisibilityVotes(prev => isVoting ? prev + 1 : prev - 1);
     } catch (error) {
       console.error('Error voting:', error);
     }
@@ -103,34 +121,49 @@ export default function PostInteractions({
 
   return (
     <div className="space-y-6">
-      {/* Voting */}
+      {/* Quality Voting */}
       <div className="flex items-center space-x-4">
         <button
-          onClick={() => handleVote(1)}
+          onClick={() => handleQualityVote(1)}
           className={`flex items-center space-x-1 transition-colors ${
-            currentVote === 1 
+            currentQualityVote === 1 
               ? 'text-violet-400' 
               : 'text-gray-400 hover:text-violet-400'
           }`}
         >
-          <FiThumbsUp className={`w-5 h-5 ${currentVote === 1 ? 'fill-current' : 'fill-none'}`} />
-          <span>{upvotes}</span>
+          <FiThumbsUp className={`w-5 h-5 ${currentQualityVote === 1 ? 'fill-current' : 'fill-none'}`} />
+          <span>{qualityUpvotes}</span>
         </button>
         <button
-          onClick={() => handleVote(-1)}
+          onClick={() => handleQualityVote(-1)}
           className={`flex items-center space-x-1 transition-colors ${
-            currentVote === -1 
+            currentQualityVote === -1 
               ? 'text-violet-400' 
               : 'text-gray-400 hover:text-violet-400'
           }`}
         >
-          <FiThumbsDown className={`w-5 h-5 ${currentVote === -1 ? 'fill-current' : 'fill-none'}`} />
-          <span>{downvotes}</span>
+          <FiThumbsDown className={`w-5 h-5 ${currentQualityVote === -1 ? 'fill-current' : 'fill-none'}`} />
+          <span>{qualityDownvotes}</span>
+        </button>
+      </div>
+
+      {/* Visibility Voting */}
+      <div className="flex items-center space-x-4">
+        <button
+          onClick={() => handleVisibilityVote(!currentVisibilityVote)}
+          className={`flex items-center space-x-1 transition-colors ${
+            currentVisibilityVote 
+              ? 'text-violet-400' 
+              : 'text-gray-400 hover:text-violet-400'
+          }`}
+        >
+          <FiThumbsUp className={`w-5 h-5 ${currentVisibilityVote ? 'fill-current' : 'fill-none'}`} />
+          <span>{visibilityVotes}</span>
         </button>
       </div>
 
       {/* Comments */}
-      <div className="space-y-4">
+      <div>
         <h3 className="text-lg font-semibold text-white">Comments ({comments.length})</h3>
         <Form onSubmit={handleComment} className="space-y-2">
           <textarea
@@ -164,7 +197,7 @@ export default function PostInteractions({
       </div>
 
       {/* Answers */}
-      <div className="space-y-4">
+      <div>
         <h3 className="text-lg font-semibold text-white">Answers ({answers.length})</h3>
         <Form onSubmit={handleAnswer} className="space-y-2">
           <textarea

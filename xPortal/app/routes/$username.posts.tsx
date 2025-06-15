@@ -1,6 +1,6 @@
 // app/routes/profile.tsx
 import { useEffect, useState } from 'react'
-import { Form, useLoaderData, Link, useActionData, useNavigate, useSubmit } from "@remix-run/react"
+import { Form, useLoaderData, Link, useActionData, useNavigate, useSubmit, useSearchParams } from "@remix-run/react"
 import { FormField } from '~/components/form-field'
 import { LoaderFunction, ActionFunction, json } from '@remix-run/node'
 import { getUser } from '~/utils/auth.server'
@@ -150,6 +150,14 @@ export default function UserPosts() {
     const submit = useSubmit();
     const navigate = useNavigate();
     const actionData = useActionData();
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    // Pagination logic
+    const POSTS_PER_PAGE = 6;
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const totalPosts = user.posts.length;
+    const totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE);
+    const paginatedPosts = user.posts.slice((page - 1) * POSTS_PER_PAGE, page * POSTS_PER_PAGE);
 
     const handleVideoError = (postId: string, error: string) => {
         console.error(`Video error for post ${postId}:`, error);
@@ -191,7 +199,7 @@ export default function UserPosts() {
                     </div>
                 ) : (
                     <video 
-                        className="w-full h-full object-contain"
+                        className="w-full h-full object-contain max-h-[200px] max-w-[300px] mx-auto"
                         controls
                         onError={(e) => handleVideoError(post.id, `Failed to load video: ${e.currentTarget.error?.message || 'Unknown error'}`)}
                     >
@@ -210,8 +218,8 @@ export default function UserPosts() {
         <div className="h-screen w-full bg-neutral-900/95 flex flex-row">
             <Nav />
             <div className="flex-1 overflow-y-auto">
-                <div className="w-[85%] max-w-4xl mx-auto mt-4 px-4">
-                    <div className="mb-6 flex justify-between items-center">
+                <div className="w-auto max-w-8xl mx-auto mt-4 px-4 ml-24 pb-16">
+                    <div className="mb-6 flex justify-between items-center mt-16">
                         <div>
                             <h1 className="text-2xl font-bold text-white mb-2">
                                 Posts by {user.username}
@@ -228,11 +236,13 @@ export default function UserPosts() {
                         </Link>
                     </div>
 
-                    <div className="space-y-6">
-                        {user.posts.map((post: Post) => (
+                    {/* Responsive grid for posts */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
+                        {paginatedPosts.map((post: Post) => (
                             <div 
                                 key={post.id} 
-                                className="bg-neutral-800/80 rounded-lg p-6 shadow-lg border border-violet-500/20 hover:border-violet-500/40 transition-all duration-300"
+                                className="bg-neutral-800/80 rounded-lg p-6 shadow-lg border border-violet-500/20 hover:border-violet-500/40 transition-all duration-300 w-full mx-auto flex flex-col"
+                                style={{ maxHeight: '600px' }}
                             >
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="flex items-center space-x-3">
@@ -253,9 +263,10 @@ export default function UserPosts() {
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center space-x-2">
+                                    {/* Top-right stats for md+ screens */}
+                                    <div className="hidden md:flex items-center space-x-2">
                                         <span className="text-sm text-gray-400">
-                                            {post.votes} votes
+                                            {(typeof post.votes === 'number' ? post.votes : 0)} votes
                                         </span>
                                         <span className="text-sm text-gray-400">
                                             {post.comments.length} comments
@@ -265,36 +276,36 @@ export default function UserPosts() {
 
                                 <Link 
                                     to={`/posts/${post.id}`}
-                                    className="block group"
+                                    className="block group flex-1"
                                 >
-                                    <h2 className="text-xl font-semibold text-white mb-3 group-hover:text-violet-400 transition-colors">
-                                        {post.title}
-                                    </h2>
-                                    <p className="text-gray-300 mb-4 line-clamp-3">{post.content}</p>
+                                    {/* Title and content with more vertical space */}
+                                    <div className="min-h-[90px]">
+                                        <h2 className="text-xl font-semibold text-white mb-3 group-hover:text-violet-400 transition-colors">
+                                            {post.title.length > 30 ? post.title.substring(0, 30) + '...' : post.title}
+                                        </h2>
+                                        <p className="text-gray-300 mb-4 overflow-hidden truncate max-w-full w-full break-words">
+                                            {post.content.length > 100 ? post.content.substring(0, 100) + '...' : post.content}
+                                        </p>
+                                    </div>
                                 </Link>
 
-                                {renderVideo(post)}
+                                {/* Add margin above the video */}
+                                <div className="mt-4">
+                                    {renderVideo(post)}
+                                </div>
 
                                 <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-700">
+                                    {/* Bottom-left stats for small screens */}
                                     <div className="flex items-center space-x-4">
-                                        <button
-                                            onClick={() => handleVote(post.id)}
-                                            className="flex items-center space-x-1 text-gray-400 hover:text-violet-400 transition-colors"
-                                        >
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                                            </svg>
-                                            <span>Vote</span>
-                                        </button>
-                                        <Link
-                                            to={`/posts/${post.id}`}
-                                            className="flex items-center space-x-1 text-gray-400 hover:text-violet-400 transition-colors"
-                                        >
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                            </svg>
-                                            <span>Comment</span>
-                                        </Link>
+                                        <div className="flex md:hidden items-center space-x-2">
+                                            <span className="text-sm text-gray-400">
+                                                {(typeof post.votes === 'number' ? post.votes : 0)} votes
+                                            </span>
+                                            <span className="text-sm text-gray-400">
+                                                {post.comments.length} comments
+                                            </span>
+                                        </div>
+                                        {/* Removed Vote and Comment buttons */}
                                     </div>
                                     <button
                                         onClick={() => handleDelete(post.id)}
@@ -306,6 +317,35 @@ export default function UserPosts() {
                             </div>
                         ))}
                     </div>
+
+                    {/* Pagination controls */}
+                    {totalPages > 1 && (
+                        <div className="flex justify-center mt-8 space-x-2">
+                            <button
+                                onClick={() => setSearchParams({ page: String(page - 1) })}
+                                disabled={page === 1}
+                                className="px-3 py-1 rounded bg-gray-700 text-white disabled:opacity-50"
+                            >
+                                Previous
+                            </button>
+                            {Array.from({ length: totalPages }, (_, i) => (
+                                <button
+                                    key={i + 1}
+                                    onClick={() => setSearchParams({ page: String(i + 1) })}
+                                    className={`px-3 py-1 rounded ${page === i + 1 ? 'bg-violet-500 text-white' : 'bg-gray-700 text-white'}`}
+                                >
+                                    {i + 1}
+                                </button>
+                            ))}
+                            <button
+                                onClick={() => setSearchParams({ page: String(page + 1) })}
+                                disabled={page === totalPages}
+                                className="px-3 py-1 rounded bg-gray-700 text-white disabled:opacity-50"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

@@ -8,11 +8,22 @@ import { RemixBrowser } from "@remix-run/react";
 import { startTransition, StrictMode } from "react";
 import { hydrateRoot } from "react-dom/client";
 
-startTransition(() => {
-  hydrateRoot(
-    document,
-    <StrictMode>
-      <RemixBrowser />
-    </StrictMode>
-  );
-});
+function hydrate() {
+  startTransition(() => {
+    hydrateRoot(
+      document,
+      <StrictMode>
+        <RemixBrowser />
+      </StrictMode>
+    );
+  });
+}
+
+// Ensure we're in a browser environment before hydrating
+if (typeof window !== "undefined") {
+  if (window.requestIdleCallback) {
+    window.requestIdleCallback(hydrate);
+  } else {
+    window.setTimeout(hydrate, 1);
+  }
+}
