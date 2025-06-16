@@ -14,12 +14,16 @@ interface LoaderData {
     username: string;
     email: string;
     createdAt: Date;
+    reputationPoints: number;
     profile: {
       bio: string | null;
       location: string | null;
       website: string | null;
       avatarUrl: string | null;
-      reputationPoints: number;
+      github: string | null;
+      twitter: string | null;
+      linkedin: string | null;
+      instagram: string | null;
     } | null;
     posts: {
       id: string;
@@ -73,9 +77,38 @@ export const loader: LoaderFunction = async ({ request }) => {
     }
 };
 
+const SocialLinks = ({ profile }: { profile: NonNullable<LoaderData['user']['profile']> }) => {
+    const links = [
+        { icon: 'github', url: profile.github, label: 'GitHub' },
+        { icon: 'twitter', url: profile.twitter, label: 'Twitter' },
+        { icon: 'linkedin', url: profile.linkedin, label: 'LinkedIn' },
+        { icon: 'instagram', url: profile.instagram, label: 'Instagram' }
+    ].filter(link => link.url);
+
+    if (links.length === 0) return null;
+
+    return (
+        <div className="flex gap-4 mt-4">
+            {links.map(link => (
+                <a
+                    key={link.icon}
+                    href={link.url!}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-400 hover:text-white transition-colors"
+                    title={link.label}
+                >
+                    <i className={`fab fa-${link.icon} text-xl`}></i>
+                </a>
+            ))}
+        </div>
+    );
+};
+
 export default function Profile() {
     const { user } = useLoaderData<LoaderData>();
-    const reputationLevel = getReputationLevel(user.profile?.reputationPoints || 0);
+    const reputationLevel = getReputationLevel(user.reputationPoints || 0);
+    const recentActivities = user.reputationHistory.slice(0, 5);
 
     return (
         <div className="h-screen w-full bg-neutral-900/95 flex flex-row">
@@ -112,7 +145,7 @@ export default function Profile() {
                                             <span className="text-violet-300 font-medium">{reputationLevel}</span>
                                         </div>
                                         <div className="bg-violet-500/20 px-3 py-1 rounded-full border border-violet-500/50">
-                                            <span className="text-violet-300 font-medium">{user.profile?.reputationPoints || 0} points</span>
+                                            <span className="text-violet-300 font-medium">{user.reputationPoints || 0} points</span>
                                         </div>
                                     </div>
                                 </div>
@@ -145,9 +178,16 @@ export default function Profile() {
                         </div>
 
                         <div className="mt-8">
+                            <h2 className="text-lg font-semibold text-violet-300 mb-4">Social Links</h2>
+                            {user.profile && (
+                                <SocialLinks profile={user.profile} />
+                            )}
+                        </div>
+
+                        <div className="mt-8">
                             <h2 className="text-lg font-semibold text-violet-300 mb-4">Recent Activity</h2>
                             <div className="space-y-4">
-                                {user.reputationHistory.map((history) => (
+                                {recentActivities.map((history) => (
                                     <div key={history.id} className="flex items-center justify-between p-4 bg-neutral-700/50 rounded-lg border border-violet-500/30">
                                         <div>
                                             <p className="text-sm font-medium text-violet-300">{history.action}</p>
@@ -164,6 +204,13 @@ export default function Profile() {
                                     </div>
                                 ))}
                             </div>
+                            {user.reputationHistory.length > 5 && (
+                                <div className="mt-4 text-center">
+                                    <Link to="/profile/activity" className="inline-block px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors border border-violet-500/50 shadow-md">
+                                        View All Activity
+                                    </Link>
+                                </div>
+                            )}
                         </div>
 
                         <div className="mt-8">

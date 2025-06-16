@@ -47,87 +47,66 @@ export const createUser = async (user: RegisterForm) => {
   return { id: newUser.id, email }
 }
 
-interface UserUpdate {
-  email?: string | undefined;
-  profile: {
-    firstName?: string | undefined;
-    lastName?: string | undefined;
-    profession?: string | undefined;
-    avatar?: string | undefined;
-    username?: string | undefined;
-    website?: string | undefined;
-    bio?: string | undefined;
-    socials: {
-      facebook?: string | undefined;
-      twitter?: string | undefined;
-      instagram?: string | undefined;
-      linkedin?: string | undefined;
-      github?: string | undefined;
-    }
-  }
+interface Profile {
+    firstName?: string;
+    lastName?: string;
+    profilePicture?: string | null;
+    bio?: string;
+    location?: string;
+    website?: string;
+    twitter?: string | null;
+    github?: string | null;
+    linkedin?: string | null;
+    instagram?: string | null;
 }
 
-export const editUser = async (user: Partial<User>, request: Request) => {
-  const userId = await getUser(request);
-  if (!userId) {
-    throw new Error('User not authenticated');
-  }
+export const editUser = async (profile: { profile: Profile }, request: Request) => {
+    const user = await getUser(request);
+    if (!user) {
+        throw new Error('User not found');
+    }
 
-  const { email, profile } = user;
-
-  const updateData: any = {};
-  if (email) updateData.email = email;
-  if (user.hasOwnProperty('username') && (user as any).username) updateData.username = (user as any).username;
-  
-  if (profile) {
-    // First check if profile exists
-    const existingProfile = await prisma.profile.findUnique({
-      where: { userId: userId.id }
+    // Get current profile data
+    const currentUser = await prisma.user.findUnique({
+        where: { id: user.id },
+        include: { profile: true }
     });
 
-    if (existingProfile) {
-      // Update existing profile
-      updateData.profile = {
-        update: {
-          firstName: profile.firstName || '',
-          lastName: profile.lastName || '',
-          profilePicture: profile.profilePicture,
-          bio: profile.bio || '',
-          location: profile.location || '',
-          website: profile.website || '',
-          twitter: profile.twitter,
-          github: profile.github,
-          linkedin: profile.linkedin
-        }
-      };
-    } else {
-      // Create new profile
-      updateData.profile = {
-        create: {
-          firstName: profile.firstName || '',
-          lastName: profile.lastName || '',
-          profilePicture: profile.profilePicture,
-          bio: profile.bio || '',
-          location: profile.location || '',
-          website: profile.website || '',
-          twitter: profile.twitter,
-          github: profile.github,
-          linkedin: profile.linkedin
-        }
-      };
+    if (!currentUser) {
+        throw new Error('User not found');
     }
-  }
 
-  const updatedUser = await prisma.user.update({
-    where: { id: userId.id },
-    data: updateData,
-    include: {
-      profile: true
-    }
-  });
+    // Merge current profile data with new data
+    const updatedProfile = {
+        firstName: profile.profile.firstName ?? currentUser.profile?.firstName ?? '',
+        lastName: profile.profile.lastName ?? currentUser.profile?.lastName ?? '',
+        profilePicture: profile.profile.profilePicture ?? currentUser.profile?.profilePicture,
+        bio: profile.profile.bio ?? currentUser.profile?.bio ?? '',
+        location: profile.profile.location ?? currentUser.profile?.location ?? '',
+        website: profile.profile.website ?? currentUser.profile?.website ?? '',
+        twitter: profile.profile.twitter ?? currentUser.profile?.twitter,
+        github: profile.profile.github ?? currentUser.profile?.github,
+        linkedin: profile.profile.linkedin ?? currentUser.profile?.linkedin,
+        instagram: profile.profile.instagram ?? currentUser.profile?.instagram
+    };
 
-  return updatedUser;
-}
+    const updatedUser = await prisma.user.update({
+        where: { id: user.id },
+        data: {
+            profile: {
+                upsert: {
+                    create: updatedProfile,
+                    update: updatedProfile
+                }
+            }
+        },
+        include: {
+            profile: true
+        }
+    });
+
+    return updatedUser;
+};
 
 export const getUserPosts = async (username: string) => {
   try {

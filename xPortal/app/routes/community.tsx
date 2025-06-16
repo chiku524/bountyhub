@@ -273,6 +273,7 @@ export default function Community() {
   const submit = useSubmit();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [isVoting, setIsVoting] = useState<Record<string, boolean>>({});
 
   // Update localPosts when posts from loader changes
   useEffect(() => {
@@ -289,10 +290,14 @@ export default function Community() {
     setVideoErrors(prev => ({ ...prev, [postId]: error }));
   };
 
-  const handleVote = async (postId: string, isVoting: boolean) => {
+  const handleVote = async (postId: string, voteValue: boolean) => {
     try {
+      // Prevent multiple votes while processing
+      if (isVoting[postId]) return;
+      setIsVoting(prev => ({ ...prev, [postId]: true }));
+
       const formData = new FormData();
-      formData.append('isVoting', isVoting.toString());
+      formData.append('isVoting', voteValue.toString());
 
       const response = await fetch(`/api/posts/${postId}/vote`, {
         method: 'POST',
@@ -324,11 +329,21 @@ export default function Community() {
               : post
           )
         );
+
+        // Refresh the page data to ensure consistency
+        const loaderResponse = await fetch(`/community?page=${currentPage}`);
+        const loaderData = await loaderResponse.json();
+        if (loaderData.posts) {
+          setLocalPosts(loaderData.posts);
+        }
       }
     } catch (error) {
       console.error('Error voting:', error);
       // Show error message to user
       alert(error instanceof Error ? error.message : 'Failed to process vote');
+    } finally {
+      // Reset voting state
+      setIsVoting(prev => ({ ...prev, [postId]: false }));
     }
   };
 
@@ -455,11 +470,12 @@ export default function Community() {
                           e.preventDefault();
                           handleVote(post.id, !post.userVoted);
                         }}
+                        disabled={isVoting[post.id]}
                         className={`flex items-center space-x-1 transition-colors ${
                           post.userVoted 
                             ? 'text-violet-400' 
                             : 'text-gray-400 hover:text-violet-400'
-                        }`}
+                        } ${isVoting[post.id] ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
                         <FiThumbsUp className={`w-5 h-5 ${post.userVoted ? 'fill-current' : 'fill-none'}`} />
                         <span>{post.visibilityVotes}</span>

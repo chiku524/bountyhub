@@ -78,7 +78,7 @@ export const action: ActionFunction = async ({ request }) => {
       post.id
     );
 
-    return redirect(`/${user.username}/posts`);
+    return redirect(`/posts/${post.id}`);
   } catch (error) {
     console.error('Error creating post:', error);
     return json<ActionData>({

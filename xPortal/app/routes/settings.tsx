@@ -21,13 +21,25 @@ interface Profile {
     twitter?: string | null;
     github?: string | null;
     linkedin?: string | null;
+    instagram?: string | null;
 }
 
 interface UserData {
     id: string;
     email: string;
     username: string;
-    profile: Profile | null;
+    profile?: {
+        firstName: string | null;
+        lastName: string | null;
+        profilePicture: string | null;
+        bio: string | null;
+        location: string | null;
+        website: string | null;
+        twitter: string | null;
+        github: string | null;
+        linkedin: string | null;
+        instagram: string | null;
+    };
 }
 
 interface ActionData {
@@ -50,111 +62,51 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     return json({ userData });
 };
 
-export const action = async ({ request }: ActionFunctionArgs) => {
-    try {
-        const form = await request.formData();
-        const action = form.get("_action");
-        const user = await getUser(request);
+export const action: ActionFunction = async ({ request }) => {
+    const user = await getUser(request);
+    if (!user) {
+        return redirect('/login');
+    }
 
-        if (!user) {
-            return json({ error: 'Not authenticated' }, { status: 401 });
-        }
+    const formData = await request.formData();
+    const action = formData.get('action');
 
-        // Get current user data to preserve existing values
+    if (action === 'updateProfile') {
+        // Get the current user data to preserve existing values
         const currentUser = await prisma.user.findUnique({
             where: { id: user.id },
-            select: {
-                email: true,
-                username: true,
-                profile: {
-                    select: {
-                        firstName: true,
-                        lastName: true,
-                        profilePicture: true,
-                        website: true,
-                        bio: true,
-                        location: true,
-                        twitter: true,
-                        github: true,
-                        linkedin: true
-                    }
-                }
-            }
+            include: { profile: true }
         });
 
         if (!currentUser) {
             return json({ error: 'User not found' }, { status: 404 });
         }
 
-        switch (action) {
-            case 'logout': {
-                return await logout(request);
-            }
-            case 'update': {
-                const updateData = {
-                    email: form.get('email')?.toString() || currentUser.email,
-                    username: form.get('username')?.toString() || currentUser.username,
-                    profile: {
-                        firstName: form.get('firstName')?.toString() || currentUser.profile?.firstName || '',
-                        lastName: form.get('lastName')?.toString() || currentUser.profile?.lastName || '',
-                        profilePicture: form.get('profilePicture')?.toString() || currentUser.profile?.profilePicture || '',
-                        website: form.get('website')?.toString() || currentUser.profile?.website || '',
-                        bio: form.get('bio')?.toString() || currentUser.profile?.bio || '',
-                        location: form.get('location')?.toString() || currentUser.profile?.location || '',
-                        twitter: form.get('twitter')?.toString() || currentUser.profile?.twitter || '',
-                        github: form.get('github')?.toString() || currentUser.profile?.github || '',
-                        linkedin: form.get('linkedin')?.toString() || currentUser.profile?.linkedin || ''
-                    }
-                };
+        // Get form data, using existing values as fallback
+        const profile = {
+            firstName: currentUser.profile?.firstName || '',
+            lastName: currentUser.profile?.lastName || '',
+            profilePicture: currentUser.profile?.profilePicture,
+            bio: formData.get('bio') as string || currentUser.profile?.bio || '',
+            location: formData.get('location') as string || currentUser.profile?.location || '',
+            website: formData.get('website') as string || currentUser.profile?.website || '',
+            github: formData.get('github') as string || currentUser.profile?.github || '',
+            twitter: formData.get('twitter') as string || currentUser.profile?.twitter || '',
+            linkedin: formData.get('linkedin') as string || currentUser.profile?.linkedin || '',
+            instagram: formData.get('instagram') as string || currentUser.profile?.instagram || ''
+        };
 
-                try {
-                    const updatedUser = await editUser(updateData, request);
-                    return json({ success: true, userData: updatedUser });
-                } catch (error) {
-                    console.error('Error updating user:', error);
-                    return json({ error: 'Failed to update profile' }, { status: 500 });
-                }
-            }
-            case 'updateProfile': {
-                const name = form.get("name") as string;
-                const bio = form.get("bio") as string;
-                const location = form.get("location") as string;
-                const website = form.get("website") as string | null;
-
-                const nameError = validateName(name);
-                if (nameError) {
-                    return json({ error: nameError });
-                }
-
-                const websiteError = validateUrl(website);
-                if (websiteError) {
-                    return json({ error: websiteError });
-                }
-
-                const userId = await requireUserId(request);
-                await editUser({
-                    profile: {
-                        firstName: name,
-                        lastName: '',
-                        bio: bio || '',
-                        location: location || '',
-                        website: website || '',
-                        twitter: undefined,
-                        github: undefined,
-                        linkedin: undefined,
-                        profilePicture: undefined
-                    }
-                }, request);
-                return redirect("/settings");
-            }
-            default:
-                return json({ error: 'Invalid action' }, { status: 400 });
+        try {
+            await editUser({ profile }, request);
+            return json({ success: true });
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            return json({ error: 'Failed to update profile' }, { status: 400 });
         }
-    } catch (error) {
-        console.error('Server error:', error);
-        return json({ error: 'An unexpected error occurred' }, { status: 500 });
     }
-}
+
+    return json({ error: 'Invalid action' }, { status: 400 });
+};
 
 export default function Profile() {
     const { userData } = useLoaderData<{ userData: UserData }>();
@@ -164,6 +116,12 @@ export default function Profile() {
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [editData, setEditData] = useState<string>('');
     const [formError, setFormError] = useState<string>('');
+    const [formData, setFormData] = useState({
+        github: userData.profile?.github || '',
+        twitter: userData.profile?.twitter || '',
+        linkedin: userData.profile?.linkedin || '',
+        instagram: userData.profile?.instagram || ''
+    });
 
     const isSubmitting = navigation.state === "submitting";
 
@@ -198,29 +156,12 @@ export default function Profile() {
         setFormError('');
     };
 
-    const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const form = event.currentTarget;
         const formData = new FormData(form);
-        formData.append('_action', 'update');
-        
-        try {
-            const response = await fetch('/settings', {
-                method: 'POST',
-                body: formData
-            });
-            
-            const data = await response.json();
-            
-            if (data.error) {
-                setFormError(data.error);
-            } else if (data.success) {
-                handleModalClose();
-                fetcher.load('/settings');
-            }
-        } catch (error) {
-            setFormError('An unexpected error occurred');
-        }
+        formData.append('action', 'updateProfile');
+        form.submit();
     };
 
     return (
@@ -321,6 +262,7 @@ export default function Profile() {
                                 <div className='bg-gray-100 rounded w-fit p-2'>{userData.profile?.github ? userData.profile.github : 'Not set'}</div>
                                 <div className='bg-gray-100 rounded w-fit p-2'>{userData.profile?.twitter ? userData.profile.twitter : 'Not set'}</div>
                                 <div className='bg-gray-100 rounded w-fit p-2'>{userData.profile?.linkedin ? userData.profile.linkedin : 'Not set'}</div>
+                                <div className='bg-gray-100 rounded w-fit p-2'>{userData.profile?.instagram ? userData.profile.instagram : 'Not set'}</div>
                             </div>
                             <span className='text-blue-500 absolute top-0 right-0 m-5 hover:text-blue-600 cursor-pointer' onClick={() => handleEditClick('socials')}>Edit</span>
                         </div>
@@ -348,57 +290,8 @@ export default function Profile() {
                                 </div>
                             )}
 
-                            <Form method="post" onSubmit={handleFormSubmit} className="space-y-4">
-                                <input type="hidden" name="_action" value="update" />
-                                
-                                {editData === 'name' && (
-                                    <div className="space-y-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-300 mb-2">First Name</label>
-                                            <input
-                                                type="text"
-                                                name="firstName"
-                                                defaultValue={userData.profile?.firstName || ''}
-                                                className="w-full px-4 py-2 bg-neutral-700 border border-violet-500/30 rounded-lg text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
-                                                placeholder="Enter your first name"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-300 mb-2">Last Name</label>
-                                            <input
-                                                type="text"
-                                                name="lastName"
-                                                defaultValue={userData.profile?.lastName || ''}
-                                                className="w-full px-4 py-2 bg-neutral-700 border border-violet-500/30 rounded-lg text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
-                                                placeholder="Enter your last name"
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-                                {editData === 'email' && (
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
-                                        <input
-                                            type="email"
-                                            name="email"
-                                            defaultValue={userData.email}
-                                            className="w-full px-4 py-2 bg-neutral-700 border border-violet-500/30 rounded-lg text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
-                                            placeholder="Enter your email"
-                                        />
-                                    </div>
-                                )}
-                                {editData === 'username' && (
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-300 mb-2">Username</label>
-                                        <input
-                                            type="text"
-                                            name="username"
-                                            defaultValue={userData.username || ''}
-                                            className="w-full px-4 py-2 bg-neutral-700 border border-violet-500/30 rounded-lg text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
-                                            placeholder="Enter your username"
-                                        />
-                                    </div>
-                                )}
+                            <Form method="post" className="space-y-4" onSubmit={handleFormSubmit}>
+                                <input type="hidden" name="action" value="updateProfile" />
                                 {editData === 'bio' && (
                                     <div>
                                         <label className="block text-sm font-medium text-gray-300 mb-2">Bio</label>
@@ -407,6 +300,18 @@ export default function Profile() {
                                             defaultValue={userData.profile?.bio || ''}
                                             className="w-full px-4 py-2 bg-neutral-700 border border-violet-500/30 rounded-lg text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors min-h-[100px] resize-y"
                                             placeholder="Tell us about yourself"
+                                        />
+                                    </div>
+                                )}
+                                {editData === 'location' && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-300 mb-2">Location</label>
+                                        <input
+                                            type="text"
+                                            name="location"
+                                            defaultValue={userData.profile?.location || ''}
+                                            className="w-full px-4 py-2 bg-neutral-700 border border-violet-500/30 rounded-lg text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
+                                            placeholder="Your location"
                                         />
                                     </div>
                                 )}
@@ -423,38 +328,48 @@ export default function Profile() {
                                     </div>
                                 )}
                                 {editData === 'socials' && (
-                                    <div className="space-y-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-300 mb-2">Twitter</label>
-                                            <input
-                                                type="text"
-                                                name="twitter"
-                                                defaultValue={userData.profile?.twitter || ''}
-                                                className="w-full px-4 py-2 bg-neutral-700 border border-violet-500/30 rounded-lg text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
-                                                placeholder="Your Twitter handle"
-                                            />
-                                        </div>
+                                    <>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-300 mb-2">GitHub</label>
                                             <input
-                                                type="text"
+                                                type="url"
                                                 name="github"
                                                 defaultValue={userData.profile?.github || ''}
                                                 className="w-full px-4 py-2 bg-neutral-700 border border-violet-500/30 rounded-lg text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
-                                                placeholder="Your GitHub username"
+                                                placeholder="https://github.com/username"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-300 mb-2">Twitter</label>
+                                            <input
+                                                type="url"
+                                                name="twitter"
+                                                defaultValue={userData.profile?.twitter || ''}
+                                                className="w-full px-4 py-2 bg-neutral-700 border border-violet-500/30 rounded-lg text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
+                                                placeholder="https://twitter.com/username"
                                             />
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-300 mb-2">LinkedIn</label>
                                             <input
-                                                type="text"
+                                                type="url"
                                                 name="linkedin"
                                                 defaultValue={userData.profile?.linkedin || ''}
                                                 className="w-full px-4 py-2 bg-neutral-700 border border-violet-500/30 rounded-lg text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
-                                                placeholder="Your LinkedIn profile URL"
+                                                placeholder="https://linkedin.com/in/username"
                                             />
                                         </div>
-                                    </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-300 mb-2">Instagram</label>
+                                            <input
+                                                type="url"
+                                                name="instagram"
+                                                defaultValue={userData.profile?.instagram || ''}
+                                                className="w-full px-4 py-2 bg-neutral-700 border border-violet-500/30 rounded-lg text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
+                                                placeholder="https://instagram.com/username"
+                                            />
+                                        </div>
+                                    </>
                                 )}
                                 
                                 <div className="flex justify-end gap-4 mt-6">
