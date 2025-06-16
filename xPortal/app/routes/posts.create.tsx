@@ -1,7 +1,6 @@
 // app/routes/profile.tsx
 import { useEffect, useState } from 'react'
 import { Form, useLoaderData, Link, useActionData, redirect, useNavigate } from "@remix-run/react"
-import { FormField } from '~/components/form-field'
 import { LoaderFunction, ActionFunction, json } from '@remix-run/node'
 import { getUser } from '~/utils/auth.server'
 import { prisma } from '~/utils/prisma.server'
@@ -47,8 +46,11 @@ export const action: ActionFunction = async ({ request }) => {
   const codeBlocks = JSON.parse(formData.get('codeBlocks') as string) as CodeBlockForm[];
 
   const errors: ActionData['errors'] = {};
-  if (!title) errors.title = 'Title is required';
-  if (!content) errors.content = 'Content is required';
+  const titleError = validateTitle(title);
+  const contentError = validateContent(content);
+
+  if (titleError) errors.title = titleError;
+  if (contentError) errors.content = contentError;
 
   if (Object.keys(errors).length > 0) {
     return json<ActionData>({ errors, fields: { title, content } });

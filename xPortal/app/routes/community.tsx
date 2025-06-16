@@ -5,6 +5,7 @@ import { getUser } from '~/utils/auth.server'
 import { Nav } from '../components/nav'
 import { prisma } from '~/utils/prisma.server'
 import { FiThumbsUp } from 'react-icons/fi'
+import { getProfilePicture } from '~/utils/profile.server'
 
 interface LoaderData {
   user: {
@@ -25,15 +26,7 @@ interface LoaderData {
     createdAt: string;
     visibilityVotes: number;
     userVoted: boolean;
-    comments: Array<{
-      id: string;
-      content: string;
-      author: {
-        id: string;
-        username: string;
-      };
-      createdAt: string;
-    }>;
+    comments: number;
   }>;
   totalPosts: number;
   currentPage: number;
@@ -55,15 +48,7 @@ type Post = {
   createdAt: string;
   visibilityVotes: number;
   userVoted: boolean;
-  comments: Array<{
-    id: string;
-    content: string;
-    author: {
-      id: string;
-      username: string;
-    };
-    createdAt: string;
-  }>;
+  comments: number;
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
@@ -98,9 +83,9 @@ export const loader: LoaderFunction = async ({ request }) => {
             isQualityVote: false
           }
         } : undefined,
-        comments: {
+        _count: {
           select: {
-            id: true
+            comments: true
           }
         }
       },
@@ -125,13 +110,20 @@ export const loader: LoaderFunction = async ({ request }) => {
       author: {
         id: post.author.id,
         username: post.author.username,
-        profilePicture: post.author.profile?.profilePicture || null
+        profilePicture: getProfilePicture(post.author.profile?.profilePicture || null, post.author.username)
       },
       createdAt: post.createdAt.toISOString(),
       visibilityVotes: post.visibilityVotes,
       userVoted: user ? post.votes.length > 0 : false,
-      comments: post.comments.length
+      comments: post._count.comments
     }));
+
+    // Transform user data if it exists
+    const transformedUser = user ? {
+      id: user.id,
+      username: user.username,
+      profilePicture: getProfilePicture(user.profile?.profilePicture || null, user.username)
+    } : null;
 
     console.log('Loader data:', {
       totalPosts,
@@ -141,7 +133,7 @@ export const loader: LoaderFunction = async ({ request }) => {
     });
 
     return json({
-      user,
+      user: transformedUser,
       posts: transformedPosts,
       totalPosts,
       currentPage: page,
@@ -414,7 +406,7 @@ export default function Community() {
                         {(typeof post.visibilityVotes === 'number' ? post.visibilityVotes : 0)} votes
                       </span>
                       <span className="text-sm text-gray-400">
-                        {post.comments.length} comments
+                        {post.comments} comments
                       </span>
                     </div>
                   </div>
@@ -455,7 +447,7 @@ export default function Community() {
                           {(typeof post.visibilityVotes === 'number' ? post.visibilityVotes : 0)} votes
                         </span>
                         <span className="text-sm text-gray-400">
-                          {post.comments.length} comments
+                          {post.comments} comments
                         </span>
                       </div>
                       <button

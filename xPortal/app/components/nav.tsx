@@ -6,9 +6,11 @@ export function Nav() {
     const bubArray = Array.from({ length: 25 }, (_, i) => i);
     const bubArray1 = Array.from({ length: 25 }, (_, i) => i);
     const bubArray2 = Array.from({ length: 25 }, (_, i) => i);
-    const [randomValues, setRandomValues] = useState<{ left: number; delay: number; duration: number }[]>([]);
+    const [randomValues, setRandomValues] = useState<number[] | null>(null);
 
     useEffect(() => {
+        // Only run on client
+        setRandomValues(Array.from({ length: 25 }, () => Math.random() * 100));
         // Dynamically import seedrandom
         import('seedrandom').then(({ default: seedrandom }) => {
             const rng = seedrandom('fixed-seed');
@@ -74,16 +76,10 @@ export function Nav() {
                     ease: "none"
                 });
             });
-
-            // Store random values for JSX
-            const values = bubArray.map(() => ({
-                left: rng() * 100,
-                delay: rng() * 5,
-                duration: 8 + rng() * 4
-            }));
-            setRandomValues(values);
         });
     }, []);
+
+    if (!randomValues) return null; // Prevent hydration mismatch
 
     return (
         <div className='group fixed left-0 top-0 h-screen w-20 bg-neutral-800 flex flex-col items-center transition-all duration-300 ease-in-out hover:w-64 overflow-hidden z-[9999] nav-container'>
@@ -94,7 +90,7 @@ export function Nav() {
                         key={el}
                         className={`bubble-${el} absolute w-2 h-2 rounded-full bg-indigo-500/20`}
                         style={{
-                            left: `${randomValues[index]?.left ?? 0}%`,
+                            left: `${randomValues[index] ?? 0}%`,
                         }}
                     />
                 ))}
@@ -103,7 +99,7 @@ export function Nav() {
                         key={`1-${el}`}
                         className={`bubble-1-${el} absolute w-1.5 h-1.5 rounded-full bg-indigo-400/20`}
                         style={{
-                            left: `${randomValues[index]?.left ?? 0}%`,
+                            left: `${randomValues[index] ?? 0}%`,
                         }}
                     />
                 ))}
@@ -112,7 +108,7 @@ export function Nav() {
                         key={`2-${el}`}
                         className={`bubble-2-${el} absolute w-1 h-1 rounded-full bg-indigo-300/20`}
                         style={{
-                            left: `${randomValues[index]?.left ?? 0}%`,
+                            left: `${randomValues[index] ?? 0}%`,
                         }}
                     />
                 ))}

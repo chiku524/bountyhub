@@ -1,13 +1,13 @@
 // app/routes/profile.tsx
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Form, useLoaderData, Link, useActionData, useNavigate, useSubmit, useSearchParams } from "@remix-run/react"
-import { FormField } from '~/components/form-field'
 import { LoaderFunction, ActionFunction, json } from '@remix-run/node'
 import { getUser } from '~/utils/auth.server'
 import { getUserPosts, deletePost } from '~/utils/user.server'
 import { Nav } from '../components/nav'
 import { FiTrash2, FiEdit2 } from 'react-icons/fi'
 import { prisma } from '~/utils/prisma.server'
+import { getProfilePicture } from '~/utils/profile.server'
 
 type Post = {
     id: string;
@@ -90,7 +90,7 @@ export const loader: LoaderFunction = async ({ params, request }) => {
     // Transform the user data to include profilePicture
     const transformedUser = {
         ...user,
-        profilePicture: user.profile?.profilePicture || null
+        profilePicture: getProfilePicture(user.profile?.profilePicture || null, user.username)
     };
 
     // Transform the posts data to include author profile pictures
@@ -101,7 +101,7 @@ export const loader: LoaderFunction = async ({ params, request }) => {
             blobVideoURL: videoUrl,
             author: {
                 ...post.author,
-                profilePicture: post.author.profile?.profilePicture || null
+                profilePicture: getProfilePicture(post.author.profile?.profilePicture || null, post.author.username)
             }
         };
     });
@@ -247,9 +247,9 @@ export default function UserPosts() {
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="flex items-center space-x-3">
                                         <img 
-                                            src={user.profilePicture || '/default-avatar.png'} 
-                                            alt={user.username}
-                                            className="w-10 h-10 rounded-full border-2 border-violet-500/50"
+                                            src={user.profilePicture} 
+                                            alt={`${user.username}'s profile`}
+                                            className="w-10 h-10 rounded-full object-cover"
                                         />
                                         <div>
                                             <Link 
