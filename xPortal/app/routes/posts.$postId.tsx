@@ -9,6 +9,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import { FiTrash2, FiThumbsUp, FiThumbsDown } from 'react-icons/fi';
 import type { Comment, Answer, CodeBlock, User, Profile } from "@prisma/client";
+import { addReputationPoints, REPUTATION_POINTS } from '~/utils/reputation.server';
 
 type CommentWithAuthor = Comment & {
   author: User & {
@@ -294,6 +295,23 @@ export const action: ActionFunction = async ({ request, params }) => {
             }
           });
 
+          // Award reputation points for upvoting/downvoting
+          if (value === 1) {
+            await addReputationPoints(
+              updatedPost.authorId,
+              REPUTATION_POINTS.POST_UPVOTED,
+              'POST_UPVOTED',
+              postId
+            );
+          } else if (value === -1) {
+            await addReputationPoints(
+              updatedPost.authorId,
+              REPUTATION_POINTS.POST_DOWNVOTED,
+              'POST_DOWNVOTED',
+              postId
+            );
+          }
+
           return {
             post: updatedPost,
             userQualityVote: value
@@ -378,32 +396,41 @@ export const action: ActionFunction = async ({ request, params }) => {
       });
     } else if (action === 'comment') {
       const content = formData.get('content') as string;
-      if (!content?.trim()) {
+      if (!content) {
         return json({ error: 'Comment content is required' }, { status: 400 });
+      }
+
+      if (!params.postId) {
+        return json({ error: 'Post ID is required' }, { status: 400 });
       }
 
       const comment = await prisma.comment.create({
         data: {
-          content: content.trim(),
+          content,
           authorId: user.id,
-          postId
+          postId: params.postId,
+          upvotes: 0,
+          downvotes: 0,
+          answerId: null
         },
         include: {
           author: {
-            select: {
-              id: true,
-              username: true,
-              profile: {
-                select: {
-                  profilePicture: true
-                }
-              }
+            include: {
+              profile: true
             }
           }
         }
       });
 
-      return json({ 
+      // Award reputation points for commenting
+      await addReputationPoints(
+        user.id,
+        REPUTATION_POINTS.COMMENT_CREATED,
+        'COMMENT_CREATED',
+        comment.id
+      );
+
+      return json({
         success: true,
         comment: {
           ...comment,
@@ -415,33 +442,41 @@ export const action: ActionFunction = async ({ request, params }) => {
       });
     } else if (action === 'answer') {
       const content = formData.get('content') as string;
-      if (!content?.trim()) {
+      if (!content) {
         return json({ error: 'Answer content is required' }, { status: 400 });
+      }
+
+      if (!params.postId) {
+        return json({ error: 'Post ID is required' }, { status: 400 });
       }
 
       const answer = await prisma.answer.create({
         data: {
-          content: content.trim(),
+          content,
+          postId: params.postId,
           authorId: user.id,
-          postId,
-          isAccepted: false
+          isAccepted: false,
+          upvotes: 0,
+          downvotes: 0
         },
         include: {
           author: {
-            select: {
-              id: true,
-              username: true,
-              profile: {
-                select: {
-                  profilePicture: true
-                }
-              }
+            include: {
+              profile: true
             }
           }
         }
       });
 
-      return json({ 
+      // Award reputation points for answering a question
+      await addReputationPoints(
+        user.id,
+        REPUTATION_POINTS.ANSWER_CREATED,
+        'ANSWER_CREATED',
+        answer.id
+      );
+
+      return json({
         success: true,
         answer: {
           ...answer,
@@ -457,13 +492,17 @@ export const action: ActionFunction = async ({ request, params }) => {
         return json({ error: 'Answer ID is required' }, { status: 400 });
       }
 
-      // Check if user is the post author
+      // Get the post to check if the user is the author
       const post = await prisma.posts.findUnique({
-        where: { id: postId },
+        where: { id: params.postId },
         select: { authorId: true }
       });
 
-      if (!post || post.authorId !== user.id) {
+      if (!post) {
+        return json({ error: 'Post not found' }, { status: 404 });
+      }
+
+      if (post.authorId !== user.id) {
         return json({ error: 'Only the post author can accept answers' }, { status: 403 });
       }
 
@@ -473,21 +512,23 @@ export const action: ActionFunction = async ({ request, params }) => {
         data: { isAccepted: true },
         include: {
           author: {
-            select: {
-              id: true,
-              username: true,
-              profile: {
-                select: {
-                  profilePicture: true
-                }
-              }
+            include: {
+              profile: true
             }
           }
         }
       });
 
-      return json({ 
-        success: true, 
+      // Award reputation points for having an answer accepted
+      await addReputationPoints(
+        answer.authorId,
+        REPUTATION_POINTS.ANSWER_ACCEPTED,
+        'ANSWER_ACCEPTED',
+        answer.id
+      );
+
+      return json({
+        success: true,
         answer: {
           ...answer,
           author: {
@@ -558,7 +599,22 @@ export default function PostDetail() {
   // Update comments when fetcher data changes
   useEffect(() => {
     if (commentFetcher.data?.success && commentFetcher.data?.comment) {
-      setComments(prev => [...prev, commentFetcher.data.comment!]);
+      const newComment = {
+        ...commentFetcher.data.comment,
+        createdAt: new Date(commentFetcher.data.comment.createdAt),
+        updatedAt: new Date(commentFetcher.data.comment.updatedAt),
+        author: {
+          ...commentFetcher.data.comment.author,
+          createdAt: new Date(commentFetcher.data.comment.author.createdAt),
+          updatedAt: new Date(commentFetcher.data.comment.author.updatedAt),
+          profile: commentFetcher.data.comment.author.profile ? {
+            ...commentFetcher.data.comment.author.profile,
+            createdAt: new Date(commentFetcher.data.comment.author.profile.createdAt),
+            updatedAt: new Date(commentFetcher.data.comment.author.profile.updatedAt)
+          } : null
+        }
+      } as unknown as CommentWithAuthor;
+      setComments(prev => [...prev, newComment]);
       setNewComment('');
       setError(null);
     } else if (commentFetcher.data?.error) {
@@ -569,7 +625,22 @@ export default function PostDetail() {
   // Update answers when fetcher data changes
   useEffect(() => {
     if (answerFetcher.data?.success && answerFetcher.data?.answer) {
-      setAnswers(prev => [...prev, answerFetcher.data.answer!]);
+      const newAnswer = {
+        ...answerFetcher.data.answer,
+        createdAt: new Date(answerFetcher.data.answer.createdAt),
+        updatedAt: new Date(answerFetcher.data.answer.updatedAt),
+        author: {
+          ...answerFetcher.data.answer.author,
+          createdAt: new Date(answerFetcher.data.answer.author.createdAt),
+          updatedAt: new Date(answerFetcher.data.answer.author.updatedAt),
+          profile: answerFetcher.data.answer.author.profile ? {
+            ...answerFetcher.data.answer.author.profile,
+            createdAt: new Date(answerFetcher.data.answer.author.profile.createdAt),
+            updatedAt: new Date(answerFetcher.data.answer.author.profile.updatedAt)
+          } : null
+        }
+      } as unknown as AnswerWithAuthor;
+      setAnswers(prev => [...prev, newAnswer]);
       setError(null);
     } else if (answerFetcher.data?.error) {
       setError(answerFetcher.data.error);
@@ -593,9 +664,24 @@ export default function PostDetail() {
   // Update answers when accept answer fetcher data changes
   useEffect(() => {
     if (acceptAnswerFetcher.data?.success && acceptAnswerFetcher.data?.answer) {
+      const updatedAnswer = {
+        ...acceptAnswerFetcher.data.answer,
+        createdAt: new Date(acceptAnswerFetcher.data.answer.createdAt),
+        updatedAt: new Date(acceptAnswerFetcher.data.answer.updatedAt),
+        author: {
+          ...acceptAnswerFetcher.data.answer.author,
+          createdAt: new Date(acceptAnswerFetcher.data.answer.author.createdAt),
+          updatedAt: new Date(acceptAnswerFetcher.data.answer.author.updatedAt),
+          profile: acceptAnswerFetcher.data.answer.author.profile ? {
+            ...acceptAnswerFetcher.data.answer.author.profile,
+            createdAt: new Date(acceptAnswerFetcher.data.answer.author.profile.createdAt),
+            updatedAt: new Date(acceptAnswerFetcher.data.answer.author.profile.updatedAt)
+          } : null
+        }
+      } as unknown as AnswerWithAuthor;
       setAnswers(prev => 
         prev.map(answer => 
-          answer.id === acceptAnswerFetcher.data.answer?.id
+          answer.id === updatedAnswer.id
             ? { ...answer, isAccepted: true }
             : answer
         )

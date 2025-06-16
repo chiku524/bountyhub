@@ -6,6 +6,7 @@ import { prisma } from './prisma.server'
 import { initGridFS, getVideo } from './gridfs'
 import mongoose from 'mongoose'
 import { GridFSBucket } from 'mongodb'
+import { addReputationPoints, REPUTATION_POINTS } from './reputation.server'
 
 export const createUser = async (user: RegisterForm) => {
   const { email, password, username } = user
@@ -154,17 +155,33 @@ export const getUserPosts = async (username: string) => {
 }
 
 export const createPost = async (post: PostForm) => {
+  try {
+    const newPost = await prisma.posts.create({
+      data: {
+        title: post.title,
+        content: post.content,
+        authorId: post.authorId,
+        blobVideoURL: post.blobVideoURL,
+        codeBlocks: {
+          create: post.codeBlocks
+        }
+      }
+    });
 
-  const newPost = await prisma.posts.create({
-    data: {
-      authorId: post.author,
-      title: post.title,
-      content: post.content,
-      blobVideoURL: post.blobVideoURL,
-    },
-  });
-  return newPost;
-}
+    // Award reputation points for creating a post
+    await addReputationPoints(
+      post.authorId,
+      REPUTATION_POINTS.POST_CREATED,
+      'POST_CREATED',
+      newPost.id
+    );
+
+    return newPost;
+  } catch (error) {
+    console.error('Error creating post:', error);
+    throw error;
+  }
+};
 
 export async function deletePost(postId: string) {
     try {

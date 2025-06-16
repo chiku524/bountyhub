@@ -26,6 +26,8 @@ model User {
   answers   Answer[]
   votes     Vote[]
   qualityVotes QualityVote[]
+  reputationPoints Int @default(0)
+  reputationHistory ReputationHistory[]
 }
 
 model Profile {
@@ -96,6 +98,12 @@ model Answer {
   isAccepted Boolean @default(false)
 }
 
+enum VoteType {
+  POST
+  COMMENT
+  ANSWER
+}
+
 model Vote {
   id String @id @map("_id") @default(auto()) @db.ObjectId
   userId String @db.ObjectId
@@ -140,4 +148,18 @@ model QualityVote {
   @@unique([userId, postId])
   @@index([userId])
   @@index([postId])
+}
+
+model ReputationHistory {
+  id String @id @map("_id") @default(auto()) @db.ObjectId
+  userId String @db.ObjectId
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  points Int
+  action String // e.g., 'POST_CREATED', 'ANSWER_ACCEPTED', 'COMMENT_UPVOTED'
+  referenceId String? @db.ObjectId // ID of the related post/comment/answer
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([action])
 }

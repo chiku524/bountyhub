@@ -72,7 +72,7 @@ export type Post = {
 }
 
 export type PostForm = {
-    author: string
+    authorId: string
     title: string
     content: string
     blobVideoURL: string | null

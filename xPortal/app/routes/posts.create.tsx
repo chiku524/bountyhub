@@ -9,6 +9,7 @@ import { validateTitle, validateContent } from '~/utils/validators.server'
 import type { VideoFile } from '~/types/video'
 import type { CodeBlockForm } from '~/utils/types.server'
 import VideoUpload from '~/components/VideoUpload'
+import { addReputationPoints, REPUTATION_POINTS } from '~/utils/reputation.server'
 
 interface LoaderData {
   user: {
@@ -68,6 +69,14 @@ export const action: ActionFunction = async ({ request }) => {
         }
       },
     });
+
+    // Award reputation points for creating a post
+    await addReputationPoints(
+      user.id,
+      REPUTATION_POINTS.POST_CREATED,
+      'POST_CREATED',
+      post.id
+    );
 
     return redirect(`/${user.username}/posts`);
   } catch (error) {

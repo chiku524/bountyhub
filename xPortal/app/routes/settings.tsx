@@ -1,6 +1,6 @@
 // app/routes/profile.tsx
 import { FormField } from '~/components/form-field'
-import { Form, useLoaderData, Link, useActionData, useNavigation } from "@remix-run/react"
+import { Form, useLoaderData, Link, useActionData, useNavigation, useFetcher } from "@remix-run/react"
 import { LoaderFunction, ActionFunction, json, redirect, ActionFunctionArgs } from '@remix-run/node'
 import { logout, getUser } from '~/utils/auth.server'
 import { editUser } from '~/utils/user.server'
@@ -160,20 +160,68 @@ export default function Profile() {
     const { userData } = useLoaderData<{ userData: UserData }>();
     const actionData = useActionData<ActionData>();
     const navigation = useNavigation();
+    const fetcher = useFetcher();
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [editData, setEditData] = useState<string>('');
     const [formError, setFormError] = useState<string>('');
 
     const isSubmitting = navigation.state === "submitting";
 
+    // Reset form error when modal opens
+    useEffect(() => {
+        if (editModalOpen) {
+            setFormError('');
+        }
+    }, [editModalOpen]);
+
+    // Handle action data changes
     useEffect(() => {
         if (actionData?.error) {
             setFormError(actionData.error);
         } else if (actionData?.success) {
             setEditModalOpen(false);
-            window.location.reload();
+            setEditData('');
+            setFormError('');
+            fetcher.load('/settings');
         }
-    }, [actionData]);
+    }, [actionData, fetcher]);
+
+    const handleEditClick = (dataType: string) => {
+        setEditData(dataType);
+        setEditModalOpen(true);
+        setFormError('');
+    };
+
+    const handleModalClose = () => {
+        setEditModalOpen(false);
+        setEditData('');
+        setFormError('');
+    };
+
+    const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const formData = new FormData(form);
+        formData.append('_action', 'update');
+        
+        try {
+            const response = await fetch('/settings', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                setFormError(data.error);
+            } else if (data.success) {
+                handleModalClose();
+                fetcher.load('/settings');
+            }
+        } catch (error) {
+            setFormError('An unexpected error occurred');
+        }
+    };
 
     return (
         <div className="h-screen w-full bg-neutral-900 flex flex-row">
@@ -245,27 +293,27 @@ export default function Profile() {
                                     `${userData.profile.firstName} ${userData.profile.lastName}` : 
                                     'Not set'}
                             </div>
-                            <span className='text-blue-500 absolute top-0 right-0 m-5 hover:text-blue-600 cursor-pointer' onClick={() => {setEditModalOpen(true); setEditData('name')}}>Edit</span>
+                            <span className='text-blue-500 absolute top-0 right-0 m-5 hover:text-blue-600 cursor-pointer' onClick={() => handleEditClick('name')}>Edit</span>
                         </div>
                         <div className='block mx-10 my-5 bg-gray-100 rounded shadow-custom-slate relative'>
                             <div className='font-bold w-fit bg-gray-100 p-2 rounded border-b border-slate-700'>Email</div>
                             <div className='bg-gray-100 rounded w-fit p-2'>{userData.email}</div>
-                            <span className='text-blue-500 absolute top-0 right-0 m-5 hover:text-blue-600 cursor-pointer' onClick={() => {setEditModalOpen(true); setEditData('email')}}>Edit</span>
+                            <span className='text-blue-500 absolute top-0 right-0 m-5 hover:text-blue-600 cursor-pointer' onClick={() => handleEditClick('email')}>Edit</span>
                         </div>
                         <div className='block mx-10 my-5 bg-gray-100 rounded shadow-custom-slate relative'>
                             <div className='font-bold w-fit bg-gray-100 p-2 rounded border-b border-slate-700'>Bio</div>
                             <div className='bg-gray-100 rounded w-fit p-2'>{userData.profile?.bio || 'Not set'}</div>
-                            <span className='text-blue-500 absolute top-0 right-0 m-5 hover:text-blue-600 cursor-pointer' onClick={() => {setEditModalOpen(true); setEditData('bio')}}>Edit</span>
+                            <span className='text-blue-500 absolute top-0 right-0 m-5 hover:text-blue-600 cursor-pointer' onClick={() => handleEditClick('bio')}>Edit</span>
                         </div>
                         <div className='block mx-10 my-5 bg-gray-100 rounded shadow-custom-slate relative'>
                             <div className='font-bold w-fit bg-gray-100 p-2 rounded border-b border-slate-700'>Username</div>
                             <div className='bg-gray-100 rounded w-fit p-2'>{userData.username ? userData.username : 'Not set'}</div>
-                            <span className='text-blue-500 absolute top-0 right-0 m-5 hover:text-blue-600 cursor-pointer' onClick={() => {setEditModalOpen(true); setEditData('username')}}>Edit</span>
+                            <span className='text-blue-500 absolute top-0 right-0 m-5 hover:text-blue-600 cursor-pointer' onClick={() => handleEditClick('username')}>Edit</span>
                         </div>
                         <div className='block mx-10 my-5 bg-gray-100 rounded shadow-custom-slate relative'>
                             <div className='font-bold w-fit bg-gray-100 p-2 rounded border-b border-slate-700'>Website</div>
                             <div className='bg-gray-100 rounded w-fit p-2'>{userData.profile?.website || 'Not set'}</div>
-                            <span className='text-blue-500 absolute top-0 right-0 m-5 hover:text-blue-600 cursor-pointer' onClick={() => {setEditModalOpen(true); setEditData('website')}}>Edit</span>
+                            <span className='text-blue-500 absolute top-0 right-0 m-5 hover:text-blue-600 cursor-pointer' onClick={() => handleEditClick('website')}>Edit</span>
                         </div>
                         <div className='block mx-10 my-5 bg-gray-100 rounded shadow-custom-slate relative'>
                             <div className='font-bold w-fit bg-gray-100 p-2 rounded border-b border-slate-700'>Socials</div>
@@ -274,7 +322,7 @@ export default function Profile() {
                                 <div className='bg-gray-100 rounded w-fit p-2'>{userData.profile?.twitter ? userData.profile.twitter : 'Not set'}</div>
                                 <div className='bg-gray-100 rounded w-fit p-2'>{userData.profile?.linkedin ? userData.profile.linkedin : 'Not set'}</div>
                             </div>
-                            <span className='text-blue-500 absolute top-0 right-0 m-5 hover:text-blue-600 cursor-pointer' onClick={() => {setEditModalOpen(true); setEditData('socials')}}>Edit</span>
+                            <span className='text-blue-500 absolute top-0 right-0 m-5 hover:text-blue-600 cursor-pointer' onClick={() => handleEditClick('socials')}>Edit</span>
                         </div>
                     </div>
                 </div>
@@ -300,7 +348,7 @@ export default function Profile() {
                                 </div>
                             )}
 
-                            <Form method="post" className="space-y-4">
+                            <Form method="post" onSubmit={handleFormSubmit} className="space-y-4">
                                 <input type="hidden" name="_action" value="update" />
                                 
                                 {editData === 'name' && (
@@ -412,7 +460,7 @@ export default function Profile() {
                                 <div className="flex justify-end gap-4 mt-6">
                                     <button
                                         type="button"
-                                        onClick={() => setEditModalOpen(false)}
+                                        onClick={handleModalClose}
                                         className="px-4 py-2 text-sm font-medium text-gray-300 bg-neutral-700 rounded-lg hover:bg-neutral-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 transition-colors"
                                         disabled={isSubmitting}
                                     >
