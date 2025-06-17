@@ -18,9 +18,7 @@ type Post = {
     author: {
         id: string;
         username: string;
-        profile: {
-            profilePicture: string | null;
-        } | null;
+        profilePicture: string;
     };
     upvotes: number;
     downvotes: number;
@@ -36,7 +34,7 @@ interface LoaderData {
     user: {
         id: string;
         username: string;
-        profilePicture: string | null;
+        profilePicture: string;
         posts: Post[];
     };
     currentUser: {
@@ -90,21 +88,17 @@ export const loader: LoaderFunction = async ({ params, request }) => {
     // Transform the user data to include profilePicture
     const transformedUser = {
         ...user,
-        profilePicture: getProfilePicture(user.profile?.profilePicture || null, user.username)
+        profilePicture: user.profile?.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&background=random`
     };
 
     // Transform the posts data to include author profile pictures
-    const transformedPosts = user.posts.map(post => {
-        const videoUrl = post.blobVideoURL && post.blobVideoURL.trim() !== '' ? post.blobVideoURL : null;
-        return {
-            ...post,
-            blobVideoURL: videoUrl,
-            author: {
-                ...post.author,
-                profilePicture: getProfilePicture(post.author.profile?.profilePicture || null, post.author.username)
-            }
-        };
-    });
+    const transformedPosts = user.posts.map(post => ({
+        ...post,
+        author: {
+            ...post.author,
+            profilePicture: post.author.profile?.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author.username)}&background=random`
+        }
+    }));
 
     return json({ 
         user: {
@@ -189,7 +183,7 @@ export default function UserPosts() {
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
                     <img
-                        src={post.author.profile?.profilePicture || getProfilePicture(null, post.author.username)}
+                        src={post.author.profilePicture}
                         alt={`${post.author.username}'s profile`}
                         className="w-10 h-10 rounded-full object-cover"
                     />

@@ -75,6 +75,8 @@ model Posts {
   qualityUpvotes Int @default(0)
   qualityDownvotes Int @default(0)
 
+  @@index([authorId])
+  @@index([createdAt])
   @@map("posts")
 }
 
@@ -92,6 +94,10 @@ model Comment {
   votes Vote[]
   upvotes Int @default(0)
   downvotes Int @default(0)
+
+  @@index([postId])
+  @@index([authorId])
+  @@index([createdAt])
 }
 
 model Answer {
@@ -108,6 +114,11 @@ model Answer {
   upvotes Int @default(0)
   downvotes Int @default(0)
   isAccepted Boolean @default(false)
+
+  @@index([postId])
+  @@index([authorId])
+  @@index([createdAt])
+  @@index([isAccepted])
 }
 
 enum VoteType {
@@ -128,7 +139,7 @@ model Vote {
   answerId String? @db.ObjectId
   answer Answer? @relation(fields: [answerId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
-  voteType String @db.String // 'POST', 'COMMENT', or 'ANSWER'
+  voteType VoteType
   isQualityVote Boolean @default(false) // Indicates if this is a quality vote
 
   @@index([userId, voteType])
