@@ -94,26 +94,24 @@ export const action: ActionFunction = async ({ request, params }) => {
       });
     }
 
-    // Find existing vote
-    const existingVote = await prisma.vote.findFirst({
+    // Use a transaction to ensure atomic operations
+    const result = await prisma.$transaction(async (tx) => {
+      // First, delete any existing vote for this user and post
+      await tx.vote.deleteMany({
       where: {
         userId: user.id,
-        postId: postId,
+          postId: postId as string,
         voteType: 'POST',
         isQualityVote: false
       }
     });
 
-    let updatedPost;
-    
-    try {
       if (isVoting) {
-        if (!existingVote) {
-          // Create new vote
-          await prisma.vote.create({
+        // Create new vote with all required fields set
+        await tx.vote.create({
             data: {
               userId: user.id,
-              postId: postId,
+            postId: postId as string,
               value: 1,
               voteType: 'POST',
               isQualityVote: false,
@@ -121,85 +119,39 @@ export const action: ActionFunction = async ({ request, params }) => {
               answerId: null
             }
           });
-
-          // Update post vote count
-          updatedPost = await prisma.posts.update({
-            where: { id: postId },
-            data: {
-              visibilityVotes: {
-                increment: 1
-              }
-            },
-            select: {
-              visibilityVotes: true
-            }
-          });
-        } else {
-          // User already voted, return current state
-          updatedPost = await prisma.posts.findUnique({
-            where: { id: postId },
-            select: {
-              visibilityVotes: true
-            }
-          });
-        }
-      } else {
-        if (existingVote) {
-          // Delete existing vote
-          await prisma.vote.delete({
-            where: { id: existingVote.id }
-          });
-
-          // Update post vote count
-          updatedPost = await prisma.posts.update({
-            where: { id: postId },
-            data: {
-              visibilityVotes: {
-                decrement: 1
-              }
-            },
-            select: {
-              visibilityVotes: true
-            }
-          });
-        } else {
-          // No vote to remove, return current state
-          updatedPost = await prisma.posts.findUnique({
-            where: { id: postId },
-            select: {
-              visibilityVotes: true
-            }
-          });
-        }
       }
 
-      if (!updatedPost) {
-        throw new Error('Failed to update post');
-      }
+      // Count visibility votes (only positive votes)
+      const visibilityVotes = await tx.vote.count({
+        where: {
+          postId: postId as string,
+          voteType: 'POST',
+          isQualityVote: false,
+          value: 1
+        }
+          });
 
-      console.log('Vote processed successfully:', { 
-        postId, 
-        newVoteCount: updatedPost.visibilityVotes,
-        voted: isVoting 
+      // Update post with new vote count
+      const updatedPost = await tx.posts.update({
+        where: { id: postId as string },
+            data: {
+          visibilityVotes
+            }
+          });
+
+      return {
+        post: updatedPost,
+        userVoted: isVoting
+      };
       });
 
       return json({ 
         success: true,
-        votes: updatedPost.visibilityVotes,
-        voted: isVoting
+      votes: result.post.visibilityVotes,
+      voted: result.userVoted
       }, {
         headers: { 'Content-Type': 'application/json' }
       });
-    } catch (dbError) {
-      console.error('Database error:', dbError);
-      return json({ 
-        error: 'Failed to update vote',
-        details: dbError instanceof Error ? dbError.message : 'Database error'
-      }, { 
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
   } catch (error) {
     console.error('Error in vote action:', error);
     return json({ 

@@ -25,7 +25,6 @@ model User {
   comments  Comment[]
   answers   Answer[]
   votes     Vote[]
-  qualityVotes QualityVote[]
   reputationPoints Int @default(0)
   reputationHistory ReputationHistory[]
 }
@@ -39,32 +38,44 @@ model Profile {
   bio           String?  @db.String
   location      String?  @db.String
   website       String?  @db.String
+  // Social Media Links
+  facebook      String?  @db.String
   twitter       String?  @db.String
-  github        String?  @db.String
-  linkedin      String?  @db.String
   instagram     String?  @db.String
+  linkedin      String?  @db.String
+  github        String?  @db.String
+  youtube       String?  @db.String
+  tiktok        String?  @db.String
+  discord       String?  @db.String
+  reddit        String?  @db.String
+  medium        String?  @db.String
+  stackoverflow String?  @db.String
+  devto         String?  @db.String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
 }
 
 model Posts {
-  id String   @id @map("_id") @default(auto()) @db.ObjectId
-  authorId  String @db.ObjectId
-  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  id String @id @map("_id") @default(auto()) @db.ObjectId
   title String
-  content  String
-  blobVideoURL String?
+  content String
+  authorId String @db.ObjectId
+  author User @relation(fields: [authorId], references: [id])
   codeBlocks CodeBlock[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  media Media[]
   comments Comment[]
   answers Answer[]
   votes Vote[]
-  qualityVotes QualityVote[]
-  visibilityVotes Int @default(0) // For community visibility
-  qualityUpvotes Int @default(0) // For quality assurance
-  qualityDownvotes Int @default(0) // For quality assurance
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  visibilityVotes Int @default(0)
+  qualityUpvotes Int @default(0)
+  qualityDownvotes Int @default(0)
+
+  @@map("posts")
 }
 
 model Comment {
@@ -121,7 +132,7 @@ model Vote {
   isQualityVote Boolean @default(false) // Indicates if this is a quality vote
 
   @@index([userId, voteType])
-  @@unique([userId, postId, voteType, isQualityVote], map: "vote_post_unique")
+  @@unique([userId, postId, voteType], map: "vote_post_unique")
   @@unique([userId, commentId, voteType], map: "vote_comment_unique")
   @@unique([userId, answerId, voteType], map: "vote_answer_unique")
 }
@@ -136,21 +147,6 @@ model CodeBlock {
   updatedAt DateTime @updatedAt
 }
 
-model QualityVote {
-  id String @id @map("_id") @default(auto()) @db.ObjectId
-  userId String @db.ObjectId
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  postId String @db.ObjectId
-  post Posts @relation(fields: [postId], references: [id], onDelete: Cascade)
-  value Int // 1 for upvote, -1 for downvote
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([userId, postId])
-  @@index([userId])
-  @@index([postId])
-}
-
 model ReputationHistory {
   id String @id @map("_id") @default(auto()) @db.ObjectId
   userId String @db.ObjectId
@@ -163,4 +159,19 @@ model ReputationHistory {
   @@index([userId])
   @@index([createdAt])
   @@index([action])
+}
+
+model Media {
+  id String @id @map("_id") @default(auto()) @db.ObjectId
+  type String
+  url String
+  thumbnailUrl String?
+  isScreenRecording Boolean @default(false)
+  cloudinaryId String
+  postId String @db.ObjectId
+  post Posts @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("media")
 }

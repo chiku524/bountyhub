@@ -4,7 +4,7 @@ import type { RegisterForm, LoginForm } from './types.server'
 import bcrypt from 'bcryptjs'
 import { prisma } from './prisma.server'
 import { redirect, createCookieSessionStorage } from '@remix-run/node'
-import { createUser } from './user.server'
+import { createUser, getUserById } from './user.server'
 
 const sessionSecret = process.env.SESSION_SECRET
 if (!sessionSecret) {
@@ -14,7 +14,7 @@ if (!sessionSecret) {
 const storage = createCookieSessionStorage({
   cookie: {
     name: 'portal-session',
-    secure: process.env.NODE_ENV === 'production',
+    secure: process.env.NODE_ENV === 'production' ? true : false,
     secrets: [sessionSecret],
     sameSite: 'lax',
     path: '/',
@@ -22,6 +22,15 @@ const storage = createCookieSessionStorage({
     httpOnly: true,
   },
 })
+
+export interface AuthError {
+  error: string;
+  fields?: {
+    email?: string;
+    password?: string;
+    username?: string;
+  };
+}
 
 export async function createUserSession(userId: string, redirectTo: string) {
   const session = await storage.getSession()
@@ -33,42 +42,55 @@ export async function createUserSession(userId: string, redirectTo: string) {
   })
 }
 
-export async function register(user: RegisterForm) {
-  const exists = await prisma.user.count({ where: { email: user.email } })
-  if (exists) {
-    return { error: `User already exists with that email` }
+export async function register({ email, password, username, redirectTo = '/profile' }: RegisterForm): Promise<Response | AuthError> {
+  const existingUser = await prisma.user.findFirst({
+    where: { OR: [{ email }, { username }] }
+  })
+
+  if (existingUser) {
+    if (existingUser.email === email) {
+      return { error: 'User already exists with that email' }
+    }
+    if (existingUser.username === username) {
+      return { error: 'Username is already taken' }
+    }
   }
 
-  const newUser = await createUser(user)
-  if (!newUser || !newUser.id) {
-    return { error: `Something went wrong trying to create a new user.`, fields: { email: user.email, password: user.password }}
+  const newUser = await createUser({ email, password, username })
+  if (!newUser) {
+    return { error: 'Something went wrong trying to create a new user.' }
   }
 
-  return createUserSession(newUser.id, '/profile');
+  return createUserSession(newUser.id, redirectTo)
 }
 
-export async function login({ email, password }: LoginForm) {
+export async function login({ email, password, redirectTo = '/profile' }: LoginForm): Promise<Response | AuthError> {
   const user = await prisma.user.findUnique({
     where: { email },
   })
 
   if (!user) {
-    return { error: `No account found with that email address` }
+    return { error: 'Invalid credentials' }
   }
 
-  if (!(await bcrypt.compare(password, user.password))) {
-    return { error: `Incorrect password` }
+  const isCorrectPassword = await bcrypt.compare(password, user.password)
+  if (!isCorrectPassword) {
+    return { error: 'Invalid credentials' }
   }
 
-  return createUserSession(user.id, "/profile");
+  return createUserSession(user.id, redirectTo)
 }
 
 export async function requireUserId(request: Request, redirectTo: string = new URL(request.url).pathname) {
   const session = await getUserSession(request)
   const userId = session.get('userId')
   if (!userId || typeof userId !== 'string') {
-    const searchParams = new URLSearchParams([['redirectTo', redirectTo]])
-    throw redirect(`/login?${searchParams}`)
+    throw new Response("Please sign in to access this page", { 
+      status: 401,
+      headers: {
+        'Location': `/login?redirectTo=${redirectTo}`
+      }
+    })
   }
   return userId
 }
@@ -91,10 +113,7 @@ export async function getUser(request: Request) {
   }
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      include: { profile: true },
-    })
+    const user = await getUserById(userId)
     return user
   } catch {
     throw logout(request)

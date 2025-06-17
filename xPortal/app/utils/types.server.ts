@@ -1,92 +1,63 @@
 // app/utils/types.server.ts
-export type RegisterForm = {
-    email: string
-    password: string
-    firstName: string
-    lastName: string
-    username: string
-}
-  
-export type LoginForm = {
-    email: string
-    password: string
+import type { CodeBlock as PrismaCodeBlock, Profile as PrismaProfile, User as PrismaUser } from '@prisma/client'
+
+export interface LoginForm {
+    email: string;
+    password: string;
+    redirectTo: string;
 }
 
-export type User = {
-    id: string | undefined
-    email: string | undefined
-    profile: {
-        firstName: string | undefined
-        lastName: string | undefined
-        profilePicture: string | undefined
-        bio: string | undefined
-        location: string | undefined
-        website: string | undefined
-        twitter: string | undefined
-        github: string | undefined
-        linkedin: string | undefined
-    }
+export interface RegisterForm {
+    email: string;
+    password: string;
+    username: string;
+    redirectTo: string;
 }
 
-export type CodeBlock = {
+export type User = PrismaUser & {
+    profile?: PrismaProfile | null;
+};
+
+export interface Post {
     id: string;
-    language: string;
-    code: string;
-    postId: string;
+    title: string;
+    content: string;
     createdAt: string;
     updatedAt: string;
+    authorId: string;
+    author: User;
+    codeBlocks: CodeBlock[];
 }
 
-export type CodeBlockForm = {
+export interface Comment {
+    id: string;
+    content: string;
+    createdAt: string;
+    updatedAt: string;
+    authorId: string;
+    postId: string;
+    author: User;
+    post: Post;
+}
+
+export type CodeBlock = PrismaCodeBlock;
+export type Profile = PrismaProfile;
+
+export interface CodeBlockForm {
     language: string;
     code: string;
-}
-
-export type Post = {
-    id: string | undefined
-    author: string
-    title: string
-    content: string
-    blobVideoURL: string | undefined
-    createdAt: string | undefined
-    updatedAt: string | undefined
-    codeBlocks: CodeBlock[] | undefined
-    comments: {
-        postedBy: string | undefined
-        content: string | undefined
-        createdAt: string | undefined
-        updatedAt: string | undefined
-    }[] | undefined
-    answers: {
-        postedBy: string | undefined
-        content: string | undefined
-        createdAt: string | undefined
-        updatedAt: string | undefined
-        comments: {
-            postedBy: string | undefined
-            content: string | undefined
-            createdAt: string | undefined
-            updatedAt: string | undefined
-        }[] | undefined
-    }[] | undefined
+    description?: string;
 }
 
 export type PostForm = {
     authorId: string
     title: string
     content: string
-    blobVideoURL: string | null
     codeBlocks: CodeBlockForm[]
-}
-
-export interface Profile {
-    firstName?: string | null;
-    lastName?: string | null;
-    profilePicture?: string | null;
-    bio?: string | null;
-    location?: string | null;
-    website?: string | null;
-    twitter?: string | null;
-    github?: string | null;
-    linkedin?: string | null;
+    media: Array<{
+        type: string
+        url: string
+        thumbnailUrl?: string
+        isScreenRecording: boolean
+    }>
 }

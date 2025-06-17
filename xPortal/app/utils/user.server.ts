@@ -1,110 +1,106 @@
 // app/utils/user.server.ts
 import bcrypt from 'bcryptjs'
-import type { RegisterForm, User, Post, PostForm } from './types.server'
+import type { RegisterForm, User, Post, PostForm, Profile } from './types.server'
 import { getUser } from './auth.server'
 import { prisma } from './prisma.server'
-import { initGridFS, getVideo } from './gridfs'
-import mongoose from 'mongoose'
-import { GridFSBucket } from 'mongodb'
 import { addReputationPoints, REPUTATION_POINTS } from './reputation.server'
+import { getProfilePicture } from './profile.server'
 
-export const createUser = async (user: RegisterForm) => {
-  const { email, password, username } = user
-  const existingUser = await prisma.user.findFirst({
-    where: {
-      OR: [
-        { email },
-        { username }
-      ]
-    }
-  })
-
-  if (existingUser) {
-    return { error: 'User already exists' }
-  }
-
-  const newUser = await prisma.user.create({
-    data: {
-      email,
-      username,
-      password: await bcrypt.hash(password, 10),
-      profile: {
-        create: {
-          firstName: '',
-          lastName: '',
-          profilePicture: null,
-          bio: '',
-          location: '',
-          website: '',
-          twitter: null,
-          github: null,
-          linkedin: null
-        }
-      }
-    }
-  })
-
-  return { id: newUser.id, email }
+export async function createUser({ email, password, username }: RegisterForm) {
+    const hashedPassword = await bcrypt.hash(password, 10)
+    const user = await prisma.user.create({
+        data: {
+            email,
+            password: hashedPassword,
+            username,
+            profile: {
+                create: {
+                    firstName: '',
+                    lastName: '',
+                },
+            },
+        },
+    })
+    return user
 }
 
-interface Profile {
-    firstName?: string;
-    lastName?: string;
-    profilePicture?: string | null;
-    bio?: string;
-    location?: string;
-    website?: string;
-    twitter?: string | null;
-    github?: string | null;
-    linkedin?: string | null;
-    instagram?: string | null;
-}
-
-export const editUser = async (profile: { profile: Profile }, request: Request) => {
+export const editUser = async (inputData: { profile: Partial<Profile> }, request: Request) => {
     const user = await getUser(request);
     if (!user) {
         throw new Error('User not found');
     }
 
-    // Get current profile data
-    const currentUser = await prisma.user.findUnique({
+    const { profile } = inputData;
+
+    // First, ensure the profile exists
+    const existingProfile = await prisma.profile.findUnique({
+        where: { userId: user.id }
+    });
+
+    if (!existingProfile) {
+        // Create new profile
+        const newProfile = await prisma.profile.create({
+            data: {
+                userId: user.id,
+                firstName: profile.firstName || '',
+                lastName: profile.lastName || '',
+                profilePicture: profile.profilePicture,
+                bio: profile.bio || '',
+                location: profile.location || '',
+                website: profile.website || '',
+                facebook: profile.facebook || '',
+                twitter: profile.twitter || '',
+                instagram: profile.instagram || '',
+                linkedin: profile.linkedin || '',
+                github: profile.github || '',
+                youtube: profile.youtube || '',
+                tiktok: profile.tiktok || '',
+                discord: profile.discord || '',
+                reddit: profile.reddit || '',
+                medium: profile.medium || '',
+                stackoverflow: profile.stackoverflow || '',
+                devto: profile.devto || ''
+            }
+        });
+        console.log('Created new profile:', newProfile);
+    } else {
+        // Update existing profile
+        const updatedProfile = await prisma.profile.update({
+            where: { userId: user.id },
+            data: {
+                firstName: profile.firstName ?? existingProfile.firstName,
+                lastName: profile.lastName ?? existingProfile.lastName,
+                profilePicture: profile.profilePicture ?? existingProfile.profilePicture,
+                bio: profile.bio ?? existingProfile.bio,
+                location: profile.location ?? existingProfile.location,
+                website: profile.website ?? existingProfile.website,
+                facebook: profile.facebook ?? existingProfile.facebook,
+                twitter: profile.twitter ?? existingProfile.twitter,
+                instagram: profile.instagram ?? existingProfile.instagram,
+                linkedin: profile.linkedin ?? existingProfile.linkedin,
+                github: profile.github ?? existingProfile.github,
+                youtube: profile.youtube ?? existingProfile.youtube,
+                tiktok: profile.tiktok ?? existingProfile.tiktok,
+                discord: profile.discord ?? existingProfile.discord,
+                reddit: profile.reddit ?? existingProfile.reddit,
+                medium: profile.medium ?? existingProfile.medium,
+                stackoverflow: profile.stackoverflow ?? existingProfile.stackoverflow,
+                devto: profile.devto ?? existingProfile.devto
+            }
+        });
+        console.log('Updated profile:', updatedProfile);
+    }
+
+    // Return the updated user with profile
+    const updatedUser = await prisma.user.findUnique({
         where: { id: user.id },
         include: { profile: true }
     });
-
-    if (!currentUser) {
-        throw new Error('User not found');
+    
+    if (!updatedUser) {
+        throw new Error('Failed to fetch updated user data');
     }
-
-    // Merge current profile data with new data
-    const updatedProfile = {
-        firstName: profile.profile.firstName ?? currentUser.profile?.firstName ?? '',
-        lastName: profile.profile.lastName ?? currentUser.profile?.lastName ?? '',
-        profilePicture: profile.profile.profilePicture ?? currentUser.profile?.profilePicture,
-        bio: profile.profile.bio ?? currentUser.profile?.bio ?? '',
-        location: profile.profile.location ?? currentUser.profile?.location ?? '',
-        website: profile.profile.website ?? currentUser.profile?.website ?? '',
-        twitter: profile.profile.twitter ?? currentUser.profile?.twitter,
-        github: profile.profile.github ?? currentUser.profile?.github,
-        linkedin: profile.profile.linkedin ?? currentUser.profile?.linkedin,
-        instagram: profile.profile.instagram ?? currentUser.profile?.instagram
-    };
-
-    const updatedUser = await prisma.user.update({
-        where: { id: user.id },
-        data: {
-            profile: {
-                upsert: {
-                    create: updatedProfile,
-                    update: updatedProfile
-                }
-            }
-        },
-        include: {
-            profile: true
-        }
-    });
-
+    
     return updatedUser;
 };
 
@@ -140,9 +136,11 @@ export const createPost = async (post: PostForm) => {
         title: post.title,
         content: post.content,
         authorId: post.authorId,
-        blobVideoURL: post.blobVideoURL,
         codeBlocks: {
           create: post.codeBlocks
+        },
+        media: {
+          create: post.media
         }
       }
     });
@@ -164,30 +162,6 @@ export const createPost = async (post: PostForm) => {
 
 export async function deletePost(postId: string) {
     try {
-        const post = await prisma.posts.findUnique({
-            where: { id: postId },
-            select: { blobVideoURL: true }
-        });
-
-        if (!post) {
-            throw new Error('Post not found');
-        }
-
-        if (post.blobVideoURL) {
-            try {
-                await initGridFS();
-                const file = await getVideo(post.blobVideoURL);
-                if (file) {
-                    const bucket = new GridFSBucket(mongoose.connection.db as any, {
-                        bucketName: 'videos'
-                    });
-                    await bucket.delete(file._id);
-                }
-            } catch (error) {
-                console.error('Error deleting video from GridFS:', error);
-            }
-        }
-
         await prisma.posts.delete({
             where: { id: postId }
         });
@@ -197,4 +171,50 @@ export async function deletePost(postId: string) {
         console.error('Error in deletePost:', error);
         throw error;
     }
+}
+
+type UserLookupType = 'id' | 'email' | 'username';
+export async function getUserById(userId: string) {
+    return prisma.user.findUnique({
+        where: { id: userId },
+        include: { profile: true },
+    })
+}
+
+export async function updateUser(userId: string, data: { firstName?: string; lastName?: string }) {
+    return prisma.user.update({
+        where: { id: userId },
+        data: {
+            profile: {
+                update: data,
+            },
+        },
+        include: { profile: true },
+    })
+}
+
+export async function deleteUser(userId: string) {
+    return prisma.user.delete({
+        where: { id: userId },
+    })
+}
+
+export async function getAllUsers() {
+    return prisma.user.findMany({
+        include: { profile: true },
+    })
+}
+
+export async function getUserByEmail(email: string) {
+    return prisma.user.findUnique({
+        where: { email },
+        include: { profile: true },
+    })
+}
+
+export async function getUserByUsername(username: string) {
+    return prisma.user.findUnique({
+        where: { username },
+        include: { profile: true },
+    })
 }

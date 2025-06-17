@@ -4,8 +4,16 @@ import { LoaderFunction, json, ActionFunction } from '@remix-run/node'
 import { getUser } from '~/utils/auth.server'
 import { Nav } from '../components/nav'
 import { prisma } from '~/utils/prisma.server'
-import { FiThumbsUp } from 'react-icons/fi'
-import { getProfilePicture } from '~/utils/profile.server'
+import { FiEye, FiEyeOff } from 'react-icons/fi'
+
+const DEFAULT_PROFILE_PICTURE = 'https://api.dicebear.com/7.x/initials/svg?seed=';
+
+function getProfilePicture(profilePicture: string | null, username: string): string {
+  if (profilePicture) {
+    return profilePicture;
+  }
+  return `${DEFAULT_PROFILE_PICTURE}${encodeURIComponent(username)}`;
+}
 
 interface LoaderData {
   user: {
@@ -39,13 +47,15 @@ type Post = {
   id: string;
   title: string;
   content: string;
-  blobVideoURL: string | null;
+  createdAt: Date;
+  updatedAt: Date;
   author: {
     id: string;
     username: string;
-    profilePicture: string | null;
+    profile: {
+      profilePicture: string | null;
+    } | null;
   };
-  createdAt: string;
   visibilityVotes: number;
   userVoted: boolean;
   comments: number;
@@ -106,13 +116,13 @@ export const loader: LoaderFunction = async ({ request }) => {
       id: post.id,
       title: post.title,
       content: post.content,
-      blobVideoURL: post.blobVideoURL,
       author: {
         id: post.author.id,
         username: post.author.username,
         profilePicture: getProfilePicture(post.author.profile?.profilePicture || null, post.author.username)
       },
-      createdAt: post.createdAt.toISOString(),
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt,
       visibilityVotes: post.visibilityVotes,
       userVoted: user ? post.votes.length > 0 : false,
       comments: post._count.comments
@@ -168,8 +178,8 @@ export const action: ActionFunction = async ({ request }) => {
       try {
         // Use a transaction to ensure atomic operations
         const result = await prisma.$transaction(async (tx) => {
-          // Get current vote state
-          const existingVote = await tx.vote.findFirst({
+          // First, delete any existing vote for this user and post
+          await tx.vote.deleteMany({
             where: {
               userId: user.id,
               postId: postId as string,
@@ -178,36 +188,32 @@ export const action: ActionFunction = async ({ request }) => {
             }
           });
 
-          // Update vote record
           if (isVoting) {
-            if (!existingVote) {
+            // Create new vote with all required fields set
               await tx.vote.create({
                 data: {
                   userId: user.id,
                   postId: postId as string,
                   value: 1,
                   voteType: 'POST',
-                  isQualityVote: false
-                }
+                isQualityVote: false,
+                commentId: null,
+                answerId: null
+              }
               });
-            }
-          } else {
-            if (existingVote) {
-              await tx.vote.delete({
-                where: { id: existingVote.id }
-              });
-            }
           }
 
-          // Update post visibility votes
+          // Count visibility votes (only positive votes)
           const visibilityVotes = await tx.vote.count({
             where: {
               postId: postId as string,
               voteType: 'POST',
-              isQualityVote: false
+              isQualityVote: false,
+              value: 1
             }
           });
 
+          // Update post with new vote count
           const updatedPost = await tx.posts.update({
             where: { id: postId as string },
             data: {
@@ -290,14 +296,14 @@ export default function Community() {
     setVideoErrors(prev => ({ ...prev, [postId]: error }));
   };
 
-  const handleVote = async (postId: string, voteValue: boolean) => {
+  const handleVote = async (postId: string, voteValue: number) => {
     try {
       // Prevent multiple votes while processing
       if (isVoting[postId]) return;
       setIsVoting(prev => ({ ...prev, [postId]: true }));
 
       const formData = new FormData();
-      formData.append('isVoting', voteValue.toString());
+      formData.append('isVoting', voteValue === 1 ? 'true' : 'false');
 
       const response = await fetch(`/api/posts/${postId}/vote`, {
         method: 'POST',
@@ -324,7 +330,7 @@ export default function Community() {
               ? { 
                   ...post, 
                   visibilityVotes: data.votes,
-                  userVoted: data.voted
+                  userVoted: voteValue === 1
                 }
               : post
           )
@@ -399,13 +405,13 @@ export default function Community() {
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center space-x-3">
                       <img 
-                        src={post.author.profilePicture || '/default-avatar.png'} 
-                        alt={post.author.username}
-                        className="w-10 h-10 rounded-full border-2 border-violet-500/50"
+                        src={post.author.profile?.profilePicture || getProfilePicture(null, post.author.username)}
+                        alt={`${post.author.username}'s profile`}
+                        className="w-10 h-10 rounded-full object-cover"
                       />
                       <div>
                         <Link 
-                          to={`/${post.author.username}`}
+                          to="/profile"
                           className="text-violet-400 hover:text-violet-300 font-medium"
                         >
                           {post.author.username}
@@ -438,47 +444,31 @@ export default function Community() {
                     </p>
                   </Link>
 
-                  {post.blobVideoURL && (
-                    <div className="mt-4">
-                      <video 
-                        className="w-full h-full object-contain max-h-[200px] max-w-[300px] mx-auto"
-                        controls
-                        onError={(e) => handleVideoError(post.id, `Failed to load video: ${e.currentTarget.error?.message || 'Unknown error'}`)}
-                      >
-                        <source 
-                          src={`/api/videos/${encodeURIComponent(post.blobVideoURL)}`}
-                          type="video/mp4"
-                        />
-                        Your browser does not support the video tag.
-                      </video>
-                    </div>
-                  )}
-
                   <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-700">
                     {/* Bottom-left stats for small screens */}
                     <div className="flex items-center space-x-4">
                       <div className="flex md:hidden items-center space-x-2">
                         <span className="text-sm text-gray-400">
-                          {(typeof post.visibilityVotes === 'number' ? post.visibilityVotes : 0)} votes
+                          {(typeof post.visibilityVotes === 'number' ? post.visibilityVotes : 0)} visibility votes
                         </span>
                         <span className="text-sm text-gray-400">
                           {post.comments} comments
                         </span>
                       </div>
                       <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleVote(post.id, !post.userVoted);
-                        }}
-                        disabled={isVoting[post.id]}
-                        className={`flex items-center space-x-1 transition-colors ${
-                          post.userVoted 
-                            ? 'text-violet-400' 
-                            : 'text-gray-400 hover:text-violet-400'
-                        } ${isVoting[post.id] ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        onClick={() => handleVote(post.id, post.userVoted ? 0 : 1)}
+                        className={`p-2 rounded-full transition-colors ${
+                          post.userVoted
+                            ? 'bg-violet-500 text-white'
+                            : 'hover:bg-violet-500/20 text-gray-400'
+                        }`}
+                        title={post.userVoted ? "Remove visibility vote" : "Vote for visibility"}
                       >
-                        <FiThumbsUp className={`w-5 h-5 ${post.userVoted ? 'fill-current' : 'fill-none'}`} />
-                        <span>{post.visibilityVotes}</span>
+                        {post.userVoted ? (
+                          <FiEye className="w-5 h-5" />
+                        ) : (
+                          <FiEyeOff className="w-5 h-5" />
+                        )}
                       </button>
                     </div>
                     {user && user.id === post.author.id && (

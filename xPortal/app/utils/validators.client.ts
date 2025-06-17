@@ -1,4 +1,4 @@
-// app/utils/validators.server.ts
+// app/utils/validators.client.ts
 
 export const validateEmail = (email: string): string | undefined => {
     var validRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;

@@ -2,6 +2,8 @@ import { useState, useRef } from 'react';
 import { useSubmit } from '@remix-run/react';
 import { FiCamera } from 'react-icons/fi';
 
+const DEFAULT_PROFILE_PICTURE = 'https://api.dicebear.com/7.x/initials/svg?seed=';
+
 interface ProfilePictureUploadProps {
   currentPicture: string | null;
   username: string;
@@ -12,6 +14,13 @@ export function ProfilePictureUpload({ currentPicture, username }: ProfilePictur
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const submit = useSubmit();
+
+  const getProfilePicture = (profilePicture: string | null, username: string): string => {
+    if (profilePicture) {
+      return profilePicture;
+    }
+    return `${DEFAULT_PROFILE_PICTURE}${encodeURIComponent(username)}`;
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -57,7 +66,7 @@ export function ProfilePictureUpload({ currentPicture, username }: ProfilePictur
     <div className="relative group">
       <div className="relative w-32 h-32 rounded-full overflow-hidden">
         <img
-          src={preview || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(username)}`}
+          src={preview || getProfilePicture(null, username)}
           alt={`${username}'s profile`}
           className="w-full h-full object-cover"
         />

@@ -1,51 +1,86 @@
 // app/routes/profile.tsx
 import { Form, useLoaderData, Link } from "@remix-run/react"
-import { LoaderFunction, json } from '@remix-run/node'
+import { LoaderFunction, json, redirect } from '@remix-run/node'
 import { getUser } from '~/utils/auth.server'
 import { Nav } from '../components/nav'
 import { prisma } from '~/utils/prisma.server'
 import { requireUserId } from '~/utils/auth.server'
 import { ProfilePictureUpload } from '~/components/ProfilePictureUpload'
 import { getReputationLevel } from '~/utils/reputationLevel'
+import { LoaderFunctionArgs } from '@remix-run/node'
+import { AuthNotice } from '~/components/auth-notice'
+import { 
+    FaGithub, 
+    FaTwitter, 
+    FaLinkedin, 
+    FaInstagram, 
+    FaFacebook, 
+    FaYoutube, 
+    FaTiktok, 
+    FaDiscord, 
+    FaReddit, 
+    FaMedium, 
+    FaStackOverflow, 
+    FaDev 
+} from 'react-icons/fa'
 
-interface LoaderData {
-  user: {
-    id: string;
-    username: string;
-    email: string;
-    createdAt: Date;
-    reputationPoints: number;
-    profile: {
-      bio: string | null;
-      location: string | null;
-      website: string | null;
-      avatarUrl: string | null;
-      github: string | null;
-      twitter: string | null;
-      linkedin: string | null;
-      instagram: string | null;
-    } | null;
-    posts: {
-      id: string;
-      title: string;
-      content: string;
-      createdAt: Date;
-    }[];
-    reputationHistory: {
-      id: string;
-      points: number;
-      action: string;
-      description: string;
-      createdAt: Date;
-    }[];
-  };
+const DEFAULT_PROFILE_PICTURE = 'https://api.dicebear.com/7.x/initials/svg?seed=';
+
+function truncateContent(content: string, maxLength: number = 200): string {
+    if (content.length <= maxLength) return content;
+    return content.slice(0, maxLength) + '...';
 }
 
-export const loader: LoaderFunction = async ({ request }) => {
+function getProfilePicture(profilePicture: string | null, username: string): string {
+    if (profilePicture) {
+        return profilePicture;
+    }
+    return `${DEFAULT_PROFILE_PICTURE}${encodeURIComponent(username)}`;
+}
+
+interface UserData {
+    id: string;
+    email: string;
+    username: string;
+    reputationPoints: number;
+    createdAt: Date;
+    profile?: {
+        firstName: string | null;
+        lastName: string | null;
+        profilePicture: string | null;
+        bio: string | null;
+        location: string | null;
+        website: string | null;
+        github: string | null;
+        twitter: string | null;
+        linkedin: string | null;
+        instagram: string | null;
+        facebook: string | null;
+        youtube: string | null;
+        tiktok: string | null;
+        discord: string | null;
+        reddit: string | null;
+        medium: string | null;
+        stackoverflow: string | null;
+        devto: string | null;
+    };
+    posts: Array<{
+        id: string;
+        title: string;
+        content: string;
+        createdAt: Date;
+    }>;
+    reputationHistory: Array<{
+        id: string;
+        points: number;
+        reason: string;
+        createdAt: Date;
+    }>;
+}
+
+export const loader = async ({ request }: LoaderFunctionArgs) => {
     try {
         const userId = await requireUserId(request);
-        
-        // Get all data in a single query
         const userData = await prisma.user.findUnique({
             where: { id: userId },
             include: { 
@@ -70,35 +105,48 @@ export const loader: LoaderFunction = async ({ request }) => {
             throw new Response("User not found", { status: 404 });
         }
 
-        return json({ user: userData });
+        return json({ user: userData, isAuthenticated: true });
     } catch (error) {
-        console.error('Error in profile loader:', error);
+        if (error instanceof Response) {
+            if (error.status === 401) {
+                return json({ isAuthenticated: false });
+            }
+            throw error;
+        }
         throw new Response("Internal Server Error", { status: 500 });
     }
 };
 
-const SocialLinks = ({ profile }: { profile: NonNullable<LoaderData['user']['profile']> }) => {
-    const links = [
-        { icon: 'github', url: profile.github, label: 'GitHub' },
-        { icon: 'twitter', url: profile.twitter, label: 'Twitter' },
-        { icon: 'linkedin', url: profile.linkedin, label: 'LinkedIn' },
-        { icon: 'instagram', url: profile.instagram, label: 'Instagram' }
+const SocialMediaIcons = ({ profile }: { profile: NonNullable<UserData['profile']> }) => {
+    const socialLinks = [
+        { icon: FaGithub, url: profile.github, label: 'GitHub', color: 'hover:text-[#333]' },
+        { icon: FaTwitter, url: profile.twitter, label: 'Twitter', color: 'hover:text-[#1DA1F2]' },
+        { icon: FaLinkedin, url: profile.linkedin, label: 'LinkedIn', color: 'hover:text-[#0077B5]' },
+        { icon: FaInstagram, url: profile.instagram, label: 'Instagram', color: 'hover:text-[#E4405F]' },
+        { icon: FaFacebook, url: profile.facebook, label: 'Facebook', color: 'hover:text-[#1877F2]' },
+        { icon: FaYoutube, url: profile.youtube, label: 'YouTube', color: 'hover:text-[#FF0000]' },
+        { icon: FaTiktok, url: profile.tiktok, label: 'TikTok', color: 'hover:text-[#000000]' },
+        { icon: FaDiscord, url: profile.discord, label: 'Discord', color: 'hover:text-[#5865F2]' },
+        { icon: FaReddit, url: profile.reddit, label: 'Reddit', color: 'hover:text-[#FF4500]' },
+        { icon: FaMedium, url: profile.medium, label: 'Medium', color: 'hover:text-[#000000]' },
+        { icon: FaStackOverflow, url: profile.stackoverflow, label: 'Stack Overflow', color: 'hover:text-[#F48024]' },
+        { icon: FaDev, url: profile.devto, label: 'Dev.to', color: 'hover:text-[#0A0A0A]' }
     ].filter(link => link.url);
 
-    if (links.length === 0) return null;
+    if (socialLinks.length === 0) return null;
 
     return (
-        <div className="flex gap-4 mt-4">
-            {links.map(link => (
+        <div className="flex flex-wrap gap-4">
+            {socialLinks.map(({ icon: Icon, url, label, color }) => (
                 <a
-                    key={link.icon}
-                    href={link.url!}
+                    key={label}
+                    href={url!}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-white transition-colors"
-                    title={link.label}
+                    className={`text-gray-400 ${color} transition-colors p-2 rounded-lg hover:bg-white/10`}
+                    title={label}
                 >
-                    <i className={`fab fa-${link.icon} text-xl`}></i>
+                    <Icon className="w-6 h-6" />
                 </a>
             ))}
         </div>
@@ -106,7 +154,24 @@ const SocialLinks = ({ profile }: { profile: NonNullable<LoaderData['user']['pro
 };
 
 export default function Profile() {
-    const { user } = useLoaderData<LoaderData>();
+    const { user, isAuthenticated } = useLoaderData<{ user: UserData; isAuthenticated?: boolean }>();
+
+    if (!isAuthenticated) {
+        return <AuthNotice />;
+    }
+
+    if (!user) {
+        return (
+            <div className="h-screen w-full bg-neutral-900 flex flex-row">
+                <Nav />
+                <div className='flex flex-col justify-center items-center w-full h-full'>
+                    <h1 className="text-white text-2xl">User not found</h1>
+                    <Link to="/community" className="mt-4 text-indigo-400 hover:text-indigo-300">Go to Community</Link>
+                </div>
+            </div>
+        );
+    }
+
     const reputationLevel = getReputationLevel(user.reputationPoints || 0);
     const recentActivities = user.reputationHistory.slice(0, 5);
 
@@ -131,7 +196,7 @@ export default function Profile() {
                     <div className="bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
                         <div className="flex items-start space-x-6">
                             <ProfilePictureUpload 
-                                currentPicture={user.profile?.avatarUrl || null}
+                                currentPicture={user.profile?.profilePicture || null}
                                 username={user.username}
                             />
                             <div className="flex-1">
@@ -174,14 +239,17 @@ export default function Profile() {
                                         ) : 'No website provided'}
                                     </p>
                                 </div>
+                                <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
+                                    <label className="block text-sm font-medium text-violet-300">Social Media</label>
+                                    <div className="mt-2">
+                                        {user.profile ? (
+                                            <SocialMediaIcons profile={user.profile} />
+                                        ) : (
+                                            <p className="text-sm text-gray-300">No social media links provided</p>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-
-                        <div className="mt-8">
-                            <h2 className="text-lg font-semibold text-violet-300 mb-4">Social Links</h2>
-                            {user.profile && (
-                                <SocialLinks profile={user.profile} />
-                            )}
                         </div>
 
                         <div className="mt-8">
@@ -190,8 +258,7 @@ export default function Profile() {
                                 {recentActivities.map((history) => (
                                     <div key={history.id} className="flex items-center justify-between p-4 bg-neutral-700/50 rounded-lg border border-violet-500/30">
                                         <div>
-                                            <p className="text-sm font-medium text-violet-300">{history.action}</p>
-                                            <p className="text-sm text-gray-300">{history.description}</p>
+                                            <p className="text-sm font-medium text-violet-300">{history.reason}</p>
                                         </div>
                                         <div className="flex items-center">
                                             <span className={`text-sm font-medium ${history.points > 0 ? 'text-green-400' : 'text-red-400'}`}>
@@ -218,11 +285,18 @@ export default function Profile() {
                             <div className="space-y-4">
                                 {user.posts.map((post) => (
                                     <div key={post.id} className="p-4 bg-neutral-700/50 rounded-lg border border-violet-500/30">
-                                        <h3 className="text-lg font-medium text-violet-300">{post.title}</h3>
-                                        <p className="mt-1 text-sm text-gray-300">{post.content}</p>
-                                        <p className="mt-2 text-sm text-gray-400">
-                                            Posted on {new Date(post.createdAt).toLocaleDateString()}
-                                        </p>
+                                        <Link to={`/posts/${post.id}`} className="block hover:bg-neutral-600/50 rounded-lg p-2 -m-2 transition-colors">
+                                            <h3 className="text-lg font-medium text-violet-300">{post.title}</h3>
+                                            <p className="mt-1 text-sm text-gray-300">{truncateContent(post.content)}</p>
+                                            <div className="mt-2 flex items-center justify-between">
+                                                <p className="text-sm text-gray-400">
+                                                    Posted on {new Date(post.createdAt).toLocaleDateString()}
+                                                </p>
+                                                <span className="text-sm text-violet-400 hover:text-violet-300 transition-colors">
+                                                    Read more →
+                                                </span>
+                                            </div>
+                                        </Link>
                                     </div>
                                 ))}
                             </div>

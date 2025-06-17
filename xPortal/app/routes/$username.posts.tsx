@@ -5,7 +5,7 @@ import { LoaderFunction, ActionFunction, json } from '@remix-run/node'
 import { getUser } from '~/utils/auth.server'
 import { getUserPosts, deletePost } from '~/utils/user.server'
 import { Nav } from '../components/nav'
-import { FiTrash2, FiEdit2 } from 'react-icons/fi'
+import { FiTrash2, FiEdit2, FiThumbsUp, FiMessageSquare } from 'react-icons/fi'
 import { prisma } from '~/utils/prisma.server'
 import { getProfilePicture } from '~/utils/profile.server'
 
@@ -13,23 +13,23 @@ type Post = {
     id: string;
     title: string;
     content: string;
-    blobVideoURL: string | null;
-    createdAt: string;
-    votes: number;
+    createdAt: Date;
+    updatedAt: Date;
     author: {
         id: string;
         username: string;
-        profilePicture: string | null;
+        profile: {
+            profilePicture: string | null;
+        } | null;
     };
-    comments: Array<{
-        id: string;
-        content: string;
-        author: {
-            id: string;
-            username: string;
-        };
-        createdAt: string;
-    }>;
+    upvotes: number;
+    downvotes: number;
+    visibilityVotes: number;
+    qualityUpvotes: number;
+    qualityDownvotes: number;
+    userVote: number;
+    userQualityVote: number;
+    comments: number;
 };
 
 interface LoaderData {
@@ -184,35 +184,45 @@ export default function UserPosts() {
         return currentUser?.id === post.author.id;
     };
 
-    const renderVideo = (post: Post) => {
-        if (!post.blobVideoURL) return null;
-
-        return (
-            <div className="relative w-full aspect-video mb-4 bg-black rounded-lg overflow-hidden max-w-[600px] max-h-[400px] mx-auto">
-                {videoErrors[post.id] ? (
-                    <div className="absolute inset-0 flex items-center justify-center bg-red-900/50 text-white p-4 text-center">
-                        <div>
-                            <p className="font-bold mb-2">Video Error</p>
-                            <p className="text-sm">{videoErrors[post.id]}</p>
-                            <p className="text-xs mt-2">Filename: {post.blobVideoURL}</p>
-                        </div>
+    const renderPost = (post: Post) => (
+        <div key={post.id} className="bg-neutral-800 rounded-lg p-6 mb-6">
+            <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                    <img
+                        src={post.author.profile?.profilePicture || getProfilePicture(null, post.author.username)}
+                        alt={`${post.author.username}'s profile`}
+                        className="w-10 h-10 rounded-full object-cover"
+                    />
+                    <div>
+                        <Link to="/profile" className="text-white hover:text-violet-400">
+                            {post.author.username}
+                        </Link>
+                        <p className="text-sm text-gray-400">
+                            {new Date(post.createdAt).toLocaleDateString()}
+                        </p>
                     </div>
-                ) : (
-                    <video 
-                        className="w-full h-full object-contain max-h-[200px] max-w-[300px] mx-auto"
-                        controls
-                        onError={(e) => handleVideoError(post.id, `Failed to load video: ${e.currentTarget.error?.message || 'Unknown error'}`)}
-                    >
-                        <source 
-                            src={`/api/videos/${encodeURIComponent(post.blobVideoURL)}`}
-                            type="video/mp4"
-                        />
-                        Your browser does not support the video tag.
-                    </video>
-                )}
+                </div>
             </div>
-        );
-    };
+
+            <Link to={`/posts/${post.id}`} className="block">
+                <h2 className="text-xl font-bold text-white mb-2">{post.title}</h2>
+                <p className="text-gray-300 mb-4">{post.content}</p>
+            </Link>
+
+            <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-700">
+                <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2">
+                        <FiThumbsUp className="w-5 h-5 text-gray-400" />
+                        <span className="text-gray-400">{post.upvotes}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <FiMessageSquare className="w-5 h-5 text-gray-400" />
+                        <span className="text-gray-400">{post.comments}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 
     return (
         <div className="h-screen w-full bg-neutral-900/95 flex flex-row">
@@ -239,83 +249,8 @@ export default function UserPosts() {
                     {/* Responsive grid for posts */}
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
                         {paginatedPosts.map((post: Post) => (
-                            <div 
-                                key={post.id} 
-                                className="bg-neutral-800/80 rounded-lg p-6 shadow-lg border border-violet-500/20 hover:border-violet-500/40 transition-all duration-300 w-full mx-auto flex flex-col"
-                                style={{ maxHeight: '600px' }}
-                            >
-                                <div className="flex items-start justify-between mb-4">
-                                    <div className="flex items-center space-x-3">
-                                        <img 
-                                            src={user.profilePicture} 
-                                            alt={`${user.username}'s profile`}
-                                            className="w-10 h-10 rounded-full object-cover"
-                                        />
-                                        <div>
-                                            <Link 
-                                                to={`/${user.username}`}
-                                                className="text-violet-400 hover:text-violet-300 font-medium"
-                                            >
-                                                {user.username}
-                                            </Link>
-                                            <p className="text-sm text-gray-400">
-                                                {new Date(post.createdAt).toLocaleDateString()}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    {/* Top-right stats for md+ screens */}
-                                    <div className="hidden md:flex items-center space-x-2">
-                                        <span className="text-sm text-gray-400">
-                                            {(typeof post.votes === 'number' ? post.votes : 0)} votes
-                                        </span>
-                                        <span className="text-sm text-gray-400">
-                                            {post.comments.length} comments
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <Link 
-                                    to={`/posts/${post.id}`}
-                                    className="block group flex-1"
-                                >
-                                    {/* Title and content with more vertical space */}
-                                    <div className="min-h-[90px]">
-                                        <h2 className="text-xl font-semibold text-white mb-3 group-hover:text-violet-400 transition-colors">
-                                            {post.title.length > 30 ? post.title.substring(0, 30) + '...' : post.title}
-                                        </h2>
-                                        <p className="text-gray-300 mb-4 overflow-hidden truncate max-w-full w-full break-words">
-                                            {post.content.length > 100 ? post.content.substring(0, 100) + '...' : post.content}
-                                        </p>
-                                    </div>
-                                </Link>
-
-                                {/* Add margin above the video */}
-                                <div className="mt-4">
-                                    {renderVideo(post)}
-                                </div>
-
-                                <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-700">
-                                    {/* Bottom-left stats for small screens */}
-                                    <div className="flex items-center space-x-4">
-                                        <div className="flex md:hidden items-center space-x-2">
-                                            <span className="text-sm text-gray-400">
-                                                {(typeof post.votes === 'number' ? post.votes : 0)} votes
-                                            </span>
-                                            <span className="text-sm text-gray-400">
-                                                {post.comments.length} comments
-                                            </span>
-                                        </div>
-                                        {/* Removed Vote and Comment buttons */}
-                                    </div>
-                                    <button
-                                        onClick={() => handleDelete(post.id)}
-                                        className="text-red-400 hover:text-red-300 transition-colors"
-                                    >
-                                        Delete
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
+                            renderPost(post))
+                        )}
                     </div>
 
                     {/* Pagination controls */}

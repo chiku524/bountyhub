@@ -28,23 +28,35 @@ export const loader: LoaderFunction = async ({ request, params }) => {
         userId: user.id,
         answerId: answerId,
         voteType: 'ANSWER',
-        isQualityVote: false
+        isQualityVote: true
       }
     });
 
     // Get total votes for the answer
-    const totalVotes = await prisma.vote.count({
-      where: {
-        answerId: answerId,
-        voteType: 'ANSWER',
-        isQualityVote: false
-      }
-    });
+    const [upvotes, downvotes] = await Promise.all([
+      prisma.vote.count({
+        where: {
+          answerId: answerId,
+          voteType: 'ANSWER',
+          isQualityVote: true,
+          value: 1
+        }
+      }),
+      prisma.vote.count({
+        where: {
+          answerId: answerId,
+          voteType: 'ANSWER',
+          isQualityVote: true,
+          value: -1
+        }
+      })
+    ]);
 
     return json({
       success: true,
-      voted: !!vote,
-      votes: totalVotes
+      userVote: vote?.value || 0,
+      upvotes,
+      downvotes
     }, {
       headers: { 'Content-Type': 'application/json' }
     });
@@ -80,19 +92,14 @@ export const action: ActionFunction = async ({ request, params }) => {
 
     const formData = await request.formData();
     const value = parseInt(formData.get('value') as string);
+    
     if (![-1, 0, 1].includes(value)) {
-      return json({ error: 'Invalid vote value' }, { 
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return json({ error: 'Invalid vote value' }, { status: 400 });
     }
 
     // First, check if the answer exists
     const answer = await prisma.answer.findUnique({
-      where: { id: answerId },
-      include: {
-        author: true
-      }
+      where: { id: answerId }
     });
 
     if (!answer) {
@@ -102,134 +109,87 @@ export const action: ActionFunction = async ({ request, params }) => {
       });
     }
 
-    // Find existing vote
-    const existingVote = await prisma.vote.findFirst({
-      where: {
-        userId: user.id,
-        answerId: answerId,
-        voteType: 'ANSWER',
-        isQualityVote: false
-      }
-    });
-
-    let updatedAnswer;
-    
     try {
-      if (value === 0) {
-        // Remove vote
-        if (existingVote) {
-          await prisma.vote.delete({
-            where: { id: existingVote.id }
-          });
+      // Use a transaction to ensure atomic operations
+      const result = await prisma.$transaction(async (tx) => {
+        // First, delete any existing vote for this user and answer
+        await tx.vote.deleteMany({
+          where: {
+            userId: user.id,
+            answerId: answerId,
+            voteType: 'ANSWER',
+            isQualityVote: true
+          }
+        });
 
-          // Update answer vote count
-          updatedAnswer = await prisma.answer.update({
-            where: { id: answerId },
-            data: {
-              upvotes: {
-                decrement: existingVote.value === 1 ? 1 : 0
-              },
-              downvotes: {
-                decrement: existingVote.value === -1 ? 1 : 0
-              }
-            }
-          });
-        } else {
-          // No vote to remove, return current state
-          updatedAnswer = await prisma.answer.findUnique({
-            where: { id: answerId }
-          });
-        }
-      } else {
-        if (existingVote) {
-          // Update existing vote
-          await prisma.vote.update({
-            where: { id: existingVote.id },
-            data: { value }
-          });
-
-          // Update answer vote count
-          updatedAnswer = await prisma.answer.update({
-            where: { id: answerId },
-            data: {
-              upvotes: {
-                increment: value === 1 ? 1 : -1
-              },
-              downvotes: {
-                increment: value === -1 ? 1 : -1
-              }
-            }
-          });
-        } else {
+        if (value !== 0) {
           // Create new vote
-          await prisma.vote.create({
+          await tx.vote.create({
             data: {
               userId: user.id,
               answerId: answerId,
               value,
               voteType: 'ANSWER',
-              isQualityVote: false,
+              isQualityVote: true,
               postId: null,
               commentId: null
             }
           });
+        }
 
-          // Update answer vote count
-          updatedAnswer = await prisma.answer.update({
-            where: { id: answerId },
-            data: {
-              upvotes: {
-                increment: value === 1 ? 1 : 0
-              },
-              downvotes: {
-                increment: value === -1 ? 1 : 0
-              }
+        // Count votes
+        const [upvotes, downvotes] = await Promise.all([
+          tx.vote.count({
+            where: {
+              answerId: answerId,
+              voteType: 'ANSWER',
+              isQualityVote: true,
+              value: 1
             }
-          });
-        }
+          }),
+          tx.vote.count({
+            where: {
+              answerId: answerId,
+              voteType: 'ANSWER',
+              isQualityVote: true,
+              value: -1
+            }
+          })
+        ]);
 
-        // Award reputation points for upvoting/downvoting
-        if (value === 1) {
-          await addReputationPoints(
-            answer.authorId,
-            REPUTATION_POINTS.ANSWER_UPVOTED,
-            'ANSWER_UPVOTED',
-            answerId
-          );
-        } else if (value === -1) {
-          await addReputationPoints(
-            answer.authorId,
-            REPUTATION_POINTS.ANSWER_DOWNVOTED,
-            'ANSWER_DOWNVOTED',
-            answerId
-          );
-        }
-      }
+        // Update answer vote counts
+        const updatedAnswer = await tx.answer.update({
+          where: { id: answerId },
+          data: {
+            upvotes,
+            downvotes
+          }
+        });
 
-      if (!updatedAnswer) {
-        throw new Error('Failed to update answer');
-      }
+        return {
+          answer: updatedAnswer,
+          userVote: value
+        };
+      });
 
       return json({ 
         success: true,
-        upvotes: updatedAnswer.upvotes,
-        downvotes: updatedAnswer.downvotes,
-        userVote: value
-      }, {
-        headers: { 'Content-Type': 'application/json' }
+        upvotes: result.answer.upvotes,
+        downvotes: result.answer.downvotes,
+        userVote: result.userVote
       });
-    } catch (dbError) {
-      console.error('Database error:', dbError);
+    } catch (error) {
+      console.error('Error in vote action:', error);
       return json({ 
-        error: 'Failed to update vote',
-        details: dbError instanceof Error ? dbError.message : 'Database error'
+        error: 'Failed to process vote',
+        details: error instanceof Error ? error.message : 'Unknown error'
       }, { 
         status: 500,
         headers: { 'Content-Type': 'application/json' }
       });
     }
   } catch (error) {
-    console.error('Error in action:', error);
+    console.error('Error in vote action:', error);
     return json({ 
       error: 'Failed to process vote',
       details: error instanceof Error ? error.message : 'Unknown error'

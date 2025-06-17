@@ -3,50 +3,48 @@ import { prisma } from './prisma.server';
 // Reputation point values for different actions
 export const REPUTATION_POINTS = {
   POST_CREATED: 10,
-  POST_UPVOTED: 5,
-  POST_DOWNVOTED: -2,
+  POST_UPVOTED: 2,
+  POST_DOWNVOTED: -1,
   ANSWER_CREATED: 5,
   ANSWER_ACCEPTED: 15,
-  ANSWER_UPVOTED: 10,
-  ANSWER_DOWNVOTED: -2,
-  COMMENT_CREATED: 2,
-  COMMENT_UPVOTED: 2,
+  ANSWER_UPVOTED: 2,
+  ANSWER_DOWNVOTED: -1,
+  COMMENT_CREATED: 1,
+  COMMENT_UPVOTED: 1,
   COMMENT_DOWNVOTED: -1,
-  QUALITY_UPVOTE_RECEIVED: 3,
-  QUALITY_DOWNVOTE_RECEIVED: -1,
-};
+  QUALITY_UPVOTE_RECEIVED: 5,
+  QUALITY_DOWNVOTE_RECEIVED: -2,
+  CREATE_POST: 10
+} as const;
 
 export async function addReputationPoints(
   userId: string,
   points: number,
-  action: string,
+  action?: string,
   referenceId?: string
 ) {
   try {
-    // Create reputation history entry
-    await prisma.reputationHistory.create({
-      data: {
-        userId,
-        points,
-        action,
-        referenceId,
-      },
-    });
-
-    // Update user's total reputation points
     await prisma.user.update({
       where: { id: userId },
       data: {
         reputationPoints: {
-          increment: points,
-        },
-      },
+          increment: points
+        }
+      }
     });
 
-    return true;
+    if (action && referenceId) {
+      await prisma.reputationHistory.create({
+        data: {
+          userId,
+          points,
+          action,
+          referenceId
+        }
+      });
+    }
   } catch (error) {
     console.error('Error adding reputation points:', error);
-    return false;
   }
 }
 

@@ -174,12 +174,13 @@ export const action: ActionFunction = async ({ request, params }) => {
           await prisma.vote.create({
             data: {
               userId: user.id,
-              value,
-              voteType,
-              ...(targetType === 'post' ? { postId: targetId } :
-                  targetType === 'comment' ? { commentId: targetId } :
-                  { answerId: targetId }),
-            },
+              postId: targetId,
+              value: 1,
+              voteType: 'POST',
+              isQualityVote: false,
+              commentId: null,
+              answerId: null
+            }
           });
         }
 
@@ -202,7 +203,10 @@ export const action: ActionFunction = async ({ request, params }) => {
         if (targetType === 'post') {
           await prisma.posts.update({
             where: { id: targetId },
-            data: { upvotes, downvotes },
+            data: { 
+              qualityUpvotes: upvotes,
+              qualityDownvotes: downvotes
+            },
           });
         } else if (targetType === 'comment') {
           await prisma.comment.update({

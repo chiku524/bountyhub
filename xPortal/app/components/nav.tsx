@@ -1,120 +1,97 @@
 import { useEffect, useState } from 'react'
 import { Link, Form } from "@remix-run/react"
-import { gsap } from 'gsap'
+import gsap from 'gsap'
+
+interface BubbleConfig {
+  size: number;
+  opacity: number;
+  duration: number;
+  className: string;
+}
 
 export function Nav() {
-    const bubArray = Array.from({ length: 25 }, (_, i) => i);
-    const bubArray1 = Array.from({ length: 25 }, (_, i) => i);
-    const bubArray2 = Array.from({ length: 25 }, (_, i) => i);
-    const [randomValues, setRandomValues] = useState<number[] | null>(null);
+    const bubbleConfigs: BubbleConfig[] = [
+        { size: 4, opacity: 0.6, duration: 3.5, className: 'bubble' },
+        { size: 3, opacity: 0.6, duration: 4, className: 'bubble-1' },
+        { size: 2, opacity: 0.6, duration: 4.5, className: 'bubble-2' }
+    ];
+    
+    const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
-        // Only run on client
-        setRandomValues(Array.from({ length: 25 }, () => Math.random() * 100));
-        // Dynamically import seedrandom
-        import('seedrandom').then(({ default: seedrandom }) => {
-            const rng = seedrandom('fixed-seed');
-            const nav = document.querySelector(".nav-container");
-            let navWidth = nav?.clientWidth ?? 375;
-            let navHeight = nav?.clientHeight ?? 500;
-
-            // Set initial positions for all bubbles
-            bubArray.forEach((el: any) => {
-                let randomX = (gsap.utils.random as any)(0, navWidth, false, rng);
-                let randomY = (gsap.utils.random as any)(-navHeight, 0, false, rng);
-                gsap.set(`.bubble-${el}`, {
-                    x: randomX,
-                    y: randomY,
-                });
-            });
-
-            bubArray1.forEach((el: any) => {
-                let randomX = (gsap.utils.random as any)(0, navWidth, false, rng);
-                let randomY = (gsap.utils.random as any)(-navHeight, 0, false, rng);
-                gsap.set(`.bubble-1-${el}`, {
-                    x: randomX,
-                    y: randomY,
-                });
-            });
-
-            bubArray2.forEach((el: any) => {
-                let randomX = (gsap.utils.random as any)(0, navWidth, false, rng);
-                let randomY = (gsap.utils.random as any)(-navHeight, 0, false, rng);
-                gsap.set(`.bubble-2-${el}`, {
-                    x: randomX,
-                    y: randomY,
-                });
-            });
-
-            // Create animations for each bubble
-            bubArray.forEach((el: any) => {
-                gsap.to(`.bubble-${el}`, {
-                    y: navHeight,
-                    repeat: -1,
-                    duration: 3.5 + (rng() * 2),
-                    delay: rng() * 2,
-                    ease: "none"
-                });
-            });
-
-            bubArray1.forEach((el: any) => {
-                gsap.to(`.bubble-1-${el}`, {
-                    y: navHeight,
-                    repeat: -1,
-                    duration: 4 + (rng() * 2),
-                    delay: rng() * 2,
-                    ease: "none"
-                });
-            });
-
-            bubArray2.forEach((el: any) => {
-                gsap.to(`.bubble-2-${el}`, {
-                    y: navHeight,
-                    repeat: -1,
-                    duration: 4.5 + (rng() * 2),
-                    delay: rng() * 2,
-                    ease: "none"
-                });
-            });
-        });
+        setIsClient(true);
     }, []);
 
-    if (!randomValues) return null; // Prevent hydration mismatch
+    useEffect(() => {
+        if (!isClient) return;
+
+        const nav = document.querySelector(".nav-container");
+        if (!nav) return;
+
+        const navWidth = nav.clientWidth;
+        const navHeight = nav.clientHeight;
+
+        // Create and append bubbles
+        const container = document.querySelector('.bubble-container');
+        if (!container) return;
+
+        // Clear existing bubbles
+        container.innerHTML = '';
+
+        // Function to create a single bubble
+        const createBubble = (config: BubbleConfig, index: number) => {
+            const bubble = document.createElement('div');
+            bubble.className = `${config.className}-${index} absolute rounded-full bg-indigo-500/60 shadow-[0_0_8px_rgba(99,102,241,0.6),0_0_15px_rgba(99,102,241,0.4)]`;
+            bubble.style.width = `${config.size}px`;
+            bubble.style.height = `${config.size}px`;
+            bubble.style.opacity = config.opacity.toString();
+            bubble.style.left = `${Math.random() * 100}%`;
+            bubble.style.top = '0%';
+            container.appendChild(bubble);
+
+            // Animate bubble
+            gsap.to(bubble, {
+                y: navHeight,
+                duration: config.duration + (Math.random() * 2),
+                ease: "none",
+                onUpdate: function() {
+                    // Add pulsing glow effect
+                    const progress = this.progress();
+                    const glowIntensity = 0.4 + Math.sin(progress * Math.PI * 2) * 0.3;
+                    bubble.style.boxShadow = `0 0 ${8 + glowIntensity * 8}px rgba(99,102,241,${0.4 + glowIntensity * 0.3}), 0 0 ${15 + glowIntensity * 15}px rgba(99,102,241,${0.3 + glowIntensity * 0.2})`;
+                },
+                onComplete: function() {
+                    // Remove the bubble when it reaches the bottom
+                    bubble.remove();
+                    // Create a new bubble at the top
+                    createBubble(config, index);
+                }
+            });
+        };
+
+        // Create initial set of bubbles
+        bubbleConfigs.forEach((config) => {
+            for (let i = 0; i < 15; i++) {
+                createBubble(config, i);
+            }
+        });
+
+        // Cleanup
+        return () => {
+            gsap.killTweensOf(".bubble, .bubble-1, .bubble-2");
+        };
+    }, [isClient]);
+
+    if (!isClient) return null;
 
     return (
         <div className='group fixed left-0 top-0 h-screen w-20 bg-neutral-800 flex flex-col items-center transition-all duration-300 ease-in-out hover:w-64 overflow-hidden z-[9999] nav-container'>
             {/* Bubble Animation Container */}
-            <div className="absolute inset-0 overflow-hidden">
-                {bubArray.map((el, index) => (
-                    <div
-                        key={el}
-                        className={`bubble-${el} absolute w-2 h-2 rounded-full bg-indigo-500/20`}
-                        style={{
-                            left: `${randomValues[index] ?? 0}%`,
-                        }}
-                    />
-                ))}
-                {bubArray1.map((el, index) => (
-                    <div
-                        key={`1-${el}`}
-                        className={`bubble-1-${el} absolute w-1.5 h-1.5 rounded-full bg-indigo-400/20`}
-                        style={{
-                            left: `${randomValues[index] ?? 0}%`,
-                        }}
-                    />
-                ))}
-                {bubArray2.map((el, index) => (
-                    <div
-                        key={`2-${el}`}
-                        className={`bubble-2-${el} absolute w-1 h-1 rounded-full bg-indigo-300/20`}
-                        style={{
-                            left: `${randomValues[index] ?? 0}%`,
-                        }}
-                    />
-                ))}
+            <div className="absolute inset-0 overflow-hidden bubble-container pointer-events-none">
+                {/* Bubbles will be added here by JavaScript */}
             </div>
 
-            <div className='w-full py-5 flex flex-col justify-center items-center space-y-2 relative z-10'>
+            <div className="relative z-10 flex flex-col items-center w-full py-5">
                 <div className="relative w-12 h-12 flex items-center justify-center">
                     <div className="absolute inset-0 bg-indigo-500/20 blur-sm transition-all duration-500 group-hover:bg-indigo-500/30"></div>
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-gray-300 transition-all duration-500 group-hover:text-indigo-300 group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -123,11 +100,11 @@ export function Nav() {
                         <line x1="12" y1="17" x2="12.01" y2="17" />
                     </svg>
                 </div>
-                <h1 className="text-gray-300 text-xs font-bold tracking-wider font-cursive transition-all duration-500 group-hover:text-indigo-300 group-hover:text-lg">portal.ask</h1>
+                <h1 className="text-gray-300 text-xs font-bold tracking-wider font-cursive transition-all duration-500 group-hover:text-indigo-300 group-hover:text-lg mt-2">portal.ask</h1>
             </div>
             <hr className='border-b border-gray-500 w-4/6 relative z-10'/>
 
-            <div className="flex-1 flex flex-col items-center justify-center space-y-2 w-full relative z-10">
+            <div className="relative z-10 flex flex-col items-center w-full flex-1 justify-center">
                 <Link to="/profile" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-white/5">
                     <div className="relative flex items-center gap-4 px-4">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-300 transition-all duration-300 group-hover:text-indigo-300 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -160,7 +137,7 @@ export function Nav() {
                 </Link>
             </div>
 
-            <div className="w-full relative z-10">
+            <div className="relative z-10 mt-auto w-full">
                 <hr className='border-b border-gray-500 w-4/6 mx-auto mb-4'/>
                 <Form method="post" action="/logout" className="w-full">
                     <button type="submit" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-white/5">
