@@ -75,7 +75,7 @@ export default function PostInteractions({
         }
       }
     } catch (error) {
-      console.error('Error voting:', error);
+      // Removed all console.error statements for cleaner production code.
     }
   };
 
@@ -85,7 +85,7 @@ export default function PostInteractions({
       setCurrentVisibilityVote(isVoting);
       setVisibilityVotes(prev => isVoting ? prev + 1 : prev - 1);
     } catch (error) {
-      console.error('Error voting:', error);
+      // Removed all console.error statements for cleaner production code.
     }
   };
 
@@ -98,7 +98,7 @@ export default function PostInteractions({
       await onComment(commentContent);
       setCommentContent('');
     } catch (error) {
-      console.error('Error posting comment:', error);
+      // Removed all console.error statements for cleaner production code.
     } finally {
       setIsSubmitting(false);
     }
@@ -113,7 +113,7 @@ export default function PostInteractions({
       await onAnswer(answerContent);
       setAnswerContent('');
     } catch (error) {
-      console.error('Error posting answer:', error);
+      // Removed all console.error statements for cleaner production code.
     } finally {
       setIsSubmitting(false);
     }

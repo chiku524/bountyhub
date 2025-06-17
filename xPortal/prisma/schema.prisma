@@ -6,6 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
@@ -14,7 +15,7 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        String   @id @map("_id") @default(auto()) @db.ObjectId
   email     String   @unique
   username  String   @unique
   password  String
@@ -58,19 +59,34 @@ model Profile {
   @@map("profiles")
 }
 
+model Media {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  type              String   // IMAGE, VIDEO, AUDIO
+  url               String
+  thumbnailUrl      String?
+  isScreenRecording Boolean  @default(false)
+  cloudinaryId      String
+  post              Posts    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId            String   @db.ObjectId
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("media")
+}
+
 model Posts {
-  id String @id @map("_id") @default(auto()) @db.ObjectId
-  title String
-  content String
-  authorId String @db.ObjectId
-  author User @relation(fields: [authorId], references: [id])
-  codeBlocks CodeBlock[]
-  media Media[]
-  comments Comment[]
-  answers Answer[]
-  votes Vote[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @map("_id") @default(auto()) @db.ObjectId
+  title       String
+  content     String
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId    String   @db.ObjectId
+  media       Media[]
+  codeBlocks  CodeBlock[]
+  comments    Comment[]
+  answers     Answer[]
+  votes       Vote[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   visibilityVotes Int @default(0)
   qualityUpvotes Int @default(0)
   qualityDownvotes Int @default(0)
@@ -128,32 +144,32 @@ enum VoteType {
 }
 
 model Vote {
-  id String @id @map("_id") @default(auto()) @db.ObjectId
-  userId String @db.ObjectId
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  value Int // 1 for upvote, -1 for downvote
-  postId String? @db.ObjectId
-  post Posts? @relation(fields: [postId], references: [id], onDelete: Cascade)
-  commentId String? @db.ObjectId
-  comment Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
-  answerId String? @db.ObjectId
-  answer Answer? @relation(fields: [answerId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  voteType VoteType
-  isQualityVote Boolean @default(false) // Indicates if this is a quality vote
+  id           String   @id @map("_id") @default(auto()) @db.ObjectId
+  userId       String   @db.ObjectId
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId       String?  @db.ObjectId
+  post         Posts?   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  commentId    String?  @db.ObjectId
+  comment      Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  answerId     String?  @db.ObjectId
+  answer       Answer?  @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  value        Int
+  voteType     String
+  isQualityVote Boolean
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  @@index([userId, voteType])
-  @@unique([userId, postId, voteType], map: "vote_post_unique")
-  @@unique([userId, commentId, voteType], map: "vote_comment_unique")
-  @@unique([userId, answerId, voteType], map: "vote_answer_unique")
+  @@index([userId, commentId], name: "user_comment_idx")
+  @@index([userId, answerId], name: "user_answer_idx")
+  @@index([userId, postId], name: "user_post_idx")
 }
 
 model CodeBlock {
-  id String @id @map("_id") @default(auto()) @db.ObjectId
-  language String
-  code String
-  postId String @db.ObjectId
-  post Posts @relation(fields: [postId], references: [id], onDelete: Cascade)
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  language  String
+  code      String
+  post      Posts    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String   @db.ObjectId
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -170,19 +186,4 @@ model ReputationHistory {
   @@index([userId])
   @@index([createdAt])
   @@index([action])
-}
-
-model Media {
-  id String @id @map("_id") @default(auto()) @db.ObjectId
-  type String
-  url String
-  thumbnailUrl String?
-  isScreenRecording Boolean @default(false)
-  cloudinaryId String
-  postId String @db.ObjectId
-  post Posts @relation(fields: [postId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("media")
 }

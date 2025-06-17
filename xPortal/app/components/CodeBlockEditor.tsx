@@ -54,7 +54,7 @@ export default function CodeBlockEditor({ codeBlocks, onCodeBlocksChange }: Code
       setCopiedIndex(index);
       setTimeout(() => setCopiedIndex(null), 2000);
     } catch (err) {
-      console.error('Failed to copy code:', err);
+      // Removed all console.error statements for cleaner production code.
     }
   };
 

@@ -12,11 +12,9 @@ export async function getMongoClient() {
     if (!client) {
       client = new MongoClient(uri);
       await client.connect();
-      console.log('Connected to MongoDB');
     }
     return client;
   } catch (error) {
-    console.error('MongoDB connection error:', error);
     throw new Error('Failed to connect to MongoDB');
   }
 }
@@ -25,6 +23,5 @@ export async function getMongoClient() {
 export async function closeMongoClient() {
   if (client) {
     await client.close();
-    console.log('Disconnected from MongoDB');
   }
 } 

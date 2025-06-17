@@ -55,7 +55,6 @@ export function ProfilePictureUpload({ currentPicture, username }: ProfilePictur
     try {
       submit(formData, { method: 'post', encType: 'multipart/form-data' });
     } catch (error) {
-      console.error('Upload error:', error);
       alert('Failed to upload profile picture');
     } finally {
       setIsUploading(false);

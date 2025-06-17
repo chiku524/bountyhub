@@ -96,7 +96,6 @@ export const action: ActionFunction = async ({ request }) => {
             const updatedUser = await editUser({ profile }, request);
             return json({ success: true, userData: updatedUser });
         } catch (error) {
-            console.error('Error updating profile:', error);
             return json({ error: 'Failed to update profile' }, { status: 400 });
         }
     }

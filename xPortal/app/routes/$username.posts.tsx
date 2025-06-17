@@ -129,7 +129,6 @@ export const action: ActionFunction = async ({ request }) => {
                 await deletePost(postId);
                 return json({ success: true });
             } catch (error) {
-                console.error('Delete post error:', error);
                 return json({ error: 'Failed to delete post' }, { status: 500 });
             }
         }
@@ -154,7 +153,6 @@ export default function UserPosts() {
     const paginatedPosts = user.posts.slice((page - 1) * POSTS_PER_PAGE, page * POSTS_PER_PAGE);
 
     const handleVideoError = (postId: string, error: string) => {
-        console.error(`Video error for post ${postId}:`, error);
         setVideoErrors(prev => ({ ...prev, [postId]: error }));
     };
 

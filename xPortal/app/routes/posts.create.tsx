@@ -1,6 +1,6 @@
 // app/routes/profile.tsx
 import { useEffect, useState } from 'react'
-import { Form, useLoaderData, Link, useActionData, redirect, useNavigate } from "@remix-run/react"
+import { Form, useLoaderData, Link, useActionData, redirect, useNavigate, useSubmit } from "@remix-run/react"
 import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from '@remix-run/node'
 import { requireUserId } from '~/utils/auth.server'
 import { prisma } from '~/utils/prisma.server'
@@ -52,38 +52,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
 
   try {
-    // Upload media to Cloudinary
-    const media = await Promise.all(
-      mediaData.map(async (item: { type: string; base64Data: string; thumbnailBase64Data?: string; isScreenRecording: boolean }) => {
-        const resourceType = item.type === 'VIDEO' ? 'video' : 'image';
-        
-        // Upload main media
-        const uploadResult = await uploadToCloudinary(item.base64Data, {
-          resourceType,
-          folder: 'portal/posts',
-        });
-
-        // Upload thumbnail if it exists
-        let thumbnailUrl;
-        if (item.thumbnailBase64Data) {
-          const thumbnailResult = await uploadToCloudinary(item.thumbnailBase64Data, {
-            resourceType: 'image',
-            folder: 'portal/posts/thumbnails',
-          });
-          thumbnailUrl = thumbnailResult.secure_url;
-        }
-
-        return {
-          type: item.type,
-          url: uploadResult.secure_url,
-          thumbnailUrl,
-          isScreenRecording: item.isScreenRecording,
-          cloudinaryId: uploadResult.public_id
-        };
-      })
-    );
-
-    // Create the post with media
+    // First create the post without media
     const post = await prisma.posts.create({
       data: {
         title,
@@ -94,26 +63,68 @@ export const action = async ({ request }: ActionFunctionArgs) => {
             language: block.language,
             code: block.code
           }))
-        },
-        media: {
-          create: media.map(item => ({
-            type: item.type,
-            url: item.url,
-            thumbnailUrl: item.thumbnailUrl,
-            isScreenRecording: item.isScreenRecording,
-            cloudinaryId: item.cloudinaryId
-          }))
         }
       }
     });
 
+    // If post creation is successful, upload media to Cloudinary
+    if (mediaData.length > 0) {
+      try {
+        const media = await Promise.all(
+          mediaData.map(async (item: { type: string; base64Data: string; thumbnailBase64Data?: string; isScreenRecording: boolean }) => {
+            const resourceType = item.type === 'VIDEO' ? 'video' : 'image';
+            
+            // Upload main media
+            const uploadResult = await uploadToCloudinary(item.base64Data, {
+              resourceType,
+              folder: 'portal/posts',
+            });
+
+            // Upload thumbnail if it exists
+            let thumbnailUrl: string | undefined;
+            if (item.thumbnailBase64Data) {
+              const thumbnailResult = await uploadToCloudinary(item.thumbnailBase64Data, {
+                resourceType: 'image',
+                folder: 'portal/posts/thumbnails',
+              });
+              thumbnailUrl = thumbnailResult.secure_url;
+            }
+
+            // Create media entries in the database
+            try {
+              const mediaEntry = await prisma.media.create({
+                data: {
+                  type: item.type,
+                  url: uploadResult.secure_url,
+                  thumbnailUrl,
+                  isScreenRecording: item.isScreenRecording,
+                  cloudinaryId: uploadResult.public_id,
+                  postId: post.id
+                }
+              });
+              return mediaEntry;
+            } catch (error) {
+              throw new Error('Failed to create media entry');
+            }
+          })
+        );
+      } catch (error) {
+        // If media upload fails, delete the post
+        await prisma.posts.delete({
+          where: { id: post.id }
+        });
+        throw new Error('Failed to upload media. Please try again.');
+      }
+    }
+
     // Add reputation points for creating a post
     await addReputationPoints(userId, REPUTATION_POINTS.CREATE_POST);
 
-    return json({ id: post.id });
+    return redirect(`/posts/${post.id}`);
   } catch (error) {
-    console.error('Error creating post:', error);
-    return json({ error: 'Failed to create post. Please try again.' });
+    return json({ 
+      error: error instanceof Error ? error.message : 'Failed to create post. Please try again.' 
+    });
   }
 };
 
@@ -121,6 +132,7 @@ export default function CreatePost() {
   const { user } = useLoaderData<LoaderData>();
   const actionData = useActionData<{ error?: string }>();
   const navigate = useNavigate();
+  const submit = useSubmit();
   const [codeBlocks, setCodeBlocks] = useState<CodeBlockForm[]>([]);
   const [media, setMedia] = useState<Array<{ type: string; url: string; thumbnailUrl?: string; isScreenRecording: boolean }>>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -158,38 +170,10 @@ export default function CreatePost() {
       formData.append('codeBlocks', JSON.stringify(codeBlocks));
       formData.append('media', JSON.stringify(mediaWithBase64));
 
-      const response = await fetch('/posts/create', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Accept': 'application/json',
-        },
-      });
-
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        const text = await response.text();
-        console.error('Server response:', text);
-        throw new Error('Server returned non-JSON response');
-      }
-
-      const data = await response.json();
-      
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      if (data.id) {
-        navigate(`/posts/${data.id}`);
-      } else {
-        throw new Error('No post ID returned from server');
-      }
+      // Use Remix's submit function
+      submit(formData, { method: 'post' });
     } catch (error) {
-      console.error('Error submitting form:', error);
-      // Show error to user
       const errorMessage = error instanceof Error ? error.message : 'Failed to create post';
-      // You might want to set this in state to display to the user
-      console.error('Error details:', errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -268,7 +252,9 @@ export default function CreatePost() {
             </div>
 
             {actionData?.error && (
-              <div className="text-red-500 text-sm">{actionData.error}</div>
+              <div className="bg-red-500/10 border border-red-500/30 text-red-500 px-4 py-2 rounded-lg">
+                {actionData.error}
+              </div>
             )}
 
             <div className="flex justify-end space-x-4">

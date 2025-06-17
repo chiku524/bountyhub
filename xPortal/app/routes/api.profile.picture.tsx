@@ -34,7 +34,6 @@ export const action: ActionFunction = async ({ request }) => {
       profilePicture: uploadResult.secure_url
     });
   } catch (error) {
-    console.error('Error uploading profile picture:', error);
     return json({ 
       error: 'Failed to upload profile picture',
       details: error instanceof Error ? error.message : 'Unknown error'

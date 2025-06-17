@@ -37,7 +37,6 @@ export async function uploadToCloudinary(base64Data: string, options: {
       resource_type: string;
     };
   } catch (error) {
-    console.error('Error uploading to Cloudinary:', error);
     throw new Error('Failed to upload media');
   }
 }
@@ -46,7 +45,6 @@ export async function deleteFromCloudinary(publicId: string) {
   try {
     await cloudinary.uploader.destroy(publicId);
   } catch (error) {
-    console.error('Error deleting from Cloudinary:', error);
     throw new Error('Failed to delete media');
   }
 } 

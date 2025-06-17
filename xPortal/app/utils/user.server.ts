@@ -62,7 +62,6 @@ export const editUser = async (inputData: { profile: Partial<Profile> }, request
                 devto: profile.devto || ''
             }
         });
-        console.log('Created new profile:', newProfile);
     } else {
         // Update existing profile
         const updatedProfile = await prisma.profile.update({
@@ -88,7 +87,6 @@ export const editUser = async (inputData: { profile: Partial<Profile> }, request
                 devto: profile.devto ?? existingProfile.devto
             }
         });
-        console.log('Updated profile:', updatedProfile);
     }
 
     // Return the updated user with profile
@@ -124,7 +122,6 @@ export const getUserPosts = async (username: string) => {
 
     return user.posts;
   } catch (error) {
-    console.error('Error in getUserPosts:', error);
     return [];
   }
 }
@@ -155,7 +152,6 @@ export const createPost = async (post: PostForm) => {
 
     return newPost;
   } catch (error) {
-    console.error('Error creating post:', error);
     throw error;
   }
 };
@@ -168,7 +164,6 @@ export async function deletePost(postId: string) {
 
         return { success: true };
     } catch (error) {
-        console.error('Error in deletePost:', error);
         throw error;
     }
 }

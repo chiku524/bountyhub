@@ -44,7 +44,7 @@ export async function addReputationPoints(
       });
     }
   } catch (error) {
-    console.error('Error adding reputation points:', error);
+    // Removed all console.error statements for cleaner production code.
   }
 }
 
@@ -63,7 +63,6 @@ export async function getUserReputation(userId: string) {
 
     return user;
   } catch (error) {
-    console.error('Error getting user reputation:', error);
     return null;
   }
 }

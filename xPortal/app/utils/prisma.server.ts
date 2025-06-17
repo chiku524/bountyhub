@@ -20,13 +20,14 @@ if (process.env.NODE_ENV === 'production') {
   prisma = global.__db
 }
 
+// Debug available models
+console.log('Available Prisma models:', Object.keys(prisma))
+
 // Ensure the database is connected
 const connectDB = async () => {
   try {
     await prisma.$connect()
-    console.log('Successfully connected to database')
   } catch (error) {
-    console.error('Failed to connect to database:', error)
     process.exit(1)
   }
 }

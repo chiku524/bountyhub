@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Form, useLoaderData, Link, useSubmit, useNavigate, useSearchParams } from "@remix-run/react"
+import { Form, useLoaderData, Link, useSubmit, useNavigate, useSearchParams, useActionData } from "@remix-run/react"
 import { LoaderFunction, json, ActionFunction } from '@remix-run/node'
 import { getUser } from '~/utils/auth.server'
 import { Nav } from '../components/nav'
 import { prisma } from '~/utils/prisma.server'
-import { FiEye, FiEyeOff } from 'react-icons/fi'
+import { FiTrendingUp } from 'react-icons/fi'
 
 const DEFAULT_PROFILE_PICTURE = 'https://api.dicebear.com/7.x/initials/svg?seed=';
 
@@ -26,6 +26,13 @@ interface LoaderData {
     title: string;
     content: string;
     blobVideoURL: string | null;
+    media: {
+      id: string;
+      type: string;
+      url: string;
+      thumbnailUrl?: string;
+      isScreenRecording: boolean;
+    } | null;
     author: {
       id: string;
       username: string;
@@ -47,6 +54,13 @@ type Post = {
   id: string;
   title: string;
   content: string;
+  media: {
+    id: string;
+    type: string;
+    url: string;
+    thumbnailUrl?: string;
+    isScreenRecording: boolean;
+  } | null;
   createdAt: Date;
   updatedAt: Date;
   author: {
@@ -86,6 +100,12 @@ export const loader: LoaderFunction = async ({ request }) => {
             }
           }
         },
+        media: {
+          take: 1,
+          orderBy: {
+            createdAt: 'asc'
+          }
+        },
         votes: user ? {
           where: {
             userId: user.id,
@@ -116,6 +136,13 @@ export const loader: LoaderFunction = async ({ request }) => {
       id: post.id,
       title: post.title,
       content: post.content,
+      media: post.media[0] ? {
+        id: post.media[0].id,
+        type: post.media[0].type,
+        url: post.media[0].url,
+        thumbnailUrl: post.media[0].thumbnailUrl,
+        isScreenRecording: post.media[0].isScreenRecording
+      } : null,
       author: {
         id: post.author.id,
         username: post.author.username,
@@ -135,13 +162,6 @@ export const loader: LoaderFunction = async ({ request }) => {
       profilePicture: getProfilePicture(user.profile?.profilePicture || null, user.username)
     } : null;
 
-    console.log('Loader data:', {
-      totalPosts,
-      currentPage: page,
-      totalPages: Math.ceil(totalPosts / perPage),
-      postsCount: transformedPosts.length
-    });
-
     return json({
       user: transformedUser,
       posts: transformedPosts,
@@ -150,7 +170,6 @@ export const loader: LoaderFunction = async ({ request }) => {
       totalPages: Math.ceil(totalPosts / perPage)
     });
   } catch (error) {
-    console.error('Error in loader:', error);
     return json({ 
       error: 'Failed to load posts',
       details: error instanceof Error ? error.message : 'Unknown error'
@@ -230,10 +249,10 @@ export const action: ActionFunction = async ({ request }) => {
         return json({ 
           success: true,
           votes: result.post.visibilityVotes,
-          voted: result.userVoted
+          voted: result.userVoted,
+          postId: postId as string
         });
       } catch (error) {
-        console.error('Error in vote action:', error);
         return json({ 
           error: 'Failed to process vote',
           details: error instanceof Error ? error.message : 'Unknown error'
@@ -264,7 +283,6 @@ export const action: ActionFunction = async ({ request }) => {
 
     return json({ error: 'Invalid action' }, { status: 400 });
   } catch (error) {
-    console.error('Error in action:', error);
     return json({ 
       error: 'Internal server error',
       details: error instanceof Error ? error.message : 'Unknown error'
@@ -280,19 +298,41 @@ export default function Community() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isVoting, setIsVoting] = useState<Record<string, boolean>>({});
+  const actionData = useActionData<{ success: boolean; votes: number; voted: boolean; postId: string }>();
 
   // Update localPosts when posts from loader changes
   useEffect(() => {
     if (posts && Array.isArray(posts)) {
+      console.log('Posts with media:', posts.map(post => ({
+        id: post.id,
+        hasMedia: !!post.media,
+        mediaType: post.media?.type,
+        mediaUrl: post.media?.url
+      })));
       setLocalPosts(posts);
     } else {
-      console.error('Invalid posts data:', posts);
       setLocalPosts([]);
     }
   }, [posts]);
 
+  // Update localPosts when action data changes
+  useEffect(() => {
+    if (actionData?.success) {
+      setLocalPosts(prevPosts => 
+        prevPosts.map(post => 
+          post.id === actionData.postId
+            ? {
+                ...post,
+                visibilityVotes: actionData.votes,
+                userVoted: actionData.voted
+              }
+            : post
+        )
+      );
+    }
+  }, [actionData]);
+
   const handleVideoError = (postId: string, error: string) => {
-    console.error(`Video error for post ${postId}:`, error);
     setVideoErrors(prev => ({ ...prev, [postId]: error }));
   };
 
@@ -303,49 +343,25 @@ export default function Community() {
       setIsVoting(prev => ({ ...prev, [postId]: true }));
 
       const formData = new FormData();
+      formData.append('action', 'vote');
+      formData.append('postId', postId);
       formData.append('isVoting', voteValue === 1 ? 'true' : 'false');
 
-      const response = await fetch(`/api/posts/${postId}/vote`, {
-        method: 'POST',
-        body: formData
-      });
+      submit(formData, { method: 'post' });
 
-      let data;
-      try {
-        data = await response.json();
-      } catch (e) {
-        console.error('Failed to parse response:', e);
-        throw new Error('Server returned invalid response');
-      }
-
-      if (!response.ok) {
-        throw new Error(data.error || data.details || 'Failed to process vote');
-      }
-
-      if (data.success) {
-        // Update the post's vote count and state in the UI
-        setLocalPosts(prevPosts => 
-          prevPosts.map(post => 
-            post.id === postId 
-              ? { 
-                  ...post, 
-                  visibilityVotes: data.votes,
-                  userVoted: voteValue === 1
-                }
-              : post
-          )
-        );
-
-        // Refresh the page data to ensure consistency
-        const loaderResponse = await fetch(`/community?page=${currentPage}`);
-        const loaderData = await loaderResponse.json();
-        if (loaderData.posts) {
-          setLocalPosts(loaderData.posts);
-        }
-      }
+      // Update the post's vote count and state in the UI optimistically
+      setLocalPosts(prevPosts => 
+        prevPosts.map(post => 
+          post.id === postId 
+            ? { 
+                ...post, 
+                visibilityVotes: voteValue === 1 ? post.visibilityVotes + 1 : post.visibilityVotes - 1,
+                userVoted: voteValue === 1
+              }
+            : post
+        )
+      );
     } catch (error) {
-      console.error('Error voting:', error);
-      // Show error message to user
       alert(error instanceof Error ? error.message : 'Failed to process vote');
     } finally {
       // Reset voting state
@@ -399,39 +415,29 @@ export default function Community() {
               localPosts.map((post: Post) => (
                 <div 
                   key={post.id}
-                  className="bg-neutral-800/80 rounded-lg p-6 shadow-lg border border-violet-500/20 hover:border-violet-500/40 transition-all duration-300 w-full mx-auto flex flex-col"
-                  style={{ maxHeight: '600px' }}
+                  className="bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 shadow-lg shadow-violet-500/20"
                 >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center space-x-3">
-                      <img 
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-2">
+                      <img
                         src={post.author.profile?.profilePicture || getProfilePicture(null, post.author.username)}
-                        alt={`${post.author.username}'s profile`}
-                        className="w-10 h-10 rounded-full object-cover"
+                        alt={`${post.author.username}'s avatar`}
+                        className="w-8 h-8 rounded-full"
                       />
-                      <div>
-                        <Link 
-                          to="/profile"
-                          className="text-violet-400 hover:text-violet-300 font-medium"
-                        >
-                          {post.author.username}
-                        </Link>
-                        <p className="text-sm text-gray-400">
-                          {new Date(post.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                    {/* Top-right stats for md+ screens */}
-                    <div className="hidden md:flex items-center space-x-2">
-                      <span className="text-sm text-gray-400">
-                        {(typeof post.visibilityVotes === 'number' ? post.visibilityVotes : 0)} votes
-                      </span>
-                      <span className="text-sm text-gray-400">
-                        {post.comments} comments
+                      <span className="font-semibold text-violet-400">{post.author.username}</span>
+                      <span className="text-gray-400">
+                        {new Date(post.createdAt).toLocaleDateString()}
                       </span>
                     </div>
+                    {user && user.id === post.author.id && (
+                      <button
+                        onClick={() => handleDelete(post.id)}
+                        className="text-red-400 hover:text-red-300 transition-colors"
+                      >
+                        Delete
+                      </button>
+                    )}
                   </div>
-
                   <Link 
                     to={`/posts/${post.id}`}
                     className="block group flex-1"
@@ -442,43 +448,44 @@ export default function Community() {
                     <p className="text-gray-300 mb-4 overflow-hidden truncate max-w-full w-full break-words">
                       {post.content.length > 100 ? post.content.substring(0, 100) + '...' : post.content}
                     </p>
-                  </Link>
-
-                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-700">
-                    {/* Bottom-left stats for small screens */}
-                    <div className="flex items-center space-x-4">
-                      <div className="flex md:hidden items-center space-x-2">
-                        <span className="text-sm text-gray-400">
-                          {(typeof post.visibilityVotes === 'number' ? post.visibilityVotes : 0)} visibility votes
-                        </span>
-                        <span className="text-sm text-gray-400">
-                          {post.comments} comments
-                        </span>
+                    {post.media && (
+                      <div className="mb-4">
+                        {post.media.type.toLowerCase() === 'image' && (
+                          <img
+                            src={post.media.url}
+                            alt="Post media"
+                            className="w-full h-48 object-cover rounded-lg"
+                          />
+                        )}
+                        {(post.media.type.toLowerCase() === 'video' || post.media.type.toLowerCase() === 'screen') && (
+                          <video
+                            src={post.media.url}
+                            poster={post.media.thumbnailUrl}
+                            controls
+                            className="w-full h-48 object-cover rounded-lg"
+                            onError={(e) => handleVideoError(post.id, e.currentTarget.error?.message || 'Video error')}
+                          />
+                        )}
                       </div>
+                    )}
+                  </Link>
+                  <div className="flex items-center justify-between mt-4">
+                    <div className="flex items-center space-x-4">
                       <button
                         onClick={() => handleVote(post.id, post.userVoted ? 0 : 1)}
-                        className={`p-2 rounded-full transition-colors ${
+                        className={`flex items-center space-x-1 transition-colors ${
                           post.userVoted
-                            ? 'bg-violet-500 text-white'
-                            : 'hover:bg-violet-500/20 text-gray-400'
+                            ? 'text-violet-400'
+                            : 'text-gray-400 hover:text-violet-400'
                         }`}
-                        title={post.userVoted ? "Remove visibility vote" : "Vote for visibility"}
                       >
-                        {post.userVoted ? (
-                          <FiEye className="w-5 h-5" />
-                        ) : (
-                          <FiEyeOff className="w-5 h-5" />
-                        )}
+                        <FiTrendingUp className={`w-5 h-5 ${post.userVoted ? 'fill-current' : 'fill-none'}`} />
+                        <span>{post.visibilityVotes}</span>
                       </button>
+                      <span className="text-gray-400">
+                        {post.comments} {post.comments === 1 ? 'comment' : 'comments'}
+                      </span>
                     </div>
-                    {user && user.id === post.author.id && (
-                      <button
-                        onClick={() => handleDelete(post.id)}
-                        className="text-red-400 hover:text-red-300 transition-colors"
-                      >
-                        Delete
-                      </button>
-                    )}
                   </div>
                 </div>
               ))

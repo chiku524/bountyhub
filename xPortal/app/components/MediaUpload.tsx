@@ -103,7 +103,6 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
       setIsRecording(true);
       setUploadType('screen');
     } catch (error) {
-      console.error('Error starting screen recording:', error);
       alert('Failed to start screen recording');
       cleanupRecording();
     }
@@ -167,7 +166,6 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
         });
       }
     } catch (error) {
-      console.error('Upload error:', error);
       alert(error instanceof Error ? error.message : 'Failed to upload file');
     } finally {
       setIsUploading(false);

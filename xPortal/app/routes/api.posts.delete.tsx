@@ -21,7 +21,6 @@ export const action: ActionFunction = async ({ request }) => {
         await deletePost(postId);
         return json({ success: true });
     } catch (error) {
-        console.error('Delete post error:', error);
         return json({ error: 'Failed to delete post' }, { status: 500 });
     }
 }; 

@@ -48,7 +48,6 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    console.error('Error in loader:', error);
     return json({ 
       error: 'Failed to get vote state',
       details: error instanceof Error ? error.message : 'Unknown error'
@@ -79,8 +78,6 @@ export const action: ActionFunction = async ({ request, params }) => {
 
     const formData = await request.formData();
     const isVoting = formData.get('isVoting') === 'true';
-
-    console.log('Processing vote:', { postId, userId: user.id, isVoting });
 
     // First, check if the post exists
     const post = await prisma.posts.findUnique({
@@ -153,7 +150,6 @@ export const action: ActionFunction = async ({ request, params }) => {
         headers: { 'Content-Type': 'application/json' }
       });
   } catch (error) {
-    console.error('Error in vote action:', error);
     return json({ 
       error: 'Failed to process vote',
       details: error instanceof Error ? error.message : 'Unknown error'

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useLoaderData, useParams, useSubmit, useFetcher, Form, useRouteError, isRouteErrorResponse, Link } from '@remix-run/react';
 import { json, LoaderFunction, ActionFunction, redirect } from '@remix-run/node';
 import { getUser } from '~/utils/auth.server';
@@ -7,7 +7,7 @@ import PostInteractions from '~/components/PostInteractions';
 import { Nav } from '~/components/nav';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
-import { FiTrash2, FiThumbsUp, FiThumbsDown } from 'react-icons/fi';
+import { FiTrash2, FiArrowUp, FiArrowDown } from 'react-icons/fi';
 import type { Comment, Answer, CodeBlock, User, Profile } from "@prisma/client";
 import { addReputationPoints, REPUTATION_POINTS } from '~/utils/reputation.server';
 
@@ -70,6 +70,13 @@ type PostWithRelations = {
   upvotes: number;
   downvotes: number;
   userQualityVote: number;
+  media: {
+    id: string;
+    type: string;
+    url: string;
+    thumbnailUrl?: string;
+    isScreenRecording: boolean;
+  }[];
 };
 
 type CommentResponse = {
@@ -111,129 +118,152 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   try {
     const user = await getUser(request);
     const { postId } = params;
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const perPage = 10;
 
     if (!postId) {
       throw new Response('Post ID is required', { status: 400 });
     }
 
-    const post = await prisma.posts.findUnique({
-      where: { id: postId },
-      include: {
-        author: {
-          select: {
-            id: true,
-            username: true,
-            profile: {
-              select: {
-                profilePicture: true
-              }
-            }
-          }
-        },
-        comments: {
-          include: {
-            author: {
-              select: {
-                id: true,
-                username: true,
-                profile: {
-                  select: {
-                    profilePicture: true
-                  }
+    // Combine all queries into a single database call
+    const [post, userVotes, voteCounts] = await Promise.all([
+      prisma.posts.findUnique({
+        where: { id: postId },
+        include: {
+          author: {
+            select: {
+              id: true,
+              username: true,
+              profile: {
+                select: {
+                  profilePicture: true
                 }
               }
             }
           },
-          orderBy: {
-            createdAt: 'desc'
-          }
-        },
-        answers: {
-          include: {
-            author: {
-              select: {
-                id: true,
-                username: true,
-                profile: {
-                  select: {
-                    profilePicture: true
+          media: true,
+          comments: {
+            include: {
+              author: {
+                select: {
+                  id: true,
+                  username: true,
+                  profile: {
+                    select: {
+                      profilePicture: true
+                    }
                   }
                 }
               }
-            }
+            },
+            orderBy: {
+              createdAt: 'desc'
+            },
+            skip: (page - 1) * perPage,
+            take: perPage
           },
-          orderBy: [
-            { isAccepted: 'desc' },
-            { createdAt: 'desc' }
-          ]
-        },
-        codeBlocks: true,
-        _count: {
-          select: {
-            votes: {
-              where: {
-                isQualityVote: true,
-                value: 1
+          answers: {
+            include: {
+              author: {
+                select: {
+                  id: true,
+                  username: true,
+                  profile: {
+                    select: {
+                      profilePicture: true
+                    }
+                  }
+                }
               }
+            },
+            orderBy: [
+              { isAccepted: 'desc' },
+              { createdAt: 'desc' }
+            ]
+          },
+          codeBlocks: true,
+          votes: {
+            where: {
+              userId: user?.id || '',
+              isQualityVote: true
             }
           }
         }
-      }
-    });
+      }),
+      user ? prisma.vote.findMany({
+        where: {
+          userId: user.id,
+          postId: postId,
+          OR: [
+            { isQualityVote: true },
+            { isQualityVote: false }
+          ]
+        }
+      }) : [],
+      prisma.vote.groupBy({
+        by: ['isQualityVote', 'value'],
+        where: {
+          postId: postId,
+          isQualityVote: true
+        },
+        _count: true
+      })
+    ]);
 
     if (!post) {
       throw new Response('Post not found', { status: 404 });
     }
 
-    // Get user's votes if they're logged in
-    let userQualityVote = 0;
-    let userVisibilityVote = 0;
-
-    if (user) {
-      const [qualityVote, visibilityVote] = await Promise.all([
-        prisma.vote.findFirst({
-          where: {
-            userId: user.id,
-            postId: postId,
-            isQualityVote: true
-          }
-        }),
-        prisma.vote.findFirst({
-          where: {
-            userId: user.id,
-            postId: postId,
-            isQualityVote: false
-          }
-        })
-      ]);
-
-      if (qualityVote) {
-        userQualityVote = qualityVote.value;
-      }
-      if (visibilityVote) {
-        userVisibilityVote = visibilityVote.value;
-      }
-    }
-
-    // Get quality vote counts
-    const [qualityUpvotes, qualityDownvotes] = await Promise.all([
-      prisma.vote.count({
-        where: {
-          postId: postId,
-          isQualityVote: true,
-          value: 1
-        }
+    // Get total counts for pagination
+    const [totalComments, totalAnswers] = await Promise.all([
+      prisma.comment.count({
+        where: { postId }
       }),
-      prisma.vote.count({
-        where: {
-          postId: postId,
-          isQualityVote: true,
-          value: -1
-        }
+      prisma.answer.count({
+        where: { postId }
       })
     ]);
 
-    // Transform the post data to include vote information
+    // Process vote counts
+    const qualityUpvotes = voteCounts.find(v => v.isQualityVote && v.value === 1)?._count || 0;
+    const qualityDownvotes = voteCounts.find(v => v.isQualityVote && v.value === -1)?._count || 0;
+    const userQualityVote = userVotes.find(v => v.isQualityVote)?.value || 0;
+    const userVisibilityVote = userVotes.find(v => !v.isQualityVote)?.value || 0;
+
+    // Fetch all comment and answer IDs
+    const commentIds = post.comments.map(c => c.id);
+    const answerIds = post.answers.map(a => a.id);
+
+    // Fetch all votes by the current user for these comments and answers
+    let commentVotes: { commentId: string; value: number }[] = [];
+    let answerVotes: { answerId: string; value: number }[] = [];
+    if (user) {
+      if (commentIds.length > 0) {
+        commentVotes = (await prisma.vote.findMany({
+          where: {
+            userId: user.id,
+            commentId: { in: commentIds },
+            voteType: 'COMMENT',
+            isQualityVote: true
+          },
+          select: { commentId: true, value: true }
+        })).filter(v => v.commentId !== null) as { commentId: string; value: number }[];
+      }
+      if (answerIds.length > 0) {
+        answerVotes = (await prisma.vote.findMany({
+          where: {
+            userId: user.id,
+            answerId: { in: answerIds },
+            voteType: 'ANSWER',
+            isQualityVote: true
+          },
+          select: { answerId: true, value: true }
+        })).filter(v => v.answerId !== null) as { answerId: string; value: number }[];
+      }
+    }
+
+    // Transform the post data
     const transformedPost = {
       ...post,
       visibilityVotes: post.visibilityVotes,
@@ -247,6 +277,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       },
       comments: post.comments.map(comment => ({
         ...comment,
+        userVote: commentVotes.find(v => v.commentId === comment.id)?.value || 0,
         author: {
           ...comment.author,
           profilePicture: comment.author.profile?.profilePicture || null
@@ -254,6 +285,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       })),
       answers: post.answers.map(answer => ({
         ...answer,
+        userVote: answerVotes.find(v => v.answerId === answer.id)?.value || 0,
         author: {
           ...answer.author,
           profilePicture: answer.author.profile?.profilePicture || null
@@ -261,7 +293,16 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       }))
     };
 
-    return json({ post: transformedPost, currentUser: user });
+    return json({ 
+      post: transformedPost, 
+      currentUser: user,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalComments / perPage),
+        totalComments,
+        totalAnswers
+      }
+    });
   } catch (error) {
     throw new Response('Failed to load post', { status: 500 });
   }
@@ -557,6 +598,13 @@ export const action: ActionFunction = async ({ request, params }) => {
           where: { id: answerId },
           data: {
             isAccepted: true
+          },
+          include: {
+            author: {
+              include: {
+                profile: true
+              }
+            }
           }
         });
 
@@ -570,8 +618,13 @@ export const action: ActionFunction = async ({ request, params }) => {
 
         return json({
           success: true,
-          answerId: updatedAnswer.id,
-          isAccepted: true
+          answer: {
+            ...updatedAnswer,
+            author: {
+              ...updatedAnswer.author,
+              profilePicture: updatedAnswer.author.profile?.profilePicture || null
+            }
+          }
         });
       });
     }
@@ -756,7 +809,7 @@ export function ErrorBoundary() {
 }
 
 export default function PostDetail() {
-  const { post, currentUser } = useLoaderData<typeof loader>();
+  const { post, currentUser, pagination } = useLoaderData<typeof loader>();
   const submit = useSubmit();
   const commentFetcher = useFetcher<CommentResponse>();
   const answerFetcher = useFetcher<AnswerResponse>();
@@ -772,6 +825,182 @@ export default function PostDetail() {
     downvotes: post.qualityDownvotes || 0,
     userQualityVote: post.userQualityVote || 0
   });
+
+  // Memoize handlers to prevent unnecessary re-renders
+  const handleVote = useCallback(async (value: number) => {
+    if (!currentUser) {
+      window.location.href = '/login';
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('action', 'qualityVote');
+    formData.append('value', value.toString());
+    voteFetcher.submit(formData, { method: 'post' });
+  }, [currentUser, voteFetcher]);
+
+  const handleComment = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentUser) {
+      window.location.href = '/login';
+      return;
+    }
+
+    if (!newComment.trim()) {
+      setError('Comment cannot be empty');
+      return;
+    }
+
+    // Optimistically update UI
+    const optimisticComment: CommentWithAuthor = {
+      id: `temp-${Date.now()}`,
+      content: newComment,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      upvotes: 0,
+      downvotes: 0,
+      userVote: 0,
+      author: {
+        id: currentUser.id,
+        username: currentUser.username,
+        createdAt: currentUser.createdAt,
+        updatedAt: currentUser.updatedAt,
+        profile: currentUser.profile
+      }
+    };
+
+    setComments(prev => [optimisticComment, ...prev]);
+    setNewComment('');
+
+    const formData = new FormData();
+    formData.append('action', 'comment');
+    formData.append('content', newComment);
+
+    commentFetcher.submit(formData, { method: 'post' });
+  }, [currentUser, newComment, commentFetcher]);
+
+  const handleCommentVote = useCallback(async (commentId: string, value: number) => {
+    if (!currentUser) {
+      window.location.href = '/login';
+      return;
+    }
+    try {
+      const formData = new FormData();
+      formData.append('value', value.toString());
+      // Use the correct endpoint for comment voting
+      const response = await fetch(`/api/comments/${commentId}/vote`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to process vote');
+      }
+      if (data.success) {
+        setComments(prevComments =>
+          prevComments.map(comment =>
+            comment.id === commentId
+              ? {
+                  ...comment,
+                  upvotes: data.upvotes,
+                  downvotes: data.downvotes,
+                  userVote: data.userVote
+                }
+              : comment
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Error voting on comment:', error);
+      setError(error instanceof Error ? error.message : 'Failed to process vote');
+    }
+  }, [currentUser]);
+
+  const handleAnswerVote = useCallback(async (answerId: string, value: number) => {
+    if (!currentUser) {
+      window.location.href = '/login';
+      return;
+    }
+    try {
+      const formData = new FormData();
+      formData.append('value', value.toString());
+      // Use the correct endpoint for answer voting
+      const response = await fetch(`/api/answers/${answerId}/vote`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to process vote');
+      }
+      if (data.success) {
+        setAnswers(prevAnswers =>
+          prevAnswers.map(answer =>
+            answer.id === answerId
+              ? {
+                  ...answer,
+                  upvotes: data.upvotes,
+                  downvotes: data.downvotes,
+                  userVote: data.userVote
+                }
+              : answer
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Error voting on answer:', error);
+      setError(error instanceof Error ? error.message : 'Failed to process vote');
+    }
+  }, [currentUser]);
+
+  // Memoize rendered components
+  const renderComment = useCallback((comment: CommentWithAuthor) => (
+    <div key={comment.id} className="p-4 bg-neutral-700/50 rounded-md border border-violet-500/20">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <img
+            src={getProfilePicture(comment.author.profile?.profilePicture ?? null, comment.author.username)}
+            alt={`${comment.author.username}'s avatar`}
+            className="w-8 h-8 rounded-full"
+          />
+          <span className="font-semibold text-violet-400">{comment.author.username}</span>
+          <span className="text-gray-400">
+            {new Date(comment.createdAt).toLocaleDateString()}
+          </span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => handleCommentVote(comment.id, comment.userVote === 1 ? 0 : 1)}
+            className={`p-1 transition-colors ${
+              comment.userVote === 1
+                ? 'text-violet-400'
+                : 'text-gray-400 hover:text-violet-400'
+            }`}
+          >
+            <FiArrowUp className="h-5 w-5" />
+          </button>
+          <span className="text-gray-300">{comment.upvotes - comment.downvotes}</span>
+          <button
+            onClick={() => handleCommentVote(comment.id, comment.userVote === -1 ? 0 : -1)}
+            className={`p-1 transition-colors ${
+              comment.userVote === -1
+                ? 'text-violet-400'
+                : 'text-gray-400 hover:text-violet-400'
+            }`}
+          >
+            <FiArrowDown className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+      <p className="mt-2 text-gray-300">{comment.content}</p>
+    </div>
+  ), [handleCommentVote]);
 
   // Update comments when fetcher data changes
   useEffect(() => {
@@ -791,10 +1020,15 @@ export default function PostDetail() {
           } : null
         }
       } as unknown as CommentWithAuthor;
-      setComments(prev => [...prev, newComment]);
-      setNewComment('');
+
+      // Replace optimistic comment with real one
+      setComments(prev => prev.map(comment => 
+        comment.id.startsWith('temp-') ? newComment : comment
+      ));
       setError(null);
     } else if (commentFetcher.data?.error) {
+      // Remove optimistic comment on error
+      setComments(prev => prev.filter(comment => !comment.id.startsWith('temp-')));
       setError(commentFetcher.data.error);
     }
   }, [commentFetcher.data]);
@@ -826,12 +1060,14 @@ export default function PostDetail() {
 
   // Update vote state when fetcher data changes
   useEffect(() => {
-    if (voteFetcher.data?.success) {
-      setVoteState({
-        upvotes: voteFetcher.data.qualityUpvotes,
-        downvotes: voteFetcher.data.qualityDownvotes,
-        userQualityVote: voteFetcher.data.userQualityVote
-      });
+    const data = voteFetcher.data;
+    if (data?.success && typeof data.qualityUpvotes === 'number' && typeof data.qualityDownvotes === 'number' && typeof data.userQualityVote === 'number') {
+      setVoteState(prev => ({
+        ...prev,
+        upvotes: data.qualityUpvotes,
+        downvotes: data.qualityDownvotes,
+        userQualityVote: data.userQualityVote
+      }));
     }
   }, [voteFetcher.data]);
 
@@ -866,96 +1102,6 @@ export default function PostDetail() {
     }
   }, [acceptAnswerFetcher.data]);
 
-  useEffect(() => {
-    const loadCommentVotes = async () => {
-      const votePromises = comments.map(async (comment) => {
-        try {
-          const response = await fetch(`/api/comments/${comment.id}/vote`);
-          if (!response.ok) {
-            throw new Error('Failed to load comment vote');
-          }
-          const data = await response.json();
-          if (data.success) {
-            return {
-              ...comment,
-              userVote: data.userVote,
-              upvotes: data.upvotes,
-              downvotes: data.downvotes
-            };
-          }
-          return comment;
-        } catch (error) {
-          console.error('Error loading comment vote:', error);
-          return comment;
-        }
-      });
-
-      const updatedComments = await Promise.all(votePromises);
-      setComments(updatedComments);
-    };
-
-    const loadAnswerVotes = async () => {
-      const votePromises = answers.map(async (answer) => {
-        try {
-          const response = await fetch(`/api/answers/${answer.id}/vote`);
-          if (!response.ok) {
-            throw new Error('Failed to load answer vote');
-          }
-          const data = await response.json();
-          if (data.success) {
-            return {
-              ...answer,
-              userVote: data.userVote,
-              upvotes: data.upvotes,
-              downvotes: data.downvotes
-            };
-          }
-          return answer;
-        } catch (error) {
-          console.error('Error loading answer vote:', error);
-          return answer;
-        }
-      });
-
-      const updatedAnswers = await Promise.all(votePromises);
-      setAnswers(updatedAnswers);
-    };
-
-    loadCommentVotes();
-    loadAnswerVotes();
-  }, [comments, answers]);
-
-  const handleVote = async (value: number) => {
-    if (!currentUser) {
-      window.location.href = '/login';
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('action', 'qualityVote');
-    formData.append('value', value.toString());
-    voteFetcher.submit(formData, { method: 'post' });
-  };
-
-  const handleComment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!currentUser) {
-      window.location.href = '/login';
-      return;
-    }
-
-    if (!newComment.trim()) {
-      setError('Comment cannot be empty');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('action', 'comment');
-    formData.append('content', newComment);
-
-    commentFetcher.submit(formData, { method: 'post' });
-  };
-
   const handleAnswer = async (content: string) => {
     const formData = new FormData();
     formData.append('action', 'answer');
@@ -966,34 +1112,10 @@ export default function PostDetail() {
   };
 
   const handleAcceptAnswer = async (answerId: string) => {
-    try {
-      const formData = new FormData();
-      formData.append('action', 'acceptAnswer');
-      formData.append('answerId', answerId);
-
-      const response = await fetch(`/posts/${post.id}`, {
-        method: 'POST',
-        body: formData
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to accept answer');
-      }
-
-      if (data.success) {
-        setAnswers(prevAnswers => 
-          prevAnswers.map(answer => 
-            answer.id === answerId 
-              ? { ...answer, isAccepted: true }
-              : { ...answer, isAccepted: false }
-          )
-        );
-      }
-    } catch (error) {
-      console.error('Error accepting answer:', error);
-      alert(error instanceof Error ? error.message : 'Failed to accept answer');
-    }
+    const formData = new FormData();
+    formData.append('action', 'acceptAnswer');
+    formData.append('answerId', answerId);
+    acceptAnswerFetcher.submit(formData, { method: 'post' });
   };
 
   const handleDelete = () => {
@@ -1004,221 +1126,17 @@ export default function PostDetail() {
     submit(formData, { method: 'post' });
   };
 
-  const handleCommentVote = async (commentId: string, value: number) => {
-    try {
-      const formData = new FormData();
-      formData.append('value', value.toString());
-
-      const response = await fetch(`/api/comments/${commentId}/vote`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to process vote');
-      }
-
-      if (data.success) {
-        setComments(prevComments => 
-          prevComments.map(comment => 
-            comment.id === commentId 
-              ? { 
-                  ...comment, 
-                  upvotes: data.upvotes,
-                  downvotes: data.downvotes,
-                  userVote: data.userVote
-                }
-              : comment
-          )
-        );
-      }
-    } catch (error) {
-      console.error('Error voting on comment:', error);
-      alert(error instanceof Error ? error.message : 'Failed to process vote');
-    }
-  };
-
-  const handleAnswerVote = async (answerId: string, value: number) => {
-    try {
-      const formData = new FormData();
-      formData.append('value', value.toString());
-
-      const response = await fetch(`/api/answers/${answerId}/vote`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to process vote');
-      }
-
-      if (data.success) {
-        setAnswers(prevAnswers => 
-          prevAnswers.map(answer => 
-            answer.id === answerId 
-              ? { 
-                  ...answer, 
-                  upvotes: data.upvotes,
-                  downvotes: data.downvotes,
-                  userVote: data.userVote
-                }
-              : answer
-          )
-        );
-      }
-    } catch (error) {
-      console.error('Error voting on answer:', error);
-      alert(error instanceof Error ? error.message : 'Failed to process vote');
-    }
-  };
-
   const handleQualityVote = async (value: number) => {
-    try {
-      const formData = new FormData();
-      formData.append('action', 'qualityVote');
-      formData.append('value', value.toString());
-
-      const response = await fetch(`/api/posts/${post.id}/vote`, {
-        method: 'POST',
-        body: formData
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to process vote');
-      }
-
-      if (data.success) {
-        setVoteState(prev => ({
-          ...prev,
-          qualityUpvotes: data.qualityUpvotes,
-          qualityDownvotes: data.qualityDownvotes,
-          userQualityVote: data.userQualityVote
-        }));
-      }
-    } catch (error) {
-      console.error('Error voting on post:', error);
-      alert(error instanceof Error ? error.message : 'Failed to process vote');
+    if (!currentUser) {
+      window.location.href = '/login';
+      return;
     }
+
+    const formData = new FormData();
+    formData.append('action', 'qualityVote');
+    formData.append('value', value.toString());
+    voteFetcher.submit(formData, { method: 'post' });
   };
-
-  // Update the comment rendering to include vote buttons
-  const renderComment = (comment: CommentWithAuthor) => (
-    <div key={comment.id} className="p-4 bg-neutral-700/50 rounded-md border border-violet-500/20">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <img
-            src={getProfilePicture(comment.author.profile?.profilePicture ?? null, comment.author.username)}
-            alt={`${comment.author.username}'s avatar`}
-            className="w-8 h-8 rounded-full"
-          />
-          <span className="font-semibold text-violet-400">{comment.author.username}</span>
-          <span className="text-gray-400">
-            {new Date(comment.createdAt).toLocaleDateString()}
-          </span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={() => handleCommentVote(comment.id, comment.userVote === 1 ? 0 : 1)}
-            className={`p-1 rounded hover:bg-neutral-600 transition-colors ${
-              comment.userVote === 1 ? 'text-violet-400' : 'text-gray-400'
-            }`}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-            </svg>
-          </button>
-          <span className="text-gray-300">{comment.upvotes - comment.downvotes}</span>
-          <button
-            onClick={() => handleCommentVote(comment.id, comment.userVote === -1 ? 0 : -1)}
-            className={`p-1 rounded hover:bg-neutral-600 transition-colors ${
-              comment.userVote === -1 ? 'text-violet-400' : 'text-gray-400'
-            }`}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M16.707 10.293a1 1 0 010 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l4.293-4.293a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
-          </button>
-        </div>
-      </div>
-      <p className="mt-2 text-gray-300">{comment.content}</p>
-    </div>
-  );
-
-  // Update the answer rendering to include vote buttons
-  const renderAnswer = (answer: AnswerWithAuthor) => (
-    <div key={answer.id} className="p-4 bg-neutral-700/50 rounded-md border border-violet-500/20">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <img
-            src={getProfilePicture(answer.author.profile?.profilePicture ?? null, answer.author.username)}
-            alt={`${answer.author.username}'s avatar`}
-            className="w-8 h-8 rounded-full"
-          />
-          <span className="font-semibold text-violet-400">{answer.author.username}</span>
-          <span className="text-gray-400">
-            {new Date(answer.createdAt).toLocaleDateString()}
-          </span>
-          {answer.isAccepted && (
-            <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded text-sm">
-              Accepted Answer
-            </span>
-          )}
-        </div>
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={() => handleAnswerVote(answer.id, answer.userVote === 1 ? 0 : 1)}
-            className={`p-1 rounded hover:bg-neutral-600 transition-colors ${
-              answer.userVote === 1 ? 'text-violet-400' : 'text-gray-400'
-            }`}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-            </svg>
-          </button>
-          <span className="text-gray-300">{answer.upvotes - answer.downvotes}</span>
-          <button
-            onClick={() => handleAnswerVote(answer.id, answer.userVote === -1 ? 0 : -1)}
-            className={`p-1 rounded hover:bg-neutral-600 transition-colors ${
-              answer.userVote === -1 ? 'text-violet-400' : 'text-gray-400'
-            }`}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M16.707 10.293a1 1 0 010 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l4.293-4.293a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
-          </button>
-          {currentUser?.id === post.author.id && !post.answers.some((a: AnswerWithAuthor) => a.isAccepted) && (
-            <button
-              onClick={() => handleAcceptAnswer(answer.id)}
-              className="px-3 py-1 bg-green-500/20 text-green-400 rounded hover:bg-green-500/30 transition-colors"
-            >
-              Accept Answer
-            </button>
-          )}
-        </div>
-      </div>
-      <p className="mt-2 text-gray-300">{answer.content}</p>
-    </div>
-  );
-
-  const renderAuthorInfo = (author: User & { profilePicture: string | null }) => (
-    <div className="flex items-center space-x-2">
-        <img
-            src={getProfilePicture(author.profilePicture, author.username)}
-            alt={`${author.username}'s avatar`}
-            className="w-8 h-8 rounded-full"
-        />
-        <span className="font-semibold text-violet-400">{author.username}</span>
-    </div>
-  );
 
   if (!post) {
     return (
@@ -1250,7 +1168,12 @@ export default function PostDetail() {
               <div>
                 <h1 className="text-2xl font-bold text-white mb-2">{post.title}</h1>
                 <div className="flex items-center gap-2">
-                  {renderAuthorInfo(post.author)}
+                  <img
+                    src={getProfilePicture(post.author.profile?.profilePicture ?? null, post.author.username)}
+                    alt={`${post.author.username}'s avatar`}
+                    className="w-8 h-8 rounded-full"
+                  />
+                  <span className="font-semibold text-violet-400">{post.author.username}</span>
                   <span className="text-gray-400">•</span>
                   <span className="text-gray-400">{new Date(post.createdAt).toLocaleDateString()}</span>
                 </div>
@@ -1259,6 +1182,38 @@ export default function PostDetail() {
             
             {/* Post Content */}
             <div className="mt-4 space-y-6">
+              {/* Media Section */}
+              {post.media && post.media.length > 0 && (
+                <div className="bg-neutral-800/50 rounded-lg p-6 border border-violet-500/20">
+                  <h2 className="text-xl font-semibold text-violet-400 mb-4">Media</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {post.media.map((media: { id: string; type: string; url: string; thumbnailUrl?: string; isScreenRecording: boolean }) => (
+                      <div key={media.id} className="relative group">
+                        {media.type === 'VIDEO' ? (
+                          <video
+                            src={media.url}
+                            poster={media.thumbnailUrl || undefined}
+                            className="w-full h-48 object-cover rounded-lg"
+                            controls
+                          />
+                        ) : (
+                          <img
+                            src={media.url}
+                            alt="Post media"
+                            className="w-full h-48 object-cover rounded-lg"
+                          />
+                        )}
+                        {media.isScreenRecording && (
+                          <span className="absolute bottom-2 left-2 px-2 py-1 bg-black/50 text-white text-sm rounded">
+                            Screen Recording
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Main Content Section */}
               <div className="bg-neutral-800/50 rounded-lg p-6 border border-violet-500/20">
                 <h2 className="text-xl font-semibold text-violet-400 mb-4">Content</h2>
@@ -1323,24 +1278,24 @@ export default function PostDetail() {
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => handleQualityVote(1)}
-                  className={`flex items-center gap-2 px-3 py-1 rounded ${
-                    voteState.userQualityVote === 1
-                      ? 'bg-violet-500 text-white'
-                      : 'bg-neutral-700 text-gray-300 hover:bg-neutral-600'
+                  className={`flex items-center space-x-1 transition-colors ${
+                    voteState.userQualityVote === 1 
+                      ? 'text-violet-400' 
+                      : 'text-gray-400 hover:text-violet-400'
                   }`}
                 >
-                  <FiThumbsUp size={18} />
+                  <FiArrowUp size={18} />
                   <span>{voteState.upvotes}</span>
                 </button>
                 <button
                   onClick={() => handleQualityVote(-1)}
-                  className={`flex items-center gap-2 px-3 py-1 rounded ${
-                    voteState.userQualityVote === -1
-                      ? 'bg-violet-500 text-white'
-                      : 'bg-neutral-700 text-gray-300 hover:bg-neutral-600'
+                  className={`flex items-center space-x-1 transition-colors ${
+                    voteState.userQualityVote === -1 
+                      ? 'text-violet-400' 
+                      : 'text-gray-400 hover:text-violet-400'
                   }`}
                 >
-                  <FiThumbsDown size={18} />
+                  <FiArrowDown size={18} />
                   <span>{voteState.downvotes}</span>
                 </button>
               </div>
@@ -1356,7 +1311,7 @@ export default function PostDetail() {
 
             {/* Comments Section */}
             <div className="mt-8">
-              <h2 className="text-xl font-semibold text-white mb-4">Comments ({comments.length})</h2>
+              <h2 className="text-xl font-semibold text-white mb-4">Comments ({pagination.totalComments})</h2>
               
               {/* Comment Form */}
               <form onSubmit={handleComment} className="mb-6">
@@ -1378,17 +1333,48 @@ export default function PostDetail() {
               {/* Comments List with fixed height and scrolling */}
               <div className="relative">
                 <div className="max-h-[400px] overflow-y-auto pr-2 space-y-4 custom-scrollbar">
-                  {comments.map((comment: CommentWithAuthor) => renderComment(comment))}
+                  {comments.map(renderComment)}
                 </div>
                 {comments.length > 5 && (
                   <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-neutral-800/80 to-transparent pointer-events-none" />
                 )}
               </div>
+
+              {/* Pagination Controls */}
+              {pagination.totalPages > 1 && (
+                <div className="flex justify-center gap-2 mt-4">
+                  <button
+                    onClick={() => {
+                      const url = new URL(window.location.href);
+                      url.searchParams.set('page', (pagination.currentPage - 1).toString());
+                      window.location.href = url.toString();
+                    }}
+                    disabled={pagination.currentPage === 1}
+                    className="px-3 py-1 bg-neutral-700 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+                  <span className="px-3 py-1 bg-neutral-700 text-white rounded">
+                    Page {pagination.currentPage} of {pagination.totalPages}
+                  </span>
+                  <button
+                    onClick={() => {
+                      const url = new URL(window.location.href);
+                      url.searchParams.set('page', (pagination.currentPage + 1).toString());
+                      window.location.href = url.toString();
+                    }}
+                    disabled={pagination.currentPage === pagination.totalPages}
+                    className="px-3 py-1 bg-neutral-700 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Answers Section */}
             <div className="mt-8">
-              <h2 className="text-xl font-semibold text-white mb-4">Answers ({answers.length})</h2>
+              <h2 className="text-xl font-semibold text-white mb-4">Answers ({pagination.totalAnswers})</h2>
               
               {/* Answer Form */}
               <form onSubmit={(e) => {
@@ -1403,7 +1389,7 @@ export default function PostDetail() {
                 <textarea
                   placeholder="Write an answer..."
                   className="w-full p-3 bg-neutral-700/50 border border-neutral-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-violet-500"
-                  rows={4}
+                  rows={6}
                 />
                 <button
                   type="submit"
@@ -1413,18 +1399,69 @@ export default function PostDetail() {
                 </button>
               </form>
 
-              {/* Answers List with fixed height and scrolling */}
-              <div className="relative">
-                <div className="max-h-[400px] overflow-y-auto pr-2 space-y-4 custom-scrollbar">
-                  {answers.map((answer: AnswerWithAuthor) => renderAnswer(answer))}
-                </div>
-                {answers.length > 5 && (
-                  <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-neutral-800/80 to-transparent pointer-events-none" />
-                )}
+              {/* Answers List */}
+              <div className="space-y-4">
+                {answers.map((answer: AnswerWithAuthor) => (
+                  <div key={answer.id} className={`p-4 rounded-md border ${
+                    answer.isAccepted 
+                      ? 'bg-green-500/10 border-green-500/50' 
+                      : 'bg-neutral-700/50 border-violet-500/20'
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <img
+                          src={getProfilePicture(answer.author.profile?.profilePicture ?? null, answer.author.username)}
+                          alt={`${answer.author.username}'s avatar`}
+                          className="w-8 h-8 rounded-full"
+                        />
+                        <span className="font-semibold text-violet-400">{answer.author.username}</span>
+                        <span className="text-gray-400">
+                          {new Date(answer.createdAt).toLocaleDateString()}
+                        </span>
+                        {answer.isAccepted && (
+                          <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded text-sm">
+                            Accepted Answer
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => handleAnswerVote(answer.id, answer.userVote === 1 ? 0 : 1)}
+                          className={`p-1 transition-colors ${
+                            answer.userVote === 1
+                              ? 'text-violet-400'
+                              : 'text-gray-400 hover:text-violet-400'
+                          }`}
+                        >
+                          <FiArrowUp className="h-5 w-5" />
+                        </button>
+                        <span className="text-gray-300">{answer.upvotes - answer.downvotes}</span>
+                        <button
+                          onClick={() => handleAnswerVote(answer.id, answer.userVote === -1 ? 0 : -1)}
+                          className={`p-1 transition-colors ${
+                            answer.userVote === -1
+                              ? 'text-violet-400'
+                              : 'text-gray-400 hover:text-violet-400'
+                          }`}
+                        >
+                          <FiArrowDown className="h-5 w-5" />
+                        </button>
+                        {currentUser?.id === post.author.id && !post.answers.some((a: AnswerWithAuthor) => a.isAccepted) && (
+                          <button
+                            onClick={() => handleAcceptAnswer(answer.id)}
+                            className="px-3 py-1 bg-green-500/20 text-green-400 rounded hover:bg-green-500/30 transition-colors"
+                          >
+                            Accept Answer
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <p className="mt-2 text-gray-300">{answer.content}</p>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Add custom scrollbar styles */}
             <style>
               {`
                 .custom-scrollbar::-webkit-scrollbar {

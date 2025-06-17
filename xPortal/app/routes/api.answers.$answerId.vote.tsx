@@ -61,7 +61,6 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    console.error('Error in loader:', error);
     return json({ 
       error: 'Failed to get vote state',
       details: error instanceof Error ? error.message : 'Unknown error'
@@ -112,8 +111,8 @@ export const action: ActionFunction = async ({ request, params }) => {
     try {
       // Use a transaction to ensure atomic operations
       const result = await prisma.$transaction(async (tx) => {
-        // First, delete any existing vote for this user and answer
-        await tx.vote.deleteMany({
+        // Find existing vote
+        const existingVote = await tx.vote.findFirst({
           where: {
             userId: user.id,
             answerId: answerId,
@@ -122,7 +121,13 @@ export const action: ActionFunction = async ({ request, params }) => {
           }
         });
 
-        if (value !== 0) {
+        if (existingVote) {
+          // Update existing vote
+          await tx.vote.update({
+            where: { id: existingVote.id },
+            data: { value }
+          });
+        } else {
           // Create new vote
           await tx.vote.create({
             data: {
@@ -179,7 +184,6 @@ export const action: ActionFunction = async ({ request, params }) => {
         userVote: result.userVote
       });
     } catch (error) {
-      console.error('Error in vote action:', error);
       return json({ 
         error: 'Failed to process vote',
         details: error instanceof Error ? error.message : 'Unknown error'
@@ -189,7 +193,6 @@ export const action: ActionFunction = async ({ request, params }) => {
       });
     }
   } catch (error) {
-    console.error('Error in vote action:', error);
     return json({ 
       error: 'Failed to process vote',
       details: error instanceof Error ? error.message : 'Unknown error'
