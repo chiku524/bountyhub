@@ -255,6 +255,23 @@ export default function CreatePost() {
       // Handle media uploads with fallback
       if (media.length > 0) {
         try {
+          // Check total media size before processing
+          let totalSize = 0;
+          for (const item of media) {
+            try {
+              const response = await fetch(item.url);
+              const blob = await response.blob();
+              totalSize += blob.size;
+            } catch (error) {
+              console.error('Failed to check media size:', error);
+            }
+          }
+          
+          const maxTotalSize = 10 * 1024 * 1024; // 10MB total limit
+          if (totalSize > maxTotalSize) {
+            throw new Error(`Total media size too large. Maximum total size is 10MB. Current size: ${(totalSize / 1024 / 1024).toFixed(2)}MB`);
+          }
+          
           // Convert blob URLs to base64 with better error handling
           const mediaWithBase64 = await Promise.all(
             media.map(async (item, index) => {
@@ -303,6 +320,13 @@ export default function CreatePost() {
         throw new Error('Failed to fetch blob data');
       }
       const blob = await response.blob();
+      
+      // Check blob size before converting to base64
+      const maxSize = 5 * 1024 * 1024; // 5MB limit for base64 data
+      if (blob.size > maxSize) {
+        throw new Error(`File size too large. Maximum size is 5MB. Current size: ${(blob.size / 1024 / 1024).toFixed(2)}MB`);
+      }
+      
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => {

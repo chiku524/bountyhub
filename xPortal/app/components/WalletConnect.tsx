@@ -3,15 +3,48 @@ import { WalletModalProvider, useWalletModal } from '@solana/wallet-adapter-reac
 import { useEffect, useState } from 'react';
 
 function WalletConnectButton() {
-  const { publicKey, connected, disconnect } = useWallet();
-  const { setVisible } = useWalletModal();
+  const [walletError, setWalletError] = useState(false);
+  
+  let publicKey: any, connected: boolean = false, disconnect: (() => void) | undefined, setVisible: ((visible: boolean) => void) | undefined;
+  
+  try {
+    const wallet = useWallet();
+    const modal = useWalletModal();
+    publicKey = wallet.publicKey;
+    connected = wallet.connected;
+    disconnect = wallet.disconnect;
+    setVisible = modal.setVisible;
+  } catch (error) {
+    console.error('Wallet context error:', error);
+    setWalletError(true);
+  }
+
+  // If there's a wallet error, show a fallback
+  if (walletError) {
+    return (
+      <div className="w-full">
+        <div className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-white/5">
+          <div className="relative flex items-center gap-4 px-4 py-1">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+            <span className="hidden text-sm font-medium text-gray-300 group-hover:text-indigo-300 group-hover:block">Wallet Error</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleWalletClick = () => {
-    setVisible(true);
+    if (setVisible) {
+      setVisible(true);
+    }
   };
 
   const handleDisconnect = () => {
-    disconnect();
+    if (disconnect) {
+      disconnect();
+    }
   };
 
   if (connected && publicKey) {

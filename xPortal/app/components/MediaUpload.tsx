@@ -176,10 +176,10 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
         throw new Error('Please upload a video or image file');
       }
 
-      // Validate file size (max 100MB for videos, 10MB for images)
-      const maxSize = isVideo ? 100 * 1024 * 1024 : 10 * 1024 * 1024;
+      // Validate file size (max 5MB for videos, 2MB for images)
+      const maxSize = isVideo ? 5 * 1024 * 1024 : 2 * 1024 * 1024;
       if (file.size > maxSize) {
-        throw new Error(`File size must be less than ${isVideo ? '100MB' : '10MB'}`);
+        throw new Error(`File size must be less than ${isVideo ? '5MB' : '2MB'}`);
       }
 
       const url = URL.createObjectURL(file);
@@ -263,6 +263,9 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
 
   return (
     <div className="space-y-4">
+      <div className="text-sm text-gray-400 mb-2">
+        <p>📁 File size limits: Images (2MB), Videos (5MB), Total uploads (10MB)</p>
+      </div>
       <div className="flex gap-4">
         <button
           type="button"
