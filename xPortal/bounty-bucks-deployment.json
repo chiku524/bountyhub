@@ -1,0 +1,46 @@
+{
+  "network": "mainnet-beta",
+  "deploymentDate": "2025-06-18T11:44:15.134Z",
+  "mint": {
+    "address": "8TxxzfEUbQcMTmsC5z1SS9TuLNzbL2iBVTLvb5JaKR6M",
+    "decimals": 9,
+    "supply": 1000000000,
+    "mintAuthority": "e6EdfgpEdo48zUKFC18cADxTqgbt68JE8uDjAgdCzkp",
+    "freezeAuthority": "e6EdfgpEdo48zUKFC18cADxTqgbt68JE8uDjAgdCzkp"
+  },
+  "platformTokenAccount": "4ShRsPAvrAueEkuNcS14PzJYXiANETowh2tpvy2JWbAh",
+  "platformWallet": "e6EdfgpEdo48zUKFC18cADxTqgbt68JE8uDjAgdCzkp",
+  "transactions": {
+    "createMint": "UMv2Xd348QVz2FFDpiExZ7SMjg9mE6mDLhs5e2HXEYiHMbbxxsz3jRMqwvWnefZSh4kaKLvX79S7rLj9C28qiXh",
+    "mintTo": "V8z6LV2JY3YZuGV2W9Znpk17Jib2vnNtvgDiJLVL5XRsQr9haGxLQwV4F3HX7wceVE79oDZuBbJvzwdqVLX3ff2"
+  },
+  "metadata": {
+    "name": "BountyBucks",
+    "symbol": "BBUX",
+    "description": "BountyBucks - The native token for Portal's decentralized bounty platform",
+    "image": "https://portal.ask/logo.png",
+    "attributes": [
+      {
+        "trait_type": "Total Supply",
+        "value": "1,000,000,000"
+      },
+      {
+        "trait_type": "Decimals",
+        "value": 9
+      },
+      {
+        "trait_type": "Network",
+        "value": "mainnet-beta"
+      }
+    ],
+    "properties": {
+      "files": [
+        {
+          "type": "image/png",
+          "uri": "https://portal.ask/logo.png"
+        }
+      ],
+      "category": "image"
+    }
+  }
+}

@@ -1,15 +1,15 @@
 const portalTokenInfo = {
-  mint: "HbLcoUfkeBPNrWs4w7PmkeS3FHbxB8DMPSe2G1cReCwH",
+  mint: "8TxxzfEUbQcMTmsC5z1SS9TuLNzbL2iBVTLvb5JaKR6M",
   mintAuthority: "e6EdfgpEdo48zUKFC18cADxTqgbt68JE8uDjAgdCzkp",
-  platformTokenAccount: "BS19RWRhxoFPRcUr61f2cTXypCK7xGzk8mYPkJbJd7vi",
+  platformTokenAccount: "4ShRsPAvrAueEkuNcS14PzJYXiANETowh2tpvy2JWbAh",
   payer: "e6EdfgpEdo48zUKFC18cADxTqgbt68JE8uDjAgdCzkp",
   config: {
     name: "BountyBucks",
     symbol: "BBUX",
     decimals: 9,
-    initialSupply: 1000000000, // 1 billion tokens
+    initialSupply: 1000000000,
     exchangeRate: 1000,
-    description: "BountyBucks - The native token for Portal's decentralized bounty platform with staking pools and integrity system"
+    description: "BountyBucks - The native token for Portal's decentralized bounty platform"
   },
   tokenSale: {
     totalTokensForSale: 200000000, // 20% of supply (200M tokens)
@@ -31,7 +31,7 @@ const portalTokenInfo = {
     community: 10, // 10% - 100M tokens
     reserve: 5, // 5% - 50M tokens
   },
-  network: "devnet"
+  network: "mainnet-beta"
 };
 
 export default portalTokenInfo;
