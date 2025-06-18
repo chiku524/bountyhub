@@ -80,8 +80,8 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
         setIsUploading(true);
         try {
           // Cloudinary config from env
-          const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || process.env.CLOUDINARY_UPLOAD_PRESET || '';
-          const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME || '';
+          const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'portal';
+          const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dqobhvk07';
           if (!uploadPreset || !cloudName) throw new Error('Cloudinary config missing');
           const uploadResult = await uploadToCloudinary(blob, 'video', uploadPreset, cloudName, 'portal/posts');
           const url = uploadResult.secure_url;
@@ -185,8 +185,8 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
       }
 
       // Cloudinary config from env
-      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || process.env.CLOUDINARY_UPLOAD_PRESET || '';
-      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME || '';
+      const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'portal';
+      const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dqobhvk07';
       if (!uploadPreset || !cloudName) throw new Error('Cloudinary config missing');
 
       // Upload to Cloudinary
