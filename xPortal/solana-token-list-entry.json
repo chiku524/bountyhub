@@ -1,0 +1,25 @@
+{
+  "chainId": 101,
+  "address": "8TxxzfEUbQcMTmsC5z1SS9TuLNzbL2iBVTLvb5JaKR6M",
+  "symbol": "BBUX",
+  "name": "BountyBucks",
+  "decimals": 9,
+  "logoURI": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/8TxxzfEUbQcMTmsC5z1SS9TuLNzbL2iBVTLvb5JaKR6M/logo.png",
+  "tags": [
+    "bounty",
+    "defi",
+    "staking",
+    "governance",
+    "developer-tools",
+    "freelance",
+    "rewards"
+  ],
+  "extensions": {
+    "website": "https://bountybucks.vercel.app/",
+    "twitter": "https://twitter.com/BountyBucks524",
+    "discord": "https://discord.gg/9uwHxMP9mz",
+    "email": "bountybucks524@gmail.com",
+    "github": "https://github.com/your-username/bountybucks",
+    "whitepaper": "https://bountybucks.vercel.app/whitepaper.pdf"
+  }
+} 
