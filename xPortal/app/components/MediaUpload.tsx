@@ -45,6 +45,11 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
       // Clean up any existing recording first
       cleanupRecording();
 
+      // Check if screen recording is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+        throw new Error('Screen recording is not supported in this browser');
+      }
+
       const stream = await navigator.mediaDevices.getDisplayMedia({
         video: true,
         audio: true
@@ -70,26 +75,65 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
         const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
         const url = URL.createObjectURL(blob);
         
-        // Create thumbnail
-        const video = document.createElement('video');
-        video.src = url;
-        video.onloadeddata = () => {
-          video.currentTime = 1; // Get frame at 1 second
-          const canvas = document.createElement('canvas');
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          const ctx = canvas.getContext('2d');
-          ctx?.drawImage(video, 0, 0);
-          const thumbnailUrl = canvas.toDataURL('image/jpeg');
-          
+        // Create thumbnail with error handling
+        try {
+          const video = document.createElement('video');
+          video.src = url;
+          video.onloadeddata = () => {
+            try {
+              video.currentTime = 1; // Get frame at 1 second
+              const canvas = document.createElement('canvas');
+              canvas.width = video.videoWidth;
+              canvas.height = video.videoHeight;
+              const ctx = canvas.getContext('2d');
+              if (ctx) {
+                ctx.drawImage(video, 0, 0);
+                const thumbnailUrl = canvas.toDataURL('image/jpeg');
+                
+                onMediaUpload({
+                  type: 'VIDEO',
+                  url,
+                  thumbnailUrl,
+                  isScreenRecording: true
+                });
+              } else {
+                // Fallback without thumbnail
+                onMediaUpload({
+                  type: 'VIDEO',
+                  url,
+                  isScreenRecording: true
+                });
+              }
+            } catch (error) {
+              console.error('Failed to create thumbnail:', error);
+              // Fallback without thumbnail
+              onMediaUpload({
+                type: 'VIDEO',
+                url,
+                isScreenRecording: true
+              });
+            }
+            cleanupRecording();
+          };
+          video.onerror = () => {
+            // Fallback without thumbnail
+            onMediaUpload({
+              type: 'VIDEO',
+              url,
+              isScreenRecording: true
+            });
+            cleanupRecording();
+          };
+        } catch (error) {
+          console.error('Failed to process video:', error);
+          // Fallback without thumbnail
           onMediaUpload({
             type: 'VIDEO',
             url,
-            thumbnailUrl,
             isScreenRecording: true
           });
           cleanupRecording();
-        };
+        }
       };
 
       // Handle when user stops sharing via browser UI
@@ -103,7 +147,9 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
       setIsRecording(true);
       setUploadType('screen');
     } catch (error) {
-      alert('Failed to start screen recording');
+      console.error('Screen recording error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to start screen recording';
+      alert(errorMessage);
       cleanupRecording();
     }
   }, [onMediaUpload, cleanupRecording]);
@@ -139,25 +185,62 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
       const url = URL.createObjectURL(file);
       
       if (isVideo) {
-        // Create thumbnail for video
-        const video = document.createElement('video');
-        video.src = url;
-        video.onloadeddata = () => {
-          video.currentTime = 1;
-          const canvas = document.createElement('canvas');
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          const ctx = canvas.getContext('2d');
-          ctx?.drawImage(video, 0, 0);
-          const thumbnailUrl = canvas.toDataURL('image/jpeg');
-          
+        // Create thumbnail for video with error handling
+        try {
+          const video = document.createElement('video');
+          video.src = url;
+          video.onloadeddata = () => {
+            try {
+              video.currentTime = 1;
+              const canvas = document.createElement('canvas');
+              canvas.width = video.videoWidth;
+              canvas.height = video.videoHeight;
+              const ctx = canvas.getContext('2d');
+              if (ctx) {
+                ctx.drawImage(video, 0, 0);
+                const thumbnailUrl = canvas.toDataURL('image/jpeg');
+                
+                onMediaUpload({
+                  type: 'VIDEO',
+                  url,
+                  thumbnailUrl,
+                  isScreenRecording: false
+                });
+              } else {
+                // Fallback without thumbnail
+                onMediaUpload({
+                  type: 'VIDEO',
+                  url,
+                  isScreenRecording: false
+                });
+              }
+            } catch (error) {
+              console.error('Failed to create video thumbnail:', error);
+              // Fallback without thumbnail
+              onMediaUpload({
+                type: 'VIDEO',
+                url,
+                isScreenRecording: false
+              });
+            }
+          };
+          video.onerror = () => {
+            // Fallback without thumbnail
+            onMediaUpload({
+              type: 'VIDEO',
+              url,
+              isScreenRecording: false
+            });
+          };
+        } catch (error) {
+          console.error('Failed to process video file:', error);
+          // Fallback without thumbnail
           onMediaUpload({
             type: 'VIDEO',
             url,
-            thumbnailUrl,
             isScreenRecording: false
           });
-        };
+        }
       } else {
         onMediaUpload({
           type: 'IMAGE',
@@ -166,7 +249,9 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
         });
       }
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Failed to upload file');
+      console.error('File upload error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to upload file';
+      alert(errorMessage);
     } finally {
       setIsUploading(false);
       setUploadType(null);

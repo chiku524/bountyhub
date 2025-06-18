@@ -38,40 +38,68 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const userId = await requireUserId(request);
-  const formData = await request.formData();
-  const title = formData.get("title") as string;
-  const content = formData.get("content") as string;
-  const codeBlocks = JSON.parse(formData.get("codeBlocks") as string || "[]");
-  const mediaData = JSON.parse(formData.get("media") as string || "[]");
-  const hasBounty = formData.get("hasBounty") === "on";
-  const bountyAmount = formData.get("bountyAmount") as string;
-  const bountyDuration = formData.get("bountyDuration") as string;
-
-  const titleError = validateTitle(title);
-  if (titleError) {
-    return json({ error: titleError });
-  }
-
-  const contentError = validateContent(content);
-  if (contentError) {
-    return json({ error: contentError });
-  }
-
-  // Check if user has sufficient balance for bounty
-  if (hasBounty && bountyAmount) {
-    const amount = parseFloat(bountyAmount);
-    const wallet = await VirtualWalletService.getOrCreateWallet(userId);
-    
-    if (wallet.balance < amount) {
-      return json({ 
-        error: `Insufficient balance. You have ${wallet.balance.toFixed(4)} ${TOKEN_SYMBOL} but need ${amount.toFixed(4)} ${TOKEN_SYMBOL} for this bounty. Please deposit more ${TOKEN_SYMBOL} to your wallet.` 
-      });
-    }
-  }
-
   try {
-    // First create the post without media
+    const userId = await requireUserId(request);
+    const formData = await request.formData();
+    
+    const title = formData.get("title") as string;
+    const content = formData.get("content") as string;
+    const codeBlocksData = formData.get("codeBlocks") as string;
+    const mediaData = formData.get("media") as string;
+    const hasBounty = formData.get("hasBounty") === "on";
+    const bountyAmount = formData.get("bountyAmount") as string;
+    const bountyDuration = formData.get("bountyDuration") as string;
+
+    // Validate required fields
+    if (!title || !content) {
+      return json({ error: "Title and content are required" }, { status: 400 });
+    }
+
+    const titleError = validateTitle(title);
+    if (titleError) {
+      return json({ error: titleError }, { status: 400 });
+    }
+
+    const contentError = validateContent(content);
+    if (contentError) {
+      return json({ error: contentError }, { status: 400 });
+    }
+
+    // Parse code blocks and media with error handling
+    let codeBlocks = [];
+    let mediaDataArray = [];
+    
+    try {
+      codeBlocks = JSON.parse(codeBlocksData || "[]");
+    } catch (error) {
+      console.error('Failed to parse code blocks:', error);
+      return json({ error: "Invalid code blocks data" }, { status: 400 });
+    }
+
+    try {
+      mediaDataArray = JSON.parse(mediaData || "[]");
+    } catch (error) {
+      console.error('Failed to parse media data:', error);
+      return json({ error: "Invalid media data" }, { status: 400 });
+    }
+
+    // Check if user has sufficient balance for bounty
+    if (hasBounty && bountyAmount) {
+      const amount = parseFloat(bountyAmount);
+      if (isNaN(amount) || amount <= 0) {
+        return json({ error: "Invalid bounty amount" }, { status: 400 });
+      }
+      
+      const wallet = await VirtualWalletService.getOrCreateWallet(userId);
+      
+      if (wallet.balance < amount) {
+        return json({ 
+          error: `Insufficient balance. You have ${wallet.balance.toFixed(4)} ${TOKEN_SYMBOL} but need ${amount.toFixed(4)} ${TOKEN_SYMBOL} for this bounty. Please deposit more ${TOKEN_SYMBOL} to your wallet.` 
+        }, { status: 400 });
+      }
+    }
+
+    // Create the post first
     const post = await prisma.posts.create({
       data: {
         title,
@@ -87,15 +115,22 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       }
     });
 
-    // If there's a bounty, create it and deduct from virtual wallet
+    // Create bounty if needed
     if (hasBounty && bountyAmount && bountyDuration) {
       const amount = parseFloat(bountyAmount);
+      const duration = parseInt(bountyDuration);
+      
+      if (isNaN(duration) || duration < 1 || duration > 30) {
+        // Delete the post if bounty creation fails
+        await prisma.posts.delete({ where: { id: post.id } });
+        return json({ error: "Invalid bounty duration (must be 1-30 days)" }, { status: 400 });
+      }
       
       const bounty = await prisma.bounty.create({
         data: {
           postId: post.id,
           amount: amount,
-          expiresAt: new Date(Date.now() + (parseInt(bountyDuration) * 24 * 60 * 60 * 1000)),
+          expiresAt: new Date(Date.now() + (duration * 24 * 60 * 60 * 1000)),
           status: 'ACTIVE'
         },
       });
@@ -104,11 +139,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       await VirtualWalletService.createBounty(userId, amount, bounty.id);
     }
 
-    // If post creation is successful, upload media to Cloudinary
-    if (mediaData.length > 0) {
+    // Upload media if any
+    if (mediaDataArray.length > 0) {
       try {
-        const media = await Promise.all(
-          mediaData.map(async (item: { type: string; base64Data: string; thumbnailBase64Data?: string; isScreenRecording: boolean }) => {
+        await Promise.all(
+          mediaDataArray.map(async (item: { type: string; base64Data: string; thumbnailBase64Data?: string; isScreenRecording: boolean }) => {
             const resourceType = item.type === 'VIDEO' ? 'video' : 'image';
             
             // Upload main media
@@ -127,32 +162,24 @@ export const action = async ({ request }: ActionFunctionArgs) => {
               thumbnailUrl = thumbnailResult.secure_url;
             }
 
-            // Create media entries in the database
-            try {
-              const mediaEntry = await prisma.media.create({
-                data: {
-                  type: item.type,
-                  url: uploadResult.secure_url,
-                  thumbnailUrl,
-                  isScreenRecording: item.isScreenRecording,
-                  cloudinaryId: uploadResult.public_id,
-                  postId: post.id
-                }
-              });
-              return mediaEntry;
-            } catch (error) {
-              console.error('Database error creating media entry:', error);
-              throw new Error('Failed to create media entry');
-            }
+            // Create media entry in the database
+            await prisma.media.create({
+              data: {
+                type: item.type,
+                url: uploadResult.secure_url,
+                thumbnailUrl,
+                isScreenRecording: item.isScreenRecording,
+                cloudinaryId: uploadResult.public_id,
+                postId: post.id
+              }
+            });
           })
         );
       } catch (error) {
-        // If media upload fails, delete the post
-        await prisma.posts.delete({
-          where: { id: post.id }
-        });
+        // If media upload fails, delete the post and bounty
         console.error('Media upload error:', error);
-        throw new Error('Failed to upload media. Please try again.');
+        await prisma.posts.delete({ where: { id: post.id } });
+        return json({ error: 'Failed to upload media. Please try again.' }, { status: 500 });
       }
     }
 
@@ -161,9 +188,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
     return redirect(`/posts/${post.id}`);
   } catch (error) {
+    console.error('Post creation error:', error);
     return json({ 
       error: error instanceof Error ? error.message : 'Failed to create post. Please try again.' 
-    });
+    }, { status: 500 });
   }
 };
 
@@ -178,6 +206,14 @@ export default function CreatePost() {
   const [hasBounty, setHasBounty] = useState(false);
   const [bountyAmount, setBountyAmount] = useState('');
   const [bountyDuration, setBountyDuration] = useState(7);
+  const [clientError, setClientError] = useState<string | null>(null);
+
+  // Clear client error when action data changes
+  useEffect(() => {
+    if (actionData?.error) {
+      setClientError(null);
+    }
+  }, [actionData]);
 
   const handleMediaUpload = (newMedia: { type: string; url: string; thumbnailUrl?: string; isScreenRecording: boolean }) => {
     setMedia(prev => [...prev, newMedia]);
@@ -190,57 +226,100 @@ export default function CreatePost() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsSubmitting(true);
+    setClientError(null);
 
     try {
-      // Convert blob URLs to base64
-      const mediaWithBase64 = await Promise.all(
-        media.map(async (item) => {
-          const base64Data = await blobUrlToBase64(item.url);
-          const thumbnailBase64Data = item.thumbnailUrl ? await blobUrlToBase64(item.thumbnailUrl) : undefined;
-          return {
-            type: item.type,
-            base64Data,
-            thumbnailBase64Data,
-            isScreenRecording: item.isScreenRecording
-          };
-        })
-      );
+      // Get form data
+      const title = (document.getElementById('title') as HTMLInputElement)?.value;
+      const content = (document.getElementById('content') as HTMLTextAreaElement)?.value;
+
+      if (!title || !content) {
+        throw new Error('Title and content are required');
+      }
 
       const formData = new FormData();
-      formData.append('title', (document.getElementById('title') as HTMLInputElement).value);
-      formData.append('content', (document.getElementById('content') as HTMLTextAreaElement).value);
+      formData.append('title', title);
+      formData.append('content', content);
       formData.append('codeBlocks', JSON.stringify(codeBlocks));
-      formData.append('media', JSON.stringify(mediaWithBase64));
       
       // Add bounty fields
       formData.append('hasBounty', hasBounty ? 'on' : 'off');
       if (hasBounty) {
+        if (!bountyAmount || parseFloat(bountyAmount) <= 0) {
+          throw new Error('Please enter a valid bounty amount');
+        }
         formData.append('bountyAmount', bountyAmount);
         formData.append('bountyDuration', bountyDuration.toString());
+      }
+
+      // Handle media uploads with fallback
+      if (media.length > 0) {
+        try {
+          // Convert blob URLs to base64 with better error handling
+          const mediaWithBase64 = await Promise.all(
+            media.map(async (item, index) => {
+              try {
+                const base64Data = await blobUrlToBase64(item.url);
+                const thumbnailBase64Data = item.thumbnailUrl ? await blobUrlToBase64(item.thumbnailUrl) : undefined;
+                return {
+                  type: item.type,
+                  base64Data,
+                  thumbnailBase64Data,
+                  isScreenRecording: item.isScreenRecording
+                };
+              } catch (error) {
+                console.error(`Failed to convert media item ${index}:`, error);
+                throw new Error(`Failed to process media item ${index + 1}. Please try again.`);
+              }
+            })
+          );
+          formData.append('media', JSON.stringify(mediaWithBase64));
+        } catch (error) {
+          console.error('Media processing error:', error);
+          // Fallback: create post without media
+          formData.append('media', JSON.stringify([]));
+          setClientError('Media upload failed. Post will be created without media.');
+        }
+      } else {
+        formData.append('media', JSON.stringify([]));
       }
 
       // Use Remix's submit function
       submit(formData, { method: 'post' });
     } catch (error) {
+      console.error('Form submission error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to create post';
+      setClientError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Helper function to convert blob URL to base64
+  // Helper function to convert blob URL to base64 with better error handling
   const blobUrlToBase64 = async (blobUrl: string): Promise<string> => {
-    const response = await fetch(blobUrl);
-    const blob = await response.blob();
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64data = reader.result as string;
-        resolve(base64data);
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
+    try {
+      const response = await fetch(blobUrl);
+      if (!response.ok) {
+        throw new Error('Failed to fetch blob data');
+      }
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64data = reader.result as string;
+          if (base64data) {
+            resolve(base64data);
+          } else {
+            reject(new Error('Failed to convert blob to base64'));
+          }
+        };
+        reader.onerror = () => reject(new Error('Failed to read blob data'));
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.error('Blob to base64 conversion error:', error);
+      throw new Error('Failed to process media file. Please try again.');
+    }
   };
 
   return (
@@ -357,9 +436,9 @@ export default function CreatePost() {
               </div>
             </div>
 
-            {actionData?.error && (
+            {(actionData?.error || clientError) && (
               <div className="bg-red-500/10 border border-red-500/30 text-red-500 px-4 py-2 rounded-lg">
-                {actionData.error}
+                {actionData?.error || clientError}
               </div>
             )}
 
