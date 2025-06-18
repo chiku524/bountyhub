@@ -24,7 +24,6 @@
     "@solana/wallet-adapter-wallets": "^0.19.37",
     "@solana/web3.js": "^1.98.2",
     "@types/react-syntax-highlighter": "15.5.13",
-    "@vercel/remix": "^2.16.6",
     "bcryptjs": "2.4.3",
     "cloudinary": "2.0.1",
     "express": "^4.21.2",
