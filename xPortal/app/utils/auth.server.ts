@@ -85,12 +85,7 @@ export async function requireUserId(request: Request, redirectTo: string = new U
   const session = await getUserSession(request)
   const userId = session.get('userId')
   if (!userId || typeof userId !== 'string') {
-    throw new Response("Please sign in to access this page", { 
-      status: 401,
-      headers: {
-        'Location': `/login?redirectTo=${redirectTo}`
-      }
-    })
+    throw redirect(`/login?redirectTo=${redirectTo}`)
   }
   return userId
 }

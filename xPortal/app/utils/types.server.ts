@@ -11,7 +11,7 @@ export interface RegisterForm {
     email: string;
     password: string;
     username: string;
-    redirectTo: string;
+    redirectTo?: string;
 }
 
 export type User = PrismaUser & {

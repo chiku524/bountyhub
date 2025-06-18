@@ -1,5 +1,5 @@
 // app/routes/profile.tsx
-import { Form, useLoaderData, Link } from "@remix-run/react"
+import { Form, useLoaderData, Link, Outlet, useLocation } from "@remix-run/react"
 import { LoaderFunction, json, redirect } from '@remix-run/node'
 import { getUser } from '~/utils/auth.server'
 import { Nav } from '../components/nav'
@@ -23,12 +23,27 @@ import {
     FaStackOverflow, 
     FaDev 
 } from 'react-icons/fa'
+import { FiThumbsUp, FiEdit2 } from 'react-icons/fi'
 
 const DEFAULT_PROFILE_PICTURE = 'https://api.dicebear.com/7.x/initials/svg?seed=';
 
-function truncateContent(content: string, maxLength: number = 200): string {
-    if (content.length <= maxLength) return content;
-    return content.slice(0, maxLength) + '...';
+type Post = {
+    id: string;
+    title: string;
+    content: string;
+    createdAt: string | Date;
+};
+
+type ReputationHistory = {
+    id: string;
+    action: string;
+    points: number;
+    createdAt: string | Date;
+};
+
+function truncateContent(content: string | undefined | null): string {
+    if (!content) return '';
+    return content.length > 100 ? content.substring(0, 100) + '...' : content;
 }
 
 function getProfilePicture(profilePicture: string | null, username: string): string {
@@ -73,48 +88,38 @@ interface UserData {
     reputationHistory: Array<{
         id: string;
         points: number;
-        reason: string;
+        action: string;
         createdAt: Date;
     }>;
 }
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-    try {
-        const userId = await requireUserId(request);
-        const userData = await prisma.user.findUnique({
-            where: { id: userId },
-            include: { 
-                profile: true,
-                posts: {
-                    orderBy: { createdAt: 'desc' },
-                    select: {
-                        id: true,
-                        title: true,
-                        content: true,
-                        createdAt: true,
-                    },
-                },
-                reputationHistory: {
-                    orderBy: { createdAt: 'desc' },
-                    take: 10,
+    const userId = await requireUserId(request);
+    const userData = await prisma.user.findUnique({
+        where: { id: userId },
+        include: { 
+            profile: true,
+            posts: {
+                orderBy: { createdAt: 'desc' },
+                select: {
+                    id: true,
+                    title: true,
+                    content: true,
+                    createdAt: true,
                 },
             },
-        });
+            reputationHistory: {
+                orderBy: { createdAt: 'desc' },
+                take: 10,
+            },
+        },
+    });
 
-        if (!userData) {
-            throw new Response("User not found", { status: 404 });
-        }
-
-        return json({ user: userData, isAuthenticated: true });
-    } catch (error) {
-        if (error instanceof Response) {
-            if (error.status === 401) {
-                return json({ isAuthenticated: false });
-            }
-            throw error;
-        }
-        throw new Response("Internal Server Error", { status: 500 });
+    if (!userData) {
+        throw new Response("User not found", { status: 404 });
     }
+
+    return json({ user: userData, isAuthenticated: true });
 };
 
 const SocialMediaIcons = ({ profile }: { profile: NonNullable<UserData['profile']> }) => {
@@ -153,8 +158,38 @@ const SocialMediaIcons = ({ profile }: { profile: NonNullable<UserData['profile'
     );
 };
 
+function getActivityDescription(action: string): string {
+    const descriptions: { [key: string]: string } = {
+        'POST_CREATED': 'Created a new post',
+        'POST_UPVOTED': 'Received an upvote on your post',
+        'POST_DOWNVOTED': 'Received a downvote on your post',
+        'COMMENT_CREATED': 'Added a comment',
+        'COMMENT_UPVOTED': 'Received an upvote on your comment',
+        'COMMENT_DOWNVOTED': 'Received a downvote on your comment',
+        'ANSWER_CREATED': 'Provided an answer',
+        'ANSWER_UPVOTED': 'Received an upvote on your answer',
+        'ANSWER_DOWNVOTED': 'Received a downvote on your answer',
+        'ANSWER_ACCEPTED': 'Your answer was accepted as the best solution',
+        'PROFILE_COMPLETED': 'Completed your profile information',
+        'DAILY_LOGIN': 'Logged in for the day',
+        'WEEKLY_STREAK': 'Maintained a weekly activity streak',
+        'MONTHLY_CONTRIBUTOR': 'Active contributor this month',
+        'HELPFUL_MEMBER': 'Recognized as a helpful community member',
+        'FIRST_POST': 'Created your first post',
+        'FIRST_ANSWER': 'Provided your first answer',
+        'FIRST_COMMENT': 'Added your first comment',
+        'REPUTATION_MILESTONE': 'Reached a reputation milestone',
+        'COMMUNITY_ENGAGEMENT': 'Active participation in the community',
+        'CREATE_POST': 'Created a new post'
+    };
+    
+    return descriptions[action] || action;
+}
+
 export default function Profile() {
     const { user, isAuthenticated } = useLoaderData<{ user: UserData; isAuthenticated?: boolean }>();
+    const location = useLocation();
+    const isActivityPage = location.pathname === '/profile/activity';
 
     if (!isAuthenticated) {
         return <AuthNotice />;
@@ -193,115 +228,129 @@ export default function Profile() {
                         </Link>
                     </div>
 
-                    <div className="bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
-                        <div className="flex items-start space-x-6">
-                            <ProfilePictureUpload 
-                                currentPicture={user.profile?.profilePicture || null}
-                                username={user.username}
-                            />
-                            <div className="flex-1">
-                                <h2 className="text-xl font-semibold text-white">{user.username}</h2>
-                                <p className="text-gray-400 mt-1">
-                                    Member since {new Date(user.createdAt).toLocaleDateString()}
-                                </p>
-                                <div className="mt-4">
-                                    <div className="flex items-center space-x-2">
-                                        <div className="bg-violet-500/20 px-3 py-1 rounded-full border border-violet-500/50">
-                                            <span className="text-violet-300 font-medium">{reputationLevel}</span>
-                                        </div>
-                                        <div className="bg-violet-500/20 px-3 py-1 rounded-full border border-violet-500/50">
-                                            <span className="text-violet-300 font-medium">{user.reputationPoints || 0} points</span>
+                    {!isActivityPage ? (
+                        <div className="bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+                            <div className="flex items-start space-x-6">
+                                <ProfilePictureUpload 
+                                    currentPicture={user.profile?.profilePicture || null}
+                                    username={user.username}
+                                />
+                                <div className="flex-1">
+                                    <h2 className="text-xl font-semibold text-white">{user.username}</h2>
+                                    <p className="text-gray-400 mt-1">
+                                        Member since {new Date(user.createdAt).toLocaleDateString()}
+                                    </p>
+                                    <div className="mt-4">
+                                        <div className="flex items-center space-x-2">
+                                            <div className="bg-violet-500/20 px-3 py-1 rounded-full border border-violet-500/50">
+                                                <span className="text-violet-300 font-medium">{reputationLevel}</span>
+                                            </div>
+                                            <div className="bg-violet-500/20 px-3 py-1 rounded-full border border-violet-500/50">
+                                                <span className="text-violet-300 font-medium">{user.reputationPoints || 0} points</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div className="mt-8">
-                            <h2 className="text-lg font-semibold text-violet-300 mb-4">Profile Information</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
-                                    <label className="block text-sm font-medium text-violet-300">Bio</label>
-                                    <p className="mt-1 text-sm text-gray-300">{user.profile?.bio || 'No bio provided'}</p>
+                            <div className="mt-8">
+                                <h2 className="text-lg font-semibold text-violet-300 mb-4">Profile Information</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
+                                        <label className="block text-sm font-medium text-violet-300">Bio</label>
+                                        <p className="mt-1 text-sm text-gray-300">{user.profile?.bio || 'No bio provided'}</p>
+                                    </div>
+                                    <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
+                                        <label className="block text-sm font-medium text-violet-300">Location</label>
+                                        <p className="mt-1 text-sm text-gray-300">{user.profile?.location || 'No location provided'}</p>
+                                    </div>
+                                    <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
+                                        <label className="block text-sm font-medium text-violet-300">Website</label>
+                                        <p className="mt-1 text-sm text-gray-300">
+                                            {user.profile?.website ? (
+                                                <a href={user.profile.website} target="_blank" rel="noopener noreferrer" 
+                                                   className="text-violet-400 hover:text-violet-300">
+                                                    {user.profile.website}
+                                                </a>
+                                            ) : 'No website provided'}
+                                        </p>
+                                    </div>
+                                    <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
+                                        <label className="block text-sm font-medium text-violet-300">Social Media</label>
+                                        <div className="mt-2">
+                                            {user.profile ? (
+                                                <SocialMediaIcons profile={user.profile} />
+                                            ) : (
+                                                <p className="text-sm text-gray-300">No social media links provided</p>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
-                                    <label className="block text-sm font-medium text-violet-300">Location</label>
-                                    <p className="mt-1 text-sm text-gray-300">{user.profile?.location || 'No location provided'}</p>
-                                </div>
-                                <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
-                                    <label className="block text-sm font-medium text-violet-300">Website</label>
-                                    <p className="mt-1 text-sm text-gray-300">
-                                        {user.profile?.website ? (
-                                            <a href={user.profile.website} target="_blank" rel="noopener noreferrer" 
-                                               className="text-violet-400 hover:text-violet-300">
-                                                {user.profile.website}
-                                            </a>
-                                        ) : 'No website provided'}
-                                    </p>
-                                </div>
-                                <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
-                                    <label className="block text-sm font-medium text-violet-300">Social Media</label>
-                                    <div className="mt-2">
-                                        {user.profile ? (
-                                            <SocialMediaIcons profile={user.profile} />
-                                        ) : (
-                                            <p className="text-sm text-gray-300">No social media links provided</p>
+                            </div>
+
+                            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h2 className="text-lg font-semibold text-violet-300 mb-4">Recent Activity</h2>
+                                    <div className="space-y-2">
+                                        {recentActivities.map((history) => (
+                                            <div key={history.id} className="flex items-center justify-between p-3 bg-neutral-700/50 rounded-lg border border-violet-500/30">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="p-1.5 bg-violet-500/20 rounded-lg">
+                                                        <FiThumbsUp className="w-3.5 h-3.5 text-violet-300" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-medium text-violet-300">{getActivityDescription(history.action)}</p>
+                                                        <p className="text-xs text-gray-400 mt-0.5">
+                                                            {new Date(history.createdAt).toLocaleDateString()}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <span className={`text-sm font-medium ${history.points > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                                    {history.points > 0 ? '+' : ''}{history.points}
+                                                </span>
+                                            </div>
+                                        ))}
+                                        {user.reputationHistory.length > 5 && (
+                                            <div className="mt-3 text-center">
+                                                <Link to="/profile/activity" className="inline-block px-3 py-1.5 text-sm bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors border border-violet-500/50 shadow-md">
+                                                    View All Activity
+                                                </Link>
+                                            </div>
                                         )}
                                     </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <div className="mt-8">
-                            <h2 className="text-lg font-semibold text-violet-300 mb-4">Recent Activity</h2>
-                            <div className="space-y-4">
-                                {recentActivities.map((history) => (
-                                    <div key={history.id} className="flex items-center justify-between p-4 bg-neutral-700/50 rounded-lg border border-violet-500/30">
-                                        <div>
-                                            <p className="text-sm font-medium text-violet-300">{history.reason}</p>
-                                        </div>
-                                        <div className="flex items-center">
-                                            <span className={`text-sm font-medium ${history.points > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                                {history.points > 0 ? '+' : ''}{history.points}
-                                            </span>
-                                            <span className="text-sm text-gray-400 ml-2">
-                                                {new Date(history.createdAt).toLocaleDateString()}
-                                            </span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                            {user.reputationHistory.length > 5 && (
-                                <div className="mt-4 text-center">
-                                    <Link to="/profile/activity" className="inline-block px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors border border-violet-500/50 shadow-md">
-                                        View All Activity
-                                    </Link>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="mt-8">
-                            <h2 className="text-lg font-semibold text-violet-300 mb-4">Recent Posts</h2>
-                            <div className="space-y-4">
-                                {user.posts.map((post) => (
-                                    <div key={post.id} className="p-4 bg-neutral-700/50 rounded-lg border border-violet-500/30">
-                                        <Link to={`/posts/${post.id}`} className="block hover:bg-neutral-600/50 rounded-lg p-2 -m-2 transition-colors">
-                                            <h3 className="text-lg font-medium text-violet-300">{post.title}</h3>
-                                            <p className="mt-1 text-sm text-gray-300">{truncateContent(post.content)}</p>
-                                            <div className="mt-2 flex items-center justify-between">
-                                                <p className="text-sm text-gray-400">
-                                                    Posted on {new Date(post.createdAt).toLocaleDateString()}
-                                                </p>
-                                                <span className="text-sm text-violet-400 hover:text-violet-300 transition-colors">
-                                                    Read more →
-                                                </span>
+                                <div>
+                                    <h2 className="text-lg font-semibold text-violet-300 mb-4">Recent Posts</h2>
+                                    <div className="space-y-2">
+                                        {user.posts.map((post) => (
+                                            <div key={post.id} className="p-3 bg-neutral-700/50 rounded-lg border border-violet-500/30">
+                                                <Link to={`/posts/${post.id}`} className="block hover:bg-neutral-600/50 rounded-lg p-1.5 -m-1.5 transition-colors">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <div className="p-1.5 bg-violet-500/20 rounded-lg">
+                                                            <FiEdit2 className="w-3.5 h-3.5 text-violet-300" />
+                                                        </div>
+                                                        <h3 className="text-sm font-medium text-violet-300">{post.title}</h3>
+                                                    </div>
+                                                    <p className="text-xs text-gray-300 line-clamp-2">{truncateContent(post.content)}</p>
+                                                    <div className="mt-1 flex items-center justify-between">
+                                                        <p className="text-xs text-gray-400">
+                                                            {new Date(post.createdAt).toLocaleDateString()}
+                                                        </p>
+                                                        <span className="text-xs text-violet-400 hover:text-violet-300 transition-colors">
+                                                            Read more →
+                                                        </span>
+                                                    </div>
+                                                </Link>
                                             </div>
-                                        </Link>
+                                        ))}
                                     </div>
-                                ))}
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    ) : (
+                        <Outlet />
+                    )}
                 </div>
             </div>
         </div>

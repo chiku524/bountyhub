@@ -1,5 +1,5 @@
 // app/routes/profile.tsx
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Form, useLoaderData, Link, useActionData, redirect, useNavigate, useSubmit } from "@remix-run/react"
 import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from '@remix-run/node'
 import { requireUserId } from '~/utils/auth.server'
@@ -11,6 +11,10 @@ import { addReputationPoints, REPUTATION_POINTS } from '~/utils/reputation.serve
 import CodeBlockEditor from '~/components/CodeBlockEditor'
 import { MediaUpload } from '~/components/MediaUpload'
 import { uploadToCloudinary } from '~/utils/cloudinary.server'
+import { VirtualWalletService } from '~/utils/virtual-wallet.server'
+import portalTokenInfo from '../../portal-token-info'
+
+const TOKEN_SYMBOL = portalTokenInfo.config.symbol
 
 interface LoaderData {
   user: {
@@ -40,6 +44,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const content = formData.get("content") as string;
   const codeBlocks = JSON.parse(formData.get("codeBlocks") as string || "[]");
   const mediaData = JSON.parse(formData.get("media") as string || "[]");
+  const hasBounty = formData.get("hasBounty") === "on";
+  const bountyAmount = formData.get("bountyAmount") as string;
+  const bountyDuration = formData.get("bountyDuration") as string;
 
   const titleError = validateTitle(title);
   if (titleError) {
@@ -51,6 +58,18 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return json({ error: contentError });
   }
 
+  // Check if user has sufficient balance for bounty
+  if (hasBounty && bountyAmount) {
+    const amount = parseFloat(bountyAmount);
+    const wallet = await VirtualWalletService.getOrCreateWallet(userId);
+    
+    if (wallet.balance < amount) {
+      return json({ 
+        error: `Insufficient balance. You have ${wallet.balance.toFixed(4)} ${TOKEN_SYMBOL} but need ${amount.toFixed(4)} ${TOKEN_SYMBOL} for this bounty. Please deposit more ${TOKEN_SYMBOL} to your wallet.` 
+      });
+    }
+  }
+
   try {
     // First create the post without media
     const post = await prisma.posts.create({
@@ -58,6 +77,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         title,
         content,
         authorId: userId,
+        hasBounty: hasBounty,
         codeBlocks: {
           create: codeBlocks.map((block: { language: string; code: string; description: string }) => ({
             language: block.language,
@@ -66,6 +86,23 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         }
       }
     });
+
+    // If there's a bounty, create it and deduct from virtual wallet
+    if (hasBounty && bountyAmount && bountyDuration) {
+      const amount = parseFloat(bountyAmount);
+      
+      const bounty = await prisma.bounty.create({
+        data: {
+          postId: post.id,
+          amount: amount,
+          expiresAt: new Date(Date.now() + (parseInt(bountyDuration) * 24 * 60 * 60 * 1000)),
+          status: 'ACTIVE'
+        },
+      });
+
+      // Deduct from virtual wallet
+      await VirtualWalletService.createBounty(userId, amount, bounty.id);
+    }
 
     // If post creation is successful, upload media to Cloudinary
     if (mediaData.length > 0) {
@@ -104,6 +141,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
               });
               return mediaEntry;
             } catch (error) {
+              console.error('Database error creating media entry:', error);
               throw new Error('Failed to create media entry');
             }
           })
@@ -113,6 +151,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         await prisma.posts.delete({
           where: { id: post.id }
         });
+        console.error('Media upload error:', error);
         throw new Error('Failed to upload media. Please try again.');
       }
     }
@@ -136,6 +175,9 @@ export default function CreatePost() {
   const [codeBlocks, setCodeBlocks] = useState<CodeBlockForm[]>([]);
   const [media, setMedia] = useState<Array<{ type: string; url: string; thumbnailUrl?: string; isScreenRecording: boolean }>>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasBounty, setHasBounty] = useState(false);
+  const [bountyAmount, setBountyAmount] = useState('');
+  const [bountyDuration, setBountyDuration] = useState(7);
 
   const handleMediaUpload = (newMedia: { type: string; url: string; thumbnailUrl?: string; isScreenRecording: boolean }) => {
     setMedia(prev => [...prev, newMedia]);
@@ -169,6 +211,13 @@ export default function CreatePost() {
       formData.append('content', (document.getElementById('content') as HTMLTextAreaElement).value);
       formData.append('codeBlocks', JSON.stringify(codeBlocks));
       formData.append('media', JSON.stringify(mediaWithBase64));
+      
+      // Add bounty fields
+      formData.append('hasBounty', hasBounty ? 'on' : 'off');
+      if (hasBounty) {
+        formData.append('bountyAmount', bountyAmount);
+        formData.append('bountyDuration', bountyDuration.toString());
+      }
 
       // Use Remix's submit function
       submit(formData, { method: 'post' });
@@ -197,13 +246,13 @@ export default function CreatePost() {
   return (
     <div className="h-screen w-full bg-neutral-900 flex flex-row">
       <Nav />
-      <div className="flex-1 overflow-y-auto">
-        <div className="w-auto max-w-4xl mx-auto mt-4 px-4 ml-24 pb-16">
+      <div className="flex-1 overflow-y-auto ml-20">
+        <div className="max-w-4xl mx-auto p-6">
           <div className="mb-6 flex justify-between items-center mt-16">
             <h1 className="text-2xl font-bold text-white">Create New Post</h1>
           </div>
 
-          <Form method="post" onSubmit={handleSubmit} className="space-y-6">
+          <Form method="post" onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto">
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-violet-300 mb-2">
                 Title
@@ -251,25 +300,74 @@ export default function CreatePost() {
               />
             </div>
 
+            <div>
+              <label className="block text-sm font-medium text-violet-300 mb-2">
+                Bounty
+              </label>
+              <div className="space-y-4 bg-neutral-700/50 border border-violet-500/30 rounded-lg p-4">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="hasBounty"
+                    name="hasBounty"
+                    checked={hasBounty}
+                    onChange={(e) => setHasBounty(e.target.checked)}
+                    className="rounded border-violet-500/30 bg-neutral-700/50 text-violet-300 focus:ring-violet-500"
+                  />
+                  <label htmlFor="hasBounty" className="text-violet-300">
+                    Add Crypto Bounty
+                  </label>
+                </div>
+
+                {hasBounty && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-violet-300 mb-1">
+                        Bounty Amount
+                      </label>
+                      <input
+                        type="number"
+                        name="bountyAmount"
+                        value={bountyAmount}
+                        onChange={(e) => setBountyAmount(e.target.value)}
+                        min="0"
+                        step="0.01"
+                        required
+                        className="w-full rounded-lg border-violet-500/30 bg-neutral-700/50 text-violet-300 focus:ring-violet-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-violet-300 mb-1">
+                        Bounty Duration (days)
+                      </label>
+                      <input
+                        type="number"
+                        name="bountyDuration"
+                        value={bountyDuration}
+                        onChange={(e) => setBountyDuration(Number(e.target.value))}
+                        min="1"
+                        max="30"
+                        required
+                        className="w-full rounded-lg border-violet-500/30 bg-neutral-700/50 text-violet-300 focus:ring-violet-500"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
             {actionData?.error && (
               <div className="bg-red-500/10 border border-red-500/30 text-red-500 px-4 py-2 rounded-lg">
                 {actionData.error}
               </div>
             )}
 
-            <div className="flex justify-end space-x-4">
-              <button
-                type="button"
-                onClick={() => navigate(-1)}
-                className="px-4 py-2 border border-violet-500/30 text-violet-300 rounded-lg hover:bg-violet-500/10 transition-colors"
-                disabled={isSubmitting}
-              >
-                Cancel
-              </button>
+            <div className="flex justify-end">
               <button
                 type="submit"
-                className="px-4 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isSubmitting}
+                className="px-6 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 disabled:opacity-50"
               >
                 {isSubmitting ? 'Creating...' : 'Create Post'}
               </button>

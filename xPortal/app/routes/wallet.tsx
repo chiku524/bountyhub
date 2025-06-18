@@ -1,0 +1,660 @@
+import { json, type LoaderFunctionArgs } from "@remix-run/node";
+import { useLoaderData, Form, useActionData, useNavigation } from "@remix-run/react";
+import { VirtualWalletService } from "~/utils/virtual-wallet.server";
+import { requireUserId } from "~/utils/auth.server";
+import { useState } from "react";
+import { Nav } from "~/components/nav";
+import { DirectDeposit } from "~/components/DirectDeposit";
+import portalTokenInfo from '../../portal-token-info';
+import { prisma } from "~/utils/db.server";
+import { TokenSupplyService } from "../utils/token-supply.server";
+
+const TOKEN_SYMBOL = portalTokenInfo.config.symbol;
+const TOKEN_DECIMALS = portalTokenInfo.config.decimals;
+
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const userId = await requireUserId(request);
+  
+  const walletData = await VirtualWalletService.getWalletDetails(userId);
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { solanaAddress: true, tokenAccountAddress: true },
+  });
+
+  // Fetch token supply stats
+  const supplyStats = await TokenSupplyService.getSupplyStats();
+
+  return json({ walletData, user, supplyStats });
+};
+
+export default function WalletPage() {
+  const { walletData, user, supplyStats } = useLoaderData<typeof loader>();
+  const { wallet, transactions } = walletData;
+  const [activeTab, setActiveTab] = useState<'overview' | 'deposit' | 'withdraw'>('overview');
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [showDepositConfirmation, setShowDepositConfirmation] = useState(false);
+  const [pendingDeposit, setPendingDeposit] = useState<any>(null);
+  const [depositResult, setDepositResult] = useState<any>(null);
+  const [isDepositLoading, setIsDepositLoading] = useState(false);
+  const [isConfirmLoading, setIsConfirmLoading] = useState(false);
+  const [depositMode, setDepositMode] = useState<'direct' | 'manual'>('direct');
+  const actionData = useActionData();
+  const [isWithdrawLoading, setIsWithdrawLoading] = useState(false);
+  const [withdrawResult, setWithdrawResult] = useState<any>(null);
+  const [withdrawError, setWithdrawError] = useState<string | null>(null);
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const getTransactionIcon = (type: string) => {
+    switch (type) {
+      case 'DEPOSIT':
+        return '💰';
+      case 'WITHDRAW':
+        return '💸';
+      case 'BOUNTY_CREATED':
+        return '🎯';
+      case 'BOUNTY_CLAIMED':
+        return '🏆';
+      case 'BOUNTY_REFUNDED':
+        return '↩️';
+      default:
+        return '📊';
+    }
+  };
+
+  const getTransactionColor = (type: string) => {
+    switch (type) {
+      case 'DEPOSIT':
+      case 'BOUNTY_CLAIMED':
+      case 'BOUNTY_REFUNDED':
+        return 'text-green-600';
+      case 'WITHDRAW':
+      case 'BOUNTY_CREATED':
+        return 'text-red-600';
+      default:
+        return 'text-gray-600';
+    }
+  };
+
+  // Handle deposit form submission
+  const handleDepositSubmit = async (formData: FormData) => {
+    setIsDepositLoading(true);
+    try {
+      const response = await fetch('/api/wallet/deposit', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        setPendingDeposit(result);
+        setShowDepositModal(false);
+        setShowDepositConfirmation(true);
+      } else {
+        alert(result.error || 'Failed to create deposit request');
+      }
+    } catch (error) {
+      alert('Failed to create deposit request. Please try again.');
+    } finally {
+      setIsDepositLoading(false);
+    }
+  };
+
+  // Handle deposit confirmation
+  const handleDepositConfirmation = async (formData: FormData) => {
+    setIsConfirmLoading(true);
+    try {
+      formData.append('action', 'confirm');
+      formData.append('transactionId', pendingDeposit.transaction.id);
+      
+      const response = await fetch('/api/wallet/deposit', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        setDepositResult(result);
+        setShowDepositConfirmation(false);
+        // Reload the page to show updated balance
+        window.location.reload();
+      } else {
+        alert(result.error || 'Failed to confirm deposit');
+      }
+    } catch (error) {
+      alert('Failed to confirm deposit. Please try again.');
+    } finally {
+      setIsConfirmLoading(false);
+    }
+  };
+
+  // Handle withdraw form submission
+  const handleWithdrawSubmit = async (formData: FormData) => {
+    setIsWithdrawLoading(true);
+    setWithdrawError(null);
+    try {
+      const response = await fetch('/api/wallet/withdraw', {
+        method: 'POST',
+        body: formData,
+      });
+      const result = await response.json();
+      if (result.success) {
+        setWithdrawResult(result);
+        setShowWithdrawModal(false);
+        // Optionally reload after a delay
+        setTimeout(() => window.location.reload(), 1500);
+      } else {
+        setWithdrawError(result.error || 'Withdrawal failed.');
+      }
+    } catch (error) {
+      setWithdrawError('Withdrawal failed. Please try again.');
+    } finally {
+      setIsWithdrawLoading(false);
+    }
+  };
+
+  return (
+    <div className="h-screen w-full bg-neutral-900 flex flex-row">
+      <Nav />
+      <div className="flex-1 overflow-y-auto ml-20">
+        <div className="max-w-4xl mx-auto p-6">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-white mb-2">My Wallet</h1>
+            <p className="text-gray-300">Manage your virtual {TOKEN_SYMBOL} balance and transactions</p>
+          </div>
+
+          {/* Wallet Overview Card */}
+          <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white mb-8">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-semibold mb-2">Virtual Balance</h2>
+                <p className="text-3xl font-bold">{wallet.balance.toFixed(4)} {TOKEN_SYMBOL}</p>
+                <p className="text-blue-100 mt-2">Available for bounties and withdrawals</p>
+              </div>
+              <div className="text-right">
+                <div className="mb-2">
+                  <p className="text-blue-100">Total Earned</p>
+                  <p className="text-xl font-semibold">{wallet.totalEarned.toFixed(4)} {TOKEN_SYMBOL}</p>
+                </div>
+                <div>
+                  <p className="text-blue-100">Total Spent</p>
+                  <p className="text-xl font-semibold">{wallet.totalSpent.toFixed(4)} {TOKEN_SYMBOL}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Token Supply Stats */}
+          <div className="bg-neutral-800 border border-yellow-600 rounded-lg p-4 mb-8">
+            <h3 className="text-lg font-semibold text-yellow-300 mb-2">PORTAL Token Supply</h3>
+            <div className="flex flex-wrap gap-6 items-center">
+              <div>
+                <span className="block text-sm text-gray-400">Initial Supply</span>
+                <span className="font-mono text-lg text-yellow-200">{supplyStats.initialSupply.toLocaleString()} {TOKEN_SYMBOL}</span>
+              </div>
+              <div>
+                <span className="block text-sm text-gray-400">Current Supply</span>
+                <span className="font-mono text-lg text-yellow-200">{supplyStats.currentSupply.toLocaleString()} {TOKEN_SYMBOL}</span>
+              </div>
+              <div>
+                <span className="block text-sm text-gray-400">Burned</span>
+                <span className="font-mono text-lg text-yellow-200">{supplyStats.burnedAmount.toLocaleString()} {TOKEN_SYMBOL}</span>
+              </div>
+              <div>
+                <span className="block text-sm text-gray-400">Burn %</span>
+                <span className="font-mono text-lg text-yellow-200">{supplyStats.burnPercentage.toFixed(4)}%</span>
+              </div>
+            </div>
+            {supplyStats.burnPercentage >= 75 && (
+              <div className="mt-4 p-3 bg-red-900 border border-red-700 text-red-200 rounded-lg">
+                <strong>⚠️ WARNING:</strong> Token supply is running low! Please contact the platform admin.
+              </div>
+            )}
+            {supplyStats.burnPercentage >= 50 && supplyStats.burnPercentage < 75 && (
+              <div className="mt-4 p-3 bg-yellow-900 border border-yellow-700 text-yellow-200 rounded-lg">
+                <strong>⚠️ NOTICE:</strong> Token supply is getting low. Monitor burn rates and consider governance action.
+              </div>
+            )}
+            {supplyStats.burnPercentage < 50 && (
+              <div className="mt-4 p-3 bg-green-900 border border-green-700 text-green-200 rounded-lg">
+                <strong>✅ Supply is healthy.</strong>
+              </div>
+            )}
+          </div>
+
+          {/* User's Solana Addresses */}
+          {user && (user.solanaAddress || user.tokenAccountAddress) && (
+            <div className="bg-neutral-800 border border-neutral-700 rounded-lg p-6 mb-6">
+              <h3 className="text-xl font-semibold mb-4 text-white">Your Solana Addresses</h3>
+              <div className="space-y-3">
+                {user.solanaAddress && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                      Wallet Address
+                    </label>
+                    <p className="font-mono text-sm bg-neutral-700 p-2 rounded border border-neutral-600 break-all text-gray-200">
+                      {user.solanaAddress}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">Your generated Solana wallet address</p>
+                  </div>
+                )}
+                {user.tokenAccountAddress && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                      {TOKEN_SYMBOL} Token Account
+                    </label>
+                    <p className="font-mono text-sm bg-neutral-700 p-2 rounded border border-neutral-600 break-all text-gray-200">
+                      {user.tokenAccountAddress}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">Where your {TOKEN_SYMBOL} tokens are stored</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex space-x-4 mb-6">
+            <button
+              onClick={() => setShowDepositModal(true)}
+              className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+            >
+              💰 Buy {TOKEN_SYMBOL} with SOL
+            </button>
+            <button
+              onClick={() => setShowWithdrawModal(true)}
+              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+            >
+              💸 Sell {TOKEN_SYMBOL} for SOL
+            </button>
+          </div>
+
+          {/* Deposit Modal */}
+          {showDepositModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-neutral-800 border border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-semibold text-white">Buy {TOKEN_SYMBOL} with SOL</h3>
+                  <button
+                    onClick={() => setShowDepositModal(false)}
+                    className="text-gray-400 hover:text-gray-200 text-2xl font-bold"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                {/* Deposit Mode Tabs */}
+                <div className="flex space-x-1 mb-6 bg-neutral-700 rounded-lg p-1">
+                  <button
+                    onClick={() => setDepositMode('direct')}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                      depositMode === 'direct'
+                        ? 'bg-blue-500 text-white'
+                        : 'text-gray-300 hover:text-white'
+                    }`}
+                  >
+                    🚀 Direct Deposit
+                  </button>
+                  <button
+                    onClick={() => setDepositMode('manual')}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                      depositMode === 'manual'
+                        ? 'bg-blue-500 text-white'
+                        : 'text-gray-300 hover:text-white'
+                    }`}
+                  >
+                    📝 Manual Deposit
+                  </button>
+                </div>
+
+                {/* Direct Deposit */}
+                {depositMode === 'direct' && (
+                  <DirectDeposit
+                    onSuccess={() => {
+                      setShowDepositModal(false);
+                      // Reload page to show updated balance
+                      setTimeout(() => window.location.reload(), 1000);
+                    }}
+                    onError={(error) => {
+                      if (error !== 'cancelled') {
+                        alert(error);
+                      }
+                      setShowDepositModal(false);
+                    }}
+                  />
+                )}
+
+                {/* Manual Deposit */}
+                {depositMode === 'manual' && (
+                  <form onSubmit={async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.currentTarget);
+                    await handleDepositSubmit(formData);
+                  }} className="space-y-4">
+                    <div className="bg-yellow-900 border border-yellow-700 rounded-lg p-4 mb-4">
+                      <h4 className="font-semibold text-yellow-200 mb-2">Manual Deposit</h4>
+                      <p className="text-yellow-300 text-sm">
+                        You'll need to manually send SOL from your wallet and then confirm the transaction
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Amount (SOL)
+                      </label>
+                      <input
+                        type="number"
+                        name="amount"
+                        step="0.001"
+                        min="0.001"
+                        max="1000"
+                        required
+                        className="w-full px-3 py-2 border border-neutral-600 bg-neutral-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="0.1"
+                      />
+                      <p className="text-sm text-gray-400 mt-1">
+                        You will receive the same amount in {TOKEN_SYMBOL} tokens (1:1 exchange rate)
+                      </p>
+                    </div>
+                    <div className="flex space-x-3">
+                      <button
+                        type="button"
+                        onClick={() => setShowDepositModal(false)}
+                        className="flex-1 px-4 py-2 text-gray-300 bg-neutral-700 rounded-md hover:bg-neutral-600 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isDepositLoading}
+                        className="flex-1 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isDepositLoading ? 'Creating...' : 'Create Deposit Request'}
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Deposit Confirmation Modal */}
+          {showDepositConfirmation && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-neutral-800 border border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-semibold text-white">Confirm Deposit</h3>
+                  <button
+                    onClick={() => {
+                      setShowDepositConfirmation(false);
+                      setPendingDeposit(null);
+                    }}
+                    className="text-gray-400 hover:text-gray-200 text-2xl font-bold"
+                  >
+                    ×
+                  </button>
+                </div>
+                
+                <div className="bg-blue-900 border border-blue-700 rounded-lg p-4 mb-4">
+                  <h4 className="font-semibold text-blue-200 mb-2">Instructions:</h4>
+                  <ol className="list-decimal list-inside space-y-1 text-blue-300">
+                    {pendingDeposit.instructions?.map((instruction: string, index: number) => (
+                      <li key={index}>{instruction}</li>
+                    ))}
+                  </ol>
+                </div>
+
+                <div className="bg-neutral-700 border border-neutral-600 rounded-lg p-4 mb-4">
+                  <h4 className="font-semibold text-gray-200 mb-2">Platform Address:</h4>
+                  <p className="font-mono text-sm bg-neutral-600 p-2 rounded border border-neutral-500 text-gray-200">{pendingDeposit.platformAddress}</p>
+                </div>
+
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  await handleDepositConfirmation(formData);
+                }} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Transaction Signature
+                    </label>
+                    <input
+                      type="text"
+                      name="solanaSignature"
+                      required
+                      className="w-full px-3 py-2 border border-neutral-600 bg-neutral-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Paste the transaction signature from your wallet"
+                    />
+                    <p className="text-sm text-gray-400 mt-1">
+                      Copy the transaction signature from your wallet after sending SOL
+                    </p>
+                  </div>
+                  <div className="flex space-x-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowDepositConfirmation(false);
+                        setPendingDeposit(null);
+                      }}
+                      className="flex-1 px-4 py-2 text-gray-300 bg-neutral-700 rounded-md hover:bg-neutral-600 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isConfirmLoading}
+                      className="flex-1 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isConfirmLoading ? 'Confirming...' : 'Confirm Deposit'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* Deposit Result Modal */}
+          {depositResult && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-neutral-800 border border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4">
+                <div className="bg-green-900 border border-green-700 rounded-lg p-4">
+                  <h4 className="font-semibold text-green-200 mb-2">Deposit Successful!</h4>
+                  <p className="text-green-300">{depositResult.message}</p>
+                  <button
+                    onClick={() => setDepositResult(null)}
+                    className="mt-4 w-full px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Withdraw Modal */}
+          {showWithdrawModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-neutral-800 border border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-semibold text-white">Sell {TOKEN_SYMBOL} for SOL</h3>
+                  <button
+                    onClick={() => setShowWithdrawModal(false)}
+                    className="text-gray-400 hover:text-gray-200 text-2xl font-bold"
+                  >
+                    ×
+                  </button>
+                </div>
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  await handleWithdrawSubmit(formData);
+                }} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Amount ({TOKEN_SYMBOL})
+                    </label>
+                    <input
+                      type="number"
+                      name="amount"
+                      step="0.001"
+                      min="0.001"
+                      max={wallet.balance}
+                      required
+                      className="w-full px-3 py-2 border border-neutral-600 bg-neutral-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="0.1"
+                    />
+                    <p className="text-sm text-gray-400 mt-1">
+                      Available: {wallet.balance.toFixed(4)} {TOKEN_SYMBOL}
+                    </p>
+                    <p className="text-sm text-gray-400">
+                      You will receive the same amount in SOL (1:1 exchange rate)
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Destination Solana Address
+                    </label>
+                    <input
+                      type="text"
+                      name="destination"
+                      required
+                      className="w-full px-3 py-2 border border-neutral-600 bg-neutral-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter your Solana address"
+                    />
+                  </div>
+                  {withdrawError && (
+                    <div className="bg-red-900 border border-red-700 text-red-200 rounded-lg p-3 text-sm">
+                      {withdrawError}
+                    </div>
+                  )}
+                  <div className="flex space-x-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowWithdrawModal(false)}
+                      className="flex-1 px-4 py-2 text-gray-300 bg-neutral-700 rounded-md hover:bg-neutral-600 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isWithdrawLoading}
+                      className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isWithdrawLoading ? 'Processing...' : 'Withdraw'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* Withdraw Result Modal */}
+          {withdrawResult && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-neutral-800 border border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4">
+                <div className="bg-blue-900 border border-blue-700 rounded-lg p-4">
+                  <h4 className="font-semibold text-blue-200 mb-2">Withdrawal Successful!</h4>
+                  <p className="text-blue-300 mb-2">Your withdrawal has been processed.</p>
+                  <div className="mb-2">
+                    <span className="block text-sm text-gray-300">Burn Transaction:</span>
+                    <a
+                      href={`https://explorer.solana.com/tx/${withdrawResult.burnSignature}?cluster=devnet`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-400 underline break-all"
+                    >
+                      {withdrawResult.burnSignature}
+                    </a>
+                  </div>
+                  <div className="mb-2">
+                    <span className="block text-sm text-gray-300">SOL Transaction:</span>
+                    <a
+                      href={`https://explorer.solana.com/tx/${withdrawResult.solSignature}?cluster=devnet`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-400 underline break-all"
+                    >
+                      {withdrawResult.solSignature}
+                    </a>
+                  </div>
+                  <button
+                    onClick={() => setWithdrawResult(null)}
+                    className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Transaction History */}
+          <div className="bg-neutral-800 border border-neutral-700 rounded-lg p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold text-white">Recent Transactions</h3>
+              <a
+                href="/transactions"
+                className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
+              >
+                See All Transactions →
+              </a>
+            </div>
+            {transactions.length === 0 ? (
+              <p className="text-gray-400 text-center py-8">No transactions yet</p>
+            ) : (
+              <div className="space-y-3">
+                {transactions.map((transaction: any) => (
+                  <div
+                    key={transaction.id}
+                    className="flex items-center justify-between p-4 border border-neutral-700 rounded-lg hover:bg-neutral-700"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{getTransactionIcon(transaction.type)}</span>
+                      <div>
+                        <p className="font-medium text-white">{transaction.description}</p>
+                        <p className="text-sm text-gray-400">{formatDate(transaction.createdAt)}</p>
+                        {transaction.bounty && (
+                          <p className="text-sm text-blue-400">
+                            Bounty: {transaction.bounty.post.title}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className={`font-semibold ${getTransactionColor(transaction.type)}`}>
+                        {transaction.type === 'WITHDRAW' || transaction.type === 'BOUNTY_CREATED' ? '-' : '+'}
+                        {transaction.amount.toFixed(4)} {TOKEN_SYMBOL}
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        Balance: {transaction.balanceAfter.toFixed(4)} {TOKEN_SYMBOL}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                {transactions.length === 5 && (
+                  <div className="text-center pt-4">
+                    <p className="text-gray-400 text-sm">
+                      Showing 5 most recent transactions
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+} 

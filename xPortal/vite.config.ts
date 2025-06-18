@@ -26,11 +26,25 @@ export default defineConfig({
     sourcemap: true,
   },
   optimizeDeps: {
-    include: ['react', 'react-dom'],
+    include: [
+      'react', 
+      'react-dom',
+      '@remix-run/react',
+      '@remix-run/node',
+      '@solana/wallet-adapter-react',
+      '@solana/wallet-adapter-react-ui',
+      '@solana/wallet-adapter-base',
+      '@solana/wallet-adapter-wallets',
+      '@solana/web3.js'
+    ],
+    exclude: ['@remix-run/dev']
   },
   server: {
     fs: {
       strict: true,
     },
+    hmr: {
+      overlay: false
+    }
   },
 });

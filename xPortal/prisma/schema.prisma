@@ -19,6 +19,8 @@ model User {
   email     String   @unique
   username  String   @unique
   password  String
+  solanaAddress String? @unique // Generated Solana wallet address for this user
+  tokenAccountAddress String? // Associated token account for PORTAL tokens
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   profile   Profile?
@@ -28,6 +30,9 @@ model User {
   votes     Vote[]
   reputationPoints Int @default(0)
   reputationHistory ReputationHistory[]
+  bountyWinners Bounty[] @relation("BountyWinners")
+  virtualWallet VirtualWallet?
+  walletTransactions WalletTransaction[]
 }
 
 model Profile {
@@ -90,6 +95,9 @@ model Posts {
   visibilityVotes Int @default(0)
   qualityUpvotes Int @default(0)
   qualityDownvotes Int @default(0)
+  hasBounty   Boolean   @default(false)
+  bounty      Bounty?
+  status      PostStatus @default(OPEN)
 
   @@index([authorId])
   @@index([createdAt])
@@ -186,4 +194,116 @@ model ReputationHistory {
   @@index([userId])
   @@index([createdAt])
   @@index([action])
+}
+
+model Bounty {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  postId        String    @db.ObjectId
+  post          Posts     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  amount        Float     // Amount in SOL
+  status        BountyStatus @default(ACTIVE)
+  winnerId      String?   @db.ObjectId // ID of the user who won the bounty
+  winner        User?     @relation("BountyWinners", fields: [winnerId], references: [id], onDelete: SetNull)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  expiresAt     DateTime? // Optional expiration date
+  signature     String?   // Solana transaction signature
+  mintAddress   String?   // SPL token mint address if using custom tokens
+  tokenDecimals Int      @default(9) // Default to 9 for SOL, can be different for SPL tokens
+  walletTransactions WalletTransaction[]
+
+  @@unique([postId])
+  @@index([winnerId])
+  @@map("bounties")
+}
+
+enum BountyStatus {
+  ACTIVE
+  CLAIMED
+  REFUNDED
+  EXPIRED
+}
+
+enum PostStatus {
+  OPEN
+  CLOSED
+  COMPLETED
+}
+
+model VirtualWallet {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String   @unique @db.ObjectId
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  balance       Float    @default(0) // Virtual balance in SOL
+  totalDeposited Float   @default(0) // Total amount ever deposited
+  totalWithdrawn Float   @default(0) // Total amount ever withdrawn
+  totalEarned   Float    @default(0) // Total amount earned from bounties
+  totalSpent    Float    @default(0) // Total amount spent on bounties
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  transactions  WalletTransaction[]
+
+  @@map("virtual_wallets")
+}
+
+model WalletTransaction {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String   @db.ObjectId
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  walletId      String   @db.ObjectId
+  wallet        VirtualWallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  type          TransactionType
+  amount        Float
+  balanceBefore Float
+  balanceAfter  Float
+  description   String
+  status        TransactionStatus @default(PENDING)
+  solanaSignature String? // Solana transaction signature for deposits/withdrawals
+  bountyId      String?  @db.ObjectId // Reference to bounty if related
+  bounty        Bounty?  @relation(fields: [bountyId], references: [id], onDelete: SetNull)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+  @@map("wallet_transactions")
+}
+
+enum TransactionType {
+  DEPOSIT      // User deposits SOL from their wallet
+  WITHDRAW     // User withdraws SOL to their wallet
+  BOUNTY_CREATED // User creates a bounty
+  BOUNTY_CLAIMED // User claims a bounty
+  BOUNTY_REFUNDED // User gets refunded from expired bounty
+  BOUNTY_EARNED // User earns from winning a bounty
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+model TransactionLog {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  type          String   // DEPOSIT, WITHDRAWAL, BOUNTY_CREATED, BOUNTY_CLAIMED, etc.
+  userId        String   @db.ObjectId
+  amount        Float
+  transactionId String   // Reference to the actual transaction
+  timestamp     DateTime @default(now())
+  status        String   // PENDING, COMPLETED, FAILED
+  metadata      String?  // JSON string with additional data
+  ipAddress     String?
+  userAgent     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+  @@index([type])
+  @@index([timestamp])
+  @@index([status])
+  @@map("transaction_logs")
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Form, useLoaderData, Link, useSubmit, useNavigate, useSearchParams, useActionData } from "@remix-run/react"
+import { Form, useLoaderData, Link, useSubmit, useNavigate, useSearchParams } from "@remix-run/react"
 import { LoaderFunction, json, ActionFunction } from '@remix-run/node'
 import { getUser } from '~/utils/auth.server'
 import { Nav } from '../components/nav'
@@ -42,6 +42,12 @@ interface LoaderData {
     visibilityVotes: number;
     userVoted: boolean;
     comments: number;
+    hasBounty: boolean;
+    bounty: {
+      id: string;
+      amount: number;
+      status: string;
+    } | null;
   }>;
   totalPosts: number;
   currentPage: number;
@@ -50,7 +56,7 @@ interface LoaderData {
 
 const POSTS_PER_PAGE = 5;
 
-type Post = {
+interface Post {
   id: string;
   title: string;
   content: string;
@@ -73,7 +79,13 @@ type Post = {
   visibilityVotes: number;
   userVoted: boolean;
   comments: number;
-};
+  hasBounty: boolean;
+  bounty: {
+    id: string;
+    amount: number;
+    status: string;
+  } | null;
+}
 
 export const loader: LoaderFunction = async ({ request }) => {
   try {
@@ -106,6 +118,7 @@ export const loader: LoaderFunction = async ({ request }) => {
             createdAt: 'asc'
           }
         },
+        bounty: true,
         votes: user ? {
           where: {
             userId: user.id,
@@ -131,6 +144,29 @@ export const loader: LoaderFunction = async ({ request }) => {
       take: perPage
     });
 
+    // Sort posts in JS: bountied first (by amount), then by visibilityVotes, then by createdAt
+    posts.sort((a, b) => {
+      // First, sort by bounty status and amount
+      const aHasBounty = a.hasBounty && a.bounty && a.bounty.status === 'ACTIVE';
+      const bHasBounty = b.hasBounty && b.bounty && b.bounty.status === 'ACTIVE';
+      
+      if (aHasBounty && !bHasBounty) return -1;
+      if (!aHasBounty && bHasBounty) return 1;
+      
+      // If both have bounties, sort by bounty amount (higher first)
+      if (aHasBounty && bHasBounty) {
+        const aAmount = a.bounty!.amount;
+        const bAmount = b.bounty!.amount;
+        if (aAmount !== bAmount) return bAmount - aAmount;
+      }
+      
+      // Then by visibility votes
+      if (b.visibilityVotes !== a.visibilityVotes) return b.visibilityVotes - a.visibilityVotes;
+      
+      // Finally by creation date
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
     // Transform the posts data
     const transformedPosts = posts.map(post => ({
       id: post.id,
@@ -148,11 +184,17 @@ export const loader: LoaderFunction = async ({ request }) => {
         username: post.author.username,
         profilePicture: getProfilePicture(post.author.profile?.profilePicture || null, post.author.username)
       },
-      createdAt: post.createdAt,
-      updatedAt: post.updatedAt,
+      createdAt: post.createdAt.toISOString(),
+      updatedAt: post.updatedAt.toISOString(),
       visibilityVotes: post.visibilityVotes,
       userVoted: user ? post.votes.length > 0 : false,
-      comments: post._count.comments
+      comments: post._count.comments,
+      hasBounty: post.hasBounty,
+      bounty: post.bounty ? {
+        id: post.bounty.id,
+        amount: post.bounty.amount,
+        status: post.bounty.status
+      } : null
     }));
 
     // Transform user data if it exists
@@ -283,94 +325,59 @@ export const action: ActionFunction = async ({ request }) => {
 
     return json({ error: 'Invalid action' }, { status: 400 });
   } catch (error) {
+    console.error('Action error:', error);
     return json({ 
-      error: 'Internal server error',
+      error: 'Failed to process action',
       details: error instanceof Error ? error.message : 'Unknown error'
-    }, 500);
+    }, { status: 500 });
   }
 };
 
 export default function Community() {
-  const { user, posts, totalPosts, currentPage, totalPages } = useLoaderData<typeof loader>();
-  const [localPosts, setLocalPosts] = useState<Post[]>([]);
+  const { user, posts: initialPosts, totalPosts, currentPage, totalPages } = useLoaderData<LoaderData>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [localPosts, setLocalPosts] = useState<any[]>(initialPosts);
   const [videoErrors, setVideoErrors] = useState<Record<string, string>>({});
   const submit = useSubmit();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [isVoting, setIsVoting] = useState<Record<string, boolean>>({});
-  const actionData = useActionData<{ success: boolean; votes: number; voted: boolean; postId: string }>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Update localPosts when posts from loader changes
   useEffect(() => {
-    if (posts && Array.isArray(posts)) {
-      console.log('Posts with media:', posts.map(post => ({
-        id: post.id,
-        hasMedia: !!post.media,
-        mediaType: post.media?.type,
-        mediaUrl: post.media?.url
-      })));
-      setLocalPosts(posts);
-    } else {
-      setLocalPosts([]);
-    }
-  }, [posts]);
-
-  // Update localPosts when action data changes
-  useEffect(() => {
-    if (actionData?.success) {
-      setLocalPosts(prevPosts => 
-        prevPosts.map(post => 
-          post.id === actionData.postId
-            ? {
-                ...post,
-                visibilityVotes: actionData.votes,
-                userVoted: actionData.voted
-              }
-            : post
-        )
-      );
-    }
-  }, [actionData]);
+    setLocalPosts(initialPosts);
+  }, [initialPosts]);
 
   const handleVideoError = (postId: string, error: string) => {
     setVideoErrors(prev => ({ ...prev, [postId]: error }));
   };
 
   const handleVote = async (postId: string, voteValue: number) => {
+    if (!user) {
+      setError('Please log in to vote');
+      return;
+    }
+
     try {
-      // Prevent multiple votes while processing
-      if (isVoting[postId]) return;
-      setIsVoting(prev => ({ ...prev, [postId]: true }));
+      if (isSubmitting) return;
+      setIsSubmitting(true);
+      setError(null);
 
       const formData = new FormData();
       formData.append('action', 'vote');
       formData.append('postId', postId);
-      formData.append('isVoting', voteValue === 1 ? 'true' : 'false');
+      formData.append('isVoting', (voteValue === 1).toString());
 
       submit(formData, { method: 'post' });
-
-      // Update the post's vote count and state in the UI optimistically
-      setLocalPosts(prevPosts => 
-        prevPosts.map(post => 
-          post.id === postId 
-            ? { 
-                ...post, 
-                visibilityVotes: voteValue === 1 ? post.visibilityVotes + 1 : post.visibilityVotes - 1,
-                userVoted: voteValue === 1
-              }
-            : post
-        )
-      );
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Failed to process vote');
+      setError(error instanceof Error ? error.message : 'Failed to process vote');
     } finally {
-      // Reset voting state
-      setIsVoting(prev => ({ ...prev, [postId]: false }));
+      setIsSubmitting(false);
     }
   };
 
   const handleDelete = (postId: string) => {
-    if (window.confirm('Are you sure you want to delete this post?')) {
+    if (confirm('Are you sure you want to delete this post?')) {
       const formData = new FormData();
       formData.append('action', 'delete');
       formData.append('postId', postId);
@@ -379,7 +386,7 @@ export default function Community() {
   };
 
   // If there's an error in the loader data, show an error message
-  if (!posts || !Array.isArray(posts)) {
+  if (!initialPosts || !Array.isArray(initialPosts)) {
     return (
       <div className="h-screen w-full bg-neutral-900/95 flex flex-row">
         <Nav />
@@ -412,15 +419,19 @@ export default function Community() {
           {/* Responsive grid for posts */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
             {localPosts.length > 0 ? (
-              localPosts.map((post: Post) => (
+              localPosts.map((post: any) => (
                 <div 
                   key={post.id}
-                  className="bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 shadow-lg shadow-violet-500/20"
+                  className={`bg-neutral-800/80 rounded-lg p-6 border-2 shadow-lg ${
+                    post.hasBounty && post.bounty && post.bounty.status === 'ACTIVE'
+                      ? 'border-cyan-400/60 shadow-cyan-400/20 shadow-lg'
+                      : 'border-violet-500/50 shadow-violet-500/20'
+                  }`}
                 >
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-2">
                       <img
-                        src={post.author.profile?.profilePicture || getProfilePicture(null, post.author.username)}
+                        src={post.author.profilePicture || getProfilePicture(null, post.author.username)}
                         alt={`${post.author.username}'s avatar`}
                         className="w-8 h-8 rounded-full"
                       />
@@ -428,6 +439,11 @@ export default function Community() {
                       <span className="text-gray-400">
                         {new Date(post.createdAt).toLocaleDateString()}
                       </span>
+                      {post.hasBounty && post.bounty && post.bounty.status === 'ACTIVE' && (
+                        <span className="px-2 py-1 bg-cyan-500/20 text-cyan-300 text-xs rounded-full border border-cyan-400/40">
+                          💰 {post.bounty.amount} PORTAL
+                        </span>
+                      )}
                     </div>
                     {user && user.id === post.author.id && (
                       <button

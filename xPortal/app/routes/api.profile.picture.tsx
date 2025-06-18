@@ -17,8 +17,17 @@ export const action: ActionFunction = async ({ request }) => {
       return json({ error: 'No file provided' }, { status: 400 });
     }
 
+    // Convert file to base64
+    const arrayBuffer = await file.arrayBuffer();
+    const base64 = Buffer.from(arrayBuffer).toString('base64');
+    const dataUrl = `data:${file.type};base64,${base64}`;
+
     // Upload to Cloudinary
-    const uploadResult = await uploadToCloudinary(file);
+    const uploadResult = await uploadToCloudinary(dataUrl, {
+      resourceType: 'image',
+      folder: 'profile-pictures'
+    });
+    
     if (!uploadResult.secure_url) {
       throw new Error('Failed to upload image');
     }

@@ -22,27 +22,17 @@ interface ActionData {
 }
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-    try {
-        const userId = await requireUserId(request);
-        const userData = await prisma.user.findUnique({
-            where: { id: userId },
-            include: { profile: true }
-        });
+    const userId = await requireUserId(request);
+    const userData = await prisma.user.findUnique({
+        where: { id: userId },
+        include: { profile: true }
+    });
 
-        if (!userData) {
-            throw new Response("User not found", { status: 404 });
-        }
-
-        return json({ userData, isAuthenticated: true });
-    } catch (error) {
-        if (error instanceof Response) {
-            if (error.status === 401) {
-                return json({ isAuthenticated: false });
-            }
-            throw error;
-        }
-        throw new Response("Internal Server Error", { status: 500 });
+    if (!userData) {
+        throw new Response("User not found", { status: 404 });
     }
+
+    return json({ userData, isAuthenticated: true });
 };
 
 export const action: ActionFunction = async ({ request }) => {

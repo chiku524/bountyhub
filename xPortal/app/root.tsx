@@ -10,13 +10,14 @@ import {
   useLoaderData,
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
-import { useEffect, useState } from "react";
-import { AuthNotice } from "~/components/auth-notice";
+import { useEffect } from "react";
 import { Nav } from "~/components/nav";
 import { json } from "@remix-run/node";
 import { getUser } from "~/utils/auth.server";
+import { WalletProvider } from './components/WalletProvider';
 
 import "./tailwind.css";
+import "./styles/wallet-adapter.css";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -40,32 +41,10 @@ export const links: LinksFunction = () => [
   { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" },
 ];
 
-export function Layout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <Meta />
-        <Links />
-      </head>
-      <body>
-        {children}
-        <ScrollRestoration />
-        <Scripts />
-      </body>
-    </html>
-  );
-}
-
 export function ErrorBoundary() {
   const error = useRouteError();
   
   if (isRouteErrorResponse(error)) {
-    if (error.status === 401) {
-      return <AuthNotice />;
-    }
-    
     return (
       <div className="h-screen w-full bg-neutral-900 flex flex-row">
         <Nav />
@@ -114,19 +93,58 @@ export function ErrorBoundary() {
   );
 }
 
-export async function loader({ request }: { request: Request }) {
-  const user = await getUser(request);
-  return json({ user });
+export const loader = async ({ request }: { request: Request }) => {
+  return json({
+    user: await getUser(request),
+  });
+};
+
+function WalletModalHandler() {
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const modal = document.querySelector('.wallet-adapter-modal');
+      const modalWrapper = document.querySelector('.wallet-adapter-modal-wrapper');
+      
+      if (modal && modalWrapper && !modalWrapper.contains(event.target as Node)) {
+        // Find and click the close button if it exists, or trigger modal close
+        const closeButton = modal.querySelector('.wallet-adapter-modal-button-close');
+        if (closeButton) {
+          (closeButton as HTMLElement).click();
+        }
+      }
+    };
+
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        const modal = document.querySelector('.wallet-adapter-modal');
+        if (modal) {
+          // Find and click the close button if it exists, or trigger modal close
+          const closeButton = modal.querySelector('.wallet-adapter-modal-button-close');
+          if (closeButton) {
+            (closeButton as HTMLElement).click();
+          }
+        }
+      }
+    };
+
+    // Add event listeners
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscapeKey);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, []);
+
+  return null;
 }
 
-export default function Root() {
+export default function App() {
   const { user } = useLoaderData<typeof loader>();
   const location = useLocation();
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const isClient = typeof window !== "undefined";
 
   useEffect(() => {
     if (isClient) {
@@ -141,5 +159,22 @@ export default function Root() {
     }
   }, [isClient, location]);
 
-  return <Outlet context={{ user }} />;
+  return (
+    <html lang="en" className="h-full bg-neutral-900">
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <Meta />
+        <Links />
+      </head>
+      <body className="h-full">
+        <WalletProvider>
+          <WalletModalHandler />
+          <Outlet context={{ user }} />
+        </WalletProvider>
+        <ScrollRestoration />
+        <Scripts />
+      </body>
+    </html>
+  );
 }

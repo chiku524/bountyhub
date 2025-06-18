@@ -5,14 +5,21 @@ import { getUser } from './auth.server'
 import { prisma } from './prisma.server'
 import { addReputationPoints, REPUTATION_POINTS } from './reputation.server'
 import { getProfilePicture } from './profile.server'
+import { SolanaAddressService } from './solana-address.server'
 
 export async function createUser({ email, password, username }: RegisterForm) {
     const hashedPassword = await bcrypt.hash(password, 10)
+    
+    // Generate Solana addresses for the new user
+    const { solanaAddress, tokenAccountAddress } = await SolanaAddressService.generateUserAddresses();
+    
     const user = await prisma.user.create({
         data: {
             email,
             password: hashedPassword,
             username,
+            solanaAddress,
+            tokenAccountAddress,
             profile: {
                 create: {
                     firstName: '',
@@ -21,6 +28,17 @@ export async function createUser({ email, password, username }: RegisterForm) {
             },
         },
     })
+    // Create a virtual wallet for the user
+    await prisma.virtualWallet.create({
+        data: {
+            userId: user.id,
+            balance: 0,
+            totalDeposited: 0,
+            totalWithdrawn: 0,
+            totalEarned: 0,
+            totalSpent: 0,
+        }
+    });
     return user
 }
 
@@ -137,7 +155,10 @@ export const createPost = async (post: PostForm) => {
           create: post.codeBlocks
         },
         media: {
-          create: post.media
+          create: post.media.map(media => ({
+            ...media,
+            cloudinaryId: media.url.split('/').pop()?.split('.')[0] || 'default' // Extract cloudinary ID from URL
+          }))
         }
       }
     });
