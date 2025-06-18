@@ -5,6 +5,7 @@ import { getUser } from '~/utils/auth.server'
 import { Nav } from '../components/nav'
 import { prisma } from '~/utils/prisma.server'
 import { FiTrendingUp } from 'react-icons/fi'
+import IntegrityRatingButton from '~/components/IntegrityRatingButton'
 
 const DEFAULT_PROFILE_PICTURE = 'https://api.dicebear.com/7.x/initials/svg?seed=';
 
@@ -376,15 +377,6 @@ export default function Community() {
     }
   };
 
-  const handleDelete = (postId: string) => {
-    if (confirm('Are you sure you want to delete this post?')) {
-      const formData = new FormData();
-      formData.append('action', 'delete');
-      formData.append('postId', postId);
-      submit(formData, { method: 'post' });
-    }
-  };
-
   // If there's an error in the loader data, show an error message
   if (!initialPosts || !Array.isArray(initialPosts)) {
     return (
@@ -422,12 +414,21 @@ export default function Community() {
               localPosts.map((post: any) => (
                 <div 
                   key={post.id}
-                  className={`bg-neutral-800/80 rounded-lg p-6 border-2 shadow-lg ${
+                  className={`bg-neutral-800/80 rounded-lg p-6 border-2 shadow-lg relative ${
                     post.hasBounty && post.bounty && post.bounty.status === 'ACTIVE'
                       ? 'border-cyan-400/60 shadow-cyan-400/20 shadow-lg'
                       : 'border-violet-500/50 shadow-violet-500/20'
                   }`}
                 >
+                  {/* Bounty Badge - Top Right */}
+                  {post.hasBounty && post.bounty && post.bounty.status === 'ACTIVE' && (
+                    <div className="absolute top-4 right-4 z-10">
+                      <div className="px-3 py-1 bg-cyan-500/20 text-cyan-300 text-sm font-semibold rounded-full border border-cyan-400/40">
+                        💰 {post.bounty.amount} PORTAL
+                      </div>
+                    </div>
+                  )}
+                  
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-2">
                       <img
@@ -435,56 +436,53 @@ export default function Community() {
                         alt={`${post.author.username}'s avatar`}
                         className="w-8 h-8 rounded-full"
                       />
-                      <span className="font-semibold text-violet-400">{post.author.username}</span>
+                      <Link 
+                        to={`/${post.author.username}`}
+                        className="font-semibold text-violet-400 hover:text-violet-300 transition-colors"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {post.author.username}
+                      </Link>
                       <span className="text-gray-400">
                         {new Date(post.createdAt).toLocaleDateString()}
                       </span>
-                      {post.hasBounty && post.bounty && post.bounty.status === 'ACTIVE' && (
-                        <span className="px-2 py-1 bg-cyan-500/20 text-cyan-300 text-xs rounded-full border border-cyan-400/40">
-                          💰 {post.bounty.amount} PORTAL
-                        </span>
-                      )}
                     </div>
-                    {user && user.id === post.author.id && (
-                      <button
-                        onClick={() => handleDelete(post.id)}
-                        className="text-red-400 hover:text-red-300 transition-colors"
-                      >
-                        Delete
-                      </button>
-                    )}
                   </div>
-                  <Link 
-                    to={`/posts/${post.id}`}
-                    className="block group flex-1"
-                  >
-                    <h2 className="text-xl font-semibold text-white mb-3 group-hover:text-violet-400 transition-colors">
-                      {post.title.length > 30 ? post.title.substring(0, 30) + '...' : post.title}
-                    </h2>
-                    <p className="text-gray-300 mb-4 overflow-hidden truncate max-w-full w-full break-words">
-                      {post.content.length > 100 ? post.content.substring(0, 100) + '...' : post.content}
-                    </p>
-                    {post.media && (
-                      <div className="mb-4">
-                        {post.media.type.toLowerCase() === 'image' && (
-                          <img
-                            src={post.media.url}
-                            alt="Post media"
-                            className="w-full h-48 object-cover rounded-lg"
-                          />
-                        )}
-                        {(post.media.type.toLowerCase() === 'video' || post.media.type.toLowerCase() === 'screen') && (
-                          <video
-                            src={post.media.url}
-                            poster={post.media.thumbnailUrl}
-                            controls
-                            className="w-full h-48 object-cover rounded-lg"
-                            onError={(e) => handleVideoError(post.id, e.currentTarget.error?.message || 'Video error')}
-                          />
-                        )}
-                      </div>
-                    )}
-                  </Link>
+                  
+                  <div className="group">
+                    <Link 
+                      to={`/posts/${post.id}`}
+                      className="block"
+                    >
+                      <h2 className="text-xl font-semibold text-white mb-3 group-hover:text-violet-400 transition-colors">
+                        {post.title.length > 30 ? post.title.substring(0, 30) + '...' : post.title}
+                      </h2>
+                      <p className="text-gray-300 mb-4 overflow-hidden truncate max-w-full w-full break-words">
+                        {post.content.length > 100 ? post.content.substring(0, 100) + '...' : post.content}
+                      </p>
+                      {post.media && (
+                        <div className="mb-4">
+                          {post.media.type.toLowerCase() === 'image' && (
+                            <img
+                              src={post.media.url}
+                              alt="Post media"
+                              className="w-full h-48 object-cover rounded-lg"
+                            />
+                          )}
+                          {(post.media.type.toLowerCase() === 'video' || post.media.type.toLowerCase() === 'screen') && (
+                            <video
+                              src={post.media.url}
+                              poster={post.media.thumbnailUrl}
+                              controls
+                              className="w-full h-48 object-cover rounded-lg"
+                              onError={(e) => handleVideoError(post.id, e.currentTarget.error?.message || 'Video error')}
+                            />
+                          )}
+                        </div>
+                      )}
+                    </Link>
+                  </div>
+                  
                   <div className="flex items-center justify-between mt-4">
                     <div className="flex items-center space-x-4">
                       <button
@@ -502,6 +500,18 @@ export default function Community() {
                         {post.comments} {post.comments === 1 ? 'comment' : 'comments'}
                       </span>
                     </div>
+                    
+                    {/* Integrity Rating Button */}
+                    {user && user.id !== post.author.id && (
+                      <IntegrityRatingButton
+                        targetUser={post.author}
+                        context={post.hasBounty ? 'BOUNTY_REJECTION' : 'GENERAL'}
+                        referenceId={post.id}
+                        referenceType="POST"
+                        variant="icon"
+                        className="ml-2"
+                      />
+                    )}
                   </div>
                 </div>
               ))

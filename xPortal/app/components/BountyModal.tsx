@@ -21,48 +21,16 @@ interface BountyModalProps {
 export function BountyModal({ isOpen, onClose, postId, onSubmit, existingBounty }: BountyModalProps) {
   const [amount, setAmount] = useState<string>(existingBounty?.amount || '');
   const [expiresAt, setExpiresAt] = useState<string>(existingBounty?.expiresAt ? new Date(existingBounty.expiresAt).toISOString().slice(0, 16) : '');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const isEditing = !!existingBounty;
   const modalTitle = isEditing ? 'Edit Bounty' : 'Create Bounty';
-  const submitButtonText = isSubmitting ? (isEditing ? 'Updating...' : 'Creating...') : (isEditing ? 'Update Bounty' : 'Create Bounty');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      setIsSubmitting(true);
-      setError(null);
-
-      const amountNum = parseFloat(amount);
-      if (isNaN(amountNum) || amountNum <= 0) {
-        throw new Error('Please enter a valid amount');
-      }
-
-      const expiresAtDate = expiresAt ? new Date(expiresAt) : null;
-      if (expiresAtDate && expiresAtDate < new Date()) {
-        throw new Error('Expiration date must be in the future');
-      }
-
-      await onSubmit(amountNum, expiresAtDate);
-      setAmount('');
-      setExpiresAt('');
-      onClose();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const handleClose = () => {
-    if (!isSubmitting) {
-      setAmount('');
-      setExpiresAt('');
-      setError(null);
-      onClose();
-    }
+    setAmount('');
+    setExpiresAt('');
+    setError(null);
+    onClose();
   };
 
   if (!isOpen) return null;
@@ -75,8 +43,7 @@ export function BountyModal({ isOpen, onClose, postId, onSubmit, existingBounty 
             <h2 className="text-xl font-bold text-white">{modalTitle}</h2>
             <button
               onClick={handleClose}
-              disabled={isSubmitting}
-              className="text-gray-400 hover:text-white transition-colors disabled:opacity-50"
+              className="text-gray-400 hover:text-white transition-colors"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -84,7 +51,7 @@ export function BountyModal({ isOpen, onClose, postId, onSubmit, existingBounty 
             </button>
           </div>
 
-          <Form method="post" onSubmit={handleSubmit} className="space-y-6">
+          <Form method="post" className="space-y-6">
             <input type="hidden" name="postId" value={postId} />
             <input type="hidden" name="action" value="createBounty" />
 
@@ -132,17 +99,15 @@ export function BountyModal({ isOpen, onClose, postId, onSubmit, existingBounty 
               <button
                 type="button"
                 onClick={handleClose}
-                disabled={isSubmitting}
-                className="flex-1 px-4 py-3 text-lg font-medium text-gray-300 bg-neutral-700 rounded-lg hover:bg-neutral-600 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50 transition-colors"
+                className="flex-1 px-4 py-3 text-lg font-medium text-gray-300 bg-neutral-700 rounded-lg hover:bg-neutral-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="flex-1 px-4 py-3 text-lg font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:opacity-50 transition-colors"
+                className="flex-1 px-4 py-3 text-lg font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500 transition-colors"
               >
-                {submitButtonText}
+                {isEditing ? 'Update Bounty' : 'Create Bounty'}
               </button>
             </div>
           </Form>

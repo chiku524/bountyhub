@@ -13,38 +13,10 @@ interface BountyFormProps {
 export function BountyForm({ postId, onSubmit }: BountyFormProps) {
   const [amount, setAmount] = useState<string>('');
   const [expiresAt, setExpiresAt] = useState<string>('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      setIsSubmitting(true);
-      setError(null);
-
-      const amountNum = parseFloat(amount);
-      if (isNaN(amountNum) || amountNum <= 0) {
-        throw new Error('Please enter a valid amount');
-      }
-
-      const expiresAtDate = expiresAt ? new Date(expiresAt) : null;
-      if (expiresAtDate && expiresAtDate < new Date()) {
-        throw new Error('Expiration date must be in the future');
-      }
-
-      await onSubmit(amountNum, expiresAtDate);
-      setAmount('');
-      setExpiresAt('');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   return (
-    <Form method="post" onSubmit={handleSubmit} className="space-y-6">
+    <Form method="post" className="space-y-6">
       <input type="hidden" name="postId" value={postId} />
       <input type="hidden" name="action" value="createBounty" />
 
@@ -90,10 +62,9 @@ export function BountyForm({ postId, onSubmit }: BountyFormProps) {
 
       <button
         type="submit"
-        disabled={isSubmitting}
-        className="w-full inline-flex justify-center rounded-lg border border-transparent bg-indigo-600 py-3 px-6 text-lg font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="w-full inline-flex justify-center rounded-lg border border-transparent bg-indigo-600 py-3 px-6 text-lg font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
       >
-        {isSubmitting ? 'Creating Bounty...' : 'Create Bounty'}
+        Create Bounty
       </button>
     </Form>
   );

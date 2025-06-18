@@ -33,6 +33,14 @@ model User {
   bountyWinners Bounty[] @relation("BountyWinners")
   virtualWallet VirtualWallet?
   walletTransactions WalletTransaction[]
+  // Integrity system fields
+  integrityScore Float @default(5.0) // Average rating from 1-10
+  totalRatings Int @default(0) // Total number of ratings received
+  integrityViolations IntegrityViolation[] @relation("ViolationTarget")
+  integrityHistory IntegrityHistory[] @relation("HistoryTarget")
+  // Ratings given and received
+  ratingsGiven UserRating[] @relation("RatingGiver")
+  ratingsReceived UserRating[] @relation("RatingReceiver")
 }
 
 model Profile {
@@ -306,4 +314,75 @@ model TransactionLog {
   @@index([timestamp])
   @@index([status])
   @@map("transaction_logs")
+}
+
+// Integrity System Models
+
+model UserRating {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  raterId       String   @db.ObjectId // User giving the rating
+  rater         User     @relation("RatingGiver", fields: [raterId], references: [id], onDelete: Cascade)
+  ratedUserId   String   @db.ObjectId // User being rated
+  ratedUser     User     @relation("RatingReceiver", fields: [ratedUserId], references: [id], onDelete: Cascade)
+  rating        Int      // Rating from 1-10
+  reason        String   // Reason for the rating
+  context       String   // Context (e.g., "BOUNTY_REJECTION", "GENERAL", "ANSWER_QUALITY")
+  referenceId   String?  @db.ObjectId // ID of related post/answer/bounty
+  referenceType String?  // Type of reference (POST, ANSWER, BOUNTY)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([raterId, ratedUserId, referenceId]) // Prevent duplicate ratings for same context
+  @@index([ratedUserId])
+  @@index([raterId])
+  @@index([context])
+  @@index([createdAt])
+  @@map("user_ratings")
+}
+
+model IntegrityViolation {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  reporterId    String   @db.ObjectId // User reporting the violation
+  targetUserId  String   @db.ObjectId // User being reported
+  targetUser    User     @relation("ViolationTarget", fields: [targetUserId], references: [id], onDelete: Cascade)
+  violationType String   // Type of violation (BOUNTY_REJECTION, SPAM, HARASSMENT, etc.)
+  description   String   // Description of the violation
+  evidence      String?  // Evidence or proof (URLs, screenshots, etc.)
+  referenceId   String?  @db.ObjectId // ID of related post/answer/bounty
+  referenceType String?  // Type of reference
+  status        ViolationStatus @default(PENDING) // PENDING, REVIEWED, RESOLVED, DISMISSED
+  moderatorNotes String? // Notes from moderators
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([targetUserId])
+  @@index([reporterId])
+  @@index([violationType])
+  @@index([status])
+  @@index([createdAt])
+  @@map("integrity_violations")
+}
+
+model IntegrityHistory {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String   @db.ObjectId
+  user          User     @relation("HistoryTarget", fields: [userId], references: [id], onDelete: Cascade)
+  action        String   // Action taken (RATING_RECEIVED, VIOLATION_REPORTED, etc.)
+  points        Int      // Points gained/lost
+  description   String   // Description of the action
+  referenceId   String?  @db.ObjectId // ID of related rating/violation
+  referenceType String?  // Type of reference
+  createdAt     DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("integrity_history")
+}
+
+enum ViolationStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+  DISMISSED
 }

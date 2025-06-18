@@ -10,6 +10,7 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import { FiTrash2, FiArrowUp, FiArrowDown } from 'react-icons/fi';
 import type { Comment, Answer, CodeBlock, User, Profile } from "@prisma/client";
 import { addReputationPoints, REPUTATION_POINTS } from '~/utils/reputation.server';
+import IntegrityRatingButton from '~/components/IntegrityRatingButton';
 
 type CommentWithAuthor = {
   id: string;
@@ -1293,7 +1294,26 @@ export default function PostDetail() {
                 <div>
                   <h1 className="text-2xl font-bold text-white">{post.title}</h1>
                   <div className="flex items-center space-x-2 text-sm text-gray-400">
-                    <span>Posted by {post.author.username}</span>
+                    <span>Posted by </span>
+                    <Link 
+                      to={`/${post.author.username}`}
+                      className="text-violet-400 hover:text-violet-300 transition-colors"
+                    >
+                      {post.author.username}
+                    </Link>
+                    
+                    {/* Integrity Rating Button for Post Author */}
+                    {currentUser && currentUser.id !== post.author.id && (
+                      <IntegrityRatingButton
+                        targetUser={post.author}
+                        context={post.hasBounty ? 'BOUNTY_REJECTION' : 'GENERAL'}
+                        referenceId={post.id}
+                        referenceType="POST"
+                        variant="badge"
+                        className="ml-2"
+                      />
+                    )}
+                    
                     <span>•</span>
                     <span>{new Date(post.createdAt).toLocaleDateString()}</span>
                   </div>
@@ -1524,7 +1544,12 @@ export default function PostDetail() {
                           alt={`${answer.author.username}'s avatar`}
                           className="w-8 h-8 rounded-full"
                         />
-                        <span className="font-semibold text-violet-400">{answer.author.username}</span>
+                        <Link 
+                          to={`/${answer.author.username}`}
+                          className="font-semibold text-violet-400 hover:text-violet-300 transition-colors"
+                        >
+                          {answer.author.username}
+                        </Link>
                         <span className="text-gray-400">
                           {new Date(answer.createdAt).toLocaleDateString()}
                         </span>
@@ -1558,6 +1583,19 @@ export default function PostDetail() {
                         >
                           <FiArrowDown className="h-5 w-5" />
                         </button>
+                        
+                        {/* Integrity Rating Button for Answer Author */}
+                        {currentUser && currentUser.id !== answer.author.id && (
+                          <IntegrityRatingButton
+                            targetUser={answer.author}
+                            context="ANSWER_QUALITY"
+                            referenceId={answer.id}
+                            referenceType="ANSWER"
+                            variant="icon"
+                            className="ml-1"
+                          />
+                        )}
+                        
                         {currentUser?.id === post.author.id && !answers.some((a: AnswerWithAuthor) => a.isAccepted) && (
                           <Form method="post">
                             <input type="hidden" name="action" value="claim_bounty" />
@@ -1595,7 +1633,7 @@ export default function PostDetail() {
                 <textarea
                   placeholder="Write a comment..."
                   className="w-full p-3 bg-neutral-700/50 border border-neutral-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-violet-500"
-                  rows={3}
+                  rows={4}
                 />
                 <button
                   type="submit"
@@ -1614,10 +1652,15 @@ export default function PostDetail() {
                         <img
                           src={getProfilePicture(comment.author.profile?.profilePicture ?? null, comment.author.username)}
                           alt={`${comment.author.username}'s avatar`}
-                          className="w-8 h-8 rounded-full"
+                          className="w-6 h-6 rounded-full"
                         />
-                        <span className="font-semibold text-violet-400">{comment.author.username}</span>
-                        <span className="text-gray-400">
+                        <Link 
+                          to={`/${comment.author.username}`}
+                          className="font-semibold text-violet-400 hover:text-violet-300 transition-colors"
+                        >
+                          {comment.author.username}
+                        </Link>
+                        <span className="text-gray-400 text-sm">
                           {new Date(comment.createdAt).toLocaleDateString()}
                         </span>
                       </div>
@@ -1631,9 +1674,9 @@ export default function PostDetail() {
                               : 'text-gray-400 hover:text-violet-400'
                           } ${votingStates[`comment-${comment.id}`] ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
-                          <FiArrowUp className="h-5 w-5" />
+                          <FiArrowUp className="h-4 w-4" />
                         </button>
-                        <span className="text-gray-300">{comment.upvotes - comment.downvotes}</span>
+                        <span className="text-gray-300 text-sm">{comment.upvotes - comment.downvotes}</span>
                         <button
                           onClick={() => handleCommentVote(comment.id, comment.userVote === -1 ? 0 : -1)}
                           disabled={votingStates[`comment-${comment.id}`]}
@@ -1643,7 +1686,7 @@ export default function PostDetail() {
                               : 'text-gray-400 hover:text-violet-400'
                           } ${votingStates[`comment-${comment.id}`] ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
-                          <FiArrowDown className="h-5 w-5" />
+                          <FiArrowDown className="h-4 w-4" />
                         </button>
                       </div>
                     </div>
@@ -1651,60 +1694,10 @@ export default function PostDetail() {
                   </div>
                 ))}
               </div>
-
-              {/* Pagination */}
-              {pagination.totalPages > 1 && (
-                <div className="flex justify-center gap-2 mt-4">
-                  <button
-                    onClick={() => {
-                      const url = new URL(window.location.href);
-                      url.searchParams.set('page', (pagination.currentPage - 1).toString());
-                      window.location.href = url.toString();
-                    }}
-                    disabled={pagination.currentPage === 1}
-                    className="px-3 py-1 bg-neutral-700 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Previous
-                  </button>
-                  <span className="px-3 py-1 bg-neutral-700 text-white rounded">
-                    Page {pagination.currentPage} of {pagination.totalPages}
-                  </span>
-                  <button
-                    onClick={() => {
-                      const url = new URL(window.location.href);
-                      url.searchParams.set('page', (pagination.currentPage + 1).toString());
-                      window.location.href = url.toString();
-                    }}
-                    disabled={pagination.currentPage === pagination.totalPages}
-                    className="px-3 py-1 bg-neutral-700 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Next
-                  </button>
-                </div>
-              )}
             </div>
           </div>
         </div>
       </div>
-
-      <style>
-        {`
-          .custom-scrollbar::-webkit-scrollbar {
-            width: 8px;
-          }
-          .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.1);
-            border-radius: 4px;
-          }
-          .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(139, 92, 246, 0.3);
-            border-radius: 4px;
-          }
-          .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: rgba(139, 92, 246, 0.5);
-          }
-        `}
-      </style>
     </div>
   );
-} 
+}

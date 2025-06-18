@@ -10,10 +10,17 @@ export const meta: MetaFunction = () => {
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
+  console.log('Index loader called, method:', request.method);
+  console.log('Index loader called, headers:', Object.fromEntries(request.headers.entries()));
+  
   const user = await getUser(request);
+  console.log('Index loader - user found:', !!user);
+  
   if (user) {
+    console.log('Index loader - redirecting to /profile');
     return redirect("/profile");
   }
+  console.log('Index loader - redirecting to /login');
   return redirect("/login");
 };
 

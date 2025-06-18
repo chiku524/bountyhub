@@ -54,7 +54,6 @@ export default function Signup() {
     const actionData = useActionData<typeof action>()
     const [errors, setErrors] = useState(actionData?.errors || {})
     const [formError, setFormError] = useState(actionData?.error || '')
-    const [isLoading, setIsLoading] = useState(false)
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>, field: string) => {
         setFormData(form => ({ ...form, [field]: event.target.value }))
@@ -64,31 +63,8 @@ export default function Signup() {
     useEffect(() => {
         if (actionData?.error) {
             setFormError(actionData.error);
-            setIsLoading(false);
         }
     }, [actionData]);
-
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        setIsLoading(true);
-        setFormError('');
-
-        // Validate fields before submission
-        const validationErrors = {
-            email: validateEmail(formData.email),
-            password: validatePassword(formData.password),
-            username: validateUsername(formData.username)
-        };
-
-        if (Object.values(validationErrors).some(Boolean)) {
-            setErrors(validationErrors);
-            setIsLoading(false);
-            return;
-        }
-
-        // If validation passes, submit the form
-        event.currentTarget.submit();
-    }
 
     return (
         <div className="h-screen w-full bg-neutral-900 flex flex-col items-center justify-center">
@@ -102,7 +78,7 @@ export default function Signup() {
                     </p>
                 </div>
 
-                <Form method="post" className="space-y-6" onSubmit={handleSubmit}>
+                <Form method="post" className="space-y-6">
                     <input type="hidden" name="redirectTo" value={redirectTo} />
 
                     <FormField
@@ -143,10 +119,9 @@ export default function Signup() {
 
                     <button
                         type="submit"
-                        disabled={isLoading}
-                        className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
                     >
-                        {isLoading ? 'Creating Account...' : 'Create Account'}
+                        Create Account
                     </button>
                 </Form>
 

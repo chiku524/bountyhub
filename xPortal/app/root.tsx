@@ -44,52 +44,131 @@ export const links: LinksFunction = () => [
 export function ErrorBoundary() {
   const error = useRouteError();
   
+  // Determine error type and message
+  let errorTitle = "Something went wrong";
+  let errorMessage = "An unexpected error occurred. Please try again later.";
+  let errorStatus = 500;
+  let is404 = false;
+  
   if (isRouteErrorResponse(error)) {
-    return (
-      <div className="h-screen w-full bg-neutral-900 flex flex-row">
-        <Nav />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="bg-slate-800 p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
-            <h2 className="text-2xl font-bold text-white mb-4 text-center">Oops!</h2>
-            <p className="text-gray-300 mb-6 text-center">
-              {error.status === 404 
-                ? "The page you're looking for doesn't exist."
-                : "Something went wrong. Please try again."}
-            </p>
-            <div className="flex justify-center">
+    errorStatus = error.status;
+    is404 = error.status === 404;
+    
+    if (is404) {
+      errorTitle = "Page Not Found";
+      errorMessage = "The page you're looking for doesn't exist or has been moved.";
+    } else if (error.status === 401) {
+      errorTitle = "Unauthorized";
+      errorMessage = "You need to be logged in to access this page.";
+    } else if (error.status === 403) {
+      errorTitle = "Access Denied";
+      errorMessage = "You don't have permission to access this page.";
+    } else if (error.status === 500) {
+      errorTitle = "Server Error";
+      errorMessage = "Something went wrong on our end. Please try again later.";
+    } else {
+      errorTitle = `Error ${error.status}`;
+      errorMessage = error.data?.message || error.statusText || "An error occurred.";
+    }
+  } else if (error instanceof Error) {
+    errorTitle = "Application Error";
+    errorMessage = error.message || "An unexpected error occurred.";
+  }
+
+  return (
+    <html lang="en" className="h-full bg-neutral-900">
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>{errorTitle} - xPortal</title>
+        <Meta />
+        <Links />
+      </head>
+      <body className="h-full">
+        <div className="h-screen w-full bg-neutral-900 flex flex-col items-center justify-center p-4">
+          <div className="w-full max-w-md p-8 space-y-8 bg-neutral-800 rounded-lg shadow-lg border border-red-500/30">
+            <div className="text-center">
+              {/* Error Icon */}
+              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-500/10 mb-6">
+                {is404 ? (
+                  <svg className="h-8 w-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.47-.881-6.08-2.33" />
+                  </svg>
+                ) : (
+                  <svg className="h-8 w-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                )}
+              </div>
+              
+              {/* Error Title */}
+              <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-pink-600 mb-4">
+                {errorTitle}
+              </h1>
+              
+              {/* Error Message */}
+              <p className="text-gray-400 mb-8 leading-relaxed">
+                {errorMessage}
+              </p>
+              
+              {/* Error Details (only in development) */}
+              {process.env.NODE_ENV === 'development' && error instanceof Error && (
+                <details className="mb-6 text-left">
+                  <summary className="text-sm text-gray-500 cursor-pointer hover:text-gray-400 mb-2">
+                    Technical Details
+                  </summary>
+                  <div className="bg-neutral-700 p-4 rounded-lg border border-neutral-600">
+                    <p className="text-xs text-red-400 font-mono break-all">
+                      {error.stack}
+                    </p>
+                  </div>
+                </details>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col space-y-3">
+              <button
+                onClick={() => window.location.reload()}
+                className="w-full py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+              >
+                Try Again
+              </button>
+              
               <a
                 href="/"
-                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors"
+                className="w-full py-3 px-4 border border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-300 bg-neutral-700 hover:bg-neutral-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors text-center"
               >
                 Return Home
+              </a>
+              
+              {!is404 && (
+                <button
+                  onClick={() => window.history.back()}
+                  className="w-full py-3 px-4 border border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-300 bg-neutral-700 hover:bg-neutral-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
+                >
+                  Go Back
+                </button>
+              )}
+            </div>
+            
+            {/* Additional Help */}
+            <div className="text-center pt-4 border-t border-neutral-700">
+              <p className="text-xs text-gray-500 mb-2">
+                Still having trouble?
+              </p>
+              <a
+                href="mailto:support@xportal.com"
+                className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+              >
+                Contact Support
               </a>
             </div>
           </div>
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="h-screen w-full bg-neutral-900 flex flex-row">
-      <Nav />
-      <div className="flex-1 flex items-center justify-center">
-        <div className="bg-slate-800 p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
-          <h2 className="text-2xl font-bold text-white mb-4 text-center">Unexpected Error</h2>
-          <p className="text-gray-300 mb-6 text-center">
-            An unexpected error occurred. Please try again later.
-          </p>
-          <div className="flex justify-center">
-            <a
-              href="/"
-              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors"
-            >
-              Return Home
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
+        <Scripts />
+      </body>
+    </html>
   );
 }
 

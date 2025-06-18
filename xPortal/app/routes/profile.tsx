@@ -24,6 +24,7 @@ import {
     FaDev 
 } from 'react-icons/fa'
 import { FiThumbsUp, FiEdit2 } from 'react-icons/fi'
+import IntegrityDisplay from '~/components/IntegrityDisplay'
 
 const DEFAULT_PROFILE_PICTURE = 'https://api.dicebear.com/7.x/initials/svg?seed=';
 
@@ -58,6 +59,8 @@ interface UserData {
     email: string;
     username: string;
     reputationPoints: number;
+    integrityScore: number;
+    totalRatings: number;
     createdAt: Date;
     profile?: {
         firstName: string | null;
@@ -112,8 +115,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
                 orderBy: { createdAt: 'desc' },
                 take: 10,
             },
-        },
-    });
+        }
+    }) as any;
 
     if (!userData) {
         throw new Response("User not found", { status: 404 });
@@ -286,6 +289,20 @@ export default function Profile() {
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+
+                            {/* Integrity Display */}
+                            <div className="mt-8">
+                                <IntegrityDisplay
+                                    user={{
+                                        id: user.id,
+                                        username: user.username,
+                                        integrityScore: (user as any).integrityScore || 5.0,
+                                        totalRatings: (user as any).totalRatings || 0,
+                                    }}
+                                    currentUserId={user.id}
+                                    canRate={false}
+                                />
                             </div>
 
                             <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">

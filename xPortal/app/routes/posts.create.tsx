@@ -178,23 +178,13 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 export default function CreatePost() {
   const { user } = useLoaderData<LoaderData>();
-  const actionData = useActionData<{ error?: string }>();
-  const navigate = useNavigate();
-  const submit = useSubmit();
+  const actionData = useActionData<typeof action>();
   const [codeBlocks, setCodeBlocks] = useState<CodeBlockForm[]>([]);
   const [media, setMedia] = useState<Array<{ type: string; url: string; thumbnailUrl?: string; isScreenRecording: boolean }>>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasBounty, setHasBounty] = useState(false);
   const [bountyAmount, setBountyAmount] = useState('');
   const [bountyDuration, setBountyDuration] = useState(7);
   const [clientError, setClientError] = useState<string | null>(null);
-
-  // Clear client error when action data changes
-  useEffect(() => {
-    if (actionData?.error) {
-      setClientError(null);
-    }
-  }, [actionData]);
 
   const handleMediaUpload = (newMedia: { type: string; url: string; thumbnailUrl?: string; isScreenRecording: boolean }) => {
     setMedia(prev => [...prev, newMedia]);
@@ -202,54 +192,6 @@ export default function CreatePost() {
 
   const handleMediaRemove = (index: number) => {
     setMedia(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setIsSubmitting(true);
-    setClientError(null);
-
-    try {
-      // Get form data
-      const title = (document.getElementById('title') as HTMLInputElement)?.value;
-      const content = (document.getElementById('content') as HTMLTextAreaElement)?.value;
-
-      if (!title || !content) {
-        throw new Error('Title and content are required');
-      }
-
-      const formData = new FormData();
-      formData.append('title', title);
-      formData.append('content', content);
-      formData.append('codeBlocks', JSON.stringify(codeBlocks));
-      
-      // Add bounty fields
-      formData.append('hasBounty', hasBounty ? 'on' : 'off');
-      if (hasBounty) {
-        if (!bountyAmount || parseFloat(bountyAmount) <= 0) {
-          throw new Error('Please enter a valid bounty amount');
-        }
-        formData.append('bountyAmount', bountyAmount);
-        formData.append('bountyDuration', bountyDuration.toString());
-      }
-
-      // Handle media uploads - now using direct Cloudinary URLs
-      if (media.length > 0) {
-        // Media items are already Cloudinary URLs from direct upload
-        formData.append('media', JSON.stringify(media));
-      } else {
-        formData.append('media', JSON.stringify([]));
-      }
-
-      // Use Remix's submit function
-      submit(formData, { method: 'post' });
-    } catch (error) {
-      console.error('Form submission error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to create post';
-      setClientError(errorMessage);
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   return (
@@ -261,7 +203,17 @@ export default function CreatePost() {
             <h1 className="text-2xl font-bold text-white">Create New Post</h1>
           </div>
 
-          <Form method="post" onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto">
+          <Form method="post" className="space-y-6 max-w-4xl mx-auto">
+            <input type="hidden" name="codeBlocks" value={JSON.stringify(codeBlocks)} />
+            <input type="hidden" name="media" value={JSON.stringify(media)} />
+            <input type="hidden" name="hasBounty" value={hasBounty ? 'on' : 'off'} />
+            {hasBounty && (
+              <>
+                <input type="hidden" name="bountyAmount" value={bountyAmount} />
+                <input type="hidden" name="bountyDuration" value={bountyDuration.toString()} />
+              </>
+            )}
+
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-violet-300 mb-2">
                 Title
@@ -318,7 +270,6 @@ export default function CreatePost() {
                   <input
                     type="checkbox"
                     id="hasBounty"
-                    name="hasBounty"
                     checked={hasBounty}
                     onChange={(e) => setHasBounty(e.target.checked)}
                     className="rounded border-violet-500/30 bg-neutral-700/50 text-violet-300 focus:ring-violet-500"
@@ -336,7 +287,6 @@ export default function CreatePost() {
                       </label>
                       <input
                         type="number"
-                        name="bountyAmount"
                         value={bountyAmount}
                         onChange={(e) => setBountyAmount(e.target.value)}
                         min="0"
@@ -352,7 +302,6 @@ export default function CreatePost() {
                       </label>
                       <input
                         type="number"
-                        name="bountyDuration"
                         value={bountyDuration}
                         onChange={(e) => setBountyDuration(Number(e.target.value))}
                         min="1"
@@ -375,10 +324,9 @@ export default function CreatePost() {
             <div className="flex justify-end">
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="px-6 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 disabled:opacity-50"
+                className="px-6 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600"
               >
-                {isSubmitting ? 'Creating...' : 'Create Post'}
+                Create Post
               </button>
             </div>
           </Form>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Form } from '@remix-run/react';
+import { Form, Link } from '@remix-run/react';
 import { FiThumbsUp, FiThumbsDown, FiMessageSquare, FiCheck } from 'react-icons/fi';
 
 interface PostInteractionsProps {
@@ -185,7 +185,12 @@ export default function PostInteractions({
           {comments.map((comment) => (
             <div key={comment.id} className="p-4 bg-neutral-700/50 rounded-md border border-violet-500/20">
               <div className="flex items-center space-x-2">
-                <span className="font-semibold text-violet-400">{comment.author.username}</span>
+                <Link 
+                  to={`/${comment.author.username}`}
+                  className="font-semibold text-violet-400 hover:text-violet-300 transition-colors"
+                >
+                  {comment.author.username}
+                </Link>
                 <span className="text-gray-400">
                   {new Date(comment.createdAt).toLocaleDateString()}
                 </span>
@@ -227,7 +232,12 @@ export default function PostInteractions({
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <span className="font-semibold text-violet-400">{answer.author.username}</span>
+                  <Link 
+                    to={`/${answer.author.username}`}
+                    className="font-semibold text-violet-400 hover:text-violet-300 transition-colors"
+                  >
+                    {answer.author.username}
+                  </Link>
                   <span className="text-gray-400">
                     {new Date(answer.createdAt).toLocaleDateString()}
                   </span>
