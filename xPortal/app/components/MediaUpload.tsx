@@ -7,6 +7,23 @@ interface MediaUploadProps {
   uploadedMedia: Array<{ type: string; url: string; thumbnailUrl?: string; isScreenRecording: boolean }>;
 }
 
+// Helper to upload a file/blob to Cloudinary
+async function uploadToCloudinary(file: File | Blob, resourceType: 'image' | 'video', uploadPreset: string, cloudName: string, folder: string) {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', uploadPreset);
+  formData.append('folder', folder);
+  const endpoint = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`;
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    body: formData,
+  });
+  if (!response.ok) {
+    throw new Error('Failed to upload to Cloudinary');
+  }
+  return response.json();
+}
+
 export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: MediaUploadProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -42,114 +59,99 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
 
   const startScreenRecording = useCallback(async () => {
     try {
-      // Clean up any existing recording first
       cleanupRecording();
-
-      // Check if screen recording is supported
       if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
         throw new Error('Screen recording is not supported in this browser');
       }
-
-      const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
-        audio: true
-      });
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
       streamRef.current = stream;
-
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       recordedChunksRef.current = [];
-
       mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          recordedChunksRef.current.push(event.data);
-        }
+        if (event.data.size > 0) recordedChunksRef.current.push(event.data);
       };
-
-      mediaRecorder.onstop = () => {
+      mediaRecorder.onstop = async () => {
         if (recordedChunksRef.current.length === 0) {
           cleanupRecording();
           return;
         }
-
         const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
-        const url = URL.createObjectURL(blob);
-        
-        // Create thumbnail with error handling
+        setIsUploading(true);
         try {
-          const video = document.createElement('video');
-          video.src = url;
-          video.onloadeddata = () => {
-            try {
-              video.currentTime = 1; // Get frame at 1 second
-              const canvas = document.createElement('canvas');
-              canvas.width = video.videoWidth;
-              canvas.height = video.videoHeight;
-              const ctx = canvas.getContext('2d');
-              if (ctx) {
-                ctx.drawImage(video, 0, 0);
-                const thumbnailUrl = canvas.toDataURL('image/jpeg');
-                
-                onMediaUpload({
-                  type: 'VIDEO',
-                  url,
-                  thumbnailUrl,
-                  isScreenRecording: true
-                });
-              } else {
-                // Fallback without thumbnail
+          // Cloudinary config from env
+          const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || process.env.CLOUDINARY_UPLOAD_PRESET || '';
+          const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME || '';
+          if (!uploadPreset || !cloudName) throw new Error('Cloudinary config missing');
+          const uploadResult = await uploadToCloudinary(blob, 'video', uploadPreset, cloudName, 'portal/posts');
+          const url = uploadResult.secure_url;
+          // Generate thumbnail as before
+          try {
+            const video = document.createElement('video');
+            video.src = url;
+            video.crossOrigin = 'anonymous';
+            video.onloadeddata = () => {
+              try {
+                video.currentTime = 1;
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                  ctx.drawImage(video, 0, 0);
+                  const thumbnailUrl = canvas.toDataURL('image/jpeg');
+                  onMediaUpload({
+                    type: 'VIDEO',
+                    url,
+                    thumbnailUrl,
+                    isScreenRecording: true
+                  });
+                } else {
+                  onMediaUpload({
+                    type: 'VIDEO',
+                    url,
+                    isScreenRecording: true
+                  });
+                }
+              } catch (error) {
                 onMediaUpload({
                   type: 'VIDEO',
                   url,
                   isScreenRecording: true
                 });
               }
-            } catch (error) {
-              console.error('Failed to create thumbnail:', error);
-              // Fallback without thumbnail
+            };
+            video.onerror = () => {
               onMediaUpload({
                 type: 'VIDEO',
                 url,
                 isScreenRecording: true
               });
-            }
-            cleanupRecording();
-          };
-          video.onerror = () => {
-            // Fallback without thumbnail
+            };
+          } catch (error) {
             onMediaUpload({
               type: 'VIDEO',
               url,
               isScreenRecording: true
             });
-            cleanupRecording();
-          };
+          }
         } catch (error) {
-          console.error('Failed to process video:', error);
-          // Fallback without thumbnail
-          onMediaUpload({
-            type: 'VIDEO',
-            url,
-            isScreenRecording: true
-          });
+          alert(error instanceof Error ? error.message : 'Failed to upload screen recording');
+        } finally {
+          setIsUploading(false);
           cleanupRecording();
         }
       };
-
-      // Handle when user stops sharing via browser UI
       stream.getVideoTracks()[0].onended = () => {
         if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
           mediaRecorderRef.current.stop();
         }
       };
-
       mediaRecorder.start();
       setIsRecording(true);
       setUploadType('screen');
     } catch (error) {
-      console.error('Screen recording error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to start screen recording';
-      alert(errorMessage);
+      alert(error instanceof Error ? error.message : 'Failed to start screen recording');
       cleanupRecording();
     }
   }, [onMediaUpload, cleanupRecording]);
@@ -176,19 +178,29 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
         throw new Error('Please upload a video or image file');
       }
 
-      // Validate file size (max 5MB for videos, 2MB for images)
-      const maxSize = isVideo ? 5 * 1024 * 1024 : 2 * 1024 * 1024;
+      // Cloudinary can handle much larger files, so we'll use generous limits
+      const maxSize = isVideo ? 100 * 1024 * 1024 : 50 * 1024 * 1024; // 100MB for videos, 50MB for images
       if (file.size > maxSize) {
-        throw new Error(`File size must be less than ${isVideo ? '5MB' : '2MB'}`);
+        throw new Error(`File size must be less than ${isVideo ? '100MB' : '50MB'}`);
       }
 
-      const url = URL.createObjectURL(file);
-      
+      // Cloudinary config from env
+      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || process.env.CLOUDINARY_UPLOAD_PRESET || '';
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME || '';
+      if (!uploadPreset || !cloudName) throw new Error('Cloudinary config missing');
+
+      // Upload to Cloudinary
+      const resourceType = isVideo ? 'video' : 'image';
+      const folder = 'portal/posts';
+      const uploadResult = await uploadToCloudinary(file, resourceType, uploadPreset, cloudName, folder);
+      const url = uploadResult.secure_url;
+
       if (isVideo) {
-        // Create thumbnail for video with error handling
+        // Generate thumbnail as before
         try {
           const video = document.createElement('video');
           video.src = url;
+          video.crossOrigin = 'anonymous';
           video.onloadeddata = () => {
             try {
               video.currentTime = 1;
@@ -264,7 +276,7 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
   return (
     <div className="space-y-4">
       <div className="text-sm text-gray-400 mb-2">
-        <p>📁 File size limits: Images (2MB), Videos (5MB), Total uploads (10MB)</p>
+        <p>📁 File size limits: Images (50MB), Videos (100MB) - Powered by Cloudinary</p>
       </div>
       <div className="flex gap-4">
         <button

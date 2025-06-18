@@ -1,6 +1,6 @@
 // app/routes/profile.tsx
 import { useEffect, useState, useRef } from 'react'
-import { Form, useLoaderData, Link, useActionData, redirect, useNavigate, useSubmit } from "@remix-run/react"
+import { Form, useLoaderData, Link, useActionData, redirect, useNavigate, useSubmit, useRouteError } from "@remix-run/react"
 import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from '@remix-run/node'
 import { requireUserId } from '~/utils/auth.server'
 import { prisma } from '~/utils/prisma.server'
@@ -143,43 +143,24 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     if (mediaDataArray.length > 0) {
       try {
         await Promise.all(
-          mediaDataArray.map(async (item: { type: string; base64Data: string; thumbnailBase64Data?: string; isScreenRecording: boolean }) => {
-            const resourceType = item.type === 'VIDEO' ? 'video' : 'image';
-            
-            // Upload main media
-            const uploadResult = await uploadToCloudinary(item.base64Data, {
-              resourceType,
-              folder: 'portal/posts',
-            });
-
-            // Upload thumbnail if it exists
-            let thumbnailUrl: string | undefined;
-            if (item.thumbnailBase64Data) {
-              const thumbnailResult = await uploadToCloudinary(item.thumbnailBase64Data, {
-                resourceType: 'image',
-                folder: 'portal/posts/thumbnails',
-              });
-              thumbnailUrl = thumbnailResult.secure_url;
-            }
-
-            // Create media entry in the database
+          mediaDataArray.map(async (item: { type: string; url: string; thumbnailUrl?: string; isScreenRecording: boolean }) => {
             await prisma.media.create({
               data: {
                 type: item.type,
-                url: uploadResult.secure_url,
-                thumbnailUrl,
+                url: item.url,
+                thumbnailUrl: item.thumbnailUrl,
                 isScreenRecording: item.isScreenRecording,
-                cloudinaryId: uploadResult.public_id,
+                cloudinaryId: '',
                 postId: post.id
               }
             });
           })
         );
       } catch (error) {
-        // If media upload fails, delete the post and bounty
-        console.error('Media upload error:', error);
+        // If media creation fails, delete the post and bounty
+        console.error('Media creation error:', error);
         await prisma.posts.delete({ where: { id: post.id } });
-        return json({ error: 'Failed to upload media. Please try again.' }, { status: 500 });
+        return json({ error: 'Failed to create media entries. Please try again.' }, { status: 500 });
       }
     }
 
@@ -252,51 +233,10 @@ export default function CreatePost() {
         formData.append('bountyDuration', bountyDuration.toString());
       }
 
-      // Handle media uploads with fallback
+      // Handle media uploads - now using direct Cloudinary URLs
       if (media.length > 0) {
-        try {
-          // Check total media size before processing
-          let totalSize = 0;
-          for (const item of media) {
-            try {
-              const response = await fetch(item.url);
-              const blob = await response.blob();
-              totalSize += blob.size;
-            } catch (error) {
-              console.error('Failed to check media size:', error);
-            }
-          }
-          
-          const maxTotalSize = 10 * 1024 * 1024; // 10MB total limit
-          if (totalSize > maxTotalSize) {
-            throw new Error(`Total media size too large. Maximum total size is 10MB. Current size: ${(totalSize / 1024 / 1024).toFixed(2)}MB`);
-          }
-          
-          // Convert blob URLs to base64 with better error handling
-          const mediaWithBase64 = await Promise.all(
-            media.map(async (item, index) => {
-              try {
-                const base64Data = await blobUrlToBase64(item.url);
-                const thumbnailBase64Data = item.thumbnailUrl ? await blobUrlToBase64(item.thumbnailUrl) : undefined;
-                return {
-                  type: item.type,
-                  base64Data,
-                  thumbnailBase64Data,
-                  isScreenRecording: item.isScreenRecording
-                };
-              } catch (error) {
-                console.error(`Failed to convert media item ${index}:`, error);
-                throw new Error(`Failed to process media item ${index + 1}. Please try again.`);
-              }
-            })
-          );
-          formData.append('media', JSON.stringify(mediaWithBase64));
-        } catch (error) {
-          console.error('Media processing error:', error);
-          // Fallback: create post without media
-          formData.append('media', JSON.stringify([]));
-          setClientError('Media upload failed. Post will be created without media.');
-        }
+        // Media items are already Cloudinary URLs from direct upload
+        formData.append('media', JSON.stringify(media));
       } else {
         formData.append('media', JSON.stringify([]));
       }
@@ -309,40 +249,6 @@ export default function CreatePost() {
       setClientError(errorMessage);
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  // Helper function to convert blob URL to base64 with better error handling
-  const blobUrlToBase64 = async (blobUrl: string): Promise<string> => {
-    try {
-      const response = await fetch(blobUrl);
-      if (!response.ok) {
-        throw new Error('Failed to fetch blob data');
-      }
-      const blob = await response.blob();
-      
-      // Check blob size before converting to base64
-      const maxSize = 5 * 1024 * 1024; // 5MB limit for base64 data
-      if (blob.size > maxSize) {
-        throw new Error(`File size too large. Maximum size is 5MB. Current size: ${(blob.size / 1024 / 1024).toFixed(2)}MB`);
-      }
-      
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const base64data = reader.result as string;
-          if (base64data) {
-            resolve(base64data);
-          } else {
-            reject(new Error('Failed to convert blob to base64'));
-          }
-        };
-        reader.onerror = () => reject(new Error('Failed to read blob data'));
-        reader.readAsDataURL(blob);
-      });
-    } catch (error) {
-      console.error('Blob to base64 conversion error:', error);
-      throw new Error('Failed to process media file. Please try again.');
     }
   };
 
@@ -476,6 +382,40 @@ export default function CreatePost() {
               </button>
             </div>
           </Form>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+  
+  return (
+    <div className="h-screen w-full bg-neutral-900 flex flex-row">
+      <Nav />
+      <div className="flex-1 flex items-center justify-center">
+        <div className="bg-slate-800 p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
+          <h2 className="text-2xl font-bold text-white mb-4 text-center">Post Creation Failed</h2>
+          <p className="text-gray-300 mb-6 text-center">
+            {error instanceof Error 
+              ? error.message 
+              : "An unexpected error occurred while creating your post. Please try again."}
+          </p>
+          <div className="flex justify-center space-x-4">
+            <a
+              href="/posts/create"
+              className="bg-violet-500 hover:bg-violet-600 text-white font-bold py-2 px-4 rounded transition-colors"
+            >
+              Try Again
+            </a>
+            <a
+              href="/"
+              className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition-colors"
+            >
+              Return Home
+            </a>
+          </div>
         </div>
       </div>
     </div>
