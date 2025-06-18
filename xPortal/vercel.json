@@ -1,9 +1,7 @@
 {
-  "functions": {
-    "app/routes/posts.create.tsx": {
-      "maxDuration": 60
-    }
-  },
+  "buildCommand": "npm run build",
+  "outputDirectory": "build/client",
+  "framework": "remix",
   "headers": [
     {
       "source": "/api/(.*)",
@@ -13,12 +11,6 @@
           "value": "*"
         }
       ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/posts/create",
-      "destination": "/app/routes/posts.create.tsx"
     }
   ]
 } 
