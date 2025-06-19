@@ -96,6 +96,7 @@ export default function Signup() {
                         onChange={e => handleInputChange(e, 'username')}
                         error={errors.username}
                         type="text"
+                        autocomplete="username"
                     />
 
                     <FormField
@@ -106,6 +107,7 @@ export default function Signup() {
                         onChange={e => handleInputChange(e, 'email')}
                         error={errors.email}
                         type="email"
+                        autocomplete="email"
                     />
 
                     <FormField
@@ -116,6 +118,7 @@ export default function Signup() {
                         onChange={e => handleInputChange(e, 'password')}
                         error={errors.password}
                         type="password"
+                        autocomplete="new-password"
                     />
 
                     {formError && (

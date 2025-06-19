@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, Form } from "@remix-run/react"
 import gsap from 'gsap'
 import { FiCreditCard, FiLogOut } from 'react-icons/fi'
+import { ClientOnly } from './ClientOnly'
 
 interface BubbleConfig {
   size: number;
@@ -43,6 +44,12 @@ function WalletButton() {
     );
   }
 
+  // Only render the wallet component when hooks are available
+  return <WalletButtonWithHooks walletHooks={walletHooks} />;
+}
+
+// Separate component that uses the wallet hooks
+function WalletButtonWithHooks({ walletHooks }: { walletHooks: any }) {
   const { useWallet, useWalletModal } = walletHooks;
   
   const { wallet, connected, disconnect } = useWallet();
@@ -132,6 +139,7 @@ export function Nav() {
             bubble.style.opacity = config.opacity.toString();
             bubble.style.left = `${Math.random() * 100}%`;
             bubble.style.top = '0%';
+
             container.appendChild(bubble);
 
             // Animate bubble
@@ -166,24 +174,6 @@ export function Nav() {
             gsap.killTweensOf(".bubble, .bubble-1, .bubble-2");
         };
     }, [mounted]);
-
-    // During SSR, render a placeholder or null
-    if (typeof window === 'undefined') {
-        return (
-            <div className='fixed left-0 top-0 h-screen w-20 bg-neutral-800 flex flex-col items-center z-[9999]'>
-                <div className="flex flex-col items-center w-full py-5">
-                    <div className="relative w-12 h-12 flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <circle cx="12" cy="12" r="10" />
-                            <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" />
-                            <line x1="12" y1="17" x2="12.01" y2="17" />
-                        </svg>
-                    </div>
-                    <h1 className="text-gray-300 text-xs font-bold tracking-wider font-cursive mt-2">portal.ask</h1>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className='group fixed left-0 top-0 h-screen w-20 bg-neutral-800 flex flex-col items-center transition-all duration-300 ease-in-out hover:w-64 overflow-hidden z-[9999] nav-container'>
@@ -250,7 +240,9 @@ export function Nav() {
             <div className="relative z-10 mt-auto w-full">
                 <hr className='border-b border-gray-500 w-4/6 mx-auto mb-4'/>
                 <div className="w-full px-4 mb-4">
-                    <WalletButton />
+                    <ClientOnly>
+                        <WalletButton />
+                    </ClientOnly>
                 </div>
                 <Form method="post" action="/logout" className="w-full">
                     <button type="submit" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-white/5">
@@ -264,5 +256,5 @@ export function Nav() {
                 </Form>
             </div>
         </div>
-    )
+    );
 }

@@ -24,11 +24,14 @@ if (process.env.NODE_ENV === 'production') {
 const connectDB = async () => {
   try {
     await prisma.$connect()
+    console.log('Prisma client connected successfully');
   } catch (error) {
+    console.error('Failed to connect to database:', error);
     process.exit(1)
   }
 }
 
-connectDB()
+// Initialize the connection immediately
+connectDB().catch(console.error);
 
 export { prisma }

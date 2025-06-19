@@ -155,6 +155,7 @@ export default function Login() {
                         onChange={e => handleInputChange(e, 'email')}
                         error={errors.email}
                         type="email"
+                        autocomplete="email"
                     />
 
                     <FormField
@@ -165,6 +166,7 @@ export default function Login() {
                         onChange={e => handleInputChange(e, 'password')}
                         error={errors.password}
                         type="password"
+                        autocomplete="current-password"
                     />
 
                     {formError && (

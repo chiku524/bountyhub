@@ -132,7 +132,7 @@ export default function Settings() {
 
     return (
         <Layout>
-            <div className="w-auto max-w-8xl mx-auto mt-4 px-4 ml-24 pb-16">
+            <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
                 <div className="mb-6 flex justify-between items-center mt-16">
                     <h1 className="text-2xl font-bold text-white">Settings</h1>
                 </div>

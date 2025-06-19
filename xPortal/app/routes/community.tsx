@@ -7,7 +7,7 @@ import { prisma } from '~/utils/prisma.server'
 import { FiTrendingUp } from 'react-icons/fi'
 import IntegrityRatingButton from '~/components/IntegrityRatingButton'
 import { AuthNotice } from '~/components/auth-notice'
-import { FaSearch, FaFilter, FaSort, FaEye, FaComment, FaThumbsUp, FaClock, FaUser, FaTag } from 'react-icons/fa'
+import { FaSearch, FaFilter, FaSort, FaEye, FaComment, FaThumbsUp, FaClock, FaUser, FaTag, FaBookmark } from 'react-icons/fa'
 
 const DEFAULT_PROFILE_PICTURE = 'https://api.dicebear.com/7.x/initials/svg?seed=';
 
@@ -67,6 +67,7 @@ interface LoaderData {
   currentPage: number;
   totalPages: number;
   selectedTags: string[];
+  searchQuery: string;
 }
 
 const POSTS_PER_PAGE = 5;
@@ -115,11 +116,14 @@ export const loader: LoaderFunction = async ({ request }) => {
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
     const selectedTags = url.searchParams.getAll('tags');
+    const searchQuery = url.searchParams.get('search') || '';
     const perPage = 9;
     const skip = (page - 1) * perPage;
 
-    // Build the where clause for tag filtering
+    // Build the where clause for tag filtering and search
     const whereClause: any = {};
+    
+    // Add tag filtering
     if (selectedTags.length > 0) {
       whereClause.postTags = {
         some: {
@@ -129,13 +133,21 @@ export const loader: LoaderFunction = async ({ request }) => {
         }
       };
     }
+    
+    // Add search filtering for title
+    if (searchQuery.trim()) {
+      whereClause.title = {
+        contains: searchQuery.trim(),
+        mode: 'insensitive' // Case-insensitive search
+      };
+    }
 
-    // First, get the total count of posts with tag filtering
+    // First, get the total count of posts with tag filtering and search
     const totalPosts = await prisma.posts.count({
       where: whereClause
     });
 
-    // Then fetch the posts with pagination and tag filtering
+    // Then fetch the posts with pagination, tag filtering, and search
     const posts = await prisma.posts.findMany({
       where: whereClause,
       include: {
@@ -198,79 +210,78 @@ export const loader: LoaderFunction = async ({ request }) => {
       
       // If both have bounties, sort by bounty amount (higher first)
       if (aHasBounty && bHasBounty) {
-        const aAmount = a.bounty!.amount;
-        const bAmount = b.bounty!.amount;
-        if (aAmount !== bAmount) return bAmount - aAmount;
+        return (b.bounty?.amount || 0) - (a.bounty?.amount || 0);
       }
       
-      // Then by visibility votes
-      if (b.visibilityVotes !== a.visibilityVotes) return b.visibilityVotes - a.visibilityVotes;
+      // Then sort by visibility votes (higher first)
+      if (a.visibilityVotes !== b.visibilityVotes) {
+        return b.visibilityVotes - a.visibilityVotes;
+      }
       
-      // Finally by creation date
+      // Finally sort by creation date (newer first)
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
-    // Transform the posts data
+    // Transform posts to match the expected format
     const transformedPosts = posts.map(post => ({
       id: post.id,
       title: post.title,
       content: post.content,
-      media: post.media[0] ? {
-        id: post.media[0].id,
-        type: post.media[0].type,
-        url: post.media[0].url,
-        thumbnailUrl: post.media[0].thumbnailUrl,
-        isScreenRecording: post.media[0].isScreenRecording
-      } : null,
+      media: post.media?.[0] || null,
       author: {
         id: post.author.id,
         username: post.author.username,
-        profilePicture: getProfilePicture(post.author.profile?.profilePicture || null, post.author.username)
+        profilePicture: post.author.profile?.profilePicture || null
       },
       createdAt: post.createdAt.toISOString(),
-      updatedAt: post.updatedAt.toISOString(),
       visibilityVotes: post.visibilityVotes,
-      userVoted: user ? post.votes.length > 0 : false,
+      userVoted: post.votes && post.votes.length > 0,
       comments: post._count.comments,
       hasBounty: post.hasBounty,
-      bounty: post.bounty ? {
-        id: post.bounty.id,
-        amount: post.bounty.amount,
-        status: post.bounty.status
-      } : null,
-      tags: post.postTags.map(postTag => ({
-        id: postTag.tag.id,
-        name: postTag.tag.name,
-        color: postTag.tag.color
+      bounty: post.bounty,
+      tags: post.postTags.map(pt => ({
+        id: pt.tag.id,
+        name: pt.tag.name,
+        color: pt.tag.color
       }))
     }));
 
-    // Transform user data if it exists
-    const transformedUser = user ? {
-      id: user.id,
-      username: user.username,
-      profilePicture: getProfilePicture(user.profile?.profilePicture || null, user.username)
-    } : null;
-
-    // Fetch all available tags
+    // Get available tags for filtering
     const availableTags = await prisma.tag.findMany({
-      orderBy: { name: 'asc' }
+      orderBy: {
+        name: 'asc'
+      }
     });
+
+    const totalPages = Math.ceil(totalPosts / perPage);
 
     return json({
-      user: transformedUser,
+      user: user ? {
+        id: user.id,
+        username: user.username,
+        profilePicture: user.profile?.profilePicture || null
+      } : null,
       posts: transformedPosts,
+      availableTags,
       totalPosts,
       currentPage: page,
-      totalPages: Math.ceil(totalPosts / perPage),
-      availableTags,
-      selectedTags
+      totalPages,
+      selectedTags,
+      searchQuery
     });
   } catch (error) {
-    return json({ 
-      error: 'Failed to load posts',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    console.error('Error loading community posts:', error);
+    return json({
+      user: null,
+      posts: [],
+      availableTags: [],
+      totalPosts: 0,
+      currentPage: 1,
+      totalPages: 1,
+      selectedTags: [],
+      searchQuery: '',
+      error: 'Failed to load posts'
+    });
   }
 };
 
@@ -389,19 +400,93 @@ export const action: ActionFunction = async ({ request }) => {
 };
 
 export default function Community() {
-  const { user, posts: initialPosts, totalPosts, currentPage, totalPages, availableTags, selectedTags } = useLoaderData<LoaderData>();
+  const { user, posts: initialPosts, totalPosts, currentPage, totalPages, availableTags, selectedTags, searchQuery } = useLoaderData<LoaderData>();
   const [searchParams, setSearchParams] = useSearchParams();
   const [localPosts, setLocalPosts] = useState<any[]>(initialPosts);
   const [videoErrors, setVideoErrors] = useState<Record<string, string>>({});
+  const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
+  const [isSearching, setIsSearching] = useState(false);
   const submit = useSubmit();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [bookmarkedPosts, setBookmarkedPosts] = useState<{ [postId: string]: boolean }>({});
 
   // Update localPosts when posts from loader changes
   useEffect(() => {
+    console.log('Setting localPosts from initialPosts:', initialPosts.length);
     setLocalPosts(initialPosts);
   }, [initialPosts]);
+
+  // Update local search query when server search query changes
+  useEffect(() => {
+    setLocalSearchQuery(searchQuery);
+    setIsSearching(false);
+  }, [searchQuery]);
+
+  // Debounced search effect
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (localSearchQuery !== searchQuery) {
+        setIsSearching(true);
+        const newParams = new URLSearchParams(searchParams);
+        if (localSearchQuery.trim()) {
+          newParams.set('search', localSearchQuery);
+        } else {
+          newParams.delete('search');
+        }
+        // Reset to page 1 when searching
+        newParams.set('page', '1');
+        setSearchParams(newParams);
+      }
+    }, 300); // 300ms debounce delay
+
+    return () => clearTimeout(timeoutId);
+  }, [localSearchQuery, searchQuery, searchParams, setSearchParams]);
+
+  // Debug: Log bookmark state changes
+  useEffect(() => {
+    // Removed debugging
+  }, [bookmarkedPosts]);
+
+  // Fetch bookmark status for visible posts when user or posts change
+  useEffect(() => {
+    if (!user || localPosts.length === 0) return;
+    
+    const fetchBookmarks = async () => {
+      try {
+        const postIdsParam = encodeURIComponent(JSON.stringify(localPosts.map(p => p.id)));
+        const res = await fetch(`/api/bookmarks-status?postIds=${postIdsParam}`, {
+          method: 'GET',
+          headers: { 
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (res.status === 401) {
+          return;
+        }
+        
+        if (!res.ok) {
+          console.error('Failed to fetch bookmark status:', res.status, res.statusText);
+          return;
+        }
+        
+        const contentType = res.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          console.error('Response is not JSON:', contentType);
+          return;
+        }
+        
+        const data = await res.json();
+        setBookmarkedPosts(data.status);
+      } catch (error) {
+        console.error('Error fetching bookmark status:', error);
+      }
+    };
+    
+    fetchBookmarks();
+  }, [user, localPosts]); // Run when user or posts change
 
   const handleVideoError = (postId: string, error: string) => {
     setVideoErrors(prev => ({ ...prev, [postId]: error }));
@@ -431,11 +516,41 @@ export default function Community() {
     }
   };
 
+  // Handle bookmark toggle
+  const handleBookmark = async (postId: string) => {
+    if (!user) return;
+    
+    // Optimistically update the UI
+    setBookmarkedPosts(prev => {
+      const newState = { ...prev, [postId]: !prev[postId] };
+      return newState;
+    });
+    
+    try {
+      const response = await fetch('/api/bookmarks-toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId })
+      });
+      
+      if (!response.ok) {
+        console.error('Failed to toggle bookmark:', response.status);
+        // Revert the state if the API call failed
+        setBookmarkedPosts(prev => ({ ...prev, [postId]: !prev[postId] }));
+      }
+      // If successful, keep the optimistic update
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+      // Revert the state if there was an error
+      setBookmarkedPosts(prev => ({ ...prev, [postId]: !prev[postId] }));
+    }
+  };
+
   // If there's an error in the loader data, show an error message
   if (!initialPosts || !Array.isArray(initialPosts)) {
     return (
       <Layout>
-        <div className="w-auto max-w-8xl mx-auto mt-4 px-4 ml-24 pb-16">
+        <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
           <div className="text-red-500 mt-16">
             Failed to load posts. Please try refreshing the page.
           </div>
@@ -446,7 +561,7 @@ export default function Community() {
 
   return (
     <Layout>
-      <div className="w-auto max-w-8xl mx-auto mt-4 px-4 ml-24 pb-16">
+      <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
         <div className="mb-6 flex justify-between items-center mt-16">
           <h1 className="text-2xl font-bold text-white">Community Posts</h1>
           <Link 
@@ -455,6 +570,44 @@ export default function Community() {
           >
             <span>Create Post</span>
           </Link>
+        </div>
+
+        {/* Search Bar */}
+        <div className="mb-6 bg-neutral-800/50 rounded-lg p-4 border border-violet-500/30">
+          <div className="flex items-center space-x-4">
+            <div className="flex-1 relative">
+              <FaSearch className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${isSearching ? 'text-violet-400 animate-pulse' : 'text-gray-400'}`} />
+              <input
+                type="text"
+                placeholder="Search posts by title..."
+                value={localSearchQuery}
+                onChange={(e) => {
+                  setLocalSearchQuery(e.target.value);
+                }}
+                className="w-full pl-10 pr-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500"
+              />
+            </div>
+            {localSearchQuery && (
+              <button
+                onClick={() => {
+                  setLocalSearchQuery('');
+                  const newParams = new URLSearchParams(searchParams);
+                  newParams.delete('search');
+                  newParams.set('page', '1');
+                  setSearchParams(newParams);
+                }}
+                className="px-3 py-2 text-gray-400 hover:text-white transition-colors"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          {searchQuery && (
+            <div className="mt-2 text-sm text-gray-400">
+              Searching for: "{searchQuery}" • {totalPosts} result{totalPosts !== 1 ? 's' : ''} found
+              {isSearching && <span className="ml-2 text-violet-400">(searching...)</span>}
+            </div>
+          )}
         </div>
 
         {/* Tag Filtering */}
@@ -555,6 +708,17 @@ export default function Community() {
                       {new Date(post.createdAt).toLocaleDateString()}
                     </span>
                   </div>
+                  
+                  {/* Bookmark Button - Top Right */}
+                  {user && (
+                    <button
+                      onClick={() => handleBookmark(post.id)}
+                      className={`p-2 rounded-full transition-colors ${bookmarkedPosts[post.id] ? 'bg-yellow-400/20 text-yellow-400' : 'bg-neutral-700/50 text-gray-400 hover:text-yellow-400'}`}
+                      title={bookmarkedPosts[post.id] ? 'Remove Bookmark' : 'Bookmark'}
+                    >
+                      <FaBookmark className={`w-4 h-4 ${bookmarkedPosts[post.id] ? 'fill-current' : 'fill-none'}`} />
+                    </button>
+                  )}
                 </div>
                 
                 <div className="group">
@@ -654,7 +818,11 @@ export default function Community() {
         {totalPages > 1 && (
           <div className="flex justify-center mt-8 space-x-2">
             <button
-              onClick={() => setSearchParams({ page: String(currentPage - 1) })}
+              onClick={() => {
+                const newParams = new URLSearchParams(searchParams);
+                newParams.set('page', String(currentPage - 1));
+                setSearchParams(newParams);
+              }}
               disabled={currentPage === 1}
               className="px-3 py-1 rounded bg-gray-700 text-white disabled:opacity-50"
             >
@@ -663,14 +831,22 @@ export default function Community() {
             {Array.from({ length: totalPages }, (_, i) => (
               <button
                 key={i + 1}
-                onClick={() => setSearchParams({ page: String(i + 1) })}
+                onClick={() => {
+                  const newParams = new URLSearchParams(searchParams);
+                  newParams.set('page', String(i + 1));
+                  setSearchParams(newParams);
+                }}
                 className={`px-3 py-1 rounded ${currentPage === i + 1 ? 'bg-violet-500 text-white' : 'bg-gray-700 text-white'}`}
               >
                 {i + 1}
               </button>
             ))}
             <button
-              onClick={() => setSearchParams({ page: String(currentPage + 1) })}
+              onClick={() => {
+                const newParams = new URLSearchParams(searchParams);
+                newParams.set('page', String(currentPage + 1));
+                setSearchParams(newParams);
+              }}
               disabled={currentPage === totalPages}
               className="px-3 py-1 rounded bg-gray-700 text-white disabled:opacity-50"
             >

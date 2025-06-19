@@ -28,6 +28,7 @@ model User {
   comments  Comment[]
   answers   Answer[]
   votes     Vote[]
+  bookmarks Bookmark[]
   reputationPoints Int @default(0)
   reputationHistory ReputationHistory[]
   bountyWinners Bounty[] @relation("BountyWinners")
@@ -99,6 +100,7 @@ model Posts {
   answers     Answer[]
   votes       Vote[]
   postTags    PostTag[]
+  bookmarks   Bookmark[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   visibilityVotes Int @default(0)
@@ -403,13 +405,26 @@ model Tag {
 }
 
 model PostTag {
-  id      String @id @map("_id") @default(auto()) @db.ObjectId
-  post    Posts  @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId  String @db.ObjectId
-  tag     Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
-  tagId   String @db.ObjectId
-  createdAt DateTime @default(now())
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  postId String @db.ObjectId
+  tagId  String @db.ObjectId
+  post   Posts  @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@unique([postId, tagId])
   @@map("post_tags")
+}
+
+model Bookmark {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  postId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Posts    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+  @@index([userId])
+  @@index([postId])
+  @@map("bookmarks")
 }

@@ -25,6 +25,7 @@ import {
 } from 'react-icons/fa'
 import { FiThumbsUp, FiEdit2 } from 'react-icons/fi'
 import IntegrityDisplay from '~/components/IntegrityDisplay'
+import { getUserBookmarks } from '~/utils/bookmark.server'
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   const username = data?.user?.username || 'Profile';
@@ -48,6 +49,32 @@ type ReputationHistory = {
     action: string;
     points: number;
     createdAt: string | Date;
+};
+
+type BookmarkData = {
+    id: string;
+    createdAt: Date;
+    post: {
+        id: string;
+        title: string;
+        content: string;
+        media: any;
+        author: {
+            id: string;
+            username: string;
+            profilePicture: string | null;
+        };
+        createdAt: string;
+        visibilityVotes: number;
+        comments: number;
+        hasBounty: boolean;
+        bounty: any;
+        tags: Array<{
+            id: string;
+            name: string;
+            color: string;
+        }>;
+    };
 };
 
 function truncateContent(content: string | undefined | null): string {
@@ -130,7 +157,18 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
         throw new Response("User not found", { status: 404 });
     }
 
-    return json({ user: userData, isAuthenticated: true });
+    // Fetch bookmarks for the user with error handling
+    let bookmarks: BookmarkData[] = [];
+    try {
+        const bookmarksData = await getUserBookmarks(userId, 1, 10);
+        bookmarks = bookmarksData.bookmarks;
+    } catch (error) {
+        console.error('Error fetching bookmarks:', error);
+        // Continue without bookmarks if there's an error
+        bookmarks = [];
+    }
+
+    return json({ user: userData, isAuthenticated: true, bookmarks });
 };
 
 const SocialMediaIcons = ({ profile }: { profile: NonNullable<UserData['profile']> }) => {
@@ -198,7 +236,7 @@ function getActivityDescription(action: string): string {
 }
 
 export default function Profile() {
-    const { user, isAuthenticated } = useLoaderData<{ user: UserData; isAuthenticated?: boolean }>();
+    const { user, isAuthenticated, bookmarks } = useLoaderData<{ user: UserData; isAuthenticated?: boolean; bookmarks: BookmarkData[] }>();
     const location = useLocation();
     const isActivityPage = location.pathname === '/profile/activity';
 
@@ -222,7 +260,7 @@ export default function Profile() {
 
     return (
         <Layout>
-            <div className="w-auto max-w-8xl mx-auto mt-4 px-4 ml-24 pb-16">
+            <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
                 <div className="mb-6 flex justify-between items-center mt-16">
                     <h1 className="text-2xl font-bold text-white">Profile</h1>
                     <Link 
@@ -369,6 +407,26 @@ export default function Profile() {
                                 </div>
                             </div>
                         </div>
+
+                        {bookmarks && bookmarks.length > 0 && (
+                            <div className="mt-8">
+                                <h2 className="text-xl font-bold text-yellow-400 mb-4">Bookmarked Posts</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {bookmarks.map(bm => (
+                                        <div key={bm.id} className="bg-neutral-800/80 rounded-lg p-4 border border-yellow-400/40 transition-all duration-300 hover:bg-neutral-700/80 hover:border-yellow-300/60 hover:shadow-lg hover:shadow-yellow-400/20 hover:scale-[1.02] group">
+                                            <Link to={`/posts/${bm.post.id}`} className="block">
+                                                <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-yellow-300 transition-colors duration-300">{bm.post.title}</h3>
+                                                <p className="text-gray-300 mb-2 truncate group-hover:text-gray-200 transition-colors duration-300">{bm.post.content.length > 100 ? bm.post.content.substring(0, 100) + '...' : bm.post.content}</p>
+                                                <div className="flex items-center space-x-2 mt-2">
+                                                    <img src={getProfilePicture(bm.post.author.profilePicture, bm.post.author.username)} alt={bm.post.author.username} className="w-6 h-6 rounded-full" />
+                                                    <span className="text-violet-400 group-hover:text-violet-300 transition-colors duration-300">{bm.post.author.username}</span>
+                                                </div>
+                                            </Link>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <Outlet />
