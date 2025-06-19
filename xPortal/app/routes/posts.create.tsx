@@ -12,9 +12,9 @@ import CodeBlockEditor from '~/components/CodeBlockEditor'
 import { MediaUpload } from '~/components/MediaUpload'
 import { uploadToCloudinary } from '~/utils/cloudinary.server'
 import { VirtualWalletService } from '~/utils/virtual-wallet.server'
-import portalTokenInfo from '../../portal-token-info'
+import bountyBucksInfo from '../../bounty-bucks-info.json'
 
-const TOKEN_SYMBOL = portalTokenInfo.config.symbol
+const TOKEN_SYMBOL = bountyBucksInfo.config.symbol
 
 interface LoaderData {
   user: {

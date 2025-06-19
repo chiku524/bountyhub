@@ -7,26 +7,17 @@ import { validateEmail, validatePassword } from '~/utils/validators.client'
 import { login, getUser } from '~/utils/auth.server'
 
 export const loader: LoaderFunction = async ({ request }) => {
-    console.log('Login loader called, method:', request.method);
-    console.log('Login loader called, headers:', Object.fromEntries(request.headers.entries()));
-    
     const user = await getUser(request);
-    console.log('Login loader - user found:', !!user);
     
     if (user) {
         const url = new URL(request.url);
         const redirectTo = url.searchParams.get('redirectTo') || '/profile';
-        console.log('Login loader - redirecting to:', redirectTo);
         return redirect(redirectTo);
     }
-    console.log('Login loader - no user, returning null');
     return null;
 }
 
 export const action: ActionFunction = async ({ request }) => {
-    console.log('Login action called, method:', request.method);
-    console.log('Login action called, headers:', Object.fromEntries(request.headers.entries()));
-    
     // Only process POST requests
     if (request.method !== 'POST') {
         return redirect('/login');
@@ -35,7 +26,6 @@ export const action: ActionFunction = async ({ request }) => {
     // Check if the request has content
     const contentLength = request.headers.get('content-length');
     if (!contentLength || contentLength === '0') {
-        console.log('Empty POST request detected, redirecting to login page');
         return redirect('/login');
     }
     
@@ -43,7 +33,6 @@ export const action: ActionFunction = async ({ request }) => {
         // Check if the request has form data
         const contentType = request.headers.get('content-type');
         if (!contentType || (!contentType.includes('multipart/form-data') && !contentType.includes('application/x-www-form-urlencoded'))) {
-            console.log('Invalid content type:', contentType);
             return redirect('/login');
         }
         
@@ -66,7 +55,6 @@ export const action: ActionFunction = async ({ request }) => {
         }
         return json({ error: result.error }, { status: 400 })
     } catch (error) {
-        console.error('Login action error:', error);
         // Return a redirect instead of throwing an error
         return redirect('/login');
     }

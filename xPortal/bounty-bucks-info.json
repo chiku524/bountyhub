@@ -1,0 +1,35 @@
+{
+  "mint": "8TxxzfEUbQcMTmsC5z1SS9TuLNzbL2iBVTLvb5JaKR6M",
+  "mintAuthority": "e6EdfgpEdo48zUKFC18cADxTqgbt68JE8uDjAgdCzkp",
+  "platformTokenAccount": "4ShRsPAvrAueEkuNcS14PzJYXiANETowh2tpvy2JWbAh",
+  "payer": "e6EdfgpEdo48zUKFC18cADxTqgbt68JE8uDjAgdCzkp",
+  "config": {
+    "name": "BountyBucks",
+    "symbol": "BBUX",
+    "decimals": 9,
+    "initialSupply": 1000000000,
+    "exchangeRate": 1000,
+    "description": "BountyBucks - The native token for Portal's decentralized bounty platform"
+  },
+  "tokenSale": {
+    "totalTokensForSale": 200000000,
+    "pricePerToken": 0.001,
+    "minInvestment": 0.1,
+    "maxInvestment": 10,
+    "vestingPeriod": 12,
+    "cliffPeriod": 3,
+    "softCap": 100,
+    "hardCap": 500
+  },
+  "allocation": {
+    "publicSale": 20,
+    "team": 15,
+    "advisors": 5,
+    "marketing": 10,
+    "development": 20,
+    "liquidity": 15,
+    "community": 10,
+    "reserve": 5
+  },
+  "network": "mainnet-beta"
+} 

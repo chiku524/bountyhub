@@ -13,16 +13,16 @@ import { TransactionMonitorService } from "./transaction-monitor.server";
 import { RateLimiterService } from "./rate-limiter.server";
 import { MultisigWalletService } from "./multisig-wallet.server";
 import { TokenSupplyService } from "./token-supply.server";
-import portalTokenInfo from '../../portal-token-info';
+import bountyBucksInfo from '../../bounty-bucks-info.json';
 
 // You'll need to set these environment variables
 const SOLANA_RPC_URL = process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com";
 const PLATFORM_WALLET_PRIVATE_KEY = process.env.SOLANA_WALLET_PRIVATE_KEY; // Your platform's wallet private key
 
-const TOKEN_SYMBOL = portalTokenInfo.config.symbol;
-const TOKEN_MINT = portalTokenInfo.mint;
-const TOKEN_DECIMALS = portalTokenInfo.config.decimals;
-const PLATFORM_TOKEN_ACCOUNT = portalTokenInfo.platformTokenAccount;
+const TOKEN_SYMBOL = bountyBucksInfo.config.symbol;
+const TOKEN_MINT = bountyBucksInfo.mint;
+const TOKEN_DECIMALS = bountyBucksInfo.config.decimals;
+const PLATFORM_TOKEN_ACCOUNT = bountyBucksInfo.platformTokenAccount;
 
 export class SolanaWalletService {
   private static connection = new Connection(SOLANA_RPC_URL);

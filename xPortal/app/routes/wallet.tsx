@@ -1,31 +1,52 @@
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
-import { useLoaderData, Form, useActionData, useNavigation } from "@remix-run/react";
+import { useLoaderData, Form, useActionData, useNavigation, useRouteError, isRouteErrorResponse } from "@remix-run/react";
 import { VirtualWalletService } from "~/utils/virtual-wallet.server";
 import { requireUserId } from "~/utils/auth.server";
 import { useState } from "react";
 import { Nav } from "~/components/nav";
 import { DirectDeposit } from "~/components/DirectDeposit";
-import portalTokenInfo from '../../portal-token-info';
+import bountyBucksInfo from '../../bounty-bucks-info.json';
 import { prisma } from "~/utils/db.server";
 import { TokenSupplyService } from "../utils/token-supply.server";
 
-const TOKEN_SYMBOL = portalTokenInfo.config.symbol;
-const TOKEN_DECIMALS = portalTokenInfo.config.decimals;
+const TOKEN_SYMBOL = bountyBucksInfo.config.symbol;
+const TOKEN_DECIMALS = bountyBucksInfo.config.decimals;
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const userId = await requireUserId(request);
-  
-  const walletData = await VirtualWalletService.getWalletDetails(userId);
+  try {
+    const userId = await requireUserId(request);
+    
+    const walletData = await VirtualWalletService.getWalletDetails(userId);
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { solanaAddress: true, tokenAccountAddress: true },
-  });
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { solanaAddress: true, tokenAccountAddress: true },
+    });
 
-  // Fetch token supply stats
-  const supplyStats = await TokenSupplyService.getSupplyStats();
+    // Fetch token supply stats with error handling
+    let supplyStats;
+    try {
+      supplyStats = await TokenSupplyService.getSupplyStats();
+    } catch (error) {
+      console.error('Error fetching token supply stats:', error);
+      // Provide fallback data if token supply fetch fails
+      supplyStats = {
+        initialSupply: bountyBucksInfo.config.initialSupply,
+        currentSupply: bountyBucksInfo.config.initialSupply,
+        burnedAmount: 0,
+        burnPercentage: 0,
+        tokensPerUser: 0,
+        dailyBurnRate: 0,
+        weeklyBurnRate: 0,
+        estimatedDaysUntilLow: 0,
+      };
+    }
 
-  return json({ walletData, user, supplyStats });
+    return json({ walletData, user, supplyStats });
+  } catch (error) {
+    console.error('Wallet loader error:', error);
+    throw new Response('Failed to load wallet data', { status: 500 });
+  }
 };
 
 export default function WalletPage() {
@@ -653,6 +674,49 @@ export default function WalletPage() {
               </div>
             )}
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+  
+  return (
+    <div className="h-screen w-full bg-neutral-900 flex flex-col items-center justify-center">
+      <div className="w-full max-w-md p-8 space-y-8 bg-neutral-800 rounded-lg shadow-lg border border-red-500/30">
+        <div className="text-center">
+          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-500/10 mb-4">
+            <svg className="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-pink-600 mb-2">
+            Wallet Error
+          </h1>
+          <p className="text-gray-400 mb-6">
+            {isRouteErrorResponse(error) 
+              ? error.status === 404 
+                ? "The wallet page you're looking for doesn't exist."
+                : "Failed to load wallet data. Please try again."
+              : "An unexpected error occurred while loading your wallet."}
+          </p>
+        </div>
+
+        <div className="flex flex-col space-y-3">
+          <button
+            onClick={() => window.location.reload()}
+            className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors text-center"
+          >
+            Try Again
+          </button>
+          <a
+            href="/"
+            className="w-full py-2 px-4 border border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-300 bg-neutral-700 hover:bg-neutral-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors text-center"
+          >
+            Return Home
+          </a>
         </div>
       </div>
     </div>

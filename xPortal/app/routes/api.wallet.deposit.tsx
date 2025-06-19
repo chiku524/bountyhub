@@ -6,9 +6,9 @@ import { RateLimiterService } from "~/utils/rate-limiter.server";
 import { requireUserId } from "~/utils/auth.server";
 import { prisma } from "~/utils/prisma.server";
 import { z } from "zod";
-import portalTokenInfo from '../../portal-token-info';
+import bountyBucksInfo from '../../bounty-bucks-info.json';
 
-const TOKEN_SYMBOL = portalTokenInfo.config.symbol;
+const TOKEN_SYMBOL = bountyBucksInfo.config.symbol;
 
 const depositSchema = z.object({
   amount: z.number().positive().max(1000), // Max 1000 SOL per deposit

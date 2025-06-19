@@ -3,10 +3,10 @@ import { useLoaderData, Link, useSearchParams } from "@remix-run/react";
 import { VirtualWalletService } from "~/utils/virtual-wallet.server";
 import { requireUserId } from "~/utils/auth.server";
 import { Nav } from "~/components/nav";
-import portalTokenInfo from '../../portal-token-info';
+import bountyBucksInfo from '../../bounty-bucks-info.json';
 import { useState } from "react";
 
-const TOKEN_SYMBOL = portalTokenInfo.config.symbol;
+const TOKEN_SYMBOL = bountyBucksInfo.config.symbol;
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const userId = await requireUserId(request);

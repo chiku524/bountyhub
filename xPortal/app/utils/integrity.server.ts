@@ -1,13 +1,6 @@
 import { prisma } from './prisma.server';
 import { getUser } from './auth.server';
 
-// Debug: Check if prisma is available
-console.log('Integrity server - prisma object:', prisma);
-console.log('Integrity server - prisma type:', typeof prisma);
-if (prisma) {
-  console.log('Integrity server - available models:', Object.keys(prisma));
-}
-
 export interface RatingData {
   ratedUserId: string;
   rating: number; // 1-10

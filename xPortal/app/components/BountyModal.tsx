@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Form } from '@remix-run/react';
-import portalTokenInfo from '../../portal-token-info';
+import bountyBucksInfo from '../../bounty-bucks-info.json';
 
-const TOKEN_SYMBOL = portalTokenInfo.config.symbol;
-const TOKEN_DECIMALS = portalTokenInfo.config.decimals;
+const TOKEN_SYMBOL = bountyBucksInfo.config.symbol;
+const TOKEN_DECIMALS = bountyBucksInfo.config.decimals;
 
 interface BountyModalProps {
   isOpen: boolean;

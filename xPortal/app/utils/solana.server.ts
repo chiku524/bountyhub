@@ -1,13 +1,13 @@
 import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID, createTransferInstruction, getAssociatedTokenAddress } from '@solana/spl-token';
-import portalTokenInfo from '../../portal-token-info';
+import bountyBucksInfo from '../../bounty-bucks-info.json';
 
 // Initialize Solana connection
 const connection = new Connection(process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com', 'confirmed');
 
-const TOKEN_MINT = portalTokenInfo.mint;
-const TOKEN_SYMBOL = portalTokenInfo.config.symbol;
-const TOKEN_DECIMALS = portalTokenInfo.config.decimals;
+const TOKEN_MINT = bountyBucksInfo.mint;
+const TOKEN_SYMBOL = bountyBucksInfo.config.symbol;
+const TOKEN_DECIMALS = bountyBucksInfo.config.decimals;
 
 export async function createBountyTransaction(
   fromPublicKey: PublicKey,

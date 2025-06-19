@@ -1,6 +1,6 @@
 import { prisma } from "./db.server";
-import portalTokenInfo from '../../portal-token-info';
-const TOKEN_SYMBOL = portalTokenInfo.config.symbol;
+import bountyBucksInfo from '../../bounty-bucks-info.json';
+const TOKEN_SYMBOL = bountyBucksInfo.config.symbol;
 
 export class VirtualWalletService {
   /**

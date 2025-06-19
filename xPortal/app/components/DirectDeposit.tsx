@@ -2,9 +2,9 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { useConnection } from '@solana/wallet-adapter-react';
 import { SystemProgram, Transaction, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
 import { useState } from 'react';
-import portalTokenInfo from '../../portal-token-info';
+import bountyBucksInfo from '../../bounty-bucks-info.json';
 
-const TOKEN_SYMBOL = portalTokenInfo.config.symbol;
+const TOKEN_SYMBOL = bountyBucksInfo.config.symbol;
 
 interface DirectDepositProps {
   onSuccess?: () => void;

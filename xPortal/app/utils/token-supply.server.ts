@@ -1,11 +1,11 @@
 import { Connection, PublicKey } from "@solana/web3.js";
 import { getMint } from "@solana/spl-token";
-import portalTokenInfo from '../../portal-token-info';
+import bountyBucksInfo from '../../bounty-bucks-info.json';
 
 const SOLANA_RPC_URL = process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com";
-const TOKEN_MINT = portalTokenInfo.mint;
-const INITIAL_SUPPLY = portalTokenInfo.config.initialSupply;
-const TOKEN_DECIMALS = portalTokenInfo.config.decimals;
+const TOKEN_MINT = bountyBucksInfo.mint;
+const INITIAL_SUPPLY = bountyBucksInfo.config.initialSupply;
+const TOKEN_DECIMALS = bountyBucksInfo.config.decimals;
 
 export class TokenSupplyService {
   private static connection = new Connection(SOLANA_RPC_URL);
@@ -34,6 +34,27 @@ export class TokenSupplyService {
       };
     } catch (error) {
       console.error("Error getting supply info:", error);
+      
+      // If it's a network error, return fallback data
+      if (error instanceof Error && (
+        error.message.includes('timeout') || 
+        error.message.includes('connection') ||
+        error.message.includes('network') ||
+        error.message.includes('fetch')
+      )) {
+        console.log("Network error detected, returning fallback supply data");
+        return {
+          initialSupply: INITIAL_SUPPLY,
+          currentSupply: INITIAL_SUPPLY,
+          burnedAmount: 0,
+          burnPercentage: 0,
+          mintAuthority: null,
+          freezeAuthority: null,
+          decimals: TOKEN_DECIMALS,
+          isInitialized: true,
+        };
+      }
+      
       throw error;
     }
   }

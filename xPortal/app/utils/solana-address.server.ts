@@ -1,8 +1,8 @@
-import { Keypair, PublicKey } from "@solana/web3.js";
+import { Keypair, PublicKey, Connection } from "@solana/web3.js";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
-import portalTokenInfo from '../../portal-token-info';
+import bountyBucksInfo from '../../bounty-bucks-info.json';
 
-const TOKEN_MINT = portalTokenInfo.mint;
+const TOKEN_MINT = bountyBucksInfo.mint;
 
 export class SolanaAddressService {
   /**
