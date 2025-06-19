@@ -217,7 +217,7 @@ export default function WalletPage() {
 
         {/* Token Supply Stats */}
         <div className="bg-neutral-800 border border-yellow-600 rounded-lg p-4 mb-8">
-          <h3 className="text-lg font-semibold text-yellow-300 mb-2">PORTAL Token Supply</h3>
+          <h3 className="text-lg font-semibold text-yellow-300 mb-2">BBUX Token Supply</h3>
           <div className="flex flex-wrap gap-6 items-center">
             <div>
               <span className="block text-sm text-gray-400">Initial Supply</span>
@@ -533,13 +533,33 @@ export default function WalletPage() {
                     required
                     className="w-full px-3 py-2 border border-neutral-600 bg-neutral-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="0.1"
+                    onChange={(e) => {
+                      const amount = parseFloat(e.target.value) || 0;
+                      const fee = amount * 0.03;
+                      const netAmount = amount - fee;
+                      // Update fee display
+                      const feeDisplay = document.getElementById('fee-display');
+                      const netDisplay = document.getElementById('net-display');
+                      if (feeDisplay) feeDisplay.textContent = fee.toFixed(4);
+                      if (netDisplay) netDisplay.textContent = netAmount.toFixed(4);
+                    }}
                   />
                   <p className="text-sm text-gray-400 mt-1">
                     Available: {wallet.balance.toFixed(4)} {TOKEN_SYMBOL}
                   </p>
-                  <p className="text-sm text-gray-400">
-                    You will receive the same amount in SOL (1:1 exchange rate)
-                  </p>
+                  <div className="mt-2 p-3 bg-neutral-700 rounded-md">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-300">Platform Fee (3%):</span>
+                      <span className="text-yellow-400" id="fee-display">0.0000</span>
+                    </div>
+                    <div className="flex justify-between text-sm mt-1">
+                      <span className="text-gray-300">You'll receive:</span>
+                      <span className="text-green-400 font-medium" id="net-display">0.0000</span>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-2">
+                      The platform fee helps maintain and improve our services
+                    </p>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -586,6 +606,23 @@ export default function WalletPage() {
               <div className="bg-blue-900 border border-blue-700 rounded-lg p-4">
                 <h4 className="font-semibold text-blue-200 mb-2">Withdrawal Successful!</h4>
                 <p className="text-blue-300 mb-2">Your withdrawal has been processed.</p>
+                
+                {/* Fee breakdown */}
+                <div className="mb-4 p-3 bg-blue-800 rounded-md">
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-blue-200">Total Amount:</span>
+                    <span className="text-white">{withdrawResult.totalAmount?.toFixed(4) || 'N/A'} {TOKEN_SYMBOL}</span>
+                  </div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-blue-200">Platform Fee (3%):</span>
+                    <span className="text-yellow-300">{withdrawResult.platformFee?.toFixed(4) || 'N/A'} {TOKEN_SYMBOL}</span>
+                  </div>
+                  <div className="flex justify-between text-sm font-medium">
+                    <span className="text-blue-200">You received:</span>
+                    <span className="text-green-300">{withdrawResult.netAmount?.toFixed(4) || 'N/A'} SOL</span>
+                  </div>
+                </div>
+                
                 <div className="mb-2">
                   <span className="block text-sm text-gray-300">Burn Transaction:</span>
                   <a
@@ -608,6 +645,19 @@ export default function WalletPage() {
                     {withdrawResult.solSignature}
                   </a>
                 </div>
+                {withdrawResult.platformFeeSignature && (
+                  <div className="mb-2">
+                    <span className="block text-sm text-gray-300">Platform Fee Transaction:</span>
+                    <a
+                      href={`https://explorer.solana.com/tx/${withdrawResult.platformFeeSignature}?cluster=devnet`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-400 underline break-all"
+                    >
+                      {withdrawResult.platformFeeSignature}
+                    </a>
+                  </div>
+                )}
                 <button
                   onClick={() => setWithdrawResult(null)}
                   className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"

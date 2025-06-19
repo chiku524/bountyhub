@@ -493,4 +493,57 @@ export class SolanaWalletService {
 
     return { ...result, burnSignature, solSignature };
   }
+
+  /**
+   * Process a withdrawal request with platform fee (burn PORTAL tokens and send SOL)
+   */
+  static async processWithdrawalWithFee(
+    userId: string,
+    netAmount: number,
+    platformFee: number,
+    userAddress: string,
+    transactionId: string
+  ) {
+    const totalAmount = netAmount + platformFee;
+    
+    // Check user's on-chain PORTAL token balance
+    const onChainBalance = await this.getUserTokenBalance(userAddress);
+    if (onChainBalance < totalAmount) {
+      throw new Error(`Insufficient PORTAL tokens on-chain. You have ${onChainBalance} but need ${totalAmount}`);
+    }
+
+    // Burn PORTAL tokens from user's wallet (total amount including fee)
+    const burnSignature = await this.burnTokensFromUser(userAddress, totalAmount);
+
+    // Log supply information after burning
+    console.log(`[WITHDRAWAL WITH FEE] Burned ${totalAmount} PORTAL tokens for user ${userId} (net: ${netAmount}, fee: ${platformFee})`);
+    await TokenSupplyService.logSupplyInfo();
+
+    // Check if supply is running low
+    const isSupplyLow = await TokenSupplyService.isSupplyLow();
+    if (isSupplyLow) {
+      console.warn(`[SUPPLY WARNING] Token supply is running low! Consider governance action.`);
+    }
+
+    // Send net SOL amount to the user
+    const userSolSignature = await this.sendSolToUser(userAddress, netAmount, transactionId);
+
+    // Send platform fee to platform wallet (if fee > 0)
+    let platformFeeSignature = null;
+    if (platformFee > 0) {
+      const platformAddress = this.getPlatformWalletAddress();
+      platformFeeSignature = await this.sendSolToUser(platformAddress, platformFee, transactionId);
+      console.log(`[PLATFORM FEE] Sent ${platformFee} SOL to platform wallet`);
+    }
+
+    // Confirm the withdrawal in the virtual wallet
+    const result = await VirtualWalletService.confirmWithdrawal(transactionId, userSolSignature);
+
+    return { 
+      ...result, 
+      burnSignature, 
+      solSignature: userSolSignature,
+      platformFeeSignature 
+    };
+  }
 } 

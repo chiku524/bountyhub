@@ -369,7 +369,7 @@ export class VirtualWalletService {
   /**
    * Create a withdrawal request
    */
-  static async createWithdrawalRequest(userId: string, amount: number) {
+  static async createWithdrawalRequest(userId: string, amount: number, metadata?: any) {
     const wallet = await this.getOrCreateWallet(userId);
 
     if (wallet.balance < amount) {
@@ -386,6 +386,7 @@ export class VirtualWalletService {
         balanceAfter: wallet.balance - amount,
         description: `Withdrawal request for ${amount} ${TOKEN_SYMBOL}`,
         status: "PENDING" as any,
+        metadata: metadata ? JSON.stringify(metadata) : null,
       },
     });
 

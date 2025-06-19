@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FiX, FiTag } from 'react-icons/fi';
 
 interface Tag {
@@ -25,6 +25,7 @@ export default function TagSelector({
 }: TagSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const filteredTags = availableTags.filter(tag =>
     tag.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -35,6 +36,24 @@ export default function TagSelector({
   const selectedTagObjects = availableTags.filter(tag => 
     selectedTags.includes(tag.id)
   );
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+        setSearchTerm('');
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   const handleTagToggle = (tagId: string) => {
     const newSelectedTags = selectedTags.includes(tagId)
@@ -131,7 +150,7 @@ export default function TagSelector({
         </button>
 
         {isOpen && (
-          <div className="absolute z-50 w-full mt-1 bg-neutral-800 border border-violet-500/30 rounded-lg shadow-xl max-h-64 overflow-hidden">
+          <div className="absolute z-50 w-full mt-1 bg-neutral-800 border border-violet-500/30 rounded-lg shadow-xl max-h-64 overflow-hidden" ref={dropdownRef}>
             {/* Search Input */}
             <div className="p-3 border-b border-violet-500/20">
               <input

@@ -12,6 +12,11 @@ import type { Comment, Answer, CodeBlock, User, Profile } from "@prisma/client";
 import { addReputationPoints, REPUTATION_POINTS } from '~/utils/reputation.server';
 import IntegrityRatingButton from '~/components/IntegrityRatingButton';
 
+// Extended CodeBlock type with description field
+type CodeBlockWithDescription = CodeBlock & {
+  description?: string;
+};
+
 type CommentWithAuthor = {
   id: string;
   content: string;
@@ -73,7 +78,7 @@ type PostWithRelations = {
   };
   comments: CommentWithAuthor[];
   answers: AnswerWithAuthor[];
-  codeBlocks: CodeBlock[];
+  codeBlocks: CodeBlockWithDescription[];
   media: {
     id: string;
     type: string;
@@ -630,49 +635,48 @@ export const action: ActionFunction = async ({ request, params }) => {
         return json({ error: 'Answer ID is required' }, { status: 400 });
       }
 
+      // Get the answer and its author
+      const answer = await prisma.answer.findUnique({
+        where: { id: answerId },
+        include: {
+          author: {
+            select: {
+              id: true,
+              username: true
+            }
+          },
+          post: true
+        }
+      });
+
+      if (!answer) {
+        return json({ error: 'Answer not found' }, { status: 404 });
+      }
+
+      if (answer.post.authorId !== user.id) {
+        return json({ error: 'Only the post author can accept answers' }, { status: 403 });
+      }
+
+      // Use a transaction to ensure atomic operations
       return await prisma.$transaction(async (tx) => {
-        // First, unaccept any previously accepted answers
-        await tx.answer.updateMany({
-          where: {
-            postId: postId,
-            isAccepted: true
-          },
-          data: {
-            isAccepted: false
-          }
-        });
-
-        // Accept the new answer
-        const updatedAnswer = await tx.answer.update({
+        // Update the answer as accepted
+        await tx.answer.update({
           where: { id: answerId },
-          data: {
-            isAccepted: true
-          },
-          include: {
-            author: {
-              include: {
-                profile: true
-              }
-            }
-          }
+          data: { isAccepted: true },
         });
 
-        // Add reputation points to the answer author
-        await addReputationPoints(
-          updatedAnswer.authorId,
-          REPUTATION_POINTS.ANSWER_ACCEPTED,
-          'ANSWER_ACCEPTED',
-          updatedAnswer.id
-        );
+        // Update the post status to completed
+        await tx.posts.update({
+          where: { id: postId },
+          data: { status: 'COMPLETED' },
+        });
 
-        return json({
+        return json({ 
           success: true,
+          message: `Answer accepted by ${answer.author.username}`,
           answer: {
-            ...updatedAnswer,
-            author: {
-              ...updatedAnswer.author,
-              profilePicture: updatedAnswer.author.profile?.profilePicture || null
-            }
+            ...answer,
+            isAccepted: true
           }
         });
       });
@@ -970,6 +974,58 @@ export const action: ActionFunction = async ({ request, params }) => {
       });
 
       return json({ success: true });
+    }
+    case 'accept_answer': {
+      const answerId = formData.get('answerId') as string;
+      if (!answerId) {
+        return json({ error: 'Answer ID is required' }, { status: 400 });
+      }
+
+      // Get the answer and its author
+      const answer = await prisma.answer.findUnique({
+        where: { id: answerId },
+        include: {
+          author: {
+            select: {
+              id: true,
+              username: true
+            }
+          },
+          post: true
+        }
+      });
+
+      if (!answer) {
+        return json({ error: 'Answer not found' }, { status: 404 });
+      }
+
+      if (answer.post.authorId !== user.id) {
+        return json({ error: 'Only the post author can accept answers' }, { status: 403 });
+      }
+
+      // Use a transaction to ensure atomic operations
+      return await prisma.$transaction(async (tx) => {
+        // Update the answer as accepted
+        await tx.answer.update({
+          where: { id: answerId },
+          data: { isAccepted: true },
+        });
+
+        // Update the post status to completed
+        await tx.posts.update({
+          where: { id: postId },
+          data: { status: 'COMPLETED' },
+        });
+
+        return json({ 
+          success: true,
+          message: `Answer accepted by ${answer.author.username}`,
+          answer: {
+            ...answer,
+            isAccepted: true
+          }
+        });
+      });
     }
     default: {
       return json({ error: 'Invalid action' }, { status: 400 });
@@ -1349,13 +1405,13 @@ export default function PostDetail() {
                           <img
                             src={mediaItem.url}
                             alt="Post media"
-                            className="w-full h-64 object-cover rounded-t-lg"
+                            className="w-full max-w-4xl max-h-96 object-contain rounded-t-lg bg-neutral-900"
                           />
                         )}
                         {mediaItem.type === 'VIDEO' && (
                           <video
                             controls
-                            className="w-full h-64 object-cover rounded-t-lg"
+                            className="w-full max-w-4xl max-h-96 object-contain rounded-t-lg bg-black"
                             poster={mediaItem.thumbnailUrl}
                           >
                             <source src={mediaItem.url} type="video/mp4" />
@@ -1412,14 +1468,31 @@ export default function PostDetail() {
               {post.codeBlocks && post.codeBlocks.length > 0 && (
                 <div className="mt-6 space-y-4">
                   <h3 className="text-lg font-semibold text-white">Code</h3>
-                  {post.codeBlocks.map((codeBlock: CodeBlock) => (
-                    <div key={codeBlock.id} className="rounded-lg overflow-hidden">
+                  {post.codeBlocks.map((codeBlock: CodeBlockWithDescription) => (
+                    <div key={codeBlock.id} className="rounded-lg overflow-hidden border border-neutral-600/50">
+                      {/* Code Block Header */}
+                      <div className="bg-neutral-700/50 px-4 py-3 border-b border-neutral-600/50">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <span className="px-2 py-1 bg-violet-500/20 text-violet-300 text-sm font-medium rounded-md">
+                              {codeBlock.language}
+                            </span>
+                            {codeBlock.description && (
+                              <span className="text-gray-300 text-sm">
+                                {codeBlock.description}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Code Content */}
                       <SyntaxHighlighter
                         language={codeBlock.language}
                         style={vscDarkPlus}
                         customStyle={{
                           margin: 0,
-                          borderRadius: '0.5rem',
+                          borderRadius: '0',
                           fontSize: '0.875rem',
                         }}
                         showLineNumbers={true}
@@ -1598,13 +1671,20 @@ export default function PostDetail() {
                         
                         {currentUser?.id === post.author.id && !answers.some((a: AnswerWithAuthor) => a.isAccepted) && (
                           <Form method="post">
-                            <input type="hidden" name="action" value="claim_bounty" />
+                            <input type="hidden" name="action" value={post.bounty && post.bounty.status === 'ACTIVE' ? 'claim_bounty' : 'accept_answer'} />
                             <input type="hidden" name="answerId" value={answer.id} />
                             <button
                               type="submit"
-                              className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition-all duration-200 shadow-lg shadow-cyan-500/25"
+                              className={`px-4 py-2 text-white rounded-lg transition-all duration-200 shadow-lg ${
+                                post.bounty && post.bounty.status === 'ACTIVE'
+                                  ? 'bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 shadow-cyan-500/25'
+                                  : 'bg-green-500 hover:bg-green-600 shadow-green-500/25'
+                              }`}
                             >
-                              Accept Answer & Claim Bounty
+                              {post.bounty && post.bounty.status === 'ACTIVE' 
+                                ? 'Accept Answer & Claim Bounty' 
+                                : 'Accept Answer'
+                              }
                             </button>
                           </Form>
                         )}

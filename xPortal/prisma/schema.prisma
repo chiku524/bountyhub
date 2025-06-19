@@ -182,13 +182,14 @@ model Vote {
 }
 
 model CodeBlock {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  language  String
-  code      String
-  post      Posts    @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId    String   @db.ObjectId
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  language    String
+  code        String
+  description String?  // Optional description for the code block
+  post        Posts    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId      String   @db.ObjectId
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model ReputationHistory {
@@ -270,6 +271,7 @@ model WalletTransaction {
   solanaSignature String? // Solana transaction signature for deposits/withdrawals
   bountyId      String?  @db.ObjectId // Reference to bounty if related
   bounty        Bounty?  @relation(fields: [bountyId], references: [id], onDelete: SetNull)
+  metadata      String?  // JSON string with additional data (fees, net amounts, etc.)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

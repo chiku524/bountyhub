@@ -217,6 +217,16 @@ export default function TransactionsPage() {
                             Bounty: {transaction.bounty.post.title}
                           </p>
                         )}
+                        {transaction.type === 'WITHDRAW' && transaction.metadata && (
+                          <div className="text-sm text-gray-400 mt-1 space-y-1">
+                            {transaction.metadata.platformFee && (
+                              <p>Platform Fee: <span className="text-yellow-400">{transaction.metadata.platformFee.toFixed(4)} {TOKEN_SYMBOL}</span></p>
+                            )}
+                            {transaction.metadata.netAmount && (
+                              <p>Net Amount: <span className="text-green-400">{transaction.metadata.netAmount.toFixed(4)} SOL</span></p>
+                            )}
+                          </div>
+                        )}
                         {transaction.solanaSignature && (
                           <a
                             href={`https://explorer.solana.com/tx/${transaction.solanaSignature}?cluster=devnet`}
