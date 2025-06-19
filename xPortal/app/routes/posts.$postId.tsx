@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useLoaderData, useParams, useSubmit, useFetcher, Form, useRouteError, isRouteErrorResponse, Link, useActionData } from '@remix-run/react';
-import { json, LoaderFunction, ActionFunction, redirect } from '@remix-run/node';
+import { useLoaderData, useParams, useSubmit, useFetcher, Form, useRouteError, isRouteErrorResponse, Link, useActionData, useNavigate, useSearchParams } from '@remix-run/react';
+import { json, LoaderFunction, ActionFunction, redirect, MetaFunction } from '@remix-run/node';
 import { getUser } from '~/utils/auth.server';
 import { prisma } from '~/utils/prisma.server';
+import { requireUserId } from '~/utils/auth.server';
 import PostInteractions from '~/components/PostInteractions';
 import { Nav } from '~/components/nav';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -11,6 +12,14 @@ import { FiTrash2, FiArrowUp, FiArrowDown } from 'react-icons/fi';
 import type { Comment, Answer, CodeBlock, User, Profile } from "@prisma/client";
 import { addReputationPoints, REPUTATION_POINTS } from '~/utils/reputation.server';
 import IntegrityRatingButton from '~/components/IntegrityRatingButton';
+import { Layout } from '~/components/Layout';
+import { AuthNotice } from '~/components/auth-notice';
+import { FaThumbsUp, FaThumbsDown, FaComment, FaReply, FaEdit, FaTrash, FaFlag, FaCheck, FaTimes, FaEye, FaClock, FaUser, FaTag, FaDollarSign, FaGift, FaLock, FaUnlock } from 'react-icons/fa';
+import { FiTrendingUp, FiAward, FiStar } from 'react-icons/fi';
+import CodeBlockEditor from '~/components/CodeBlockEditor';
+import { MediaUpload } from '~/components/MediaUpload';
+import TagSelector from '~/components/TagSelector';
+import bountyBucksInfo from '../../bounty-bucks-info.json';
 
 // Extended CodeBlock type with description field
 type CodeBlockWithDescription = CodeBlock & {
@@ -136,6 +145,14 @@ function getProfilePicture(profilePicture: string | null, username: string): str
     }
     return `${DEFAULT_PROFILE_PICTURE}${encodeURIComponent(username)}`;
 }
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  const postTitle = data?.post?.title || 'Post';
+  return [
+    { title: `${postTitle} - portal.ask` },
+    { name: "description", content: postTitle },
+  ];
+};
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   try {

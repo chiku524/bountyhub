@@ -1,4 +1,4 @@
-import { json, type LoaderFunctionArgs } from "@remix-run/node";
+import { json, type LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { useLoaderData, Form, useActionData, useNavigation, useRouteError, isRouteErrorResponse } from "@remix-run/react";
 import { VirtualWalletService } from "~/utils/virtual-wallet.server";
 import { requireUserId } from "~/utils/auth.server";
@@ -11,6 +11,13 @@ import { TokenSupplyService } from "../utils/token-supply.server";
 
 const TOKEN_SYMBOL = bountyBucksInfo.config.symbol;
 const TOKEN_DECIMALS = bountyBucksInfo.config.decimals;
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Wallet - portal.ask" },
+    { name: "description", content: "Manage your portal.ask wallet and transactions" },
+  ];
+};
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   try {

@@ -39,6 +39,11 @@ export const links: LinksFunction = () => [
     href: "https://fonts.cdnfonts.com/css/self-deception",
   },
   { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" },
+  // Favicon configuration - portal.ask logo
+  { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+  { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+  { rel: "apple-touch-icon", href: "/logo.png" },
+  { rel: "shortcut icon", href: "/favicon.svg" },
 ];
 
 export function ErrorBoundary() {
@@ -80,7 +85,7 @@ export function ErrorBoundary() {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>{errorTitle} - xPortal</title>
+        <title>{errorTitle} - portal.ask</title>
         <Meta />
         <Links />
       </head>

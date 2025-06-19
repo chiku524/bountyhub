@@ -1,6 +1,6 @@
 // app/routes/profile.tsx
 import { Form, useLoaderData, Link, Outlet, useLocation } from "@remix-run/react"
-import { LoaderFunction, json, redirect } from '@remix-run/node'
+import { LoaderFunction, json, redirect, MetaFunction } from '@remix-run/node'
 import { getUser } from '~/utils/auth.server'
 import { Layout } from '../components/Layout'
 import { prisma } from '~/utils/prisma.server'
@@ -25,6 +25,14 @@ import {
 } from 'react-icons/fa'
 import { FiThumbsUp, FiEdit2 } from 'react-icons/fi'
 import IntegrityDisplay from '~/components/IntegrityDisplay'
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  const username = data?.user?.username || 'Profile';
+  return [
+    { title: `${username} - portal.ask` },
+    { name: "description", content: `View ${username}'s profile on portal.ask` },
+  ];
+};
 
 const DEFAULT_PROFILE_PICTURE = 'https://api.dicebear.com/7.x/initials/svg?seed=';
 

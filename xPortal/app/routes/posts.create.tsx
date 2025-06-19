@@ -1,6 +1,6 @@
 // app/routes/profile.tsx
 import { useEffect, useState, useRef } from 'react'
-import { Form, useLoaderData, Link, useActionData, redirect, useNavigate, useSubmit, useRouteError, useNavigation } from "@remix-run/react"
+import { Form, useLoaderData, Link, useActionData, redirect, useNavigate, useSubmit, useRouteError, useNavigation, MetaFunction } from "@remix-run/react"
 import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from '@remix-run/node'
 import { requireUserId } from '~/utils/auth.server'
 import { prisma } from '~/utils/prisma.server'
@@ -14,6 +14,7 @@ import { uploadToCloudinary } from '~/utils/cloudinary.server'
 import { VirtualWalletService } from '~/utils/virtual-wallet.server'
 import TagSelector from '~/components/TagSelector'
 import bountyBucksInfo from '../../bounty-bucks-info.json'
+import { BountyForm } from '~/components/BountyForm'
 
 const TOKEN_SYMBOL = bountyBucksInfo.config.symbol
 
@@ -31,6 +32,13 @@ interface LoaderData {
   } | null;
   availableTags: Tag[];
 }
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Create Post - portal.ask" },
+    { name: "description", content: "Create a new question or discussion post on portal.ask" },
+  ];
+};
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const userId = await requireUserId(request);

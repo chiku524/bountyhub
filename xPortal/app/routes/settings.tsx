@@ -1,6 +1,6 @@
 // app/routes/profile.tsx
 import { Form, useLoaderData, Link, useActionData, useNavigation, useFetcher } from "@remix-run/react"
-import { LoaderFunction, ActionFunction, json, redirect, ActionFunctionArgs } from '@remix-run/node'
+import { LoaderFunction, ActionFunction, json, redirect, ActionFunctionArgs, MetaFunction } from '@remix-run/node'
 import { logout, getUser } from '~/utils/auth.server'
 import { editUser } from '~/utils/user.server'
 import { useEffect, useState } from 'react'
@@ -12,6 +12,7 @@ import { validateUsername } from "~/utils/validators.client";
 import { AuthNotice } from '~/components/auth-notice';
 import type { Profile, User } from '~/utils/types.server';
 import { FiUser, FiLink, FiMail, FiLock, FiSave, FiCheck } from 'react-icons/fi';
+import { FaUser, FaLock, FaBell, FaPalette, FaGlobe, FaTrash, FaSave, FaTimes, FaCheck, FaEdit, FaEye, FaEyeSlash } from 'react-icons/fa'
 
 type UserData = User;
 
@@ -20,6 +21,13 @@ interface ActionData {
     success?: boolean;
     userData?: UserData;
 }
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Settings - portal.ask" },
+    { name: "description", content: "Manage your portal.ask account settings" },
+  ];
+};
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
     const userId = await requireUserId(request);

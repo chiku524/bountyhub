@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Form, useLoaderData, Link, useSubmit, useNavigate, useSearchParams } from "@remix-run/react"
-import { LoaderFunction, json, ActionFunction } from '@remix-run/node'
+import { LoaderFunction, json, ActionFunction, MetaFunction } from '@remix-run/node'
 import { getUser } from '~/utils/auth.server'
 import { Layout } from '../components/Layout'
 import { prisma } from '~/utils/prisma.server'
 import { FiTrendingUp } from 'react-icons/fi'
 import IntegrityRatingButton from '~/components/IntegrityRatingButton'
+import { AuthNotice } from '~/components/auth-notice'
+import { FaSearch, FaFilter, FaSort, FaEye, FaComment, FaThumbsUp, FaClock, FaUser, FaTag } from 'react-icons/fa'
 
 const DEFAULT_PROFILE_PICTURE = 'https://api.dicebear.com/7.x/initials/svg?seed=';
 
@@ -99,6 +101,13 @@ interface Post {
     status: string;
   } | null;
 }
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Community - portal.ask" },
+    { name: "description", content: "Explore the portal.ask community and discover questions, answers, and discussions" },
+  ];
+};
 
 export const loader: LoaderFunction = async ({ request }) => {
   try {

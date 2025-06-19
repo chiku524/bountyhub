@@ -2,9 +2,16 @@
 import { useState, useEffect } from 'react'
 import { Form, useActionData, useSearchParams, Link, useRouteError, isRouteErrorResponse } from '@remix-run/react'
 import { FormField } from '~/components/form-field'
-import { ActionFunction, LoaderFunction, redirect, json } from '@remix-run/node'
+import { ActionFunction, LoaderFunction, redirect, json, MetaFunction } from '@remix-run/node'
 import { validateEmail, validatePassword } from '~/utils/validators.client'
 import { login, getUser } from '~/utils/auth.server'
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Login - portal.ask" },
+    { name: "description", content: "Sign in to your portal.ask account" },
+  ];
+};
 
 export const loader: LoaderFunction = async ({ request }) => {
     const user = await getUser(request);

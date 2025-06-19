@@ -1,4 +1,4 @@
-import { json, type LoaderFunction } from '@remix-run/node';
+import { json, type LoaderFunction, MetaFunction } from '@remix-run/node';
 import { useLoaderData, Link } from '@remix-run/react';
 import { Layout } from '~/components/Layout';
 import { 
@@ -28,6 +28,13 @@ interface Category {
   title: string;
   description: string;
 }
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Documentation - portal.ask" },
+    { name: "description", content: "Learn how to use portal.ask and explore our documentation" },
+  ];
+};
 
 export const loader: LoaderFunction = async () => {
   return json({

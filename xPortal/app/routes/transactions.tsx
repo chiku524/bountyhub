@@ -1,4 +1,4 @@
-import { json, type LoaderFunctionArgs } from "@remix-run/node";
+import { json, type LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { useLoaderData, Link, useSearchParams } from "@remix-run/react";
 import { VirtualWalletService } from "~/utils/virtual-wallet.server";
 import { requireUserId } from "~/utils/auth.server";
@@ -7,6 +7,13 @@ import bountyBucksInfo from '../../bounty-bucks-info.json';
 import { useState } from "react";
 
 const TOKEN_SYMBOL = bountyBucksInfo.config.symbol;
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Transactions - portal.ask" },
+    { name: "description", content: "View your portal.ask transaction history" },
+  ];
+};
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const userId = await requireUserId(request);
