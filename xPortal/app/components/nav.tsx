@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, Form } from "@remix-run/react"
 import gsap from 'gsap'
-import { useWallet } from '@solana/wallet-adapter-react'
-import { useWalletModal } from '@solana/wallet-adapter-react-ui'
 import { FiCreditCard, FiLogOut } from 'react-icons/fi'
 
 interface BubbleConfig {
@@ -12,24 +10,105 @@ interface BubbleConfig {
   className: string;
 }
 
+// Client-only wallet component
+function WalletButton() {
+  const [mounted, setMounted] = useState(false);
+  const [walletHooks, setWalletHooks] = useState<any>(null);
+
+  useEffect(() => {
+    setMounted(true);
+    
+    // Dynamically import wallet hooks only on client
+    if (typeof window !== 'undefined') {
+      Promise.all([
+        import('@solana/wallet-adapter-react'),
+        import('@solana/wallet-adapter-react-ui')
+      ]).then(([walletModule, modalModule]) => {
+        setWalletHooks({
+          useWallet: walletModule.useWallet,
+          useWalletModal: modalModule.useWalletModal
+        });
+      }).catch(error => {
+        console.error('Failed to load wallet hooks:', error);
+      });
+    }
+  }, []);
+
+  if (!mounted || !walletHooks) {
+    return (
+      <button className="w-full py-2 px-3 bg-violet-600/20 border border-violet-500/30 rounded-lg text-violet-400 text-xs font-medium flex items-center justify-center gap-2">
+        <FiCreditCard className="w-4 h-4" />
+        <span className="hidden group-hover:block">Connect Wallet</span>
+      </button>
+    );
+  }
+
+  const { useWallet, useWalletModal } = walletHooks;
+  
+  const { wallet, connected, disconnect } = useWallet();
+  const { setVisible } = useWalletModal();
+
+  const handleWalletClick = () => {
+    if (connected) {
+      disconnect();
+    } else {
+      setVisible(true);
+    }
+  };
+
+  const formatAddress = (address: string) => {
+    return `${address.slice(0, 4)}...${address.slice(-4)}`;
+  };
+
+  if (connected) {
+    return (
+      <div className="group/wallet relative">
+        <button
+          onClick={handleWalletClick}
+          className="w-full py-2 px-3 bg-green-600/20 border border-green-500/30 rounded-lg text-green-400 text-xs font-medium transition-all duration-300 hover:bg-green-600/30 hover:border-green-500/50 flex items-center justify-center gap-2"
+        >
+          <FiCreditCard className="w-4 h-4" />
+          <span className="hidden group-hover:block">
+            {wallet?.adapter?.publicKey ? formatAddress(wallet.adapter.publicKey.toString()) : 'Connected'}
+          </span>
+        </button>
+        <button
+          onClick={() => disconnect()}
+          className="absolute inset-0 w-full py-2 px-3 bg-red-600/80 border border-red-500/80 rounded-lg text-red-400 text-xs font-medium transition-all duration-300 opacity-0 group-hover/wallet:opacity-100 flex items-center justify-center gap-2"
+        >
+          <FiLogOut className="w-4 h-4" />
+          <span className="hidden group-hover/wallet:block">Disconnect</span>
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={handleWalletClick}
+      className="w-full py-2 px-3 bg-violet-600/20 border border-violet-500/30 rounded-lg text-violet-400 text-xs font-medium transition-all duration-300 hover:bg-violet-600/30 hover:border-violet-500/50 flex items-center justify-center gap-2"
+    >
+      <FiCreditCard className="w-4 h-4" />
+      <span className="hidden group-hover:block">Connect Wallet</span>
+    </button>
+  );
+}
+
 export function Nav() {
-    const { wallet, connected, disconnect } = useWallet()
-    const { setVisible } = useWalletModal()
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
     
     const bubbleConfigs: BubbleConfig[] = [
         { size: 4, opacity: 0.6, duration: 3.5, className: 'bubble' },
         { size: 3, opacity: 0.6, duration: 4, className: 'bubble-1' },
         { size: 2, opacity: 0.6, duration: 4.5, className: 'bubble-2' }
     ];
-    
-    const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
-        setIsClient(true);
-    }, []);
-
-    useEffect(() => {
-        if (!isClient) return;
+        if (!mounted) return;
 
         const nav = document.querySelector(".nav-container");
         if (!nav) return;
@@ -86,21 +165,25 @@ export function Nav() {
         return () => {
             gsap.killTweensOf(".bubble, .bubble-1, .bubble-2");
         };
-    }, [isClient]);
+    }, [mounted]);
 
-    const handleWalletClick = () => {
-        if (connected) {
-            disconnect()
-        } else {
-            setVisible(true)
-        }
+    // During SSR, render a placeholder or null
+    if (typeof window === 'undefined') {
+        return (
+            <div className='fixed left-0 top-0 h-screen w-20 bg-neutral-800 flex flex-col items-center z-[9999]'>
+                <div className="flex flex-col items-center w-full py-5">
+                    <div className="relative w-12 h-12 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" />
+                            <line x1="12" y1="17" x2="12.01" y2="17" />
+                        </svg>
+                    </div>
+                    <h1 className="text-gray-300 text-xs font-bold tracking-wider font-cursive mt-2">portal.ask</h1>
+                </div>
+            </div>
+        );
     }
-
-    const formatAddress = (address: string) => {
-        return `${address.slice(0, 4)}...${address.slice(-4)}`
-    }
-
-    if (!isClient) return null;
 
     return (
         <div className='group fixed left-0 top-0 h-screen w-20 bg-neutral-800 flex flex-col items-center transition-all duration-300 ease-in-out hover:w-64 overflow-hidden z-[9999] nav-container'>
@@ -167,34 +250,7 @@ export function Nav() {
             <div className="relative z-10 mt-auto w-full">
                 <hr className='border-b border-gray-500 w-4/6 mx-auto mb-4'/>
                 <div className="w-full px-4 mb-4">
-                    {connected ? (
-                        <div className="group/wallet relative">
-                            <button
-                                onClick={handleWalletClick}
-                                className="w-full py-2 px-3 bg-green-600/20 border border-green-500/30 rounded-lg text-green-400 text-xs font-medium transition-all duration-300 hover:bg-green-600/30 hover:border-green-500/50 flex items-center justify-center gap-2"
-                            >
-                                <FiCreditCard className="w-4 h-4" />
-                                <span className="hidden group-hover:block">
-                                    {wallet?.adapter?.publicKey ? formatAddress(wallet.adapter.publicKey.toString()) : 'Connected'}
-                                </span>
-                            </button>
-                            <button
-                                onClick={() => disconnect()}
-                                className="absolute inset-0 w-full py-2 px-3 bg-red-600/80 border border-red-500/80 rounded-lg text-red-400 text-xs font-medium transition-all duration-300 opacity-0 group-hover/wallet:opacity-100 flex items-center justify-center gap-2"
-                            >
-                                <FiLogOut className="w-4 h-4" />
-                                <span className="hidden group-hover/wallet:block">Disconnect</span>
-                            </button>
-                        </div>
-                    ) : (
-                        <button
-                            onClick={handleWalletClick}
-                            className="w-full py-2 px-3 bg-violet-600/20 border border-violet-500/30 rounded-lg text-violet-400 text-xs font-medium transition-all duration-300 hover:bg-violet-600/30 hover:border-violet-500/50 flex items-center justify-center gap-2"
-                        >
-                            <FiCreditCard className="w-4 h-4" />
-                            <span className="hidden group-hover:block">Connect Wallet</span>
-                        </button>
-                    )}
+                    <WalletButton />
                 </div>
                 <Form method="post" action="/logout" className="w-full">
                     <button type="submit" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-white/5">
