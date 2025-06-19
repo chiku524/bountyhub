@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link, Form } from "@remix-run/react"
 import gsap from 'gsap'
-import { WalletConnect } from './WalletConnect'
+import { useWallet } from '@solana/wallet-adapter-react'
+import { useWalletModal } from '@solana/wallet-adapter-react-ui'
+import { FiCreditCard, FiLogOut } from 'react-icons/fi'
 
 interface BubbleConfig {
   size: number;
@@ -11,6 +13,9 @@ interface BubbleConfig {
 }
 
 export function Nav() {
+    const { wallet, connected, disconnect } = useWallet()
+    const { setVisible } = useWalletModal()
+    
     const bubbleConfigs: BubbleConfig[] = [
         { size: 4, opacity: 0.6, duration: 3.5, className: 'bubble' },
         { size: 3, opacity: 0.6, duration: 4, className: 'bubble-1' },
@@ -83,6 +88,18 @@ export function Nav() {
         };
     }, [isClient]);
 
+    const handleWalletClick = () => {
+        if (connected) {
+            disconnect()
+        } else {
+            setVisible(true)
+        }
+    }
+
+    const formatAddress = (address: string) => {
+        return `${address.slice(0, 4)}...${address.slice(-4)}`
+    }
+
     if (!isClient) return null;
 
     return (
@@ -150,7 +167,34 @@ export function Nav() {
             <div className="relative z-10 mt-auto w-full">
                 <hr className='border-b border-gray-500 w-4/6 mx-auto mb-4'/>
                 <div className="w-full px-4 mb-4">
-                    <WalletConnect />
+                    {connected ? (
+                        <div className="group/wallet relative">
+                            <button
+                                onClick={handleWalletClick}
+                                className="w-full py-2 px-3 bg-green-600/20 border border-green-500/30 rounded-lg text-green-400 text-xs font-medium transition-all duration-300 hover:bg-green-600/30 hover:border-green-500/50 flex items-center justify-center gap-2"
+                            >
+                                <FiCreditCard className="w-4 h-4" />
+                                <span className="hidden group-hover:block">
+                                    {wallet?.adapter?.publicKey ? formatAddress(wallet.adapter.publicKey.toString()) : 'Connected'}
+                                </span>
+                            </button>
+                            <button
+                                onClick={() => disconnect()}
+                                className="absolute inset-0 w-full py-2 px-3 bg-red-600/80 border border-red-500/80 rounded-lg text-red-400 text-xs font-medium transition-all duration-300 opacity-0 group-hover/wallet:opacity-100 flex items-center justify-center gap-2"
+                            >
+                                <FiLogOut className="w-4 h-4" />
+                                <span className="hidden group-hover/wallet:block">Disconnect</span>
+                            </button>
+                        </div>
+                    ) : (
+                        <button
+                            onClick={handleWalletClick}
+                            className="w-full py-2 px-3 bg-violet-600/20 border border-violet-500/30 rounded-lg text-violet-400 text-xs font-medium transition-all duration-300 hover:bg-violet-600/30 hover:border-violet-500/50 flex items-center justify-center gap-2"
+                        >
+                            <FiCreditCard className="w-4 h-4" />
+                            <span className="hidden group-hover:block">Connect Wallet</span>
+                        </button>
+                    )}
                 </div>
                 <Form method="post" action="/logout" className="w-full">
                     <button type="submit" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-white/5">

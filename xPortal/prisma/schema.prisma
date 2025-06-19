@@ -98,6 +98,7 @@ model Posts {
   comments    Comment[]
   answers     Answer[]
   votes       Vote[]
+  postTags    PostTag[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   visibilityVotes Int @default(0)
@@ -385,4 +386,28 @@ enum ViolationStatus {
   REVIEWED
   RESOLVED
   DISMISSED
+}
+
+model Tag {
+  id          String   @id @map("_id") @default(auto()) @db.ObjectId
+  name        String   @unique
+  description String?
+  color       String   @default("#8B5CF6") // Default violet color
+  postTags    PostTag[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("tags")
+}
+
+model PostTag {
+  id      String @id @map("_id") @default(auto()) @db.ObjectId
+  post    Posts  @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId  String @db.ObjectId
+  tag     Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  tagId   String @db.ObjectId
+  createdAt DateTime @default(now())
+
+  @@unique([postId, tagId])
+  @@map("post_tags")
 }

@@ -4,7 +4,7 @@ import { LoaderFunction, ActionFunction, json, redirect, ActionFunctionArgs } fr
 import { logout, getUser } from '~/utils/auth.server'
 import { editUser } from '~/utils/user.server'
 import { useEffect, useState } from 'react'
-import { Nav } from '../components/nav'
+import { Layout } from '../components/Layout'
 import { prisma } from '~/utils/prisma.server'
 import { LoaderFunctionArgs } from '@remix-run/node'
 import { requireUserId } from '~/utils/auth.server'
@@ -123,347 +123,344 @@ export default function Settings() {
     ];
 
     return (
-        <div className="h-screen w-full bg-neutral-900 flex flex-row">
-            <Nav />
-            <div className="flex-1 overflow-y-auto">
-                <div className="w-auto max-w-8xl mx-auto mt-4 px-4 ml-24 pb-16">
-                    <div className="mb-6 flex justify-between items-center mt-16">
-                        <h1 className="text-2xl font-bold text-white">Settings</h1>
+        <Layout>
+            <div className="w-auto max-w-8xl mx-auto mt-4 px-4 ml-24 pb-16">
+                <div className="mb-6 flex justify-between items-center mt-16">
+                    <h1 className="text-2xl font-bold text-white">Settings</h1>
+                </div>
+
+                {/* Success Notice */}
+                {showSuccess && (
+                    <div className="mb-6 p-4 bg-green-500/20 border border-green-500/50 rounded-lg flex items-center gap-2 text-green-400">
+                        <FiCheck className="w-5 h-5" />
+                        <span>Changes saved successfully!</span>
+                    </div>
+                )}
+
+                <div className="bg-neutral-800/80 rounded-lg border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+                    {/* Tabs */}
+                    <div className="flex border-b border-violet-500/30">
+                        {tabs.map((tab) => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`flex items-center gap-2 px-6 py-4 text-sm font-medium transition-colors ${
+                                    activeTab === tab.id
+                                        ? 'text-violet-400 border-b-2 border-violet-400'
+                                        : 'text-gray-400 hover:text-violet-300'
+                                }`}
+                            >
+                                <tab.icon className="w-5 h-5" />
+                                {tab.label}
+                            </button>
+                        ))}
                     </div>
 
-                    {/* Success Notice */}
-                    {showSuccess && (
-                        <div className="mb-6 p-4 bg-green-500/20 border border-green-500/50 rounded-lg flex items-center gap-2 text-green-400">
-                            <FiCheck className="w-5 h-5" />
-                            <span>Changes saved successfully!</span>
-                        </div>
-                    )}
+                    {/* Tab Content */}
+                    <div className="p-6">
+                        <fetcher.Form method="post" className="space-y-6">
+                            <input type="hidden" name="action" value="updateProfile" />
 
-                    <div className="bg-neutral-800/80 rounded-lg border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
-                        {/* Tabs */}
-                        <div className="flex border-b border-violet-500/30">
-                            {tabs.map((tab) => (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setActiveTab(tab.id)}
-                                    className={`flex items-center gap-2 px-6 py-4 text-sm font-medium transition-colors ${
-                                        activeTab === tab.id
-                                            ? 'text-violet-400 border-b-2 border-violet-400'
-                                            : 'text-gray-400 hover:text-violet-300'
-                                    }`}
-                                >
-                                    <tab.icon className="w-5 h-5" />
-                                    {tab.label}
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* Tab Content */}
-                        <div className="p-6">
-                            <fetcher.Form method="post" className="space-y-6">
-                                <input type="hidden" name="action" value="updateProfile" />
-
-                                {activeTab === 'profile' && (
-                                    <div className="space-y-6">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <div>
-                                                <label className="block text-sm font-medium text-violet-300 mb-2">
-                                                    First Name
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    name="firstName"
-                                                    defaultValue={userData.profile?.firstName || ''}
-                                                    placeholder="Enter your first name"
-                                                    className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-violet-300 mb-2">
-                                                    Last Name
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    name="lastName"
-                                                    defaultValue={userData.profile?.lastName || ''}
-                                                    placeholder="Enter your last name"
-                                                    className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium text-violet-300 mb-2">
-                                                Bio
-                                            </label>
-                                            <textarea
-                                                name="bio"
-                                                defaultValue={userData.profile?.bio || ''}
-                                                placeholder="Tell us about yourself..."
-                                                rows={4}
-                                                className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium text-violet-300 mb-2">
-                                                Location
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="location"
-                                                defaultValue={userData.profile?.location || ''}
-                                                placeholder="City, Country"
-                                                className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium text-violet-300 mb-2">
-                                                Website
-                                            </label>
-                                            <input
-                                                type="url"
-                                                name="website"
-                                                defaultValue={userData.profile?.website || ''}
-                                                placeholder="https://your-website.com"
-                                                className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-
-                                {activeTab === 'social' && (
+                            {activeTab === 'profile' && (
+                                <div className="space-y-6">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
                                             <label className="block text-sm font-medium text-violet-300 mb-2">
-                                                Facebook
+                                                First Name
                                             </label>
                                             <input
                                                 type="text"
-                                                name="facebook"
-                                                defaultValue={userData.profile?.facebook || ''}
-                                                placeholder="facebook.com/username"
+                                                name="firstName"
+                                                defaultValue={userData.profile?.firstName || ''}
+                                                placeholder="Enter your first name"
                                                 className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
                                             />
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium text-violet-300 mb-2">
-                                                Twitter
+                                                Last Name
                                             </label>
                                             <input
                                                 type="text"
-                                                name="twitter"
-                                                defaultValue={userData.profile?.twitter || ''}
-                                                placeholder="@username"
-                                                className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-violet-300 mb-2">
-                                                Instagram
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="instagram"
-                                                defaultValue={userData.profile?.instagram || ''}
-                                                placeholder="@username"
-                                                className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-violet-300 mb-2">
-                                                LinkedIn
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="linkedin"
-                                                defaultValue={userData.profile?.linkedin || ''}
-                                                placeholder="linkedin.com/in/username"
-                                                className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-violet-300 mb-2">
-                                                GitHub
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="github"
-                                                defaultValue={userData.profile?.github || ''}
-                                                placeholder="github.com/username"
-                                                className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-violet-300 mb-2">
-                                                YouTube
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="youtube"
-                                                defaultValue={userData.profile?.youtube || ''}
-                                                placeholder="youtube.com/@username"
-                                                className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-violet-300 mb-2">
-                                                TikTok
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="tiktok"
-                                                defaultValue={userData.profile?.tiktok || ''}
-                                                placeholder="@username"
-                                                className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-violet-300 mb-2">
-                                                Discord
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="discord"
-                                                defaultValue={userData.profile?.discord || ''}
-                                                placeholder="username#0000"
-                                                className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-violet-300 mb-2">
-                                                Reddit
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="reddit"
-                                                defaultValue={userData.profile?.reddit || ''}
-                                                placeholder="u/username"
-                                                className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-violet-300 mb-2">
-                                                Medium
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="medium"
-                                                defaultValue={userData.profile?.medium || ''}
-                                                placeholder="medium.com/@username"
-                                                className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-violet-300 mb-2">
-                                                Stack Overflow
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="stackoverflow"
-                                                defaultValue={userData.profile?.stackoverflow || ''}
-                                                placeholder="stackoverflow.com/users/username"
-                                                className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-violet-300 mb-2">
-                                                Dev.to
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="devto"
-                                                defaultValue={userData.profile?.devto || ''}
-                                                placeholder="dev.to/username"
+                                                name="lastName"
+                                                defaultValue={userData.profile?.lastName || ''}
+                                                placeholder="Enter your last name"
                                                 className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
                                             />
                                         </div>
                                     </div>
-                                )}
 
-                                {activeTab === 'account' && (
-                                    <div className="space-y-6">
-                                        <div>
-                                            <label className="block text-sm font-medium text-violet-300 mb-2">
-                                                Email
-                                            </label>
-                                            <input
-                                                type="email"
-                                                value={userData.email}
-                                                disabled
-                                                placeholder="Your email address"
-                                                className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-gray-400 cursor-not-allowed"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-violet-300 mb-2">
-                                                Username
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={userData.username}
-                                                disabled
-                                                placeholder="Your username"
-                                                className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-gray-400 cursor-not-allowed"
-                                            />
-                                        </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                            Bio
+                                        </label>
+                                        <textarea
+                                            name="bio"
+                                            defaultValue={userData.profile?.bio || ''}
+                                            placeholder="Tell us about yourself..."
+                                            rows={4}
+                                            className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                                        />
                                     </div>
-                                )}
 
-                                {activeTab === 'security' && (
-                                    <div className="space-y-6">
-                                        <div>
-                                            <label className="block text-sm font-medium text-violet-300 mb-2">
-                                                Current Password
-                                            </label>
-                                            <input
-                                                type="password"
-                                                name="currentPassword"
-                                                placeholder="Enter your current password"
-                                                className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-violet-300 mb-2">
-                                                New Password
-                                            </label>
-                                            <input
-                                                type="password"
-                                                name="newPassword"
-                                                placeholder="Enter your new password"
-                                                className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-violet-300 mb-2">
-                                                Confirm New Password
-                                            </label>
-                                            <input
-                                                type="password"
-                                                name="confirmPassword"
-                                                placeholder="Confirm your new password"
-                                                className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
-                                            />
-                                        </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                            Location
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="location"
+                                            defaultValue={userData.profile?.location || ''}
+                                            placeholder="City, Country"
+                                            className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                                        />
                                     </div>
-                                )}
 
-                                <div className="flex justify-end pt-6 border-t border-violet-500/30">
-                                    <button
-                                        type="submit"
-                                        disabled={isSubmitting}
-                                        className="flex items-center gap-2 px-6 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        <FiSave className="w-5 h-5" />
-                                        {isSubmitting ? 'Saving...' : 'Save Changes'}
-                                    </button>
+                                    <div>
+                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                            Website
+                                        </label>
+                                        <input
+                                            type="url"
+                                            name="website"
+                                            defaultValue={userData.profile?.website || ''}
+                                            placeholder="https://your-website.com"
+                                            className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                                        />
+                                    </div>
                                 </div>
-                            </fetcher.Form>
-                        </div>
+                            )}
+
+                            {activeTab === 'social' && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                            Facebook
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="facebook"
+                                            defaultValue={userData.profile?.facebook || ''}
+                                            placeholder="facebook.com/username"
+                                            className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                            Twitter
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="twitter"
+                                            defaultValue={userData.profile?.twitter || ''}
+                                            placeholder="@username"
+                                            className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                            Instagram
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="instagram"
+                                            defaultValue={userData.profile?.instagram || ''}
+                                            placeholder="@username"
+                                            className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                            LinkedIn
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="linkedin"
+                                            defaultValue={userData.profile?.linkedin || ''}
+                                            placeholder="linkedin.com/in/username"
+                                            className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                            GitHub
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="github"
+                                            defaultValue={userData.profile?.github || ''}
+                                            placeholder="github.com/username"
+                                            className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                            YouTube
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="youtube"
+                                            defaultValue={userData.profile?.youtube || ''}
+                                            placeholder="youtube.com/@username"
+                                            className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                            TikTok
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="tiktok"
+                                            defaultValue={userData.profile?.tiktok || ''}
+                                            placeholder="@username"
+                                            className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                            Discord
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="discord"
+                                            defaultValue={userData.profile?.discord || ''}
+                                            placeholder="username#0000"
+                                            className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                            Reddit
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="reddit"
+                                            defaultValue={userData.profile?.reddit || ''}
+                                            placeholder="u/username"
+                                            className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                            Medium
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="medium"
+                                            defaultValue={userData.profile?.medium || ''}
+                                            placeholder="medium.com/@username"
+                                            className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                            Stack Overflow
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="stackoverflow"
+                                            defaultValue={userData.profile?.stackoverflow || ''}
+                                            placeholder="stackoverflow.com/users/username"
+                                            className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                            Dev.to
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="devto"
+                                            defaultValue={userData.profile?.devto || ''}
+                                            placeholder="dev.to/username"
+                                            className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'account' && (
+                                <div className="space-y-6">
+                                    <div>
+                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                            Email
+                                        </label>
+                                        <input
+                                            type="email"
+                                            value={userData.email}
+                                            disabled
+                                            placeholder="Your email address"
+                                            className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-gray-400 cursor-not-allowed"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                            Username
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={userData.username}
+                                            disabled
+                                            placeholder="Your username"
+                                            className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-gray-400 cursor-not-allowed"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'security' && (
+                                <div className="space-y-6">
+                                    <div>
+                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                            Current Password
+                                        </label>
+                                        <input
+                                            type="password"
+                                            name="currentPassword"
+                                            placeholder="Enter your current password"
+                                            className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                            New Password
+                                        </label>
+                                        <input
+                                            type="password"
+                                            name="newPassword"
+                                            placeholder="Enter your new password"
+                                            className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                            Confirm New Password
+                                        </label>
+                                        <input
+                                            type="password"
+                                            name="confirmPassword"
+                                            placeholder="Confirm your new password"
+                                            className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="flex justify-end pt-6 border-t border-violet-500/30">
+                                <button
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                    className="flex items-center gap-2 px-6 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    <FiSave className="w-5 h-5" />
+                                    {isSubmitting ? 'Saving...' : 'Save Changes'}
+                                </button>
+                            </div>
+                        </fetcher.Form>
                     </div>
                 </div>
             </div>
-        </div>
+        </Layout>
     );
 }

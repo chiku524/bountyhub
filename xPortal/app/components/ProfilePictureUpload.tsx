@@ -1,5 +1,4 @@
 import { useState, useRef } from 'react';
-import { useSubmit } from '@remix-run/react';
 import { FiCamera } from 'react-icons/fi';
 
 const DEFAULT_PROFILE_PICTURE = 'https://api.dicebear.com/7.x/initials/svg?seed=';
@@ -13,7 +12,6 @@ export function ProfilePictureUpload({ currentPicture, username }: ProfilePictur
   const [preview, setPreview] = useState<string | null>(currentPicture);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const submit = useSubmit();
 
   const getProfilePicture = (profilePicture: string | null, username: string): string => {
     if (profilePicture) {
@@ -50,12 +48,29 @@ export function ProfilePictureUpload({ currentPicture, username }: ProfilePictur
     // Upload file
     const formData = new FormData();
     formData.append('profilePicture', file);
-    formData.append('_action', 'uploadProfilePicture');
 
     try {
-      submit(formData, { method: 'post', encType: 'multipart/form-data' });
+      const response = await fetch('/api/profile/picture', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        // Update the preview with the new image URL
+        setPreview(result.profilePicture);
+        // Optionally reload the page to show the updated profile picture
+        window.location.reload();
+      } else {
+        alert(result.error || 'Failed to upload profile picture');
+        // Reset preview to original
+        setPreview(currentPicture);
+      }
     } catch (error) {
       alert('Failed to upload profile picture');
+      // Reset preview to original
+      setPreview(currentPicture);
     } finally {
       setIsUploading(false);
     }
@@ -65,7 +80,7 @@ export function ProfilePictureUpload({ currentPicture, username }: ProfilePictur
     <div className="relative group">
       <div className="relative w-32 h-32 rounded-full overflow-hidden">
         <img
-          src={preview || getProfilePicture(null, username)}
+          src={preview || getProfilePicture(currentPicture, username)}
           alt={`${username}'s profile`}
           className="w-full h-full object-cover"
         />

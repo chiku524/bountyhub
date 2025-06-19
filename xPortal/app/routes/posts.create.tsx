@@ -1,10 +1,10 @@
 // app/routes/profile.tsx
 import { useEffect, useState, useRef } from 'react'
-import { Form, useLoaderData, Link, useActionData, redirect, useNavigate, useSubmit, useRouteError } from "@remix-run/react"
+import { Form, useLoaderData, Link, useActionData, redirect, useNavigate, useSubmit, useRouteError, useNavigation } from "@remix-run/react"
 import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from '@remix-run/node'
 import { requireUserId } from '~/utils/auth.server'
 import { prisma } from '~/utils/prisma.server'
-import { Nav } from '~/components/nav'
+import { Layout } from '~/components/Layout'
 import { validateTitle, validateContent } from '~/utils/validators.server'
 import type { CodeBlockForm } from '~/utils/types.server'
 import { addReputationPoints, REPUTATION_POINTS } from '~/utils/reputation.server'
@@ -12,15 +12,24 @@ import CodeBlockEditor from '~/components/CodeBlockEditor'
 import { MediaUpload } from '~/components/MediaUpload'
 import { uploadToCloudinary } from '~/utils/cloudinary.server'
 import { VirtualWalletService } from '~/utils/virtual-wallet.server'
+import TagSelector from '~/components/TagSelector'
 import bountyBucksInfo from '../../bounty-bucks-info.json'
 
 const TOKEN_SYMBOL = bountyBucksInfo.config.symbol
+
+interface Tag {
+  id: string;
+  name: string;
+  description: string | null;
+  color: string;
+}
 
 interface LoaderData {
   user: {
     id: string;
     username: string;
   } | null;
+  availableTags: Tag[];
 }
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -34,7 +43,12 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     throw new Error("User not found");
   }
 
-  return json<LoaderData>({ user });
+  // Fetch available tags
+  const availableTags = await prisma.tag.findMany({
+    orderBy: { name: 'asc' }
+  });
+
+  return json<LoaderData>({ user, availableTags });
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -49,10 +63,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     const hasBounty = formData.get("hasBounty") === "on";
     const bountyAmount = formData.get("bountyAmount") as string;
     const bountyDuration = formData.get("bountyDuration") as string;
+    const tagIds = formData.getAll("tags") as string[];
 
     // Validate required fields
     if (!title || !content) {
       return json({ error: "Title and content are required" }, { status: 400 });
+    }
+    if (!tagIds || tagIds.length === 0) {
+      return json({ error: "At least one tag is required" }, { status: 400 });
     }
 
     const titleError = validateTitle(title);
@@ -111,6 +129,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
             language: block.language,
             code: block.code
           }))
+        },
+        postTags: {
+          create: tagIds.map((tagId: string) => ({ tag: { connect: { id: tagId } } }))
         }
       }
     });
@@ -177,14 +198,17 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function CreatePost() {
-  const { user } = useLoaderData<LoaderData>();
+  const { user, availableTags } = useLoaderData<LoaderData>();
   const actionData = useActionData<typeof action>();
+  const navigation = useNavigation();
+  const isSubmitting = navigation.state === "submitting";
   const [codeBlocks, setCodeBlocks] = useState<CodeBlockForm[]>([]);
   const [media, setMedia] = useState<Array<{ type: string; url: string; thumbnailUrl?: string; isScreenRecording: boolean }>>([]);
   const [hasBounty, setHasBounty] = useState(false);
   const [bountyAmount, setBountyAmount] = useState('');
   const [bountyDuration, setBountyDuration] = useState(7);
   const [clientError, setClientError] = useState<string | null>(null);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const handleMediaUpload = (newMedia: { type: string; url: string; thumbnailUrl?: string; isScreenRecording: boolean }) => {
     setMedia(prev => [...prev, newMedia]);
@@ -195,144 +219,155 @@ export default function CreatePost() {
   };
 
   return (
-    <div className="h-screen w-full bg-neutral-900 flex flex-row">
-      <Nav />
-      <div className="flex-1 overflow-y-auto ml-20">
-        <div className="max-w-4xl mx-auto p-6">
-          <div className="mb-6 flex justify-between items-center mt-16">
-            <h1 className="text-2xl font-bold text-white">Create New Post</h1>
+    <Layout>
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="mb-6 flex justify-between items-center mt-16">
+          <h1 className="text-2xl font-bold text-white">Create New Post</h1>
+        </div>
+
+        <Form method="post" className="space-y-6 max-w-4xl mx-auto">
+          <input type="hidden" name="codeBlocks" value={JSON.stringify(codeBlocks)} />
+          <input type="hidden" name="media" value={JSON.stringify(media)} />
+          <input type="hidden" name="hasBounty" value={hasBounty ? 'on' : 'off'} />
+          {hasBounty && (
+            <>
+              <input type="hidden" name="bountyAmount" value={bountyAmount} />
+              <input type="hidden" name="bountyDuration" value={bountyDuration.toString()} />
+            </>
+          )}
+
+          <div>
+            <TagSelector
+              selectedTags={selectedTags}
+              onTagsChange={setSelectedTags}
+              availableTags={availableTags}
+              error={actionData?.error?.includes('tag') ? actionData.error : undefined}
+              required
+            />
+            {selectedTags.map(tagId => (
+              <input key={tagId} type="hidden" name="tags" value={tagId} />
+            ))}
           </div>
 
-          <Form method="post" className="space-y-6 max-w-4xl mx-auto">
-            <input type="hidden" name="codeBlocks" value={JSON.stringify(codeBlocks)} />
-            <input type="hidden" name="media" value={JSON.stringify(media)} />
-            <input type="hidden" name="hasBounty" value={hasBounty ? 'on' : 'off'} />
-            {hasBounty && (
-              <>
-                <input type="hidden" name="bountyAmount" value={bountyAmount} />
-                <input type="hidden" name="bountyDuration" value={bountyDuration.toString()} />
-              </>
-            )}
+          <div>
+            <label htmlFor="title" className="block text-sm font-medium text-violet-300 mb-2">
+              Title
+            </label>
+            <input
+              type="text"
+              name="title"
+              id="title"
+              className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+              required
+            />
+          </div>
 
-            <div>
-              <label htmlFor="title" className="block text-sm font-medium text-violet-300 mb-2">
-                Title
-              </label>
-              <input
-                type="text"
-                name="title"
-                id="title"
-                className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
-                required
-              />
-            </div>
+          <div>
+            <label htmlFor="content" className="block text-sm font-medium text-violet-300 mb-2">
+              Content
+            </label>
+            <textarea
+              name="content"
+              id="content"
+              rows={6}
+              className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+              required
+            />
+          </div>
 
-            <div>
-              <label htmlFor="content" className="block text-sm font-medium text-violet-300 mb-2">
-                Content
-              </label>
-              <textarea
-                name="content"
-                id="content"
-                rows={6}
-                className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
-                required
-              />
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-violet-300 mb-2">
+              Media
+            </label>
+            <MediaUpload
+              onMediaUpload={handleMediaUpload}
+              onMediaRemove={handleMediaRemove}
+              uploadedMedia={media}
+            />
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-violet-300 mb-2">
-                Media
-              </label>
-              <MediaUpload
-                onMediaUpload={handleMediaUpload}
-                onMediaRemove={handleMediaRemove}
-                uploadedMedia={media}
-              />
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-violet-300 mb-2">
+              Code Blocks
+            </label>
+            <CodeBlockEditor
+              codeBlocks={codeBlocks}
+              onCodeBlocksChange={setCodeBlocks}
+            />
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-violet-300 mb-2">
-                Code Blocks
-              </label>
-              <CodeBlockEditor
-                codeBlocks={codeBlocks}
-                onCodeBlocksChange={setCodeBlocks}
-              />
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-violet-300 mb-2">
+              Bounty
+            </label>
+            <div className="space-y-4 bg-neutral-700/50 border border-violet-500/30 rounded-lg p-4">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="hasBounty"
+                  checked={hasBounty}
+                  onChange={(e) => setHasBounty(e.target.checked)}
+                  className="rounded border-violet-500/30 bg-neutral-700/50 text-violet-300 focus:ring-violet-500"
+                />
+                <label htmlFor="hasBounty" className="text-violet-300">
+                  Add Crypto Bounty
+                </label>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-violet-300 mb-2">
-                Bounty
-              </label>
-              <div className="space-y-4 bg-neutral-700/50 border border-violet-500/30 rounded-lg p-4">
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="hasBounty"
-                    checked={hasBounty}
-                    onChange={(e) => setHasBounty(e.target.checked)}
-                    className="rounded border-violet-500/30 bg-neutral-700/50 text-violet-300 focus:ring-violet-500"
-                  />
-                  <label htmlFor="hasBounty" className="text-violet-300">
-                    Add Crypto Bounty
-                  </label>
-                </div>
-
-                {hasBounty && (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-violet-300 mb-1">
-                        Bounty Amount
-                      </label>
-                      <input
-                        type="number"
-                        value={bountyAmount}
-                        onChange={(e) => setBountyAmount(e.target.value)}
-                        min="0"
-                        step="0.01"
-                        required
-                        className="w-full rounded-lg border-violet-500/30 bg-neutral-700/50 text-violet-300 focus:ring-violet-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-violet-300 mb-1">
-                        Bounty Duration (days)
-                      </label>
-                      <input
-                        type="number"
-                        value={bountyDuration}
-                        onChange={(e) => setBountyDuration(Number(e.target.value))}
-                        min="1"
-                        max="30"
-                        required
-                        className="w-full rounded-lg border-violet-500/30 bg-neutral-700/50 text-violet-300 focus:ring-violet-500"
-                      />
-                    </div>
+              {hasBounty && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-violet-300 mb-1">
+                      Bounty Amount
+                    </label>
+                    <input
+                      type="number"
+                      value={bountyAmount}
+                      onChange={(e) => setBountyAmount(e.target.value)}
+                      min="0"
+                      step="0.01"
+                      required
+                      className="w-full rounded-lg border-violet-500/30 bg-neutral-700/50 text-violet-300 focus:ring-violet-500"
+                    />
                   </div>
-                )}
-              </div>
-            </div>
 
-            {(actionData?.error || clientError) && (
-              <div className="bg-red-500/10 border border-red-500/30 text-red-500 px-4 py-2 rounded-lg">
-                {actionData?.error || clientError}
-              </div>
-            )}
-
-            <div className="flex justify-end">
-              <button
-                type="submit"
-                className="px-6 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600"
-              >
-                Create Post
-              </button>
+                  <div>
+                    <label className="block text-sm font-medium text-violet-300 mb-1">
+                      Bounty Duration (days)
+                    </label>
+                    <input
+                      type="number"
+                      value={bountyDuration}
+                      onChange={(e) => setBountyDuration(Number(e.target.value))}
+                      min="1"
+                      max="30"
+                      required
+                      className="w-full rounded-lg border-violet-500/30 bg-neutral-700/50 text-violet-300 focus:ring-violet-500"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
-          </Form>
-        </div>
+          </div>
+
+          {(actionData?.error || clientError) && (
+            <div className="bg-red-500/10 border border-red-500/30 text-red-500 px-4 py-2 rounded-lg">
+              {actionData?.error || clientError}
+            </div>
+          )}
+
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-6 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 disabled:bg-violet-500/50 disabled:cursor-not-allowed disabled:hover:bg-violet-500/50 transition-colors"
+            >
+              {isSubmitting ? "Creating Post..." : "Create Post"}
+            </button>
+          </div>
+        </Form>
       </div>
-    </div>
+    </Layout>
   );
 }
 
@@ -340,8 +375,7 @@ export function ErrorBoundary() {
   const error = useRouteError();
   
   return (
-    <div className="h-screen w-full bg-neutral-900 flex flex-row">
-      <Nav />
+    <Layout>
       <div className="flex-1 flex items-center justify-center">
         <div className="bg-slate-800 p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
           <h2 className="text-2xl font-bold text-white mb-4 text-center">Post Creation Failed</h2>
@@ -366,6 +400,6 @@ export function ErrorBoundary() {
           </div>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 }
