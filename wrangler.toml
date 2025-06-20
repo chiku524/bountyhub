@@ -1,1 +1,17 @@
-main = "xPortal/build/index.js" 
+name = "bountyhub"
+main = "xPortal/build/index.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[build]
+command = "cd xPortal && npm run build"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "bountyhub-db"
+database_id = "4df28277-6977-4d38-b2d0-d0b48826c275"
+migrations_dir = "xPortal/drizzle/migrations"
+
+[vars]
+NODE_ENV = "production"
+SESSION_SECRET = "mysupersecretpassword" 
