@@ -5,7 +5,6 @@ import { logout, getUser } from '~/utils/auth.server'
 import { editUser } from '~/utils/user.server'
 import { useEffect, useState } from 'react'
 import { Layout } from '../components/Layout'
-import { prisma } from '~/utils/prisma.server'
 import { LoaderFunctionArgs } from '@remix-run/node'
 import { requireUserId } from '~/utils/auth.server'
 import { validateUsername } from "~/utils/validators.client";
@@ -13,8 +12,50 @@ import { AuthNotice } from '~/components/auth-notice';
 import type { Profile, User } from '~/utils/types.server';
 import { FiUser, FiLink, FiMail, FiLock, FiSave, FiCheck } from 'react-icons/fi';
 import { FaUser, FaLock, FaBell, FaPalette, FaGlobe, FaTrash, FaSave, FaTimes, FaCheck, FaEdit, FaEye, FaEyeSlash } from 'react-icons/fa'
+import { eq } from 'drizzle-orm';
+import { users, profiles } from '../../drizzle/schema';
+import type { DrizzleD1Database } from 'drizzle-orm/d1';
 
-type UserData = User;
+interface CloudflareContext {
+  env: {
+    DB: DrizzleD1Database<typeof import('../../drizzle/schema')>;
+  };
+}
+
+type UserData = {
+  id: string;
+  username: string;
+  email: string;
+  solanaAddress: string | null;
+  createdAt: Date;
+  reputationPoints: number;
+  integrityScore: number;
+  totalRatings: number;
+  profile: {
+    firstName: string | null;
+    lastName: string | null;
+    profilePicture: string | null;
+    bio: string | null;
+    location: string | null;
+    website: string | null;
+    facebook: string | null;
+    twitter: string | null;
+    instagram: string | null;
+    linkedin: string | null;
+    github: string | null;
+    youtube: string | null;
+    tiktok: string | null;
+    discord: string | null;
+    reddit: string | null;
+    medium: string | null;
+    stackoverflow: string | null;
+    devto: string | null;
+  } | null;
+};
+
+interface LoaderData {
+  user: UserData;
+}
 
 interface ActionData {
     error?: string;
@@ -29,77 +70,166 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-    const userId = await requireUserId(request);
-    const userData = await prisma.user.findUnique({
-        where: { id: userId },
-        include: { profile: true }
-    });
+export async function loader({ request, context }: LoaderFunctionArgs) {
+  const user = await getUser(request);
+  
+  if (!user) {
+    throw new Response('Unauthorized', { status: 401 });
+  }
 
-    if (!userData) {
-        throw new Response("User not found", { status: 404 });
+  try {
+    const db = (context as unknown as CloudflareContext).env.DB;
+
+    const userData = await db
+      .select({
+        id: users.id,
+        username: users.username,
+        email: users.email,
+        solanaAddress: users.solanaAddress,
+        createdAt: users.createdAt,
+        reputationPoints: users.reputationPoints,
+        integrityScore: users.integrityScore,
+        totalRatings: users.totalRatings,
+        profile: {
+          firstName: profiles.firstName,
+          lastName: profiles.lastName,
+          profilePicture: profiles.profilePicture,
+          bio: profiles.bio,
+          location: profiles.location,
+          website: profiles.website,
+          facebook: profiles.facebook,
+          twitter: profiles.twitter,
+          instagram: profiles.instagram,
+          linkedin: profiles.linkedin,
+          github: profiles.github,
+          youtube: profiles.youtube,
+          tiktok: profiles.tiktok,
+          discord: profiles.discord,
+          reddit: profiles.reddit,
+          medium: profiles.medium,
+          stackoverflow: profiles.stackoverflow,
+          devto: profiles.devto,
+        },
+      })
+      .from(users)
+      .leftJoin(profiles, eq(users.id, profiles.userId))
+      .where(eq(users.id, user.id))
+      .limit(1);
+
+    if (!userData.length) {
+      throw new Response('User not found', { status: 404 });
     }
 
-    return json({ userData, isAuthenticated: true });
-};
+    return json({ user: userData[0] });
+  } catch (error) {
+    console.error('Error fetching user data:', error);
+    throw new Response('Failed to fetch user data', { status: 500 });
+  }
+}
 
-export const action: ActionFunction = async ({ request }) => {
-    const user = await getUser(request);
-    if (!user) {
-        return redirect('/login');
-    }
+export async function action({ request, context }: ActionFunctionArgs) {
+  const user = await getUser(request);
+  
+  if (!user) {
+    throw new Response('Unauthorized', { status: 401 });
+  }
 
-    const formData = await request.formData();
-    const action = formData.get('action');
+  const formData = await request.formData();
+  const action = formData.get('action') as string;
 
-    if (action === 'updateProfile') {
-        const currentUser = await prisma.user.findUnique({
-            where: { id: user.id },
-            include: { profile: true }
-        });
+  try {
+    const db = (context as unknown as CloudflareContext).env.DB;
 
-        if (!currentUser) {
-            return json({ error: 'User not found' }, { status: 404 });
+    switch (action) {
+      case 'updateProfile': {
+        const firstName = formData.get('firstName') as string;
+        const lastName = formData.get('lastName') as string;
+        const bio = formData.get('bio') as string;
+        const location = formData.get('location') as string;
+        const website = formData.get('website') as string;
+        const facebook = formData.get('facebook') as string;
+        const twitter = formData.get('twitter') as string;
+        const instagram = formData.get('instagram') as string;
+        const linkedin = formData.get('linkedin') as string;
+        const github = formData.get('github') as string;
+        const youtube = formData.get('youtube') as string;
+        const tiktok = formData.get('tiktok') as string;
+        const discord = formData.get('discord') as string;
+        const reddit = formData.get('reddit') as string;
+        const medium = formData.get('medium') as string;
+        const stackoverflow = formData.get('stackoverflow') as string;
+        const devto = formData.get('devto') as string;
+
+        // Check if profile exists
+        const existingProfile = await db
+          .select()
+          .from(profiles)
+          .where(eq(profiles.userId, user.id))
+          .limit(1);
+
+        if (existingProfile.length > 0) {
+          // Update existing profile
+          await db
+            .update(profiles)
+            .set({
+              firstName,
+              lastName,
+              bio,
+              location,
+              website,
+              facebook,
+              twitter,
+              instagram,
+              linkedin,
+              github,
+              youtube,
+              tiktok,
+              discord,
+              reddit,
+              medium,
+              stackoverflow,
+              devto,
+              updatedAt: new Date(),
+            })
+            .where(eq(profiles.userId, user.id));
+        } else {
+          // Create new profile
+          await db.insert(profiles).values({
+            id: crypto.randomUUID(),
+            userId: user.id,
+            firstName,
+            lastName,
+            bio,
+            location,
+            website,
+            facebook,
+            twitter,
+            instagram,
+            linkedin,
+            github,
+            youtube,
+            tiktok,
+            discord,
+            reddit,
+            medium,
+            stackoverflow,
+            devto,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          });
         }
 
-        // Helper function to get form data with proper handling of empty strings
-        const getFormValue = (field: string) => {
-            const value = formData.get(field);
-            return value === null || value === '' ? null : value.toString();
-        };
+        return json({ success: true, message: 'Profile updated successfully' });
+      }
 
-        const profile = {
-            firstName: getFormValue('firstName'),
-            lastName: getFormValue('lastName'),
-            profilePicture: currentUser.profile?.profilePicture,
-            bio: getFormValue('bio'),
-            location: getFormValue('location'),
-            website: getFormValue('website'),
-            // Social Media Links
-            facebook: getFormValue('facebook'),
-            twitter: getFormValue('twitter'),
-            instagram: getFormValue('instagram'),
-            linkedin: getFormValue('linkedin'),
-            github: getFormValue('github'),
-            youtube: getFormValue('youtube'),
-            tiktok: getFormValue('tiktok'),
-            discord: getFormValue('discord'),
-            reddit: getFormValue('reddit'),
-            medium: getFormValue('medium'),
-            stackoverflow: getFormValue('stackoverflow'),
-            devto: getFormValue('devto')
-        };
-
-        try {
-            const updatedUser = await editUser({ profile }, request);
-            return json({ success: true, userData: updatedUser });
-        } catch (error) {
-            return json({ error: 'Failed to update profile' }, { status: 400 });
-        }
+      default:
+        return json({ error: 'Invalid action' }, { status: 400 });
     }
-
-    return json({ error: 'Invalid action' }, { status: 400 });
-};
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    return json({ error: 'Failed to update profile' }, { status: 500 });
+  }
+}
 
 export default function Settings() {
     const { userData, isAuthenticated } = useLoaderData<{ userData: UserData; isAuthenticated?: boolean }>();

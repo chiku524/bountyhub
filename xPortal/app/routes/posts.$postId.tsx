@@ -2,14 +2,15 @@ import { useEffect, useState, useCallback } from 'react';
 import { useLoaderData, useParams, useSubmit, useFetcher, Form, useRouteError, isRouteErrorResponse, Link, useActionData, useNavigate, useSearchParams } from '@remix-run/react';
 import { json, LoaderFunction, ActionFunction, redirect, MetaFunction } from '@remix-run/node';
 import { getUser } from '~/utils/auth.server';
-import { prisma } from '~/utils/prisma.server';
+import { createDb } from '~/utils/db.server';
+import { eq, and, desc, or } from 'drizzle-orm';
+import { posts, users, profiles, media, comments, answers, codeBlocks, votes, bounties, virtualWallets, postTags, tags, reports, bookmarks, integrityRatings, bountyClaims } from '../../drizzle/schema';
 import { requireUserId } from '~/utils/auth.server';
 import PostInteractions from '~/components/PostInteractions';
 import { Nav } from '~/components/nav';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import { FiTrash2, FiArrowUp, FiArrowDown } from 'react-icons/fi';
-import type { Comment, Answer, CodeBlock, User, Profile } from "@prisma/client";
 import { addReputationPoints, REPUTATION_POINTS } from '~/utils/reputation.server';
 import IntegrityRatingButton from '~/components/IntegrityRatingButton';
 import { Layout } from '~/components/Layout';
@@ -20,10 +21,20 @@ import CodeBlockEditor from '~/components/CodeBlockEditor';
 import { MediaUpload } from '~/components/MediaUpload';
 import TagSelector from '~/components/TagSelector';
 import bountyBucksInfo from '../../bounty-bucks-info.json';
+import { getVirtualWallet, createDepositRequest, confirmDeposit, createWithdrawalRequest } from '~/utils/virtual-wallet.server';
+import { BountyModal } from '~/components/BountyModal';
+import { RefundRequestModal } from '~/components/RefundRequestModal';
+import IntegrityRatingModal from '~/components/IntegrityRatingModal';
+import { z } from 'zod';
 
 // Extended CodeBlock type with description field
-type CodeBlockWithDescription = CodeBlock & {
+type CodeBlockWithDescription = {
+  id: string;
+  language: string;
+  code: string;
   description?: string;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 type CommentWithAuthor = {
@@ -156,7 +167,8 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   try {
-    const user = await getUser(request);
+    const db = createDb((request as any).context?.env?.DB);
+    const user = await getUser(request, db);
     const { postId } = params;
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -166,201 +178,192 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       throw new Response('Post ID is required', { status: 400 });
     }
 
-    // Combine all queries into a single database call
-    const [post, userVotes, voteCounts] = await Promise.all([
-      prisma.posts.findUnique({
-        where: { id: postId },
-        include: {
-          author: {
-            select: {
-              id: true,
-              username: true,
-              profile: {
-                select: {
-                  profilePicture: true
-                }
-              }
-            }
+    // Fetch the post and all relations
+    const post = await db.query.posts.findFirst({
+      where: eq(posts.id, postId),
+      with: {
+        author: {
+          columns: {
+            id: true,
+            username: true,
           },
-          media: true,
-          comments: {
-            include: {
-              author: {
-                select: {
-                  id: true,
-                  username: true,
-                  profile: {
-                    select: {
-                      profilePicture: true
-                    }
-                  }
-                }
-              }
+          with: {
+            profile: {
+              columns: {
+                profilePicture: true,
+              },
             },
-            orderBy: [
-              { upvotes: 'desc' },
-              { createdAt: 'desc' }
-            ],
-            skip: (page - 1) * perPage,
-            take: perPage
           },
-          answers: {
-            include: {
-              author: {
-                select: {
-                  id: true,
-                  username: true,
-                  profile: {
-                    select: {
-                      profilePicture: true
-                    }
-                  }
-                }
-              }
-            },
-            orderBy: [
-              { isAccepted: 'desc' },
-              { upvotes: 'desc' },
-              { createdAt: 'desc' }
-            ]
-          },
-          codeBlocks: true,
-          votes: {
-            where: {
-              userId: user?.id || '',
-              isQualityVote: true
-            }
-          },
-          bounty: true
-        }
-      }),
-      user ? prisma.vote.findMany({
-        where: {
-          userId: user.id,
-          postId: postId,
-          OR: [
-            { isQualityVote: true },
-            { isQualityVote: false }
-          ]
-        }
-      }) : [],
-      prisma.vote.groupBy({
-        by: ['isQualityVote', 'value'],
-        where: {
-          postId: postId,
-          isQualityVote: true
         },
-        _count: true
-      })
-    ]);
+        media: true,
+        comments: {
+          orderBy: [desc(comments.upvotes), desc(comments.createdAt)],
+          limit: perPage,
+          offset: (page - 1) * perPage,
+          with: {
+            author: {
+              columns: {
+                id: true,
+                username: true,
+              },
+              with: {
+                profile: {
+                  columns: {
+                    profilePicture: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        answers: {
+          orderBy: [desc(answers.isAccepted), desc(answers.upvotes), desc(answers.createdAt)],
+          with: {
+            author: {
+              columns: {
+                id: true,
+                username: true,
+              },
+              with: {
+                profile: {
+                  columns: {
+                    profilePicture: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        codeBlocks: true,
+        votes: user ? {
+          where: and(eq(votes.userId, user.id), eq(votes.isQualityVote, true)),
+        } : undefined,
+        bounty: true,
+      },
+    }) as unknown as {
+      id: string;
+      title: string;
+      content: string;
+      createdAt: Date;
+      updatedAt: Date;
+      authorId: string;
+      visibilityVotes: number;
+      hasBounty: boolean;
+      status: string;
+      author: { id: string; username: string; profile?: { profilePicture: string | null } | null };
+      comments: any[];
+      answers: any[];
+      codeBlocks: any[];
+      media: any[];
+      bounty?: any;
+    } | null;
 
     if (!post) {
       throw new Response('Post not found', { status: 404 });
     }
 
-    // Get total counts for pagination
-    const [totalComments, totalAnswers] = await Promise.all([
-      prisma.comment.count({
-        where: { postId }
-      }),
-      prisma.answer.count({
-        where: { postId }
-      })
-    ]);
+    // Fetch user votes for this post
+    const userVotes = user ? await db.query.votes.findMany({
+      where: and(eq(votes.userId, user.id), eq(votes.postId, postId)),
+    }) : [];
 
-    // Process vote counts
-    const qualityUpvotes = voteCounts.find(v => v.isQualityVote && v.value === 1)?._count || 0;
-    const qualityDownvotes = voteCounts.find(v => v.isQualityVote && v.value === -1)?._count || 0;
+    // Fetch grouped vote counts for quality votes
+    const allVotes = await db.query.votes.findMany({
+      where: and(eq(votes.postId, postId), eq(votes.isQualityVote, true)),
+    });
+    const qualityUpvotes = allVotes.filter(v => v.value === 1).length;
+    const qualityDownvotes = allVotes.filter(v => v.value === -1).length;
     const userQualityVote = userVotes.find(v => v.isQualityVote)?.value || 0;
     const userVisibilityVote = userVotes.find(v => !v.isQualityVote)?.value || 0;
 
+    // Get total counts for pagination
+    const totalComments = (await db.query.comments.findMany({ where: eq(comments.postId, postId) })).length;
+    const totalAnswers = (await db.query.answers.findMany({ where: eq(answers.postId, postId) })).length;
+
     // Fetch all comment and answer IDs
-    const commentIds = post.comments.map(c => c.id);
-    const answerIds = post.answers.map(a => a.id);
+    const commentIds = post?.comments?.map(c => c.id) || [];
+    const answerIds = post?.answers?.map(a => a.id) || [];
 
     // Fetch all votes by the current user for these comments and answers
     let commentVotes: { commentId: string; value: number }[] = [];
     let answerVotes: { answerId: string; value: number }[] = [];
     if (user) {
       if (commentIds.length > 0) {
-        commentVotes = (await prisma.vote.findMany({
-          where: {
-            userId: user.id,
-            commentId: { in: commentIds },
-            voteType: 'COMMENT',
-            isQualityVote: true
-          },
-          select: { commentId: true, value: true }
-        })).filter(v => v.commentId !== null) as { commentId: string; value: number }[];
+        commentVotes = (await db.query.votes.findMany({
+          where: and(eq(votes.userId, user.id), eq(votes.voteType, 'COMMENT'), eq(votes.isQualityVote, true)),
+        })).filter(v => commentIds.includes(v.commentId!)).map(v => ({ commentId: v.commentId!, value: v.value }));
       }
       if (answerIds.length > 0) {
-        answerVotes = (await prisma.vote.findMany({
-          where: {
-            userId: user.id,
-            answerId: { in: answerIds },
-            voteType: 'ANSWER',
-            isQualityVote: true
-          },
-          select: { answerId: true, value: true }
-        })).filter(v => v.answerId !== null) as { answerId: string; value: number }[];
+        answerVotes = (await db.query.votes.findMany({
+          where: and(eq(votes.userId, user.id), eq(votes.voteType, 'ANSWER'), eq(votes.isQualityVote, true)),
+        })).filter(v => answerIds.includes(v.answerId!)).map(v => ({ answerId: v.answerId!, value: v.value }));
       }
     }
 
     // Transform the post data
     const transformedPost: PostWithRelations = {
-      ...post,
-      visibilityVotes: post.visibilityVotes,
+      id: post.id!,
+      title: post.title!,
+      content: post.content!,
+      createdAt: post.createdAt!,
+      updatedAt: post.updatedAt!,
+      authorId: post.authorId!,
+      visibilityVotes: post.visibilityVotes ?? 0,
       qualityUpvotes,
       qualityDownvotes,
       userQualityVote,
       userVisibilityVote,
-      hasBounty: post.hasBounty,
-      status: post.status,
+      hasBounty: post.hasBounty ?? false,
+      status: post.status as 'OPEN' | 'CLOSED' | 'COMPLETED',
       author: {
-        ...post.author,
-        profilePicture: post.author.profile?.profilePicture || null
+        id: post.author.id!,
+        username: post.author.username!,
+        profilePicture: post.author.profile?.profilePicture || null,
+        profile: post.author.profile ? {
+          profilePicture: post.author.profile.profilePicture
+        } : null
       },
-      comments: post.comments.map(comment => ({
+      comments: (post.comments || []).map(comment => ({
         ...comment,
-        createdAt: comment.createdAt.toISOString(),
-        updatedAt: comment.updatedAt.toISOString(),
+        createdAt: comment.createdAt?.toISOString?.() ?? '',
+        updatedAt: comment.updatedAt?.toISOString?.() ?? '',
         userVote: commentVotes.find(v => v.commentId === comment.id)?.value || 0,
         author: {
-          id: comment.author.id,
-          username: comment.author.username,
+          id: comment.author.id!,
+          username: comment.author.username!,
           profilePicture: comment.author.profile?.profilePicture || null,
           profile: comment.author.profile ? {
             profilePicture: comment.author.profile.profilePicture
           } : null
         }
       })),
-      answers: post.answers.map(answer => ({
+      answers: (post.answers || []).map(answer => ({
         ...answer,
-        createdAt: answer.createdAt.toISOString(),
-        updatedAt: answer.updatedAt.toISOString(),
+        createdAt: answer.createdAt?.toISOString?.() ?? '',
+        updatedAt: answer.updatedAt?.toISOString?.() ?? '',
         userVote: answerVotes.find(v => v.answerId === answer.id)?.value || 0,
         author: {
-          id: answer.author.id,
-          username: answer.author.username,
+          id: answer.author.id!,
+          username: answer.author.username!,
           profilePicture: answer.author.profile?.profilePicture || null,
           profile: answer.author.profile ? {
             profilePicture: answer.author.profile.profilePicture
           } : null
         }
       })),
-      codeBlocks: post.codeBlocks,
-      media: post.media.map(m => ({
-        id: m.id,
-        type: m.type,
-        url: m.url,
+      codeBlocks: (post.codeBlocks || []).map(cb => ({ ...cb })),
+      media: (post.media || []).map(m => ({
+        id: m.id!,
+        type: m.type!,
+        url: m.url!,
         thumbnailUrl: m.thumbnailUrl || undefined,
-        isScreenRecording: m.isScreenRecording
+        isScreenRecording: m.isScreenRecording ?? false
       })),
       bounty: post.bounty ? {
-        amount: post.bounty.amount.toString(),
+        amount: post.bounty.amount?.toString?.() ?? '',
         tokenSymbol: 'SOL', // Default to SOL since we don't store token symbol
-        expiresAt: post.bounty.expiresAt?.toISOString() || '',
-        status: post.bounty.status
+        expiresAt: post.bounty.expiresAt?.toISOString?.() || '',
+        status: post.bounty.status as 'ACTIVE' | 'CLAIMED' | 'REFUNDED' | 'EXPIRED'
       } : null
     };
 
@@ -380,7 +383,8 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 };
 
 export const action: ActionFunction = async ({ request, params }) => {
-  const user = await getUser(request);
+  const db = createDb((request as any).context?.env?.DB);
+  const user = await getUser(request, db);
   if (!user) {
     return json({ error: 'Not authenticated' }, { status: 401 });
   }
@@ -395,24 +399,19 @@ export const action: ActionFunction = async ({ request, params }) => {
 
   switch (action) {
     case 'deletePost': {
-      const post = await prisma.posts.findUnique({
-        where: { id: postId },
-        include: {
-          author: true
-        }
+      const post = await db.query.posts.findFirst({
+        where: eq(posts.id, postId),
       });
 
       if (!post) {
         return json({ error: 'Post not found' }, { status: 404 });
       }
 
-      if (post.author.id !== user.id) {
+      if (post.authorId !== user.id) {
         return json({ error: 'You can only delete your own posts' }, { status: 403 });
       }
 
-      await prisma.posts.delete({
-        where: { id: postId }
-      });
+      await db.delete(posts).where(eq(posts.id, postId));
 
       return redirect('/community');
     }
@@ -421,62 +420,33 @@ export const action: ActionFunction = async ({ request, params }) => {
       if (![-1, 0, 1].includes(value)) {
         return json({ error: 'Invalid vote value' }, { status: 400 });
       }
-
-      return await prisma.$transaction(async (tx) => {
-        // First, delete any existing vote for this user and post
-        await tx.vote.deleteMany({
-          where: {
-            userId: user.id,
-            postId: postId,
-            voteType: 'POST',
-            isQualityVote: true
-          }
-        });
-
+      // Use a transaction to ensure atomic operations
+      return await db.transaction(async (tx) => {
+        // Delete existing vote first
+        await tx.delete(votes).where(and(eq(votes.userId, user.id), eq(votes.postId, postId), eq(votes.voteType, 'POST'), eq(votes.isQualityVote, true)));
         if (value !== 0) {
-          // Create new vote if value is not 0
-          await tx.vote.create({
-            data: {
-              userId: user.id,
-              postId: postId,
-              value,
-              voteType: 'POST',
-              isQualityVote: true,
-              commentId: null,
-              answerId: null
-            }
+          await tx.insert(votes).values({
+            id: crypto.randomUUID(),
+            userId: user.id,
+            postId,
+            value,
+            voteType: 'POST',
+            isQualityVote: true,
+            commentId: null,
+            answerId: null
           });
         }
-
         // Get updated vote counts
-        const [qualityUpvotes, qualityDownvotes] = await Promise.all([
-          tx.vote.count({
-            where: {
-              postId: postId,
-              voteType: 'POST',
-              isQualityVote: true,
-              value: 1
-            }
-          }),
-          tx.vote.count({
-            where: {
-              postId: postId,
-              voteType: 'POST',
-              isQualityVote: true,
-              value: -1
-            }
-          })
-        ]);
-
-        // Update post vote counts
-        await tx.posts.update({
-          where: { id: postId },
-          data: {
-            qualityUpvotes,
-            qualityDownvotes
-          }
+        const allVotes = await tx.query.votes.findMany({
+          where: and(eq(votes.postId, postId), eq(votes.voteType, 'POST'), eq(votes.isQualityVote, true)),
         });
-
+        const qualityUpvotes = allVotes.filter(v => v.value === 1).length;
+        const qualityDownvotes = allVotes.filter(v => v.value === -1).length;
+        // Update post vote counts
+        await tx.update(posts).set({
+          qualityUpvotes,
+          qualityDownvotes
+        }).where(eq(posts.id, postId));
         return json({
           success: true,
           qualityUpvotes,
@@ -489,56 +459,37 @@ export const action: ActionFunction = async ({ request, params }) => {
       const isVoting = formData.get('isVoting') === 'true';
 
       // Use a transaction to ensure atomic operations
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await db.$transaction(async (tx) => {
         // Get current vote state
-        const existingVote = await tx.vote.findFirst({
-          where: {
-            userId: user.id,
-            postId,
-            voteType: 'POST',
-            isQualityVote: false
-          }
+        const existingVote = await tx.query.vote.findFirst({
+          where: and(eq(votes.userId, user.id), eq(votes.postId, postId), eq(votes.voteType, 'POST'), eq(votes.isQualityVote, false)),
         });
 
         // Update vote record
         if (isVoting) {
           if (!existingVote) {
-            await tx.vote.create({
-              data: {
-                userId: user.id,
-                postId,
-                value: 1, // Always 1 for visibility votes
-                voteType: 'POST',
-                isQualityVote: false,
-                commentId: null,
-                answerId: null
-              }
+            await tx.insert(votes).values({
+              userId: user.id,
+              postId,
+              value: 1, // Always 1 for visibility votes
+              voteType: 'POST',
+              isQualityVote: false,
+              commentId: null,
+              answerId: null
             });
           }
         } else {
           if (existingVote) {
-            await tx.vote.delete({
-              where: { id: existingVote.id }
-            });
+            await tx.delete(votes).where(eq(votes.id, existingVote.id));
           }
         }
 
         // Update post visibility votes
-        const visibilityVotes = await tx.vote.count({
-          where: {
-            postId,
-            voteType: 'POST',
-            isQualityVote: false,
-            value: 1 // Only count positive votes
-          }
-        });
+        const visibilityVotes = await tx.select({ count: db.raw('COUNT(*)') }).from(votes).where(and(eq(votes.postId, postId), eq(votes.voteType, 'POST'), eq(votes.isQualityVote, false), eq(votes.value, 1)));
 
-        const updatedPost = await tx.posts.update({
-          where: { id: postId },
-          data: {
-            visibilityVotes
-          }
-        });
+        const updatedPost = await tx.update(posts).set({
+          visibilityVotes: visibilityVotes.count
+        }).where(eq(posts.id, postId));
 
         return {
           post: updatedPost,
@@ -557,45 +508,45 @@ export const action: ActionFunction = async ({ request, params }) => {
       if (!content) {
         return json({ error: 'Comment content is required' }, { status: 400 });
       }
-
       if (!params.postId) {
         return json({ error: 'Post ID is required' }, { status: 400 });
       }
-
-      const comment = await prisma.comment.create({
-        data: {
-          content,
-          authorId: user.id,
-          postId: params.postId,
-          upvotes: 0,
-          downvotes: 0,
-          answerId: null
-        },
-        include: {
-          author: {
-            include: {
-              profile: true
-            }
-          }
-        }
+      const commentId = crypto.randomUUID();
+      await db.insert(comments).values({
+        id: commentId,
+        content,
+        authorId: user.id,
+        postId: params.postId,
+        upvotes: 0,
+        downvotes: 0,
+        answerId: null
       });
-
+      // Fetch author and profile
+      const author = await db.query.users.findFirst({ where: eq(users.id, user.id) });
+      const profile = await db.query.profiles.findFirst({ where: eq(profiles.userId, user.id) });
       // Award reputation points for commenting
       await addReputationPoints(
         user.id,
         REPUTATION_POINTS.COMMENT_CREATED,
         'COMMENT_CREATED',
-        comment.id
+        commentId
       );
-
       return json({
         success: true,
         comment: {
-          ...comment,
+          id: commentId,
+          content,
           author: {
-            ...comment.author,
-            profilePicture: comment.author.profile?.profilePicture || null
-          }
+            id: author?.id,
+            username: author?.username,
+            profilePicture: profile?.profilePicture || null,
+            profile: profile ? { profilePicture: profile.profilePicture } : null
+          },
+          upvotes: 0,
+          downvotes: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          userVote: 0
         }
       });
     }
@@ -604,45 +555,46 @@ export const action: ActionFunction = async ({ request, params }) => {
       if (!content) {
         return json({ error: 'Answer content is required' }, { status: 400 });
       }
-
       if (!params.postId) {
         return json({ error: 'Post ID is required' }, { status: 400 });
       }
-
-      const answer = await prisma.answer.create({
-        data: {
-          content,
-          postId: params.postId,
-          authorId: user.id,
-          isAccepted: false,
-          upvotes: 0,
-          downvotes: 0
-        },
-        include: {
-          author: {
-            include: {
-              profile: true
-            }
-          }
-        }
+      const answerId = crypto.randomUUID();
+      await db.insert(answers).values({
+        id: answerId,
+        content,
+        postId: params.postId,
+        authorId: user.id,
+        isAccepted: false,
+        upvotes: 0,
+        downvotes: 0
       });
-
+      // Fetch author and profile
+      const author = await db.query.users.findFirst({ where: eq(users.id, user.id) });
+      const profile = await db.query.profiles.findFirst({ where: eq(profiles.userId, user.id) });
       // Award reputation points for answering a question
       await addReputationPoints(
         user.id,
         REPUTATION_POINTS.ANSWER_CREATED,
         'ANSWER_CREATED',
-        answer.id
+        answerId
       );
-
       return json({
         success: true,
         answer: {
-          ...answer,
+          id: answerId,
+          content,
           author: {
-            ...answer.author,
-            profilePicture: answer.author.profile?.profilePicture || null
-          }
+            id: author?.id,
+            username: author?.username,
+            profilePicture: profile?.profilePicture || null,
+            profile: profile ? { profilePicture: profile.profilePicture } : null
+          },
+          upvotes: 0,
+          downvotes: 0,
+          isAccepted: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          userVote: 0
         }
       });
     }
@@ -653,8 +605,8 @@ export const action: ActionFunction = async ({ request, params }) => {
       }
 
       // Get the answer and its author
-      const answer = await prisma.answer.findUnique({
-        where: { id: answerId },
+      const answer = await db.query.answer.findFirst({
+        where: eq(answers.id, answerId),
         include: {
           author: {
             select: {
@@ -675,18 +627,12 @@ export const action: ActionFunction = async ({ request, params }) => {
       }
 
       // Use a transaction to ensure atomic operations
-      return await prisma.$transaction(async (tx) => {
+      return await db.$transaction(async (tx) => {
         // Update the answer as accepted
-        await tx.answer.update({
-          where: { id: answerId },
-          data: { isAccepted: true },
-        });
+        await tx.update(answers).set({ isAccepted: true }).where(eq(answers.id, answerId));
 
         // Update the post status to completed
-        await tx.posts.update({
-          where: { id: postId },
-          data: { status: 'COMPLETED' },
-        });
+        await tx.update(posts).set({ status: 'COMPLETED' }).where(eq(posts.id, answer.postId));
 
         return json({ 
           success: true,
@@ -712,60 +658,34 @@ export const action: ActionFunction = async ({ request, params }) => {
 
       while (retryCount < maxRetries) {
         try {
-          return await prisma.$transaction(async (tx) => {
+          return await db.$transaction(async (tx) => {
             // Delete existing vote first
-            await tx.vote.deleteMany({
-              where: {
-                userId: user.id,
-                commentId: commentId,
-                voteType: 'COMMENT',
-                isQualityVote: true
-              }
-            });
+            await tx.delete(votes).where(and(eq(votes.userId, user.id), eq(votes.commentId, commentId), eq(votes.voteType, 'COMMENT'), eq(votes.isQualityVote, true)));
 
             // Create new vote if value is not 0
             if (value !== 0) {
-              await tx.vote.create({
-                data: {
-                  userId: user.id,
-                  commentId: commentId,
-                  value,
-                  voteType: 'COMMENT',
-                  isQualityVote: true,
-                  postId: null,
-                  answerId: null
-                }
+              await tx.insert(votes).values({
+                userId: user.id,
+                commentId: commentId,
+                value,
+                voteType: 'COMMENT',
+                isQualityVote: true,
+                postId: null,
+                answerId: null
               });
             }
 
             // Get updated vote counts
             const [upvotes, downvotes] = await Promise.all([
-              tx.vote.count({
-                where: {
-                  commentId: commentId,
-                  voteType: 'COMMENT',
-                  isQualityVote: true,
-                  value: 1
-                }
-              }),
-              tx.vote.count({
-                where: {
-                  commentId: commentId,
-                  voteType: 'COMMENT',
-                  isQualityVote: true,
-                  value: -1
-                }
-              })
+              tx.select({ count: db.raw('COUNT(*)') }).from(votes).where(and(eq(votes.commentId, commentId), eq(votes.voteType, 'COMMENT'), eq(votes.isQualityVote, true), eq(votes.value, 1))),
+              tx.select({ count: db.raw('COUNT(*)') }).from(votes).where(and(eq(votes.commentId, commentId), eq(votes.voteType, 'COMMENT'), eq(votes.isQualityVote, true), eq(votes.value, -1))),
             ]);
 
             // Update comment vote counts
-            await tx.comment.update({
-              where: { id: commentId },
-              data: {
-                upvotes,
-                downvotes
-              }
-            });
+            await tx.update(comments).set({
+              upvotes,
+              downvotes
+            }).where(eq(comments.id, commentId));
 
             return json({
               success: true,
@@ -805,60 +725,34 @@ export const action: ActionFunction = async ({ request, params }) => {
 
       while (retryCount < maxRetries) {
         try {
-          return await prisma.$transaction(async (tx) => {
+          return await db.$transaction(async (tx) => {
             // Delete existing vote first
-            await tx.vote.deleteMany({
-              where: {
-                userId: user.id,
-                answerId: answerId,
-                voteType: 'ANSWER',
-                isQualityVote: true
-              }
-            });
+            await tx.delete(votes).where(and(eq(votes.userId, user.id), eq(votes.answerId, answerId), eq(votes.voteType, 'ANSWER'), eq(votes.isQualityVote, true)));
 
             // Create new vote if value is not 0
             if (value !== 0) {
-              await tx.vote.create({
-                data: {
-                  userId: user.id,
-                  answerId: answerId,
-                  value,
-                  voteType: 'ANSWER',
-                  isQualityVote: true,
-                  postId: null,
-                  commentId: null
-                }
+              await tx.insert(votes).values({
+                userId: user.id,
+                answerId: answerId,
+                value,
+                voteType: 'ANSWER',
+                isQualityVote: true,
+                postId: null,
+                commentId: null
               });
             }
 
             // Get updated vote counts
             const [upvotes, downvotes] = await Promise.all([
-              tx.vote.count({
-                where: {
-                  answerId: answerId,
-                  voteType: 'ANSWER',
-                  isQualityVote: true,
-                  value: 1
-                }
-              }),
-              tx.vote.count({
-                where: {
-                  answerId: answerId,
-                  voteType: 'ANSWER',
-                  isQualityVote: true,
-                  value: -1
-                }
-              })
+              tx.select({ count: db.raw('COUNT(*)') }).from(votes).where(and(eq(votes.answerId, answerId), eq(votes.voteType, 'ANSWER'), eq(votes.isQualityVote, true), eq(votes.value, 1))),
+              tx.select({ count: db.raw('COUNT(*)') }).from(votes).where(and(eq(votes.answerId, answerId), eq(votes.voteType, 'ANSWER'), eq(votes.isQualityVote, true), eq(votes.value, -1))),
             ]);
 
             // Update answer vote counts
-            await tx.answer.update({
-              where: { id: answerId },
-              data: {
-                upvotes,
-                downvotes
-              }
-            });
+            await tx.update(answers).set({
+              upvotes,
+              downvotes
+            }).where(eq(answers.id, answerId));
 
             return json({
               success: true,
@@ -891,8 +785,8 @@ export const action: ActionFunction = async ({ request, params }) => {
       }
 
       // Get the answer and its author
-      const answer = await prisma.answer.findUnique({
-        where: { id: answerId },
+      const answer = await db.query.answer.findFirst({
+        where: eq(answers.id, answerId),
         include: {
           author: {
             select: {
@@ -925,34 +819,25 @@ export const action: ActionFunction = async ({ request, params }) => {
       }
 
       // Use a transaction to ensure atomic operations
-      return await prisma.$transaction(async (tx) => {
+      return await db.$transaction(async (tx) => {
         // Update the answer as accepted
-        await tx.answer.update({
-          where: { id: answerId },
-          data: { isAccepted: true },
-        });
+        await tx.update(answers).set({ isAccepted: true }).where(eq(answers.id, answerId));
 
         // Update the post status
-        await tx.posts.update({
-          where: { id: postId },
-          data: { status: 'COMPLETED' },
-        });
+        await tx.update(posts).set({ status: 'COMPLETED' }).where(eq(posts.id, answer.postId));
 
         // Update the bounty status to claimed and set winner
-        await tx.bounty.update({
-          where: { postId },
-          data: {
-            status: 'CLAIMED',
-            winnerId: answer.authorId,
-          },
-        });
+        await tx.update(bounties).set({
+          status: 'CLAIMED',
+          winnerId: answer.authorId,
+        }).where(eq(bounties.postId, answer.postId));
 
-        // Import VirtualWalletService at the top of the file
-        const { VirtualWalletService } = await import('~/utils/virtual-wallet.server');
+        // Import claimBounty function at the top of the file
+        const { claimBounty } = await import('~/utils/virtual-wallet.server');
         
         // Transfer bounty tokens to the answer author
         const bountyAmount = answer.post.bounty!.amount;
-        await VirtualWalletService.claimBounty(
+        await claimBounty(
           answer.authorId,
           bountyAmount,
           answer.post.bounty!.id
@@ -969,8 +854,8 @@ export const action: ActionFunction = async ({ request, params }) => {
       });
     }
     case 'refund_bounty': {
-      const post = await prisma.posts.findUnique({
-        where: { id: postId },
+      const post = await db.query.posts.findFirst({
+        where: eq(posts.id, postId),
         include: { bounty: true },
       });
 
@@ -983,12 +868,9 @@ export const action: ActionFunction = async ({ request, params }) => {
       }
 
       // Update the bounty status to refunded
-      await prisma.bounty.update({
-        where: { postId },
-        data: {
-          status: 'REFUNDED',
-        },
-      });
+      await db.update(bounties).set({
+        status: 'REFUNDED',
+      }).where(eq(bounties.postId, postId));
 
       return json({ success: true });
     }
@@ -999,8 +881,8 @@ export const action: ActionFunction = async ({ request, params }) => {
       }
 
       // Get the answer and its author
-      const answer = await prisma.answer.findUnique({
-        where: { id: answerId },
+      const answer = await db.query.answer.findFirst({
+        where: eq(answers.id, answerId),
         include: {
           author: {
             select: {
@@ -1021,18 +903,12 @@ export const action: ActionFunction = async ({ request, params }) => {
       }
 
       // Use a transaction to ensure atomic operations
-      return await prisma.$transaction(async (tx) => {
+      return await db.$transaction(async (tx) => {
         // Update the answer as accepted
-        await tx.answer.update({
-          where: { id: answerId },
-          data: { isAccepted: true },
-        });
+        await tx.update(answers).set({ isAccepted: true }).where(eq(answers.id, answerId));
 
         // Update the post status to completed
-        await tx.posts.update({
-          where: { id: postId },
-          data: { status: 'COMPLETED' },
-        });
+        await tx.update(posts).set({ status: 'COMPLETED' }).where(eq(posts.id, answer.postId));
 
         return json({ 
           success: true,
@@ -1044,9 +920,348 @@ export const action: ActionFunction = async ({ request, params }) => {
         });
       });
     }
-    default: {
-      return json({ error: 'Invalid action' }, { status: 400 });
+    case 'deleteComment': {
+      const { commentId } = data;
+      const comment = await db
+        .select()
+        .from(comments)
+        .where(eq(comments.id, commentId))
+        .limit(1);
+
+      if (!comment.length || comment[0].authorId !== user.id) {
+        throw new Response("Unauthorized", { status: 401 });
+      }
+
+      await db.delete(comments).where(eq(comments.id, commentId));
+      return { success: true };
     }
+
+    case 'deleteAnswer': {
+      const { answerId } = data;
+      const answer = await db
+        .select()
+        .from(answers)
+        .where(eq(answers.id, answerId))
+        .limit(1);
+
+      if (!answer.length || answer[0].authorId !== user.id) {
+        throw new Response("Unauthorized", { status: 401 });
+      }
+
+      await db.delete(answers).where(eq(answers.id, answerId));
+      return { success: true };
+    }
+
+    case 'updatePost': {
+      const { title, content, tags, bountyAmount } = data;
+      
+      if (!user.id) {
+        throw new Response("Unauthorized", { status: 401 });
+      }
+
+      const post = await db
+        .select()
+        .from(posts)
+        .where(eq(posts.id, postId))
+        .limit(1);
+
+      if (!post.length || post[0].authorId !== user.id) {
+        throw new Response("Unauthorized", { status: 401 });
+      }
+
+      // Use transaction for atomic operations
+      await db.transaction(async (tx: any) => {
+        // Update post
+        await tx
+          .update(posts)
+          .set({
+            title,
+            content,
+            updatedAt: new Date(),
+          })
+          .where(eq(posts.id, postId));
+
+        // Delete existing tags
+        await tx.delete(postTags).where(eq(postTags.postId, postId));
+
+        // Add new tags
+        if (tags && tags.length > 0) {
+          const tagValues = tags.map((tag: string) => ({
+            id: crypto.randomUUID(),
+            postId,
+            tagId: tag,
+          }));
+          await tx.insert(postTags).values(tagValues);
+        }
+      });
+
+      return { success: true };
+    }
+
+    case 'reportPost': {
+      const { reason } = data;
+      
+      if (!user.id) {
+        throw new Response("Unauthorized", { status: 401 });
+      }
+
+      const existingReport = await db
+        .select()
+        .from(reports)
+        .where(
+          and(
+            eq(reports.postId, postId),
+            eq(reports.reporterId, user.id)
+          )
+        )
+        .limit(1);
+
+      if (existingReport.length > 0) {
+        throw new Response("Already reported", { status: 400 });
+      }
+
+      await db.insert(reports).values({
+        id: crypto.randomUUID(),
+        postId,
+        reporterId: user.id,
+        reason,
+        status: "pending",
+        createdAt: new Date(),
+      });
+
+      return { success: true };
+    }
+
+    case 'reportComment': {
+      const { commentId, reason } = data;
+      
+      if (!user.id) {
+        throw new Response("Unauthorized", { status: 401 });
+      }
+
+      const existingReport = await db
+        .select()
+        .from(reports)
+        .where(
+          and(
+            eq(reports.commentId, commentId),
+            eq(reports.reporterId, user.id)
+          )
+        )
+        .limit(1);
+
+      if (existingReport.length > 0) {
+        throw new Response("Already reported", { status: 400 });
+      }
+
+      await db.insert(reports).values({
+        id: crypto.randomUUID(),
+        commentId,
+        reporterId: user.id,
+        reason,
+        status: "pending",
+        createdAt: new Date(),
+      });
+
+      return { success: true };
+    }
+
+    case 'reportAnswer': {
+      const { answerId, reason } = data;
+      
+      if (!user.id) {
+        throw new Response("Unauthorized", { status: 401 });
+      }
+
+      const existingReport = await db
+        .select()
+        .from(reports)
+        .where(
+          and(
+            eq(reports.answerId, answerId),
+            eq(reports.reporterId, user.id)
+          )
+        )
+        .limit(1);
+
+      if (existingReport.length > 0) {
+        throw new Response("Already reported", { status: 400 });
+      }
+
+      await db.insert(reports).values({
+        id: crypto.randomUUID(),
+        answerId,
+        reporterId: user.id,
+        reason,
+        status: "pending",
+        createdAt: new Date(),
+      });
+
+      return { success: true };
+    }
+
+    case 'toggleBookmark': {
+      if (!user.id) {
+        throw new Response("Unauthorized", { status: 401 });
+      }
+
+      const existingBookmark = await db
+        .select()
+        .from(bookmarks)
+        .where(
+          and(
+            eq(bookmarks.postId, postId),
+            eq(bookmarks.userId, user.id)
+          )
+        )
+        .limit(1);
+
+      if (existingBookmark.length > 0) {
+        await db
+          .delete(bookmarks)
+          .where(
+            and(
+              eq(bookmarks.postId, postId),
+              eq(bookmarks.userId, user.id)
+            )
+          );
+        return { bookmarked: false };
+      } else {
+        await db.insert(bookmarks).values({
+          id: crypto.randomUUID(),
+          postId,
+          userId: user.id,
+          createdAt: new Date(),
+        });
+        return { bookmarked: true };
+      }
+    }
+
+    case 'rateIntegrity': {
+      const { rating, reason } = data;
+      
+      if (!user.id) {
+        throw new Response("Unauthorized", { status: 401 });
+      }
+
+      const existingRating = await db
+        .select()
+        .from(integrityRatings)
+        .where(
+          and(
+            eq(integrityRatings.postId, postId),
+            eq(integrityRatings.raterId, user.id)
+          )
+        )
+        .limit(1);
+
+      if (existingRating.length > 0) {
+        await db
+          .update(integrityRatings)
+          .set({
+            rating,
+            reason,
+            updatedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(integrityRatings.postId, postId),
+              eq(integrityRatings.raterId, user.id)
+            )
+          );
+      } else {
+        await db.insert(integrityRatings).values({
+          id: crypto.randomUUID(),
+          postId,
+          raterId: user.id,
+          rating,
+          reason,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+      }
+
+      return { success: true };
+    }
+
+    case 'claimBounty': {
+      const { answerId } = data;
+      
+      if (!user.id) {
+        throw new Response("Unauthorized", { status: 401 });
+      }
+
+      const post = await db
+        .select()
+        .from(posts)
+        .where(eq(posts.id, postId))
+        .limit(1);
+
+      if (!post.length) {
+        throw new Response("Post not found", { status: 404 });
+      }
+
+      if (post[0].authorId === user.id) {
+        throw new Response("Cannot claim your own bounty", { status: 400 });
+      }
+
+      if (!post[0].bountyAmount || post[0].bountyAmount <= 0) {
+        throw new Response("No bounty available", { status: 400 });
+      }
+
+      const answer = await db
+        .select()
+        .from(answers)
+        .where(eq(answers.id, answerId))
+        .limit(1);
+
+      if (!answer.length || answer[0].postId !== postId) {
+        throw new Response("Answer not found", { status: 404 });
+      }
+
+      if (answer[0].authorId !== user.id) {
+        throw new Response("Cannot claim bounty for another user's answer", { status: 400 });
+      }
+
+      // Check if bounty is already claimed
+      const existingClaim = await db
+        .select()
+        .from(bountyClaims)
+        .where(eq(bountyClaims.postId, postId))
+        .limit(1);
+
+      if (existingClaim.length > 0) {
+        throw new Response("Bounty already claimed", { status: 400 });
+      }
+
+      // Use transaction for atomic operations
+      await db.transaction(async (tx: any) => {
+        // Create bounty claim
+        await tx.insert(bountyClaims).values({
+          id: crypto.randomUUID(),
+          postId,
+          answerId,
+          claimantId: user.id,
+          amount: post[0].bountyAmount,
+          status: "pending",
+          createdAt: new Date(),
+        });
+
+        // Update post to mark bounty as claimed
+        await tx
+          .update(posts)
+          .set({
+            bountyClaimed: true,
+            updatedAt: new Date(),
+          })
+          .where(eq(posts.id, postId));
+      });
+
+      return { success: true };
+    }
+
+    default:
+      throw new Response("Invalid action", { status: 400 });
   }
 };
 

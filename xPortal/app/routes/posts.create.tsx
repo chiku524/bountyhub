@@ -3,7 +3,6 @@ import { useEffect, useState, useRef } from 'react'
 import { Form, useLoaderData, Link, useActionData, redirect, useNavigate, useSubmit, useRouteError, useNavigation, MetaFunction } from "@remix-run/react"
 import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from '@remix-run/node'
 import { requireUserId } from '~/utils/auth.server'
-import { prisma } from '~/utils/prisma.server'
 import { Layout } from '~/components/Layout'
 import { validateTitle, validateContent } from '~/utils/validators.server'
 import type { CodeBlockForm } from '~/utils/types.server'
@@ -11,10 +10,15 @@ import { addReputationPoints, REPUTATION_POINTS } from '~/utils/reputation.serve
 import CodeBlockEditor from '~/components/CodeBlockEditor'
 import { MediaUpload } from '~/components/MediaUpload'
 import { uploadToCloudinary } from '~/utils/cloudinary.server'
-import { VirtualWalletService } from '~/utils/virtual-wallet.server'
+import { getVirtualWallet, createVirtualWallet, createBounty } from "~/utils/virtual-wallet.server"
+import { createDb } from "~/utils/db.server"
+import { posts, bounties, tags, users } from "../../drizzle/schema"
+import { eq, asc } from "drizzle-orm"
+import { z } from "zod"
 import TagSelector from '~/components/TagSelector'
 import bountyBucksInfo from '../../bounty-bucks-info.json'
 import { BountyForm } from '~/components/BountyForm'
+import { FiGift, FiDollarSign, FiClock, FiInfo } from 'react-icons/fi'
 
 const TOKEN_SYMBOL = bountyBucksInfo.config.symbol
 
@@ -40,170 +44,99 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export const loader = async ({ request, context }: LoaderFunctionArgs) => {
   const userId = await requireUserId(request);
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { id: true, username: true },
-  });
+  const db = createDb((context as any).env.DB);
 
+  // Fetch user
+  const userRows = await db.select({ id: users.id, username: users.username }).from(users).where(eq(users.id, userId)).limit(1);
+  const user = userRows[0];
   if (!user) {
-    throw new Error("User not found");
+    throw new Error('User not found');
   }
 
   // Fetch available tags
-  const availableTags = await prisma.tag.findMany({
-    orderBy: { name: 'asc' }
-  });
+  const availableTags = await db.select({
+    id: tags.id,
+    name: tags.name,
+    description: tags.description,
+    color: tags.color,
+  }).from(tags).orderBy(asc(tags.name));
 
   return json<LoaderData>({ user, availableTags });
 };
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+export async function action({ request, context }: ActionFunctionArgs) {
+  const userId = await requireUserId(request);
+  const formData = await request.formData();
+  const title = formData.get("title") as string;
+  const content = formData.get("content") as string;
+  const bountyAmount = formData.get("bountyAmount") as string;
+
+  // Validate input
+  const postSchema = z.object({
+    title: z.string().min(1, "Title is required").max(200, "Title must be less than 200 characters"),
+    content: z.string().min(10, "Content must be at least 10 characters"),
+    bountyAmount: z.string().optional(),
+  });
+
+  const validation = postSchema.safeParse({ title, content, bountyAmount });
+  if (!validation.success) {
+    return json({ error: validation.error.errors[0].message }, { status: 400 });
+  }
+
+  const db = createDb((context as any).env.DB);
+
   try {
-    const userId = await requireUserId(request);
-    const formData = await request.formData();
-    
-    const title = formData.get("title") as string;
-    const content = formData.get("content") as string;
-    const codeBlocksData = formData.get("codeBlocks") as string;
-    const mediaData = formData.get("media") as string;
-    const hasBounty = formData.get("hasBounty") === "on";
-    const bountyAmount = formData.get("bountyAmount") as string;
-    const bountyDuration = formData.get("bountyDuration") as string;
-    const tagIds = formData.getAll("tags") as string[];
+    // Create the post
+    const [post] = await db.insert(posts).values({
+      id: crypto.randomUUID(),
+      title: validation.data.title,
+      content: validation.data.content,
+      authorId: userId,
+    }).returning().all();
 
-    // Validate required fields
-    if (!title || !content) {
-      return json({ error: "Title and content are required" }, { status: 400 });
-    }
-    if (!tagIds || tagIds.length === 0) {
-      return json({ error: "At least one tag is required" }, { status: 400 });
-    }
-
-    const titleError = validateTitle(title);
-    if (titleError) {
-      return json({ error: titleError }, { status: 400 });
-    }
-
-    const contentError = validateContent(content);
-    if (contentError) {
-      return json({ error: contentError }, { status: 400 });
-    }
-
-    // Parse code blocks and media with error handling
-    let codeBlocks = [];
-    let mediaDataArray = [];
-    
-    try {
-      codeBlocks = JSON.parse(codeBlocksData || "[]");
-    } catch (error) {
-      console.error('Failed to parse code blocks:', error);
-      return json({ error: "Invalid code blocks data" }, { status: 400 });
-    }
-
-    try {
-      mediaDataArray = JSON.parse(mediaData || "[]");
-    } catch (error) {
-      console.error('Failed to parse media data:', error);
-      return json({ error: "Invalid media data" }, { status: 400 });
-    }
-
-    // Check if user has sufficient balance for bounty
-    if (hasBounty && bountyAmount) {
-      const amount = parseFloat(bountyAmount);
-      if (isNaN(amount) || amount <= 0) {
-        return json({ error: "Invalid bounty amount" }, { status: 400 });
+    // If bounty amount is provided, create a bounty
+    if (validation.data.bountyAmount && parseFloat(validation.data.bountyAmount) > 0) {
+      const amount = parseFloat(validation.data.bountyAmount);
+      
+      // Get or create user's wallet
+      let wallet = await getVirtualWallet(db, userId);
+      if (!wallet) {
+        wallet = await createVirtualWallet(db, userId);
       }
       
-      const wallet = await VirtualWalletService.getOrCreateWallet(userId);
+      if (!wallet) {
+        return json({ error: "Failed to create wallet" }, { status: 500 });
+      }
       
+      // Check if user has sufficient balance
       if (wallet.balance < amount) {
-        return json({ 
-          error: `Insufficient balance. You have ${wallet.balance.toFixed(4)} ${TOKEN_SYMBOL} but need ${amount.toFixed(4)} ${TOKEN_SYMBOL} for this bounty. Please deposit more ${TOKEN_SYMBOL} to your wallet.` 
-        }, { status: 400 });
+        return json({ error: "Insufficient balance to create bounty" }, { status: 400 });
       }
+
+      // Create the bounty
+      const [bounty] = await db.insert(bounties).values({
+        id: crypto.randomUUID(),
+        postId: post.id,
+        amount: amount,
+        status: 'ACTIVE',
+        tokenDecimals: 9,
+        refundLockPeriod: 24,
+        refundPenalty: 0,
+        communityFee: 0.05,
+      }).returning().all();
+
+      // Deduct amount from user's wallet
+      await createBounty(db, userId, amount, bounty.id);
     }
-
-    // Create the post first
-    const post = await prisma.posts.create({
-      data: {
-        title,
-        content,
-        authorId: userId,
-        hasBounty: hasBounty,
-        codeBlocks: {
-          create: codeBlocks.map((block: { language: string; code: string; description: string }) => ({
-            language: block.language,
-            code: block.code
-          }))
-        },
-        postTags: {
-          create: tagIds.map((tagId: string) => ({ tag: { connect: { id: tagId } } }))
-        }
-      }
-    });
-
-    // Create bounty if needed
-    if (hasBounty && bountyAmount && bountyDuration) {
-      const amount = parseFloat(bountyAmount);
-      const duration = parseInt(bountyDuration);
-      
-      if (isNaN(duration) || duration < 1 || duration > 30) {
-        // Delete the post if bounty creation fails
-        await prisma.posts.delete({ where: { id: post.id } });
-        return json({ error: "Invalid bounty duration (must be 1-30 days)" }, { status: 400 });
-      }
-      
-      const bounty = await prisma.bounty.create({
-        data: {
-          postId: post.id,
-          amount: amount,
-          expiresAt: new Date(Date.now() + (duration * 24 * 60 * 60 * 1000)),
-          status: 'ACTIVE'
-        },
-      });
-
-      // Deduct from virtual wallet
-      await VirtualWalletService.createBounty(userId, amount, bounty.id);
-    }
-
-    // Upload media if any
-    if (mediaDataArray.length > 0) {
-      try {
-        await Promise.all(
-          mediaDataArray.map(async (item: { type: string; url: string; thumbnailUrl?: string; isScreenRecording: boolean }) => {
-            await prisma.media.create({
-              data: {
-                type: item.type,
-                url: item.url,
-                thumbnailUrl: item.thumbnailUrl,
-                isScreenRecording: item.isScreenRecording,
-                cloudinaryId: '',
-                postId: post.id
-              }
-            });
-          })
-        );
-      } catch (error) {
-        // If media creation fails, delete the post and bounty
-        console.error('Media creation error:', error);
-        await prisma.posts.delete({ where: { id: post.id } });
-        return json({ error: 'Failed to create media entries. Please try again.' }, { status: 500 });
-      }
-    }
-
-    // Add reputation points for creating a post
-    await addReputationPoints(userId, REPUTATION_POINTS.CREATE_POST);
 
     return redirect(`/posts/${post.id}`);
   } catch (error) {
-    console.error('Post creation error:', error);
-    return json({ 
-      error: error instanceof Error ? error.message : 'Failed to create post. Please try again.' 
-    }, { status: 500 });
+    console.error("Error creating post:", error);
+    return json({ error: "Failed to create post" }, { status: 500 });
   }
-};
+}
 
 export default function CreatePost() {
   const { user, availableTags } = useLoaderData<LoaderData>();
@@ -305,53 +238,154 @@ export default function CreatePost() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-violet-300 mb-2">
-              Bounty
+            <label className="block text-sm font-medium text-violet-300 mb-3">
+              <div className="flex items-center gap-2">
+                <FiGift className="w-4 h-4" />
+                Bounty Settings
+              </div>
             </label>
-            <div className="space-y-4 bg-neutral-700/50 border border-violet-500/30 rounded-lg p-4">
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="hasBounty"
-                  checked={hasBounty}
-                  onChange={(e) => setHasBounty(e.target.checked)}
-                  className="rounded border-violet-500/30 bg-neutral-700/50 text-violet-300 focus:ring-violet-500"
-                />
-                <label htmlFor="hasBounty" className="text-violet-300">
-                  Add Crypto Bounty
-                </label>
+            
+            <div className="bg-gradient-to-br from-neutral-800/60 to-neutral-900/60 border border-violet-500/20 rounded-xl p-6 backdrop-blur-sm">
+              {/* Bounty Toggle */}
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      id="hasBounty"
+                      checked={hasBounty}
+                      onChange={(e) => setHasBounty(e.target.checked)}
+                      className="sr-only"
+                    />
+                    <label
+                      htmlFor="hasBounty"
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out cursor-pointer ${
+                        hasBounty ? 'bg-violet-500' : 'bg-neutral-600'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${
+                          hasBounty ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </label>
+                  </div>
+                  <div>
+                    <label htmlFor="hasBounty" className="text-white font-medium cursor-pointer">
+                      Add Crypto Bounty
+                    </label>
+                    <p className="text-gray-400 text-sm">Reward the best answer with tokens</p>
+                  </div>
+                </div>
+                
+                {hasBounty && (
+                  <div className="flex items-center gap-2 px-3 py-1 bg-violet-500/20 border border-violet-500/30 rounded-full">
+                    <FiGift className="w-4 h-4 text-violet-300" />
+                    <span className="text-violet-300 text-sm font-medium">Active</span>
+                  </div>
+                )}
               </div>
 
+              {/* Bounty Configuration */}
               {hasBounty && (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-violet-300 mb-1">
-                      Bounty Amount
-                    </label>
-                    <input
-                      type="number"
-                      value={bountyAmount}
-                      onChange={(e) => setBountyAmount(e.target.value)}
-                      min="0"
-                      step="0.01"
-                      required
-                      className="w-full rounded-lg border-violet-500/30 bg-neutral-700/50 text-violet-300 focus:ring-violet-500"
-                    />
+                <div className="space-y-6 animate-in slide-in-from-top-2 duration-300">
+                  {/* Amount Section */}
+                  <div className="bg-neutral-700/30 rounded-lg p-4 border border-neutral-600/50">
+                    <div className="flex items-center gap-2 mb-3">
+                      <FiDollarSign className="w-4 h-4 text-yellow-400" />
+                      <label className="text-white font-medium">Bounty Amount</label>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        value={bountyAmount}
+                        onChange={(e) => setBountyAmount(e.target.value)}
+                        min="0"
+                        step="0.01"
+                        required
+                        placeholder="0.00"
+                        className="w-full px-4 py-3 bg-neutral-800/50 border border-neutral-600/50 rounded-lg text-white placeholder-gray-400 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all duration-200"
+                      />
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
+                        {TOKEN_SYMBOL}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
+                      <FiInfo className="w-3 h-3" />
+                      <span>5% goes to community governance rewards</span>
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-violet-300 mb-1">
-                      Bounty Duration (days)
-                    </label>
-                    <input
-                      type="number"
-                      value={bountyDuration}
-                      onChange={(e) => setBountyDuration(Number(e.target.value))}
-                      min="1"
-                      max="30"
-                      required
-                      className="w-full rounded-lg border-violet-500/30 bg-neutral-700/50 text-violet-300 focus:ring-violet-500"
-                    />
+                  {/* Duration Section */}
+                  <div className="bg-neutral-700/30 rounded-lg p-4 border border-neutral-600/50">
+                    <div className="flex items-center gap-2 mb-3">
+                      <FiClock className="w-4 h-4 text-blue-400" />
+                      <label className="text-white font-medium">Bounty Duration</label>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <input
+                        type="number"
+                        value={bountyDuration}
+                        onChange={(e) => setBountyDuration(Number(e.target.value))}
+                        min="1"
+                        max="30"
+                        required
+                        className="px-4 py-3 bg-neutral-800/50 border border-neutral-600/50 rounded-lg text-white focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all duration-200"
+                      />
+                      <div className="flex items-center justify-center px-4 py-3 bg-neutral-800/30 border border-neutral-600/30 rounded-lg text-gray-300 text-sm">
+                        days
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
+                      <FiInfo className="w-3 h-3" />
+                      <span>Bounty expires after {bountyDuration} days</span>
+                    </div>
+                  </div>
+
+                  {/* Summary Card */}
+                  <div className="bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/30 rounded-lg p-4">
+                    <h4 className="text-violet-300 font-medium mb-2">Bounty Summary</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Amount:</span>
+                        <span className="text-white font-medium">
+                          {bountyAmount ? `${parseFloat(bountyAmount).toFixed(2)} ${TOKEN_SYMBOL}` : '0.00 SOL'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Duration:</span>
+                        <span className="text-white font-medium">{bountyDuration} days</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Governance Fee:</span>
+                        <span className="text-yellow-400 font-medium">
+                          {bountyAmount ? `${(parseFloat(bountyAmount) * 0.05).toFixed(3)} ${TOKEN_SYMBOL}` : '0.000 SOL'}
+                        </span>
+                      </div>
+                      <div className="border-t border-violet-500/20 pt-2 mt-2">
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Total Cost:</span>
+                          <span className="text-violet-300 font-semibold">
+                            {bountyAmount ? `${(parseFloat(bountyAmount) * 1.05).toFixed(3)} ${TOKEN_SYMBOL}` : '0.000 SOL'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Info Card when bounty is disabled */}
+              {!hasBounty && (
+                <div className="bg-neutral-700/20 rounded-lg p-4 border border-neutral-600/30">
+                  <div className="flex items-start gap-3">
+                    <FiInfo className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="text-gray-300 font-medium mb-1">No Bounty Selected</h4>
+                      <p className="text-gray-400 text-sm">
+                        Enable bounty to reward the best answer with tokens. This will attract more attention to your question and incentivize quality responses.
+                      </p>
+                    </div>
                   </div>
                 </div>
               )}

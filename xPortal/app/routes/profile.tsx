@@ -3,7 +3,6 @@ import { Form, useLoaderData, Link, Outlet, useLocation } from "@remix-run/react
 import { LoaderFunction, json, redirect, MetaFunction } from '@remix-run/node'
 import { getUser } from '~/utils/auth.server'
 import { Layout } from '../components/Layout'
-import { prisma } from '~/utils/prisma.server'
 import { requireUserId } from '~/utils/auth.server'
 import { ProfilePictureUpload } from '~/components/ProfilePictureUpload'
 import { getReputationLevel } from '~/utils/reputationLevel'
@@ -26,6 +25,9 @@ import {
 import { FiThumbsUp, FiEdit2 } from 'react-icons/fi'
 import IntegrityDisplay from '~/components/IntegrityDisplay'
 import { getUserBookmarks } from '~/utils/bookmark.server'
+import { eq, desc } from 'drizzle-orm'
+import { users, profiles, posts, reputationHistory } from '../../drizzle/schema'
+import { createDb } from '~/utils/db.server'
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   const username = data?.user?.username || 'Profile';
@@ -131,31 +133,33 @@ interface UserData {
     }>;
 }
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export const loader = async ({ request, context }: LoaderFunctionArgs) => {
     const userId = await requireUserId(request);
-    const userData = await prisma.user.findUnique({
-        where: { id: userId },
-        include: { 
-            profile: true,
-            posts: {
-                orderBy: { createdAt: 'desc' },
-                select: {
-                    id: true,
-                    title: true,
-                    content: true,
-                    createdAt: true,
-                },
-            },
-            reputationHistory: {
-                orderBy: { createdAt: 'desc' },
-                take: 10,
-            },
-        }
-    }) as any;
+    const db = createDb((context as any).env.DB);
 
-    if (!userData) {
-        throw new Response("User not found", { status: 404 });
-    }
+    // Fetch user and profile
+    const userRows = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+    if (!userRows.length) throw new Response('User not found', { status: 404 });
+    const user = userRows[0];
+
+    const profileRows = await db.select().from(profiles).where(eq(profiles.userId, userId)).limit(1);
+    const profile = profileRows[0] || null;
+
+    // Fetch posts
+    const userPosts = await db.select({
+        id: posts.id,
+        title: posts.title,
+        content: posts.content,
+        createdAt: posts.createdAt
+    }).from(posts).where(eq(posts.authorId, userId)).orderBy(desc(posts.createdAt));
+
+    // Fetch reputation history
+    const repHistory = await db.select({
+        id: reputationHistory.id,
+        points: reputationHistory.points,
+        action: reputationHistory.action,
+        createdAt: reputationHistory.createdAt
+    }).from(reputationHistory).where(eq(reputationHistory.userId, userId)).orderBy(desc(reputationHistory.createdAt)).limit(10);
 
     // Fetch bookmarks for the user with error handling
     let bookmarks: BookmarkData[] = [];
@@ -164,9 +168,40 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
         bookmarks = bookmarksData.bookmarks;
     } catch (error) {
         console.error('Error fetching bookmarks:', error);
-        // Continue without bookmarks if there's an error
         bookmarks = [];
     }
+
+    const userData: UserData = {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        reputationPoints: user.reputationPoints,
+        integrityScore: user.integrityScore,
+        totalRatings: user.totalRatings,
+        createdAt: user.createdAt,
+        profile: profile && {
+            firstName: profile.firstName,
+            lastName: profile.lastName,
+            profilePicture: profile.profilePicture,
+            bio: profile.bio,
+            location: profile.location,
+            website: profile.website,
+            github: profile.github,
+            twitter: profile.twitter,
+            linkedin: profile.linkedin,
+            instagram: profile.instagram,
+            facebook: profile.facebook,
+            youtube: profile.youtube,
+            tiktok: profile.tiktok,
+            discord: profile.discord,
+            reddit: profile.reddit,
+            medium: profile.medium,
+            stackoverflow: profile.stackoverflow,
+            devto: profile.devto,
+        },
+        posts: userPosts,
+        reputationHistory: repHistory,
+    };
 
     return json({ user: userData, isAuthenticated: true, bookmarks });
 };

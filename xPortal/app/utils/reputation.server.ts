@@ -1,4 +1,7 @@
-import { prisma } from './prisma.server';
+import type { Db } from './db.server';
+import { users, reputationHistory } from '../../drizzle/schema';
+import { eq, desc } from 'drizzle-orm';
+import { sql } from 'drizzle-orm';
 
 // Reputation point values for different actions
 export const REPUTATION_POINTS = {
@@ -18,50 +21,53 @@ export const REPUTATION_POINTS = {
 } as const;
 
 export async function addReputationPoints(
+  db: Db,
   userId: string,
   points: number,
   action?: string,
   referenceId?: string
 ) {
   try {
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
-        reputationPoints: {
-          increment: points
-        }
-      }
-    });
+    await db.update(users)
+      .set({
+        reputationPoints: sql`${users.reputationPoints} + ${points}`
+      })
+      .where(eq(users.id, userId))
+      .run();
 
     if (action && referenceId) {
-      await prisma.reputationHistory.create({
-        data: {
-          userId,
-          points,
-          action,
-          referenceId
-        }
-      });
+      await db.insert(reputationHistory).values({
+        id: crypto.randomUUID(),
+        userId,
+        points,
+        action,
+        referenceId
+      }).run();
     }
   } catch (error) {
     // Removed all console.error statements for cleaner production code.
   }
 }
 
-export async function getUserReputation(userId: string) {
+export async function getUserReputation(db: Db, userId: string) {
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        reputationPoints: true,
-        reputationHistory: {
-          orderBy: { createdAt: 'desc' },
-          take: 10, // Get last 10 reputation changes
-        },
-      },
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+      columns: {
+        reputationPoints: true
+      }
     });
 
-    return user;
+    const history = await db.query.reputationHistory.findMany({
+      where: eq(reputationHistory.userId, userId),
+      orderBy: [desc(reputationHistory.createdAt)],
+      limit: 10
+    });
+
+    return {
+      reputationPoints: user?.reputationPoints || 0,
+      reputationHistory: history
+    };
   } catch (error) {
     return null;
   }

@@ -3,7 +3,9 @@ import { Form, useLoaderData, Link, useSubmit, useNavigate, useSearchParams } fr
 import { LoaderFunction, json, ActionFunction, MetaFunction } from '@remix-run/node'
 import { getUser } from '~/utils/auth.server'
 import { Layout } from '../components/Layout'
-import { prisma } from '~/utils/prisma.server'
+import { createDb } from '~/utils/db.server'
+import { eq, and, desc, sql, inArray, or } from 'drizzle-orm'
+import { posts, tags, users, bounties, comments, votes, profiles, postTags } from '../../drizzle/schema'
 import { FiTrendingUp } from 'react-icons/fi'
 import IntegrityRatingButton from '~/components/IntegrityRatingButton'
 import { AuthNotice } from '~/components/auth-notice'
@@ -110,177 +112,162 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export const loader: LoaderFunction = async ({ request }) => {
+export const loader: LoaderFunction = async ({ request, context }) => {
   try {
     const user = await getUser(request);
+    const db = (context as any).env.DB;
+    
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
-    const selectedTags = url.searchParams.getAll('tags');
+    const selectedTags = url.searchParams.get('tags')?.split(',').filter(Boolean) || [];
     const searchQuery = url.searchParams.get('search') || '';
-    const perPage = 9;
+    const perPage = 20;
     const skip = (page - 1) * perPage;
 
-    // Build the where clause for tag filtering and search
-    const whereClause: any = {};
+    // Build where clause for tag filtering and search
+    let whereConditions = [];
     
-    // Add tag filtering
     if (selectedTags.length > 0) {
-      whereClause.postTags = {
-        some: {
-          tagId: {
-            in: selectedTags
-          }
-        }
-      };
+      // For tag filtering, we need to join with postTags
+      // This is a simplified approach - in a real implementation you'd need proper joins
+      whereConditions.push(sql`EXISTS (
+        SELECT 1 FROM post_tags pt 
+        JOIN tags t ON pt.tag_id = t.id 
+        WHERE pt.post_id = posts.id AND t.name IN (${selectedTags.join(',')})
+      )`);
     }
     
-    // Add search filtering for title
-    if (searchQuery.trim()) {
-      whereClause.title = {
-        contains: searchQuery.trim(),
-        mode: 'insensitive' // Case-insensitive search
-      };
+    if (searchQuery) {
+      whereConditions.push(
+        or(
+          sql`posts.title LIKE ${`%${searchQuery}%`}`,
+          sql`posts.content LIKE ${`%${searchQuery}%`}`
+        )
+      );
     }
 
-    // First, get the total count of posts with tag filtering and search
-    const totalPosts = await prisma.posts.count({
-      where: whereClause
-    });
+    // Fetch posts with pagination
+    const postsQuery = db
+      .select({
+        id: posts.id,
+        title: posts.title,
+        content: posts.content,
+        createdAt: posts.createdAt,
+        authorId: posts.authorId,
+        visibilityVotes: posts.visibilityVotes,
+        qualityUpvotes: posts.qualityUpvotes,
+        qualityDownvotes: posts.qualityDownvotes,
+        hasBounty: posts.hasBounty,
+        status: posts.status,
+      })
+      .from(posts)
+      .orderBy(desc(posts.createdAt))
+      .limit(perPage)
+      .offset(skip);
 
-    // Then fetch the posts with pagination, tag filtering, and search
-    const posts = await prisma.posts.findMany({
-      where: whereClause,
-      include: {
-        author: {
-          select: {
-            id: true,
-            username: true,
-            profile: {
-              select: {
-                profilePicture: true
-              }
-            }
-          }
-        },
-        media: {
-          take: 1,
-          orderBy: {
-            createdAt: 'asc'
-          }
-        },
-        bounty: true,
-        postTags: {
-          include: {
-            tag: true
-          }
-        },
-        votes: user ? {
-          where: {
-            userId: user.id,
-            voteType: 'POST',
-            isQualityVote: false
-          }
-        } : undefined,
-        _count: {
-          select: {
-            comments: true
-          }
+    if (whereConditions.length > 0) {
+      postsQuery.where(and(...whereConditions));
+    }
+
+    const posts = await postsQuery;
+
+    // Fetch related data for each post
+    const postsWithData = await Promise.all(
+      posts.map(async (post) => {
+        // Get author info
+        const author = await db
+          .select({
+            id: users.id,
+            username: users.username,
+          })
+          .from(users)
+          .where(eq(users.id, post.authorId))
+          .get();
+
+        // Get profile picture
+        const profile = await db
+          .select({
+            profilePicture: profiles.profilePicture,
+          })
+          .from(profiles)
+          .where(eq(profiles.userId, post.authorId))
+          .get();
+
+        // Get tags
+        const postTags = await db
+          .select({
+            tagId: postTags.tagId,
+          })
+          .from(postTags)
+          .where(eq(postTags.postId, post.id));
+
+        const tagNames = await Promise.all(
+          postTags.map(async (pt) => {
+            const tag = await db
+              .select({
+                name: tags.name,
+                color: tags.color,
+              })
+              .from(tags)
+              .where(eq(tags.id, pt.tagId))
+              .get();
+            return tag;
+          })
+        );
+
+        // Get comments count
+        const commentsCount = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(comments)
+          .where(eq(comments.postId, post.id))
+          .get();
+
+        // Get bounty info if exists
+        let bounty = null;
+        if (post.hasBounty) {
+          bounty = await db
+            .select({
+              amount: bounties.amount,
+              status: bounties.status,
+            })
+            .from(bounties)
+            .where(eq(bounties.postId, post.id))
+            .get();
         }
-      },
-      orderBy: [
-        {
-          visibilityVotes: 'desc'
-        },
-        {
-          createdAt: 'desc'
-        }
-      ],
-      skip,
-      take: perPage
-    });
 
-    // Sort posts in JS: bountied first (by amount), then by visibilityVotes, then by createdAt
-    posts.sort((a, b) => {
-      // First, sort by bounty status and amount
-      const aHasBounty = a.hasBounty && a.bounty && a.bounty.status === 'ACTIVE';
-      const bHasBounty = b.hasBounty && b.bounty && b.bounty.status === 'ACTIVE';
-      
-      if (aHasBounty && !bHasBounty) return -1;
-      if (!aHasBounty && bHasBounty) return 1;
-      
-      // If both have bounties, sort by bounty amount (higher first)
-      if (aHasBounty && bHasBounty) {
-        return (b.bounty?.amount || 0) - (a.bounty?.amount || 0);
-      }
-      
-      // Then sort by visibility votes (higher first)
-      if (a.visibilityVotes !== b.visibilityVotes) {
-        return b.visibilityVotes - a.visibilityVotes;
-      }
-      
-      // Finally sort by creation date (newer first)
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
+        return {
+          ...post,
+          author: author || { id: '', username: 'Unknown' },
+          profile: profile || { profilePicture: null },
+          tags: tagNames.filter(Boolean),
+          commentsCount: commentsCount?.count || 0,
+          bounty,
+        };
+      })
+    );
 
-    // Transform posts to match the expected format
-    const transformedPosts = posts.map(post => ({
-      id: post.id,
-      title: post.title,
-      content: post.content,
-      media: post.media?.[0] || null,
-      author: {
-        id: post.author.id,
-        username: post.author.username,
-        profilePicture: post.author.profile?.profilePicture || null
-      },
-      createdAt: post.createdAt.toISOString(),
-      visibilityVotes: post.visibilityVotes,
-      userVoted: post.votes && post.votes.length > 0,
-      comments: post._count.comments,
-      hasBounty: post.hasBounty,
-      bounty: post.bounty,
-      tags: post.postTags.map(pt => ({
-        id: pt.tag.id,
-        name: pt.tag.name,
-        color: pt.tag.color
-      }))
-    }));
-
-    // Get available tags for filtering
-    const availableTags = await prisma.tag.findMany({
-      orderBy: {
-        name: 'asc'
-      }
-    });
-
-    const totalPages = Math.ceil(totalPosts / perPage);
+    // Get total count for pagination
+    const totalCount = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(posts)
+      .get();
 
     return json({
-      user: user ? {
-        id: user.id,
-        username: user.username,
-        profilePicture: user.profile?.profilePicture || null
-      } : null,
-      posts: transformedPosts,
-      availableTags,
-      totalPosts,
-      currentPage: page,
-      totalPages,
-      selectedTags,
-      searchQuery
+      posts: postsWithData,
+      pagination: {
+        page,
+        perPage,
+        total: totalCount?.count || 0,
+        totalPages: Math.ceil((totalCount?.count || 0) / perPage),
+      },
+      currentUser: user,
     });
   } catch (error) {
     console.error('Error loading community posts:', error);
     return json({
-      user: null,
       posts: [],
-      availableTags: [],
-      totalPosts: 0,
-      currentPage: 1,
-      totalPages: 1,
-      selectedTags: [],
-      searchQuery: '',
-      error: 'Failed to load posts'
+      pagination: { page: 1, perPage: 20, total: 0, totalPages: 0 },
+      currentUser: null,
     });
   }
 };
@@ -304,49 +291,40 @@ export const action: ActionFunction = async ({ request }) => {
     if (action === 'vote') {
       try {
         // Use a transaction to ensure atomic operations
-        const result = await prisma.$transaction(async (tx) => {
+        const result = await createDb().transaction(async (tx) => {
           // First, delete any existing vote for this user and post
-          await tx.vote.deleteMany({
-            where: {
-              userId: user.id,
-              postId: postId as string,
-              voteType: 'POST',
-              isQualityVote: false
-            }
-          });
+          await tx.delete(posts.votes).where(and(
+            eq(posts.votes.userId),
+            eq(posts.votes.postId),
+            eq(posts.votes.voteType),
+            eq(posts.votes.isQualityVote)
+          ));
 
           if (isVoting) {
             // Create new vote with all required fields set
-              await tx.vote.create({
-                data: {
-                  userId: user.id,
-                  postId: postId as string,
-                  value: 1,
-                  voteType: 'POST',
+              await tx.insert(posts.votes).values({
+                userId: user.id,
+                postId: postId as string,
+                value: 1,
+                voteType: 'POST',
                 isQualityVote: false,
                 commentId: null,
                 answerId: null
-              }
               });
           }
 
           // Count visibility votes (only positive votes)
-          const visibilityVotes = await tx.vote.count({
-            where: {
-              postId: postId as string,
-              voteType: 'POST',
-              isQualityVote: false,
-              value: 1
-            }
-          });
+          const visibilityVotes = await tx.count(posts.votes).where(and(
+            eq(posts.votes.postId),
+            eq(posts.votes.voteType),
+            eq(posts.votes.isQualityVote),
+            eq(posts.votes.value)
+          ));
 
           // Update post with new vote count
-          const updatedPost = await tx.posts.update({
-            where: { id: postId as string },
-            data: {
-              visibilityVotes
-            }
-          });
+          const updatedPost = await tx.update(posts).set({
+            visibilityVotes
+          }).where(eq(posts.id, postId as string));
 
           return {
             post: updatedPost,
@@ -368,10 +346,7 @@ export const action: ActionFunction = async ({ request }) => {
       }
     } else if (action === 'delete') {
       // Check if the post exists and belongs to the user
-      const post = await prisma.posts.findUnique({
-        where: { id: postId as string },
-        select: { authorId: true }
-      });
+      const post = await createDb().table(posts).select().where(eq(posts.id, postId as string)).limit(1);
 
       if (!post) {
         return json({ error: 'Post not found' }, { status: 404 });
@@ -382,9 +357,7 @@ export const action: ActionFunction = async ({ request }) => {
       }
 
       // Delete the post
-      await prisma.posts.delete({
-        where: { id: postId as string }
-      });
+      await createDb().delete(posts).where(eq(posts.id, postId as string));
 
       return json({ success: true });
     }

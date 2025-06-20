@@ -42,6 +42,9 @@ model User {
   // Ratings given and received
   ratingsGiven UserRating[] @relation("RatingGiver")
   ratingsReceived UserRating[] @relation("RatingReceiver")
+  // Refund request relations
+  refundRequests RefundRequest[] @relation("RefundRequesters")
+  refundRequestVotes RefundRequestVote[] @relation("RefundRequestVoters")
 }
 
 model Profile {
@@ -223,6 +226,16 @@ model Bounty {
   mintAddress   String?   // SPL token mint address if using custom tokens
   tokenDecimals Int      @default(9) // Default to 9 for SOL, can be different for SPL tokens
   walletTransactions WalletTransaction[]
+  
+  // Time-based refund restrictions
+  refundLockPeriod Int @default(24) // Hours after first answer before refund is allowed
+  firstAnswerAt DateTime? // When first answer was received
+  refundReason String? // Required reason for refund
+  refundPenalty Float @default(0) // Penalty amount for refunding
+  
+  // Community approval system
+  refundRequests RefundRequest[]
+  communityFee Float @default(0.05) // 5% fee for community governance
 
   @@unique([postId])
   @@index([winnerId])
@@ -233,6 +246,13 @@ enum BountyStatus {
   ACTIVE
   CLAIMED
   REFUNDED
+  EXPIRED
+}
+
+enum RefundRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
   EXPIRED
 }
 
@@ -291,6 +311,7 @@ enum TransactionType {
   BOUNTY_CLAIMED // User claims a bounty
   BOUNTY_REFUNDED // User gets refunded from expired bounty
   BOUNTY_EARNED // User earns from winning a bounty
+  COMPENSATION // Compensation for governance participation or penalties
 }
 
 enum TransactionStatus {
@@ -427,4 +448,42 @@ model Bookmark {
   @@index([userId])
   @@index([postId])
   @@map("bookmarks")
+}
+
+model RefundRequest {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  bountyId String @db.ObjectId
+  bounty Bounty @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  requesterId String @db.ObjectId
+  requester User @relation("RefundRequesters", fields: [requesterId], references: [id], onDelete: Cascade)
+  reason String
+  status RefundRequestStatus @default(PENDING)
+  communityVotes Int @default(0) // Positive votes needed
+  requiredVotes Int @default(5) // Minimum votes to approve
+  createdAt DateTime @default(now())
+  expiresAt DateTime // 48 hours to get votes
+  votes RefundRequestVote[]
+  
+  @@index([bountyId])
+  @@index([requesterId])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("refund_requests")
+}
+
+model RefundRequestVote {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  refundRequestId String @db.ObjectId
+  refundRequest RefundRequest @relation(fields: [refundRequestId], references: [id], onDelete: Cascade)
+  voterId String @db.ObjectId
+  voter User @relation("RefundRequestVoters", fields: [voterId], references: [id], onDelete: Cascade)
+  vote Boolean // true for approve, false for reject
+  reason String?
+  rewardAmount Float @default(0) // Reward for participating in governance
+  createdAt DateTime @default(now())
+  
+  @@unique([refundRequestId, voterId]) // One vote per user per refund request
+  @@index([refundRequestId])
+  @@index([voterId])
+  @@map("refund_request_votes")
 }

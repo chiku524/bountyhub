@@ -2,9 +2,9 @@
 
 import type { RegisterForm, LoginForm } from './types.server'
 import bcrypt from 'bcryptjs'
-import { prisma } from './prisma.server'
 import { redirect, createCookieSessionStorage } from '@remix-run/node'
-import { createUser, getUserById } from './user.server'
+import { createUser, getUserById, getUserByEmail, getUserByUsername } from './user.server'
+import type { Db } from './db.server'
 
 const sessionSecret = process.env.SESSION_SECRET
 if (!sessionSecret) {
@@ -42,21 +42,20 @@ export async function createUserSession(userId: string, redirectTo: string) {
   })
 }
 
-export async function register({ email, password, username, redirectTo = '/profile' }: RegisterForm): Promise<Response | AuthError> {
-  const existingUser = await prisma.user.findFirst({
-    where: { OR: [{ email }, { username }] }
-  })
-
-  if (existingUser) {
-    if (existingUser.email === email) {
-      return { error: 'User already exists with that email' }
-    }
-    if (existingUser.username === username) {
-      return { error: 'Username is already taken' }
-    }
+export async function register(db: Db, { email, password, username, redirectTo = '/profile' }: RegisterForm): Promise<Response | AuthError> {
+  // Check if user exists by email or username
+  const existingUserByEmail = await getUserByEmail(db, email);
+  const existingUserByUsername = await getUserByUsername(db, username);
+  
+  if (existingUserByEmail) {
+    return { error: 'User already exists with that email' }
+  }
+  
+  if (existingUserByUsername) {
+    return { error: 'Username is already taken' }
   }
 
-  const newUser = await createUser({ email, password, username })
+  const newUser = await createUser(db, { email, password, username })
   if (!newUser) {
     return { error: 'Something went wrong trying to create a new user.' }
   }
@@ -64,11 +63,9 @@ export async function register({ email, password, username, redirectTo = '/profi
   return createUserSession(newUser.id, redirectTo)
 }
 
-export async function login({ email, password, redirectTo = '/profile' }: LoginForm): Promise<Response | AuthError> {
-  const user = await prisma.user.findUnique({
-    where: { email },
-  })
-
+export async function login(db: Db, { email, password, redirectTo = '/profile' }: LoginForm): Promise<Response | AuthError> {
+  const user = await getUserByEmail(db, email);
+  
   if (!user) {
     return { error: 'Invalid credentials' }
   }
@@ -101,15 +98,21 @@ async function getUserId(request: Request): Promise<string | null> {
   return userId
 }
 
-export async function getUser(request: Request) {
+export async function getUser(request: Request, db?: Db) {
   const userId = await getUserId(request)
   if (!userId || typeof userId !== 'string') {
     return null
   }
 
   try {
-    const user = await getUserById(userId)
-    return user
+    if (db) {
+      const user = await getUserById(db, userId)
+      return user
+    } else {
+      // Fallback for backward compatibility - this will need to be updated
+      // when all routes are migrated to pass the database context
+      return null
+    }
   } catch {
     throw logout(request)
   }

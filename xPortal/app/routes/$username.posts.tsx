@@ -6,135 +6,185 @@ import { getUser } from '~/utils/auth.server'
 import { getUserPosts, deletePost } from '~/utils/user.server'
 import { Nav } from '../components/nav'
 import { FiTrash2, FiEdit2, FiThumbsUp, FiMessageSquare } from 'react-icons/fi'
-import { prisma } from '~/utils/prisma.server'
 import { getProfilePicture } from '~/utils/profile.server'
+import { json as cloudflareJson, LoaderFunctionArgs, ActionFunctionArgs } from '@remix-run/cloudflare'
+import { eq, and } from 'drizzle-orm'
+import { users, posts, profiles, votes, comments } from '../../drizzle/schema'
+import type { DrizzleD1Database } from 'drizzle-orm/d1'
 
 type Post = {
     id: string;
     title: string;
     content: string;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: string;
+    visibilityVotes: number;
+    comments: number;
+    hasBounty: boolean;
     author: {
         id: string;
         username: string;
-        profilePicture: string;
+        profilePicture: string | null;
     };
-    upvotes: number;
-    downvotes: number;
-    visibilityVotes: number;
-    qualityUpvotes: number;
-    qualityDownvotes: number;
-    userVote: number;
-    userQualityVote: number;
-    comments: number;
+};
+
+type User = {
+    id: string;
+    username: string;
+    email: string;
+    createdAt: Date;
+    reputationPoints: number;
+    integrityScore: number;
+    totalRatings: number;
 };
 
 interface LoaderData {
-    user: {
-        id: string;
-        username: string;
-        profilePicture: string;
-        posts: Post[];
-    };
-    currentUser: {
-        id: string;
-        username: string;
-    } | null;
+    user: User;
+    posts: Post[];
 }
 
-export const loader: LoaderFunction = async ({ params, request }) => {
-    const { username } = params;
-    const currentUser = await getUser(request);
+interface CloudflareContext {
+  env: {
+    DB: DrizzleD1Database<typeof import('../../drizzle/schema')>;
+  };
+}
 
-    if (!username) {
-        return json({ error: 'Username is required' }, { status: 400 });
+export async function loader({ params, context }: LoaderFunctionArgs) {
+  const { username } = params;
+  
+  if (!username) {
+    throw new Response('Username is required', { status: 400 });
+  }
+
+  try {
+    const db = (context as unknown as CloudflareContext).env.DB;
+
+    // First, find the user
+    const user = await db
+      .select({
+        id: users.id,
+        username: users.username,
+        email: users.email,
+        createdAt: users.createdAt,
+        reputationPoints: users.reputationPoints,
+        integrityScore: users.integrityScore,
+        totalRatings: users.totalRatings,
+      })
+      .from(users)
+      .where(eq(users.username, username))
+      .limit(1);
+
+    if (!user.length) {
+      throw new Response('User not found', { status: 404 });
     }
 
-    const user = await prisma.user.findUnique({
-        where: { username },
-        include: {
-            profile: {
-                select: {
-                    profilePicture: true
-                }
-            },
-            posts: {
-                include: {
-                    comments: true,
-                    author: {
-                        select: {
-                            id: true,
-                            username: true,
-                            profile: {
-                                select: {
-                                    profilePicture: true
-                                }
-                            },
-                        },
-                    },
-                },
-                orderBy: {
-                    createdAt: 'desc',
-                },
-            },
-        },
-    });
-
-    if (!user) {
-        return json({ error: 'User not found' }, { status: 404 });
-    }
-
-    // Transform the user data to include profilePicture
-    const transformedUser = {
-        ...user,
-        profilePicture: user.profile?.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&background=random`
-    };
-
-    // Transform the posts data to include author profile pictures
-    const transformedPosts = user.posts.map(post => ({
-        ...post,
+    // Get user's posts with vote counts
+    const userPosts = await db
+      .select({
+        id: posts.id,
+        title: posts.title,
+        content: posts.content,
+        createdAt: posts.createdAt,
+        updatedAt: posts.updatedAt,
+        visibilityVotes: posts.visibilityVotes,
+        qualityUpvotes: posts.qualityUpvotes,
+        qualityDownvotes: posts.qualityDownvotes,
+        hasBounty: posts.hasBounty,
+        status: posts.status,
         author: {
-            ...post.author,
-            profilePicture: post.author.profile?.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author.username)}&background=random`
-        }
+          id: users.id,
+          username: users.username,
+        },
+        profile: {
+          profilePicture: profiles.profilePicture,
+        },
+      })
+      .from(posts)
+      .innerJoin(users, eq(posts.authorId, users.id))
+      .leftJoin(profiles, eq(users.id, profiles.userId))
+      .where(eq(posts.authorId, user[0].id))
+      .orderBy(posts.createdAt);
+
+    // Get comment counts for each post
+    const postIds = userPosts.map((post: any) => post.id);
+    const commentCounts = await db
+      .select({
+        postId: comments.postId,
+        count: comments.id,
+      })
+      .from(comments)
+      .where(and(eq(comments.postId, postIds[0]), ...postIds.slice(1).map((id: string) => eq(comments.postId, id))));
+
+    // Transform the data to match expected format
+    const transformedPosts = userPosts.map((post: any) => ({
+      id: post.id,
+      title: post.title,
+      content: post.content,
+      createdAt: post.createdAt.toISOString(),
+      visibilityVotes: post.visibilityVotes,
+      comments: commentCounts.find((c: any) => c.postId === post.id)?.count || 0,
+      hasBounty: post.hasBounty,
+      author: {
+        id: post.author.id,
+        username: post.author.username,
+        profilePicture: post.profile?.profilePicture || null,
+      },
     }));
 
     return json({ 
-        user: {
-            ...transformedUser,
-            posts: transformedPosts
-        },
-        currentUser 
+      user: user[0],
+      posts: transformedPosts,
     });
+  } catch (error) {
+    console.error('Error fetching user posts:', error);
+    throw new Response('Failed to fetch user posts', { status: 500 });
+  }
 }
 
-export const action: ActionFunction = async ({ request }) => {
-    const form = await request.formData()
-    const action = form.get('_action')
+export async function action({ request, params, context }: ActionFunctionArgs) {
+  const user = await getUser(request);
+  
+  if (!user) {
+    throw new Response('Unauthorized', { status: 401 });
+  }
+
+  const formData = await request.formData();
+  const action = formData.get('action') as string;
+
+  try {
+    const db = (context as unknown as CloudflareContext).env.DB;
 
     switch (action) {
-        case 'deletePost': {
-            const postId = form.get('postId') as string;
-            if (!postId) {
-                return json({ error: 'Post ID is required' }, { status: 400 });
-            }
-
-            const user = await getUser(request);
-            if (!user) {
-                return json({ error: 'Not authenticated' }, { status: 401 });
-            }
-
-            try {
-                await deletePost(postId);
-                return json({ success: true });
-            } catch (error) {
-                return json({ error: 'Failed to delete post' }, { status: 500 });
-            }
+      case 'deletePost': {
+        const postId = formData.get('postId') as string;
+        
+        if (!postId) {
+          return cloudflareJson({ error: 'Post ID is required' }, { status: 400 });
         }
-        default:
-            return json({ error: 'Invalid action' }, { status: 400 });
+
+        // Check if user owns the post
+        const post = await db
+          .select()
+          .from(posts)
+          .where(eq(posts.id, postId))
+          .limit(1);
+
+        if (!post.length || post[0].authorId !== user.id) {
+          return cloudflareJson({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // Delete the post (cascade will handle related data)
+        await db.delete(posts).where(eq(posts.id, postId));
+
+        return cloudflareJson({ success: true });
+      }
+
+      default:
+        return cloudflareJson({ error: 'Invalid action' }, { status: 400 });
     }
+  } catch (error) {
+    console.error('Error processing action:', error);
+    return cloudflareJson({ error: 'Failed to process action' }, { status: 500 });
+  }
 }
 
 export default function UserPosts() {

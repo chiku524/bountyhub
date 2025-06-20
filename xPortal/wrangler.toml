@@ -1,0 +1,20 @@
+name = "bountyhub"
+main = "_worker.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[build]
+command = "npm run build"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "bountyhub-db"
+database_id = "4df28277-6977-4d38-b2d0-d0b48826c275"
+migrations_dir = "drizzle/migrations"
+
+[env.production]
+name = "bountyhub"
+route = "bountyhub.tech/*"
+
+[env.production.vars]
+NODE_ENV = "production" 

@@ -4,6 +4,7 @@ skip-lint = false
 
 [programs.localnet]
 bounty_program = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
+governance_program = "GovPool111111111111111111111111111111111111"
 
 [registry]
 url = "https://api.apr.dev"

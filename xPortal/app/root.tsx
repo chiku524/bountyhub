@@ -12,9 +12,10 @@ import {
 import type { LinksFunction } from "@remix-run/node";
 import { useEffect } from "react";
 import { Nav } from "~/components/nav";
-import { json } from "@remix-run/node";
+import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { getUser } from "~/utils/auth.server";
 import { WalletProvider } from './components/WalletProvider';
+import { createDb } from '~/utils/db.server'
 
 import "./tailwind.css";
 import "./styles/wallet-adapter.css";
@@ -177,9 +178,10 @@ export function ErrorBoundary() {
   );
 }
 
-export const loader = async ({ request }: { request: Request }) => {
+export const loader = async ({ request, context }: LoaderFunctionArgs) => {
+  const db = createDb((context as any).env.DB)
   return json({
-    user: await getUser(request),
+    user: await getUser(request, db),
   });
 };
 

@@ -1,29 +1,30 @@
-import { json, type ActionFunction } from "@remix-run/node";
-import { requireUserId } from "../utils/auth.server";
-import { VirtualWalletService } from "../utils/virtual-wallet.server";
+import { json, type ActionFunction, type ActionFunctionArgs } from "@remix-run/cloudflare";
+import { getUser } from "../utils/auth.server";
+import { cancelTransaction } from "../utils/virtual-wallet.server";
+import { createDb } from "../utils/db.server";
 
-export const action: ActionFunction = async ({ request }) => {
-  try {
-    const userId = await requireUserId(request);
-    const formData = await request.formData();
-    const transactionId = formData.get("transactionId") as string;
-
-    if (!transactionId) {
-      return json({ error: "Transaction ID is required." }, { status: 400 });
-    }
-
-    // Cancel the pending transaction
-    const result = await VirtualWalletService.cancelPendingTransaction(transactionId, userId);
-
-    return json({ 
-      success: true, 
-      message: "Transaction cancelled successfully",
-      transaction: result 
-    });
-  } catch (error: unknown) {
-    console.error("Cancel transaction error:", error);
-    return json({ 
-      error: (error as Error).message || "Failed to cancel transaction." 
-    }, { status: 500 });
+export async function action({ request, context }: ActionFunctionArgs) {
+  const db = createDb((context as any).env.DB)
+  const user = await getUser(request, db);
+  if (!user) {
+    return json({ success: false, error: 'Unauthorized' }, { status: 401 });
   }
-}; 
+
+  const form = await request.formData();
+  const transactionId = form.get('transactionId') as string;
+
+  if (!transactionId) {
+    return json({ success: false, error: 'Transaction ID required' }, { status: 400 });
+  }
+
+  try {
+    const success = await cancelTransaction(db, transactionId);
+    if (success) {
+      return json({ success: true, message: 'Transaction cancelled successfully' });
+    } else {
+      return json({ success: false, error: 'Failed to cancel transaction' }, { status: 400 });
+    }
+  } catch (error) {
+    return json({ success: false, error: 'Failed to cancel transaction' }, { status: 500 });
+  }
+} 

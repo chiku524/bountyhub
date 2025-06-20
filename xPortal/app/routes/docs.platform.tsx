@@ -52,7 +52,7 @@ export default function PlatformDocsPage() {
             <ul>
               <li><strong>Frontend</strong>: React 18, Remix 2.8, TypeScript</li>
               <li><strong>Backend</strong>: Node.js, Express</li>
-              <li><strong>Database</strong>: MongoDB with Prisma ORM</li>
+              <li><strong>Database</strong>: Cloudflare D1 with Drizzle ORM</li>
               <li><strong>Blockchain</strong>: Solana (Web3.js, Anchor Framework)</li>
               <li><strong>Styling</strong>: Tailwind CSS</li>
               <li><strong>Media</strong>: Cloudinary for file uploads</li>
@@ -105,6 +105,7 @@ export default function PlatformDocsPage() {
               <li>Set bounty amounts in PORTAL tokens</li>
               <li>Optional expiration dates</li>
               <li>Automatic escrow of funds</li>
+              <li><strong>5% governance fee</strong> for community rewards</li>
             </ul>
 
             <h4>Claiming Bounties</h4>
@@ -113,6 +114,33 @@ export default function PlatformDocsPage() {
               <li>Automatic payout to answer author</li>
               <li>Transaction history tracking</li>
               <li>Dispute resolution system</li>
+            </ul>
+
+            <h4>Refund System</h4>
+            <ul>
+              <li><strong>Time-based restrictions</strong>: 24-hour lock period after first answer</li>
+              <li><strong>Community approval</strong>: All refunds require community voting</li>
+              <li><strong>Governance rewards</strong>: 5% of bounty amount distributed to voters</li>
+              <li><strong>Penalty system</strong>: 20% penalty for refunding with helpful answers</li>
+              <li><strong>Integrity impact</strong>: Refunding with helpful answers reduces integrity score</li>
+            </ul>
+
+            <h4>Refund Process</h4>
+            <ol>
+              <li><strong>Request Creation</strong>: User submits refund request with reason</li>
+              <li><strong>Time Validation</strong>: System checks if 24 hours have passed since first answer</li>
+              <li><strong>Community Voting</strong>: 48-hour voting window with minimum vote requirements</li>
+              <li><strong>Approval Criteria</strong>: 60% approval rate with minimum votes (3-7 depending on answers)</li>
+              <li><strong>Processing</strong>: If approved, refund minus penalties distributed</li>
+              <li><strong>Rewards</strong>: Governance participants receive tokens and reputation points</li>
+            </ol>
+
+            <h4>Governance Participation</h4>
+            <ul>
+              <li><strong>Voting Rewards</strong>: Earn tokens proportional to bounty amount</li>
+              <li><strong>Reputation Points</strong>: +5 points for each governance participation</li>
+              <li><strong>Vote Requirements</strong>: Cannot vote on own requests or multiple times</li>
+              <li><strong>Transparency</strong>: All votes and reasons are publicly visible</li>
             </ul>
 
             <h3>4. Reputation System</h3>
@@ -169,6 +197,7 @@ export default function PlatformDocsPage() {
               <li><strong>BOUNTY_CREATED</strong>: Create new bounty</li>
               <li><strong>BOUNTY_CLAIMED</strong>: Win bounty reward</li>
               <li><strong>BOUNTY_REFUNDED</strong>: Get bounty refund</li>
+              <li><strong>COMPENSATION</strong>: Receive governance rewards or penalty distributions</li>
             </ul>
 
             <h3>7. Voting System</h3>
@@ -257,9 +286,11 @@ export default function PlatformDocsPage() {
             <ul>
               <li>Initial platform release</li>
               <li>Core Q&A functionality</li>
-              <li>Bounty system</li>
+              <li>Bounty system with 5% governance fee</li>
+              <li>Time-based refund restrictions (24-hour lock period)</li>
+              <li>Community governance system for refund approval</li>
               <li>Reputation and integrity systems</li>
-              <li>Virtual wallet</li>
+              <li>Virtual wallet with governance rewards</li>
               <li>Media uploads</li>
               <li>PDF generation for legal documents</li>
             </ul>

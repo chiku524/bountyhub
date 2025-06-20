@@ -1,11 +1,14 @@
-import { ActionFunction, json } from '@remix-run/node';
+import { json, type ActionFunctionArgs } from '@remix-run/node';
 import { getUser } from '~/utils/auth.server';
-import { prisma } from '~/utils/prisma.server';
+import { createDb } from '~/utils/db.server';
 import { uploadToCloudinary } from '~/utils/cloudinary.server';
+import { profiles } from '../../drizzle/schema';
+import { eq } from 'drizzle-orm';
 
-export const action: ActionFunction = async ({ request }) => {
+export async function action({ request, context }: ActionFunctionArgs) {
   try {
-    const user = await getUser(request);
+    const db = createDb((context as any).env.DB)
+    const user = await getUser(request, db);
     if (!user) {
       return json({ error: 'You must be logged in to perform this action' }, { status: 401 });
     }
@@ -33,10 +36,10 @@ export const action: ActionFunction = async ({ request }) => {
     }
 
     // Update user's profile picture in database
-    await prisma.profile.update({
-      where: { userId: user.id },
-      data: { profilePicture: uploadResult.secure_url }
-    });
+    await db.update(profiles)
+      .set({ profilePicture: uploadResult.secure_url })
+      .where(eq(profiles.userId, user.id))
+      .run();
 
     return json({ 
       success: true,

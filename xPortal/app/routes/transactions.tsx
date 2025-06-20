@@ -1,7 +1,8 @@
 import { json, type LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { useLoaderData, Link, useSearchParams } from "@remix-run/react";
-import { VirtualWalletService } from "~/utils/virtual-wallet.server";
-import { requireUserId } from "~/utils/auth.server";
+import { getAllTransactions, getPendingTransactions } from "~/utils/virtual-wallet.server";
+import { getUser } from "~/utils/auth.server";
+import { createDb } from "~/utils/db.server";
 import { Nav } from "~/components/nav";
 import bountyBucksInfo from '../../bounty-bucks-info.json';
 import { useState } from "react";
@@ -15,24 +16,32 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const userId = await requireUserId(request);
+export async function loader({ request, context }: LoaderFunctionArgs) {
+  const db = createDb((context as any).env.DB)
+  const user = await getUser(request, db);
+  if (!user) {
+    throw new Response("Unauthorized", { status: 401 });
+  }
+
   const url = new URL(request.url);
   const page = parseInt(url.searchParams.get("page") || "1");
-  const limit = 50; // Show 50 transactions per page
-  
-  const transactionData = await VirtualWalletService.getAllTransactions(userId, page, limit);
-  const pendingTransactions = await VirtualWalletService.getPendingTransactions(userId);
-  const transactionStats = await VirtualWalletService.getTransactionStats(userId);
+  const limit = 50;
 
-  return json({ transactionData, pendingTransactions, transactionStats });
-};
+  const transactionData = await getAllTransactions(db, user.id, page, limit);
+  const pendingTransactions = await getPendingTransactions(db, user.id);
+
+  return json({ user, transactionData, pendingTransactions });
+}
 
 export default function TransactionsPage() {
-  const { transactionData, pendingTransactions, transactionStats } = useLoaderData<typeof loader>();
-  const { transactions, pagination } = transactionData;
+  const { transactionData, pendingTransactions } = useLoaderData<typeof loader>();
+  const { transactions, totalCount, wallet } = transactionData;
   const [searchParams, setSearchParams] = useSearchParams();
   const [cancellingTransaction, setCancellingTransaction] = useState<string | null>(null);
+
+  // Calculate pagination
+  const currentPage = parseInt(searchParams.get("page") || "1");
+  const totalPages = Math.ceil(totalCount / 50);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -95,32 +104,22 @@ export default function TransactionsPage() {
   };
 
   const handleCancelTransaction = async (transactionId: string) => {
-    if (!confirm("Are you sure you want to cancel this transaction?")) {
-      return;
-    }
-
-    setCancellingTransaction(transactionId);
     try {
-      const formData = new FormData();
-      formData.append('transactionId', transactionId);
-      
       const response = await fetch('/api/wallet/cancel-transaction', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transactionId }),
       });
-      
-      const result = await response.json();
-      
+      const result = await response.json() as { success: boolean; error?: string };
       if (result.success) {
-        // Reload the page to show updated transactions
+        // Refresh the page to show updated transactions
         window.location.reload();
       } else {
         alert(result.error || 'Failed to cancel transaction');
       }
     } catch (error) {
-      alert('Failed to cancel transaction. Please try again.');
-    } finally {
-      setCancellingTransaction(null);
+      console.error('Cancel transaction error:', error);
+      alert('Failed to cancel transaction');
     }
   };
 
@@ -160,38 +159,6 @@ export default function TransactionsPage() {
               </div>
             </div>
           )}
-
-          {/* Transaction Stats */}
-          <div className="bg-neutral-800 border border-neutral-700 rounded-lg p-4 mb-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div>
-                <span className="text-gray-400 text-sm">Total Transactions:</span>
-                <span className="text-white font-semibold ml-2">{transactionStats.total}</span>
-              </div>
-              <div>
-                <span className="text-gray-400 text-sm">Completed:</span>
-                <span className="text-green-400 font-semibold ml-2">{transactionStats.completed}</span>
-              </div>
-              <div>
-                <span className="text-gray-400 text-sm">Pending:</span>
-                <span className="text-yellow-400 font-semibold ml-2">{transactionStats.pending}</span>
-              </div>
-              <div>
-                <span className="text-gray-400 text-sm">Cancelled:</span>
-                <span className="text-red-400 font-semibold ml-2">{transactionStats.cancelled}</span>
-              </div>
-            </div>
-            <div className="mt-4 pt-4 border-t border-neutral-700">
-              <div className="flex justify-between items-center">
-                <div>
-                  <span className="text-gray-400">Page:</span>
-                  <span className="text-white font-semibold ml-2">
-                    {pagination.currentPage} of {pagination.totalPages}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
 
           {/* Transactions List */}
           <div className="bg-neutral-800 border border-neutral-700 rounded-lg p-6">
@@ -273,25 +240,25 @@ export default function TransactionsPage() {
           </div>
 
           {/* Pagination */}
-          {pagination.totalPages > 1 && (
+          {totalCount > 50 && (
             <div className="flex justify-center items-center gap-4 mt-6">
               <button
-                onClick={() => handlePageChange(pagination.currentPage - 1)}
-                disabled={!pagination.hasPrevPage}
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage <= 1}
                 className="px-4 py-2 bg-neutral-700 text-white rounded-lg hover:bg-neutral-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Previous
               </button>
               
               <div className="flex items-center gap-2">
-                {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                   const pageNum = i + 1;
                   return (
                     <button
                       key={pageNum}
                       onClick={() => handlePageChange(pageNum)}
                       className={`px-3 py-2 rounded-lg transition-colors ${
-                        pageNum === pagination.currentPage
+                        pageNum === currentPage
                           ? 'bg-blue-500 text-white'
                           : 'bg-neutral-700 text-gray-300 hover:bg-neutral-600'
                       }`}
@@ -303,8 +270,8 @@ export default function TransactionsPage() {
               </div>
               
               <button
-                onClick={() => handlePageChange(pagination.currentPage + 1)}
-                disabled={!pagination.hasNextPage}
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage >= totalPages}
                 className="px-4 py-2 bg-neutral-700 text-white rounded-lg hover:bg-neutral-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Next

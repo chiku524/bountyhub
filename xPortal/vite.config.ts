@@ -24,6 +24,9 @@ export default defineConfig({
     target: "esnext",
     minify: "terser",
     sourcemap: true,
+    rollupOptions: {
+      external: ['@remix-run/cloudflare']
+    }
   },
   optimizeDeps: {
     include: [
@@ -31,6 +34,7 @@ export default defineConfig({
       'react-dom',
       '@remix-run/react',
       '@remix-run/node',
+      '@remix-run/cloudflare',
       '@solana/wallet-adapter-react',
       '@solana/wallet-adapter-react-ui',
       '@solana/wallet-adapter-base',

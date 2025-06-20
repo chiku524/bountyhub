@@ -1,12 +1,12 @@
 import { json, type LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { useLoaderData, Form, useActionData, useNavigation, useRouteError, isRouteErrorResponse } from "@remix-run/react";
-import { VirtualWalletService } from "~/utils/virtual-wallet.server";
-import { requireUserId } from "~/utils/auth.server";
+import { getWalletDetails } from "~/utils/virtual-wallet.server";
+import { getUser } from "~/utils/auth.server";
+import { createDb } from "~/utils/db.server";
 import { useState } from "react";
 import { Layout } from "~/components/Layout";
 import { DirectDeposit } from "~/components/DirectDeposit";
 import bountyBucksInfo from '../../bounty-bucks-info.json';
-import { prisma } from "~/utils/db.server";
 import { TokenSupplyService } from "../utils/token-supply.server";
 
 const TOKEN_SYMBOL = bountyBucksInfo.config.symbol;
@@ -14,50 +14,25 @@ const TOKEN_DECIMALS = bountyBucksInfo.config.decimals;
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "Wallet - portal.ask" },
-    { name: "description", content: "Manage your portal.ask wallet and transactions" },
+    { title: "Wallet - BountyHub" },
+    { name: "description", content: "Manage your virtual wallet and transactions" },
   ];
 };
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  try {
-    const userId = await requireUserId(request);
-    
-    const walletData = await VirtualWalletService.getWalletDetails(userId);
-
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { solanaAddress: true, tokenAccountAddress: true },
-    });
-
-    // Fetch token supply stats with error handling
-    let supplyStats;
-    try {
-      supplyStats = await TokenSupplyService.getSupplyStats();
-    } catch (error) {
-      console.error('Error fetching token supply stats:', error);
-      // Provide fallback data if token supply fetch fails
-      supplyStats = {
-        initialSupply: bountyBucksInfo.config.initialSupply,
-        currentSupply: bountyBucksInfo.config.initialSupply,
-        burnedAmount: 0,
-        burnPercentage: 0,
-        tokensPerUser: 0,
-        dailyBurnRate: 0,
-        weeklyBurnRate: 0,
-        estimatedDaysUntilLow: 0,
-      };
-    }
-
-    return json({ walletData, user, supplyStats });
-  } catch (error) {
-    console.error('Wallet loader error:', error);
-    throw new Response('Failed to load wallet data', { status: 500 });
+export async function loader({ request, context }: LoaderFunctionArgs) {
+  const db = createDb((context as any).env.DB)
+  const user = await getUser(request, db);
+  if (!user) {
+    throw new Response("Unauthorized", { status: 401 });
   }
-};
+
+  const walletData = await getWalletDetails(db, user.id);
+
+  return json({ user, walletData });
+}
 
 export default function WalletPage() {
-  const { walletData, user, supplyStats } = useLoaderData<typeof loader>();
+  const { walletData, user } = useLoaderData<typeof loader>();
   const { wallet, transactions } = walletData;
   const [activeTab, setActiveTab] = useState<'overview' | 'deposit' | 'withdraw'>('overview');
   const [showDepositModal, setShowDepositModal] = useState(false);
@@ -114,84 +89,73 @@ export default function WalletPage() {
     }
   };
 
-  // Handle deposit form submission
-  const handleDepositSubmit = async (formData: FormData) => {
-    setIsDepositLoading(true);
+  const handleDeposit = async (amount: number) => {
     try {
       const response = await fetch('/api/wallet/deposit', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount }),
       });
-      
-      const result = await response.json();
-      
+      const result = await response.json() as { success: boolean; error?: string };
       if (result.success) {
-        setPendingDeposit(result);
+        setDepositResult(result);
         setShowDepositModal(false);
         setShowDepositConfirmation(true);
       } else {
         alert(result.error || 'Failed to create deposit request');
       }
     } catch (error) {
-      alert('Failed to create deposit request. Please try again.');
-    } finally {
-      setIsDepositLoading(false);
+      console.error('Deposit error:', error);
+      alert('Failed to create deposit request');
     }
   };
 
-  // Handle deposit confirmation
-  const handleDepositConfirmation = async (formData: FormData) => {
-    setIsConfirmLoading(true);
+  const handleConfirmDeposit = async (transactionId: string) => {
     try {
-      formData.append('action', 'confirm');
-      formData.append('transactionId', pendingDeposit.transaction.id);
-      
-      const response = await fetch('/api/wallet/deposit', {
+      const response = await fetch('/api/wallet/confirm-deposit', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transactionId }),
       });
-      
-      const result = await response.json();
-      
+      const result = await response.json() as { success: boolean; error?: string };
       if (result.success) {
         setDepositResult(result);
         setShowDepositConfirmation(false);
-        // Reload the page to show updated balance
-        window.location.reload();
+        setTimeout(() => window.location.reload(), 1000);
       } else {
         alert(result.error || 'Failed to confirm deposit');
       }
     } catch (error) {
-      alert('Failed to confirm deposit. Please try again.');
-    } finally {
-      setIsConfirmLoading(false);
+      console.error('Confirm deposit error:', error);
+      alert('Failed to confirm deposit');
     }
   };
 
-  // Handle withdraw form submission
-  const handleWithdrawSubmit = async (formData: FormData) => {
-    setIsWithdrawLoading(true);
-    setWithdrawError(null);
+  const handleWithdraw = async (amount: number) => {
     try {
       const response = await fetch('/api/wallet/withdraw', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount }),
       });
-      const result = await response.json();
+      const result = await response.json() as { success: boolean; error?: string };
       if (result.success) {
         setWithdrawResult(result);
         setShowWithdrawModal(false);
-        // Optionally reload after a delay
         setTimeout(() => window.location.reload(), 1500);
       } else {
         setWithdrawError(result.error || 'Withdrawal failed.');
       }
     } catch (error) {
-      setWithdrawError('Withdrawal failed. Please try again.');
-    } finally {
-      setIsWithdrawLoading(false);
+      console.error('Withdrawal error:', error);
+      setWithdrawError('Withdrawal failed.');
     }
   };
+
+  // Add null checks for wallet object
+  const walletBalance = wallet?.balance || 0;
+  const walletTotalEarned = wallet?.totalEarned || 0;
+  const walletTotalSpent = wallet?.totalSpent || 0;
 
   return (
     <Layout>
@@ -350,7 +314,6 @@ export default function WalletPage() {
                 <DirectDeposit
                   onSuccess={() => {
                     setShowDepositModal(false);
-                    // Reload page to show updated balance
                     setTimeout(() => window.location.reload(), 1000);
                   }}
                   onError={(error) => {
@@ -367,7 +330,7 @@ export default function WalletPage() {
                 <form onSubmit={async (e) => {
                   e.preventDefault();
                   const formData = new FormData(e.currentTarget);
-                  await handleDepositSubmit(formData);
+                  await handleDeposit(parseFloat(formData.get('amount') as string));
                 }} className="space-y-4">
                   <div className="bg-yellow-900 border border-yellow-700 rounded-lg p-4 mb-4">
                     <h4 className="font-semibold text-yellow-200 mb-2">Manual Deposit</h4>
@@ -450,7 +413,7 @@ export default function WalletPage() {
               <form onSubmit={async (e) => {
                 e.preventDefault();
                 const formData = new FormData(e.currentTarget);
-                await handleDepositConfirmation(formData);
+                await handleConfirmDeposit(formData.get('transactionId') as string);
               }} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -458,7 +421,7 @@ export default function WalletPage() {
                   </label>
                   <input
                     type="text"
-                    name="solanaSignature"
+                    name="transactionId"
                     required
                     className="w-full px-3 py-2 border border-neutral-600 bg-neutral-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Paste the transaction signature from your wallet"
@@ -525,7 +488,7 @@ export default function WalletPage() {
               <form onSubmit={async (e) => {
                 e.preventDefault();
                 const formData = new FormData(e.currentTarget);
-                await handleWithdrawSubmit(formData);
+                await handleWithdraw(parseFloat(formData.get('amount') as string));
               }} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">

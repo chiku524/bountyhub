@@ -1,6 +1,8 @@
 import { LoaderFunction, json } from '@remix-run/node';
 import { requireUserId } from '~/utils/auth.server';
-import { prisma } from '~/utils/prisma.server';
+import { createDb } from '~/utils/db.server';
+import { eq, and, desc } from 'drizzle-orm';
+import { posts, comments, answers, reputationHistory } from '../../drizzle/schema';
 import { useLoaderData, Link } from '@remix-run/react';
 import { FiMessageSquare, FiThumbsUp, FiThumbsDown, FiCheckCircle, FiEdit2 } from 'react-icons/fi';
 
@@ -19,98 +21,67 @@ interface LoaderData {
   activities: Activity[];
 }
 
-export const loader: LoaderFunction = async ({ request }) => {
-  const userId = await requireUserId(request);
-  
-  // Get all user activities
-  const [posts, comments, answers, reputationHistory] = await Promise.all([
-    // Get user's posts
-    prisma.posts.findMany({
-      where: { authorId: userId },
-      select: {
-        id: true,
-        title: true,
-        content: true,
-        createdAt: true,
-      },
-      orderBy: { createdAt: 'desc' },
-    }),
-    // Get user's comments
-    prisma.comment.findMany({
-      where: { authorId: userId },
-      select: {
-        id: true,
-        content: true,
-        createdAt: true,
-        post: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-    }),
-    // Get user's answers
-    prisma.answer.findMany({
-      where: { authorId: userId },
-      select: {
-        id: true,
-        content: true,
-        createdAt: true,
-        isAccepted: true,
-        post: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-    }),
-    // Get reputation history
-    prisma.reputationHistory.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
-    }),
-  ]);
+export const loader: LoaderFunction = async ({ request, context }) => {
+  try {
+    const userId = await requireUserId(request);
+    const db = (context as any).env.DB;
+    
+    // Fetch user activity data
+    const [userPosts, userComments, userAnswers, userReputationHistory] = await Promise.all([
+      db.select().from(posts).where(eq(posts.authorId, userId)).orderBy(desc(posts.createdAt)).limit(100),
+      db.select().from(comments).where(eq(comments.authorId, userId)).orderBy(desc(comments.createdAt)).limit(100),
+      db.select().from(answers).where(eq(answers.authorId, userId)).orderBy(desc(answers.createdAt)).limit(100),
+      db.select().from(reputationHistory).where(eq(reputationHistory.userId, userId)).orderBy(desc(reputationHistory.createdAt)).limit(100),
+    ]);
 
-  // Combine and sort all activities
-  const activities: Activity[] = [
-    ...posts.map(post => ({
-      id: post.id,
-      type: 'post' as const,
-      title: post.title,
-      content: post.content,
-      createdAt: post.createdAt,
-    })),
-    ...comments.map(comment => ({
-      id: comment.id,
-      type: 'comment' as const,
-      content: comment.content,
-      createdAt: comment.createdAt,
-      referenceId: comment.post.id,
-      title: comment.post.title,
-    })),
-    ...answers.map(answer => ({
-      id: answer.id,
-      type: 'answer' as const,
-      content: answer.content,
-      createdAt: answer.createdAt,
-      referenceId: answer.post.id,
-      title: answer.post.title,
-    })),
-    ...reputationHistory.map(history => ({
-      id: history.id,
-      type: 'reputation' as const,
-      points: history.points,
-      action: history.action,
-      createdAt: history.createdAt,
-      referenceId: history.referenceId,
-    })),
-  ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    // Transform data for the frontend
+    const activityItems = [
+      ...userPosts.map((post: any) => ({
+        id: post.id,
+        type: 'post' as const,
+        title: post.title,
+        content: post.content,
+        createdAt: post.createdAt,
+        points: 0,
+        action: 'Created post',
+      })),
+      ...userComments.map((comment: any) => ({
+        id: comment.id,
+        type: 'comment' as const,
+        title: 'Comment',
+        content: comment.content,
+        createdAt: comment.createdAt,
+        points: 0,
+        action: 'Added comment',
+      })),
+      ...userAnswers.map((answer: any) => ({
+        id: answer.id,
+        type: 'answer' as const,
+        title: 'Answer',
+        content: answer.content,
+        createdAt: answer.createdAt,
+        points: 0,
+        action: 'Provided answer',
+      })),
+      ...userReputationHistory.map((history: any) => ({
+        id: history.id,
+        type: 'reputation' as const,
+        title: history.action,
+        content: history.description || '',
+        createdAt: history.createdAt,
+        points: history.points,
+        action: history.action,
+      })),
+    ];
 
-  return json<LoaderData>({ activities });
+    // Sort by creation date (newest first)
+    activityItems.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    return json({ activityItems });
+  } catch (error) {
+    console.error('Error loading profile activity:', error);
+    return json({ activityItems: [] });
+  }
 };
 
 function getActivityDescription(action: string): string {

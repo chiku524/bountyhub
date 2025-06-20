@@ -215,7 +215,17 @@ export function Nav() {
                     </div>
                 </Link>
                 <hr className='border-b border-gray-500 w-4/6'/>
-
+                
+                <Link to="/refund-requests" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-white/5">
+                    <div className="relative flex items-center gap-4 px-4 py-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-300 transition-all duration-300 group-hover:text-yellow-300 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="hidden text-sm font-medium text-gray-300 group-hover:text-yellow-300 group-hover:block">Refund Requests</span>
+                    </div>
+                </Link>
+                <hr className='border-b border-gray-500 w-4/6'/>
+                
                 <Link to="/wallet" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-white/5">
                     <div className="relative flex items-center gap-4 px-4 py-1">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-300 transition-all duration-300 group-hover:text-indigo-300 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">

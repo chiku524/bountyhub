@@ -1,161 +1,124 @@
-import { requireUserId } from './auth.server';
+import { eq, and } from 'drizzle-orm';
+import { bookmarks, posts, users, profiles } from '../../drizzle/schema';
+import type { DrizzleD1Database } from 'drizzle-orm/d1';
 
-// Lazy import to ensure Prisma client is fully initialized
-let prisma: any = null;
+export async function toggleBookmark(
+  db: DrizzleD1Database<typeof import('../../drizzle/schema')>,
+  postId: string,
+  userId: string
+) {
+  const existingBookmark = await db
+    .select()
+    .from(bookmarks)
+    .where(
+      and(
+        eq(bookmarks.postId, postId),
+        eq(bookmarks.userId, userId)
+      )
+    )
+    .limit(1);
 
-const getPrisma = async () => {
-  if (!prisma) {
-    const { prisma: prismaClient } = await import('./prisma.server');
-    prisma = prismaClient;
-  }
-  return prisma;
-};
-
-export async function toggleBookmark(userId: string, postId: string) {
-  const prismaClient = await getPrisma();
-  
-  try {
-    // Check if bookmark already exists
-    const existingBookmark = await prismaClient.bookmark.findFirst({
-      where: {
-        userId,
-        postId
-      }
+  if (existingBookmark.length > 0) {
+    await db
+      .delete(bookmarks)
+      .where(
+        and(
+          eq(bookmarks.postId, postId),
+          eq(bookmarks.userId, userId)
+        )
+      );
+    return { bookmarked: false };
+  } else {
+    await db.insert(bookmarks).values({
+      id: crypto.randomUUID(),
+      postId,
+      userId,
+      createdAt: new Date(),
     });
-
-    if (existingBookmark) {
-      // Remove bookmark
-      await prismaClient.bookmark.delete({
-        where: {
-          id: existingBookmark.id
-        }
-      });
-      return { isBookmarked: false };
-    } else {
-      // Add bookmark
-      await prismaClient.bookmark.create({
-        data: {
-          userId,
-          postId
-        }
-      });
-      return { isBookmarked: true };
-    }
-  } catch (error) {
-    console.error('Error toggling bookmark:', error);
-    throw new Error('Failed to toggle bookmark');
+    return { bookmarked: true };
   }
 }
 
-export async function getUserBookmarks(userId: string, page: number = 1, perPage: number = 10) {
-  const prismaClient = await getPrisma();
-  
-  // Debug: Check if prisma is available in the function
-  if (!prismaClient) {
-    console.error('Prisma client is undefined in getUserBookmarks');
-    throw new Error('Database connection not available');
+export async function getUserBookmarks(
+  db: DrizzleD1Database<typeof import('../../drizzle/schema')>,
+  userId: string
+) {
+  // Debug: Check if db is available in the function
+  if (!db) {
+    console.error('Database is undefined in getUserBookmarks');
+    return [];
   }
-  
+
   try {
-    const skip = (page - 1) * perPage;
-
-    const [bookmarks, totalCount] = await Promise.all([
-      prismaClient.bookmark.findMany({
-        where: { userId },
-        include: {
-          post: {
-            include: {
-              author: {
-                select: {
-                  id: true,
-                  username: true,
-                  profile: {
-                    select: {
-                      profilePicture: true
-                    }
-                  }
-                }
-              },
-              media: {
-                take: 1,
-                orderBy: {
-                  createdAt: 'asc'
-                }
-              },
-              bounty: true,
-              postTags: {
-                include: {
-                  tag: true
-                }
-              },
-              _count: {
-                select: {
-                  comments: true
-                }
-              }
-            }
-          }
-        },
-        orderBy: {
-          createdAt: 'desc'
-        },
-        skip,
-        take: perPage
-      }),
-      prismaClient.bookmark.count({
-        where: { userId }
-      })
-    ]);
-
-    const totalPages = Math.ceil(totalCount / perPage);
-
-    return {
-      bookmarks: bookmarks.map((bookmark: any) => ({
-        id: bookmark.id,
-        createdAt: bookmark.createdAt,
+    const userBookmarks = await db
+      .select({
+        id: bookmarks.id,
+        postId: bookmarks.postId,
+        createdAt: bookmarks.createdAt,
         post: {
-          id: bookmark.post.id,
-          title: bookmark.post.title,
-          content: bookmark.post.content,
-          media: bookmark.post.media?.[0] || null,
-          author: {
-            id: bookmark.post.author.id,
-            username: bookmark.post.author.username,
-            profilePicture: bookmark.post.author.profile?.profilePicture || null
-          },
-          createdAt: bookmark.post.createdAt.toISOString(),
-          visibilityVotes: bookmark.post.visibilityVotes,
-          comments: bookmark.post._count.comments,
-          hasBounty: bookmark.post.hasBounty,
-          bounty: bookmark.post.bounty,
-          tags: bookmark.post.postTags.map((pt: any) => ({
-            id: pt.tag.id,
-            name: pt.tag.name,
-            color: pt.tag.color
-          }))
-        }
-      })),
-      totalCount,
-      totalPages,
-      currentPage: page
-    };
+          id: posts.id,
+          title: posts.title,
+          content: posts.content,
+          createdAt: posts.createdAt,
+          authorId: posts.authorId,
+        },
+        user: {
+          id: users.id,
+          username: users.username,
+        },
+        profile: {
+          profilePicture: profiles.profilePicture,
+        },
+      })
+      .from(bookmarks)
+      .innerJoin(posts, eq(bookmarks.postId, posts.id))
+      .innerJoin(users, eq(posts.authorId, users.id))
+      .leftJoin(profiles, eq(users.id, profiles.userId))
+      .where(eq(bookmarks.userId, userId))
+      .orderBy(bookmarks.createdAt);
+
+    return userBookmarks;
   } catch (error) {
     console.error('Error fetching user bookmarks:', error);
-    throw new Error('Failed to fetch bookmarks');
+    return [];
   }
 }
 
-export async function isPostBookmarked(userId: string, postId: string) {
-  const prismaClient = await getPrisma();
-  
+export async function getBookmarkCount(
+  db: DrizzleD1Database<typeof import('../../drizzle/schema')>,
+  postId: string
+) {
   try {
-    const bookmark = await prismaClient.bookmark.findFirst({
-      where: {
-        userId,
-        postId
-      }
-    });
-    return !!bookmark;
+    const result = await db
+      .select({ count: bookmarks.id })
+      .from(bookmarks)
+      .where(eq(bookmarks.postId, postId));
+
+    return result.length;
+  } catch (error) {
+    console.error('Error fetching bookmark count:', error);
+    return 0;
+  }
+}
+
+export async function isBookmarked(
+  db: DrizzleD1Database<typeof import('../../drizzle/schema')>,
+  postId: string,
+  userId: string
+) {
+  try {
+    const bookmark = await db
+      .select()
+      .from(bookmarks)
+      .where(
+        and(
+          eq(bookmarks.postId, postId),
+          eq(bookmarks.userId, userId)
+        )
+      )
+      .limit(1);
+
+    return bookmark.length > 0;
   } catch (error) {
     console.error('Error checking bookmark status:', error);
     return false;

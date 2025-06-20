@@ -1,5 +1,4 @@
 // app/utils/types.server.ts
-import type { CodeBlock as PrismaCodeBlock, Profile as PrismaProfile, User as PrismaUser } from '@prisma/client'
 
 export interface LoginForm {
     email: string;
@@ -14,8 +13,14 @@ export interface RegisterForm {
     redirectTo?: string;
 }
 
-export type User = PrismaUser & {
-    profile?: PrismaProfile | null;
+export type User = {
+    id: string;
+    email: string;
+    username: string;
+    password: string;
+    createdAt: Date;
+    updatedAt: Date;
+    profile?: Profile | null;
 };
 
 export interface Post {
@@ -40,8 +45,38 @@ export interface Comment {
     post: Post;
 }
 
-export type CodeBlock = PrismaCodeBlock;
-export type Profile = PrismaProfile;
+export type Profile = {
+    id: string;
+    userId: string;
+    firstName?: string | null;
+    lastName?: string | null;
+    profilePicture?: string | null;
+    bio?: string | null;
+    location?: string | null;
+    website?: string | null;
+    facebook?: string | null;
+    twitter?: string | null;
+    instagram?: string | null;
+    linkedin?: string | null;
+    github?: string | null;
+    youtube?: string | null;
+    tiktok?: string | null;
+    discord?: string | null;
+    reddit?: string | null;
+    medium?: string | null;
+    stackoverflow?: string | null;
+    devto?: string | null;
+    createdAt?: Date;
+    updatedAt?: Date;
+};
+
+export type CodeBlock = {
+    id: string;
+    content: string;
+    language: string;
+    createdAt: Date;
+    updatedAt: Date;
+};
 
 export interface CodeBlockForm {
     language: string;

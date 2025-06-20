@@ -1,7 +1,6 @@
-import { LoaderFunction, json } from '@remix-run/node'
+import { json, LoaderFunctionArgs } from '@remix-run/cloudflare'
 import { useLoaderData, Link } from '@remix-run/react'
 import { getUser } from '~/utils/auth.server'
-import { prisma } from '~/utils/prisma.server'
 import { Nav } from '~/components/nav'
 import { getReputationLevel } from '~/utils/reputationLevel'
 import { 
@@ -20,6 +19,9 @@ import {
 } from 'react-icons/fa'
 import { FiThumbsUp, FiEdit2 } from 'react-icons/fi'
 import IntegrityDisplay from '~/components/IntegrityDisplay'
+import { eq } from 'drizzle-orm'
+import { users, profiles } from '../../drizzle/schema'
+import type { DrizzleD1Database } from 'drizzle-orm/d1'
 
 const DEFAULT_PROFILE_PICTURE = 'https://api.dicebear.com/7.x/initials/svg?seed=';
 
@@ -27,7 +29,7 @@ function getProfilePicture(profilePicture: string | null, username: string): str
     if (profilePicture) {
         return profilePicture;
     }
-    return `${DEFAULT_PROFILE_PICTURE}${encodeURIComponent(username)}`;
+    return `${DEFAULT_PROFILE_PICTURE}${username}`;
 }
 
 function truncateContent(content: string | undefined | null): string {
@@ -149,92 +151,63 @@ interface LoaderData {
     } | null;
 }
 
-export const loader: LoaderFunction = async ({ params, request }) => {
-    const { username } = params;
-    const currentUser = await getUser(request);
-    
-    if (!username) {
-        throw new Response('Username is required', { status: 400 });
+interface CloudflareContext {
+  env: {
+    DB: DrizzleD1Database<typeof import('../../drizzle/schema')>;
+  };
+}
+
+export async function loader({ params, context }: LoaderFunctionArgs) {
+  const { username } = params;
+  
+  if (!username) {
+    throw new Response('Username is required', { status: 400 });
+  }
+
+  try {
+    const db = (context as unknown as CloudflareContext).env.DB;
+
+    const user = await db
+      .select({
+        id: users.id,
+        username: users.username,
+        email: users.email,
+        solanaAddress: users.solanaAddress,
+        createdAt: users.createdAt,
+        reputationPoints: users.reputationPoints,
+        integrityScore: users.integrityScore,
+        totalRatings: users.totalRatings,
+        profile: {
+          firstName: profiles.firstName,
+          lastName: profiles.lastName,
+          profilePicture: profiles.profilePicture,
+          bio: profiles.bio,
+          location: profiles.location,
+          website: profiles.website,
+          github: profiles.github,
+        },
+      })
+      .from(users)
+      .leftJoin(profiles, eq(users.id, profiles.userId))
+      .where(eq(users.username, username))
+      .limit(1);
+
+    if (!user.length) {
+      throw new Response('User not found', { status: 404 });
     }
 
-    // Check if user exists
-    const user = await prisma.user.findUnique({
-        where: { username },
-        include: {
-            profile: true,
-            posts: {
-                select: {
-                    id: true,
-                    title: true,
-                    content: true,
-                    createdAt: true,
-                    visibilityVotes: true,
-                    _count: {
-                        select: {
-                            comments: true
-                        }
-                    }
-                },
-                orderBy: {
-                    createdAt: 'desc'
-                },
-                take: 5
-            },
-            reputationHistory: {
-                select: {
-                    id: true,
-                    points: true,
-                    action: true,
-                    createdAt: true
-                },
-                orderBy: {
-                    createdAt: 'desc'
-                },
-                take: 5
-            }
-        }
-    });
-
-    if (!user) {
-        throw new Response('User not found', { status: 404 });
-    }
-
-    // Transform the data
-    const transformedUser = {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        reputationPoints: user.reputationPoints || 0,
-        createdAt: user.createdAt.toISOString(),
-        profilePicture: user.profile?.profilePicture || getProfilePicture(null, user.username),
-        integrityScore: (user as any).integrityScore || 5.0,
-        totalRatings: (user as any).totalRatings || 0,
-        profile: user.profile,
-        posts: user.posts.map(post => ({
-            id: post.id,
-            title: post.title,
-            content: post.content,
-            createdAt: post.createdAt.toISOString(),
-            visibilityVotes: post.visibilityVotes,
-            comments: post._count.comments
-        })),
-        reputationHistory: user.reputationHistory.map(history => ({
-            id: history.id,
-            points: history.points,
-            action: history.action,
-            createdAt: history.createdAt.toISOString()
-        }))
-    };
-
-    return json({ 
-        user: transformedUser,
-        currentUser 
-    });
+    return json({ user: user[0] });
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    throw new Response('Failed to fetch user', { status: 500 });
+  }
 }
 
 export default function UserProfile() {
-    const { user, currentUser } = useLoaderData<LoaderData>();
+    const { user } = useLoaderData<typeof loader>();
     const reputationLevel = getReputationLevel(user.reputationPoints);
+
+    const profilePicture = getProfilePicture(user.profile?.profilePicture || null, user.username);
 
     return (
         <div className="h-screen w-full bg-neutral-900/95 flex flex-row">
@@ -249,7 +222,7 @@ export default function UserProfile() {
                         <div className="flex items-start space-x-6">
                             <div className="flex-shrink-0">
                                 <img
-                                    src={user.profilePicture}
+                                    src={profilePicture}
                                     alt={`${user.username}'s profile`}
                                     className="w-24 h-24 rounded-full border-2 border-violet-500/50"
                                 />
@@ -315,7 +288,7 @@ export default function UserProfile() {
                                     integrityScore: user.integrityScore,
                                     totalRatings: user.totalRatings,
                                 }}
-                                currentUserId={currentUser?.id}
+                                currentUserId={user.currentUser?.id}
                                 canRate={true}
                             />
                         </div>

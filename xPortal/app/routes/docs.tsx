@@ -80,6 +80,13 @@ export const loader: LoaderFunction = async () => {
         href: "/docs/legal",
         category: "legal",
         featured: false
+      },
+      {
+        title: "Refund System Guide",
+        description: "Complete guide to the community governance refund system and time-based restrictions",
+        href: "/docs/refund-system",
+        category: "user",
+        featured: false
       }
     ] as DocItem[],
     categories: [
@@ -117,7 +124,8 @@ export default function DocsPage() {
     { ...docs[2], icon: FiCode },
     { ...docs[3], icon: FiServer },
     { ...docs[4], icon: FiCloud },
-    { ...docs[5], icon: FiShield }
+    { ...docs[5], icon: FiShield },
+    { ...docs[6], icon: FiShield }
   ];
 
   const getCategoryDocs = (categoryName: string): DocItem[] => {

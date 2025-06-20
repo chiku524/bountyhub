@@ -1,5 +1,8 @@
-import { prisma } from './prisma.server';
+import { eq, and, desc } from 'drizzle-orm';
+import { userRatings, integrityHistory, integrityViolations, users } from '../../drizzle/schema';
+import type { Db } from './db.server';
 import { getUser } from './auth.server';
+import { User } from '../../drizzle/schema';
 
 export interface RatingData {
   ratedUserId: string;
@@ -19,70 +22,62 @@ export interface ViolationData {
   referenceType?: string | null;
 }
 
-export async function rateUser(request: Request, ratingData: RatingData) {
-  const user = await getUser(request);
-  if (!user) {
-    throw new Error('User not authenticated');
+export async function rateUser(
+  db: Db,
+  user: User,
+  ratingData: {
+    ratedUserId: string;
+    rating: number;
+    reason: string;
+    context: string;
+    referenceId?: string;
+    referenceType?: string;
   }
-
-  // Validate rating
-  if (ratingData.rating < 1 || ratingData.rating > 10) {
-    throw new Error('Rating must be between 1 and 10');
-  }
-
-  // Prevent self-rating
-  if (user.id === ratingData.ratedUserId) {
-    throw new Error('Cannot rate yourself');
-  }
-
+): Promise<void> {
   try {
-    // Check if user already rated this person in the same context
-    const existingRating = await prisma.userRating.findUnique({
-      where: {
-        raterId_ratedUserId_referenceId: {
-          raterId: user.id,
-          ratedUserId: ratingData.ratedUserId,
-          referenceId: ratingData.referenceId || null,
-        },
-      },
-    });
+    // Check if user already rated this user for this reference
+    const existingRating = await db
+      .select()
+      .from(userRatings)
+      .where(and(
+        eq(userRatings.raterId, user.id), 
+        eq(userRatings.ratedUserId, ratingData.ratedUserId), 
+        eq(userRatings.referenceId, ratingData.referenceId || null)
+      ))
+      .limit(1);
 
-    if (existingRating) {
-      throw new Error('You have already rated this user in this context');
+    if (existingRating.length > 0) {
+      throw new Error('Already rated this user for this reference');
     }
 
-    // Create the rating
-    const newRating = await prisma.userRating.create({
-      data: {
-        raterId: user.id,
-        ratedUserId: ratingData.ratedUserId,
-        rating: ratingData.rating,
-        reason: ratingData.reason,
-        context: ratingData.context,
-        referenceId: ratingData.referenceId || null,
-        referenceType: ratingData.referenceType || null,
-      },
+    // Create new rating
+    await db.insert(userRatings).values({
+      id: crypto.randomUUID(),
+      raterId: user.id,
+      ratedUserId: ratingData.ratedUserId,
+      rating: ratingData.rating,
+      reason: ratingData.reason,
+      context: ratingData.context,
+      referenceId: ratingData.referenceId || null,
+      referenceType: ratingData.referenceType || null,
     });
-
-    // Update the rated user's integrity score
-    await updateUserIntegrityScore(ratingData.ratedUserId);
 
     // Add to integrity history
-    await prisma.integrityHistory.create({
-      data: {
-        userId: ratingData.ratedUserId,
-        action: 'RATING_RECEIVED',
-        points: ratingData.rating,
-        description: `Received a ${ratingData.rating}/10 rating for ${ratingData.context.toLowerCase()}`,
-        referenceId: newRating.id,
-        referenceType: 'RATING',
-      },
+    await db.insert(integrityHistory).values({
+      id: crypto.randomUUID(),
+      userId: ratingData.ratedUserId,
+      action: 'USER_RATED',
+      points: ratingData.rating,
+      description: `Rated by ${user.username}: ${ratingData.reason}`,
+      referenceId: ratingData.referenceId || null,
+      referenceType: ratingData.referenceType || null,
     });
 
-    return newRating;
+    // Update user's integrity score
+    await updateUserIntegrityScore(db, ratingData.ratedUserId);
   } catch (error) {
-    console.error('Error in rateUser:', error);
-    throw new Error('Failed to submit rating. Please try again.');
+    console.error('Error rating user:', error);
+    throw error;
   }
 }
 
@@ -99,16 +94,8 @@ export async function reportViolation(request: Request, violationData: Violation
 
   try {
     // Check if user already reported this person for the same violation
-    const existingViolation = await prisma.integrityViolation.findFirst({
-      where: {
-        reporterId: user.id,
-        targetUserId: violationData.targetUserId,
-        violationType: violationData.violationType,
-        referenceId: violationData.referenceId,
-        status: {
-          in: ['PENDING', 'REVIEWED'],
-        },
-      },
+    const existingViolation = await db.query.integrityViolations.findFirst({
+      where: and(eq(integrityViolations.reporterId, user.id), eq(integrityViolations.targetUserId, violationData.targetUserId), eq(integrityViolations.violationType, violationData.violationType), eq(integrityViolations.referenceId, violationData.referenceId)),
     });
 
     if (existingViolation) {
@@ -116,8 +103,8 @@ export async function reportViolation(request: Request, violationData: Violation
     }
 
     // Create the violation report
-    const violation = await prisma.integrityViolation.create({
-      data: {
+    const violation = await db.insert(integrityViolations)
+      .values({
         reporterId: user.id,
         targetUserId: violationData.targetUserId,
         violationType: violationData.violationType,
@@ -125,20 +112,20 @@ export async function reportViolation(request: Request, violationData: Violation
         evidence: violationData.evidence,
         referenceId: violationData.referenceId,
         referenceType: violationData.referenceType,
-      },
-    });
+      })
+      .returning({ id: true });
 
     // Add to integrity history
-    await prisma.integrityHistory.create({
-      data: {
+    await db.insert(integrityHistory)
+      .values({
         userId: violationData.targetUserId,
         action: 'VIOLATION_REPORTED',
         points: -5, // Negative points for being reported
         description: `Reported for ${violationData.violationType.toLowerCase()}`,
         referenceId: violation.id,
         referenceType: 'VIOLATION',
-      },
-    });
+      })
+      .returning({ id: true });
 
     return violation;
   } catch (error) {
@@ -147,13 +134,11 @@ export async function reportViolation(request: Request, violationData: Violation
   }
 }
 
-export async function updateUserIntegrityScore(userId: string) {
+export async function updateUserIntegrityScore(db: Db, userId: string) {
   try {
     // Get all ratings for the user
-    const ratings = await prisma.userRating.findMany({
-      where: {
-        ratedUserId: userId,
-      },
+    const ratings = await db.query.userRatings.findMany({
+      where: eq(userRatings.ratedUserId, userId),
       select: {
         rating: true,
       },
@@ -168,13 +153,12 @@ export async function updateUserIntegrityScore(userId: string) {
     const averageRating = totalRating / ratings.length;
 
     // Update user's integrity score
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
+    await db.update(users)
+      .set({
         integrityScore: averageRating,
         totalRatings: ratings.length,
-      },
-    });
+      })
+      .where(eq(users.id, userId));
   } catch (error) {
     console.error('Error updating integrity score:', error);
   }
@@ -182,17 +166,17 @@ export async function updateUserIntegrityScore(userId: string) {
 
 export async function getUserIntegrityStats(userId: string) {
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, userId),
       select: {
         integrityScore: true,
         totalRatings: true,
         integrityHistory: {
-          orderBy: { createdAt: 'desc' },
+          orderBy: desc(integrityHistory.createdAt),
           take: 10,
         },
         ratingsReceived: {
-          orderBy: { createdAt: 'desc' },
+          orderBy: desc(userRatings.createdAt),
           take: 5,
           include: {
             rater: {
@@ -208,7 +192,7 @@ export async function getUserIntegrityStats(userId: string) {
               in: ['PENDING', 'REVIEWED'],
             },
           },
-          orderBy: { createdAt: 'desc' },
+          orderBy: desc(integrityViolations.createdAt),
           take: 5,
         },
       },
@@ -242,14 +226,8 @@ export function getIntegrityLevel(score: number): string {
 export async function canRateUser(raterId: string, ratedUserId: string, context: string, referenceId?: string): Promise<boolean> {
   try {
     // Check if user already rated this person in the same context
-    const existingRating = await prisma.userRating.findUnique({
-      where: {
-        raterId_ratedUserId_referenceId: {
-          raterId,
-          ratedUserId,
-          referenceId: referenceId || null,
-        },
-      },
+    const existingRating = await db.query.userRatings.findFirst({
+      where: and(eq(userRatings.userId, raterId), eq(userRatings.targetUserId, ratedUserId), eq(userRatings.referenceId, referenceId || null)),
     });
 
     return !existingRating;

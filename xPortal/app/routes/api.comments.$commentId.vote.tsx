@@ -1,204 +1,117 @@
-import { json } from '@remix-run/node';
-import type { ActionFunction, LoaderFunction } from '@remix-run/node';
-import { prisma } from '~/utils/prisma.server';
-import { getUser } from '~/utils/auth.server';
-import { addReputationPoints, REPUTATION_POINTS } from '~/utils/reputation.server';
+import { json } from '@remix-run/cloudflare';
+import { eq, and } from 'drizzle-orm';
+import { votes, comments } from '../../drizzle/schema';
+import type { DrizzleD1Database } from 'drizzle-orm/d1';
+import type { ActionFunctionArgs } from '@remix-run/cloudflare';
 
-export const loader: LoaderFunction = async ({ request, params }) => {
+interface CloudflareContext {
+  env: {
+    DB: DrizzleD1Database<typeof import('../../drizzle/schema')>;
+  };
+}
+
+export async function action({ request, params, context }: ActionFunctionArgs) {
+  const { commentId } = params;
+  
+  if (!commentId) {
+    return json({ error: 'Comment ID is required' }, { status: 400 });
+  }
+
+  const formData = await request.formData();
+  const userId = formData.get('userId') as string;
+  const value = parseInt(formData.get('value') as string);
+  const voteType = formData.get('voteType') as string;
+  const isQualityVote = formData.get('isQualityVote') === 'true';
+
+  if (!userId || isNaN(value) || !voteType) {
+    return json({ error: 'Missing required fields' }, { status: 400 });
+  }
+
   try {
-    const user = await getUser(request);
-    if (!user) {
-      return json({ error: 'You must be logged in to perform this action' }, { 
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
+    const db = (context as unknown as CloudflareContext).env.DB;
+
+    // Check if user already voted
+    const existingVote = await db
+      .select()
+      .from(votes)
+      .where(
+        and(
+          eq(votes.commentId, commentId),
+          eq(votes.userId, userId),
+          eq(votes.voteType, voteType)
+        )
+      )
+      .limit(1);
+
+    let totalVotes = 0;
+    let upvotes = 0;
+    let downvotes = 0;
+
+    if (existingVote.length > 0) {
+      // Update existing vote
+      await db
+        .update(votes)
+        .set({
+          value,
+          updatedAt: new Date(),
+        })
+        .where(eq(votes.id, existingVote[0].id));
+    } else {
+      // Create new vote
+      await db.insert(votes).values({
+        id: crypto.randomUUID(),
+        commentId,
+        userId,
+        value,
+        voteType,
+        isQualityVote,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
     }
 
-    const commentId = params.commentId;
-    if (!commentId) {
-      return json({ error: 'Comment ID is required' }, { 
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
+    // Calculate vote counts
+    const voteCounts = await db
+      .select({
+        totalVotes: votes.value,
+        upvotes: votes.value,
+        downvotes: votes.value,
+      })
+      .from(votes)
+      .where(
+        and(
+          eq(votes.commentId, commentId),
+          eq(votes.voteType, voteType)
+        )
+      );
 
-    // Get current vote state
-    const vote = await prisma.vote.findFirst({
-      where: {
-        userId: user.id,
-        commentId: commentId,
-        voteType: 'COMMENT',
-        isQualityVote: true
-      }
+    // Calculate totals
+    voteCounts.forEach((vote) => {
+      totalVotes += vote.totalVotes;
+      if (vote.upvotes > 0) upvotes += vote.upvotes;
+      if (vote.downvotes < 0) downvotes += Math.abs(vote.downvotes);
     });
 
-    // Get total votes for the comment
-    const [upvotes, downvotes] = await Promise.all([
-      prisma.vote.count({
-        where: {
-          commentId: commentId,
-          voteType: 'COMMENT',
-          isQualityVote: true,
-          value: 1
-        }
-      }),
-      prisma.vote.count({
-        where: {
-          commentId: commentId,
-          voteType: 'COMMENT',
-          isQualityVote: true,
-          value: -1
-        }
-      })
-    ]);
+    // Update comment with new vote counts
+    const updateData: any = {};
+    if (voteType === 'comment') {
+      updateData.upvotes = upvotes;
+      updateData.downvotes = downvotes;
+    }
+
+    await db
+      .update(comments)
+      .set(updateData)
+      .where(eq(comments.id, commentId));
 
     return json({
       success: true,
-      userVote: vote?.value || 0,
+      totalVotes,
       upvotes,
-      downvotes
-    }, {
-      headers: { 'Content-Type': 'application/json' }
+      downvotes,
     });
   } catch (error) {
-    return json({ 
-      error: 'Failed to get vote state',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { 
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    console.error('Error processing comment vote:', error);
+    return json({ error: 'Failed to process vote' }, { status: 500 });
   }
-};
-
-export const action: ActionFunction = async ({ request, params }) => {
-  try {
-    const user = await getUser(request);
-    if (!user) {
-      return json({ error: 'You must be logged in to perform this action' }, { 
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-
-    const commentId = params.commentId;
-    if (!commentId) {
-      return json({ error: 'Comment ID is required' }, { 
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-
-    const formData = await request.formData();
-    const value = parseInt(formData.get('value') as string);
-    
-    if (![-1, 0, 1].includes(value)) {
-      return json({ error: 'Invalid vote value' }, { status: 400 });
-    }
-
-    // First, check if the comment exists
-    const comment = await prisma.comment.findUnique({
-      where: { id: commentId }
-    });
-
-    if (!comment) {
-      return json({ error: 'Comment not found' }, { 
-        status: 404,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-
-    try {
-      // Use a transaction to ensure atomic operations
-      const result = await prisma.$transaction(async (tx) => {
-        // Find existing vote
-        const existingVote = await tx.vote.findFirst({
-          where: {
-            userId: user.id,
-            commentId: commentId,
-            voteType: 'COMMENT',
-            isQualityVote: true
-          }
-        });
-
-        if (existingVote) {
-          // Update existing vote
-          await tx.vote.update({
-            where: { id: existingVote.id },
-            data: { value }
-          });
-        } else {
-          // Create new vote
-          await tx.vote.create({
-            data: {
-              userId: user.id,
-              commentId: commentId,
-              value,
-              voteType: 'COMMENT',
-              isQualityVote: true,
-              postId: null,
-              answerId: null
-            }
-          });
-        }
-
-        // Count votes
-        const [upvotes, downvotes] = await Promise.all([
-          tx.vote.count({
-            where: {
-              commentId: commentId,
-              voteType: 'COMMENT',
-              isQualityVote: true,
-              value: 1
-            }
-          }),
-          tx.vote.count({
-            where: {
-              commentId: commentId,
-              voteType: 'COMMENT',
-              isQualityVote: true,
-              value: -1
-            }
-          })
-        ]);
-
-        // Update comment vote counts
-        const updatedComment = await tx.comment.update({
-          where: { id: commentId },
-          data: {
-            upvotes,
-            downvotes
-          }
-        });
-
-        return {
-          comment: updatedComment,
-          userVote: value
-        };
-      });
-
-      return json({ 
-        success: true,
-        upvotes: result.comment.upvotes,
-        downvotes: result.comment.downvotes,
-        userVote: result.userVote
-      });
-    } catch (error) {
-      return json({ 
-        error: 'Failed to process vote',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      }, { 
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-  } catch (error) {
-    return json({ 
-      error: 'Failed to process vote',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { 
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  }
-}; 
+} 

@@ -2,235 +2,178 @@
 import bcrypt from 'bcryptjs'
 import type { RegisterForm, User, Post, PostForm, Profile } from './types.server'
 import { getUser } from './auth.server'
-import { prisma } from './prisma.server'
 import { addReputationPoints, REPUTATION_POINTS } from './reputation.server'
 import { getProfilePicture } from './profile.server'
 import { SolanaAddressService } from './solana-address.server'
+import type { Db } from './db.server';
+import { users, profiles, posts as postsTable, virtualWallets, codeBlocks, media as mediaTable } from '../../drizzle/schema';
+import { eq, and, desc, sql } from 'drizzle-orm';
 
-export async function createUser({ email, password, username }: RegisterForm) {
+export async function createUser(db: Db, { email, password, username }: RegisterForm) {
     const hashedPassword = await bcrypt.hash(password, 10)
-    
-    // Generate Solana addresses for the new user
     const { solanaAddress, tokenAccountAddress } = await SolanaAddressService.generateUserAddresses();
-    
-    const user = await prisma.user.create({
-        data: {
-            email,
-            password: hashedPassword,
-            username,
-            solanaAddress,
-            tokenAccountAddress,
-            profile: {
-                create: {
-                    firstName: '',
-                    lastName: '',
-                },
-            },
-        },
-    })
-    // Create a virtual wallet for the user
-    await prisma.virtualWallet.create({
-        data: {
-            userId: user.id,
-            balance: 0,
-            totalDeposited: 0,
-            totalWithdrawn: 0,
-            totalEarned: 0,
-            totalSpent: 0,
-        }
-    });
-    return user
+    const userId = crypto.randomUUID();
+    const [user] = await db.insert(users).values({
+        id: userId,
+        email,
+        password: hashedPassword,
+        username,
+        solanaAddress,
+        tokenAccountAddress,
+    }).returning().all();
+    await db.insert(profiles).values({
+        id: crypto.randomUUID(),
+        userId: user.id,
+        firstName: '',
+        lastName: '',
+    }).run();
+    await db.insert(virtualWallets).values({
+        id: crypto.randomUUID(),
+        userId: user.id,
+        balance: 0,
+        totalDeposited: 0,
+        totalWithdrawn: 0,
+        totalEarned: 0,
+        totalSpent: 0,
+    }).run();
+    return user;
 }
 
-export const editUser = async (inputData: { profile: Partial<Profile> }, request: Request) => {
+export const editUser = async (db: Db, inputData: { profile: Partial<Profile> }, request: Request) => {
     const user = await getUser(request);
-    if (!user) {
-        throw new Error('User not found');
-    }
-
+    if (!user) throw new Error('User not found');
     const { profile } = inputData;
-
-    // First, ensure the profile exists
-    const existingProfile = await prisma.profile.findUnique({
-        where: { userId: user.id }
-    });
-
+    const existingProfile = await db.query.profiles.findFirst({ where: eq(profiles.userId, user.id) });
     if (!existingProfile) {
-        // Create new profile
-        const newProfile = await prisma.profile.create({
-            data: {
-                userId: user.id,
-                firstName: profile.firstName || '',
-                lastName: profile.lastName || '',
-                profilePicture: profile.profilePicture,
-                bio: profile.bio || '',
-                location: profile.location || '',
-                website: profile.website || '',
-                facebook: profile.facebook || '',
-                twitter: profile.twitter || '',
-                instagram: profile.instagram || '',
-                linkedin: profile.linkedin || '',
-                github: profile.github || '',
-                youtube: profile.youtube || '',
-                tiktok: profile.tiktok || '',
-                discord: profile.discord || '',
-                reddit: profile.reddit || '',
-                medium: profile.medium || '',
-                stackoverflow: profile.stackoverflow || '',
-                devto: profile.devto || ''
-            }
-        });
+        await db.insert(profiles).values({
+            id: crypto.randomUUID(),
+            userId: user.id,
+            firstName: profile.firstName || '',
+            lastName: profile.lastName || '',
+            profilePicture: profile.profilePicture,
+            bio: profile.bio || '',
+            location: profile.location || '',
+            website: profile.website || '',
+            facebook: profile.facebook || '',
+            twitter: profile.twitter || '',
+            instagram: profile.instagram || '',
+            linkedin: profile.linkedin || '',
+            github: profile.github || '',
+            youtube: profile.youtube || '',
+            tiktok: profile.tiktok || '',
+            discord: profile.discord || '',
+            reddit: profile.reddit || '',
+            medium: profile.medium || '',
+            stackoverflow: profile.stackoverflow || '',
+            devto: profile.devto || ''
+        }).run();
     } else {
-        // Update existing profile
-        const updatedProfile = await prisma.profile.update({
-            where: { userId: user.id },
-            data: {
-                firstName: profile.firstName ?? existingProfile.firstName,
-                lastName: profile.lastName ?? existingProfile.lastName,
-                profilePicture: profile.profilePicture ?? existingProfile.profilePicture,
-                bio: profile.bio ?? existingProfile.bio,
-                location: profile.location ?? existingProfile.location,
-                website: profile.website ?? existingProfile.website,
-                facebook: profile.facebook ?? existingProfile.facebook,
-                twitter: profile.twitter ?? existingProfile.twitter,
-                instagram: profile.instagram ?? existingProfile.instagram,
-                linkedin: profile.linkedin ?? existingProfile.linkedin,
-                github: profile.github ?? existingProfile.github,
-                youtube: profile.youtube ?? existingProfile.youtube,
-                tiktok: profile.tiktok ?? existingProfile.tiktok,
-                discord: profile.discord ?? existingProfile.discord,
-                reddit: profile.reddit ?? existingProfile.reddit,
-                medium: profile.medium ?? existingProfile.medium,
-                stackoverflow: profile.stackoverflow ?? existingProfile.stackoverflow,
-                devto: profile.devto ?? existingProfile.devto
-            }
-        });
+        await db.update(profiles).set({
+            firstName: profile.firstName ?? existingProfile.firstName,
+            lastName: profile.lastName ?? existingProfile.lastName,
+            profilePicture: profile.profilePicture ?? existingProfile.profilePicture,
+            bio: profile.bio ?? existingProfile.bio,
+            location: profile.location ?? existingProfile.location,
+            website: profile.website ?? existingProfile.website,
+            facebook: profile.facebook ?? existingProfile.facebook,
+            twitter: profile.twitter ?? existingProfile.twitter,
+            instagram: profile.instagram ?? existingProfile.instagram,
+            linkedin: profile.linkedin ?? existingProfile.linkedin,
+            github: profile.github ?? existingProfile.github,
+            youtube: profile.youtube ?? existingProfile.youtube,
+            tiktok: profile.tiktok ?? existingProfile.tiktok,
+            discord: profile.discord ?? existingProfile.discord,
+            reddit: profile.reddit ?? existingProfile.reddit,
+            medium: profile.medium ?? existingProfile.medium,
+            stackoverflow: profile.stackoverflow ?? existingProfile.stackoverflow,
+            devto: profile.devto ?? existingProfile.devto
+        }).where(eq(profiles.userId, user.id)).run();
     }
-
-    // Return the updated user with profile
-    const updatedUser = await prisma.user.findUnique({
-        where: { id: user.id },
-        include: { profile: true }
-    });
-    
-    if (!updatedUser) {
-        throw new Error('Failed to fetch updated user data');
-    }
-    
+    const updatedUser = await db.query.users.findFirst({ where: eq(users.id, user.id) });
     return updatedUser;
 };
 
-export const getUserPosts = async (username: string) => {
+export const getUserPosts = async (db: Db, username: string) => {
   try {
-    const user = await prisma.user.findUnique({
-      where: { username },
-      select: {
-        id: true,
+    const user = await db.query.users.findFirst({
+      where: eq(users.username, username),
+      with: {
         posts: {
-          orderBy: {
-            createdAt: 'desc'
-          }
+          orderBy: [desc(postsTable.createdAt)]
         }
       }
     });
-
-    if (!user) {
-      return [];
-    }
-
+    if (!user) return [];
     return user.posts;
   } catch (error) {
     return [];
   }
 }
 
-export const createPost = async (post: PostForm) => {
+export const createPost = async (db: Db, post: PostForm) => {
   try {
-    const newPost = await prisma.posts.create({
-      data: {
-        title: post.title,
-        content: post.content,
-        authorId: post.authorId,
-        codeBlocks: {
-          create: post.codeBlocks
-        },
-        media: {
-          create: post.media.map(media => ({
-            ...media,
-            cloudinaryId: media.url.split('/').pop()?.split('.')[0] || 'default' // Extract cloudinary ID from URL
-          }))
-        }
-      }
-    });
-
-    // Award reputation points for creating a post
-    await addReputationPoints(
-      post.authorId,
-      REPUTATION_POINTS.POST_CREATED,
-      'POST_CREATED',
-      newPost.id
-    );
-
+    const postId = crypto.randomUUID();
+    const [newPost] = await db.insert(postsTable).values({
+      id: postId,
+      title: post.title,
+      content: post.content,
+      authorId: post.authorId,
+    }).returning().all();
+    for (const cb of post.codeBlocks) {
+      await db.insert(codeBlocks).values({
+        id: crypto.randomUUID(),
+        postId: newPost.id,
+        language: cb.language,
+        code: cb.code,
+        description: cb.description,
+      }).run();
+    }
+    for (const m of post.media) {
+      await db.insert(mediaTable).values({
+        id: crypto.randomUUID(),
+        postId: newPost.id,
+        type: m.type,
+        url: m.url,
+        thumbnailUrl: m.thumbnailUrl,
+        isScreenRecording: m.isScreenRecording,
+        cloudinaryId: m.url.split('/').pop()?.split('.')[0] || 'default',
+      }).run();
+    }
+    await addReputationPoints(db, post.authorId, REPUTATION_POINTS.POST_CREATED, 'POST_CREATED', newPost.id);
     return newPost;
   } catch (error) {
     throw error;
   }
 };
 
-export async function deletePost(postId: string) {
-    try {
-        await prisma.posts.delete({
-            where: { id: postId }
-        });
-
-        return { success: true };
-    } catch (error) {
-        throw error;
-    }
+export async function deletePost(db: Db, postId: string) {
+    await db.delete(postsTable).where(eq(postsTable.id, postId)).run();
+    return { success: true };
 }
 
 type UserLookupType = 'id' | 'email' | 'username';
-export async function getUserById(userId: string) {
-    return prisma.user.findUnique({
-        where: { id: userId },
-        include: { profile: true },
-    })
+export async function getUserById(db: Db, userId: string) {
+    return db.query.users.findFirst({ where: eq(users.id, userId) });
 }
 
-export async function updateUser(userId: string, data: { firstName?: string; lastName?: string }) {
-    return prisma.user.update({
-        where: { id: userId },
-        data: {
-            profile: {
-                update: data,
-            },
-        },
-        include: { profile: true },
-    })
+export async function updateUser(db: Db, userId: string, data: { firstName?: string; lastName?: string }) {
+    await db.update(profiles).set(data).where(eq(profiles.userId, userId)).run();
+    return db.query.users.findFirst({ where: eq(users.id, userId) });
 }
 
-export async function deleteUser(userId: string) {
-    return prisma.user.delete({
-        where: { id: userId },
-    })
+export async function deleteUser(db: Db, userId: string) {
+    await db.delete(users).where(eq(users.id, userId)).run();
+    return { success: true };
 }
 
-export async function getAllUsers() {
-    return prisma.user.findMany({
-        include: { profile: true },
-    })
+export async function getAllUsers(db: Db) {
+    return db.query.users.findMany();
 }
 
-export async function getUserByEmail(email: string) {
-    return prisma.user.findUnique({
-        where: { email },
-        include: { profile: true },
-    })
+export async function getUserByEmail(db: Db, email: string) {
+    return db.query.users.findFirst({ where: eq(users.email, email) });
 }
 
-export async function getUserByUsername(username: string) {
-    return prisma.user.findUnique({
-        where: { username },
-        include: { profile: true },
-    })
+export async function getUserByUsername(db: Db, username: string) {
+    return db.query.users.findFirst({ where: eq(users.username, username) });
 }
