@@ -1,4 +1,12 @@
-import * as puppeteer from 'puppeteer';
+// Conditional import for puppeteer - will be undefined in Workers environment
+let puppeteer: any = null;
+try {
+  puppeteer = require('puppeteer');
+} catch (error) {
+  // Puppeteer not available in Workers environment
+  console.warn('Puppeteer not available in current environment');
+}
+
 import { renderToString } from 'react-dom/server';
 import React from 'react';
 
@@ -17,9 +25,13 @@ export interface PDFOptions {
 }
 
 export class PDFService {
-  private static browser: puppeteer.Browser | null = null;
+  private static browser: any = null;
 
-  private static async getBrowser(): Promise<puppeteer.Browser> {
+  private static async getBrowser(): Promise<any> {
+    if (!puppeteer) {
+      throw new Error('Puppeteer is not available in this environment');
+    }
+    
     if (!this.browser) {
       this.browser = await puppeteer.launch({
         headless: true,
@@ -33,6 +45,10 @@ export class PDFService {
     htmlContent: string,
     options: PDFOptions = {}
   ): Promise<Buffer> {
+    if (!puppeteer) {
+      throw new Error('PDF generation is not available in this environment');
+    }
+
     const browser = await this.getBrowser();
     const page = await browser.newPage();
 
@@ -67,6 +83,10 @@ export class PDFService {
     component: React.ReactElement,
     options: PDFOptions = {}
   ): Promise<Buffer> {
+    if (!puppeteer) {
+      throw new Error('PDF generation is not available in this environment');
+    }
+
     const htmlString = renderToString(component);
     
     // Create a complete HTML document
@@ -124,6 +144,11 @@ export class PDFService {
       this.browser = null;
     }
   }
+
+  // Check if PDF generation is available
+  static isAvailable(): boolean {
+    return puppeteer !== null;
+  }
 }
 
 // Helper function to create a simple PDF from text content
@@ -132,6 +157,10 @@ export async function createSimplePDF(
   content: string,
   options: PDFOptions = {}
 ): Promise<Buffer> {
+  if (!puppeteer) {
+    throw new Error('PDF generation is not available in this environment');
+  }
+
   const htmlContent = `
     <!DOCTYPE html>
     <html>

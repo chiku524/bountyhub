@@ -6,7 +6,7 @@ import { z } from "zod";
 import bountyBucksInfo from '../../bounty-bucks-info.json';
 import { confirmDeposit } from '~/utils/virtual-wallet.server';
 
-const TOKEN_SYMBOL = bountyBucksInfo.config.symbol;
+const TOKEN_SYMBOL = bountyBucksInfo.symbol;
 
 const depositSchema = z.object({
   amount: z.number().positive().max(10000),

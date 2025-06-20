@@ -20,7 +20,7 @@ import bountyBucksInfo from '../../bounty-bucks-info.json'
 import { BountyForm } from '~/components/BountyForm'
 import { FiGift, FiDollarSign, FiClock, FiInfo } from 'react-icons/fi'
 
-const TOKEN_SYMBOL = bountyBucksInfo.config.symbol
+const TOKEN_SYMBOL = bountyBucksInfo.symbol
 
 interface Tag {
   id: string;

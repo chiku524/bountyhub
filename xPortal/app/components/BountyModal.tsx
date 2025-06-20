@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Form } from '@remix-run/react';
 import bountyBucksInfo from '../../bounty-bucks-info.json';
 
-const TOKEN_SYMBOL = bountyBucksInfo.config.symbol;
-const TOKEN_DECIMALS = bountyBucksInfo.config.decimals;
+const TOKEN_SYMBOL = bountyBucksInfo.symbol;
+const TOKEN_DECIMALS = 9; // From the attributes in the JSON
 
 interface BountyModalProps {
   isOpen: boolean;

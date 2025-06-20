@@ -7,8 +7,17 @@ interface MediaUploadProps {
   uploadedMedia: Array<{ type: string; url: string; thumbnailUrl?: string; isScreenRecording: boolean }>;
 }
 
+interface CloudinaryUploadResult {
+  secure_url: string;
+  public_id: string;
+  format: string;
+  width?: number;
+  height?: number;
+  duration?: number;
+}
+
 // Helper to upload a file/blob to Cloudinary
-async function uploadToCloudinary(file: File | Blob, resourceType: 'image' | 'video', uploadPreset: string, cloudName: string, folder: string) {
+async function uploadToCloudinary(file: File | Blob, resourceType: 'image' | 'video', uploadPreset: string, cloudName: string, folder: string): Promise<CloudinaryUploadResult> {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('upload_preset', uploadPreset);
@@ -21,7 +30,7 @@ async function uploadToCloudinary(file: File | Blob, resourceType: 'image' | 'vi
   if (!response.ok) {
     throw new Error('Failed to upload to Cloudinary');
   }
-  return response.json();
+  return response.json() as Promise<CloudinaryUploadResult>;
 }
 
 export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: MediaUploadProps) {

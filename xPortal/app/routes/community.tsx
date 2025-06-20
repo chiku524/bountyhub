@@ -125,11 +125,9 @@ export const loader: LoaderFunction = async ({ request, context }) => {
     const skip = (page - 1) * perPage;
 
     // Build where clause for tag filtering and search
-    let whereConditions = [];
+    let whereConditions: any[] = [];
     
     if (selectedTags.length > 0) {
-      // For tag filtering, we need to join with postTags
-      // This is a simplified approach - in a real implementation you'd need proper joins
       whereConditions.push(sql`EXISTS (
         SELECT 1 FROM post_tags pt 
         JOIN tags t ON pt.tag_id = t.id 
@@ -147,7 +145,7 @@ export const loader: LoaderFunction = async ({ request, context }) => {
     }
 
     // Fetch posts with pagination
-    const postsQuery = db
+    const baseQuery = db
       .select({
         id: posts.id,
         title: posts.title,
@@ -165,36 +163,38 @@ export const loader: LoaderFunction = async ({ request, context }) => {
       .limit(perPage)
       .offset(skip);
 
-    if (whereConditions.length > 0) {
-      postsQuery.where(and(...whereConditions));
-    }
+    const finalQuery = whereConditions.length > 0 
+      ? baseQuery.where(and(...whereConditions))
+      : baseQuery;
 
-    const posts = await postsQuery;
+    const postsData = await finalQuery;
 
     // Fetch related data for each post
     const postsWithData = await Promise.all(
-      posts.map(async (post) => {
+      postsData.map(async (post: any) => {
         // Get author info
-        const author = await db
+        const authorArr = await db
           .select({
             id: users.id,
             username: users.username,
           })
           .from(users)
           .where(eq(users.id, post.authorId))
-          .get();
+          .limit(1);
+        const author = authorArr[0] || { id: '', username: 'Unknown' };
 
         // Get profile picture
-        const profile = await db
+        const profileArr = await db
           .select({
             profilePicture: profiles.profilePicture,
           })
           .from(profiles)
           .where(eq(profiles.userId, post.authorId))
-          .get();
+          .limit(1);
+        const profilePicture = profileArr[0]?.profilePicture || null;
 
         // Get tags
-        const postTags = await db
+        const postTagsArr = await db
           .select({
             tagId: postTags.tagId,
           })
@@ -202,87 +202,102 @@ export const loader: LoaderFunction = async ({ request, context }) => {
           .where(eq(postTags.postId, post.id));
 
         const tagNames = await Promise.all(
-          postTags.map(async (pt) => {
-            const tag = await db
+          postTagsArr.map(async (pt: { tagId: string }) => {
+            const tagArr = await db
               .select({
+                id: tags.id,
                 name: tags.name,
                 color: tags.color,
               })
               .from(tags)
               .where(eq(tags.id, pt.tagId))
-              .get();
-            return tag;
+              .limit(1);
+            return tagArr[0] || null;
           })
         );
 
         // Get comments count
-        const commentsCount = await db
+        const commentsCountArr = await db
           .select({ count: sql<number>`count(*)` })
           .from(comments)
-          .where(eq(comments.postId, post.id))
-          .get();
+          .where(eq(comments.postId, post.id));
+        const commentsCount = commentsCountArr[0]?.count || 0;
 
         // Get bounty info if exists
         let bounty = null;
         if (post.hasBounty) {
-          bounty = await db
+          const bountyArr = await db
             .select({
+              id: bounties.id,
               amount: bounties.amount,
               status: bounties.status,
             })
             .from(bounties)
             .where(eq(bounties.postId, post.id))
-            .get();
+            .limit(1);
+          bounty = bountyArr[0] || null;
         }
 
         return {
           ...post,
-          author: author || { id: '', username: 'Unknown' },
-          profile: profile || { profilePicture: null },
+          author: {
+            id: author.id,
+            username: author.username,
+            profilePicture,
+          },
           tags: tagNames.filter(Boolean),
-          commentsCount: commentsCount?.count || 0,
+          comments: commentsCount,
+          hasBounty: post.hasBounty,
           bounty,
         };
       })
     );
 
     // Get total count for pagination
-    const totalCount = await db
+    const totalCountArr = await db
       .select({ count: sql<number>`count(*)` })
-      .from(posts)
-      .get();
+      .from(posts);
+    const totalCount = totalCountArr[0]?.count || 0;
 
     return json({
       posts: postsWithData,
-      pagination: {
-        page,
-        perPage,
-        total: totalCount?.count || 0,
-        totalPages: Math.ceil((totalCount?.count || 0) / perPage),
-      },
-      currentUser: user,
+      totalPosts: totalCount,
+      currentPage: page,
+      totalPages: Math.ceil(totalCount / perPage),
+      availableTags: [], // TODO: implement tag fetching if needed
+      selectedTags,
+      searchQuery,
+      user,
     });
   } catch (error) {
     console.error('Error loading community posts:', error);
     return json({
       posts: [],
-      pagination: { page: 1, perPage: 20, total: 0, totalPages: 0 },
-      currentUser: null,
+      totalPosts: 0,
+      currentPage: 1,
+      totalPages: 1,
+      availableTags: [],
+      selectedTags: [],
+      searchQuery: '',
+      user: null,
     });
   }
 };
 
-export const action: ActionFunction = async ({ request }) => {
+export const action: ActionFunction = async ({ request, context }) => {
   try {
     const user = await getUser(request);
     if (!user) {
       return json({ error: 'You must be logged in to perform this action' }, { status: 401 });
     }
 
+    const db = createDb((context as any).env.DB);
     const formData = await request.formData();
     const action = formData.get('action');
-    const postId = formData.get('postId');
-    const isVoting = formData.get('isVoting') === 'true';
+    const postIdRaw = formData.get('postId');
+    const postId = typeof postIdRaw === 'string' ? postIdRaw : undefined;
+    const isVotingRaw = formData.get('isVoting');
+    const isVoting = isVotingRaw === 'true';
 
     if (!postId) {
       return json({ error: 'Post ID is required' }, { status: 400 });
@@ -291,43 +306,48 @@ export const action: ActionFunction = async ({ request }) => {
     if (action === 'vote') {
       try {
         // Use a transaction to ensure atomic operations
-        const result = await createDb().transaction(async (tx) => {
+        const result = await db.transaction(async (tx) => {
           // First, delete any existing vote for this user and post
-          await tx.delete(posts.votes).where(and(
-            eq(posts.votes.userId),
-            eq(posts.votes.postId),
-            eq(posts.votes.voteType),
-            eq(posts.votes.isQualityVote)
+          await tx.delete(votes).where(and(
+            eq(votes.userId, user.id),
+            eq(votes.postId, postId),
+            eq(votes.voteType, 'POST'),
+            eq(votes.isQualityVote, false)
           ));
 
           if (isVoting) {
             // Create new vote with all required fields set
-              await tx.insert(posts.votes).values({
-                userId: user.id,
-                postId: postId as string,
-                value: 1,
-                voteType: 'POST',
-                isQualityVote: false,
-                commentId: null,
-                answerId: null
-              });
+            await tx.insert(votes).values({
+              id: crypto.randomUUID(),
+              userId: user.id,
+              postId: postId,
+              value: 1,
+              voteType: 'POST',
+              isQualityVote: false,
+              commentId: null,
+              answerId: null
+            });
           }
 
           // Count visibility votes (only positive votes)
-          const visibilityVotes = await tx.count(posts.votes).where(and(
-            eq(posts.votes.postId),
-            eq(posts.votes.voteType),
-            eq(posts.votes.isQualityVote),
-            eq(posts.votes.value)
-          ));
+          const visibilityVotesArr = await tx
+            .select({ count: sql<number>`count(*)` })
+            .from(votes)
+            .where(and(
+              eq(votes.postId, postId),
+              eq(votes.voteType, 'POST'),
+              eq(votes.isQualityVote, false),
+              eq(votes.value, 1)
+            ));
+          const visibilityVotes = visibilityVotesArr[0]?.count || 0;
 
           // Update post with new vote count
-          const updatedPost = await tx.update(posts).set({
+          const updatedPostArr = await tx.update(posts).set({
             visibilityVotes
-          }).where(eq(posts.id, postId as string));
+          }).where(eq(posts.id, postId)).returning();
 
           return {
-            post: updatedPost,
+            post: updatedPostArr[0],
             userVoted: isVoting
           };
         });
@@ -336,7 +356,7 @@ export const action: ActionFunction = async ({ request }) => {
           success: true,
           votes: result.post.visibilityVotes,
           voted: result.userVoted,
-          postId: postId as string
+          postId: postId
         });
       } catch (error) {
         return json({ 
@@ -346,22 +366,18 @@ export const action: ActionFunction = async ({ request }) => {
       }
     } else if (action === 'delete') {
       // Check if the post exists and belongs to the user
-      const post = await createDb().table(posts).select().where(eq(posts.id, postId as string)).limit(1);
-
+      const postArr = await db.select().from(posts).where(eq(posts.id, postId)).limit(1);
+      const post = postArr[0];
       if (!post) {
         return json({ error: 'Post not found' }, { status: 404 });
       }
-
       if (post.authorId !== user.id) {
         return json({ error: 'You can only delete your own posts' }, { status: 403 });
       }
-
       // Delete the post
-      await createDb().delete(posts).where(eq(posts.id, postId as string));
-
+      await db.delete(posts).where(eq(posts.id, postId));
       return json({ success: true });
     }
-
     return json({ error: 'Invalid action' }, { status: 400 });
   } catch (error) {
     console.error('Action error:', error);
@@ -452,7 +468,7 @@ export default function Community() {
         }
         
         const data = await res.json();
-        setBookmarkedPosts(data.status);
+        setBookmarkedPosts((data as { status: { [postId: string]: boolean } }).status);
       } catch (error) {
         console.error('Error fetching bookmark status:', error);
       }

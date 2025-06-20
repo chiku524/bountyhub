@@ -1,8 +1,9 @@
 import bountyBucksInfo from '../../bounty-bucks-info.json';
-const TOKEN_SYMBOL = bountyBucksInfo.config.symbol;
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { virtualWallets, walletTransactions, bounties } from '../../drizzle/schema';
 import type { Db } from './db.server';
+
+const TOKEN_SYMBOL = bountyBucksInfo.symbol;
 
 export interface VirtualWallet {
   id: string;

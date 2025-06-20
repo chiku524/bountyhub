@@ -9,8 +9,8 @@ import { DirectDeposit } from "~/components/DirectDeposit";
 import bountyBucksInfo from '../../bounty-bucks-info.json';
 import { TokenSupplyService } from "../utils/token-supply.server";
 
-const TOKEN_SYMBOL = bountyBucksInfo.config.symbol;
-const TOKEN_DECIMALS = bountyBucksInfo.config.decimals;
+const TOKEN_SYMBOL = bountyBucksInfo.symbol;
+const TOKEN_DECIMALS = 9; // From the attributes in the JSON
 
 export const meta: MetaFunction = () => {
   return [
@@ -27,12 +27,13 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   }
 
   const walletData = await getWalletDetails(db, user.id);
+  const supplyStats = await TokenSupplyService.getSupplyStats();
 
-  return json({ user, walletData });
+  return json({ user, walletData, supplyStats });
 }
 
 export default function WalletPage() {
-  const { walletData, user } = useLoaderData<typeof loader>();
+  const { walletData, user, supplyStats } = useLoaderData<typeof loader>();
   const { wallet, transactions } = walletData;
   const [activeTab, setActiveTab] = useState<'overview' | 'deposit' | 'withdraw'>('overview');
   const [showDepositModal, setShowDepositModal] = useState(false);
@@ -170,17 +171,17 @@ export default function WalletPage() {
           <div className="flex justify-between items-center">
             <div>
               <h2 className="text-2xl font-semibold mb-2">Virtual Balance</h2>
-              <p className="text-3xl font-bold">{wallet.balance.toFixed(4)} {TOKEN_SYMBOL}</p>
+              <p className="text-3xl font-bold">{wallet ? wallet.balance.toFixed(4) : '0.0000'} {TOKEN_SYMBOL}</p>
               <p className="text-blue-100 mt-2">Available for bounties and withdrawals</p>
             </div>
             <div className="text-right">
               <div className="mb-2">
                 <p className="text-blue-100">Total Earned</p>
-                <p className="text-xl font-semibold">{wallet.totalEarned.toFixed(4)} {TOKEN_SYMBOL}</p>
+                <p className="text-xl font-semibold">{wallet ? wallet.totalEarned.toFixed(4) : '0.0000'} {TOKEN_SYMBOL}</p>
               </div>
               <div>
                 <p className="text-blue-100">Total Spent</p>
-                <p className="text-xl font-semibold">{wallet.totalSpent.toFixed(4)} {TOKEN_SYMBOL}</p>
+                <p className="text-xl font-semibold">{wallet ? wallet.totalSpent.toFixed(4) : '0.0000'} {TOKEN_SYMBOL}</p>
               </div>
             </div>
           </div>
@@ -499,7 +500,7 @@ export default function WalletPage() {
                     name="amount"
                     step="0.001"
                     min="0.001"
-                    max={wallet.balance}
+                    max={wallet ? wallet.balance : 0}
                     required
                     className="w-full px-3 py-2 border border-neutral-600 bg-neutral-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="0.1"
@@ -515,7 +516,7 @@ export default function WalletPage() {
                     }}
                   />
                   <p className="text-sm text-gray-400 mt-1">
-                    Available: {wallet.balance.toFixed(4)} {TOKEN_SYMBOL}
+                    Available: {wallet ? wallet.balance.toFixed(4) : '0.0000'} {TOKEN_SYMBOL}
                   </p>
                   <div className="mt-2 p-3 bg-neutral-700 rounded-md">
                     <div className="flex justify-between text-sm">

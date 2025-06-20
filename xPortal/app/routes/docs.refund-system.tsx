@@ -3,15 +3,21 @@ import { useLoaderData, Link } from '@remix-run/react';
 import { Layout } from '~/components/Layout';
 import { FiArrowLeft, FiDownload, FiExternalLink, FiClock, FiUsers, FiShield, FiAward, FiAlertTriangle } from 'react-icons/fi';
 
-export const loader: LoaderFunction = async () => {
-  return json({
-    title: "Refund System Guide",
-    description: "Complete guide to the community governance refund system and time-based restrictions"
+interface LoaderData {
+  title: string;
+  description: string;
+}
+
+export const loader: LoaderFunction = async (): Promise<Response> => {
+  return json<LoaderData>({
+    title: "Refund System Documentation",
+    description: "Understanding the refund system and dispute resolution"
   });
 };
 
 export default function RefundSystemDocsPage() {
-  const { title, description } = useLoaderData<typeof loader>();
+  const data = useLoaderData<typeof loader>();
+  const { title, description } = data as LoaderData;
 
   return (
     <Layout>

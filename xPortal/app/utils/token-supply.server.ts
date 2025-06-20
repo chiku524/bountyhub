@@ -1,11 +1,11 @@
 import { Connection, PublicKey } from "@solana/web3.js";
-import { getMint } from "@solana/spl-token";
+import { getAccount, getMint } from "@solana/spl-token";
 import bountyBucksInfo from '../../bounty-bucks-info.json';
 
 const SOLANA_RPC_URL = process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com";
-const TOKEN_MINT = bountyBucksInfo.mint;
-const INITIAL_SUPPLY = bountyBucksInfo.config.initialSupply;
-const TOKEN_DECIMALS = bountyBucksInfo.config.decimals;
+const TOKEN_MINT = new PublicKey(bountyBucksInfo.mint);
+const INITIAL_SUPPLY = 1000000000; // 1 billion tokens
+const TOKEN_DECIMALS = 9; // From the attributes in the JSON
 
 export class TokenSupplyService {
   private static connection = new Connection(SOLANA_RPC_URL);

@@ -1,5 +1,4 @@
-import { useWallet } from '@solana/wallet-adapter-react';
-import { PublicKey } from '@solana/web3.js';
+import { useState } from 'react';
 
 interface BountyInfoProps {
   bounty: {
@@ -14,78 +13,127 @@ interface BountyInfoProps {
 }
 
 export function BountyInfo({ bounty, onClaim }: BountyInfoProps) {
-  const { publicKey } = useWallet();
-  const isExpired = bounty.expiresAt && new Date(bounty.expiresAt) < new Date();
-  const canClaim = bounty.status === 'ACTIVE' && !isExpired && publicKey;
+  const [isLoading, setIsLoading] = useState(false);
+  const [walletHooks, setWalletHooks] = useState<any>(null);
+
+  // Dynamically load wallet hooks
+  useState(() => {
+    if (typeof window !== 'undefined') {
+      Promise.all([
+        import('@solana/wallet-adapter-react'),
+        import('@solana/web3.js')
+      ]).then(([
+        { useWallet },
+        { PublicKey }
+      ]) => {
+        setWalletHooks({ useWallet, PublicKey });
+      }).catch(error => {
+        console.error('Failed to load wallet hooks:', error);
+      });
+    }
+  });
+
+  const handleClaim = async () => {
+    if (!walletHooks) {
+      alert('Wallet not available');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await onClaim();
+    } catch (error) {
+      console.error('Claim error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const formatAmount = (amount: number) => {
+    return `${amount} BBUX`;
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'ACTIVE':
-        return 'text-green-600';
+        return 'text-green-400';
       case 'CLAIMED':
-        return 'text-blue-600';
+        return 'text-blue-400';
       case 'REFUNDED':
-        return 'text-yellow-600';
+        return 'text-yellow-400';
       case 'EXPIRED':
-        return 'text-red-600';
+        return 'text-red-400';
       default:
-        return 'text-gray-600';
+        return 'text-gray-400';
     }
   };
 
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'No expiration';
-    return new Date(dateString).toLocaleString();
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'ACTIVE':
+        return 'Active';
+      case 'CLAIMED':
+        return 'Claimed';
+      case 'REFUNDED':
+        return 'Refunded';
+      case 'EXPIRED':
+        return 'Expired';
+      default:
+        return status;
+    }
   };
 
   return (
-    <div className="bg-white shadow rounded-lg p-4 space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium text-gray-900">Bounty Details</h3>
-        <span className={`text-sm font-medium ${getStatusColor(bounty.status)}`}>
-          {bounty.status}
+    <div className="bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-xl font-bold text-white">Bounty Information</h3>
+        <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(bounty.status)}`}>
+          {getStatusText(bounty.status)}
         </span>
       </div>
-
-      <div className="space-y-2">
-        <div className="flex justify-between">
-          <span className="text-sm text-gray-500">Amount</span>
-          <span className="text-sm font-medium">{bounty.amount} SOL</span>
+      
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <span className="text-gray-400">Amount:</span>
+          <span className="text-white font-semibold">{formatAmount(bounty.amount)}</span>
         </div>
-
-        <div className="flex justify-between">
-          <span className="text-sm text-gray-500">Expires</span>
-          <span className="text-sm font-medium">{formatDate(bounty.expiresAt)}</span>
-        </div>
-
+        
+        {bounty.expiresAt && (
+          <div className="flex justify-between items-center">
+            <span className="text-gray-400">Expires:</span>
+            <span className="text-white">
+              {new Date(bounty.expiresAt).toLocaleDateString()}
+            </span>
+          </div>
+        )}
+        
+        {bounty.winnerId && (
+          <div className="flex justify-between items-center">
+            <span className="text-gray-400">Winner:</span>
+            <span className="text-white">
+              {bounty.winnerId.slice(0, 8)}...{bounty.winnerId.slice(-8)}
+            </span>
+          </div>
+        )}
+        
         {bounty.signature && (
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-500">Transaction</span>
-            <a
-              href={`https://explorer.solana.com/tx/${bounty.signature}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
-            >
-              View on Explorer
-            </a>
+          <div className="flex justify-between items-center">
+            <span className="text-gray-400">Transaction:</span>
+            <span className="text-white text-sm">
+              {bounty.signature.slice(0, 8)}...{bounty.signature.slice(-8)}
+            </span>
           </div>
         )}
       </div>
-
-      {canClaim && (
+      
+      {bounty.status === 'ACTIVE' && (
         <button
-          onClick={onClaim}
-          className="w-full inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          onClick={handleClaim}
+          disabled={isLoading || !walletHooks}
+          className="w-full mt-6 py-2 px-4 bg-violet-600 text-white rounded-md hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          Claim Bounty
+          {isLoading ? 'Claiming...' : 'Claim Bounty'}
         </button>
-      )}
-
-      {isExpired && bounty.status === 'ACTIVE' && (
-        <div className="text-sm text-red-600">
-          This bounty has expired
-        </div>
       )}
     </div>
   );

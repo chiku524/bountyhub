@@ -19,8 +19,8 @@ import {
 } from 'react-icons/fa'
 import { FiThumbsUp, FiEdit2 } from 'react-icons/fi'
 import IntegrityDisplay from '~/components/IntegrityDisplay'
-import { eq } from 'drizzle-orm'
-import { users, profiles } from '../../drizzle/schema'
+import { eq, desc, inArray, sql } from 'drizzle-orm'
+import { users, profiles, posts, comments, reputationHistory } from '../../drizzle/schema'
 import type { DrizzleD1Database } from 'drizzle-orm/d1'
 
 const DEFAULT_PROFILE_PICTURE = 'https://api.dicebear.com/7.x/initials/svg?seed=';
@@ -157,7 +157,7 @@ interface CloudflareContext {
   };
 }
 
-export async function loader({ params, context }: LoaderFunctionArgs) {
+export async function loader({ params, context, request }: LoaderFunctionArgs) {
   const { username } = params;
   
   if (!username) {
@@ -166,6 +166,7 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
 
   try {
     const db = (context as unknown as CloudflareContext).env.DB;
+    const currentUser = await getUser(request);
 
     const user = await db
       .select({
@@ -196,7 +197,68 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
       throw new Response('User not found', { status: 404 });
     }
 
-    return json({ user: user[0] });
+    // Get user's posts
+    const userPosts = await db
+      .select({
+        id: posts.id,
+        title: posts.title,
+        content: posts.content,
+        createdAt: posts.createdAt,
+        visibilityVotes: posts.visibilityVotes,
+      })
+      .from(posts)
+      .where(eq(posts.authorId, user[0].id))
+      .orderBy(desc(posts.createdAt))
+      .limit(5);
+
+    // Get comment counts for posts
+    const postIds = userPosts.map(post => post.id);
+    const commentCounts = postIds.length > 0 ? await db
+      .select({
+        postId: comments.postId,
+        count: sql<number>`count(${comments.id})`,
+      })
+      .from(comments)
+      .where(inArray(comments.postId, postIds))
+      .groupBy(comments.postId) : [];
+
+    // Get reputation history
+    const userReputationHistory = await db
+      .select({
+        id: reputationHistory.id,
+        points: reputationHistory.points,
+        action: reputationHistory.action,
+        createdAt: reputationHistory.createdAt,
+      })
+      .from(reputationHistory)
+      .where(eq(reputationHistory.userId, user[0].id))
+      .orderBy(desc(reputationHistory.createdAt))
+      .limit(10);
+
+    const transformedPosts = userPosts.map(post => ({
+      id: post.id,
+      title: post.title,
+      content: post.content,
+      createdAt: post.createdAt.toISOString(),
+      visibilityVotes: post.visibilityVotes,
+      comments: commentCounts.find(c => c.postId === post.id)?.count || 0,
+    }));
+
+    const transformedReputationHistory = userReputationHistory.map((history: any) => ({
+      id: history.id,
+      points: history.points,
+      action: history.action,
+      createdAt: history.createdAt.toISOString(),
+    }));
+
+    return json({ 
+      user: {
+        ...user[0],
+        posts: transformedPosts,
+        reputationHistory: transformedReputationHistory,
+      },
+      currentUser,
+    });
   } catch (error) {
     console.error('Error fetching user:', error);
     throw new Response('Failed to fetch user', { status: 500 });
@@ -204,7 +266,7 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
 }
 
 export default function UserProfile() {
-    const { user } = useLoaderData<typeof loader>();
+    const { user, currentUser } = useLoaderData<typeof loader>();
     const reputationLevel = getReputationLevel(user.reputationPoints);
 
     const profilePicture = getProfilePicture(user.profile?.profilePicture || null, user.username);
@@ -288,7 +350,7 @@ export default function UserProfile() {
                                     integrityScore: user.integrityScore,
                                     totalRatings: user.totalRatings,
                                 }}
-                                currentUserId={user.currentUser?.id}
+                                currentUserId={currentUser?.id}
                                 canRate={true}
                             />
                         </div>
@@ -298,7 +360,7 @@ export default function UserProfile() {
                                 <h2 className="text-lg font-semibold text-violet-300 mb-4">Recent Activity</h2>
                                 <div className="space-y-2">
                                     {user.reputationHistory.length > 0 ? (
-                                        user.reputationHistory.map((history) => (
+                                        user.reputationHistory.map((history: any) => (
                                             <div key={history.id} className="flex items-center justify-between p-3 bg-neutral-700/50 rounded-lg border border-violet-500/30">
                                                 <div className="flex items-center gap-2">
                                                     <div className="p-1.5 bg-violet-500/20 rounded-lg">
@@ -328,7 +390,7 @@ export default function UserProfile() {
                                 <h2 className="text-lg font-semibold text-violet-300 mb-4">Recent Posts</h2>
                                 <div className="space-y-2">
                                     {user.posts.length > 0 ? (
-                                        user.posts.map((post) => (
+                                        user.posts.map((post: any) => (
                                             <div key={post.id} className="p-3 bg-neutral-700/50 rounded-lg border border-violet-500/30">
                                                 <Link to={`/posts/${post.id}`} className="block hover:bg-neutral-600/50 rounded-lg p-1.5 -m-1.5 transition-colors">
                                                     <div className="flex items-center gap-2 mb-1">

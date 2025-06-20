@@ -1,0 +1,1 @@
+import{b as e}from"/build/_shared/chunk-G5WX4PPA.js";var s=e((r,a)=>{function n(t){return{name:"Node REPL",contains:[{className:"meta",starts:{end:/ |$/,starts:{end:"$",subLanguage:"javascript"}},variants:[{begin:/^>(?=[ ]|$)/},{begin:/^\.\.\.(?=[ ]|$)/}]}]}}a.exports=n});export default s();

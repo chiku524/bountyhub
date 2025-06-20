@@ -8,6 +8,12 @@ interface ProfilePictureUploadProps {
   username: string;
 }
 
+interface ProfilePictureResponse {
+  success: boolean;
+  profilePicture?: string;
+  error?: string;
+}
+
 export function ProfilePictureUpload({ currentPicture, username }: ProfilePictureUploadProps) {
   const [preview, setPreview] = useState<string | null>(currentPicture);
   const [isUploading, setIsUploading] = useState(false);
@@ -55,11 +61,11 @@ export function ProfilePictureUpload({ currentPicture, username }: ProfilePictur
         body: formData,
       });
 
-      const result = await response.json();
+      const result = await response.json() as ProfilePictureResponse;
 
       if (response.ok && result.success) {
         // Update the preview with the new image URL
-        setPreview(result.profilePicture);
+        setPreview(result.profilePicture || null);
         // Optionally reload the page to show the updated profile picture
         window.location.reload();
       } else {

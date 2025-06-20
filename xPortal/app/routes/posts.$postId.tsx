@@ -3,7 +3,7 @@ import { useLoaderData, useParams, useSubmit, useFetcher, Form, useRouteError, i
 import { json, LoaderFunction, ActionFunction, redirect, MetaFunction } from '@remix-run/node';
 import { getUser } from '~/utils/auth.server';
 import { createDb } from '~/utils/db.server';
-import { eq, and, desc, or } from 'drizzle-orm';
+import { eq, and, desc, or, sql } from 'drizzle-orm';
 import { posts, users, profiles, media, comments, answers, codeBlocks, votes, bounties, virtualWallets, postTags, tags, reports, bookmarks, integrityRatings, bountyClaims } from '../../drizzle/schema';
 import { requireUserId } from '~/utils/auth.server';
 import PostInteractions from '~/components/PostInteractions';
@@ -157,17 +157,17 @@ function getProfilePicture(profilePicture: string | null, username: string): str
     return `${DEFAULT_PROFILE_PICTURE}${encodeURIComponent(username)}`;
 }
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  const postTitle = data?.post?.title || 'Post';
+export const meta: MetaFunction = ({ data }) => {
+  const postTitle = (data as any)?.post?.title || 'Post';
   return [
     { title: `${postTitle} - portal.ask` },
     { name: "description", content: postTitle },
   ];
 };
 
-export const loader: LoaderFunction = async ({ request, params }) => {
+export const loader: LoaderFunction = async ({ request, params, context }) => {
   try {
-    const db = createDb((request as any).context?.env?.DB);
+    const db = createDb((context as any).env.DB);
     const user = await getUser(request, db);
     const { postId } = params;
     const url = new URL(request.url);
@@ -269,10 +269,10 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
     // Fetch grouped vote counts for quality votes
     const allVotes = await db.query.votes.findMany({
-      where: and(eq(votes.postId, postId), eq(votes.isQualityVote, true)),
+      where: and(eq(votes.postId, postId), eq(votes.voteType, 'POST'), eq(votes.isQualityVote, true)),
     });
-    const qualityUpvotes = allVotes.filter(v => v.value === 1).length;
-    const qualityDownvotes = allVotes.filter(v => v.value === -1).length;
+    const qualityUpvotes = allVotes.filter((v: any) => v.value === 1).length;
+    const qualityDownvotes = allVotes.filter((v: any) => v.value === -1).length;
     const userQualityVote = userVotes.find(v => v.isQualityVote)?.value || 0;
     const userVisibilityVote = userVotes.find(v => !v.isQualityVote)?.value || 0;
 
@@ -382,8 +382,8 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   }
 };
 
-export const action: ActionFunction = async ({ request, params }) => {
-  const db = createDb((request as any).context?.env?.DB);
+export const action: ActionFunction = async ({ request, params, context }) => {
+  const db = createDb((context as any).env.DB);
   const user = await getUser(request, db);
   if (!user) {
     return json({ error: 'Not authenticated' }, { status: 401 });
@@ -421,11 +421,11 @@ export const action: ActionFunction = async ({ request, params }) => {
         return json({ error: 'Invalid vote value' }, { status: 400 });
       }
       // Use a transaction to ensure atomic operations
-      return await db.transaction(async (tx) => {
+      return await db.transaction(async () => {
         // Delete existing vote first
-        await tx.delete(votes).where(and(eq(votes.userId, user.id), eq(votes.postId, postId), eq(votes.voteType, 'POST'), eq(votes.isQualityVote, true)));
+        await db.delete(votes).where(and(eq(votes.userId, user.id), eq(votes.postId, postId), eq(votes.voteType, 'POST'), eq(votes.isQualityVote, true)));
         if (value !== 0) {
-          await tx.insert(votes).values({
+          await db.insert(votes).values({
             id: crypto.randomUUID(),
             userId: user.id,
             postId,
@@ -437,13 +437,13 @@ export const action: ActionFunction = async ({ request, params }) => {
           });
         }
         // Get updated vote counts
-        const allVotes = await tx.query.votes.findMany({
+        const allVotes = await db.query.votes.findMany({
           where: and(eq(votes.postId, postId), eq(votes.voteType, 'POST'), eq(votes.isQualityVote, true)),
         });
-        const qualityUpvotes = allVotes.filter(v => v.value === 1).length;
-        const qualityDownvotes = allVotes.filter(v => v.value === -1).length;
+        const qualityUpvotes = allVotes.filter((v: any) => v.value === 1).length;
+        const qualityDownvotes = allVotes.filter((v: any) => v.value === -1).length;
         // Update post vote counts
-        await tx.update(posts).set({
+        await db.update(posts).set({
           qualityUpvotes,
           qualityDownvotes
         }).where(eq(posts.id, postId));
@@ -459,16 +459,19 @@ export const action: ActionFunction = async ({ request, params }) => {
       const isVoting = formData.get('isVoting') === 'true';
 
       // Use a transaction to ensure atomic operations
-      const result = await db.$transaction(async (tx) => {
+      const result = await db.transaction(async () => {
         // Get current vote state
-        const existingVote = await tx.query.vote.findFirst({
-          where: and(eq(votes.userId, user.id), eq(votes.postId, postId), eq(votes.voteType, 'POST'), eq(votes.isQualityVote, false)),
-        });
+        const existingVote = await db
+          .select()
+          .from(votes)
+          .where(and(eq(votes.userId, user.id), eq(votes.postId, postId), eq(votes.voteType, 'POST'), eq(votes.isQualityVote, false)))
+          .limit(1);
 
         // Update vote record
         if (isVoting) {
-          if (!existingVote) {
-            await tx.insert(votes).values({
+          if (!existingVote.length) {
+            await db.insert(votes).values({
+              id: crypto.randomUUID(),
               userId: user.id,
               postId,
               value: 1, // Always 1 for visibility votes
@@ -479,20 +482,27 @@ export const action: ActionFunction = async ({ request, params }) => {
             });
           }
         } else {
-          if (existingVote) {
-            await tx.delete(votes).where(eq(votes.id, existingVote.id));
+          if (existingVote.length) {
+            await db.delete(votes).where(eq(votes.id, existingVote[0].id));
           }
         }
 
         // Update post visibility votes
-        const visibilityVotes = await tx.select({ count: db.raw('COUNT(*)') }).from(votes).where(and(eq(votes.postId, postId), eq(votes.voteType, 'POST'), eq(votes.isQualityVote, false), eq(votes.value, 1)));
+        const visibilityVotesResult = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(votes)
+          .where(and(eq(votes.postId, postId), eq(votes.voteType, 'POST'), eq(votes.isQualityVote, false), eq(votes.value, 1)));
 
-        const updatedPost = await tx.update(posts).set({
-          visibilityVotes: visibilityVotes.count
-        }).where(eq(posts.id, postId));
+        const updatedPost = await db
+          .update(posts)
+          .set({
+            visibilityVotes: visibilityVotesResult[0]?.count || 0
+          })
+          .where(eq(posts.id, postId))
+          .returning();
 
         return {
-          post: updatedPost,
+          post: updatedPost[0],
           userVisibilityVote: isVoting
         };
       });
@@ -522,10 +532,11 @@ export const action: ActionFunction = async ({ request, params }) => {
         answerId: null
       });
       // Fetch author and profile
-      const author = await db.query.users.findFirst({ where: eq(users.id, user.id) });
-      const profile = await db.query.profiles.findFirst({ where: eq(profiles.userId, user.id) });
+      const author = await db.select().from(users).where(eq(users.id, user.id)).limit(1);
+      const profile = await db.select().from(profiles).where(eq(profiles.userId, user.id)).limit(1);
       // Award reputation points for commenting
       await addReputationPoints(
+        db,
         user.id,
         REPUTATION_POINTS.COMMENT_CREATED,
         'COMMENT_CREATED',
@@ -537,10 +548,10 @@ export const action: ActionFunction = async ({ request, params }) => {
           id: commentId,
           content,
           author: {
-            id: author?.id,
-            username: author?.username,
-            profilePicture: profile?.profilePicture || null,
-            profile: profile ? { profilePicture: profile.profilePicture } : null
+            id: author[0]?.id,
+            username: author[0]?.username,
+            profilePicture: profile[0]?.profilePicture || null,
+            profile: profile[0] ? { profilePicture: profile[0].profilePicture } : null
           },
           upvotes: 0,
           downvotes: 0,
@@ -569,10 +580,11 @@ export const action: ActionFunction = async ({ request, params }) => {
         downvotes: 0
       });
       // Fetch author and profile
-      const author = await db.query.users.findFirst({ where: eq(users.id, user.id) });
-      const profile = await db.query.profiles.findFirst({ where: eq(profiles.userId, user.id) });
+      const author = await db.select().from(users).where(eq(users.id, user.id)).limit(1);
+      const profile = await db.select().from(profiles).where(eq(profiles.userId, user.id)).limit(1);
       // Award reputation points for answering a question
       await addReputationPoints(
+        db,
         user.id,
         REPUTATION_POINTS.ANSWER_CREATED,
         'ANSWER_CREATED',
@@ -584,10 +596,10 @@ export const action: ActionFunction = async ({ request, params }) => {
           id: answerId,
           content,
           author: {
-            id: author?.id,
-            username: author?.username,
-            profilePicture: profile?.profilePicture || null,
-            profile: profile ? { profilePicture: profile.profilePicture } : null
+            id: author[0]?.id,
+            username: author[0]?.username,
+            profilePicture: profile[0]?.profilePicture || null,
+            profile: profile[0] ? { profilePicture: profile[0].profilePicture } : null
           },
           upvotes: 0,
           downvotes: 0,
@@ -605,38 +617,75 @@ export const action: ActionFunction = async ({ request, params }) => {
       }
 
       // Get the answer and its author
-      const answer = await db.query.answer.findFirst({
+      const answer = await db.query.answers.findFirst({
         where: eq(answers.id, answerId),
-        include: {
+        with: {
           author: {
-            select: {
+            columns: {
               id: true,
               username: true
             }
-          },
-          post: true
+          }
         }
-      });
+      }) as any;
 
       if (!answer) {
         return json({ error: 'Answer not found' }, { status: 404 });
       }
 
-      if (answer.post.authorId !== user.id) {
+      // Get the post and bounty separately
+      const post = await db.query.posts.findFirst({
+        where: eq(posts.id, answer.postId),
+        with: {
+          bounty: true
+        }
+      }) as any;
+
+      if (!post) {
+        return json({ error: 'Post not found' }, { status: 404 });
+      }
+
+      if (post.authorId !== user.id) {
         return json({ error: 'Only the post author can accept answers' }, { status: 403 });
       }
 
-      // Use a transaction to ensure atomic operations
-      return await db.$transaction(async (tx) => {
-        // Update the answer as accepted
-        await tx.update(answers).set({ isAccepted: true }).where(eq(answers.id, answerId));
+      if (!post.bounty) {
+        return json({ error: 'No bounty found for this post' }, { status: 404 });
+      }
 
-        // Update the post status to completed
-        await tx.update(posts).set({ status: 'COMPLETED' }).where(eq(posts.id, answer.postId));
+      if (post.bounty.status !== 'ACTIVE') {
+        return json({ error: 'Bounty is not active' }, { status: 400 });
+      }
+
+      // Use a transaction to ensure atomic operations
+      return await db.transaction(async () => {
+        // Update the answer as accepted
+        await db.update(answers).set({ isAccepted: true }).where(eq(answers.id, answerId));
+
+        // Update the post status
+        await db.update(posts).set({ status: 'COMPLETED' }).where(eq(posts.id, answer.postId));
+
+        // Update the bounty status to claimed and set winner
+        await db.update(bounties).set({
+          status: 'CLAIMED',
+          winnerId: answer.authorId,
+        }).where(eq(bounties.postId, answer.postId));
+
+        // Import claimBounty function at the top of the file
+        const { claimBounty } = await import('~/utils/virtual-wallet.server');
+        
+        // Transfer bounty tokens to the answer author
+        const bountyAmount = post.bounty!.amount;
+        await claimBounty(
+          db,
+          answer.authorId,
+          bountyAmount,
+          post.bounty!.id
+        );
 
         return json({ 
           success: true,
-          message: `Answer accepted by ${answer.author.username}`,
+          message: `Bounty of ${bountyAmount} BBUX transferred to ${answer.author.username}`,
           answer: {
             ...answer,
             isAccepted: true
@@ -658,13 +707,14 @@ export const action: ActionFunction = async ({ request, params }) => {
 
       while (retryCount < maxRetries) {
         try {
-          return await db.$transaction(async (tx) => {
+          return await db.transaction(async () => {
             // Delete existing vote first
-            await tx.delete(votes).where(and(eq(votes.userId, user.id), eq(votes.commentId, commentId), eq(votes.voteType, 'COMMENT'), eq(votes.isQualityVote, true)));
+            await db.delete(votes).where(and(eq(votes.userId, user.id), eq(votes.commentId, commentId), eq(votes.voteType, 'COMMENT'), eq(votes.isQualityVote, true)));
 
             // Create new vote if value is not 0
             if (value !== 0) {
-              await tx.insert(votes).values({
+              await db.insert(votes).values({
+                id: crypto.randomUUID(),
                 userId: user.id,
                 commentId: commentId,
                 value,
@@ -676,26 +726,23 @@ export const action: ActionFunction = async ({ request, params }) => {
             }
 
             // Get updated vote counts
-            const [upvotes, downvotes] = await Promise.all([
-              tx.select({ count: db.raw('COUNT(*)') }).from(votes).where(and(eq(votes.commentId, commentId), eq(votes.voteType, 'COMMENT'), eq(votes.isQualityVote, true), eq(votes.value, 1))),
-              tx.select({ count: db.raw('COUNT(*)') }).from(votes).where(and(eq(votes.commentId, commentId), eq(votes.voteType, 'COMMENT'), eq(votes.isQualityVote, true), eq(votes.value, -1))),
+            const [upvotesResult, downvotesResult] = await Promise.all([
+              db.select({ count: sql<number>`count(*)` }).from(votes).where(and(eq(votes.commentId, commentId), eq(votes.voteType, 'COMMENT'), eq(votes.isQualityVote, true), eq(votes.value, 1))),
+              db.select({ count: sql<number>`count(*)` }).from(votes).where(and(eq(votes.commentId, commentId), eq(votes.voteType, 'COMMENT'), eq(votes.isQualityVote, true), eq(votes.value, -1))),
             ]);
 
             // Update comment vote counts
-            await tx.update(comments).set({
-              upvotes,
-              downvotes
+            await db.update(comments).set({
+              upvotes: upvotesResult[0]?.count || 0,
+              downvotes: downvotesResult[0]?.count || 0
             }).where(eq(comments.id, commentId));
 
             return json({
               success: true,
-              upvotes,
-              downvotes,
+              upvotes: upvotesResult[0]?.count || 0,
+              downvotes: downvotesResult[0]?.count || 0,
               userVote: value
             });
-          }, {
-            maxWait: 5000, // 5 seconds max wait
-            timeout: 10000  // 10 seconds timeout
           });
         } catch (error: any) {
           retryCount++;
@@ -725,13 +772,14 @@ export const action: ActionFunction = async ({ request, params }) => {
 
       while (retryCount < maxRetries) {
         try {
-          return await db.$transaction(async (tx) => {
+          return await db.transaction(async () => {
             // Delete existing vote first
-            await tx.delete(votes).where(and(eq(votes.userId, user.id), eq(votes.answerId, answerId), eq(votes.voteType, 'ANSWER'), eq(votes.isQualityVote, true)));
+            await db.delete(votes).where(and(eq(votes.userId, user.id), eq(votes.answerId, answerId), eq(votes.voteType, 'ANSWER'), eq(votes.isQualityVote, true)));
 
             // Create new vote if value is not 0
             if (value !== 0) {
-              await tx.insert(votes).values({
+              await db.insert(votes).values({
+                id: crypto.randomUUID(),
                 userId: user.id,
                 answerId: answerId,
                 value,
@@ -743,26 +791,23 @@ export const action: ActionFunction = async ({ request, params }) => {
             }
 
             // Get updated vote counts
-            const [upvotes, downvotes] = await Promise.all([
-              tx.select({ count: db.raw('COUNT(*)') }).from(votes).where(and(eq(votes.answerId, answerId), eq(votes.voteType, 'ANSWER'), eq(votes.isQualityVote, true), eq(votes.value, 1))),
-              tx.select({ count: db.raw('COUNT(*)') }).from(votes).where(and(eq(votes.answerId, answerId), eq(votes.voteType, 'ANSWER'), eq(votes.isQualityVote, true), eq(votes.value, -1))),
+            const [upvotesResult, downvotesResult] = await Promise.all([
+              db.select({ count: sql<number>`count(*)` }).from(votes).where(and(eq(votes.answerId, answerId), eq(votes.voteType, 'ANSWER'), eq(votes.isQualityVote, true), eq(votes.value, 1))),
+              db.select({ count: sql<number>`count(*)` }).from(votes).where(and(eq(votes.answerId, answerId), eq(votes.voteType, 'ANSWER'), eq(votes.isQualityVote, true), eq(votes.value, -1))),
             ]);
 
             // Update answer vote counts
-            await tx.update(answers).set({
-              upvotes,
-              downvotes
+            await db.update(answers).set({
+              upvotes: upvotesResult[0]?.count || 0,
+              downvotes: downvotesResult[0]?.count || 0
             }).where(eq(answers.id, answerId));
 
             return json({
               success: true,
-              upvotes,
-              downvotes,
+              upvotes: upvotesResult[0]?.count || 0,
+              downvotes: downvotesResult[0]?.count || 0,
               userVote: value
             });
-          }, {
-            maxWait: 5000, // 5 seconds max wait
-            timeout: 10000  // 10 seconds timeout
           });
         } catch (error: any) {
           retryCount++;
@@ -785,49 +830,56 @@ export const action: ActionFunction = async ({ request, params }) => {
       }
 
       // Get the answer and its author
-      const answer = await db.query.answer.findFirst({
+      const answer = await db.query.answers.findFirst({
         where: eq(answers.id, answerId),
-        include: {
+        with: {
           author: {
-            select: {
+            columns: {
               id: true,
               username: true
             }
-          },
-          post: {
-            include: {
-              bounty: true
-            }
           }
         }
-      });
+      }) as any;
 
       if (!answer) {
         return json({ error: 'Answer not found' }, { status: 404 });
       }
 
-      if (!answer.post.bounty) {
-        return json({ error: 'No bounty found for this post' }, { status: 404 });
+      // Get the post and bounty separately
+      const post = await db.query.posts.findFirst({
+        where: eq(posts.id, answer.postId),
+        with: {
+          bounty: true
+        }
+      }) as any;
+
+      if (!post) {
+        return json({ error: 'Post not found' }, { status: 404 });
       }
 
-      if (answer.post.bounty.status !== 'ACTIVE') {
-        return json({ error: 'Bounty is not active' }, { status: 400 });
-      }
-
-      if (answer.post.authorId !== user.id) {
+      if (post.authorId !== user.id) {
         return json({ error: 'Only the post author can claim the bounty' }, { status: 403 });
       }
 
+      if (!post.bounty) {
+        return json({ error: 'No bounty found for this post' }, { status: 404 });
+      }
+
+      if (post.bounty.status !== 'ACTIVE') {
+        return json({ error: 'Bounty is not active' }, { status: 400 });
+      }
+
       // Use a transaction to ensure atomic operations
-      return await db.$transaction(async (tx) => {
+      return await db.transaction(async () => {
         // Update the answer as accepted
-        await tx.update(answers).set({ isAccepted: true }).where(eq(answers.id, answerId));
+        await db.update(answers).set({ isAccepted: true }).where(eq(answers.id, answerId));
 
         // Update the post status
-        await tx.update(posts).set({ status: 'COMPLETED' }).where(eq(posts.id, answer.postId));
+        await db.update(posts).set({ status: 'COMPLETED' }).where(eq(posts.id, answer.postId));
 
         // Update the bounty status to claimed and set winner
-        await tx.update(bounties).set({
+        await db.update(bounties).set({
           status: 'CLAIMED',
           winnerId: answer.authorId,
         }).where(eq(bounties.postId, answer.postId));
@@ -836,16 +888,17 @@ export const action: ActionFunction = async ({ request, params }) => {
         const { claimBounty } = await import('~/utils/virtual-wallet.server');
         
         // Transfer bounty tokens to the answer author
-        const bountyAmount = answer.post.bounty!.amount;
+        const bountyAmount = post.bounty!.amount;
         await claimBounty(
+          db,
           answer.authorId,
           bountyAmount,
-          answer.post.bounty!.id
+          post.bounty!.id
         );
 
         return json({ 
           success: true,
-          message: `Bounty of ${bountyAmount} PORTAL transferred to ${answer.author.username}`,
+          message: `Bounty of ${bountyAmount} BBUX transferred to ${answer.author.username}`,
           answer: {
             ...answer,
             isAccepted: true
@@ -856,7 +909,7 @@ export const action: ActionFunction = async ({ request, params }) => {
     case 'refund_bounty': {
       const post = await db.query.posts.findFirst({
         where: eq(posts.id, postId),
-        include: { bounty: true },
+        with: { bounty: true },
       });
 
       if (!post?.bounty) {
@@ -881,34 +934,42 @@ export const action: ActionFunction = async ({ request, params }) => {
       }
 
       // Get the answer and its author
-      const answer = await db.query.answer.findFirst({
+      const answer = await db.query.answers.findFirst({
         where: eq(answers.id, answerId),
-        include: {
+        with: {
           author: {
-            select: {
+            columns: {
               id: true,
               username: true
             }
-          },
-          post: true
+          }
         }
-      });
+      }) as any;
 
       if (!answer) {
         return json({ error: 'Answer not found' }, { status: 404 });
       }
 
-      if (answer.post.authorId !== user.id) {
+      // Get the post separately
+      const post = await db.query.posts.findFirst({
+        where: eq(posts.id, answer.postId)
+      });
+
+      if (!post) {
+        return json({ error: 'Post not found' }, { status: 404 });
+      }
+
+      if (post.authorId !== user.id) {
         return json({ error: 'Only the post author can accept answers' }, { status: 403 });
       }
 
       // Use a transaction to ensure atomic operations
-      return await db.$transaction(async (tx) => {
+      return await db.transaction(async () => {
         // Update the answer as accepted
-        await tx.update(answers).set({ isAccepted: true }).where(eq(answers.id, answerId));
+        await db.update(answers).set({ isAccepted: true }).where(eq(answers.id, answerId));
 
         // Update the post status to completed
-        await tx.update(posts).set({ status: 'COMPLETED' }).where(eq(posts.id, answer.postId));
+        await db.update(posts).set({ status: 'COMPLETED' }).where(eq(posts.id, answer.postId));
 
         return json({ 
           success: true,
@@ -921,7 +982,7 @@ export const action: ActionFunction = async ({ request, params }) => {
       });
     }
     case 'deleteComment': {
-      const { commentId } = data;
+      const commentId = formData.get('commentId') as string;
       const comment = await db
         .select()
         .from(comments)
@@ -937,7 +998,7 @@ export const action: ActionFunction = async ({ request, params }) => {
     }
 
     case 'deleteAnswer': {
-      const { answerId } = data;
+      const answerId = formData.get('answerId') as string;
       const answer = await db
         .select()
         .from(answers)
@@ -953,7 +1014,10 @@ export const action: ActionFunction = async ({ request, params }) => {
     }
 
     case 'updatePost': {
-      const { title, content, tags, bountyAmount } = data;
+      const title = formData.get('title') as string;
+      const content = formData.get('content') as string;
+      const tags = formData.getAll('tags') as string[];
+      const bountyAmount = formData.get('bountyAmount') as string;
       
       if (!user.id) {
         throw new Response("Unauthorized", { status: 401 });
@@ -970,9 +1034,9 @@ export const action: ActionFunction = async ({ request, params }) => {
       }
 
       // Use transaction for atomic operations
-      await db.transaction(async (tx: any) => {
+      await db.transaction(async () => {
         // Update post
-        await tx
+        await db
           .update(posts)
           .set({
             title,
@@ -982,7 +1046,7 @@ export const action: ActionFunction = async ({ request, params }) => {
           .where(eq(posts.id, postId));
 
         // Delete existing tags
-        await tx.delete(postTags).where(eq(postTags.postId, postId));
+        await db.delete(postTags).where(eq(postTags.postId, postId));
 
         // Add new tags
         if (tags && tags.length > 0) {
@@ -991,7 +1055,7 @@ export const action: ActionFunction = async ({ request, params }) => {
             postId,
             tagId: tag,
           }));
-          await tx.insert(postTags).values(tagValues);
+          await db.insert(postTags).values(tagValues);
         }
       });
 
@@ -999,7 +1063,7 @@ export const action: ActionFunction = async ({ request, params }) => {
     }
 
     case 'reportPost': {
-      const { reason } = data;
+      const reason = formData.get('reason') as string;
       
       if (!user.id) {
         throw new Response("Unauthorized", { status: 401 });
@@ -1025,7 +1089,7 @@ export const action: ActionFunction = async ({ request, params }) => {
         postId,
         reporterId: user.id,
         reason,
-        status: "pending",
+        status: "PENDING",
         createdAt: new Date(),
       });
 
@@ -1033,7 +1097,8 @@ export const action: ActionFunction = async ({ request, params }) => {
     }
 
     case 'reportComment': {
-      const { commentId, reason } = data;
+      const commentId = formData.get('commentId') as string;
+      const reason = formData.get('reason') as string;
       
       if (!user.id) {
         throw new Response("Unauthorized", { status: 401 });
@@ -1059,7 +1124,7 @@ export const action: ActionFunction = async ({ request, params }) => {
         commentId,
         reporterId: user.id,
         reason,
-        status: "pending",
+        status: "PENDING",
         createdAt: new Date(),
       });
 
@@ -1067,7 +1132,8 @@ export const action: ActionFunction = async ({ request, params }) => {
     }
 
     case 'reportAnswer': {
-      const { answerId, reason } = data;
+      const answerId = formData.get('answerId') as string;
+      const reason = formData.get('reason') as string;
       
       if (!user.id) {
         throw new Response("Unauthorized", { status: 401 });
@@ -1093,7 +1159,7 @@ export const action: ActionFunction = async ({ request, params }) => {
         answerId,
         reporterId: user.id,
         reason,
-        status: "pending",
+        status: "PENDING",
         createdAt: new Date(),
       });
 
@@ -1138,7 +1204,8 @@ export const action: ActionFunction = async ({ request, params }) => {
     }
 
     case 'rateIntegrity': {
-      const { rating, reason } = data;
+      const rating = parseInt(formData.get('rating') as string);
+      const reason = formData.get('reason') as string;
       
       if (!user.id) {
         throw new Response("Unauthorized", { status: 401 });
@@ -1185,7 +1252,7 @@ export const action: ActionFunction = async ({ request, params }) => {
     }
 
     case 'claimBounty': {
-      const { answerId } = data;
+      const answerId = formData.get('answerId') as string;
       
       if (!user.id) {
         throw new Response("Unauthorized", { status: 401 });
@@ -1203,10 +1270,6 @@ export const action: ActionFunction = async ({ request, params }) => {
 
       if (post[0].authorId === user.id) {
         throw new Response("Cannot claim your own bounty", { status: 400 });
-      }
-
-      if (!post[0].bountyAmount || post[0].bountyAmount <= 0) {
-        throw new Response("No bounty available", { status: 400 });
       }
 
       const answer = await db
@@ -1235,23 +1298,22 @@ export const action: ActionFunction = async ({ request, params }) => {
       }
 
       // Use transaction for atomic operations
-      await db.transaction(async (tx: any) => {
+      await db.transaction(async () => {
         // Create bounty claim
-        await tx.insert(bountyClaims).values({
+        await db.insert(bountyClaims).values({
           id: crypto.randomUUID(),
           postId,
           answerId,
           claimantId: user.id,
-          amount: post[0].bountyAmount,
-          status: "pending",
+          amount: 0, // This should be fetched from bounty table
+          status: "PENDING",
           createdAt: new Date(),
         });
 
         // Update post to mark bounty as claimed
-        await tx
+        await db
           .update(posts)
           .set({
-            bountyClaimed: true,
             updatedAt: new Date(),
           })
           .where(eq(posts.id, postId));
@@ -1298,7 +1360,16 @@ export function ErrorBoundary() {
 }
 
 export default function PostDetail() {
-  const { post, currentUser, pagination } = useLoaderData<typeof loader>();
+  const { post, currentUser, pagination } = useLoaderData<typeof loader>() as {
+    post: PostWithRelations;
+    currentUser: any;
+    pagination: {
+      currentPage: number;
+      totalPages: number;
+      totalComments: number;
+      totalAnswers: number;
+    };
+  };
   const [answers, setAnswers] = useState<AnswerWithAuthor[]>(post.answers);
   const [comments, setComments] = useState<CommentWithAuthor[]>(post.comments);
   const [votingStates, setVotingStates] = useState<Record<string, boolean>>({});

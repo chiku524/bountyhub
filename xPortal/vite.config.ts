@@ -1,8 +1,11 @@
-import { vitePlugin as remix } from "@remix-run/dev";
 import { defineConfig } from "vite";
-import tsconfigPaths from "vite-tsconfig-paths";
 import tailwindcss from 'tailwindcss';
 import autoprefixer from 'autoprefixer';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import react from '@vitejs/plugin-react';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 declare module "@remix-run/node" {
   interface Future {
@@ -11,7 +14,7 @@ declare module "@remix-run/node" {
 }
 
 export default defineConfig({
-  plugins: [remix(), tsconfigPaths()],
+  plugins: [react()],
   css: {
     postcss: {
       plugins: [
@@ -20,13 +23,44 @@ export default defineConfig({
       ],
     },
   },
+  resolve: {
+    alias: {
+      '~': path.resolve(__dirname, './app'),
+    },
+  },
   build: {
     target: "esnext",
     minify: "terser",
-    sourcemap: true,
+    sourcemap: false,
     rollupOptions: {
-      external: ['@remix-run/cloudflare']
-    }
+      external: [
+        '@remix-run/cloudflare',
+        'puppeteer',
+        'puppeteer-core'
+      ],
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom'],
+          'remix-vendor': ['@remix-run/react', '@remix-run/node'],
+          'solana-vendor': ['@solana/web3.js', '@solana/spl-token'],
+          'wallet-vendor': [
+            '@solana/wallet-adapter-base',
+            '@solana/wallet-adapter-react',
+            '@solana/wallet-adapter-react-ui',
+            '@solana/wallet-adapter-phantom',
+            '@solana/wallet-adapter-solflare'
+          ],
+          'ui-vendor': ['react-icons/fi', 'react-icons/fa'],
+          'utils-vendor': ['bcryptjs', 'zod', 'cloudinary'],
+          'drizzle-vendor': ['drizzle-orm', 'drizzle-orm/sqlite-core', 'drizzle-orm/d1'],
+        },
+        chunkFileNames: (chunkInfo: any) => {
+          const facadeModuleId = chunkInfo.facadeModuleId ? chunkInfo.facadeModuleId.split('/').pop() : 'chunk';
+          return `js/[name]-[hash].js`;
+        },
+      }
+    },
+    chunkSizeWarningLimit: 1000,
   },
   optimizeDeps: {
     include: [
@@ -34,14 +68,12 @@ export default defineConfig({
       'react-dom',
       '@remix-run/react',
       '@remix-run/node',
-      '@remix-run/cloudflare',
-      '@solana/wallet-adapter-react',
-      '@solana/wallet-adapter-react-ui',
-      '@solana/wallet-adapter-base',
-      '@solana/wallet-adapter-wallets',
-      '@solana/web3.js'
+      '@remix-run/cloudflare'
     ],
-    exclude: ['@remix-run/dev']
+    exclude: [
+      'puppeteer',
+      'puppeteer-core'
+    ]
   },
   server: {
     fs: {
@@ -51,4 +83,10 @@ export default defineConfig({
       overlay: false
     }
   },
+  define: {
+    global: 'globalThis',
+  },
+  ssr: {
+    noExternal: ['@remix-run/cloudflare']
+  }
 });

@@ -164,8 +164,28 @@ export const loader = async ({ request, context }: LoaderFunctionArgs) => {
     // Fetch bookmarks for the user with error handling
     let bookmarks: BookmarkData[] = [];
     try {
-        const bookmarksData = await getUserBookmarks(userId, 1, 10);
-        bookmarks = bookmarksData.bookmarks;
+        const bookmarksData = await getUserBookmarks(db, userId);
+        bookmarks = bookmarksData.map(bm => ({
+            id: bm.id,
+            createdAt: bm.createdAt,
+            post: {
+                id: bm.post.id,
+                title: bm.post.title,
+                content: bm.post.content,
+                media: [], // default empty array
+                author: {
+                    id: bm.user.id,
+                    username: bm.user.username,
+                    profilePicture: bm.profile?.profilePicture || null,
+                },
+                createdAt: bm.post.createdAt.toISOString(),
+                visibilityVotes: 0,
+                comments: 0,
+                hasBounty: false,
+                bounty: null,
+                tags: [],
+            }
+        }));
     } catch (error) {
         console.error('Error fetching bookmarks:', error);
         bookmarks = [];

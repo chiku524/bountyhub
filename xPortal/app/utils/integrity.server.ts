@@ -1,8 +1,7 @@
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, isNull } from 'drizzle-orm';
 import { userRatings, integrityHistory, integrityViolations, users } from '../../drizzle/schema';
 import type { Db } from './db.server';
 import { getUser } from './auth.server';
-import { User } from '../../drizzle/schema';
 
 export interface RatingData {
   ratedUserId: string;
@@ -24,7 +23,7 @@ export interface ViolationData {
 
 export async function rateUser(
   db: Db,
-  user: User,
+  user: { id: string; username: string },
   ratingData: {
     ratedUserId: string;
     rating: number;
@@ -42,7 +41,7 @@ export async function rateUser(
       .where(and(
         eq(userRatings.raterId, user.id), 
         eq(userRatings.ratedUserId, ratingData.ratedUserId), 
-        eq(userRatings.referenceId, ratingData.referenceId || null)
+        ratingData.referenceId ? eq(userRatings.referenceId, ratingData.referenceId) : isNull(userRatings.referenceId)
       ))
       .limit(1);
 
@@ -81,12 +80,7 @@ export async function rateUser(
   }
 }
 
-export async function reportViolation(request: Request, violationData: ViolationData) {
-  const user = await getUser(request);
-  if (!user) {
-    throw new Error('User not authenticated');
-  }
-
+export async function reportViolation(db: Db, user: { id: string; username: string }, violationData: ViolationData) {
   // Prevent self-reporting
   if (user.id === violationData.targetUserId) {
     throw new Error('Cannot report yourself');
@@ -94,17 +88,25 @@ export async function reportViolation(request: Request, violationData: Violation
 
   try {
     // Check if user already reported this person for the same violation
-    const existingViolation = await db.query.integrityViolations.findFirst({
-      where: and(eq(integrityViolations.reporterId, user.id), eq(integrityViolations.targetUserId, violationData.targetUserId), eq(integrityViolations.violationType, violationData.violationType), eq(integrityViolations.referenceId, violationData.referenceId)),
-    });
+    const existingViolation = await db
+      .select()
+      .from(integrityViolations)
+      .where(and(
+        eq(integrityViolations.reporterId, user.id), 
+        eq(integrityViolations.targetUserId, violationData.targetUserId), 
+        eq(integrityViolations.violationType, violationData.violationType), 
+        violationData.referenceId ? eq(integrityViolations.referenceId, violationData.referenceId) : isNull(integrityViolations.referenceId)
+      ))
+      .limit(1);
 
-    if (existingViolation) {
+    if (existingViolation.length > 0) {
       throw new Error('You have already reported this user for this violation');
     }
 
     // Create the violation report
     const violation = await db.insert(integrityViolations)
       .values({
+        id: crypto.randomUUID(),
         reporterId: user.id,
         targetUserId: violationData.targetUserId,
         violationType: violationData.violationType,
@@ -113,19 +115,19 @@ export async function reportViolation(request: Request, violationData: Violation
         referenceId: violationData.referenceId,
         referenceType: violationData.referenceType,
       })
-      .returning({ id: true });
+      .returning({ id: integrityViolations.id });
 
     // Add to integrity history
     await db.insert(integrityHistory)
       .values({
+        id: crypto.randomUUID(),
         userId: violationData.targetUserId,
         action: 'VIOLATION_REPORTED',
         points: -5, // Negative points for being reported
         description: `Reported for ${violationData.violationType.toLowerCase()}`,
-        referenceId: violation.id,
+        referenceId: violation[0]?.id || null,
         referenceType: 'VIOLATION',
-      })
-      .returning({ id: true });
+      });
 
     return violation;
   } catch (error) {
@@ -137,12 +139,10 @@ export async function reportViolation(request: Request, violationData: Violation
 export async function updateUserIntegrityScore(db: Db, userId: string) {
   try {
     // Get all ratings for the user
-    const ratings = await db.query.userRatings.findMany({
-      where: eq(userRatings.ratedUserId, userId),
-      select: {
-        rating: true,
-      },
-    });
+    const ratings = await db
+      .select({ rating: userRatings.rating })
+      .from(userRatings)
+      .where(eq(userRatings.ratedUserId, userId));
 
     if (ratings.length === 0) {
       return;
@@ -164,50 +164,62 @@ export async function updateUserIntegrityScore(db: Db, userId: string) {
   }
 }
 
-export async function getUserIntegrityStats(userId: string) {
+export async function getUserIntegrityStats(db: Db, userId: string) {
   try {
-    const user = await db.query.users.findFirst({
-      where: eq(users.id, userId),
-      select: {
-        integrityScore: true,
-        totalRatings: true,
-        integrityHistory: {
-          orderBy: desc(integrityHistory.createdAt),
-          take: 10,
-        },
-        ratingsReceived: {
-          orderBy: desc(userRatings.createdAt),
-          take: 5,
-          include: {
-            rater: {
-              select: {
-                username: true,
-              },
-            },
-          },
-        },
-        integrityViolations: {
-          where: {
-            status: {
-              in: ['PENDING', 'REVIEWED'],
-            },
-          },
-          orderBy: desc(integrityViolations.createdAt),
-          take: 5,
-        },
-      },
-    });
+    const user = await db
+      .select({
+        integrityScore: users.integrityScore,
+        totalRatings: users.totalRatings,
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
 
-    return user;
+    if (!user.length) {
+      return null;
+    }
+
+    const integrityHistoryData = await db
+      .select()
+      .from(integrityHistory)
+      .where(eq(integrityHistory.userId, userId))
+      .orderBy(desc(integrityHistory.createdAt))
+      .limit(10);
+
+    const ratingsReceived = await db
+      .select({
+        rating: userRatings.rating,
+        reason: userRatings.reason,
+        createdAt: userRatings.createdAt,
+        rater: {
+          username: users.username,
+        },
+      })
+      .from(userRatings)
+      .innerJoin(users, eq(userRatings.raterId, users.id))
+      .where(eq(userRatings.ratedUserId, userId))
+      .orderBy(desc(userRatings.createdAt))
+      .limit(5);
+
+    const violations = await db
+      .select()
+      .from(integrityViolations)
+      .where(and(
+        eq(integrityViolations.targetUserId, userId),
+        eq(integrityViolations.status, 'PENDING')
+      ))
+      .orderBy(desc(integrityViolations.createdAt))
+      .limit(5);
+
+    return {
+      ...user[0],
+      integrityHistory: integrityHistoryData,
+      ratingsReceived,
+      violations,
+    };
   } catch (error) {
     console.error('Error getting integrity stats:', error);
-    return {
-      integrityScore: 5.0,
-      totalRatings: 0,
-      integrityHistory: [],
-      ratingsReceived: [],
-      integrityViolations: [],
-    };
+    return null;
   }
 }
 
@@ -223,14 +235,20 @@ export function getIntegrityLevel(score: number): string {
   return 'Unacceptable';
 }
 
-export async function canRateUser(raterId: string, ratedUserId: string, context: string, referenceId?: string): Promise<boolean> {
+export async function canRateUser(db: Db, raterId: string, ratedUserId: string, context: string, referenceId?: string): Promise<boolean> {
   try {
     // Check if user already rated this person in the same context
-    const existingRating = await db.query.userRatings.findFirst({
-      where: and(eq(userRatings.userId, raterId), eq(userRatings.targetUserId, ratedUserId), eq(userRatings.referenceId, referenceId || null)),
-    });
+    const existingRating = await db
+      .select()
+      .from(userRatings)
+      .where(and(
+        eq(userRatings.raterId, raterId), 
+        eq(userRatings.ratedUserId, ratedUserId), 
+        referenceId ? eq(userRatings.referenceId, referenceId) : isNull(userRatings.referenceId)
+      ))
+      .limit(1);
 
-    return !existingRating;
+    return existingRating.length === 0;
   } catch (error) {
     console.error('Error checking if user can rate:', error);
     return true; // Allow rating if there's an error

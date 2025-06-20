@@ -8,7 +8,7 @@ import { Nav } from '../components/nav'
 import { FiTrash2, FiEdit2, FiThumbsUp, FiMessageSquare } from 'react-icons/fi'
 import { getProfilePicture } from '~/utils/profile.server'
 import { json as cloudflareJson, LoaderFunctionArgs, ActionFunctionArgs } from '@remix-run/cloudflare'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, inArray, sql } from 'drizzle-orm'
 import { users, posts, profiles, votes, comments } from '../../drizzle/schema'
 import type { DrizzleD1Database } from 'drizzle-orm/d1'
 
@@ -20,6 +20,7 @@ type Post = {
     visibilityVotes: number;
     comments: number;
     hasBounty: boolean;
+    upvotes: number;
     author: {
         id: string;
         username: string;
@@ -40,6 +41,7 @@ type User = {
 interface LoaderData {
     user: User;
     posts: Post[];
+    currentUser?: User;
 }
 
 interface CloudflareContext {
@@ -48,7 +50,7 @@ interface CloudflareContext {
   };
 }
 
-export async function loader({ params, context }: LoaderFunctionArgs) {
+export async function loader({ params, context, request }: LoaderFunctionArgs) {
   const { username } = params;
   
   if (!username) {
@@ -57,6 +59,7 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
 
   try {
     const db = (context as unknown as CloudflareContext).env.DB;
+    const currentUser = await getUser(request);
 
     // First, find the user
     const user = await db
@@ -106,13 +109,14 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
 
     // Get comment counts for each post
     const postIds = userPosts.map((post: any) => post.id);
-    const commentCounts = await db
+    const commentCounts = postIds.length > 0 ? await db
       .select({
         postId: comments.postId,
-        count: comments.id,
+        count: sql<number>`count(${comments.id})`,
       })
       .from(comments)
-      .where(and(eq(comments.postId, postIds[0]), ...postIds.slice(1).map((id: string) => eq(comments.postId, id))));
+      .where(inArray(comments.postId, postIds))
+      .groupBy(comments.postId) : [];
 
     // Transform the data to match expected format
     const transformedPosts = userPosts.map((post: any) => ({
@@ -121,6 +125,7 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
       content: post.content,
       createdAt: post.createdAt.toISOString(),
       visibilityVotes: post.visibilityVotes,
+      upvotes: post.qualityUpvotes,
       comments: commentCounts.find((c: any) => c.postId === post.id)?.count || 0,
       hasBounty: post.hasBounty,
       author: {
@@ -133,6 +138,7 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
     return json({ 
       user: user[0],
       posts: transformedPosts,
+      currentUser,
     });
   } catch (error) {
     console.error('Error fetching user posts:', error);
@@ -188,7 +194,7 @@ export async function action({ request, params, context }: ActionFunctionArgs) {
 }
 
 export default function UserPosts() {
-    const { user, currentUser } = useLoaderData<typeof loader>();
+    const { user, posts, currentUser } = useLoaderData<typeof loader>();
     const [videoErrors, setVideoErrors] = useState<Record<string, string>>({});
     const submit = useSubmit();
     const navigate = useNavigate();
@@ -198,9 +204,9 @@ export default function UserPosts() {
     // Pagination logic
     const POSTS_PER_PAGE = 6;
     const page = parseInt(searchParams.get('page') || '1', 10);
-    const totalPosts = user.posts.length;
+    const totalPosts = posts.length;
     const totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE);
-    const paginatedPosts = user.posts.slice((page - 1) * POSTS_PER_PAGE, page * POSTS_PER_PAGE);
+    const paginatedPosts = posts.slice((page - 1) * POSTS_PER_PAGE, page * POSTS_PER_PAGE);
 
     const handleVideoError = (postId: string, error: string) => {
         setVideoErrors(prev => ({ ...prev, [postId]: error }));
@@ -216,7 +222,7 @@ export default function UserPosts() {
     const handleDelete = (postId: string) => {
         if (window.confirm('Are you sure you want to delete this post?')) {
             const formData = new FormData();
-            formData.append('_action', 'deletePost');
+            formData.append('action', 'deletePost');
             formData.append('postId', postId);
             submit(formData, { method: 'post' });
         }
@@ -231,7 +237,7 @@ export default function UserPosts() {
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
                     <img
-                        src={post.author.profilePicture}
+                        src={post.author.profilePicture || '/default-avatar.svg'}
                         alt={`${post.author.username}'s profile`}
                         className="w-10 h-10 rounded-full object-cover"
                     />
@@ -277,7 +283,7 @@ export default function UserPosts() {
                                 Posts by {user.username}
                             </h1>
                             <p className="text-gray-400 text-sm">
-                                {user.posts.length} {user.posts.length === 1 ? 'post' : 'posts'}
+                                {posts.length} {posts.length === 1 ? 'post' : 'posts'}
                             </p>
                         </div>
                         <Link 
@@ -290,8 +296,8 @@ export default function UserPosts() {
 
                     {/* Responsive grid for posts */}
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
-                        {paginatedPosts.map((post: Post) => (
-                            renderPost(post))
+                        {paginatedPosts.map((post) => (
+                            renderPost(post as Post))
                         )}
                     </div>
 

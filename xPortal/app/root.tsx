@@ -15,7 +15,7 @@ import { Nav } from "~/components/nav";
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { getUser } from "~/utils/auth.server";
 import { WalletProvider } from './components/WalletProvider';
-import { createDb } from '~/utils/db.server'
+import { createDb } from "~/utils/db.server";
 
 import "./tailwind.css";
 import "./styles/wallet-adapter.css";

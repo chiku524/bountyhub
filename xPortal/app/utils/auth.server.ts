@@ -6,22 +6,51 @@ import { redirect, createCookieSessionStorage } from '@remix-run/node'
 import { createUser, getUserById, getUserByEmail, getUserByUsername } from './user.server'
 import type { Db } from './db.server'
 
-const sessionSecret = process.env.SESSION_SECRET
-if (!sessionSecret) {
+// Declare global interface for SESSION_SECRET
+declare global {
+  var SESSION_SECRET: string | undefined;
+}
+
+// Define session data type
+interface SessionData {
+  userId: string;
+}
+
+// Lazy initialization of session secret
+function getSessionSecret(): string {
+  // Check global variable first (for Workers environment)
+  if (typeof global !== 'undefined' && global.SESSION_SECRET) {
+    return global.SESSION_SECRET;
+  }
+
+  // Fallback to process.env (for Node.js environment)
+  if (typeof process !== 'undefined' && process.env && process.env.SESSION_SECRET) {
+    return process.env.SESSION_SECRET;
+  }
+
   throw new Error('SESSION_SECRET must be set')
 }
 
-const storage = createCookieSessionStorage({
-  cookie: {
-    name: 'portal-session',
-    secure: process.env.NODE_ENV === 'production' ? true : false,
-    secrets: [sessionSecret],
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 60 * 60 * 24 * 30,
-    httpOnly: true,
-  },
-})
+// Lazy storage creation
+let storageInstance: ReturnType<typeof createCookieSessionStorage<SessionData>> | null = null;
+
+function getStorage() {
+  if (!storageInstance) {
+    const sessionSecret = getSessionSecret();
+    storageInstance = createCookieSessionStorage<SessionData>({
+      cookie: {
+        name: 'portal-session',
+        secure: process.env?.NODE_ENV === 'production' ? true : false,
+        secrets: [sessionSecret],
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 30,
+        httpOnly: true,
+      },
+    });
+  }
+  return storageInstance;
+}
 
 export interface AuthError {
   error: string;
@@ -33,6 +62,7 @@ export interface AuthError {
 }
 
 export async function createUserSession(userId: string, redirectTo: string) {
+  const storage = getStorage();
   const session = await storage.getSession()
   session.set('userId', userId)
   return redirect(redirectTo, {
@@ -88,6 +118,7 @@ export async function requireUserId(request: Request, redirectTo: string = new U
 }
 
 function getUserSession(request: Request) {
+  const storage = getStorage();
   return storage.getSession(request.headers.get('Cookie'))
 }
 
@@ -119,6 +150,7 @@ export async function getUser(request: Request, db?: Db) {
 }
 
 export async function logout(request: Request) {
+  const storage = getStorage();
   const session = await getUserSession(request)
   return redirect('/login', {
     headers: {

@@ -6,8 +6,8 @@ import bountyBucksInfo from '../../bounty-bucks-info.json';
 const connection = new Connection(process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com', 'confirmed');
 
 const TOKEN_MINT = bountyBucksInfo.mint;
-const TOKEN_SYMBOL = bountyBucksInfo.config.symbol;
-const TOKEN_DECIMALS = bountyBucksInfo.config.decimals;
+const TOKEN_SYMBOL = bountyBucksInfo.symbol;
+const TOKEN_DECIMALS = 9; // From the attributes in the JSON
 
 export async function createBountyTransaction(
   fromPublicKey: PublicKey,

@@ -3,15 +3,21 @@ import { useLoaderData, Link } from '@remix-run/react';
 import { Layout } from '~/components/Layout';
 import { FiArrowLeft, FiDownload, FiExternalLink } from 'react-icons/fi';
 
-export const loader: LoaderFunction = async () => {
-  return json({
+interface LoaderData {
+  title: string;
+  description: string;
+}
+
+export const loader: LoaderFunction = async (): Promise<Response> => {
+  return json<LoaderData>({
     title: "Platform Documentation",
     description: "Complete overview of portal.ask platform features, architecture, and functionality"
   });
 };
 
 export default function PlatformDocsPage() {
-  const { title, description } = useLoaderData<typeof loader>();
+  const data = useLoaderData<typeof loader>();
+  const { title, description } = data as LoaderData;
 
   return (
     <Layout>

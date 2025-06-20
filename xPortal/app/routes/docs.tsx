@@ -29,6 +29,17 @@ interface Category {
   description: string;
 }
 
+interface LoaderData {
+  docs: Array<{
+    title: string;
+    description: string;
+    href: string;
+    category: string;
+    featured: boolean;
+  }>;
+  categories: Category[];
+}
+
 export const meta: MetaFunction = () => {
   return [
     { title: "Documentation - portal.ask" },
@@ -36,8 +47,8 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export const loader: LoaderFunction = async () => {
-  return json({
+export const loader: LoaderFunction = async (): Promise<Response> => {
+  return json<LoaderData>({
     docs: [
       {
         title: "Platform Documentation",
@@ -88,7 +99,7 @@ export const loader: LoaderFunction = async () => {
         category: "user",
         featured: false
       }
-    ] as DocItem[],
+    ],
     categories: [
       {
         name: "overview",
@@ -110,12 +121,13 @@ export const loader: LoaderFunction = async () => {
         title: "Legal & Compliance",
         description: "Legal documents and compliance information"
       }
-    ] as Category[]
+    ]
   });
 };
 
 export default function DocsPage() {
-  const { docs, categories } = useLoaderData<typeof loader>();
+  const data = useLoaderData<typeof loader>();
+  const { docs, categories } = data as LoaderData;
 
   // Add icons to the docs data
   const docsWithIcons = [

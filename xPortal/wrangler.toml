@@ -12,9 +12,22 @@ database_name = "bountyhub-db"
 database_id = "4df28277-6977-4d38-b2d0-d0b48826c275"
 migrations_dir = "drizzle/migrations"
 
+[vars]
+NODE_ENV = "production"
+SESSION_SECRET = "mysupersecretpassword"
+
 [env.production]
 name = "bountyhub"
-route = "bountyhub.tech/*"
+routes = [
+  { pattern = "bountyhub.tech/*", zone_name = "bountyhub.tech" }
+]
 
 [env.production.vars]
-NODE_ENV = "production" 
+NODE_ENV = "production"
+SESSION_SECRET = "mysupersecretpassword"
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "bountyhub-db"
+database_id = "4df28277-6977-4d38-b2d0-d0b48826c275"
+migrations_dir = "drizzle/migrations" 
