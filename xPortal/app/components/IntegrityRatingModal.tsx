@@ -64,7 +64,8 @@ export default function IntegrityRatingModal({
   const isSubmitting = fetcher.state === 'submitting';
 
   useEffect(() => {
-    if ((fetcher.data as any)?.success) {
+    const data = fetcher.data as { success?: boolean } | undefined;
+    if (data?.success) {
       onClose();
       setRating(5);
       setReason('');
@@ -113,7 +114,7 @@ export default function IntegrityRatingModal({
         <fetcher.Form onSubmit={handleSubmit} className="space-y-4">
           {/* Rating Stars */}
           <div>
-            <label className="block text-sm font-medium text-violet-300 mb-2">
+            <label className="block text-sm font-medium text-violet-300 mb-2" htmlFor="rating">
               Integrity Rating (1-10)
             </label>
             <div className="flex items-center space-x-1">
@@ -141,7 +142,7 @@ export default function IntegrityRatingModal({
 
           {/* Context Selection */}
           <div>
-            <label className="block text-sm font-medium text-violet-300 mb-2">
+            <label className="block text-sm font-medium text-violet-300 mb-2" htmlFor="context">
               Rating Context
             </label>
             <select
@@ -162,7 +163,7 @@ export default function IntegrityRatingModal({
 
           {/* Reason */}
           <div>
-            <label className="block text-sm font-medium text-violet-300 mb-2">
+            <label className="block text-sm font-medium text-violet-300 mb-2" htmlFor="reason">
               Reason for Rating
             </label>
             <textarea
@@ -180,10 +181,10 @@ export default function IntegrityRatingModal({
           </div>
 
           {/* Error Display */}
-          {(fetcher.data as any)?.error && (
+          {typeof fetcher.data === 'object' && fetcher.data && 'error' in fetcher.data && (
             <div className="flex items-center space-x-2 p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
               <FiAlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
-              <p className="text-red-400 text-sm">{(fetcher.data as any).error}</p>
+              <p className="text-red-400 text-sm">{(fetcher.data as { error: string }).error}</p>
             </div>
           )}
 

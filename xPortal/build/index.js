@@ -20,10 +20,10 @@ var __commonJS = (cb, mod) => function() {
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, { get: all[name], enumerable: !0 });
-}, __copyProps = (to, from, except2, desc2) => {
+}, __copyProps = (to, from, except2, desc12) => {
   if (from && typeof from == "object" || typeof from == "function")
     for (let key of __getOwnPropNames(from))
-      !__hasOwnProp.call(to, key) && key !== except2 && __defProp(to, key, { get: () => from[key], enumerable: !(desc2 = __getOwnPropDesc(from, key)) || desc2.enumerable });
+      !__hasOwnProp.call(to, key) && key !== except2 && __defProp(to, key, { get: () => from[key], enumerable: !(desc12 = __getOwnPropDesc(from, key)) || desc12.enumerable });
   return to;
 };
 var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
@@ -125,9 +125,9 @@ var require_bcrypt = __commonJS({
             });
           });
       };
-      function safeStringCompare(known, unknown2) {
+      function safeStringCompare(known, unknown) {
         for (var right = 0, wrong = 0, i = 0, k = known.length; i < k; ++i)
-          known.charCodeAt(i) === unknown2.charCodeAt(i) ? ++right : ++wrong;
+          known.charCodeAt(i) === unknown.charCodeAt(i) ? ++right : ++wrong;
         return right < 0 ? !1 : wrong === 0;
       }
       bcrypt3.compareSync = function(s, hash) {
@@ -1466,8 +1466,8 @@ var require_bcrypt = __commonJS({
         return { key: word, offp };
       }
       function _key(key, P, S) {
-        for (var offset2 = 0, lr = [0, 0], plen = P.length, slen = S.length, sw, i = 0; i < plen; i++)
-          sw = _streamtoword(key, offset2), offset2 = sw.offp, P[i] = P[i] ^ sw.key;
+        for (var offset = 0, lr = [0, 0], plen = P.length, slen = S.length, sw, i = 0; i < plen; i++)
+          sw = _streamtoword(key, offset), offset = sw.offp, P[i] = P[i] ^ sw.key;
         for (i = 0; i < plen; i += 2)
           lr = _encipher(lr, 0, P, S), P[i] = lr[0], P[i + 1] = lr[1];
         for (i = 0; i < slen; i += 2)
@@ -1532,7 +1532,7 @@ var require_bcrypt = __commonJS({
             return;
           } else
             throw err;
-        var minor, offset2;
+        var minor, offset;
         if (salt.charAt(0) !== "$" || salt.charAt(1) !== "2")
           if (err = Error("Invalid salt version: " + salt.substring(0, 2)), callback) {
             nextTick(callback.bind(this, err));
@@ -1540,7 +1540,7 @@ var require_bcrypt = __commonJS({
           } else
             throw err;
         if (salt.charAt(2) === "$")
-          minor = String.fromCharCode(0), offset2 = 3;
+          minor = String.fromCharCode(0), offset = 3;
         else {
           if (minor = salt.charAt(2), minor !== "a" && minor !== "b" && minor !== "y" || salt.charAt(3) !== "$")
             if (err = Error("Invalid salt revision: " + salt.substring(2, 4)), callback) {
@@ -1548,15 +1548,15 @@ var require_bcrypt = __commonJS({
               return;
             } else
               throw err;
-          offset2 = 4;
+          offset = 4;
         }
-        if (salt.charAt(offset2 + 2) > "$")
+        if (salt.charAt(offset + 2) > "$")
           if (err = Error("Missing salt rounds"), callback) {
             nextTick(callback.bind(this, err));
             return;
           } else
             throw err;
-        var r1 = parseInt(salt.substring(offset2, offset2 + 1), 10) * 10, r2 = parseInt(salt.substring(offset2 + 1, offset2 + 2), 10), rounds = r1 + r2, real_salt = salt.substring(offset2 + 3, offset2 + 25);
+        var r1 = parseInt(salt.substring(offset, offset + 1), 10) * 10, r2 = parseInt(salt.substring(offset + 1, offset + 2), 10), rounds = r1 + r2, real_salt = salt.substring(offset + 3, offset + 25);
         s += minor >= "a" ? "\0" : "";
         var passwordb = stringToBytes(s), saltb = base64_decode(real_salt, BCRYPT_SALT_LEN);
         function finish(bytes) {
@@ -1578,4937 +1578,6 @@ var require_bcrypt = __commonJS({
 var require_bcryptjs = __commonJS({
   "node_modules/bcryptjs/index.js"(exports, module) {
     module.exports = require_bcrypt();
-  }
-});
-
-// node_modules/drizzle-orm/entity.js
-function is(value, type2) {
-  if (!value || typeof value != "object")
-    return !1;
-  if (value instanceof type2)
-    return !0;
-  if (!Object.prototype.hasOwnProperty.call(type2, entityKind))
-    throw new Error(
-      `Class "${type2.name ?? "<unknown>"}" doesn't look like a Drizzle entity. If this is incorrect and the class is provided by Drizzle, please report this as a bug.`
-    );
-  let cls = Object.getPrototypeOf(value).constructor;
-  if (cls)
-    for (; cls; ) {
-      if (entityKind in cls && cls[entityKind] === type2[entityKind])
-        return !0;
-      cls = Object.getPrototypeOf(cls);
-    }
-  return !1;
-}
-var entityKind, hasOwnEntityKind, init_entity = __esm({
-  "node_modules/drizzle-orm/entity.js"() {
-    entityKind = Symbol.for("drizzle:entityKind"), hasOwnEntityKind = Symbol.for("drizzle:hasOwnEntityKind");
-  }
-});
-
-// node_modules/drizzle-orm/column.js
-var _a, Column, init_column = __esm({
-  "node_modules/drizzle-orm/column.js"() {
-    init_entity();
-    Column = class {
-      constructor(table, config) {
-        this.table = table, this.config = config, this.name = config.name, this.keyAsName = config.keyAsName, this.notNull = config.notNull, this.default = config.default, this.defaultFn = config.defaultFn, this.onUpdateFn = config.onUpdateFn, this.hasDefault = config.hasDefault, this.primary = config.primaryKey, this.isUnique = config.isUnique, this.uniqueName = config.uniqueName, this.uniqueType = config.uniqueType, this.dataType = config.dataType, this.columnType = config.columnType, this.generated = config.generated, this.generatedIdentity = config.generatedIdentity;
-      }
-      name;
-      keyAsName;
-      primary;
-      notNull;
-      default;
-      defaultFn;
-      onUpdateFn;
-      hasDefault;
-      isUnique;
-      uniqueName;
-      uniqueType;
-      dataType;
-      columnType;
-      enumValues = void 0;
-      generated = void 0;
-      generatedIdentity = void 0;
-      config;
-      mapFromDriverValue(value) {
-        return value;
-      }
-      mapToDriverValue(value) {
-        return value;
-      }
-      // ** @internal */
-      shouldDisableInsert() {
-        return this.config.generated !== void 0 && this.config.generated.type !== "byDefault";
-      }
-    };
-    _a = entityKind, __publicField(Column, _a, "Column");
-  }
-});
-
-// node_modules/drizzle-orm/column-builder.js
-var _a2, ColumnBuilder, init_column_builder = __esm({
-  "node_modules/drizzle-orm/column-builder.js"() {
-    init_entity();
-    ColumnBuilder = class {
-      config;
-      constructor(name, dataType, columnType) {
-        this.config = {
-          name,
-          keyAsName: name === "",
-          notNull: !1,
-          default: void 0,
-          hasDefault: !1,
-          primaryKey: !1,
-          isUnique: !1,
-          uniqueName: void 0,
-          uniqueType: void 0,
-          dataType,
-          columnType,
-          generated: void 0
-        };
-      }
-      /**
-       * Changes the data type of the column. Commonly used with `json` columns. Also, useful for branded types.
-       *
-       * @example
-       * ```ts
-       * const users = pgTable('users', {
-       * 	id: integer('id').$type<UserId>().primaryKey(),
-       * 	details: json('details').$type<UserDetails>().notNull(),
-       * });
-       * ```
-       */
-      $type() {
-        return this;
-      }
-      /**
-       * Adds a `not null` clause to the column definition.
-       *
-       * Affects the `select` model of the table - columns *without* `not null` will be nullable on select.
-       */
-      notNull() {
-        return this.config.notNull = !0, this;
-      }
-      /**
-       * Adds a `default <value>` clause to the column definition.
-       *
-       * Affects the `insert` model of the table - columns *with* `default` are optional on insert.
-       *
-       * If you need to set a dynamic default value, use {@link $defaultFn} instead.
-       */
-      default(value) {
-        return this.config.default = value, this.config.hasDefault = !0, this;
-      }
-      /**
-       * Adds a dynamic default value to the column.
-       * The function will be called when the row is inserted, and the returned value will be used as the column value.
-       *
-       * **Note:** This value does not affect the `drizzle-kit` behavior, it is only used at runtime in `drizzle-orm`.
-       */
-      $defaultFn(fn) {
-        return this.config.defaultFn = fn, this.config.hasDefault = !0, this;
-      }
-      /**
-       * Alias for {@link $defaultFn}.
-       */
-      $default = this.$defaultFn;
-      /**
-       * Adds a dynamic update value to the column.
-       * The function will be called when the row is updated, and the returned value will be used as the column value if none is provided.
-       * If no `default` (or `$defaultFn`) value is provided, the function will be called when the row is inserted as well, and the returned value will be used as the column value.
-       *
-       * **Note:** This value does not affect the `drizzle-kit` behavior, it is only used at runtime in `drizzle-orm`.
-       */
-      $onUpdateFn(fn) {
-        return this.config.onUpdateFn = fn, this.config.hasDefault = !0, this;
-      }
-      /**
-       * Alias for {@link $onUpdateFn}.
-       */
-      $onUpdate = this.$onUpdateFn;
-      /**
-       * Adds a `primary key` clause to the column definition. This implicitly makes the column `not null`.
-       *
-       * In SQLite, `integer primary key` implicitly makes the column auto-incrementing.
-       */
-      primaryKey() {
-        return this.config.primaryKey = !0, this.config.notNull = !0, this;
-      }
-      /** @internal Sets the name of the column to the key within the table definition if a name was not given. */
-      setName(name) {
-        this.config.name === "" && (this.config.name = name);
-      }
-    };
-    _a2 = entityKind, __publicField(ColumnBuilder, _a2, "ColumnBuilder");
-  }
-});
-
-// node_modules/drizzle-orm/table.utils.js
-var TableName, init_table_utils = __esm({
-  "node_modules/drizzle-orm/table.utils.js"() {
-    TableName = Symbol.for("drizzle:Name");
-  }
-});
-
-// node_modules/drizzle-orm/pg-core/foreign-keys.js
-var _a3, ForeignKeyBuilder, _a4, ForeignKey, init_foreign_keys = __esm({
-  "node_modules/drizzle-orm/pg-core/foreign-keys.js"() {
-    init_entity();
-    init_table_utils();
-    ForeignKeyBuilder = class {
-      /** @internal */
-      reference;
-      /** @internal */
-      _onUpdate = "no action";
-      /** @internal */
-      _onDelete = "no action";
-      constructor(config, actions) {
-        this.reference = () => {
-          let { name, columns, foreignColumns } = config();
-          return { name, columns, foreignTable: foreignColumns[0].table, foreignColumns };
-        }, actions && (this._onUpdate = actions.onUpdate, this._onDelete = actions.onDelete);
-      }
-      onUpdate(action26) {
-        return this._onUpdate = action26 === void 0 ? "no action" : action26, this;
-      }
-      onDelete(action26) {
-        return this._onDelete = action26 === void 0 ? "no action" : action26, this;
-      }
-      /** @internal */
-      build(table) {
-        return new ForeignKey(table, this);
-      }
-    };
-    _a3 = entityKind, __publicField(ForeignKeyBuilder, _a3, "PgForeignKeyBuilder");
-    ForeignKey = class {
-      constructor(table, builder) {
-        this.table = table, this.reference = builder.reference, this.onUpdate = builder._onUpdate, this.onDelete = builder._onDelete;
-      }
-      reference;
-      onUpdate;
-      onDelete;
-      getName() {
-        let { name, columns, foreignColumns } = this.reference(), columnNames = columns.map((column) => column.name), foreignColumnNames = foreignColumns.map((column) => column.name), chunks = [
-          this.table[TableName],
-          ...columnNames,
-          foreignColumns[0].table[TableName],
-          ...foreignColumnNames
-        ];
-        return name ?? `${chunks.join("_")}_fk`;
-      }
-    };
-    _a4 = entityKind, __publicField(ForeignKey, _a4, "PgForeignKey");
-  }
-});
-
-// node_modules/drizzle-orm/tracing-utils.js
-function iife(fn, ...args) {
-  return fn(...args);
-}
-var init_tracing_utils = __esm({
-  "node_modules/drizzle-orm/tracing-utils.js"() {
-  }
-});
-
-// node_modules/drizzle-orm/pg-core/unique-constraint.js
-function uniqueKeyName(table, columns) {
-  return `${table[TableName]}_${columns.join("_")}_unique`;
-}
-var _a5, UniqueConstraintBuilder, _a6, UniqueOnConstraintBuilder, _a7, UniqueConstraint, init_unique_constraint = __esm({
-  "node_modules/drizzle-orm/pg-core/unique-constraint.js"() {
-    init_entity();
-    init_table_utils();
-    UniqueConstraintBuilder = class {
-      constructor(columns, name) {
-        this.name = name, this.columns = columns;
-      }
-      /** @internal */
-      columns;
-      /** @internal */
-      nullsNotDistinctConfig = !1;
-      nullsNotDistinct() {
-        return this.nullsNotDistinctConfig = !0, this;
-      }
-      /** @internal */
-      build(table) {
-        return new UniqueConstraint(table, this.columns, this.nullsNotDistinctConfig, this.name);
-      }
-    };
-    _a5 = entityKind, __publicField(UniqueConstraintBuilder, _a5, "PgUniqueConstraintBuilder");
-    UniqueOnConstraintBuilder = class {
-      /** @internal */
-      name;
-      constructor(name) {
-        this.name = name;
-      }
-      on(...columns) {
-        return new UniqueConstraintBuilder(columns, this.name);
-      }
-    };
-    _a6 = entityKind, __publicField(UniqueOnConstraintBuilder, _a6, "PgUniqueOnConstraintBuilder");
-    UniqueConstraint = class {
-      constructor(table, columns, nullsNotDistinct, name) {
-        this.table = table, this.columns = columns, this.name = name ?? uniqueKeyName(this.table, this.columns.map((column) => column.name)), this.nullsNotDistinct = nullsNotDistinct;
-      }
-      columns;
-      name;
-      nullsNotDistinct = !1;
-      getName() {
-        return this.name;
-      }
-    };
-    _a7 = entityKind, __publicField(UniqueConstraint, _a7, "PgUniqueConstraint");
-  }
-});
-
-// node_modules/drizzle-orm/pg-core/utils/array.js
-function parsePgArrayValue(arrayString, startFrom, inQuotes) {
-  for (let i = startFrom; i < arrayString.length; i++) {
-    let char = arrayString[i];
-    if (char === "\\") {
-      i++;
-      continue;
-    }
-    if (char === '"')
-      return [arrayString.slice(startFrom, i).replace(/\\/g, ""), i + 1];
-    if (!inQuotes && (char === "," || char === "}"))
-      return [arrayString.slice(startFrom, i).replace(/\\/g, ""), i];
-  }
-  return [arrayString.slice(startFrom).replace(/\\/g, ""), arrayString.length];
-}
-function parsePgNestedArray(arrayString, startFrom = 0) {
-  let result = [], i = startFrom, lastCharIsComma = !1;
-  for (; i < arrayString.length; ) {
-    let char = arrayString[i];
-    if (char === ",") {
-      (lastCharIsComma || i === startFrom) && result.push(""), lastCharIsComma = !0, i++;
-      continue;
-    }
-    if (lastCharIsComma = !1, char === "\\") {
-      i += 2;
-      continue;
-    }
-    if (char === '"') {
-      let [value2, startFrom2] = parsePgArrayValue(arrayString, i + 1, !0);
-      result.push(value2), i = startFrom2;
-      continue;
-    }
-    if (char === "}")
-      return [result, i + 1];
-    if (char === "{") {
-      let [value2, startFrom2] = parsePgNestedArray(arrayString, i + 1);
-      result.push(value2), i = startFrom2;
-      continue;
-    }
-    let [value, newStartFrom] = parsePgArrayValue(arrayString, i, !1);
-    result.push(value), i = newStartFrom;
-  }
-  return [result, i];
-}
-function parsePgArray(arrayString) {
-  let [result] = parsePgNestedArray(arrayString, 1);
-  return result;
-}
-function makePgArray(array2) {
-  return `{${array2.map((item) => Array.isArray(item) ? makePgArray(item) : typeof item == "string" ? `"${item.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"` : `${item}`).join(",")}}`;
-}
-var init_array = __esm({
-  "node_modules/drizzle-orm/pg-core/utils/array.js"() {
-  }
-});
-
-// node_modules/drizzle-orm/pg-core/columns/common.js
-var _a8, PgColumnBuilder, _a9, PgColumn, _a10, ExtraConfigColumn, _a11, IndexedColumn, _a12, PgArrayBuilder, _a13, _PgArray, PgArray, init_common = __esm({
-  "node_modules/drizzle-orm/pg-core/columns/common.js"() {
-    init_column_builder();
-    init_column();
-    init_entity();
-    init_foreign_keys();
-    init_tracing_utils();
-    init_unique_constraint();
-    init_array();
-    PgColumnBuilder = class extends ColumnBuilder {
-      foreignKeyConfigs = [];
-      array(size) {
-        return new PgArrayBuilder(this.config.name, this, size);
-      }
-      references(ref, actions = {}) {
-        return this.foreignKeyConfigs.push({ ref, actions }), this;
-      }
-      unique(name, config) {
-        return this.config.isUnique = !0, this.config.uniqueName = name, this.config.uniqueType = config?.nulls, this;
-      }
-      generatedAlwaysAs(as) {
-        return this.config.generated = {
-          as,
-          type: "always",
-          mode: "stored"
-        }, this;
-      }
-      /** @internal */
-      buildForeignKeys(column, table) {
-        return this.foreignKeyConfigs.map(({ ref, actions }) => iife(
-          (ref2, actions2) => {
-            let builder = new ForeignKeyBuilder(() => {
-              let foreignColumn = ref2();
-              return { columns: [column], foreignColumns: [foreignColumn] };
-            });
-            return actions2.onUpdate && builder.onUpdate(actions2.onUpdate), actions2.onDelete && builder.onDelete(actions2.onDelete), builder.build(table);
-          },
-          ref,
-          actions
-        ));
-      }
-      /** @internal */
-      buildExtraConfigColumn(table) {
-        return new ExtraConfigColumn(table, this.config);
-      }
-    };
-    _a8 = entityKind, __publicField(PgColumnBuilder, _a8, "PgColumnBuilder");
-    PgColumn = class extends Column {
-      constructor(table, config) {
-        config.uniqueName || (config.uniqueName = uniqueKeyName(table, [config.name])), super(table, config), this.table = table;
-      }
-    };
-    _a9 = entityKind, __publicField(PgColumn, _a9, "PgColumn");
-    ExtraConfigColumn = class extends PgColumn {
-      getSQLType() {
-        return this.getSQLType();
-      }
-      indexConfig = {
-        order: this.config.order ?? "asc",
-        nulls: this.config.nulls ?? "last",
-        opClass: this.config.opClass
-      };
-      defaultConfig = {
-        order: "asc",
-        nulls: "last",
-        opClass: void 0
-      };
-      asc() {
-        return this.indexConfig.order = "asc", this;
-      }
-      desc() {
-        return this.indexConfig.order = "desc", this;
-      }
-      nullsFirst() {
-        return this.indexConfig.nulls = "first", this;
-      }
-      nullsLast() {
-        return this.indexConfig.nulls = "last", this;
-      }
-      /**
-       * ### PostgreSQL documentation quote
-       *
-       * > An operator class with optional parameters can be specified for each column of an index.
-       * The operator class identifies the operators to be used by the index for that column.
-       * For example, a B-tree index on four-byte integers would use the int4_ops class;
-       * this operator class includes comparison functions for four-byte integers.
-       * In practice the default operator class for the column's data type is usually sufficient.
-       * The main point of having operator classes is that for some data types, there could be more than one meaningful ordering.
-       * For example, we might want to sort a complex-number data type either by absolute value or by real part.
-       * We could do this by defining two operator classes for the data type and then selecting the proper class when creating an index.
-       * More information about operator classes check:
-       *
-       * ### Useful links
-       * https://www.postgresql.org/docs/current/sql-createindex.html
-       *
-       * https://www.postgresql.org/docs/current/indexes-opclass.html
-       *
-       * https://www.postgresql.org/docs/current/xindex.html
-       *
-       * ### Additional types
-       * If you have the `pg_vector` extension installed in your database, you can use the
-       * `vector_l2_ops`, `vector_ip_ops`, `vector_cosine_ops`, `vector_l1_ops`, `bit_hamming_ops`, `bit_jaccard_ops`, `halfvec_l2_ops`, `sparsevec_l2_ops` options, which are predefined types.
-       *
-       * **You can always specify any string you want in the operator class, in case Drizzle doesn't have it natively in its types**
-       *
-       * @param opClass
-       * @returns
-       */
-      op(opClass) {
-        return this.indexConfig.opClass = opClass, this;
-      }
-    };
-    _a10 = entityKind, __publicField(ExtraConfigColumn, _a10, "ExtraConfigColumn");
-    IndexedColumn = class {
-      constructor(name, keyAsName, type2, indexConfig) {
-        this.name = name, this.keyAsName = keyAsName, this.type = type2, this.indexConfig = indexConfig;
-      }
-      name;
-      keyAsName;
-      type;
-      indexConfig;
-    };
-    _a11 = entityKind, __publicField(IndexedColumn, _a11, "IndexedColumn");
-    PgArrayBuilder = class extends PgColumnBuilder {
-      constructor(name, baseBuilder, size) {
-        super(name, "array", "PgArray"), this.config.baseBuilder = baseBuilder, this.config.size = size;
-      }
-      /** @internal */
-      build(table) {
-        let baseColumn = this.config.baseBuilder.build(table);
-        return new PgArray(
-          table,
-          this.config,
-          baseColumn
-        );
-      }
-    };
-    _a12 = entityKind, __publicField(PgArrayBuilder, _a12, "PgArrayBuilder");
-    _PgArray = class extends PgColumn {
-      constructor(table, config, baseColumn, range) {
-        super(table, config), this.baseColumn = baseColumn, this.range = range, this.size = config.size;
-      }
-      size;
-      getSQLType() {
-        return `${this.baseColumn.getSQLType()}[${typeof this.size == "number" ? this.size : ""}]`;
-      }
-      mapFromDriverValue(value) {
-        return typeof value == "string" && (value = parsePgArray(value)), value.map((v) => this.baseColumn.mapFromDriverValue(v));
-      }
-      mapToDriverValue(value, isNestedArray = !1) {
-        let a = value.map(
-          (v) => v === null ? null : is(this.baseColumn, _PgArray) ? this.baseColumn.mapToDriverValue(v, !0) : this.baseColumn.mapToDriverValue(v)
-        );
-        return isNestedArray ? a : makePgArray(a);
-      }
-    }, PgArray = _PgArray;
-    _a13 = entityKind, __publicField(PgArray, _a13, "PgArray");
-  }
-});
-
-// node_modules/drizzle-orm/pg-core/columns/enum.js
-function isPgEnum(obj) {
-  return !!obj && typeof obj == "function" && isPgEnumSym in obj && obj[isPgEnumSym] === !0;
-}
-var _a14, PgEnumObjectColumnBuilder, _a15, PgEnumObjectColumn, isPgEnumSym, _a16, PgEnumColumnBuilder, _a17, PgEnumColumn, init_enum = __esm({
-  "node_modules/drizzle-orm/pg-core/columns/enum.js"() {
-    init_entity();
-    init_common();
-    PgEnumObjectColumnBuilder = class extends PgColumnBuilder {
-      constructor(name, enumInstance) {
-        super(name, "string", "PgEnumObjectColumn"), this.config.enum = enumInstance;
-      }
-      /** @internal */
-      build(table) {
-        return new PgEnumObjectColumn(
-          table,
-          this.config
-        );
-      }
-    };
-    _a14 = entityKind, __publicField(PgEnumObjectColumnBuilder, _a14, "PgEnumObjectColumnBuilder");
-    PgEnumObjectColumn = class extends PgColumn {
-      enum;
-      enumValues = this.config.enum.enumValues;
-      constructor(table, config) {
-        super(table, config), this.enum = config.enum;
-      }
-      getSQLType() {
-        return this.enum.enumName;
-      }
-    };
-    _a15 = entityKind, __publicField(PgEnumObjectColumn, _a15, "PgEnumObjectColumn");
-    isPgEnumSym = Symbol.for("drizzle:isPgEnum");
-    PgEnumColumnBuilder = class extends PgColumnBuilder {
-      constructor(name, enumInstance) {
-        super(name, "string", "PgEnumColumn"), this.config.enum = enumInstance;
-      }
-      /** @internal */
-      build(table) {
-        return new PgEnumColumn(
-          table,
-          this.config
-        );
-      }
-    };
-    _a16 = entityKind, __publicField(PgEnumColumnBuilder, _a16, "PgEnumColumnBuilder");
-    PgEnumColumn = class extends PgColumn {
-      enum = this.config.enum;
-      enumValues = this.config.enum.enumValues;
-      constructor(table, config) {
-        super(table, config), this.enum = config.enum;
-      }
-      getSQLType() {
-        return this.enum.enumName;
-      }
-    };
-    _a17 = entityKind, __publicField(PgEnumColumn, _a17, "PgEnumColumn");
-  }
-});
-
-// node_modules/drizzle-orm/subquery.js
-var _a18, Subquery, _a19, WithSubquery, init_subquery = __esm({
-  "node_modules/drizzle-orm/subquery.js"() {
-    init_entity();
-    Subquery = class {
-      constructor(sql3, fields, alias, isWith = !1, usedTables = []) {
-        this._ = {
-          brand: "Subquery",
-          sql: sql3,
-          selectedFields: fields,
-          alias,
-          isWith,
-          usedTables
-        };
-      }
-      // getSQL(): SQL<unknown> {
-      // 	return new SQL([this]);
-      // }
-    };
-    _a18 = entityKind, __publicField(Subquery, _a18, "Subquery");
-    WithSubquery = class extends Subquery {
-    };
-    _a19 = entityKind, __publicField(WithSubquery, _a19, "WithSubquery");
-  }
-});
-
-// node_modules/drizzle-orm/version.js
-var version, init_version = __esm({
-  "node_modules/drizzle-orm/version.js"() {
-    version = "0.44.2";
-  }
-});
-
-// node_modules/drizzle-orm/tracing.js
-var otel, rawTracer, tracer, init_tracing = __esm({
-  "node_modules/drizzle-orm/tracing.js"() {
-    init_tracing_utils();
-    init_version();
-    tracer = {
-      startActiveSpan(name, fn) {
-        return otel ? (rawTracer || (rawTracer = otel.trace.getTracer("drizzle-orm", version)), iife(
-          (otel2, rawTracer2) => rawTracer2.startActiveSpan(
-            name,
-            (span) => {
-              try {
-                return fn(span);
-              } catch (e) {
-                throw span.setStatus({
-                  code: otel2.SpanStatusCode.ERROR,
-                  message: e instanceof Error ? e.message : "Unknown error"
-                  // eslint-disable-line no-instanceof/no-instanceof
-                }), e;
-              } finally {
-                span.end();
-              }
-            }
-          ),
-          otel,
-          rawTracer
-        )) : fn();
-      }
-    };
-  }
-});
-
-// node_modules/drizzle-orm/view-common.js
-var ViewBaseConfig, init_view_common = __esm({
-  "node_modules/drizzle-orm/view-common.js"() {
-    ViewBaseConfig = Symbol.for("drizzle:ViewBaseConfig");
-  }
-});
-
-// node_modules/drizzle-orm/table.js
-function getTableName(table) {
-  return table[TableName];
-}
-function getTableUniqueName(table) {
-  return `${table[Schema] ?? "public"}.${table[TableName]}`;
-}
-var Schema, Columns, ExtraConfigColumns, OriginalName, BaseName, IsAlias, ExtraConfigBuilder, IsDrizzleTable, _a20, Table, init_table = __esm({
-  "node_modules/drizzle-orm/table.js"() {
-    init_entity();
-    init_table_utils();
-    Schema = Symbol.for("drizzle:Schema"), Columns = Symbol.for("drizzle:Columns"), ExtraConfigColumns = Symbol.for("drizzle:ExtraConfigColumns"), OriginalName = Symbol.for("drizzle:OriginalName"), BaseName = Symbol.for("drizzle:BaseName"), IsAlias = Symbol.for("drizzle:IsAlias"), ExtraConfigBuilder = Symbol.for("drizzle:ExtraConfigBuilder"), IsDrizzleTable = Symbol.for("drizzle:IsDrizzleTable"), Table = class {
-      /**
-       * @internal
-       * Can be changed if the table is aliased.
-       */
-      [(_a20 = entityKind, TableName)];
-      /**
-       * @internal
-       * Used to store the original name of the table, before any aliasing.
-       */
-      [OriginalName];
-      /** @internal */
-      [Schema];
-      /** @internal */
-      [Columns];
-      /** @internal */
-      [ExtraConfigColumns];
-      /**
-       *  @internal
-       * Used to store the table name before the transformation via the `tableCreator` functions.
-       */
-      [BaseName];
-      /** @internal */
-      [IsAlias] = !1;
-      /** @internal */
-      [IsDrizzleTable] = !0;
-      /** @internal */
-      [ExtraConfigBuilder] = void 0;
-      constructor(name, schema3, baseName) {
-        this[TableName] = this[OriginalName] = name, this[Schema] = schema3, this[BaseName] = baseName;
-      }
-    };
-    __publicField(Table, _a20, "Table"), /** @internal */
-    __publicField(Table, "Symbol", {
-      Name: TableName,
-      Schema,
-      OriginalName,
-      Columns,
-      ExtraConfigColumns,
-      BaseName,
-      IsAlias,
-      ExtraConfigBuilder
-    });
-  }
-});
-
-// node_modules/drizzle-orm/sql/sql.js
-function isSQLWrapper(value) {
-  return value != null && typeof value.getSQL == "function";
-}
-function mergeQueries(queries) {
-  let result = { sql: "", params: [] };
-  for (let query of queries)
-    result.sql += query.sql, result.params.push(...query.params), query.typings?.length && (result.typings || (result.typings = []), result.typings.push(...query.typings));
-  return result;
-}
-function isDriverValueEncoder(value) {
-  return typeof value == "object" && value !== null && "mapToDriverValue" in value && typeof value.mapToDriverValue == "function";
-}
-function sql(strings, ...params) {
-  let queryChunks = [];
-  (params.length > 0 || strings.length > 0 && strings[0] !== "") && queryChunks.push(new StringChunk(strings[0]));
-  for (let [paramIndex, param2] of params.entries())
-    queryChunks.push(param2, new StringChunk(strings[paramIndex + 1]));
-  return new SQL(queryChunks);
-}
-function fillPlaceholders(params, values) {
-  return params.map((p) => {
-    if (is(p, Placeholder)) {
-      if (!(p.name in values))
-        throw new Error(`No value for placeholder "${p.name}" was provided`);
-      return values[p.name];
-    }
-    if (is(p, Param) && is(p.value, Placeholder)) {
-      if (!(p.value.name in values))
-        throw new Error(`No value for placeholder "${p.value.name}" was provided`);
-      return p.encoder.mapToDriverValue(values[p.value.name]);
-    }
-    return p;
-  });
-}
-var _a21, FakePrimitiveParam, _a22, StringChunk, _a23, _SQL, SQL, _a24, Name, noopDecoder, noopEncoder, noopMapper, _a25, Param, _a26, Placeholder, IsDrizzleView, _a27, View, init_sql = __esm({
-  "node_modules/drizzle-orm/sql/sql.js"() {
-    init_entity();
-    init_enum();
-    init_subquery();
-    init_tracing();
-    init_view_common();
-    init_column();
-    init_table();
-    FakePrimitiveParam = class {
-    };
-    _a21 = entityKind, __publicField(FakePrimitiveParam, _a21, "FakePrimitiveParam");
-    StringChunk = class {
-      value;
-      constructor(value) {
-        this.value = Array.isArray(value) ? value : [value];
-      }
-      getSQL() {
-        return new SQL([this]);
-      }
-    };
-    _a22 = entityKind, __publicField(StringChunk, _a22, "StringChunk");
-    _SQL = class {
-      constructor(queryChunks) {
-        this.queryChunks = queryChunks;
-        for (let chunk of queryChunks)
-          if (is(chunk, Table)) {
-            let schemaName = chunk[Table.Symbol.Schema];
-            this.usedTables.push(
-              schemaName === void 0 ? chunk[Table.Symbol.Name] : schemaName + "." + chunk[Table.Symbol.Name]
-            );
-          }
-      }
-      /** @internal */
-      decoder = noopDecoder;
-      shouldInlineParams = !1;
-      /** @internal */
-      usedTables = [];
-      append(query) {
-        return this.queryChunks.push(...query.queryChunks), this;
-      }
-      toQuery(config) {
-        return tracer.startActiveSpan("drizzle.buildSQL", (span) => {
-          let query = this.buildQueryFromSourceParams(this.queryChunks, config);
-          return span?.setAttributes({
-            "drizzle.query.text": query.sql,
-            "drizzle.query.params": JSON.stringify(query.params)
-          }), query;
-        });
-      }
-      buildQueryFromSourceParams(chunks, _config) {
-        let config = Object.assign({}, _config, {
-          inlineParams: _config.inlineParams || this.shouldInlineParams,
-          paramStartIndex: _config.paramStartIndex || { value: 0 }
-        }), {
-          casing,
-          escapeName,
-          escapeParam,
-          prepareTyping,
-          inlineParams,
-          paramStartIndex
-        } = config;
-        return mergeQueries(chunks.map((chunk) => {
-          if (is(chunk, StringChunk))
-            return { sql: chunk.value.join(""), params: [] };
-          if (is(chunk, Name))
-            return { sql: escapeName(chunk.value), params: [] };
-          if (chunk === void 0)
-            return { sql: "", params: [] };
-          if (Array.isArray(chunk)) {
-            let result = [new StringChunk("(")];
-            for (let [i, p] of chunk.entries())
-              result.push(p), i < chunk.length - 1 && result.push(new StringChunk(", "));
-            return result.push(new StringChunk(")")), this.buildQueryFromSourceParams(result, config);
-          }
-          if (is(chunk, _SQL))
-            return this.buildQueryFromSourceParams(chunk.queryChunks, {
-              ...config,
-              inlineParams: inlineParams || chunk.shouldInlineParams
-            });
-          if (is(chunk, Table)) {
-            let schemaName = chunk[Table.Symbol.Schema], tableName = chunk[Table.Symbol.Name];
-            return {
-              sql: schemaName === void 0 || chunk[IsAlias] ? escapeName(tableName) : escapeName(schemaName) + "." + escapeName(tableName),
-              params: []
-            };
-          }
-          if (is(chunk, Column)) {
-            let columnName = casing.getColumnCasing(chunk);
-            if (_config.invokeSource === "indexes")
-              return { sql: escapeName(columnName), params: [] };
-            let schemaName = chunk.table[Table.Symbol.Schema];
-            return {
-              sql: chunk.table[IsAlias] || schemaName === void 0 ? escapeName(chunk.table[Table.Symbol.Name]) + "." + escapeName(columnName) : escapeName(schemaName) + "." + escapeName(chunk.table[Table.Symbol.Name]) + "." + escapeName(columnName),
-              params: []
-            };
-          }
-          if (is(chunk, View)) {
-            let schemaName = chunk[ViewBaseConfig].schema, viewName = chunk[ViewBaseConfig].name;
-            return {
-              sql: schemaName === void 0 || chunk[ViewBaseConfig].isAlias ? escapeName(viewName) : escapeName(schemaName) + "." + escapeName(viewName),
-              params: []
-            };
-          }
-          if (is(chunk, Param)) {
-            if (is(chunk.value, Placeholder))
-              return { sql: escapeParam(paramStartIndex.value++, chunk), params: [chunk], typings: ["none"] };
-            let mappedValue = chunk.value === null ? null : chunk.encoder.mapToDriverValue(chunk.value);
-            if (is(mappedValue, _SQL))
-              return this.buildQueryFromSourceParams([mappedValue], config);
-            if (inlineParams)
-              return { sql: this.mapInlineParam(mappedValue, config), params: [] };
-            let typings = ["none"];
-            return prepareTyping && (typings = [prepareTyping(chunk.encoder)]), { sql: escapeParam(paramStartIndex.value++, mappedValue), params: [mappedValue], typings };
-          }
-          return is(chunk, Placeholder) ? { sql: escapeParam(paramStartIndex.value++, chunk), params: [chunk], typings: ["none"] } : is(chunk, _SQL.Aliased) && chunk.fieldAlias !== void 0 ? { sql: escapeName(chunk.fieldAlias), params: [] } : is(chunk, Subquery) ? chunk._.isWith ? { sql: escapeName(chunk._.alias), params: [] } : this.buildQueryFromSourceParams([
-            new StringChunk("("),
-            chunk._.sql,
-            new StringChunk(") "),
-            new Name(chunk._.alias)
-          ], config) : isPgEnum(chunk) ? chunk.schema ? { sql: escapeName(chunk.schema) + "." + escapeName(chunk.enumName), params: [] } : { sql: escapeName(chunk.enumName), params: [] } : isSQLWrapper(chunk) ? chunk.shouldOmitSQLParens?.() ? this.buildQueryFromSourceParams([chunk.getSQL()], config) : this.buildQueryFromSourceParams([
-            new StringChunk("("),
-            chunk.getSQL(),
-            new StringChunk(")")
-          ], config) : inlineParams ? { sql: this.mapInlineParam(chunk, config), params: [] } : { sql: escapeParam(paramStartIndex.value++, chunk), params: [chunk], typings: ["none"] };
-        }));
-      }
-      mapInlineParam(chunk, { escapeString }) {
-        if (chunk === null)
-          return "null";
-        if (typeof chunk == "number" || typeof chunk == "boolean")
-          return chunk.toString();
-        if (typeof chunk == "string")
-          return escapeString(chunk);
-        if (typeof chunk == "object") {
-          let mappedValueAsString = chunk.toString();
-          return escapeString(mappedValueAsString === "[object Object]" ? JSON.stringify(chunk) : mappedValueAsString);
-        }
-        throw new Error("Unexpected param value: " + chunk);
-      }
-      getSQL() {
-        return this;
-      }
-      as(alias) {
-        return alias === void 0 ? this : new _SQL.Aliased(this, alias);
-      }
-      mapWith(decoder) {
-        return this.decoder = typeof decoder == "function" ? { mapFromDriverValue: decoder } : decoder, this;
-      }
-      inlineParams() {
-        return this.shouldInlineParams = !0, this;
-      }
-      /**
-       * This method is used to conditionally include a part of the query.
-       *
-       * @param condition - Condition to check
-       * @returns itself if the condition is `true`, otherwise `undefined`
-       */
-      if(condition) {
-        return condition ? this : void 0;
-      }
-    }, SQL = _SQL;
-    _a23 = entityKind, __publicField(SQL, _a23, "SQL");
-    Name = class {
-      constructor(value) {
-        this.value = value;
-      }
-      brand;
-      getSQL() {
-        return new SQL([this]);
-      }
-    };
-    _a24 = entityKind, __publicField(Name, _a24, "Name");
-    noopDecoder = {
-      mapFromDriverValue: (value) => value
-    }, noopEncoder = {
-      mapToDriverValue: (value) => value
-    }, noopMapper = {
-      ...noopDecoder,
-      ...noopEncoder
-    }, Param = class {
-      /**
-       * @param value - Parameter value
-       * @param encoder - Encoder to convert the value to a driver parameter
-       */
-      constructor(value, encoder = noopEncoder) {
-        this.value = value, this.encoder = encoder;
-      }
-      brand;
-      getSQL() {
-        return new SQL([this]);
-      }
-    };
-    _a25 = entityKind, __publicField(Param, _a25, "Param");
-    ((sql22) => {
-      function empty() {
-        return new SQL([]);
-      }
-      sql22.empty = empty;
-      function fromList(list) {
-        return new SQL(list);
-      }
-      sql22.fromList = fromList;
-      function raw(str) {
-        return new SQL([new StringChunk(str)]);
-      }
-      sql22.raw = raw;
-      function join(chunks, separator) {
-        let result = [];
-        for (let [i, chunk] of chunks.entries())
-          i > 0 && separator !== void 0 && result.push(separator), result.push(chunk);
-        return new SQL(result);
-      }
-      sql22.join = join;
-      function identifier(value) {
-        return new Name(value);
-      }
-      sql22.identifier = identifier;
-      function placeholder2(name2) {
-        return new Placeholder(name2);
-      }
-      sql22.placeholder = placeholder2;
-      function param2(value, encoder) {
-        return new Param(value, encoder);
-      }
-      sql22.param = param2;
-    })(sql || (sql = {}));
-    ((SQL2) => {
-      class Aliased {
-        constructor(sql22, fieldAlias) {
-          this.sql = sql22, this.fieldAlias = fieldAlias;
-        }
-        static [entityKind] = "SQL.Aliased";
-        /** @internal */
-        isSelectionField = !1;
-        getSQL() {
-          return this.sql;
-        }
-        /** @internal */
-        clone() {
-          return new Aliased(this.sql, this.fieldAlias);
-        }
-      }
-      SQL2.Aliased = Aliased;
-    })(SQL || (SQL = {}));
-    Placeholder = class {
-      constructor(name2) {
-        this.name = name2;
-      }
-      getSQL() {
-        return new SQL([this]);
-      }
-    };
-    _a26 = entityKind, __publicField(Placeholder, _a26, "Placeholder");
-    IsDrizzleView = Symbol.for("drizzle:IsDrizzleView"), View = class {
-      /** @internal */
-      [(_a27 = entityKind, ViewBaseConfig)];
-      /** @internal */
-      [IsDrizzleView] = !0;
-      constructor({ name: name2, schema: schema3, selectedFields, query }) {
-        this[ViewBaseConfig] = {
-          name: name2,
-          originalName: name2,
-          schema: schema3,
-          selectedFields,
-          query,
-          isExisting: !query,
-          isAlias: !1
-        };
-      }
-      getSQL() {
-        return new SQL([this]);
-      }
-    };
-    __publicField(View, _a27, "View");
-    Column.prototype.getSQL = function() {
-      return new SQL([this]);
-    };
-    Table.prototype.getSQL = function() {
-      return new SQL([this]);
-    };
-    Subquery.prototype.getSQL = function() {
-      return new SQL([this]);
-    };
-  }
-});
-
-// node_modules/drizzle-orm/alias.js
-function aliasedTable(table, tableAlias) {
-  return new Proxy(table, new TableAliasProxyHandler(tableAlias, !1));
-}
-function aliasedTableColumn(column, tableAlias) {
-  return new Proxy(
-    column,
-    new ColumnAliasProxyHandler(new Proxy(column.table, new TableAliasProxyHandler(tableAlias, !1)))
-  );
-}
-function mapColumnsInAliasedSQLToAlias(query, alias) {
-  return new SQL.Aliased(mapColumnsInSQLToAlias(query.sql, alias), query.fieldAlias);
-}
-function mapColumnsInSQLToAlias(query, alias) {
-  return sql.join(query.queryChunks.map((c) => is(c, Column) ? aliasedTableColumn(c, alias) : is(c, SQL) ? mapColumnsInSQLToAlias(c, alias) : is(c, SQL.Aliased) ? mapColumnsInAliasedSQLToAlias(c, alias) : c));
-}
-var _a28, ColumnAliasProxyHandler, _a29, TableAliasProxyHandler, _a30, RelationTableAliasProxyHandler, init_alias = __esm({
-  "node_modules/drizzle-orm/alias.js"() {
-    init_column();
-    init_entity();
-    init_sql();
-    init_table();
-    init_view_common();
-    ColumnAliasProxyHandler = class {
-      constructor(table) {
-        this.table = table;
-      }
-      get(columnObj, prop) {
-        return prop === "table" ? this.table : columnObj[prop];
-      }
-    };
-    _a28 = entityKind, __publicField(ColumnAliasProxyHandler, _a28, "ColumnAliasProxyHandler");
-    TableAliasProxyHandler = class {
-      constructor(alias, replaceOriginalName) {
-        this.alias = alias, this.replaceOriginalName = replaceOriginalName;
-      }
-      get(target, prop) {
-        if (prop === Table.Symbol.IsAlias)
-          return !0;
-        if (prop === Table.Symbol.Name)
-          return this.alias;
-        if (this.replaceOriginalName && prop === Table.Symbol.OriginalName)
-          return this.alias;
-        if (prop === ViewBaseConfig)
-          return {
-            ...target[ViewBaseConfig],
-            name: this.alias,
-            isAlias: !0
-          };
-        if (prop === Table.Symbol.Columns) {
-          let columns = target[Table.Symbol.Columns];
-          if (!columns)
-            return columns;
-          let proxiedColumns = {};
-          return Object.keys(columns).map((key) => {
-            proxiedColumns[key] = new Proxy(
-              columns[key],
-              new ColumnAliasProxyHandler(new Proxy(target, this))
-            );
-          }), proxiedColumns;
-        }
-        let value = target[prop];
-        return is(value, Column) ? new Proxy(value, new ColumnAliasProxyHandler(new Proxy(target, this))) : value;
-      }
-    };
-    _a29 = entityKind, __publicField(TableAliasProxyHandler, _a29, "TableAliasProxyHandler");
-    RelationTableAliasProxyHandler = class {
-      constructor(alias) {
-        this.alias = alias;
-      }
-      get(target, prop) {
-        return prop === "sourceTable" ? aliasedTable(target.sourceTable, this.alias) : target[prop];
-      }
-    };
-    _a30 = entityKind, __publicField(RelationTableAliasProxyHandler, _a30, "RelationTableAliasProxyHandler");
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/alias.js
-var init_alias2 = __esm({
-  "node_modules/drizzle-orm/sqlite-core/alias.js"() {
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/checks.js
-var _a31, CheckBuilder, _a32, Check, init_checks = __esm({
-  "node_modules/drizzle-orm/sqlite-core/checks.js"() {
-    init_entity();
-    CheckBuilder = class {
-      constructor(name, value) {
-        this.name = name, this.value = value;
-      }
-      brand;
-      build(table) {
-        return new Check(table, this);
-      }
-    };
-    _a31 = entityKind, __publicField(CheckBuilder, _a31, "SQLiteCheckBuilder");
-    Check = class {
-      constructor(table, builder) {
-        this.table = table, this.name = builder.name, this.value = builder.value;
-      }
-      name;
-      value;
-    };
-    _a32 = entityKind, __publicField(Check, _a32, "SQLiteCheck");
-  }
-});
-
-// node_modules/drizzle-orm/utils.js
-function mapResultRow(columns, row, joinsNotNullableMap) {
-  let nullifyMap = {}, result = columns.reduce(
-    (result2, { path, field }, columnIndex) => {
-      let decoder;
-      is(field, Column) ? decoder = field : is(field, SQL) ? decoder = field.decoder : decoder = field.sql.decoder;
-      let node = result2;
-      for (let [pathChunkIndex, pathChunk] of path.entries())
-        if (pathChunkIndex < path.length - 1)
-          pathChunk in node || (node[pathChunk] = {}), node = node[pathChunk];
-        else {
-          let rawValue = row[columnIndex], value = node[pathChunk] = rawValue === null ? null : decoder.mapFromDriverValue(rawValue);
-          if (joinsNotNullableMap && is(field, Column) && path.length === 2) {
-            let objectName = path[0];
-            objectName in nullifyMap ? typeof nullifyMap[objectName] == "string" && nullifyMap[objectName] !== getTableName(field.table) && (nullifyMap[objectName] = !1) : nullifyMap[objectName] = value === null ? getTableName(field.table) : !1;
-          }
-        }
-      return result2;
-    },
-    {}
-  );
-  if (joinsNotNullableMap && Object.keys(nullifyMap).length > 0)
-    for (let [objectName, tableName] of Object.entries(nullifyMap))
-      typeof tableName == "string" && !joinsNotNullableMap[tableName] && (result[objectName] = null);
-  return result;
-}
-function orderSelectedFields(fields, pathPrefix) {
-  return Object.entries(fields).reduce((result, [name, field]) => {
-    if (typeof name != "string")
-      return result;
-    let newPath = pathPrefix ? [...pathPrefix, name] : [name];
-    return is(field, Column) || is(field, SQL) || is(field, SQL.Aliased) ? result.push({ path: newPath, field }) : is(field, Table) ? result.push(...orderSelectedFields(field[Table.Symbol.Columns], newPath)) : result.push(...orderSelectedFields(field, newPath)), result;
-  }, []);
-}
-function haveSameKeys(left, right) {
-  let leftKeys = Object.keys(left), rightKeys = Object.keys(right);
-  if (leftKeys.length !== rightKeys.length)
-    return !1;
-  for (let [index, key] of leftKeys.entries())
-    if (key !== rightKeys[index])
-      return !1;
-  return !0;
-}
-function mapUpdateSet(table, values) {
-  let entries = Object.entries(values).filter(([, value]) => value !== void 0).map(([key, value]) => is(value, SQL) || is(value, Column) ? [key, value] : [key, new Param(value, table[Table.Symbol.Columns][key])]);
-  if (entries.length === 0)
-    throw new Error("No values to set");
-  return Object.fromEntries(entries);
-}
-function applyMixins(baseClass, extendedClasses) {
-  for (let extendedClass of extendedClasses)
-    for (let name of Object.getOwnPropertyNames(extendedClass.prototype))
-      name !== "constructor" && Object.defineProperty(
-        baseClass.prototype,
-        name,
-        Object.getOwnPropertyDescriptor(extendedClass.prototype, name) || /* @__PURE__ */ Object.create(null)
-      );
-}
-function getTableColumns(table) {
-  return table[Table.Symbol.Columns];
-}
-function getTableLikeName(table) {
-  return is(table, Subquery) ? table._.alias : is(table, View) ? table[ViewBaseConfig].name : is(table, SQL) ? void 0 : table[Table.Symbol.IsAlias] ? table[Table.Symbol.Name] : table[Table.Symbol.BaseName];
-}
-function getColumnNameAndConfig(a, b) {
-  return {
-    name: typeof a == "string" && a.length > 0 ? a : "",
-    config: typeof a == "object" ? a : b
-  };
-}
-var init_utils = __esm({
-  "node_modules/drizzle-orm/utils.js"() {
-    init_column();
-    init_entity();
-    init_sql();
-    init_subquery();
-    init_table();
-    init_view_common();
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/foreign-keys.js
-var _a33, ForeignKeyBuilder2, _a34, ForeignKey2, init_foreign_keys2 = __esm({
-  "node_modules/drizzle-orm/sqlite-core/foreign-keys.js"() {
-    init_entity();
-    init_table_utils();
-    ForeignKeyBuilder2 = class {
-      /** @internal */
-      reference;
-      /** @internal */
-      _onUpdate;
-      /** @internal */
-      _onDelete;
-      constructor(config, actions) {
-        this.reference = () => {
-          let { name, columns, foreignColumns } = config();
-          return { name, columns, foreignTable: foreignColumns[0].table, foreignColumns };
-        }, actions && (this._onUpdate = actions.onUpdate, this._onDelete = actions.onDelete);
-      }
-      onUpdate(action26) {
-        return this._onUpdate = action26, this;
-      }
-      onDelete(action26) {
-        return this._onDelete = action26, this;
-      }
-      /** @internal */
-      build(table) {
-        return new ForeignKey2(table, this);
-      }
-    };
-    _a33 = entityKind, __publicField(ForeignKeyBuilder2, _a33, "SQLiteForeignKeyBuilder");
-    ForeignKey2 = class {
-      constructor(table, builder) {
-        this.table = table, this.reference = builder.reference, this.onUpdate = builder._onUpdate, this.onDelete = builder._onDelete;
-      }
-      reference;
-      onUpdate;
-      onDelete;
-      getName() {
-        let { name, columns, foreignColumns } = this.reference(), columnNames = columns.map((column) => column.name), foreignColumnNames = foreignColumns.map((column) => column.name), chunks = [
-          this.table[TableName],
-          ...columnNames,
-          foreignColumns[0].table[TableName],
-          ...foreignColumnNames
-        ];
-        return name ?? `${chunks.join("_")}_fk`;
-      }
-    };
-    _a34 = entityKind, __publicField(ForeignKey2, _a34, "SQLiteForeignKey");
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/unique-constraint.js
-function uniqueKeyName2(table, columns) {
-  return `${table[TableName]}_${columns.join("_")}_unique`;
-}
-var _a35, UniqueConstraintBuilder2, _a36, UniqueOnConstraintBuilder2, _a37, UniqueConstraint2, init_unique_constraint2 = __esm({
-  "node_modules/drizzle-orm/sqlite-core/unique-constraint.js"() {
-    init_entity();
-    init_table_utils();
-    UniqueConstraintBuilder2 = class {
-      constructor(columns, name) {
-        this.name = name, this.columns = columns;
-      }
-      /** @internal */
-      columns;
-      /** @internal */
-      build(table) {
-        return new UniqueConstraint2(table, this.columns, this.name);
-      }
-    };
-    _a35 = entityKind, __publicField(UniqueConstraintBuilder2, _a35, "SQLiteUniqueConstraintBuilder");
-    UniqueOnConstraintBuilder2 = class {
-      /** @internal */
-      name;
-      constructor(name) {
-        this.name = name;
-      }
-      on(...columns) {
-        return new UniqueConstraintBuilder2(columns, this.name);
-      }
-    };
-    _a36 = entityKind, __publicField(UniqueOnConstraintBuilder2, _a36, "SQLiteUniqueOnConstraintBuilder");
-    UniqueConstraint2 = class {
-      constructor(table, columns, name) {
-        this.table = table, this.columns = columns, this.name = name ?? uniqueKeyName2(this.table, this.columns.map((column) => column.name));
-      }
-      columns;
-      name;
-      getName() {
-        return this.name;
-      }
-    };
-    _a37 = entityKind, __publicField(UniqueConstraint2, _a37, "SQLiteUniqueConstraint");
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/columns/common.js
-var _a38, SQLiteColumnBuilder, _a39, SQLiteColumn, init_common2 = __esm({
-  "node_modules/drizzle-orm/sqlite-core/columns/common.js"() {
-    init_column_builder();
-    init_column();
-    init_entity();
-    init_foreign_keys2();
-    init_unique_constraint2();
-    SQLiteColumnBuilder = class extends ColumnBuilder {
-      foreignKeyConfigs = [];
-      references(ref, actions = {}) {
-        return this.foreignKeyConfigs.push({ ref, actions }), this;
-      }
-      unique(name) {
-        return this.config.isUnique = !0, this.config.uniqueName = name, this;
-      }
-      generatedAlwaysAs(as, config) {
-        return this.config.generated = {
-          as,
-          type: "always",
-          mode: config?.mode ?? "virtual"
-        }, this;
-      }
-      /** @internal */
-      buildForeignKeys(column, table) {
-        return this.foreignKeyConfigs.map(({ ref, actions }) => ((ref2, actions2) => {
-          let builder = new ForeignKeyBuilder2(() => {
-            let foreignColumn = ref2();
-            return { columns: [column], foreignColumns: [foreignColumn] };
-          });
-          return actions2.onUpdate && builder.onUpdate(actions2.onUpdate), actions2.onDelete && builder.onDelete(actions2.onDelete), builder.build(table);
-        })(ref, actions));
-      }
-    };
-    _a38 = entityKind, __publicField(SQLiteColumnBuilder, _a38, "SQLiteColumnBuilder");
-    SQLiteColumn = class extends Column {
-      constructor(table, config) {
-        config.uniqueName || (config.uniqueName = uniqueKeyName2(table, [config.name])), super(table, config), this.table = table;
-      }
-    };
-    _a39 = entityKind, __publicField(SQLiteColumn, _a39, "SQLiteColumn");
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/columns/blob.js
-function blob(a, b) {
-  let { name, config } = getColumnNameAndConfig(a, b);
-  return config?.mode === "json" ? new SQLiteBlobJsonBuilder(name) : config?.mode === "bigint" ? new SQLiteBigIntBuilder(name) : new SQLiteBlobBufferBuilder(name);
-}
-var _a40, SQLiteBigIntBuilder, _a41, SQLiteBigInt, _a42, SQLiteBlobJsonBuilder, _a43, SQLiteBlobJson, _a44, SQLiteBlobBufferBuilder, _a45, SQLiteBlobBuffer, init_blob = __esm({
-  "node_modules/drizzle-orm/sqlite-core/columns/blob.js"() {
-    init_entity();
-    init_utils();
-    init_common2();
-    SQLiteBigIntBuilder = class extends SQLiteColumnBuilder {
-      constructor(name) {
-        super(name, "bigint", "SQLiteBigInt");
-      }
-      /** @internal */
-      build(table) {
-        return new SQLiteBigInt(table, this.config);
-      }
-    };
-    _a40 = entityKind, __publicField(SQLiteBigIntBuilder, _a40, "SQLiteBigIntBuilder");
-    SQLiteBigInt = class extends SQLiteColumn {
-      getSQLType() {
-        return "blob";
-      }
-      mapFromDriverValue(value) {
-        if (Buffer.isBuffer(value))
-          return BigInt(value.toString());
-        if (value instanceof ArrayBuffer) {
-          let decoder = new TextDecoder();
-          return BigInt(decoder.decode(value));
-        }
-        return BigInt(String.fromCodePoint(...value));
-      }
-      mapToDriverValue(value) {
-        return Buffer.from(value.toString());
-      }
-    };
-    _a41 = entityKind, __publicField(SQLiteBigInt, _a41, "SQLiteBigInt");
-    SQLiteBlobJsonBuilder = class extends SQLiteColumnBuilder {
-      constructor(name) {
-        super(name, "json", "SQLiteBlobJson");
-      }
-      /** @internal */
-      build(table) {
-        return new SQLiteBlobJson(
-          table,
-          this.config
-        );
-      }
-    };
-    _a42 = entityKind, __publicField(SQLiteBlobJsonBuilder, _a42, "SQLiteBlobJsonBuilder");
-    SQLiteBlobJson = class extends SQLiteColumn {
-      getSQLType() {
-        return "blob";
-      }
-      mapFromDriverValue(value) {
-        if (Buffer.isBuffer(value))
-          return JSON.parse(value.toString());
-        if (value instanceof ArrayBuffer) {
-          let decoder = new TextDecoder();
-          return JSON.parse(decoder.decode(value));
-        }
-        return JSON.parse(String.fromCodePoint(...value));
-      }
-      mapToDriverValue(value) {
-        return Buffer.from(JSON.stringify(value));
-      }
-    };
-    _a43 = entityKind, __publicField(SQLiteBlobJson, _a43, "SQLiteBlobJson");
-    SQLiteBlobBufferBuilder = class extends SQLiteColumnBuilder {
-      constructor(name) {
-        super(name, "buffer", "SQLiteBlobBuffer");
-      }
-      /** @internal */
-      build(table) {
-        return new SQLiteBlobBuffer(table, this.config);
-      }
-    };
-    _a44 = entityKind, __publicField(SQLiteBlobBufferBuilder, _a44, "SQLiteBlobBufferBuilder");
-    SQLiteBlobBuffer = class extends SQLiteColumn {
-      mapFromDriverValue(value) {
-        return Buffer.isBuffer(value) ? value : Buffer.from(value);
-      }
-      getSQLType() {
-        return "blob";
-      }
-    };
-    _a45 = entityKind, __publicField(SQLiteBlobBuffer, _a45, "SQLiteBlobBuffer");
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/columns/custom.js
-function customType(customTypeParams) {
-  return (a, b) => {
-    let { name, config } = getColumnNameAndConfig(a, b);
-    return new SQLiteCustomColumnBuilder(
-      name,
-      config,
-      customTypeParams
-    );
-  };
-}
-var _a46, SQLiteCustomColumnBuilder, _a47, SQLiteCustomColumn, init_custom = __esm({
-  "node_modules/drizzle-orm/sqlite-core/columns/custom.js"() {
-    init_entity();
-    init_utils();
-    init_common2();
-    SQLiteCustomColumnBuilder = class extends SQLiteColumnBuilder {
-      constructor(name, fieldConfig, customTypeParams) {
-        super(name, "custom", "SQLiteCustomColumn"), this.config.fieldConfig = fieldConfig, this.config.customTypeParams = customTypeParams;
-      }
-      /** @internal */
-      build(table) {
-        return new SQLiteCustomColumn(
-          table,
-          this.config
-        );
-      }
-    };
-    _a46 = entityKind, __publicField(SQLiteCustomColumnBuilder, _a46, "SQLiteCustomColumnBuilder");
-    SQLiteCustomColumn = class extends SQLiteColumn {
-      sqlName;
-      mapTo;
-      mapFrom;
-      constructor(table, config) {
-        super(table, config), this.sqlName = config.customTypeParams.dataType(config.fieldConfig), this.mapTo = config.customTypeParams.toDriver, this.mapFrom = config.customTypeParams.fromDriver;
-      }
-      getSQLType() {
-        return this.sqlName;
-      }
-      mapFromDriverValue(value) {
-        return typeof this.mapFrom == "function" ? this.mapFrom(value) : value;
-      }
-      mapToDriverValue(value) {
-        return typeof this.mapTo == "function" ? this.mapTo(value) : value;
-      }
-    };
-    _a47 = entityKind, __publicField(SQLiteCustomColumn, _a47, "SQLiteCustomColumn");
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/columns/integer.js
-function integer(a, b) {
-  let { name, config } = getColumnNameAndConfig(a, b);
-  return config?.mode === "timestamp" || config?.mode === "timestamp_ms" ? new SQLiteTimestampBuilder(name, config.mode) : config?.mode === "boolean" ? new SQLiteBooleanBuilder(name, config.mode) : new SQLiteIntegerBuilder(name);
-}
-var _a48, SQLiteBaseIntegerBuilder, _a49, SQLiteBaseInteger, _a50, SQLiteIntegerBuilder, _a51, SQLiteInteger, _a52, SQLiteTimestampBuilder, _a53, SQLiteTimestamp, _a54, SQLiteBooleanBuilder, _a55, SQLiteBoolean, init_integer = __esm({
-  "node_modules/drizzle-orm/sqlite-core/columns/integer.js"() {
-    init_entity();
-    init_sql();
-    init_utils();
-    init_common2();
-    SQLiteBaseIntegerBuilder = class extends SQLiteColumnBuilder {
-      constructor(name, dataType, columnType) {
-        super(name, dataType, columnType), this.config.autoIncrement = !1;
-      }
-      primaryKey(config) {
-        return config?.autoIncrement && (this.config.autoIncrement = !0), this.config.hasDefault = !0, super.primaryKey();
-      }
-    };
-    _a48 = entityKind, __publicField(SQLiteBaseIntegerBuilder, _a48, "SQLiteBaseIntegerBuilder");
-    SQLiteBaseInteger = class extends SQLiteColumn {
-      autoIncrement = this.config.autoIncrement;
-      getSQLType() {
-        return "integer";
-      }
-    };
-    _a49 = entityKind, __publicField(SQLiteBaseInteger, _a49, "SQLiteBaseInteger");
-    SQLiteIntegerBuilder = class extends SQLiteBaseIntegerBuilder {
-      constructor(name) {
-        super(name, "number", "SQLiteInteger");
-      }
-      build(table) {
-        return new SQLiteInteger(
-          table,
-          this.config
-        );
-      }
-    };
-    _a50 = entityKind, __publicField(SQLiteIntegerBuilder, _a50, "SQLiteIntegerBuilder");
-    SQLiteInteger = class extends SQLiteBaseInteger {
-    };
-    _a51 = entityKind, __publicField(SQLiteInteger, _a51, "SQLiteInteger");
-    SQLiteTimestampBuilder = class extends SQLiteBaseIntegerBuilder {
-      constructor(name, mode2) {
-        super(name, "date", "SQLiteTimestamp"), this.config.mode = mode2;
-      }
-      /**
-       * @deprecated Use `default()` with your own expression instead.
-       *
-       * Adds `DEFAULT (cast((julianday('now') - 2440587.5)*86400000 as integer))` to the column, which is the current epoch timestamp in milliseconds.
-       */
-      defaultNow() {
-        return this.default(sql`(cast((julianday('now') - 2440587.5)*86400000 as integer))`);
-      }
-      build(table) {
-        return new SQLiteTimestamp(
-          table,
-          this.config
-        );
-      }
-    };
-    _a52 = entityKind, __publicField(SQLiteTimestampBuilder, _a52, "SQLiteTimestampBuilder");
-    SQLiteTimestamp = class extends SQLiteBaseInteger {
-      mode = this.config.mode;
-      mapFromDriverValue(value) {
-        return this.config.mode === "timestamp" ? new Date(value * 1e3) : new Date(value);
-      }
-      mapToDriverValue(value) {
-        let unix = value.getTime();
-        return this.config.mode === "timestamp" ? Math.floor(unix / 1e3) : unix;
-      }
-    };
-    _a53 = entityKind, __publicField(SQLiteTimestamp, _a53, "SQLiteTimestamp");
-    SQLiteBooleanBuilder = class extends SQLiteBaseIntegerBuilder {
-      constructor(name, mode2) {
-        super(name, "boolean", "SQLiteBoolean"), this.config.mode = mode2;
-      }
-      build(table) {
-        return new SQLiteBoolean(
-          table,
-          this.config
-        );
-      }
-    };
-    _a54 = entityKind, __publicField(SQLiteBooleanBuilder, _a54, "SQLiteBooleanBuilder");
-    SQLiteBoolean = class extends SQLiteBaseInteger {
-      mode = this.config.mode;
-      mapFromDriverValue(value) {
-        return Number(value) === 1;
-      }
-      mapToDriverValue(value) {
-        return value ? 1 : 0;
-      }
-    };
-    _a55 = entityKind, __publicField(SQLiteBoolean, _a55, "SQLiteBoolean");
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/columns/numeric.js
-function numeric(a, b) {
-  let { name, config } = getColumnNameAndConfig(a, b), mode2 = config?.mode;
-  return mode2 === "number" ? new SQLiteNumericNumberBuilder(name) : mode2 === "bigint" ? new SQLiteNumericBigIntBuilder(name) : new SQLiteNumericBuilder(name);
-}
-var _a56, SQLiteNumericBuilder, _a57, SQLiteNumeric, _a58, SQLiteNumericNumberBuilder, _a59, SQLiteNumericNumber, _a60, SQLiteNumericBigIntBuilder, _a61, SQLiteNumericBigInt, init_numeric = __esm({
-  "node_modules/drizzle-orm/sqlite-core/columns/numeric.js"() {
-    init_entity();
-    init_utils();
-    init_common2();
-    SQLiteNumericBuilder = class extends SQLiteColumnBuilder {
-      constructor(name) {
-        super(name, "string", "SQLiteNumeric");
-      }
-      /** @internal */
-      build(table) {
-        return new SQLiteNumeric(
-          table,
-          this.config
-        );
-      }
-    };
-    _a56 = entityKind, __publicField(SQLiteNumericBuilder, _a56, "SQLiteNumericBuilder");
-    SQLiteNumeric = class extends SQLiteColumn {
-      mapFromDriverValue(value) {
-        return typeof value == "string" ? value : String(value);
-      }
-      getSQLType() {
-        return "numeric";
-      }
-    };
-    _a57 = entityKind, __publicField(SQLiteNumeric, _a57, "SQLiteNumeric");
-    SQLiteNumericNumberBuilder = class extends SQLiteColumnBuilder {
-      constructor(name) {
-        super(name, "number", "SQLiteNumericNumber");
-      }
-      /** @internal */
-      build(table) {
-        return new SQLiteNumericNumber(
-          table,
-          this.config
-        );
-      }
-    };
-    _a58 = entityKind, __publicField(SQLiteNumericNumberBuilder, _a58, "SQLiteNumericNumberBuilder");
-    SQLiteNumericNumber = class extends SQLiteColumn {
-      mapFromDriverValue(value) {
-        return typeof value == "number" ? value : Number(value);
-      }
-      mapToDriverValue = String;
-      getSQLType() {
-        return "numeric";
-      }
-    };
-    _a59 = entityKind, __publicField(SQLiteNumericNumber, _a59, "SQLiteNumericNumber");
-    SQLiteNumericBigIntBuilder = class extends SQLiteColumnBuilder {
-      constructor(name) {
-        super(name, "bigint", "SQLiteNumericBigInt");
-      }
-      /** @internal */
-      build(table) {
-        return new SQLiteNumericBigInt(
-          table,
-          this.config
-        );
-      }
-    };
-    _a60 = entityKind, __publicField(SQLiteNumericBigIntBuilder, _a60, "SQLiteNumericBigIntBuilder");
-    SQLiteNumericBigInt = class extends SQLiteColumn {
-      mapFromDriverValue = BigInt;
-      mapToDriverValue = String;
-      getSQLType() {
-        return "numeric";
-      }
-    };
-    _a61 = entityKind, __publicField(SQLiteNumericBigInt, _a61, "SQLiteNumericBigInt");
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/columns/real.js
-function real(name) {
-  return new SQLiteRealBuilder(name ?? "");
-}
-var _a62, SQLiteRealBuilder, _a63, SQLiteReal, init_real = __esm({
-  "node_modules/drizzle-orm/sqlite-core/columns/real.js"() {
-    init_entity();
-    init_common2();
-    SQLiteRealBuilder = class extends SQLiteColumnBuilder {
-      constructor(name) {
-        super(name, "number", "SQLiteReal");
-      }
-      /** @internal */
-      build(table) {
-        return new SQLiteReal(table, this.config);
-      }
-    };
-    _a62 = entityKind, __publicField(SQLiteRealBuilder, _a62, "SQLiteRealBuilder");
-    SQLiteReal = class extends SQLiteColumn {
-      getSQLType() {
-        return "real";
-      }
-    };
-    _a63 = entityKind, __publicField(SQLiteReal, _a63, "SQLiteReal");
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/columns/text.js
-function text(a, b = {}) {
-  let { name, config } = getColumnNameAndConfig(a, b);
-  return config.mode === "json" ? new SQLiteTextJsonBuilder(name) : new SQLiteTextBuilder(name, config);
-}
-var _a64, SQLiteTextBuilder, _a65, SQLiteText, _a66, SQLiteTextJsonBuilder, _a67, SQLiteTextJson, init_text = __esm({
-  "node_modules/drizzle-orm/sqlite-core/columns/text.js"() {
-    init_entity();
-    init_utils();
-    init_common2();
-    SQLiteTextBuilder = class extends SQLiteColumnBuilder {
-      constructor(name, config) {
-        super(name, "string", "SQLiteText"), this.config.enumValues = config.enum, this.config.length = config.length;
-      }
-      /** @internal */
-      build(table) {
-        return new SQLiteText(
-          table,
-          this.config
-        );
-      }
-    };
-    _a64 = entityKind, __publicField(SQLiteTextBuilder, _a64, "SQLiteTextBuilder");
-    SQLiteText = class extends SQLiteColumn {
-      enumValues = this.config.enumValues;
-      length = this.config.length;
-      constructor(table, config) {
-        super(table, config);
-      }
-      getSQLType() {
-        return `text${this.config.length ? `(${this.config.length})` : ""}`;
-      }
-    };
-    _a65 = entityKind, __publicField(SQLiteText, _a65, "SQLiteText");
-    SQLiteTextJsonBuilder = class extends SQLiteColumnBuilder {
-      constructor(name) {
-        super(name, "json", "SQLiteTextJson");
-      }
-      /** @internal */
-      build(table) {
-        return new SQLiteTextJson(
-          table,
-          this.config
-        );
-      }
-    };
-    _a66 = entityKind, __publicField(SQLiteTextJsonBuilder, _a66, "SQLiteTextJsonBuilder");
-    SQLiteTextJson = class extends SQLiteColumn {
-      getSQLType() {
-        return "text";
-      }
-      mapFromDriverValue(value) {
-        return JSON.parse(value);
-      }
-      mapToDriverValue(value) {
-        return JSON.stringify(value);
-      }
-    };
-    _a67 = entityKind, __publicField(SQLiteTextJson, _a67, "SQLiteTextJson");
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/columns/index.js
-var init_columns = __esm({
-  "node_modules/drizzle-orm/sqlite-core/columns/index.js"() {
-    init_blob();
-    init_common2();
-    init_custom();
-    init_integer();
-    init_numeric();
-    init_real();
-    init_text();
-  }
-});
-
-// node_modules/drizzle-orm/selection-proxy.js
-var _a68, _SelectionProxyHandler, SelectionProxyHandler, init_selection_proxy = __esm({
-  "node_modules/drizzle-orm/selection-proxy.js"() {
-    init_alias();
-    init_column();
-    init_entity();
-    init_sql();
-    init_subquery();
-    init_view_common();
-    _SelectionProxyHandler = class {
-      config;
-      constructor(config) {
-        this.config = { ...config };
-      }
-      get(subquery, prop) {
-        if (prop === "_")
-          return {
-            ...subquery._,
-            selectedFields: new Proxy(
-              subquery._.selectedFields,
-              this
-            )
-          };
-        if (prop === ViewBaseConfig)
-          return {
-            ...subquery[ViewBaseConfig],
-            selectedFields: new Proxy(
-              subquery[ViewBaseConfig].selectedFields,
-              this
-            )
-          };
-        if (typeof prop == "symbol")
-          return subquery[prop];
-        let value = (is(subquery, Subquery) ? subquery._.selectedFields : is(subquery, View) ? subquery[ViewBaseConfig].selectedFields : subquery)[prop];
-        if (is(value, SQL.Aliased)) {
-          if (this.config.sqlAliasedBehavior === "sql" && !value.isSelectionField)
-            return value.sql;
-          let newValue = value.clone();
-          return newValue.isSelectionField = !0, newValue;
-        }
-        if (is(value, SQL)) {
-          if (this.config.sqlBehavior === "sql")
-            return value;
-          throw new Error(
-            `You tried to reference "${prop}" field from a subquery, which is a raw SQL field, but it doesn't have an alias declared. Please add an alias to the field using ".as('alias')" method.`
-          );
-        }
-        return is(value, Column) ? this.config.alias ? new Proxy(
-          value,
-          new ColumnAliasProxyHandler(
-            new Proxy(
-              value.table,
-              new TableAliasProxyHandler(this.config.alias, this.config.replaceOriginalName ?? !1)
-            )
-          )
-        ) : value : typeof value != "object" || value === null ? value : new Proxy(value, new _SelectionProxyHandler(this.config));
-      }
-    }, SelectionProxyHandler = _SelectionProxyHandler;
-    _a68 = entityKind, __publicField(SelectionProxyHandler, _a68, "SelectionProxyHandler");
-  }
-});
-
-// node_modules/drizzle-orm/query-promise.js
-var _a69, QueryPromise, init_query_promise = __esm({
-  "node_modules/drizzle-orm/query-promise.js"() {
-    init_entity();
-    QueryPromise = class {
-      [(_a69 = entityKind, Symbol.toStringTag)] = "QueryPromise";
-      catch(onRejected) {
-        return this.then(void 0, onRejected);
-      }
-      finally(onFinally) {
-        return this.then(
-          (value) => (onFinally?.(), value),
-          (reason) => {
-            throw onFinally?.(), reason;
-          }
-        );
-      }
-      then(onFulfilled, onRejected) {
-        return this.execute().then(onFulfilled, onRejected);
-      }
-    };
-    __publicField(QueryPromise, _a69, "QueryPromise");
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/columns/all.js
-function getSQLiteColumnBuilders() {
-  return {
-    blob,
-    customType,
-    integer,
-    numeric,
-    real,
-    text
-  };
-}
-var init_all = __esm({
-  "node_modules/drizzle-orm/sqlite-core/columns/all.js"() {
-    init_blob();
-    init_custom();
-    init_integer();
-    init_numeric();
-    init_real();
-    init_text();
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/table.js
-function sqliteTableBase(name, columns, extraConfig, schema3, baseName = name) {
-  let rawTable = new SQLiteTable(name, schema3, baseName), parsedColumns = typeof columns == "function" ? columns(getSQLiteColumnBuilders()) : columns, builtColumns = Object.fromEntries(
-    Object.entries(parsedColumns).map(([name2, colBuilderBase]) => {
-      let colBuilder = colBuilderBase;
-      colBuilder.setName(name2);
-      let column = colBuilder.build(rawTable);
-      return rawTable[InlineForeignKeys].push(...colBuilder.buildForeignKeys(column, rawTable)), [name2, column];
-    })
-  ), table = Object.assign(rawTable, builtColumns);
-  return table[Table.Symbol.Columns] = builtColumns, table[Table.Symbol.ExtraConfigColumns] = builtColumns, extraConfig && (table[SQLiteTable.Symbol.ExtraConfigBuilder] = extraConfig), table;
-}
-var InlineForeignKeys, _a70, SQLiteTable, sqliteTable, init_table2 = __esm({
-  "node_modules/drizzle-orm/sqlite-core/table.js"() {
-    init_entity();
-    init_table();
-    init_all();
-    InlineForeignKeys = Symbol.for("drizzle:SQLiteInlineForeignKeys"), SQLiteTable = class extends Table {
-      /** @internal */
-      [(_a70 = entityKind, Table.Symbol.Columns)];
-      /** @internal */
-      [InlineForeignKeys] = [];
-      /** @internal */
-      [Table.Symbol.ExtraConfigBuilder] = void 0;
-    };
-    __publicField(SQLiteTable, _a70, "SQLiteTable"), /** @internal */
-    __publicField(SQLiteTable, "Symbol", Object.assign({}, Table.Symbol, {
-      InlineForeignKeys
-    }));
-    sqliteTable = (name, columns, extraConfig) => sqliteTableBase(name, columns, extraConfig);
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/indexes.js
-var _a71, IndexBuilderOn, _a72, IndexBuilder, _a73, Index, init_indexes = __esm({
-  "node_modules/drizzle-orm/sqlite-core/indexes.js"() {
-    init_entity();
-    IndexBuilderOn = class {
-      constructor(name, unique) {
-        this.name = name, this.unique = unique;
-      }
-      on(...columns) {
-        return new IndexBuilder(this.name, columns, this.unique);
-      }
-    };
-    _a71 = entityKind, __publicField(IndexBuilderOn, _a71, "SQLiteIndexBuilderOn");
-    IndexBuilder = class {
-      /** @internal */
-      config;
-      constructor(name, columns, unique) {
-        this.config = {
-          name,
-          columns,
-          unique,
-          where: void 0
-        };
-      }
-      /**
-       * Condition for partial index.
-       */
-      where(condition) {
-        return this.config.where = condition, this;
-      }
-      /** @internal */
-      build(table) {
-        return new Index(this.config, table);
-      }
-    };
-    _a72 = entityKind, __publicField(IndexBuilder, _a72, "SQLiteIndexBuilder");
-    Index = class {
-      config;
-      constructor(config, table) {
-        this.config = { ...config, table };
-      }
-    };
-    _a73 = entityKind, __publicField(Index, _a73, "SQLiteIndex");
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/primary-keys.js
-var _a74, PrimaryKeyBuilder, _a75, PrimaryKey, init_primary_keys = __esm({
-  "node_modules/drizzle-orm/sqlite-core/primary-keys.js"() {
-    init_entity();
-    init_table2();
-    PrimaryKeyBuilder = class {
-      /** @internal */
-      columns;
-      /** @internal */
-      name;
-      constructor(columns, name) {
-        this.columns = columns, this.name = name;
-      }
-      /** @internal */
-      build(table) {
-        return new PrimaryKey(table, this.columns, this.name);
-      }
-    };
-    _a74 = entityKind, __publicField(PrimaryKeyBuilder, _a74, "SQLitePrimaryKeyBuilder");
-    PrimaryKey = class {
-      constructor(table, columns, name) {
-        this.table = table, this.columns = columns, this.name = name;
-      }
-      columns;
-      name;
-      getName() {
-        return this.name ?? `${this.table[SQLiteTable.Symbol.Name]}_${this.columns.map((column) => column.name).join("_")}_pk`;
-      }
-    };
-    _a75 = entityKind, __publicField(PrimaryKey, _a75, "SQLitePrimaryKey");
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/utils.js
-function extractUsedTable(table) {
-  return is(table, SQLiteTable) ? [`${table[Table.Symbol.BaseName]}`] : is(table, Subquery) ? table._.usedTables ?? [] : is(table, SQL) ? table.usedTables ?? [] : [];
-}
-var init_utils2 = __esm({
-  "node_modules/drizzle-orm/sqlite-core/utils.js"() {
-    init_entity();
-    init_sql();
-    init_subquery();
-    init_table();
-    init_table2();
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/query-builders/delete.js
-var _a76, SQLiteDeleteBase, init_delete = __esm({
-  "node_modules/drizzle-orm/sqlite-core/query-builders/delete.js"() {
-    init_entity();
-    init_query_promise();
-    init_selection_proxy();
-    init_table2();
-    init_table();
-    init_utils();
-    init_utils2();
-    SQLiteDeleteBase = class extends QueryPromise {
-      constructor(table, session, dialect, withList) {
-        super(), this.table = table, this.session = session, this.dialect = dialect, this.config = { table, withList };
-      }
-      /** @internal */
-      config;
-      /**
-       * Adds a `where` clause to the query.
-       *
-       * Calling this method will delete only those rows that fulfill a specified condition.
-       *
-       * See docs: {@link https://orm.drizzle.team/docs/delete}
-       *
-       * @param where the `where` clause.
-       *
-       * @example
-       * You can use conditional operators and `sql function` to filter the rows to be deleted.
-       *
-       * ```ts
-       * // Delete all cars with green color
-       * db.delete(cars).where(eq(cars.color, 'green'));
-       * // or
-       * db.delete(cars).where(sql`${cars.color} = 'green'`)
-       * ```
-       *
-       * You can logically combine conditional operators with `and()` and `or()` operators:
-       *
-       * ```ts
-       * // Delete all BMW cars with a green color
-       * db.delete(cars).where(and(eq(cars.color, 'green'), eq(cars.brand, 'BMW')));
-       *
-       * // Delete all cars with the green or blue color
-       * db.delete(cars).where(or(eq(cars.color, 'green'), eq(cars.color, 'blue')));
-       * ```
-       */
-      where(where) {
-        return this.config.where = where, this;
-      }
-      orderBy(...columns) {
-        if (typeof columns[0] == "function") {
-          let orderBy = columns[0](
-            new Proxy(
-              this.config.table[Table.Symbol.Columns],
-              new SelectionProxyHandler({ sqlAliasedBehavior: "alias", sqlBehavior: "sql" })
-            )
-          ), orderByArray = Array.isArray(orderBy) ? orderBy : [orderBy];
-          this.config.orderBy = orderByArray;
-        } else {
-          let orderByArray = columns;
-          this.config.orderBy = orderByArray;
-        }
-        return this;
-      }
-      limit(limit) {
-        return this.config.limit = limit, this;
-      }
-      returning(fields = this.table[SQLiteTable.Symbol.Columns]) {
-        return this.config.returning = orderSelectedFields(fields), this;
-      }
-      /** @internal */
-      getSQL() {
-        return this.dialect.buildDeleteQuery(this.config);
-      }
-      toSQL() {
-        let { typings: _typings, ...rest } = this.dialect.sqlToQuery(this.getSQL());
-        return rest;
-      }
-      /** @internal */
-      _prepare(isOneTimeQuery = !0) {
-        return this.session[isOneTimeQuery ? "prepareOneTimeQuery" : "prepareQuery"](
-          this.dialect.sqlToQuery(this.getSQL()),
-          this.config.returning,
-          this.config.returning ? "all" : "run",
-          !0,
-          void 0,
-          {
-            type: "delete",
-            tables: extractUsedTable(this.config.table)
-          }
-        );
-      }
-      prepare() {
-        return this._prepare(!1);
-      }
-      run = (placeholderValues) => this._prepare().run(placeholderValues);
-      all = (placeholderValues) => this._prepare().all(placeholderValues);
-      get = (placeholderValues) => this._prepare().get(placeholderValues);
-      values = (placeholderValues) => this._prepare().values(placeholderValues);
-      async execute(placeholderValues) {
-        return this._prepare().execute(placeholderValues);
-      }
-      $dynamic() {
-        return this;
-      }
-    };
-    _a76 = entityKind, __publicField(SQLiteDeleteBase, _a76, "SQLiteDelete");
-  }
-});
-
-// node_modules/drizzle-orm/casing.js
-function toSnakeCase(input) {
-  return (input.replace(/['\u2019]/g, "").match(/[\da-z]+|[A-Z]+(?![a-z])|[A-Z][\da-z]+/g) ?? []).map((word) => word.toLowerCase()).join("_");
-}
-function toCamelCase(input) {
-  return (input.replace(/['\u2019]/g, "").match(/[\da-z]+|[A-Z]+(?![a-z])|[A-Z][\da-z]+/g) ?? []).reduce((acc, word, i) => {
-    let formattedWord = i === 0 ? word.toLowerCase() : `${word[0].toUpperCase()}${word.slice(1)}`;
-    return acc + formattedWord;
-  }, "");
-}
-function noopCase(input) {
-  return input;
-}
-var _a77, CasingCache, init_casing = __esm({
-  "node_modules/drizzle-orm/casing.js"() {
-    init_entity();
-    init_table();
-    CasingCache = class {
-      /** @internal */
-      cache = {};
-      cachedTables = {};
-      convert;
-      constructor(casing) {
-        this.convert = casing === "snake_case" ? toSnakeCase : casing === "camelCase" ? toCamelCase : noopCase;
-      }
-      getColumnCasing(column) {
-        if (!column.keyAsName)
-          return column.name;
-        let schema3 = column.table[Table.Symbol.Schema] ?? "public", tableName = column.table[Table.Symbol.OriginalName], key = `${schema3}.${tableName}.${column.name}`;
-        return this.cache[key] || this.cacheTable(column.table), this.cache[key];
-      }
-      cacheTable(table) {
-        let schema3 = table[Table.Symbol.Schema] ?? "public", tableName = table[Table.Symbol.OriginalName], tableKey = `${schema3}.${tableName}`;
-        if (!this.cachedTables[tableKey]) {
-          for (let column of Object.values(table[Table.Symbol.Columns])) {
-            let columnKey = `${tableKey}.${column.name}`;
-            this.cache[columnKey] = this.convert(column.name);
-          }
-          this.cachedTables[tableKey] = !0;
-        }
-      }
-      clearCache() {
-        this.cache = {}, this.cachedTables = {};
-      }
-    };
-    _a77 = entityKind, __publicField(CasingCache, _a77, "CasingCache");
-  }
-});
-
-// node_modules/drizzle-orm/errors.js
-var _a78, DrizzleError, _a79, TransactionRollbackError, init_errors = __esm({
-  "node_modules/drizzle-orm/errors.js"() {
-    init_entity();
-    DrizzleError = class extends Error {
-      constructor({ message, cause }) {
-        super(message), this.name = "DrizzleError", this.cause = cause;
-      }
-    };
-    _a78 = entityKind, __publicField(DrizzleError, _a78, "DrizzleError");
-    TransactionRollbackError = class extends DrizzleError {
-      constructor() {
-        super({ message: "Rollback" });
-      }
-    };
-    _a79 = entityKind, __publicField(TransactionRollbackError, _a79, "TransactionRollbackError");
-  }
-});
-
-// node_modules/drizzle-orm/pg-core/table.js
-var InlineForeignKeys2, EnableRLS, _a80, PgTable, init_table3 = __esm({
-  "node_modules/drizzle-orm/pg-core/table.js"() {
-    init_entity();
-    init_table();
-    InlineForeignKeys2 = Symbol.for("drizzle:PgInlineForeignKeys"), EnableRLS = Symbol.for("drizzle:EnableRLS"), PgTable = class extends Table {
-      /**@internal */
-      [(_a80 = entityKind, InlineForeignKeys2)] = [];
-      /** @internal */
-      [EnableRLS] = !1;
-      /** @internal */
-      [Table.Symbol.ExtraConfigBuilder] = void 0;
-      /** @internal */
-      [Table.Symbol.ExtraConfigColumns] = {};
-    };
-    __publicField(PgTable, _a80, "PgTable"), /** @internal */
-    __publicField(PgTable, "Symbol", Object.assign({}, Table.Symbol, {
-      InlineForeignKeys: InlineForeignKeys2,
-      EnableRLS
-    }));
-  }
-});
-
-// node_modules/drizzle-orm/pg-core/primary-keys.js
-var _a81, PrimaryKeyBuilder2, _a82, PrimaryKey2, init_primary_keys2 = __esm({
-  "node_modules/drizzle-orm/pg-core/primary-keys.js"() {
-    init_entity();
-    init_table3();
-    PrimaryKeyBuilder2 = class {
-      /** @internal */
-      columns;
-      /** @internal */
-      name;
-      constructor(columns, name) {
-        this.columns = columns, this.name = name;
-      }
-      /** @internal */
-      build(table) {
-        return new PrimaryKey2(table, this.columns, this.name);
-      }
-    };
-    _a81 = entityKind, __publicField(PrimaryKeyBuilder2, _a81, "PgPrimaryKeyBuilder");
-    PrimaryKey2 = class {
-      constructor(table, columns, name) {
-        this.table = table, this.columns = columns, this.name = name;
-      }
-      columns;
-      name;
-      getName() {
-        return this.name ?? `${this.table[PgTable.Symbol.Name]}_${this.columns.map((column) => column.name).join("_")}_pk`;
-      }
-    };
-    _a82 = entityKind, __publicField(PrimaryKey2, _a82, "PgPrimaryKey");
-  }
-});
-
-// node_modules/drizzle-orm/sql/expressions/conditions.js
-function bindIfParam(value, column) {
-  return isDriverValueEncoder(column) && !isSQLWrapper(value) && !is(value, Param) && !is(value, Placeholder) && !is(value, Column) && !is(value, Table) && !is(value, View) ? new Param(value, column) : value;
-}
-function and(...unfilteredConditions) {
-  let conditions = unfilteredConditions.filter(
-    (c) => c !== void 0
-  );
-  if (conditions.length !== 0)
-    return conditions.length === 1 ? new SQL(conditions) : new SQL([
-      new StringChunk("("),
-      sql.join(conditions, new StringChunk(" and ")),
-      new StringChunk(")")
-    ]);
-}
-function or(...unfilteredConditions) {
-  let conditions = unfilteredConditions.filter(
-    (c) => c !== void 0
-  );
-  if (conditions.length !== 0)
-    return conditions.length === 1 ? new SQL(conditions) : new SQL([
-      new StringChunk("("),
-      sql.join(conditions, new StringChunk(" or ")),
-      new StringChunk(")")
-    ]);
-}
-function not(condition) {
-  return sql`not ${condition}`;
-}
-function inArray(column, values) {
-  return Array.isArray(values) ? values.length === 0 ? sql`false` : sql`${column} in ${values.map((v) => bindIfParam(v, column))}` : sql`${column} in ${bindIfParam(values, column)}`;
-}
-function notInArray(column, values) {
-  return Array.isArray(values) ? values.length === 0 ? sql`true` : sql`${column} not in ${values.map((v) => bindIfParam(v, column))}` : sql`${column} not in ${bindIfParam(values, column)}`;
-}
-function isNull(value) {
-  return sql`${value} is null`;
-}
-function isNotNull(value) {
-  return sql`${value} is not null`;
-}
-function exists(subquery) {
-  return sql`exists ${subquery}`;
-}
-function notExists(subquery) {
-  return sql`not exists ${subquery}`;
-}
-function between(column, min, max) {
-  return sql`${column} between ${bindIfParam(min, column)} and ${bindIfParam(
-    max,
-    column
-  )}`;
-}
-function notBetween(column, min, max) {
-  return sql`${column} not between ${bindIfParam(
-    min,
-    column
-  )} and ${bindIfParam(max, column)}`;
-}
-function like(column, value) {
-  return sql`${column} like ${value}`;
-}
-function notLike(column, value) {
-  return sql`${column} not like ${value}`;
-}
-function ilike(column, value) {
-  return sql`${column} ilike ${value}`;
-}
-function notIlike(column, value) {
-  return sql`${column} not ilike ${value}`;
-}
-var eq, ne, gt, gte, lt, lte, init_conditions = __esm({
-  "node_modules/drizzle-orm/sql/expressions/conditions.js"() {
-    init_column();
-    init_entity();
-    init_table();
-    init_sql();
-    eq = (left, right) => sql`${left} = ${bindIfParam(right, left)}`, ne = (left, right) => sql`${left} <> ${bindIfParam(right, left)}`;
-    gt = (left, right) => sql`${left} > ${bindIfParam(right, left)}`, gte = (left, right) => sql`${left} >= ${bindIfParam(right, left)}`, lt = (left, right) => sql`${left} < ${bindIfParam(right, left)}`, lte = (left, right) => sql`${left} <= ${bindIfParam(right, left)}`;
-  }
-});
-
-// node_modules/drizzle-orm/sql/expressions/select.js
-function asc(column) {
-  return sql`${column} asc`;
-}
-function desc(column) {
-  return sql`${column} desc`;
-}
-var init_select = __esm({
-  "node_modules/drizzle-orm/sql/expressions/select.js"() {
-    init_sql();
-  }
-});
-
-// node_modules/drizzle-orm/sql/expressions/index.js
-var init_expressions = __esm({
-  "node_modules/drizzle-orm/sql/expressions/index.js"() {
-    init_conditions();
-    init_select();
-  }
-});
-
-// node_modules/drizzle-orm/relations.js
-function getOperators() {
-  return {
-    and,
-    between,
-    eq,
-    exists,
-    gt,
-    gte,
-    ilike,
-    inArray,
-    isNull,
-    isNotNull,
-    like,
-    lt,
-    lte,
-    ne,
-    not,
-    notBetween,
-    notExists,
-    notLike,
-    notIlike,
-    notInArray,
-    or,
-    sql
-  };
-}
-function getOrderByOperators() {
-  return {
-    sql,
-    asc,
-    desc
-  };
-}
-function extractTablesRelationalConfig(schema3, configHelpers) {
-  Object.keys(schema3).length === 1 && "default" in schema3 && !is(schema3.default, Table) && (schema3 = schema3.default);
-  let tableNamesMap = {}, relationsBuffer = {}, tablesConfig = {};
-  for (let [key, value] of Object.entries(schema3))
-    if (is(value, Table)) {
-      let dbName = getTableUniqueName(value), bufferedRelations = relationsBuffer[dbName];
-      tableNamesMap[dbName] = key, tablesConfig[key] = {
-        tsName: key,
-        dbName: value[Table.Symbol.Name],
-        schema: value[Table.Symbol.Schema],
-        columns: value[Table.Symbol.Columns],
-        relations: bufferedRelations?.relations ?? {},
-        primaryKey: bufferedRelations?.primaryKey ?? []
-      };
-      for (let column of Object.values(
-        value[Table.Symbol.Columns]
-      ))
-        column.primary && tablesConfig[key].primaryKey.push(column);
-      let extraConfig = value[Table.Symbol.ExtraConfigBuilder]?.(value[Table.Symbol.ExtraConfigColumns]);
-      if (extraConfig)
-        for (let configEntry of Object.values(extraConfig))
-          is(configEntry, PrimaryKeyBuilder2) && tablesConfig[key].primaryKey.push(...configEntry.columns);
-    } else if (is(value, Relations)) {
-      let dbName = getTableUniqueName(value.table), tableName = tableNamesMap[dbName], relations2 = value.config(
-        configHelpers(value.table)
-      ), primaryKey;
-      for (let [relationName, relation] of Object.entries(relations2))
-        if (tableName) {
-          let tableConfig = tablesConfig[tableName];
-          tableConfig.relations[relationName] = relation, primaryKey && tableConfig.primaryKey.push(...primaryKey);
-        } else
-          dbName in relationsBuffer || (relationsBuffer[dbName] = {
-            relations: {},
-            primaryKey
-          }), relationsBuffer[dbName].relations[relationName] = relation;
-    }
-  return { tables: tablesConfig, tableNamesMap };
-}
-function createOne(sourceTable) {
-  return function(table, config) {
-    return new One(
-      sourceTable,
-      table,
-      config,
-      config?.fields.reduce((res, f) => res && f.notNull, !0) ?? !1
-    );
-  };
-}
-function createMany(sourceTable) {
-  return function(referencedTable, config) {
-    return new Many(sourceTable, referencedTable, config);
-  };
-}
-function normalizeRelation(schema3, tableNamesMap, relation) {
-  if (is(relation, One) && relation.config)
-    return {
-      fields: relation.config.fields,
-      references: relation.config.references
-    };
-  let referencedTableTsName = tableNamesMap[getTableUniqueName(relation.referencedTable)];
-  if (!referencedTableTsName)
-    throw new Error(
-      `Table "${relation.referencedTable[Table.Symbol.Name]}" not found in schema`
-    );
-  let referencedTableConfig = schema3[referencedTableTsName];
-  if (!referencedTableConfig)
-    throw new Error(`Table "${referencedTableTsName}" not found in schema`);
-  let sourceTable = relation.sourceTable, sourceTableTsName = tableNamesMap[getTableUniqueName(sourceTable)];
-  if (!sourceTableTsName)
-    throw new Error(
-      `Table "${sourceTable[Table.Symbol.Name]}" not found in schema`
-    );
-  let reverseRelations = [];
-  for (let referencedTableRelation of Object.values(
-    referencedTableConfig.relations
-  ))
-    (relation.relationName && relation !== referencedTableRelation && referencedTableRelation.relationName === relation.relationName || !relation.relationName && referencedTableRelation.referencedTable === relation.sourceTable) && reverseRelations.push(referencedTableRelation);
-  if (reverseRelations.length > 1)
-    throw relation.relationName ? new Error(
-      `There are multiple relations with name "${relation.relationName}" in table "${referencedTableTsName}"`
-    ) : new Error(
-      `There are multiple relations between "${referencedTableTsName}" and "${relation.sourceTable[Table.Symbol.Name]}". Please specify relation name`
-    );
-  if (reverseRelations[0] && is(reverseRelations[0], One) && reverseRelations[0].config)
-    return {
-      fields: reverseRelations[0].config.references,
-      references: reverseRelations[0].config.fields
-    };
-  throw new Error(
-    `There is not enough information to infer relation "${sourceTableTsName}.${relation.fieldName}"`
-  );
-}
-function createTableRelationsHelpers(sourceTable) {
-  return {
-    one: createOne(sourceTable),
-    many: createMany(sourceTable)
-  };
-}
-function mapRelationalRow(tablesConfig, tableConfig, row, buildQueryResultSelection, mapColumnValue = (value) => value) {
-  let result = {};
-  for (let [
-    selectionItemIndex,
-    selectionItem
-  ] of buildQueryResultSelection.entries())
-    if (selectionItem.isJson) {
-      let relation = tableConfig.relations[selectionItem.tsKey], rawSubRows = row[selectionItemIndex], subRows = typeof rawSubRows == "string" ? JSON.parse(rawSubRows) : rawSubRows;
-      result[selectionItem.tsKey] = is(relation, One) ? subRows && mapRelationalRow(
-        tablesConfig,
-        tablesConfig[selectionItem.relationTableTsKey],
-        subRows,
-        selectionItem.selection,
-        mapColumnValue
-      ) : subRows.map(
-        (subRow) => mapRelationalRow(
-          tablesConfig,
-          tablesConfig[selectionItem.relationTableTsKey],
-          subRow,
-          selectionItem.selection,
-          mapColumnValue
-        )
-      );
-    } else {
-      let value = mapColumnValue(row[selectionItemIndex]), field = selectionItem.field, decoder;
-      is(field, Column) ? decoder = field : is(field, SQL) ? decoder = field.decoder : decoder = field.sql.decoder, result[selectionItem.tsKey] = value === null ? null : decoder.mapFromDriverValue(value);
-    }
-  return result;
-}
-var _a83, Relation, _a84, Relations, _a85, _One, One, _a86, _Many, Many, init_relations = __esm({
-  "node_modules/drizzle-orm/relations.js"() {
-    init_table();
-    init_column();
-    init_entity();
-    init_primary_keys2();
-    init_expressions();
-    init_sql();
-    Relation = class {
-      constructor(sourceTable, referencedTable, relationName) {
-        this.sourceTable = sourceTable, this.referencedTable = referencedTable, this.relationName = relationName, this.referencedTableName = referencedTable[Table.Symbol.Name];
-      }
-      referencedTableName;
-      fieldName;
-    };
-    _a83 = entityKind, __publicField(Relation, _a83, "Relation");
-    Relations = class {
-      constructor(table, config) {
-        this.table = table, this.config = config;
-      }
-    };
-    _a84 = entityKind, __publicField(Relations, _a84, "Relations");
-    _One = class extends Relation {
-      constructor(sourceTable, referencedTable, config, isNullable) {
-        super(sourceTable, referencedTable, config?.relationName), this.config = config, this.isNullable = isNullable;
-      }
-      withFieldName(fieldName) {
-        let relation = new _One(
-          this.sourceTable,
-          this.referencedTable,
-          this.config,
-          this.isNullable
-        );
-        return relation.fieldName = fieldName, relation;
-      }
-    }, One = _One;
-    _a85 = entityKind, __publicField(One, _a85, "One");
-    _Many = class extends Relation {
-      constructor(sourceTable, referencedTable, config) {
-        super(sourceTable, referencedTable, config?.relationName), this.config = config;
-      }
-      withFieldName(fieldName) {
-        let relation = new _Many(
-          this.sourceTable,
-          this.referencedTable,
-          this.config
-        );
-        return relation.fieldName = fieldName, relation;
-      }
-    }, Many = _Many;
-    _a86 = entityKind, __publicField(Many, _a86, "Many");
-  }
-});
-
-// node_modules/drizzle-orm/sql/functions/aggregate.js
-var init_aggregate = __esm({
-  "node_modules/drizzle-orm/sql/functions/aggregate.js"() {
-  }
-});
-
-// node_modules/drizzle-orm/sql/functions/vector.js
-var init_vector = __esm({
-  "node_modules/drizzle-orm/sql/functions/vector.js"() {
-  }
-});
-
-// node_modules/drizzle-orm/sql/functions/index.js
-var init_functions = __esm({
-  "node_modules/drizzle-orm/sql/functions/index.js"() {
-    init_aggregate();
-    init_vector();
-  }
-});
-
-// node_modules/drizzle-orm/sql/index.js
-var init_sql2 = __esm({
-  "node_modules/drizzle-orm/sql/index.js"() {
-    init_expressions();
-    init_functions();
-    init_sql();
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/view-base.js
-var _a87, SQLiteViewBase, init_view_base = __esm({
-  "node_modules/drizzle-orm/sqlite-core/view-base.js"() {
-    init_entity();
-    init_sql();
-    SQLiteViewBase = class extends View {
-    };
-    _a87 = entityKind, __publicField(SQLiteViewBase, _a87, "SQLiteViewBase");
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/dialect.js
-var _a88, SQLiteDialect, _a89, SQLiteSyncDialect, _a90, SQLiteAsyncDialect, init_dialect = __esm({
-  "node_modules/drizzle-orm/sqlite-core/dialect.js"() {
-    init_alias();
-    init_casing();
-    init_column();
-    init_entity();
-    init_errors();
-    init_relations();
-    init_sql2();
-    init_sql();
-    init_columns();
-    init_table2();
-    init_subquery();
-    init_table();
-    init_utils();
-    init_view_common();
-    init_view_base();
-    SQLiteDialect = class {
-      /** @internal */
-      casing;
-      constructor(config) {
-        this.casing = new CasingCache(config?.casing);
-      }
-      escapeName(name) {
-        return `"${name}"`;
-      }
-      escapeParam(_num) {
-        return "?";
-      }
-      escapeString(str) {
-        return `'${str.replace(/'/g, "''")}'`;
-      }
-      buildWithCTE(queries) {
-        if (!queries?.length)
-          return;
-        let withSqlChunks = [sql`with `];
-        for (let [i, w] of queries.entries())
-          withSqlChunks.push(sql`${sql.identifier(w._.alias)} as (${w._.sql})`), i < queries.length - 1 && withSqlChunks.push(sql`, `);
-        return withSqlChunks.push(sql` `), sql.join(withSqlChunks);
-      }
-      buildDeleteQuery({ table, where, returning, withList, limit, orderBy }) {
-        let withSql = this.buildWithCTE(withList), returningSql = returning ? sql` returning ${this.buildSelection(returning, { isSingleTable: !0 })}` : void 0, whereSql = where ? sql` where ${where}` : void 0, orderBySql = this.buildOrderBy(orderBy), limitSql = this.buildLimit(limit);
-        return sql`${withSql}delete from ${table}${whereSql}${returningSql}${orderBySql}${limitSql}`;
-      }
-      buildUpdateSet(table, set) {
-        let tableColumns = table[Table.Symbol.Columns], columnNames = Object.keys(tableColumns).filter(
-          (colName) => set[colName] !== void 0 || tableColumns[colName]?.onUpdateFn !== void 0
-        ), setSize = columnNames.length;
-        return sql.join(columnNames.flatMap((colName, i) => {
-          let col = tableColumns[colName], value = set[colName] ?? sql.param(col.onUpdateFn(), col), res = sql`${sql.identifier(this.casing.getColumnCasing(col))} = ${value}`;
-          return i < setSize - 1 ? [res, sql.raw(", ")] : [res];
-        }));
-      }
-      buildUpdateQuery({ table, set, where, returning, withList, joins, from, limit, orderBy }) {
-        let withSql = this.buildWithCTE(withList), setSql = this.buildUpdateSet(table, set), fromSql = from && sql.join([sql.raw(" from "), this.buildFromTable(from)]), joinsSql = this.buildJoins(joins), returningSql = returning ? sql` returning ${this.buildSelection(returning, { isSingleTable: !0 })}` : void 0, whereSql = where ? sql` where ${where}` : void 0, orderBySql = this.buildOrderBy(orderBy), limitSql = this.buildLimit(limit);
-        return sql`${withSql}update ${table} set ${setSql}${fromSql}${joinsSql}${whereSql}${returningSql}${orderBySql}${limitSql}`;
-      }
-      /**
-       * Builds selection SQL with provided fields/expressions
-       *
-       * Examples:
-       *
-       * `select <selection> from`
-       *
-       * `insert ... returning <selection>`
-       *
-       * If `isSingleTable` is true, then columns won't be prefixed with table name
-       */
-      buildSelection(fields, { isSingleTable = !1 } = {}) {
-        let columnsLen = fields.length, chunks = fields.flatMap(({ field }, i) => {
-          let chunk = [];
-          if (is(field, SQL.Aliased) && field.isSelectionField)
-            chunk.push(sql.identifier(field.fieldAlias));
-          else if (is(field, SQL.Aliased) || is(field, SQL)) {
-            let query = is(field, SQL.Aliased) ? field.sql : field;
-            isSingleTable ? chunk.push(
-              new SQL(
-                query.queryChunks.map((c) => is(c, Column) ? sql.identifier(this.casing.getColumnCasing(c)) : c)
-              )
-            ) : chunk.push(query), is(field, SQL.Aliased) && chunk.push(sql` as ${sql.identifier(field.fieldAlias)}`);
-          } else if (is(field, Column)) {
-            let tableName = field.table[Table.Symbol.Name];
-            field.columnType === "SQLiteNumericBigInt" ? isSingleTable ? chunk.push(sql`cast(${sql.identifier(this.casing.getColumnCasing(field))} as text)`) : chunk.push(
-              sql`cast(${sql.identifier(tableName)}.${sql.identifier(this.casing.getColumnCasing(field))} as text)`
-            ) : isSingleTable ? chunk.push(sql.identifier(this.casing.getColumnCasing(field))) : chunk.push(sql`${sql.identifier(tableName)}.${sql.identifier(this.casing.getColumnCasing(field))}`);
-          }
-          return i < columnsLen - 1 && chunk.push(sql`, `), chunk;
-        });
-        return sql.join(chunks);
-      }
-      buildJoins(joins) {
-        if (!joins || joins.length === 0)
-          return;
-        let joinsArray = [];
-        if (joins)
-          for (let [index, joinMeta] of joins.entries()) {
-            index === 0 && joinsArray.push(sql` `);
-            let table = joinMeta.table, onSql = joinMeta.on ? sql` on ${joinMeta.on}` : void 0;
-            if (is(table, SQLiteTable)) {
-              let tableName = table[SQLiteTable.Symbol.Name], tableSchema = table[SQLiteTable.Symbol.Schema], origTableName = table[SQLiteTable.Symbol.OriginalName], alias = tableName === origTableName ? void 0 : joinMeta.alias;
-              joinsArray.push(
-                sql`${sql.raw(joinMeta.joinType)} join ${tableSchema ? sql`${sql.identifier(tableSchema)}.` : void 0}${sql.identifier(origTableName)}${alias && sql` ${sql.identifier(alias)}`}${onSql}`
-              );
-            } else
-              joinsArray.push(
-                sql`${sql.raw(joinMeta.joinType)} join ${table}${onSql}`
-              );
-            index < joins.length - 1 && joinsArray.push(sql` `);
-          }
-        return sql.join(joinsArray);
-      }
-      buildLimit(limit) {
-        return typeof limit == "object" || typeof limit == "number" && limit >= 0 ? sql` limit ${limit}` : void 0;
-      }
-      buildOrderBy(orderBy) {
-        let orderByList = [];
-        if (orderBy)
-          for (let [index, orderByValue] of orderBy.entries())
-            orderByList.push(orderByValue), index < orderBy.length - 1 && orderByList.push(sql`, `);
-        return orderByList.length > 0 ? sql` order by ${sql.join(orderByList)}` : void 0;
-      }
-      buildFromTable(table) {
-        return is(table, Table) && table[Table.Symbol.IsAlias] ? sql`${sql`${sql.identifier(table[Table.Symbol.Schema] ?? "")}.`.if(table[Table.Symbol.Schema])}${sql.identifier(table[Table.Symbol.OriginalName])} ${sql.identifier(table[Table.Symbol.Name])}` : table;
-      }
-      buildSelectQuery({
-        withList,
-        fields,
-        fieldsFlat,
-        where,
-        having,
-        table,
-        joins,
-        orderBy,
-        groupBy,
-        limit,
-        offset: offset2,
-        distinct,
-        setOperators
-      }) {
-        let fieldsList = fieldsFlat ?? orderSelectedFields(fields);
-        for (let f of fieldsList)
-          if (is(f.field, Column) && getTableName(f.field.table) !== (is(table, Subquery) ? table._.alias : is(table, SQLiteViewBase) ? table[ViewBaseConfig].name : is(table, SQL) ? void 0 : getTableName(table)) && !((table2) => joins?.some(
-            ({ alias }) => alias === (table2[Table.Symbol.IsAlias] ? getTableName(table2) : table2[Table.Symbol.BaseName])
-          ))(f.field.table)) {
-            let tableName = getTableName(f.field.table);
-            throw new Error(
-              `Your "${f.path.join("->")}" field references a column "${tableName}"."${f.field.name}", but the table "${tableName}" is not part of the query! Did you forget to join it?`
-            );
-          }
-        let isSingleTable = !joins || joins.length === 0, withSql = this.buildWithCTE(withList), distinctSql = distinct ? sql` distinct` : void 0, selection = this.buildSelection(fieldsList, { isSingleTable }), tableSql = this.buildFromTable(table), joinsSql = this.buildJoins(joins), whereSql = where ? sql` where ${where}` : void 0, havingSql = having ? sql` having ${having}` : void 0, groupByList = [];
-        if (groupBy)
-          for (let [index, groupByValue] of groupBy.entries())
-            groupByList.push(groupByValue), index < groupBy.length - 1 && groupByList.push(sql`, `);
-        let groupBySql = groupByList.length > 0 ? sql` group by ${sql.join(groupByList)}` : void 0, orderBySql = this.buildOrderBy(orderBy), limitSql = this.buildLimit(limit), offsetSql = offset2 ? sql` offset ${offset2}` : void 0, finalQuery = sql`${withSql}select${distinctSql} ${selection} from ${tableSql}${joinsSql}${whereSql}${groupBySql}${havingSql}${orderBySql}${limitSql}${offsetSql}`;
-        return setOperators.length > 0 ? this.buildSetOperations(finalQuery, setOperators) : finalQuery;
-      }
-      buildSetOperations(leftSelect, setOperators) {
-        let [setOperator, ...rest] = setOperators;
-        if (!setOperator)
-          throw new Error("Cannot pass undefined values to any set operator");
-        return rest.length === 0 ? this.buildSetOperationQuery({ leftSelect, setOperator }) : this.buildSetOperations(
-          this.buildSetOperationQuery({ leftSelect, setOperator }),
-          rest
-        );
-      }
-      buildSetOperationQuery({
-        leftSelect,
-        setOperator: { type: type2, isAll, rightSelect, limit, orderBy, offset: offset2 }
-      }) {
-        let leftChunk = sql`${leftSelect.getSQL()} `, rightChunk = sql`${rightSelect.getSQL()}`, orderBySql;
-        if (orderBy && orderBy.length > 0) {
-          let orderByValues = [];
-          for (let singleOrderBy of orderBy)
-            if (is(singleOrderBy, SQLiteColumn))
-              orderByValues.push(sql.identifier(singleOrderBy.name));
-            else if (is(singleOrderBy, SQL)) {
-              for (let i = 0; i < singleOrderBy.queryChunks.length; i++) {
-                let chunk = singleOrderBy.queryChunks[i];
-                is(chunk, SQLiteColumn) && (singleOrderBy.queryChunks[i] = sql.identifier(this.casing.getColumnCasing(chunk)));
-              }
-              orderByValues.push(sql`${singleOrderBy}`);
-            } else
-              orderByValues.push(sql`${singleOrderBy}`);
-          orderBySql = sql` order by ${sql.join(orderByValues, sql`, `)}`;
-        }
-        let limitSql = typeof limit == "object" || typeof limit == "number" && limit >= 0 ? sql` limit ${limit}` : void 0, operatorChunk = sql.raw(`${type2} ${isAll ? "all " : ""}`), offsetSql = offset2 ? sql` offset ${offset2}` : void 0;
-        return sql`${leftChunk}${operatorChunk}${rightChunk}${orderBySql}${limitSql}${offsetSql}`;
-      }
-      buildInsertQuery({ table, values: valuesOrSelect, onConflict, returning, withList, select }) {
-        let valuesSqlList = [], columns = table[Table.Symbol.Columns], colEntries = Object.entries(columns).filter(
-          ([_, col]) => !col.shouldDisableInsert()
-        ), insertOrder = colEntries.map(([, column]) => sql.identifier(this.casing.getColumnCasing(column)));
-        if (select) {
-          let select2 = valuesOrSelect;
-          is(select2, SQL) ? valuesSqlList.push(select2) : valuesSqlList.push(select2.getSQL());
-        } else {
-          let values = valuesOrSelect;
-          valuesSqlList.push(sql.raw("values "));
-          for (let [valueIndex, value] of values.entries()) {
-            let valueList = [];
-            for (let [fieldName, col] of colEntries) {
-              let colValue = value[fieldName];
-              if (colValue === void 0 || is(colValue, Param) && colValue.value === void 0) {
-                let defaultValue;
-                if (col.default !== null && col.default !== void 0)
-                  defaultValue = is(col.default, SQL) ? col.default : sql.param(col.default, col);
-                else if (col.defaultFn !== void 0) {
-                  let defaultFnResult = col.defaultFn();
-                  defaultValue = is(defaultFnResult, SQL) ? defaultFnResult : sql.param(defaultFnResult, col);
-                } else if (!col.default && col.onUpdateFn !== void 0) {
-                  let onUpdateFnResult = col.onUpdateFn();
-                  defaultValue = is(onUpdateFnResult, SQL) ? onUpdateFnResult : sql.param(onUpdateFnResult, col);
-                } else
-                  defaultValue = sql`null`;
-                valueList.push(defaultValue);
-              } else
-                valueList.push(colValue);
-            }
-            valuesSqlList.push(valueList), valueIndex < values.length - 1 && valuesSqlList.push(sql`, `);
-          }
-        }
-        let withSql = this.buildWithCTE(withList), valuesSql = sql.join(valuesSqlList), returningSql = returning ? sql` returning ${this.buildSelection(returning, { isSingleTable: !0 })}` : void 0, onConflictSql = onConflict?.length ? sql.join(onConflict) : void 0;
-        return sql`${withSql}insert into ${table} ${insertOrder} ${valuesSql}${onConflictSql}${returningSql}`;
-      }
-      sqlToQuery(sql22, invokeSource) {
-        return sql22.toQuery({
-          casing: this.casing,
-          escapeName: this.escapeName,
-          escapeParam: this.escapeParam,
-          escapeString: this.escapeString,
-          invokeSource
-        });
-      }
-      buildRelationalQuery({
-        fullSchema,
-        schema: schema3,
-        tableNamesMap,
-        table,
-        tableConfig,
-        queryConfig: config,
-        tableAlias,
-        nestedQueryRelation,
-        joinOn
-      }) {
-        let selection = [], limit, offset2, orderBy = [], where, joins = [];
-        if (config === !0)
-          selection = Object.entries(tableConfig.columns).map(([key, value]) => ({
-            dbKey: value.name,
-            tsKey: key,
-            field: aliasedTableColumn(value, tableAlias),
-            relationTableTsKey: void 0,
-            isJson: !1,
-            selection: []
-          }));
-        else {
-          let aliasedColumns = Object.fromEntries(
-            Object.entries(tableConfig.columns).map(([key, value]) => [key, aliasedTableColumn(value, tableAlias)])
-          );
-          if (config.where) {
-            let whereSql = typeof config.where == "function" ? config.where(aliasedColumns, getOperators()) : config.where;
-            where = whereSql && mapColumnsInSQLToAlias(whereSql, tableAlias);
-          }
-          let fieldsSelection = [], selectedColumns = [];
-          if (config.columns) {
-            let isIncludeMode = !1;
-            for (let [field, value] of Object.entries(config.columns))
-              value !== void 0 && field in tableConfig.columns && (!isIncludeMode && value === !0 && (isIncludeMode = !0), selectedColumns.push(field));
-            selectedColumns.length > 0 && (selectedColumns = isIncludeMode ? selectedColumns.filter((c) => config.columns?.[c] === !0) : Object.keys(tableConfig.columns).filter((key) => !selectedColumns.includes(key)));
-          } else
-            selectedColumns = Object.keys(tableConfig.columns);
-          for (let field of selectedColumns) {
-            let column = tableConfig.columns[field];
-            fieldsSelection.push({ tsKey: field, value: column });
-          }
-          let selectedRelations = [];
-          config.with && (selectedRelations = Object.entries(config.with).filter((entry2) => !!entry2[1]).map(([tsKey, queryConfig]) => ({ tsKey, queryConfig, relation: tableConfig.relations[tsKey] })));
-          let extras;
-          if (config.extras) {
-            extras = typeof config.extras == "function" ? config.extras(aliasedColumns, { sql }) : config.extras;
-            for (let [tsKey, value] of Object.entries(extras))
-              fieldsSelection.push({
-                tsKey,
-                value: mapColumnsInAliasedSQLToAlias(value, tableAlias)
-              });
-          }
-          for (let { tsKey, value } of fieldsSelection)
-            selection.push({
-              dbKey: is(value, SQL.Aliased) ? value.fieldAlias : tableConfig.columns[tsKey].name,
-              tsKey,
-              field: is(value, Column) ? aliasedTableColumn(value, tableAlias) : value,
-              relationTableTsKey: void 0,
-              isJson: !1,
-              selection: []
-            });
-          let orderByOrig = typeof config.orderBy == "function" ? config.orderBy(aliasedColumns, getOrderByOperators()) : config.orderBy ?? [];
-          Array.isArray(orderByOrig) || (orderByOrig = [orderByOrig]), orderBy = orderByOrig.map((orderByValue) => is(orderByValue, Column) ? aliasedTableColumn(orderByValue, tableAlias) : mapColumnsInSQLToAlias(orderByValue, tableAlias)), limit = config.limit, offset2 = config.offset;
-          for (let {
-            tsKey: selectedRelationTsKey,
-            queryConfig: selectedRelationConfigValue,
-            relation
-          } of selectedRelations) {
-            let normalizedRelation = normalizeRelation(schema3, tableNamesMap, relation), relationTableName = getTableUniqueName(relation.referencedTable), relationTableTsName = tableNamesMap[relationTableName], relationTableAlias = `${tableAlias}_${selectedRelationTsKey}`, joinOn2 = and(
-              ...normalizedRelation.fields.map(
-                (field2, i) => eq(
-                  aliasedTableColumn(normalizedRelation.references[i], relationTableAlias),
-                  aliasedTableColumn(field2, tableAlias)
-                )
-              )
-            ), builtRelation = this.buildRelationalQuery({
-              fullSchema,
-              schema: schema3,
-              tableNamesMap,
-              table: fullSchema[relationTableTsName],
-              tableConfig: schema3[relationTableTsName],
-              queryConfig: is(relation, One) ? selectedRelationConfigValue === !0 ? { limit: 1 } : { ...selectedRelationConfigValue, limit: 1 } : selectedRelationConfigValue,
-              tableAlias: relationTableAlias,
-              joinOn: joinOn2,
-              nestedQueryRelation: relation
-            }), field = sql`(${builtRelation.sql})`.as(selectedRelationTsKey);
-            selection.push({
-              dbKey: selectedRelationTsKey,
-              tsKey: selectedRelationTsKey,
-              field,
-              relationTableTsKey: relationTableTsName,
-              isJson: !0,
-              selection: builtRelation.selection
-            });
-          }
-        }
-        if (selection.length === 0)
-          throw new DrizzleError({
-            message: `No fields selected for table "${tableConfig.tsName}" ("${tableAlias}"). You need to have at least one item in "columns", "with" or "extras". If you need to select all columns, omit the "columns" key or set it to undefined.`
-          });
-        let result;
-        if (where = and(joinOn, where), nestedQueryRelation) {
-          let field = sql`json_array(${sql.join(
-            selection.map(
-              ({ field: field2 }) => is(field2, SQLiteColumn) ? sql.identifier(this.casing.getColumnCasing(field2)) : is(field2, SQL.Aliased) ? field2.sql : field2
-            ),
-            sql`, `
-          )})`;
-          is(nestedQueryRelation, Many) && (field = sql`coalesce(json_group_array(${field}), json_array())`);
-          let nestedSelection = [{
-            dbKey: "data",
-            tsKey: "data",
-            field: field.as("data"),
-            isJson: !0,
-            relationTableTsKey: tableConfig.tsName,
-            selection
-          }];
-          limit !== void 0 || offset2 !== void 0 || orderBy.length > 0 ? (result = this.buildSelectQuery({
-            table: aliasedTable(table, tableAlias),
-            fields: {},
-            fieldsFlat: [
-              {
-                path: [],
-                field: sql.raw("*")
-              }
-            ],
-            where,
-            limit,
-            offset: offset2,
-            orderBy,
-            setOperators: []
-          }), where = void 0, limit = void 0, offset2 = void 0, orderBy = void 0) : result = aliasedTable(table, tableAlias), result = this.buildSelectQuery({
-            table: is(result, SQLiteTable) ? result : new Subquery(result, {}, tableAlias),
-            fields: {},
-            fieldsFlat: nestedSelection.map(({ field: field2 }) => ({
-              path: [],
-              field: is(field2, Column) ? aliasedTableColumn(field2, tableAlias) : field2
-            })),
-            joins,
-            where,
-            limit,
-            offset: offset2,
-            orderBy,
-            setOperators: []
-          });
-        } else
-          result = this.buildSelectQuery({
-            table: aliasedTable(table, tableAlias),
-            fields: {},
-            fieldsFlat: selection.map(({ field }) => ({
-              path: [],
-              field: is(field, Column) ? aliasedTableColumn(field, tableAlias) : field
-            })),
-            joins,
-            where,
-            limit,
-            offset: offset2,
-            orderBy,
-            setOperators: []
-          });
-        return {
-          tableTsKey: tableConfig.tsName,
-          sql: result,
-          selection
-        };
-      }
-    };
-    _a88 = entityKind, __publicField(SQLiteDialect, _a88, "SQLiteDialect");
-    SQLiteSyncDialect = class extends SQLiteDialect {
-      migrate(migrations, session, config) {
-        let migrationsTable = config === void 0 || typeof config == "string" ? "__drizzle_migrations" : config.migrationsTable ?? "__drizzle_migrations", migrationTableCreate = sql`
-			CREATE TABLE IF NOT EXISTS ${sql.identifier(migrationsTable)} (
-				id SERIAL PRIMARY KEY,
-				hash text NOT NULL,
-				created_at numeric
-			)
-		`;
-        session.run(migrationTableCreate);
-        let lastDbMigration = session.values(
-          sql`SELECT id, hash, created_at FROM ${sql.identifier(migrationsTable)} ORDER BY created_at DESC LIMIT 1`
-        )[0] ?? void 0;
-        session.run(sql`BEGIN`);
-        try {
-          for (let migration of migrations)
-            if (!lastDbMigration || Number(lastDbMigration[2]) < migration.folderMillis) {
-              for (let stmt of migration.sql)
-                session.run(sql.raw(stmt));
-              session.run(
-                sql`INSERT INTO ${sql.identifier(migrationsTable)} ("hash", "created_at") VALUES(${migration.hash}, ${migration.folderMillis})`
-              );
-            }
-          session.run(sql`COMMIT`);
-        } catch (e) {
-          throw session.run(sql`ROLLBACK`), e;
-        }
-      }
-    };
-    _a89 = entityKind, __publicField(SQLiteSyncDialect, _a89, "SQLiteSyncDialect");
-    SQLiteAsyncDialect = class extends SQLiteDialect {
-      async migrate(migrations, session, config) {
-        let migrationsTable = config === void 0 || typeof config == "string" ? "__drizzle_migrations" : config.migrationsTable ?? "__drizzle_migrations", migrationTableCreate = sql`
-			CREATE TABLE IF NOT EXISTS ${sql.identifier(migrationsTable)} (
-				id SERIAL PRIMARY KEY,
-				hash text NOT NULL,
-				created_at numeric
-			)
-		`;
-        await session.run(migrationTableCreate);
-        let lastDbMigration = (await session.values(
-          sql`SELECT id, hash, created_at FROM ${sql.identifier(migrationsTable)} ORDER BY created_at DESC LIMIT 1`
-        ))[0] ?? void 0;
-        await session.transaction(async (tx) => {
-          for (let migration of migrations)
-            if (!lastDbMigration || Number(lastDbMigration[2]) < migration.folderMillis) {
-              for (let stmt of migration.sql)
-                await tx.run(sql.raw(stmt));
-              await tx.run(
-                sql`INSERT INTO ${sql.identifier(migrationsTable)} ("hash", "created_at") VALUES(${migration.hash}, ${migration.folderMillis})`
-              );
-            }
-        });
-      }
-    };
-    _a90 = entityKind, __publicField(SQLiteAsyncDialect, _a90, "SQLiteAsyncDialect");
-  }
-});
-
-// node_modules/drizzle-orm/query-builders/query-builder.js
-var _a91, TypedQueryBuilder, init_query_builder = __esm({
-  "node_modules/drizzle-orm/query-builders/query-builder.js"() {
-    init_entity();
-    TypedQueryBuilder = class {
-      /** @internal */
-      getSelectedFields() {
-        return this._.selectedFields;
-      }
-    };
-    _a91 = entityKind, __publicField(TypedQueryBuilder, _a91, "TypedQueryBuilder");
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/query-builders/select.js
-function createSetOperator(type2, isAll) {
-  return (leftSelect, rightSelect, ...restSelects) => {
-    let setOperators = [rightSelect, ...restSelects].map((select) => ({
-      type: type2,
-      isAll,
-      rightSelect: select
-    }));
-    for (let setOperator of setOperators)
-      if (!haveSameKeys(leftSelect.getSelectedFields(), setOperator.rightSelect.getSelectedFields()))
-        throw new Error(
-          "Set operator error (union / intersect / except): selected fields are not the same or are in a different order"
-        );
-    return leftSelect.addSetOperators(setOperators);
-  };
-}
-var _a92, SQLiteSelectBuilder, _a93, SQLiteSelectQueryBuilderBase, _a94, SQLiteSelectBase, getSQLiteSetOperators, union, unionAll, intersect, except, init_select2 = __esm({
-  "node_modules/drizzle-orm/sqlite-core/query-builders/select.js"() {
-    init_entity();
-    init_query_builder();
-    init_query_promise();
-    init_selection_proxy();
-    init_sql();
-    init_subquery();
-    init_table();
-    init_utils();
-    init_view_common();
-    init_utils2();
-    init_view_base();
-    SQLiteSelectBuilder = class {
-      fields;
-      session;
-      dialect;
-      withList;
-      distinct;
-      constructor(config) {
-        this.fields = config.fields, this.session = config.session, this.dialect = config.dialect, this.withList = config.withList, this.distinct = config.distinct;
-      }
-      from(source) {
-        let isPartialSelect = !!this.fields, fields;
-        return this.fields ? fields = this.fields : is(source, Subquery) ? fields = Object.fromEntries(
-          Object.keys(source._.selectedFields).map((key) => [key, source[key]])
-        ) : is(source, SQLiteViewBase) ? fields = source[ViewBaseConfig].selectedFields : is(source, SQL) ? fields = {} : fields = getTableColumns(source), new SQLiteSelectBase({
-          table: source,
-          fields,
-          isPartialSelect,
-          session: this.session,
-          dialect: this.dialect,
-          withList: this.withList,
-          distinct: this.distinct
-        });
-      }
-    };
-    _a92 = entityKind, __publicField(SQLiteSelectBuilder, _a92, "SQLiteSelectBuilder");
-    SQLiteSelectQueryBuilderBase = class extends TypedQueryBuilder {
-      _;
-      /** @internal */
-      config;
-      joinsNotNullableMap;
-      tableName;
-      isPartialSelect;
-      session;
-      dialect;
-      cacheConfig = void 0;
-      usedTables = /* @__PURE__ */ new Set();
-      constructor({ table, fields, isPartialSelect, session, dialect, withList, distinct }) {
-        super(), this.config = {
-          withList,
-          table,
-          fields: { ...fields },
-          distinct,
-          setOperators: []
-        }, this.isPartialSelect = isPartialSelect, this.session = session, this.dialect = dialect, this._ = {
-          selectedFields: fields,
-          config: this.config
-        }, this.tableName = getTableLikeName(table), this.joinsNotNullableMap = typeof this.tableName == "string" ? { [this.tableName]: !0 } : {};
-        for (let item of extractUsedTable(table))
-          this.usedTables.add(item);
-      }
-      /** @internal */
-      getUsedTables() {
-        return [...this.usedTables];
-      }
-      createJoin(joinType) {
-        return (table, on) => {
-          let baseTableName = this.tableName, tableName = getTableLikeName(table);
-          for (let item of extractUsedTable(table))
-            this.usedTables.add(item);
-          if (typeof tableName == "string" && this.config.joins?.some((join) => join.alias === tableName))
-            throw new Error(`Alias "${tableName}" is already used in this query`);
-          if (!this.isPartialSelect && (Object.keys(this.joinsNotNullableMap).length === 1 && typeof baseTableName == "string" && (this.config.fields = {
-            [baseTableName]: this.config.fields
-          }), typeof tableName == "string" && !is(table, SQL))) {
-            let selection = is(table, Subquery) ? table._.selectedFields : is(table, View) ? table[ViewBaseConfig].selectedFields : table[Table.Symbol.Columns];
-            this.config.fields[tableName] = selection;
-          }
-          if (typeof on == "function" && (on = on(
-            new Proxy(
-              this.config.fields,
-              new SelectionProxyHandler({ sqlAliasedBehavior: "sql", sqlBehavior: "sql" })
-            )
-          )), this.config.joins || (this.config.joins = []), this.config.joins.push({ on, table, joinType, alias: tableName }), typeof tableName == "string")
-            switch (joinType) {
-              case "left": {
-                this.joinsNotNullableMap[tableName] = !1;
-                break;
-              }
-              case "right": {
-                this.joinsNotNullableMap = Object.fromEntries(
-                  Object.entries(this.joinsNotNullableMap).map(([key]) => [key, !1])
-                ), this.joinsNotNullableMap[tableName] = !0;
-                break;
-              }
-              case "cross":
-              case "inner": {
-                this.joinsNotNullableMap[tableName] = !0;
-                break;
-              }
-              case "full": {
-                this.joinsNotNullableMap = Object.fromEntries(
-                  Object.entries(this.joinsNotNullableMap).map(([key]) => [key, !1])
-                ), this.joinsNotNullableMap[tableName] = !1;
-                break;
-              }
-            }
-          return this;
-        };
-      }
-      /**
-       * Executes a `left join` operation by adding another table to the current query.
-       *
-       * Calling this method associates each row of the table with the corresponding row from the joined table, if a match is found. If no matching row exists, it sets all columns of the joined table to null.
-       *
-       * See docs: {@link https://orm.drizzle.team/docs/joins#left-join}
-       *
-       * @param table the table to join.
-       * @param on the `on` clause.
-       *
-       * @example
-       *
-       * ```ts
-       * // Select all users and their pets
-       * const usersWithPets: { user: User; pets: Pet | null; }[] = await db.select()
-       *   .from(users)
-       *   .leftJoin(pets, eq(users.id, pets.ownerId))
-       *
-       * // Select userId and petId
-       * const usersIdsAndPetIds: { userId: number; petId: number | null; }[] = await db.select({
-       *   userId: users.id,
-       *   petId: pets.id,
-       * })
-       *   .from(users)
-       *   .leftJoin(pets, eq(users.id, pets.ownerId))
-       * ```
-       */
-      leftJoin = this.createJoin("left");
-      /**
-       * Executes a `right join` operation by adding another table to the current query.
-       *
-       * Calling this method associates each row of the joined table with the corresponding row from the main table, if a match is found. If no matching row exists, it sets all columns of the main table to null.
-       *
-       * See docs: {@link https://orm.drizzle.team/docs/joins#right-join}
-       *
-       * @param table the table to join.
-       * @param on the `on` clause.
-       *
-       * @example
-       *
-       * ```ts
-       * // Select all users and their pets
-       * const usersWithPets: { user: User | null; pets: Pet; }[] = await db.select()
-       *   .from(users)
-       *   .rightJoin(pets, eq(users.id, pets.ownerId))
-       *
-       * // Select userId and petId
-       * const usersIdsAndPetIds: { userId: number | null; petId: number; }[] = await db.select({
-       *   userId: users.id,
-       *   petId: pets.id,
-       * })
-       *   .from(users)
-       *   .rightJoin(pets, eq(users.id, pets.ownerId))
-       * ```
-       */
-      rightJoin = this.createJoin("right");
-      /**
-       * Executes an `inner join` operation, creating a new table by combining rows from two tables that have matching values.
-       *
-       * Calling this method retrieves rows that have corresponding entries in both joined tables. Rows without matching entries in either table are excluded, resulting in a table that includes only matching pairs.
-       *
-       * See docs: {@link https://orm.drizzle.team/docs/joins#inner-join}
-       *
-       * @param table the table to join.
-       * @param on the `on` clause.
-       *
-       * @example
-       *
-       * ```ts
-       * // Select all users and their pets
-       * const usersWithPets: { user: User; pets: Pet; }[] = await db.select()
-       *   .from(users)
-       *   .innerJoin(pets, eq(users.id, pets.ownerId))
-       *
-       * // Select userId and petId
-       * const usersIdsAndPetIds: { userId: number; petId: number; }[] = await db.select({
-       *   userId: users.id,
-       *   petId: pets.id,
-       * })
-       *   .from(users)
-       *   .innerJoin(pets, eq(users.id, pets.ownerId))
-       * ```
-       */
-      innerJoin = this.createJoin("inner");
-      /**
-       * Executes a `full join` operation by combining rows from two tables into a new table.
-       *
-       * Calling this method retrieves all rows from both main and joined tables, merging rows with matching values and filling in `null` for non-matching columns.
-       *
-       * See docs: {@link https://orm.drizzle.team/docs/joins#full-join}
-       *
-       * @param table the table to join.
-       * @param on the `on` clause.
-       *
-       * @example
-       *
-       * ```ts
-       * // Select all users and their pets
-       * const usersWithPets: { user: User | null; pets: Pet | null; }[] = await db.select()
-       *   .from(users)
-       *   .fullJoin(pets, eq(users.id, pets.ownerId))
-       *
-       * // Select userId and petId
-       * const usersIdsAndPetIds: { userId: number | null; petId: number | null; }[] = await db.select({
-       *   userId: users.id,
-       *   petId: pets.id,
-       * })
-       *   .from(users)
-       *   .fullJoin(pets, eq(users.id, pets.ownerId))
-       * ```
-       */
-      fullJoin = this.createJoin("full");
-      /**
-       * Executes a `cross join` operation by combining rows from two tables into a new table.
-       *
-       * Calling this method retrieves all rows from both main and joined tables, merging all rows from each table.
-       *
-       * See docs: {@link https://orm.drizzle.team/docs/joins#cross-join}
-       *
-       * @param table the table to join.
-       *
-       * @example
-       *
-       * ```ts
-       * // Select all users, each user with every pet
-       * const usersWithPets: { user: User; pets: Pet; }[] = await db.select()
-       *   .from(users)
-       *   .crossJoin(pets)
-       *
-       * // Select userId and petId
-       * const usersIdsAndPetIds: { userId: number; petId: number; }[] = await db.select({
-       *   userId: users.id,
-       *   petId: pets.id,
-       * })
-       *   .from(users)
-       *   .crossJoin(pets)
-       * ```
-       */
-      crossJoin = this.createJoin("cross");
-      createSetOperator(type2, isAll) {
-        return (rightSelection) => {
-          let rightSelect = typeof rightSelection == "function" ? rightSelection(getSQLiteSetOperators()) : rightSelection;
-          if (!haveSameKeys(this.getSelectedFields(), rightSelect.getSelectedFields()))
-            throw new Error(
-              "Set operator error (union / intersect / except): selected fields are not the same or are in a different order"
-            );
-          return this.config.setOperators.push({ type: type2, isAll, rightSelect }), this;
-        };
-      }
-      /**
-       * Adds `union` set operator to the query.
-       *
-       * Calling this method will combine the result sets of the `select` statements and remove any duplicate rows that appear across them.
-       *
-       * See docs: {@link https://orm.drizzle.team/docs/set-operations#union}
-       *
-       * @example
-       *
-       * ```ts
-       * // Select all unique names from customers and users tables
-       * await db.select({ name: users.name })
-       *   .from(users)
-       *   .union(
-       *     db.select({ name: customers.name }).from(customers)
-       *   );
-       * // or
-       * import { union } from 'drizzle-orm/sqlite-core'
-       *
-       * await union(
-       *   db.select({ name: users.name }).from(users),
-       *   db.select({ name: customers.name }).from(customers)
-       * );
-       * ```
-       */
-      union = this.createSetOperator("union", !1);
-      /**
-       * Adds `union all` set operator to the query.
-       *
-       * Calling this method will combine the result-set of the `select` statements and keep all duplicate rows that appear across them.
-       *
-       * See docs: {@link https://orm.drizzle.team/docs/set-operations#union-all}
-       *
-       * @example
-       *
-       * ```ts
-       * // Select all transaction ids from both online and in-store sales
-       * await db.select({ transaction: onlineSales.transactionId })
-       *   .from(onlineSales)
-       *   .unionAll(
-       *     db.select({ transaction: inStoreSales.transactionId }).from(inStoreSales)
-       *   );
-       * // or
-       * import { unionAll } from 'drizzle-orm/sqlite-core'
-       *
-       * await unionAll(
-       *   db.select({ transaction: onlineSales.transactionId }).from(onlineSales),
-       *   db.select({ transaction: inStoreSales.transactionId }).from(inStoreSales)
-       * );
-       * ```
-       */
-      unionAll = this.createSetOperator("union", !0);
-      /**
-       * Adds `intersect` set operator to the query.
-       *
-       * Calling this method will retain only the rows that are present in both result sets and eliminate duplicates.
-       *
-       * See docs: {@link https://orm.drizzle.team/docs/set-operations#intersect}
-       *
-       * @example
-       *
-       * ```ts
-       * // Select course names that are offered in both departments A and B
-       * await db.select({ courseName: depA.courseName })
-       *   .from(depA)
-       *   .intersect(
-       *     db.select({ courseName: depB.courseName }).from(depB)
-       *   );
-       * // or
-       * import { intersect } from 'drizzle-orm/sqlite-core'
-       *
-       * await intersect(
-       *   db.select({ courseName: depA.courseName }).from(depA),
-       *   db.select({ courseName: depB.courseName }).from(depB)
-       * );
-       * ```
-       */
-      intersect = this.createSetOperator("intersect", !1);
-      /**
-       * Adds `except` set operator to the query.
-       *
-       * Calling this method will retrieve all unique rows from the left query, except for the rows that are present in the result set of the right query.
-       *
-       * See docs: {@link https://orm.drizzle.team/docs/set-operations#except}
-       *
-       * @example
-       *
-       * ```ts
-       * // Select all courses offered in department A but not in department B
-       * await db.select({ courseName: depA.courseName })
-       *   .from(depA)
-       *   .except(
-       *     db.select({ courseName: depB.courseName }).from(depB)
-       *   );
-       * // or
-       * import { except } from 'drizzle-orm/sqlite-core'
-       *
-       * await except(
-       *   db.select({ courseName: depA.courseName }).from(depA),
-       *   db.select({ courseName: depB.courseName }).from(depB)
-       * );
-       * ```
-       */
-      except = this.createSetOperator("except", !1);
-      /** @internal */
-      addSetOperators(setOperators) {
-        return this.config.setOperators.push(...setOperators), this;
-      }
-      /**
-       * Adds a `where` clause to the query.
-       *
-       * Calling this method will select only those rows that fulfill a specified condition.
-       *
-       * See docs: {@link https://orm.drizzle.team/docs/select#filtering}
-       *
-       * @param where the `where` clause.
-       *
-       * @example
-       * You can use conditional operators and `sql function` to filter the rows to be selected.
-       *
-       * ```ts
-       * // Select all cars with green color
-       * await db.select().from(cars).where(eq(cars.color, 'green'));
-       * // or
-       * await db.select().from(cars).where(sql`${cars.color} = 'green'`)
-       * ```
-       *
-       * You can logically combine conditional operators with `and()` and `or()` operators:
-       *
-       * ```ts
-       * // Select all BMW cars with a green color
-       * await db.select().from(cars).where(and(eq(cars.color, 'green'), eq(cars.brand, 'BMW')));
-       *
-       * // Select all cars with the green or blue color
-       * await db.select().from(cars).where(or(eq(cars.color, 'green'), eq(cars.color, 'blue')));
-       * ```
-       */
-      where(where) {
-        return typeof where == "function" && (where = where(
-          new Proxy(
-            this.config.fields,
-            new SelectionProxyHandler({ sqlAliasedBehavior: "sql", sqlBehavior: "sql" })
-          )
-        )), this.config.where = where, this;
-      }
-      /**
-       * Adds a `having` clause to the query.
-       *
-       * Calling this method will select only those rows that fulfill a specified condition. It is typically used with aggregate functions to filter the aggregated data based on a specified condition.
-       *
-       * See docs: {@link https://orm.drizzle.team/docs/select#aggregations}
-       *
-       * @param having the `having` clause.
-       *
-       * @example
-       *
-       * ```ts
-       * // Select all brands with more than one car
-       * await db.select({
-       * 	brand: cars.brand,
-       * 	count: sql<number>`cast(count(${cars.id}) as int)`,
-       * })
-       *   .from(cars)
-       *   .groupBy(cars.brand)
-       *   .having(({ count }) => gt(count, 1));
-       * ```
-       */
-      having(having) {
-        return typeof having == "function" && (having = having(
-          new Proxy(
-            this.config.fields,
-            new SelectionProxyHandler({ sqlAliasedBehavior: "sql", sqlBehavior: "sql" })
-          )
-        )), this.config.having = having, this;
-      }
-      groupBy(...columns) {
-        if (typeof columns[0] == "function") {
-          let groupBy = columns[0](
-            new Proxy(
-              this.config.fields,
-              new SelectionProxyHandler({ sqlAliasedBehavior: "alias", sqlBehavior: "sql" })
-            )
-          );
-          this.config.groupBy = Array.isArray(groupBy) ? groupBy : [groupBy];
-        } else
-          this.config.groupBy = columns;
-        return this;
-      }
-      orderBy(...columns) {
-        if (typeof columns[0] == "function") {
-          let orderBy = columns[0](
-            new Proxy(
-              this.config.fields,
-              new SelectionProxyHandler({ sqlAliasedBehavior: "alias", sqlBehavior: "sql" })
-            )
-          ), orderByArray = Array.isArray(orderBy) ? orderBy : [orderBy];
-          this.config.setOperators.length > 0 ? this.config.setOperators.at(-1).orderBy = orderByArray : this.config.orderBy = orderByArray;
-        } else {
-          let orderByArray = columns;
-          this.config.setOperators.length > 0 ? this.config.setOperators.at(-1).orderBy = orderByArray : this.config.orderBy = orderByArray;
-        }
-        return this;
-      }
-      /**
-       * Adds a `limit` clause to the query.
-       *
-       * Calling this method will set the maximum number of rows that will be returned by this query.
-       *
-       * See docs: {@link https://orm.drizzle.team/docs/select#limit--offset}
-       *
-       * @param limit the `limit` clause.
-       *
-       * @example
-       *
-       * ```ts
-       * // Get the first 10 people from this query.
-       * await db.select().from(people).limit(10);
-       * ```
-       */
-      limit(limit) {
-        return this.config.setOperators.length > 0 ? this.config.setOperators.at(-1).limit = limit : this.config.limit = limit, this;
-      }
-      /**
-       * Adds an `offset` clause to the query.
-       *
-       * Calling this method will skip a number of rows when returning results from this query.
-       *
-       * See docs: {@link https://orm.drizzle.team/docs/select#limit--offset}
-       *
-       * @param offset the `offset` clause.
-       *
-       * @example
-       *
-       * ```ts
-       * // Get the 10th-20th people from this query.
-       * await db.select().from(people).offset(10).limit(10);
-       * ```
-       */
-      offset(offset2) {
-        return this.config.setOperators.length > 0 ? this.config.setOperators.at(-1).offset = offset2 : this.config.offset = offset2, this;
-      }
-      /** @internal */
-      getSQL() {
-        return this.dialect.buildSelectQuery(this.config);
-      }
-      toSQL() {
-        let { typings: _typings, ...rest } = this.dialect.sqlToQuery(this.getSQL());
-        return rest;
-      }
-      as(alias) {
-        let usedTables = [];
-        if (usedTables.push(...extractUsedTable(this.config.table)), this.config.joins)
-          for (let it of this.config.joins)
-            usedTables.push(...extractUsedTable(it.table));
-        return new Proxy(
-          new Subquery(this.getSQL(), this.config.fields, alias, !1, [...new Set(usedTables)]),
-          new SelectionProxyHandler({ alias, sqlAliasedBehavior: "alias", sqlBehavior: "error" })
-        );
-      }
-      /** @internal */
-      getSelectedFields() {
-        return new Proxy(
-          this.config.fields,
-          new SelectionProxyHandler({ alias: this.tableName, sqlAliasedBehavior: "alias", sqlBehavior: "error" })
-        );
-      }
-      $dynamic() {
-        return this;
-      }
-    };
-    _a93 = entityKind, __publicField(SQLiteSelectQueryBuilderBase, _a93, "SQLiteSelectQueryBuilder");
-    SQLiteSelectBase = class extends SQLiteSelectQueryBuilderBase {
-      /** @internal */
-      _prepare(isOneTimeQuery = !0) {
-        if (!this.session)
-          throw new Error("Cannot execute a query on a query builder. Please use a database instance instead.");
-        let fieldsList = orderSelectedFields(this.config.fields), query = this.session[isOneTimeQuery ? "prepareOneTimeQuery" : "prepareQuery"](
-          this.dialect.sqlToQuery(this.getSQL()),
-          fieldsList,
-          "all",
-          !0,
-          void 0,
-          {
-            type: "select",
-            tables: [...this.usedTables]
-          },
-          this.cacheConfig
-        );
-        return query.joinsNotNullableMap = this.joinsNotNullableMap, query;
-      }
-      $withCache(config) {
-        return this.cacheConfig = config === void 0 ? { config: {}, enable: !0, autoInvalidate: !0 } : config === !1 ? { enable: !1 } : { enable: !0, autoInvalidate: !0, ...config }, this;
-      }
-      prepare() {
-        return this._prepare(!1);
-      }
-      run = (placeholderValues) => this._prepare().run(placeholderValues);
-      all = (placeholderValues) => this._prepare().all(placeholderValues);
-      get = (placeholderValues) => this._prepare().get(placeholderValues);
-      values = (placeholderValues) => this._prepare().values(placeholderValues);
-      async execute() {
-        return this.all();
-      }
-    };
-    _a94 = entityKind, __publicField(SQLiteSelectBase, _a94, "SQLiteSelect");
-    applyMixins(SQLiteSelectBase, [QueryPromise]);
-    getSQLiteSetOperators = () => ({
-      union,
-      unionAll,
-      intersect,
-      except
-    }), union = createSetOperator("union", !1), unionAll = createSetOperator("union", !0), intersect = createSetOperator("intersect", !1), except = createSetOperator("except", !1);
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/query-builders/query-builder.js
-var _a95, QueryBuilder, init_query_builder2 = __esm({
-  "node_modules/drizzle-orm/sqlite-core/query-builders/query-builder.js"() {
-    init_entity();
-    init_selection_proxy();
-    init_dialect();
-    init_subquery();
-    init_select2();
-    QueryBuilder = class {
-      dialect;
-      dialectConfig;
-      constructor(dialect) {
-        this.dialect = is(dialect, SQLiteDialect) ? dialect : void 0, this.dialectConfig = is(dialect, SQLiteDialect) ? void 0 : dialect;
-      }
-      $with = (alias, selection) => {
-        let queryBuilder = this;
-        return { as: (qb) => (typeof qb == "function" && (qb = qb(queryBuilder)), new Proxy(
-          new WithSubquery(
-            qb.getSQL(),
-            selection ?? ("getSelectedFields" in qb ? qb.getSelectedFields() ?? {} : {}),
-            alias,
-            !0
-          ),
-          new SelectionProxyHandler({ alias, sqlAliasedBehavior: "alias", sqlBehavior: "error" })
-        )) };
-      };
-      with(...queries) {
-        let self2 = this;
-        function select(fields) {
-          return new SQLiteSelectBuilder({
-            fields: fields ?? void 0,
-            session: void 0,
-            dialect: self2.getDialect(),
-            withList: queries
-          });
-        }
-        function selectDistinct(fields) {
-          return new SQLiteSelectBuilder({
-            fields: fields ?? void 0,
-            session: void 0,
-            dialect: self2.getDialect(),
-            withList: queries,
-            distinct: !0
-          });
-        }
-        return { select, selectDistinct };
-      }
-      select(fields) {
-        return new SQLiteSelectBuilder({ fields: fields ?? void 0, session: void 0, dialect: this.getDialect() });
-      }
-      selectDistinct(fields) {
-        return new SQLiteSelectBuilder({
-          fields: fields ?? void 0,
-          session: void 0,
-          dialect: this.getDialect(),
-          distinct: !0
-        });
-      }
-      // Lazy load dialect to avoid circular dependency
-      getDialect() {
-        return this.dialect || (this.dialect = new SQLiteSyncDialect(this.dialectConfig)), this.dialect;
-      }
-    };
-    _a95 = entityKind, __publicField(QueryBuilder, _a95, "SQLiteQueryBuilder");
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/query-builders/insert.js
-var _a96, SQLiteInsertBuilder, _a97, SQLiteInsertBase, init_insert = __esm({
-  "node_modules/drizzle-orm/sqlite-core/query-builders/insert.js"() {
-    init_entity();
-    init_query_promise();
-    init_sql();
-    init_table2();
-    init_table();
-    init_utils();
-    init_utils2();
-    init_query_builder2();
-    SQLiteInsertBuilder = class {
-      constructor(table, session, dialect, withList) {
-        this.table = table, this.session = session, this.dialect = dialect, this.withList = withList;
-      }
-      values(values) {
-        if (values = Array.isArray(values) ? values : [values], values.length === 0)
-          throw new Error("values() must be called with at least one value");
-        let mappedValues = values.map((entry2) => {
-          let result = {}, cols = this.table[Table.Symbol.Columns];
-          for (let colKey of Object.keys(entry2)) {
-            let colValue = entry2[colKey];
-            result[colKey] = is(colValue, SQL) ? colValue : new Param(colValue, cols[colKey]);
-          }
-          return result;
-        });
-        return new SQLiteInsertBase(this.table, mappedValues, this.session, this.dialect, this.withList);
-      }
-      select(selectQuery) {
-        let select = typeof selectQuery == "function" ? selectQuery(new QueryBuilder()) : selectQuery;
-        if (!is(select, SQL) && !haveSameKeys(this.table[Columns], select._.selectedFields))
-          throw new Error(
-            "Insert select error: selected fields are not the same or are in a different order compared to the table definition"
-          );
-        return new SQLiteInsertBase(this.table, select, this.session, this.dialect, this.withList, !0);
-      }
-    };
-    _a96 = entityKind, __publicField(SQLiteInsertBuilder, _a96, "SQLiteInsertBuilder");
-    SQLiteInsertBase = class extends QueryPromise {
-      constructor(table, values, session, dialect, withList, select) {
-        super(), this.session = session, this.dialect = dialect, this.config = { table, values, withList, select };
-      }
-      /** @internal */
-      config;
-      returning(fields = this.config.table[SQLiteTable.Symbol.Columns]) {
-        return this.config.returning = orderSelectedFields(fields), this;
-      }
-      /**
-       * Adds an `on conflict do nothing` clause to the query.
-       *
-       * Calling this method simply avoids inserting a row as its alternative action.
-       *
-       * See docs: {@link https://orm.drizzle.team/docs/insert#on-conflict-do-nothing}
-       *
-       * @param config The `target` and `where` clauses.
-       *
-       * @example
-       * ```ts
-       * // Insert one row and cancel the insert if there's a conflict
-       * await db.insert(cars)
-       *   .values({ id: 1, brand: 'BMW' })
-       *   .onConflictDoNothing();
-       *
-       * // Explicitly specify conflict target
-       * await db.insert(cars)
-       *   .values({ id: 1, brand: 'BMW' })
-       *   .onConflictDoNothing({ target: cars.id });
-       * ```
-       */
-      onConflictDoNothing(config = {}) {
-        if (this.config.onConflict || (this.config.onConflict = []), config.target === void 0)
-          this.config.onConflict.push(sql` on conflict do nothing`);
-        else {
-          let targetSql = Array.isArray(config.target) ? sql`${config.target}` : sql`${[config.target]}`, whereSql = config.where ? sql` where ${config.where}` : sql``;
-          this.config.onConflict.push(sql` on conflict ${targetSql} do nothing${whereSql}`);
-        }
-        return this;
-      }
-      /**
-       * Adds an `on conflict do update` clause to the query.
-       *
-       * Calling this method will update the existing row that conflicts with the row proposed for insertion as its alternative action.
-       *
-       * See docs: {@link https://orm.drizzle.team/docs/insert#upserts-and-conflicts}
-       *
-       * @param config The `target`, `set` and `where` clauses.
-       *
-       * @example
-       * ```ts
-       * // Update the row if there's a conflict
-       * await db.insert(cars)
-       *   .values({ id: 1, brand: 'BMW' })
-       *   .onConflictDoUpdate({
-       *     target: cars.id,
-       *     set: { brand: 'Porsche' }
-       *   });
-       *
-       * // Upsert with 'where' clause
-       * await db.insert(cars)
-       *   .values({ id: 1, brand: 'BMW' })
-       *   .onConflictDoUpdate({
-       *     target: cars.id,
-       *     set: { brand: 'newBMW' },
-       *     where: sql`${cars.createdAt} > '2023-01-01'::date`,
-       *   });
-       * ```
-       */
-      onConflictDoUpdate(config) {
-        if (config.where && (config.targetWhere || config.setWhere))
-          throw new Error(
-            'You cannot use both "where" and "targetWhere"/"setWhere" at the same time - "where" is deprecated, use "targetWhere" or "setWhere" instead.'
-          );
-        this.config.onConflict || (this.config.onConflict = []);
-        let whereSql = config.where ? sql` where ${config.where}` : void 0, targetWhereSql = config.targetWhere ? sql` where ${config.targetWhere}` : void 0, setWhereSql = config.setWhere ? sql` where ${config.setWhere}` : void 0, targetSql = Array.isArray(config.target) ? sql`${config.target}` : sql`${[config.target]}`, setSql = this.dialect.buildUpdateSet(this.config.table, mapUpdateSet(this.config.table, config.set));
-        return this.config.onConflict.push(
-          sql` on conflict ${targetSql}${targetWhereSql} do update set ${setSql}${whereSql}${setWhereSql}`
-        ), this;
-      }
-      /** @internal */
-      getSQL() {
-        return this.dialect.buildInsertQuery(this.config);
-      }
-      toSQL() {
-        let { typings: _typings, ...rest } = this.dialect.sqlToQuery(this.getSQL());
-        return rest;
-      }
-      /** @internal */
-      _prepare(isOneTimeQuery = !0) {
-        return this.session[isOneTimeQuery ? "prepareOneTimeQuery" : "prepareQuery"](
-          this.dialect.sqlToQuery(this.getSQL()),
-          this.config.returning,
-          this.config.returning ? "all" : "run",
-          !0,
-          void 0,
-          {
-            type: "insert",
-            tables: extractUsedTable(this.config.table)
-          }
-        );
-      }
-      prepare() {
-        return this._prepare(!1);
-      }
-      run = (placeholderValues) => this._prepare().run(placeholderValues);
-      all = (placeholderValues) => this._prepare().all(placeholderValues);
-      get = (placeholderValues) => this._prepare().get(placeholderValues);
-      values = (placeholderValues) => this._prepare().values(placeholderValues);
-      async execute() {
-        return this.config.returning ? this.all() : this.run();
-      }
-      $dynamic() {
-        return this;
-      }
-    };
-    _a97 = entityKind, __publicField(SQLiteInsertBase, _a97, "SQLiteInsert");
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/query-builders/select.types.js
-var init_select_types = __esm({
-  "node_modules/drizzle-orm/sqlite-core/query-builders/select.types.js"() {
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/query-builders/update.js
-var _a98, SQLiteUpdateBuilder, _a99, SQLiteUpdateBase, init_update = __esm({
-  "node_modules/drizzle-orm/sqlite-core/query-builders/update.js"() {
-    init_entity();
-    init_query_promise();
-    init_selection_proxy();
-    init_table2();
-    init_subquery();
-    init_table();
-    init_utils();
-    init_view_common();
-    init_utils2();
-    init_view_base();
-    SQLiteUpdateBuilder = class {
-      constructor(table, session, dialect, withList) {
-        this.table = table, this.session = session, this.dialect = dialect, this.withList = withList;
-      }
-      set(values) {
-        return new SQLiteUpdateBase(
-          this.table,
-          mapUpdateSet(this.table, values),
-          this.session,
-          this.dialect,
-          this.withList
-        );
-      }
-    };
-    _a98 = entityKind, __publicField(SQLiteUpdateBuilder, _a98, "SQLiteUpdateBuilder");
-    SQLiteUpdateBase = class extends QueryPromise {
-      constructor(table, set, session, dialect, withList) {
-        super(), this.session = session, this.dialect = dialect, this.config = { set, table, withList, joins: [] };
-      }
-      /** @internal */
-      config;
-      from(source) {
-        return this.config.from = source, this;
-      }
-      createJoin(joinType) {
-        return (table, on) => {
-          let tableName = getTableLikeName(table);
-          if (typeof tableName == "string" && this.config.joins.some((join) => join.alias === tableName))
-            throw new Error(`Alias "${tableName}" is already used in this query`);
-          if (typeof on == "function") {
-            let from = this.config.from ? is(table, SQLiteTable) ? table[Table.Symbol.Columns] : is(table, Subquery) ? table._.selectedFields : is(table, SQLiteViewBase) ? table[ViewBaseConfig].selectedFields : void 0 : void 0;
-            on = on(
-              new Proxy(
-                this.config.table[Table.Symbol.Columns],
-                new SelectionProxyHandler({ sqlAliasedBehavior: "sql", sqlBehavior: "sql" })
-              ),
-              from && new Proxy(
-                from,
-                new SelectionProxyHandler({ sqlAliasedBehavior: "sql", sqlBehavior: "sql" })
-              )
-            );
-          }
-          return this.config.joins.push({ on, table, joinType, alias: tableName }), this;
-        };
-      }
-      leftJoin = this.createJoin("left");
-      rightJoin = this.createJoin("right");
-      innerJoin = this.createJoin("inner");
-      fullJoin = this.createJoin("full");
-      /**
-       * Adds a 'where' clause to the query.
-       *
-       * Calling this method will update only those rows that fulfill a specified condition.
-       *
-       * See docs: {@link https://orm.drizzle.team/docs/update}
-       *
-       * @param where the 'where' clause.
-       *
-       * @example
-       * You can use conditional operators and `sql function` to filter the rows to be updated.
-       *
-       * ```ts
-       * // Update all cars with green color
-       * db.update(cars).set({ color: 'red' })
-       *   .where(eq(cars.color, 'green'));
-       * // or
-       * db.update(cars).set({ color: 'red' })
-       *   .where(sql`${cars.color} = 'green'`)
-       * ```
-       *
-       * You can logically combine conditional operators with `and()` and `or()` operators:
-       *
-       * ```ts
-       * // Update all BMW cars with a green color
-       * db.update(cars).set({ color: 'red' })
-       *   .where(and(eq(cars.color, 'green'), eq(cars.brand, 'BMW')));
-       *
-       * // Update all cars with the green or blue color
-       * db.update(cars).set({ color: 'red' })
-       *   .where(or(eq(cars.color, 'green'), eq(cars.color, 'blue')));
-       * ```
-       */
-      where(where) {
-        return this.config.where = where, this;
-      }
-      orderBy(...columns) {
-        if (typeof columns[0] == "function") {
-          let orderBy = columns[0](
-            new Proxy(
-              this.config.table[Table.Symbol.Columns],
-              new SelectionProxyHandler({ sqlAliasedBehavior: "alias", sqlBehavior: "sql" })
-            )
-          ), orderByArray = Array.isArray(orderBy) ? orderBy : [orderBy];
-          this.config.orderBy = orderByArray;
-        } else {
-          let orderByArray = columns;
-          this.config.orderBy = orderByArray;
-        }
-        return this;
-      }
-      limit(limit) {
-        return this.config.limit = limit, this;
-      }
-      returning(fields = this.config.table[SQLiteTable.Symbol.Columns]) {
-        return this.config.returning = orderSelectedFields(fields), this;
-      }
-      /** @internal */
-      getSQL() {
-        return this.dialect.buildUpdateQuery(this.config);
-      }
-      toSQL() {
-        let { typings: _typings, ...rest } = this.dialect.sqlToQuery(this.getSQL());
-        return rest;
-      }
-      /** @internal */
-      _prepare(isOneTimeQuery = !0) {
-        return this.session[isOneTimeQuery ? "prepareOneTimeQuery" : "prepareQuery"](
-          this.dialect.sqlToQuery(this.getSQL()),
-          this.config.returning,
-          this.config.returning ? "all" : "run",
-          !0,
-          void 0,
-          {
-            type: "insert",
-            tables: extractUsedTable(this.config.table)
-          }
-        );
-      }
-      prepare() {
-        return this._prepare(!1);
-      }
-      run = (placeholderValues) => this._prepare().run(placeholderValues);
-      all = (placeholderValues) => this._prepare().all(placeholderValues);
-      get = (placeholderValues) => this._prepare().get(placeholderValues);
-      values = (placeholderValues) => this._prepare().values(placeholderValues);
-      async execute() {
-        return this.config.returning ? this.all() : this.run();
-      }
-      $dynamic() {
-        return this;
-      }
-    };
-    _a99 = entityKind, __publicField(SQLiteUpdateBase, _a99, "SQLiteUpdate");
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/query-builders/index.js
-var init_query_builders = __esm({
-  "node_modules/drizzle-orm/sqlite-core/query-builders/index.js"() {
-    init_delete();
-    init_insert();
-    init_query_builder2();
-    init_select2();
-    init_select_types();
-    init_update();
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/query-builders/count.js
-var _a100, _SQLiteCountBuilder, SQLiteCountBuilder, init_count = __esm({
-  "node_modules/drizzle-orm/sqlite-core/query-builders/count.js"() {
-    init_entity();
-    init_sql();
-    _SQLiteCountBuilder = class extends SQL {
-      constructor(params) {
-        super(_SQLiteCountBuilder.buildEmbeddedCount(params.source, params.filters).queryChunks), this.params = params, this.session = params.session, this.sql = _SQLiteCountBuilder.buildCount(
-          params.source,
-          params.filters
-        );
-      }
-      sql;
-      [(_a100 = entityKind, Symbol.toStringTag)] = "SQLiteCountBuilderAsync";
-      session;
-      static buildEmbeddedCount(source, filters) {
-        return sql`(select count(*) from ${source}${sql.raw(" where ").if(filters)}${filters})`;
-      }
-      static buildCount(source, filters) {
-        return sql`select count(*) from ${source}${sql.raw(" where ").if(filters)}${filters}`;
-      }
-      then(onfulfilled, onrejected) {
-        return Promise.resolve(this.session.count(this.sql)).then(
-          onfulfilled,
-          onrejected
-        );
-      }
-      catch(onRejected) {
-        return this.then(void 0, onRejected);
-      }
-      finally(onFinally) {
-        return this.then(
-          (value) => (onFinally?.(), value),
-          (reason) => {
-            throw onFinally?.(), reason;
-          }
-        );
-      }
-    }, SQLiteCountBuilder = _SQLiteCountBuilder;
-    __publicField(SQLiteCountBuilder, _a100, "SQLiteCountBuilderAsync");
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/query-builders/query.js
-var _a101, RelationalQueryBuilder, _a102, SQLiteRelationalQuery, _a103, SQLiteSyncRelationalQuery, init_query = __esm({
-  "node_modules/drizzle-orm/sqlite-core/query-builders/query.js"() {
-    init_entity();
-    init_query_promise();
-    init_relations();
-    RelationalQueryBuilder = class {
-      constructor(mode2, fullSchema, schema3, tableNamesMap, table, tableConfig, dialect, session) {
-        this.mode = mode2, this.fullSchema = fullSchema, this.schema = schema3, this.tableNamesMap = tableNamesMap, this.table = table, this.tableConfig = tableConfig, this.dialect = dialect, this.session = session;
-      }
-      findMany(config) {
-        return this.mode === "sync" ? new SQLiteSyncRelationalQuery(
-          this.fullSchema,
-          this.schema,
-          this.tableNamesMap,
-          this.table,
-          this.tableConfig,
-          this.dialect,
-          this.session,
-          config || {},
-          "many"
-        ) : new SQLiteRelationalQuery(
-          this.fullSchema,
-          this.schema,
-          this.tableNamesMap,
-          this.table,
-          this.tableConfig,
-          this.dialect,
-          this.session,
-          config || {},
-          "many"
-        );
-      }
-      findFirst(config) {
-        return this.mode === "sync" ? new SQLiteSyncRelationalQuery(
-          this.fullSchema,
-          this.schema,
-          this.tableNamesMap,
-          this.table,
-          this.tableConfig,
-          this.dialect,
-          this.session,
-          config ? { ...config, limit: 1 } : { limit: 1 },
-          "first"
-        ) : new SQLiteRelationalQuery(
-          this.fullSchema,
-          this.schema,
-          this.tableNamesMap,
-          this.table,
-          this.tableConfig,
-          this.dialect,
-          this.session,
-          config ? { ...config, limit: 1 } : { limit: 1 },
-          "first"
-        );
-      }
-    };
-    _a101 = entityKind, __publicField(RelationalQueryBuilder, _a101, "SQLiteAsyncRelationalQueryBuilder");
-    SQLiteRelationalQuery = class extends QueryPromise {
-      constructor(fullSchema, schema3, tableNamesMap, table, tableConfig, dialect, session, config, mode2) {
-        super(), this.fullSchema = fullSchema, this.schema = schema3, this.tableNamesMap = tableNamesMap, this.table = table, this.tableConfig = tableConfig, this.dialect = dialect, this.session = session, this.config = config, this.mode = mode2;
-      }
-      /** @internal */
-      mode;
-      /** @internal */
-      getSQL() {
-        return this.dialect.buildRelationalQuery({
-          fullSchema: this.fullSchema,
-          schema: this.schema,
-          tableNamesMap: this.tableNamesMap,
-          table: this.table,
-          tableConfig: this.tableConfig,
-          queryConfig: this.config,
-          tableAlias: this.tableConfig.tsName
-        }).sql;
-      }
-      /** @internal */
-      _prepare(isOneTimeQuery = !1) {
-        let { query, builtQuery } = this._toSQL();
-        return this.session[isOneTimeQuery ? "prepareOneTimeQuery" : "prepareQuery"](
-          builtQuery,
-          void 0,
-          this.mode === "first" ? "get" : "all",
-          !0,
-          (rawRows, mapColumnValue) => {
-            let rows = rawRows.map(
-              (row) => mapRelationalRow(this.schema, this.tableConfig, row, query.selection, mapColumnValue)
-            );
-            return this.mode === "first" ? rows[0] : rows;
-          }
-        );
-      }
-      prepare() {
-        return this._prepare(!1);
-      }
-      _toSQL() {
-        let query = this.dialect.buildRelationalQuery({
-          fullSchema: this.fullSchema,
-          schema: this.schema,
-          tableNamesMap: this.tableNamesMap,
-          table: this.table,
-          tableConfig: this.tableConfig,
-          queryConfig: this.config,
-          tableAlias: this.tableConfig.tsName
-        }), builtQuery = this.dialect.sqlToQuery(query.sql);
-        return { query, builtQuery };
-      }
-      toSQL() {
-        return this._toSQL().builtQuery;
-      }
-      /** @internal */
-      executeRaw() {
-        return this.mode === "first" ? this._prepare(!1).get() : this._prepare(!1).all();
-      }
-      async execute() {
-        return this.executeRaw();
-      }
-    };
-    _a102 = entityKind, __publicField(SQLiteRelationalQuery, _a102, "SQLiteAsyncRelationalQuery");
-    SQLiteSyncRelationalQuery = class extends SQLiteRelationalQuery {
-      sync() {
-        return this.executeRaw();
-      }
-    };
-    _a103 = entityKind, __publicField(SQLiteSyncRelationalQuery, _a103, "SQLiteSyncRelationalQuery");
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/query-builders/raw.js
-var _a104, SQLiteRaw, init_raw = __esm({
-  "node_modules/drizzle-orm/sqlite-core/query-builders/raw.js"() {
-    init_entity();
-    init_query_promise();
-    SQLiteRaw = class extends QueryPromise {
-      constructor(execute, getSQL, action26, dialect, mapBatchResult) {
-        super(), this.execute = execute, this.getSQL = getSQL, this.dialect = dialect, this.mapBatchResult = mapBatchResult, this.config = { action: action26 };
-      }
-      /** @internal */
-      config;
-      getQuery() {
-        return { ...this.dialect.sqlToQuery(this.getSQL()), method: this.config.action };
-      }
-      mapResult(result, isFromBatch) {
-        return isFromBatch ? this.mapBatchResult(result) : result;
-      }
-      _prepare() {
-        return this;
-      }
-      /** @internal */
-      isResponseInArrayMode() {
-        return !1;
-      }
-    };
-    _a104 = entityKind, __publicField(SQLiteRaw, _a104, "SQLiteRaw");
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/db.js
-var _a105, BaseSQLiteDatabase, init_db = __esm({
-  "node_modules/drizzle-orm/sqlite-core/db.js"() {
-    init_entity();
-    init_selection_proxy();
-    init_sql();
-    init_query_builders();
-    init_subquery();
-    init_count();
-    init_query();
-    init_raw();
-    BaseSQLiteDatabase = class {
-      constructor(resultKind, dialect, session, schema3) {
-        this.resultKind = resultKind, this.dialect = dialect, this.session = session, this._ = schema3 ? {
-          schema: schema3.schema,
-          fullSchema: schema3.fullSchema,
-          tableNamesMap: schema3.tableNamesMap
-        } : {
-          schema: void 0,
-          fullSchema: {},
-          tableNamesMap: {}
-        }, this.query = {};
-        let query = this.query;
-        if (this._.schema)
-          for (let [tableName, columns] of Object.entries(this._.schema))
-            query[tableName] = new RelationalQueryBuilder(
-              resultKind,
-              schema3.fullSchema,
-              this._.schema,
-              this._.tableNamesMap,
-              schema3.fullSchema[tableName],
-              columns,
-              dialect,
-              session
-            );
-        this.$cache = { invalidate: async (_params) => {
-        } };
-      }
-      query;
-      /**
-       * Creates a subquery that defines a temporary named result set as a CTE.
-       *
-       * It is useful for breaking down complex queries into simpler parts and for reusing the result set in subsequent parts of the query.
-       *
-       * See docs: {@link https://orm.drizzle.team/docs/select#with-clause}
-       *
-       * @param alias The alias for the subquery.
-       *
-       * Failure to provide an alias will result in a DrizzleTypeError, preventing the subquery from being referenced in other queries.
-       *
-       * @example
-       *
-       * ```ts
-       * // Create a subquery with alias 'sq' and use it in the select query
-       * const sq = db.$with('sq').as(db.select().from(users).where(eq(users.id, 42)));
-       *
-       * const result = await db.with(sq).select().from(sq);
-       * ```
-       *
-       * To select arbitrary SQL values as fields in a CTE and reference them in other CTEs or in the main query, you need to add aliases to them:
-       *
-       * ```ts
-       * // Select an arbitrary SQL value as a field in a CTE and reference it in the main query
-       * const sq = db.$with('sq').as(db.select({
-       *   name: sql<string>`upper(${users.name})`.as('name'),
-       * })
-       * .from(users));
-       *
-       * const result = await db.with(sq).select({ name: sq.name }).from(sq);
-       * ```
-       */
-      $with = (alias, selection) => {
-        let self2 = this;
-        return { as: (qb) => (typeof qb == "function" && (qb = qb(new QueryBuilder(self2.dialect))), new Proxy(
-          new WithSubquery(
-            qb.getSQL(),
-            selection ?? ("getSelectedFields" in qb ? qb.getSelectedFields() ?? {} : {}),
-            alias,
-            !0
-          ),
-          new SelectionProxyHandler({ alias, sqlAliasedBehavior: "alias", sqlBehavior: "error" })
-        )) };
-      };
-      $count(source, filters) {
-        return new SQLiteCountBuilder({ source, filters, session: this.session });
-      }
-      /**
-       * Incorporates a previously defined CTE (using `$with`) into the main query.
-       *
-       * This method allows the main query to reference a temporary named result set.
-       *
-       * See docs: {@link https://orm.drizzle.team/docs/select#with-clause}
-       *
-       * @param queries The CTEs to incorporate into the main query.
-       *
-       * @example
-       *
-       * ```ts
-       * // Define a subquery 'sq' as a CTE using $with
-       * const sq = db.$with('sq').as(db.select().from(users).where(eq(users.id, 42)));
-       *
-       * // Incorporate the CTE 'sq' into the main query and select from it
-       * const result = await db.with(sq).select().from(sq);
-       * ```
-       */
-      with(...queries) {
-        let self2 = this;
-        function select(fields) {
-          return new SQLiteSelectBuilder({
-            fields: fields ?? void 0,
-            session: self2.session,
-            dialect: self2.dialect,
-            withList: queries
-          });
-        }
-        function selectDistinct(fields) {
-          return new SQLiteSelectBuilder({
-            fields: fields ?? void 0,
-            session: self2.session,
-            dialect: self2.dialect,
-            withList: queries,
-            distinct: !0
-          });
-        }
-        function update(table) {
-          return new SQLiteUpdateBuilder(table, self2.session, self2.dialect, queries);
-        }
-        function insert(into) {
-          return new SQLiteInsertBuilder(into, self2.session, self2.dialect, queries);
-        }
-        function delete_(from) {
-          return new SQLiteDeleteBase(from, self2.session, self2.dialect, queries);
-        }
-        return { select, selectDistinct, update, insert, delete: delete_ };
-      }
-      select(fields) {
-        return new SQLiteSelectBuilder({ fields: fields ?? void 0, session: this.session, dialect: this.dialect });
-      }
-      selectDistinct(fields) {
-        return new SQLiteSelectBuilder({
-          fields: fields ?? void 0,
-          session: this.session,
-          dialect: this.dialect,
-          distinct: !0
-        });
-      }
-      /**
-       * Creates an update query.
-       *
-       * Calling this method without `.where()` clause will update all rows in a table. The `.where()` clause specifies which rows should be updated.
-       *
-       * Use `.set()` method to specify which values to update.
-       *
-       * See docs: {@link https://orm.drizzle.team/docs/update}
-       *
-       * @param table The table to update.
-       *
-       * @example
-       *
-       * ```ts
-       * // Update all rows in the 'cars' table
-       * await db.update(cars).set({ color: 'red' });
-       *
-       * // Update rows with filters and conditions
-       * await db.update(cars).set({ color: 'red' }).where(eq(cars.brand, 'BMW'));
-       *
-       * // Update with returning clause
-       * const updatedCar: Car[] = await db.update(cars)
-       *   .set({ color: 'red' })
-       *   .where(eq(cars.id, 1))
-       *   .returning();
-       * ```
-       */
-      update(table) {
-        return new SQLiteUpdateBuilder(table, this.session, this.dialect);
-      }
-      $cache;
-      /**
-       * Creates an insert query.
-       *
-       * Calling this method will create new rows in a table. Use `.values()` method to specify which values to insert.
-       *
-       * See docs: {@link https://orm.drizzle.team/docs/insert}
-       *
-       * @param table The table to insert into.
-       *
-       * @example
-       *
-       * ```ts
-       * // Insert one row
-       * await db.insert(cars).values({ brand: 'BMW' });
-       *
-       * // Insert multiple rows
-       * await db.insert(cars).values([{ brand: 'BMW' }, { brand: 'Porsche' }]);
-       *
-       * // Insert with returning clause
-       * const insertedCar: Car[] = await db.insert(cars)
-       *   .values({ brand: 'BMW' })
-       *   .returning();
-       * ```
-       */
-      insert(into) {
-        return new SQLiteInsertBuilder(into, this.session, this.dialect);
-      }
-      /**
-       * Creates a delete query.
-       *
-       * Calling this method without `.where()` clause will delete all rows in a table. The `.where()` clause specifies which rows should be deleted.
-       *
-       * See docs: {@link https://orm.drizzle.team/docs/delete}
-       *
-       * @param table The table to delete from.
-       *
-       * @example
-       *
-       * ```ts
-       * // Delete all rows in the 'cars' table
-       * await db.delete(cars);
-       *
-       * // Delete rows with filters and conditions
-       * await db.delete(cars).where(eq(cars.color, 'green'));
-       *
-       * // Delete with returning clause
-       * const deletedCar: Car[] = await db.delete(cars)
-       *   .where(eq(cars.id, 1))
-       *   .returning();
-       * ```
-       */
-      delete(from) {
-        return new SQLiteDeleteBase(from, this.session, this.dialect);
-      }
-      run(query) {
-        let sequel = typeof query == "string" ? sql.raw(query) : query.getSQL();
-        return this.resultKind === "async" ? new SQLiteRaw(
-          async () => this.session.run(sequel),
-          () => sequel,
-          "run",
-          this.dialect,
-          this.session.extractRawRunValueFromBatchResult.bind(this.session)
-        ) : this.session.run(sequel);
-      }
-      all(query) {
-        let sequel = typeof query == "string" ? sql.raw(query) : query.getSQL();
-        return this.resultKind === "async" ? new SQLiteRaw(
-          async () => this.session.all(sequel),
-          () => sequel,
-          "all",
-          this.dialect,
-          this.session.extractRawAllValueFromBatchResult.bind(this.session)
-        ) : this.session.all(sequel);
-      }
-      get(query) {
-        let sequel = typeof query == "string" ? sql.raw(query) : query.getSQL();
-        return this.resultKind === "async" ? new SQLiteRaw(
-          async () => this.session.get(sequel),
-          () => sequel,
-          "get",
-          this.dialect,
-          this.session.extractRawGetValueFromBatchResult.bind(this.session)
-        ) : this.session.get(sequel);
-      }
-      values(query) {
-        let sequel = typeof query == "string" ? sql.raw(query) : query.getSQL();
-        return this.resultKind === "async" ? new SQLiteRaw(
-          async () => this.session.values(sequel),
-          () => sequel,
-          "values",
-          this.dialect,
-          this.session.extractRawValuesValueFromBatchResult.bind(this.session)
-        ) : this.session.values(sequel);
-      }
-      transaction(transaction, config) {
-        return this.session.transaction(transaction, config);
-      }
-    };
-    _a105 = entityKind, __publicField(BaseSQLiteDatabase, _a105, "BaseSQLiteDatabase");
-  }
-});
-
-// node_modules/drizzle-orm/cache/core/cache.js
-async function hashQuery(sql3, params) {
-  let dataToHash = `${sql3}-${JSON.stringify(params)}`, data = new TextEncoder().encode(dataToHash), hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  return [...new Uint8Array(hashBuffer)].map((b) => b.toString(16).padStart(2, "0")).join("");
-}
-var _a106, Cache, _a107, NoopCache, init_cache = __esm({
-  "node_modules/drizzle-orm/cache/core/cache.js"() {
-    init_entity();
-    Cache = class {
-    };
-    _a106 = entityKind, __publicField(Cache, _a106, "Cache");
-    NoopCache = class extends Cache {
-      strategy() {
-        return "all";
-      }
-      async get(_key) {
-      }
-      async put(_hashedQuery, _response, _tables, _config) {
-      }
-      async onMutate(_params) {
-      }
-    };
-    _a107 = entityKind, __publicField(NoopCache, _a107, "NoopCache");
-  }
-});
-
-// node_modules/drizzle-orm/errors/index.js
-var DrizzleQueryError, init_errors2 = __esm({
-  "node_modules/drizzle-orm/errors/index.js"() {
-    DrizzleQueryError = class extends Error {
-      constructor(query, params, cause) {
-        super(`Failed query: ${query}
-params: ${params}`), this.query = query, this.params = params, this.cause = cause, Error.captureStackTrace(this, DrizzleQueryError), cause && (this.cause = cause);
-      }
-    };
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/session.js
-var _a108, ExecuteResultSync, _a109, SQLitePreparedQuery, _a110, SQLiteSession, _a111, SQLiteTransaction, init_session = __esm({
-  "node_modules/drizzle-orm/sqlite-core/session.js"() {
-    init_cache();
-    init_entity();
-    init_errors();
-    init_errors2();
-    init_query_promise();
-    init_db();
-    ExecuteResultSync = class extends QueryPromise {
-      constructor(resultCb) {
-        super(), this.resultCb = resultCb;
-      }
-      async execute() {
-        return this.resultCb();
-      }
-      sync() {
-        return this.resultCb();
-      }
-    };
-    _a108 = entityKind, __publicField(ExecuteResultSync, _a108, "ExecuteResultSync");
-    SQLitePreparedQuery = class {
-      constructor(mode2, executeMethod, query, cache, queryMetadata, cacheConfig) {
-        this.mode = mode2, this.executeMethod = executeMethod, this.query = query, this.cache = cache, this.queryMetadata = queryMetadata, this.cacheConfig = cacheConfig, cache && cache.strategy() === "all" && cacheConfig === void 0 && (this.cacheConfig = { enable: !0, autoInvalidate: !0 }), this.cacheConfig?.enable || (this.cacheConfig = void 0);
-      }
-      /** @internal */
-      joinsNotNullableMap;
-      /** @internal */
-      async queryWithCache(queryString, params, query) {
-        if (this.cache === void 0 || is(this.cache, NoopCache) || this.queryMetadata === void 0)
-          try {
-            return await query();
-          } catch (e) {
-            throw new DrizzleQueryError(queryString, params, e);
-          }
-        if (this.cacheConfig && !this.cacheConfig.enable)
-          try {
-            return await query();
-          } catch (e) {
-            throw new DrizzleQueryError(queryString, params, e);
-          }
-        if ((this.queryMetadata.type === "insert" || this.queryMetadata.type === "update" || this.queryMetadata.type === "delete") && this.queryMetadata.tables.length > 0)
-          try {
-            let [res] = await Promise.all([
-              query(),
-              this.cache.onMutate({ tables: this.queryMetadata.tables })
-            ]);
-            return res;
-          } catch (e) {
-            throw new DrizzleQueryError(queryString, params, e);
-          }
-        if (!this.cacheConfig)
-          try {
-            return await query();
-          } catch (e) {
-            throw new DrizzleQueryError(queryString, params, e);
-          }
-        if (this.queryMetadata.type === "select") {
-          let fromCache = await this.cache.get(
-            this.cacheConfig.tag ?? await hashQuery(queryString, params),
-            this.queryMetadata.tables,
-            this.cacheConfig.tag !== void 0,
-            this.cacheConfig.autoInvalidate
-          );
-          if (fromCache === void 0) {
-            let result;
-            try {
-              result = await query();
-            } catch (e) {
-              throw new DrizzleQueryError(queryString, params, e);
-            }
-            return await this.cache.put(
-              this.cacheConfig.tag ?? await hashQuery(queryString, params),
-              result,
-              // make sure we send tables that were used in a query only if user wants to invalidate it on each write
-              this.cacheConfig.autoInvalidate ? this.queryMetadata.tables : [],
-              this.cacheConfig.tag !== void 0,
-              this.cacheConfig.config
-            ), result;
-          }
-          return fromCache;
-        }
-        try {
-          return await query();
-        } catch (e) {
-          throw new DrizzleQueryError(queryString, params, e);
-        }
-      }
-      getQuery() {
-        return this.query;
-      }
-      mapRunResult(result, _isFromBatch) {
-        return result;
-      }
-      mapAllResult(_result, _isFromBatch) {
-        throw new Error("Not implemented");
-      }
-      mapGetResult(_result, _isFromBatch) {
-        throw new Error("Not implemented");
-      }
-      execute(placeholderValues) {
-        return this.mode === "async" ? this[this.executeMethod](placeholderValues) : new ExecuteResultSync(() => this[this.executeMethod](placeholderValues));
-      }
-      mapResult(response, isFromBatch) {
-        switch (this.executeMethod) {
-          case "run":
-            return this.mapRunResult(response, isFromBatch);
-          case "all":
-            return this.mapAllResult(response, isFromBatch);
-          case "get":
-            return this.mapGetResult(response, isFromBatch);
-        }
-      }
-    };
-    _a109 = entityKind, __publicField(SQLitePreparedQuery, _a109, "PreparedQuery");
-    SQLiteSession = class {
-      constructor(dialect) {
-        this.dialect = dialect;
-      }
-      prepareOneTimeQuery(query, fields, executeMethod, isResponseInArrayMode, customResultMapper, queryMetadata, cacheConfig) {
-        return this.prepareQuery(
-          query,
-          fields,
-          executeMethod,
-          isResponseInArrayMode,
-          customResultMapper,
-          queryMetadata,
-          cacheConfig
-        );
-      }
-      run(query) {
-        let staticQuery = this.dialect.sqlToQuery(query);
-        try {
-          return this.prepareOneTimeQuery(staticQuery, void 0, "run", !1).run();
-        } catch (err) {
-          throw new DrizzleError({ cause: err, message: `Failed to run the query '${staticQuery.sql}'` });
-        }
-      }
-      /** @internal */
-      extractRawRunValueFromBatchResult(result) {
-        return result;
-      }
-      all(query) {
-        return this.prepareOneTimeQuery(this.dialect.sqlToQuery(query), void 0, "run", !1).all();
-      }
-      /** @internal */
-      extractRawAllValueFromBatchResult(_result) {
-        throw new Error("Not implemented");
-      }
-      get(query) {
-        return this.prepareOneTimeQuery(this.dialect.sqlToQuery(query), void 0, "run", !1).get();
-      }
-      /** @internal */
-      extractRawGetValueFromBatchResult(_result) {
-        throw new Error("Not implemented");
-      }
-      values(query) {
-        return this.prepareOneTimeQuery(this.dialect.sqlToQuery(query), void 0, "run", !1).values();
-      }
-      async count(sql3) {
-        return (await this.values(sql3))[0][0];
-      }
-      /** @internal */
-      extractRawValuesValueFromBatchResult(_result) {
-        throw new Error("Not implemented");
-      }
-    };
-    _a110 = entityKind, __publicField(SQLiteSession, _a110, "SQLiteSession");
-    SQLiteTransaction = class extends BaseSQLiteDatabase {
-      constructor(resultType, dialect, session, schema3, nestedIndex = 0) {
-        super(resultType, dialect, session, schema3), this.schema = schema3, this.nestedIndex = nestedIndex;
-      }
-      rollback() {
-        throw new TransactionRollbackError();
-      }
-    };
-    _a111 = entityKind, __publicField(SQLiteTransaction, _a111, "SQLiteTransaction");
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/subquery.js
-var init_subquery2 = __esm({
-  "node_modules/drizzle-orm/sqlite-core/subquery.js"() {
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/view.js
-var _a112, ViewBuilderCore, _a113, ViewBuilder, _a114, ManualViewBuilder, _a115, SQLiteView, init_view = __esm({
-  "node_modules/drizzle-orm/sqlite-core/view.js"() {
-    init_entity();
-    init_selection_proxy();
-    init_utils();
-    init_query_builder2();
-    init_table2();
-    init_view_base();
-    ViewBuilderCore = class {
-      constructor(name) {
-        this.name = name;
-      }
-      config = {};
-    };
-    _a112 = entityKind, __publicField(ViewBuilderCore, _a112, "SQLiteViewBuilderCore");
-    ViewBuilder = class extends ViewBuilderCore {
-      as(qb) {
-        typeof qb == "function" && (qb = qb(new QueryBuilder()));
-        let selectionProxy = new SelectionProxyHandler({
-          alias: this.name,
-          sqlBehavior: "error",
-          sqlAliasedBehavior: "alias",
-          replaceOriginalName: !0
-        }), aliasedSelectedFields = qb.getSelectedFields();
-        return new Proxy(
-          new SQLiteView({
-            // sqliteConfig: this.config,
-            config: {
-              name: this.name,
-              schema: void 0,
-              selectedFields: aliasedSelectedFields,
-              query: qb.getSQL().inlineParams()
-            }
-          }),
-          selectionProxy
-        );
-      }
-    };
-    _a113 = entityKind, __publicField(ViewBuilder, _a113, "SQLiteViewBuilder");
-    ManualViewBuilder = class extends ViewBuilderCore {
-      columns;
-      constructor(name, columns) {
-        super(name), this.columns = getTableColumns(sqliteTable(name, columns));
-      }
-      existing() {
-        return new Proxy(
-          new SQLiteView({
-            config: {
-              name: this.name,
-              schema: void 0,
-              selectedFields: this.columns,
-              query: void 0
-            }
-          }),
-          new SelectionProxyHandler({
-            alias: this.name,
-            sqlBehavior: "error",
-            sqlAliasedBehavior: "alias",
-            replaceOriginalName: !0
-          })
-        );
-      }
-      as(query) {
-        return new Proxy(
-          new SQLiteView({
-            config: {
-              name: this.name,
-              schema: void 0,
-              selectedFields: this.columns,
-              query: query.inlineParams()
-            }
-          }),
-          new SelectionProxyHandler({
-            alias: this.name,
-            sqlBehavior: "error",
-            sqlAliasedBehavior: "alias",
-            replaceOriginalName: !0
-          })
-        );
-      }
-    };
-    _a114 = entityKind, __publicField(ManualViewBuilder, _a114, "SQLiteManualViewBuilder");
-    SQLiteView = class extends SQLiteViewBase {
-      constructor({ config }) {
-        super(config);
-      }
-    };
-    _a115 = entityKind, __publicField(SQLiteView, _a115, "SQLiteView");
-  }
-});
-
-// node_modules/drizzle-orm/sqlite-core/index.js
-var init_sqlite_core = __esm({
-  "node_modules/drizzle-orm/sqlite-core/index.js"() {
-    init_alias2();
-    init_checks();
-    init_columns();
-    init_db();
-    init_dialect();
-    init_foreign_keys2();
-    init_indexes();
-    init_primary_keys();
-    init_query_builders();
-    init_session();
-    init_subquery2();
-    init_table2();
-    init_unique_constraint2();
-    init_utils2();
-    init_view();
-  }
-});
-
-// node_modules/drizzle-orm/logger.js
-var _a116, ConsoleLogWriter, _a117, DefaultLogger, _a118, NoopLogger, init_logger = __esm({
-  "node_modules/drizzle-orm/logger.js"() {
-    init_entity();
-    ConsoleLogWriter = class {
-      write(message) {
-        console.log(message);
-      }
-    };
-    _a116 = entityKind, __publicField(ConsoleLogWriter, _a116, "ConsoleLogWriter");
-    DefaultLogger = class {
-      writer;
-      constructor(config) {
-        this.writer = config?.writer ?? new ConsoleLogWriter();
-      }
-      logQuery(query, params) {
-        let stringifiedParams = params.map((p) => {
-          try {
-            return JSON.stringify(p);
-          } catch {
-            return String(p);
-          }
-        }), paramsStr = stringifiedParams.length ? ` -- params: [${stringifiedParams.join(", ")}]` : "";
-        this.writer.write(`Query: ${query}${paramsStr}`);
-      }
-    };
-    _a117 = entityKind, __publicField(DefaultLogger, _a117, "DefaultLogger");
-    NoopLogger = class {
-      logQuery() {
-      }
-    };
-    _a118 = entityKind, __publicField(NoopLogger, _a118, "NoopLogger");
-  }
-});
-
-// node_modules/drizzle-orm/operations.js
-var init_operations = __esm({
-  "node_modules/drizzle-orm/operations.js"() {
-  }
-});
-
-// node_modules/drizzle-orm/index.js
-var init_drizzle_orm = __esm({
-  "node_modules/drizzle-orm/index.js"() {
-    init_alias();
-    init_column_builder();
-    init_column();
-    init_entity();
-    init_errors();
-    init_logger();
-    init_operations();
-    init_query_promise();
-    init_relations();
-    init_sql2();
-    init_subquery();
-    init_table();
-    init_utils();
-    init_view_common();
   }
 });
 
@@ -6541,11 +1610,11 @@ __export(schema_exports, {
   votes: () => votes,
   walletTransactions: () => walletTransactions
 });
+import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
+import { sql } from "drizzle-orm";
 var users, profiles, posts, media, comments, answers, votes, codeBlocks, reputationHistory, bounties, virtualWallets, walletTransactions, transactionLogs, userRatings, integrityViolations, integrityHistory, tags, postTags, bookmarks, refundRequests, refundRequestVotes, reports, bountyClaims, integrityRatings, schema, init_schema = __esm({
   "drizzle/schema.ts"() {
     "use strict";
-    init_sqlite_core();
-    init_drizzle_orm();
     users = sqliteTable("users", {
       id: text("id").primaryKey(),
       email: text("email").notNull().unique(),
@@ -6828,7256 +1897,6 @@ var users, profiles, posts, media, comments, answers, votes, codeBlocks, reputat
   }
 });
 
-// node_modules/@solana/web3.js/lib/index.esm.js
-var index_esm_exports = {};
-__export(index_esm_exports, {
-  Account: () => Account,
-  AddressLookupTableAccount: () => AddressLookupTableAccount,
-  AddressLookupTableInstruction: () => AddressLookupTableInstruction,
-  AddressLookupTableProgram: () => AddressLookupTableProgram,
-  Authorized: () => Authorized,
-  BLOCKHASH_CACHE_TIMEOUT_MS: () => BLOCKHASH_CACHE_TIMEOUT_MS,
-  BPF_LOADER_DEPRECATED_PROGRAM_ID: () => BPF_LOADER_DEPRECATED_PROGRAM_ID,
-  BPF_LOADER_PROGRAM_ID: () => BPF_LOADER_PROGRAM_ID,
-  BpfLoader: () => BpfLoader,
-  COMPUTE_BUDGET_INSTRUCTION_LAYOUTS: () => COMPUTE_BUDGET_INSTRUCTION_LAYOUTS,
-  ComputeBudgetInstruction: () => ComputeBudgetInstruction,
-  ComputeBudgetProgram: () => ComputeBudgetProgram,
-  Connection: () => Connection,
-  Ed25519Program: () => Ed25519Program,
-  Enum: () => Enum,
-  EpochSchedule: () => EpochSchedule,
-  FeeCalculatorLayout: () => FeeCalculatorLayout,
-  Keypair: () => Keypair,
-  LAMPORTS_PER_SOL: () => LAMPORTS_PER_SOL,
-  LOOKUP_TABLE_INSTRUCTION_LAYOUTS: () => LOOKUP_TABLE_INSTRUCTION_LAYOUTS,
-  Loader: () => Loader,
-  Lockup: () => Lockup,
-  MAX_SEED_LENGTH: () => MAX_SEED_LENGTH,
-  Message: () => Message,
-  MessageAccountKeys: () => MessageAccountKeys,
-  MessageV0: () => MessageV0,
-  NONCE_ACCOUNT_LENGTH: () => NONCE_ACCOUNT_LENGTH,
-  NonceAccount: () => NonceAccount,
-  PACKET_DATA_SIZE: () => PACKET_DATA_SIZE,
-  PUBLIC_KEY_LENGTH: () => PUBLIC_KEY_LENGTH,
-  PublicKey: () => PublicKey,
-  SIGNATURE_LENGTH_IN_BYTES: () => SIGNATURE_LENGTH_IN_BYTES,
-  SOLANA_SCHEMA: () => SOLANA_SCHEMA,
-  STAKE_CONFIG_ID: () => STAKE_CONFIG_ID,
-  STAKE_INSTRUCTION_LAYOUTS: () => STAKE_INSTRUCTION_LAYOUTS,
-  SYSTEM_INSTRUCTION_LAYOUTS: () => SYSTEM_INSTRUCTION_LAYOUTS,
-  SYSVAR_CLOCK_PUBKEY: () => SYSVAR_CLOCK_PUBKEY,
-  SYSVAR_EPOCH_SCHEDULE_PUBKEY: () => SYSVAR_EPOCH_SCHEDULE_PUBKEY,
-  SYSVAR_INSTRUCTIONS_PUBKEY: () => SYSVAR_INSTRUCTIONS_PUBKEY,
-  SYSVAR_RECENT_BLOCKHASHES_PUBKEY: () => SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
-  SYSVAR_RENT_PUBKEY: () => SYSVAR_RENT_PUBKEY,
-  SYSVAR_REWARDS_PUBKEY: () => SYSVAR_REWARDS_PUBKEY,
-  SYSVAR_SLOT_HASHES_PUBKEY: () => SYSVAR_SLOT_HASHES_PUBKEY,
-  SYSVAR_SLOT_HISTORY_PUBKEY: () => SYSVAR_SLOT_HISTORY_PUBKEY,
-  SYSVAR_STAKE_HISTORY_PUBKEY: () => SYSVAR_STAKE_HISTORY_PUBKEY,
-  Secp256k1Program: () => Secp256k1Program,
-  SendTransactionError: () => SendTransactionError,
-  SolanaJSONRPCError: () => SolanaJSONRPCError,
-  SolanaJSONRPCErrorCode: () => SolanaJSONRPCErrorCode,
-  StakeAuthorizationLayout: () => StakeAuthorizationLayout,
-  StakeInstruction: () => StakeInstruction,
-  StakeProgram: () => StakeProgram,
-  Struct: () => Struct,
-  SystemInstruction: () => SystemInstruction,
-  SystemProgram: () => SystemProgram,
-  Transaction: () => Transaction,
-  TransactionExpiredBlockheightExceededError: () => TransactionExpiredBlockheightExceededError,
-  TransactionExpiredNonceInvalidError: () => TransactionExpiredNonceInvalidError,
-  TransactionExpiredTimeoutError: () => TransactionExpiredTimeoutError,
-  TransactionInstruction: () => TransactionInstruction,
-  TransactionMessage: () => TransactionMessage,
-  TransactionStatus: () => TransactionStatus,
-  VALIDATOR_INFO_KEY: () => VALIDATOR_INFO_KEY,
-  VERSION_PREFIX_MASK: () => VERSION_PREFIX_MASK,
-  VOTE_PROGRAM_ID: () => VOTE_PROGRAM_ID,
-  ValidatorInfo: () => ValidatorInfo,
-  VersionedMessage: () => VersionedMessage,
-  VersionedTransaction: () => VersionedTransaction,
-  VoteAccount: () => VoteAccount,
-  VoteAuthorizationLayout: () => VoteAuthorizationLayout,
-  VoteInit: () => VoteInit,
-  VoteInstruction: () => VoteInstruction,
-  VoteProgram: () => VoteProgram,
-  clusterApiUrl: () => clusterApiUrl,
-  sendAndConfirmRawTransaction: () => sendAndConfirmRawTransaction,
-  sendAndConfirmTransaction: () => sendAndConfirmTransaction
-});
-import { Buffer as Buffer2 } from "buffer";
-import { ed25519 } from "@noble/curves/ed25519";
-import BN from "bn.js";
-import bs58 from "bs58";
-import { sha256 } from "@noble/hashes/sha256";
-import { serialize, deserialize, deserializeUnchecked } from "borsh";
-import * as BufferLayout from "@solana/buffer-layout";
-import { blob as blob4 } from "@solana/buffer-layout";
-import { getU64Codec, getU64Encoder } from "@solana/codecs-numbers";
-import require$$0 from "util";
-import require$$0$1 from "http";
-import require$$0$2, { Agent } from "https";
-import { coerce, instance, string, tuple, literal, unknown, type, number, array, nullable, optional, boolean, record, union as union2, create, any, assert as assert$1 } from "superstruct";
-import RpcClient from "jayson/lib/client/browser";
-import * as nodeFetch from "node-fetch";
-import { CommonClient, WebSocket } from "rpc-websockets";
-import { keccak_256 } from "@noble/hashes/sha3";
-import { secp256k1 } from "@noble/curves/secp256k1";
-function isOnCurve(publicKey5) {
-  try {
-    return ed25519.ExtendedPoint.fromHex(publicKey5), !0;
-  } catch {
-    return !1;
-  }
-}
-function isPublicKeyData(value) {
-  return value._bn !== void 0;
-}
-function getAlloc(type2, fields) {
-  let getItemAlloc = (item) => {
-    if (item.span >= 0)
-      return item.span;
-    if (typeof item.alloc == "function")
-      return item.alloc(fields[item.property]);
-    if ("count" in item && "elementLayout" in item) {
-      let field = fields[item.property];
-      if (Array.isArray(field))
-        return field.length * getItemAlloc(item.elementLayout);
-    } else if ("fields" in item)
-      return getAlloc({
-        layout: item
-      }, fields[item.property]);
-    return 0;
-  }, alloc = 0;
-  return type2.layout.fields.forEach((item) => {
-    alloc += getItemAlloc(item);
-  }), alloc;
-}
-function decodeLength(bytes) {
-  let len = 0, size = 0;
-  for (; ; ) {
-    let elem = bytes.shift();
-    if (len |= (elem & 127) << size * 7, size += 1, !(elem & 128))
-      break;
-  }
-  return len;
-}
-function encodeLength(bytes, len) {
-  let rem_len = len;
-  for (; ; ) {
-    let elem = rem_len & 127;
-    if (rem_len >>= 7, rem_len == 0) {
-      bytes.push(elem);
-      break;
-    } else
-      elem |= 128, bytes.push(elem);
-  }
-}
-function assert(condition, message) {
-  if (!condition)
-    throw new Error(message || "Assertion failed");
-}
-function guardedShift(byteArray) {
-  if (byteArray.length === 0)
-    throw new Error(END_OF_BUFFER_ERROR_MESSAGE);
-  return byteArray.shift();
-}
-function guardedSplice(byteArray, ...args) {
-  let [start] = args;
-  if (args.length === 2 ? start + (args[1] ?? 0) > byteArray.length : start >= byteArray.length)
-    throw new Error(END_OF_BUFFER_ERROR_MESSAGE);
-  return byteArray.splice(...args);
-}
-async function sendAndConfirmTransaction(connection, transaction, signers, options) {
-  let sendOptions = options && {
-    skipPreflight: options.skipPreflight,
-    preflightCommitment: options.preflightCommitment || options.commitment,
-    maxRetries: options.maxRetries,
-    minContextSlot: options.minContextSlot
-  }, signature2 = await connection.sendTransaction(transaction, signers, sendOptions), status;
-  if (transaction.recentBlockhash != null && transaction.lastValidBlockHeight != null)
-    status = (await connection.confirmTransaction({
-      abortSignal: options?.abortSignal,
-      signature: signature2,
-      blockhash: transaction.recentBlockhash,
-      lastValidBlockHeight: transaction.lastValidBlockHeight
-    }, options && options.commitment)).value;
-  else if (transaction.minNonceContextSlot != null && transaction.nonceInfo != null) {
-    let {
-      nonceInstruction
-    } = transaction.nonceInfo, nonceAccountPubkey = nonceInstruction.keys[0].pubkey;
-    status = (await connection.confirmTransaction({
-      abortSignal: options?.abortSignal,
-      minContextSlot: transaction.minNonceContextSlot,
-      nonceAccountPubkey,
-      nonceValue: transaction.nonceInfo.nonce,
-      signature: signature2
-    }, options && options.commitment)).value;
-  } else
-    options?.abortSignal != null && console.warn("sendAndConfirmTransaction(): A transaction with a deprecated confirmation strategy was supplied along with an `abortSignal`. Only transactions having `lastValidBlockHeight` or a combination of `nonceInfo` and `minNonceContextSlot` are abortable."), status = (await connection.confirmTransaction(signature2, options && options.commitment)).value;
-  if (status.err)
-    throw signature2 != null ? new SendTransactionError({
-      action: "send",
-      signature: signature2,
-      transactionMessage: `Status: (${JSON.stringify(status)})`
-    }) : new Error(`Transaction ${signature2} failed (${JSON.stringify(status)})`);
-  return signature2;
-}
-function sleep(ms2) {
-  return new Promise((resolve) => setTimeout(resolve, ms2));
-}
-function encodeData(type2, fields) {
-  let allocLength = type2.layout.span >= 0 ? type2.layout.span : getAlloc(type2, fields), data = Buffer2.alloc(allocLength), layoutFields = Object.assign({
-    instruction: type2.index
-  }, fields);
-  return type2.layout.encode(layoutFields, data), data;
-}
-function decodeData$1(type2, buffer) {
-  let data;
-  try {
-    data = type2.layout.decode(buffer);
-  } catch (err) {
-    throw new Error("invalid instruction; " + err);
-  }
-  if (data.instruction !== type2.index)
-    throw new Error(`invalid instruction; instruction index mismatch ${data.instruction} != ${type2.index}`);
-  return data;
-}
-function u64(property) {
-  let layout = blob4(8, property), decode = layout.decode.bind(layout), encode = layout.encode.bind(layout), bigIntLayout = layout, codec = getU64Codec();
-  return bigIntLayout.decode = (buffer, offset2) => {
-    let src = decode(buffer, offset2);
-    return codec.decode(src);
-  }, bigIntLayout.encode = (bigInt, buffer, offset2) => {
-    let src = codec.encode(bigInt);
-    return encode(src, buffer, offset2);
-  }, bigIntLayout;
-}
-function getDefaultExportFromCjs(x) {
-  return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x.default : x;
-}
-function requireMs() {
-  if (hasRequiredMs)
-    return ms;
-  hasRequiredMs = 1;
-  var s = 1e3, m = s * 60, h = m * 60, d = h * 24, w = d * 7, y = d * 365.25;
-  ms = function(val, options) {
-    options = options || {};
-    var type2 = typeof val;
-    if (type2 === "string" && val.length > 0)
-      return parse(val);
-    if (type2 === "number" && isFinite(val))
-      return options.long ? fmtLong(val) : fmtShort(val);
-    throw new Error(
-      "val is not a non-empty string or a valid number. val=" + JSON.stringify(val)
-    );
-  };
-  function parse(str) {
-    if (str = String(str), !(str.length > 100)) {
-      var match = /^(-?(?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(
-        str
-      );
-      if (match) {
-        var n = parseFloat(match[1]), type2 = (match[2] || "ms").toLowerCase();
-        switch (type2) {
-          case "years":
-          case "year":
-          case "yrs":
-          case "yr":
-          case "y":
-            return n * y;
-          case "weeks":
-          case "week":
-          case "w":
-            return n * w;
-          case "days":
-          case "day":
-          case "d":
-            return n * d;
-          case "hours":
-          case "hour":
-          case "hrs":
-          case "hr":
-          case "h":
-            return n * h;
-          case "minutes":
-          case "minute":
-          case "mins":
-          case "min":
-          case "m":
-            return n * m;
-          case "seconds":
-          case "second":
-          case "secs":
-          case "sec":
-          case "s":
-            return n * s;
-          case "milliseconds":
-          case "millisecond":
-          case "msecs":
-          case "msec":
-          case "ms":
-            return n;
-          default:
-            return;
-        }
-      }
-    }
-  }
-  function fmtShort(ms2) {
-    var msAbs = Math.abs(ms2);
-    return msAbs >= d ? Math.round(ms2 / d) + "d" : msAbs >= h ? Math.round(ms2 / h) + "h" : msAbs >= m ? Math.round(ms2 / m) + "m" : msAbs >= s ? Math.round(ms2 / s) + "s" : ms2 + "ms";
-  }
-  function fmtLong(ms2) {
-    var msAbs = Math.abs(ms2);
-    return msAbs >= d ? plural(ms2, msAbs, d, "day") : msAbs >= h ? plural(ms2, msAbs, h, "hour") : msAbs >= m ? plural(ms2, msAbs, m, "minute") : msAbs >= s ? plural(ms2, msAbs, s, "second") : ms2 + " ms";
-  }
-  function plural(ms2, msAbs, n, name) {
-    var isPlural = msAbs >= n * 1.5;
-    return Math.round(ms2 / n) + " " + name + (isPlural ? "s" : "");
-  }
-  return ms;
-}
-function requireHumanizeMs() {
-  if (hasRequiredHumanizeMs)
-    return humanizeMs;
-  hasRequiredHumanizeMs = 1;
-  var util = require$$0, ms2 = /* @__PURE__ */ requireMs();
-  return humanizeMs = function(t) {
-    if (typeof t == "number")
-      return t;
-    var r = ms2(t);
-    if (r === void 0) {
-      var err = new Error(util.format("humanize-ms(%j) result undefined", t));
-      console.warn(err.stack);
-    }
-    return r;
-  }, humanizeMs;
-}
-function requireConstants() {
-  return hasRequiredConstants || (hasRequiredConstants = 1, constants = {
-    // agent
-    CURRENT_ID: Symbol("agentkeepalive#currentId"),
-    CREATE_ID: Symbol("agentkeepalive#createId"),
-    INIT_SOCKET: Symbol("agentkeepalive#initSocket"),
-    CREATE_HTTPS_CONNECTION: Symbol("agentkeepalive#createHttpsConnection"),
-    // socket
-    SOCKET_CREATED_TIME: Symbol("agentkeepalive#socketCreatedTime"),
-    SOCKET_NAME: Symbol("agentkeepalive#socketName"),
-    SOCKET_REQUEST_COUNT: Symbol("agentkeepalive#socketRequestCount"),
-    SOCKET_REQUEST_FINISHED_COUNT: Symbol("agentkeepalive#socketRequestFinishedCount")
-  }), constants;
-}
-function requireAgent() {
-  if (hasRequiredAgent)
-    return agent;
-  hasRequiredAgent = 1;
-  let OriginalAgent = require$$0$1.Agent, ms2 = /* @__PURE__ */ requireHumanizeMs(), debug = require$$0.debuglog("agentkeepalive"), {
-    INIT_SOCKET,
-    CURRENT_ID,
-    CREATE_ID,
-    SOCKET_CREATED_TIME,
-    SOCKET_NAME,
-    SOCKET_REQUEST_COUNT,
-    SOCKET_REQUEST_FINISHED_COUNT
-  } = /* @__PURE__ */ requireConstants(), defaultTimeoutListenerCount = 1, majorVersion = parseInt(process.version.split(".", 1)[0].substring(1));
-  majorVersion >= 11 && majorVersion <= 12 ? defaultTimeoutListenerCount = 2 : majorVersion >= 13 && (defaultTimeoutListenerCount = 3);
-  function deprecate(message) {
-    console.log("[agentkeepalive:deprecated] %s", message);
-  }
-  class Agent2 extends OriginalAgent {
-    constructor(options) {
-      options = options || {}, options.keepAlive = options.keepAlive !== !1, options.freeSocketTimeout === void 0 && (options.freeSocketTimeout = 4e3), options.keepAliveTimeout && (deprecate("options.keepAliveTimeout is deprecated, please use options.freeSocketTimeout instead"), options.freeSocketTimeout = options.keepAliveTimeout, delete options.keepAliveTimeout), options.freeSocketKeepAliveTimeout && (deprecate("options.freeSocketKeepAliveTimeout is deprecated, please use options.freeSocketTimeout instead"), options.freeSocketTimeout = options.freeSocketKeepAliveTimeout, delete options.freeSocketKeepAliveTimeout), options.timeout === void 0 && (options.timeout = Math.max(options.freeSocketTimeout * 2, 8e3)), options.timeout = ms2(options.timeout), options.freeSocketTimeout = ms2(options.freeSocketTimeout), options.socketActiveTTL = options.socketActiveTTL ? ms2(options.socketActiveTTL) : 0, super(options), this[CURRENT_ID] = 0, this.createSocketCount = 0, this.createSocketCountLastCheck = 0, this.createSocketErrorCount = 0, this.createSocketErrorCountLastCheck = 0, this.closeSocketCount = 0, this.closeSocketCountLastCheck = 0, this.errorSocketCount = 0, this.errorSocketCountLastCheck = 0, this.requestCount = 0, this.requestCountLastCheck = 0, this.timeoutSocketCount = 0, this.timeoutSocketCountLastCheck = 0, this.on("free", (socket) => {
-        let timeout = this.calcSocketTimeout(socket);
-        timeout > 0 && socket.timeout !== timeout && socket.setTimeout(timeout);
-      });
-    }
-    get freeSocketKeepAliveTimeout() {
-      return deprecate("agent.freeSocketKeepAliveTimeout is deprecated, please use agent.options.freeSocketTimeout instead"), this.options.freeSocketTimeout;
-    }
-    get timeout() {
-      return deprecate("agent.timeout is deprecated, please use agent.options.timeout instead"), this.options.timeout;
-    }
-    get socketActiveTTL() {
-      return deprecate("agent.socketActiveTTL is deprecated, please use agent.options.socketActiveTTL instead"), this.options.socketActiveTTL;
-    }
-    calcSocketTimeout(socket) {
-      let freeSocketTimeout = this.options.freeSocketTimeout, socketActiveTTL = this.options.socketActiveTTL;
-      if (socketActiveTTL) {
-        let aliveTime = Date.now() - socket[SOCKET_CREATED_TIME], diff = socketActiveTTL - aliveTime;
-        if (diff <= 0)
-          return diff;
-        freeSocketTimeout && diff < freeSocketTimeout && (freeSocketTimeout = diff);
-      }
-      if (freeSocketTimeout)
-        return socket.freeSocketTimeout || socket.freeSocketKeepAliveTimeout || freeSocketTimeout;
-    }
-    keepSocketAlive(socket) {
-      let result = super.keepSocketAlive(socket);
-      if (!result)
-        return result;
-      let customTimeout = this.calcSocketTimeout(socket);
-      return typeof customTimeout > "u" ? !0 : customTimeout <= 0 ? (debug(
-        "%s(requests: %s, finished: %s) free but need to destroy by TTL, request count %s, diff is %s",
-        socket[SOCKET_NAME],
-        socket[SOCKET_REQUEST_COUNT],
-        socket[SOCKET_REQUEST_FINISHED_COUNT],
-        customTimeout
-      ), !1) : (socket.timeout !== customTimeout && socket.setTimeout(customTimeout), !0);
-    }
-    // only call on addRequest
-    reuseSocket(...args) {
-      super.reuseSocket(...args);
-      let socket = args[0], req = args[1];
-      req.reusedSocket = !0;
-      let agentTimeout = this.options.timeout;
-      getSocketTimeout(socket) !== agentTimeout && (socket.setTimeout(agentTimeout), debug("%s reset timeout to %sms", socket[SOCKET_NAME], agentTimeout)), socket[SOCKET_REQUEST_COUNT]++, debug(
-        "%s(requests: %s, finished: %s) reuse on addRequest, timeout %sms",
-        socket[SOCKET_NAME],
-        socket[SOCKET_REQUEST_COUNT],
-        socket[SOCKET_REQUEST_FINISHED_COUNT],
-        getSocketTimeout(socket)
-      );
-    }
-    [CREATE_ID]() {
-      let id = this[CURRENT_ID]++;
-      return this[CURRENT_ID] === Number.MAX_SAFE_INTEGER && (this[CURRENT_ID] = 0), id;
-    }
-    [INIT_SOCKET](socket, options) {
-      options.timeout && (getSocketTimeout(socket) || socket.setTimeout(options.timeout)), this.options.keepAlive && socket.setNoDelay(!0), this.createSocketCount++, this.options.socketActiveTTL && (socket[SOCKET_CREATED_TIME] = Date.now()), socket[SOCKET_NAME] = `sock[${this[CREATE_ID]()}#${options._agentKey}]`.split("-----BEGIN", 1)[0], socket[SOCKET_REQUEST_COUNT] = 1, socket[SOCKET_REQUEST_FINISHED_COUNT] = 0, installListeners(this, socket, options);
-    }
-    createConnection(options, oncreate) {
-      let called = !1, onNewCreate = (err, socket) => {
-        if (!called) {
-          if (called = !0, err)
-            return this.createSocketErrorCount++, oncreate(err);
-          this[INIT_SOCKET](socket, options), oncreate(err, socket);
-        }
-      }, newSocket = super.createConnection(options, onNewCreate);
-      return newSocket && onNewCreate(null, newSocket), newSocket;
-    }
-    get statusChanged() {
-      let changed = this.createSocketCount !== this.createSocketCountLastCheck || this.createSocketErrorCount !== this.createSocketErrorCountLastCheck || this.closeSocketCount !== this.closeSocketCountLastCheck || this.errorSocketCount !== this.errorSocketCountLastCheck || this.timeoutSocketCount !== this.timeoutSocketCountLastCheck || this.requestCount !== this.requestCountLastCheck;
-      return changed && (this.createSocketCountLastCheck = this.createSocketCount, this.createSocketErrorCountLastCheck = this.createSocketErrorCount, this.closeSocketCountLastCheck = this.closeSocketCount, this.errorSocketCountLastCheck = this.errorSocketCount, this.timeoutSocketCountLastCheck = this.timeoutSocketCount, this.requestCountLastCheck = this.requestCount), changed;
-    }
-    getCurrentStatus() {
-      return {
-        createSocketCount: this.createSocketCount,
-        createSocketErrorCount: this.createSocketErrorCount,
-        closeSocketCount: this.closeSocketCount,
-        errorSocketCount: this.errorSocketCount,
-        timeoutSocketCount: this.timeoutSocketCount,
-        requestCount: this.requestCount,
-        freeSockets: inspect(this.freeSockets),
-        sockets: inspect(this.sockets),
-        requests: inspect(this.requests)
-      };
-    }
-  }
-  function getSocketTimeout(socket) {
-    return socket.timeout || socket._idleTimeout;
-  }
-  function installListeners(agent2, socket, options) {
-    debug("%s create, timeout %sms", socket[SOCKET_NAME], getSocketTimeout(socket));
-    function onFree() {
-      if (!socket._httpMessage && socket[SOCKET_REQUEST_COUNT] === 1)
-        return;
-      socket[SOCKET_REQUEST_FINISHED_COUNT]++, agent2.requestCount++, debug(
-        "%s(requests: %s, finished: %s) free",
-        socket[SOCKET_NAME],
-        socket[SOCKET_REQUEST_COUNT],
-        socket[SOCKET_REQUEST_FINISHED_COUNT]
-      );
-      let name = agent2.getName(options);
-      socket.writable && agent2.requests[name] && agent2.requests[name].length && (socket[SOCKET_REQUEST_COUNT]++, debug(
-        "%s(requests: %s, finished: %s) will be reuse on agent free event",
-        socket[SOCKET_NAME],
-        socket[SOCKET_REQUEST_COUNT],
-        socket[SOCKET_REQUEST_FINISHED_COUNT]
-      ));
-    }
-    socket.on("free", onFree);
-    function onClose(isError) {
-      debug(
-        "%s(requests: %s, finished: %s) close, isError: %s",
-        socket[SOCKET_NAME],
-        socket[SOCKET_REQUEST_COUNT],
-        socket[SOCKET_REQUEST_FINISHED_COUNT],
-        isError
-      ), agent2.closeSocketCount++;
-    }
-    socket.on("close", onClose);
-    function onTimeout() {
-      let listenerCount = socket.listeners("timeout").length, timeout = getSocketTimeout(socket), req = socket._httpMessage, reqTimeoutListenerCount = req && req.listeners("timeout").length || 0;
-      debug(
-        "%s(requests: %s, finished: %s) timeout after %sms, listeners %s, defaultTimeoutListenerCount %s, hasHttpRequest %s, HttpRequest timeoutListenerCount %s",
-        socket[SOCKET_NAME],
-        socket[SOCKET_REQUEST_COUNT],
-        socket[SOCKET_REQUEST_FINISHED_COUNT],
-        timeout,
-        listenerCount,
-        defaultTimeoutListenerCount,
-        !!req,
-        reqTimeoutListenerCount
-      ), debug.enabled && debug("timeout listeners: %s", socket.listeners("timeout").map((f) => f.name).join(", ")), agent2.timeoutSocketCount++;
-      let name = agent2.getName(options);
-      if (agent2.freeSockets[name] && agent2.freeSockets[name].indexOf(socket) !== -1)
-        socket.destroy(), agent2.removeSocket(socket, options), debug("%s is free, destroy quietly", socket[SOCKET_NAME]);
-      else if (reqTimeoutListenerCount === 0) {
-        let error = new Error("Socket timeout");
-        error.code = "ERR_SOCKET_TIMEOUT", error.timeout = timeout, socket.destroy(error), agent2.removeSocket(socket, options), debug("%s destroy with timeout error", socket[SOCKET_NAME]);
-      }
-    }
-    socket.on("timeout", onTimeout);
-    function onError(err) {
-      let listenerCount = socket.listeners("error").length;
-      debug(
-        "%s(requests: %s, finished: %s) error: %s, listenerCount: %s",
-        socket[SOCKET_NAME],
-        socket[SOCKET_REQUEST_COUNT],
-        socket[SOCKET_REQUEST_FINISHED_COUNT],
-        err,
-        listenerCount
-      ), agent2.errorSocketCount++, listenerCount === 1 && (debug("%s emit uncaught error event", socket[SOCKET_NAME]), socket.removeListener("error", onError), socket.emit("error", err));
-    }
-    socket.on("error", onError);
-    function onRemove() {
-      debug(
-        "%s(requests: %s, finished: %s) agentRemove",
-        socket[SOCKET_NAME],
-        socket[SOCKET_REQUEST_COUNT],
-        socket[SOCKET_REQUEST_FINISHED_COUNT]
-      ), socket.removeListener("close", onClose), socket.removeListener("error", onError), socket.removeListener("free", onFree), socket.removeListener("timeout", onTimeout), socket.removeListener("agentRemove", onRemove);
-    }
-    socket.on("agentRemove", onRemove);
-  }
-  agent = Agent2;
-  function inspect(obj) {
-    let res = {};
-    for (let key in obj)
-      res[key] = obj[key].length;
-    return res;
-  }
-  return agent;
-}
-function requireHttps_agent() {
-  if (hasRequiredHttps_agent)
-    return https_agent;
-  hasRequiredHttps_agent = 1;
-  let OriginalHttpsAgent = require$$0$2.Agent, HttpAgent = /* @__PURE__ */ requireAgent(), {
-    INIT_SOCKET,
-    CREATE_HTTPS_CONNECTION
-  } = /* @__PURE__ */ requireConstants();
-  class HttpsAgent extends HttpAgent {
-    constructor(options) {
-      super(options), this.defaultPort = 443, this.protocol = "https:", this.maxCachedSessions = this.options.maxCachedSessions, this.maxCachedSessions === void 0 && (this.maxCachedSessions = 100), this._sessionCache = {
-        map: {},
-        list: []
-      };
-    }
-    createConnection(options, oncreate) {
-      let socket = this[CREATE_HTTPS_CONNECTION](options, oncreate);
-      return this[INIT_SOCKET](socket, options), socket;
-    }
-  }
-  return HttpsAgent.prototype[CREATE_HTTPS_CONNECTION] = OriginalHttpsAgent.prototype.createConnection, [
-    "getName",
-    "_getSession",
-    "_cacheSession",
-    // https://github.com/nodejs/node/pull/4982
-    "_evictSession"
-  ].forEach(function(method) {
-    typeof OriginalHttpsAgent.prototype[method] == "function" && (HttpsAgent.prototype[method] = OriginalHttpsAgent.prototype[method]);
-  }), https_agent = HttpsAgent, https_agent;
-}
-function requireAgentkeepalive() {
-  return hasRequiredAgentkeepalive || (hasRequiredAgentkeepalive = 1, agentkeepalive.exports = /* @__PURE__ */ requireAgent(), agentkeepalive.exports.HttpsAgent = /* @__PURE__ */ requireHttps_agent(), agentkeepalive.exports.constants = /* @__PURE__ */ requireConstants()), agentkeepalive.exports;
-}
-function requireFastStableStringify() {
-  if (hasRequiredFastStableStringify)
-    return fastStableStringify$1;
-  hasRequiredFastStableStringify = 1;
-  var objToString = Object.prototype.toString, objKeys = Object.keys || function(obj) {
-    var keys = [];
-    for (var name in obj)
-      keys.push(name);
-    return keys;
-  };
-  function stringify(val, isArrayProp) {
-    var i, max, str, keys, key, propVal, toStr;
-    if (val === !0)
-      return "true";
-    if (val === !1)
-      return "false";
-    switch (typeof val) {
-      case "object":
-        if (val === null)
-          return null;
-        if (val.toJSON && typeof val.toJSON == "function")
-          return stringify(val.toJSON(), isArrayProp);
-        if (toStr = objToString.call(val), toStr === "[object Array]") {
-          for (str = "[", max = val.length - 1, i = 0; i < max; i++)
-            str += stringify(val[i], !0) + ",";
-          return max > -1 && (str += stringify(val[i], !0)), str + "]";
-        } else if (toStr === "[object Object]") {
-          for (keys = objKeys(val).sort(), max = keys.length, str = "", i = 0; i < max; )
-            key = keys[i], propVal = stringify(val[key], !1), propVal !== void 0 && (str && (str += ","), str += JSON.stringify(key) + ":" + propVal), i++;
-          return "{" + str + "}";
-        } else
-          return JSON.stringify(val);
-      case "function":
-      case "undefined":
-        return isArrayProp ? null : void 0;
-      case "string":
-        return JSON.stringify(val);
-      default:
-        return isFinite(val) ? val : null;
-    }
-  }
-  return fastStableStringify$1 = function(val) {
-    var returnVal = stringify(val, !1);
-    if (returnVal !== void 0)
-      return "" + returnVal;
-  }, fastStableStringify$1;
-}
-function trailingZeros(n) {
-  let trailingZeros2 = 0;
-  for (; n > 1; )
-    n /= 2, trailingZeros2++;
-  return trailingZeros2;
-}
-function nextPowerOfTwo(n) {
-  return n === 0 ? 1 : (n--, n |= n >> 1, n |= n >> 2, n |= n >> 4, n |= n >> 8, n |= n >> 16, n |= n >> 32, n + 1);
-}
-function decodeData(type2, data) {
-  let decoded;
-  try {
-    decoded = type2.layout.decode(data);
-  } catch (err) {
-    throw new Error("invalid instruction; " + err);
-  }
-  if (decoded.typeIndex !== type2.index)
-    throw new Error(`invalid account data; account type mismatch ${decoded.typeIndex} != ${type2.index}`);
-  return decoded;
-}
-function makeWebsocketUrl(endpoint2) {
-  let matches = endpoint2.match(URL_RE);
-  if (matches == null)
-    throw TypeError(`Failed to validate endpoint URL \`${endpoint2}\``);
-  let [
-    _,
-    // eslint-disable-line @typescript-eslint/no-unused-vars
-    hostish,
-    portWithColon,
-    rest
-  ] = matches, protocol = endpoint2.startsWith("https:") ? "wss:" : "ws:", startPort = portWithColon == null ? null : parseInt(portWithColon.slice(1), 10), websocketPort = (
-    // Only shift the port by +1 as a convention for ws(s) only if given endpoint
-    // is explicitly specifying the endpoint port (HTTP-based RPC), assuming
-    // we're directly trying to connect to agave-validator's ws listening port.
-    // When the endpoint omits the port, we're connecting to the protocol
-    // default ports: http(80) or https(443) and it's assumed we're behind a reverse
-    // proxy which manages WebSocket upgrade and backend port redirection.
-    startPort == null ? "" : `:${startPort + 1}`
-  );
-  return `${protocol}//${hostish}${websocketPort}${rest}`;
-}
-function assertEndpointUrl(putativeUrl) {
-  if (/^https?:/.test(putativeUrl) === !1)
-    throw new TypeError("Endpoint URL must start with `http:` or `https:`.");
-  return putativeUrl;
-}
-function extractCommitmentFromConfig(commitmentOrConfig) {
-  let commitment, config;
-  if (typeof commitmentOrConfig == "string")
-    commitment = commitmentOrConfig;
-  else if (commitmentOrConfig) {
-    let {
-      commitment: specifiedCommitment,
-      ...specifiedConfig
-    } = commitmentOrConfig;
-    commitment = specifiedCommitment, config = specifiedConfig;
-  }
-  return {
-    commitment,
-    config
-  };
-}
-function applyDefaultMemcmpEncodingToFilters(filters) {
-  return filters.map((filter) => "memcmp" in filter ? {
-    ...filter,
-    memcmp: {
-      ...filter.memcmp,
-      encoding: filter.memcmp.encoding ?? "base58"
-    }
-  } : filter);
-}
-function createRpcResult(result) {
-  return union2([type({
-    jsonrpc: literal("2.0"),
-    id: string(),
-    result
-  }), type({
-    jsonrpc: literal("2.0"),
-    id: string(),
-    error: type({
-      code: unknown(),
-      message: string(),
-      data: optional(any())
-    })
-  })]);
-}
-function jsonRpcResult(schema3) {
-  return coerce(createRpcResult(schema3), UnknownRpcResult, (value) => "error" in value ? value : {
-    ...value,
-    result: create(value.result, schema3)
-  });
-}
-function jsonRpcResultAndContext(value) {
-  return jsonRpcResult(type({
-    context: type({
-      slot: number()
-    }),
-    value
-  }));
-}
-function notificationResultAndContext(value) {
-  return type({
-    context: type({
-      slot: number()
-    }),
-    value
-  });
-}
-function versionedMessageFromResponse(version2, response) {
-  return version2 === 0 ? new MessageV0({
-    header: response.header,
-    staticAccountKeys: response.accountKeys.map((accountKey) => new PublicKey(accountKey)),
-    recentBlockhash: response.recentBlockhash,
-    compiledInstructions: response.instructions.map((ix) => ({
-      programIdIndex: ix.programIdIndex,
-      accountKeyIndexes: ix.accounts,
-      data: bs58.decode(ix.data)
-    })),
-    addressTableLookups: response.addressTableLookups
-  }) : new Message(response);
-}
-function createRpcClient(url, httpHeaders, customFetch, fetchMiddleware, disableRetryOnRateLimit, httpAgent) {
-  let fetch2 = customFetch || fetchImpl, agent2;
-  if (httpAgent == null) {
-    let agentOptions = {
-      // One second fewer than the Solana RPC's keepalive timeout.
-      // Read more: https://github.com/solana-labs/solana/issues/27859#issuecomment-1340097889
-      freeSocketTimeout: 19e3,
-      keepAlive: !0,
-      maxSockets: 25
-    };
-    url.startsWith("https:") ? agent2 = new agentkeepaliveExports.HttpsAgent(agentOptions) : agent2 = new HttpKeepAliveAgent(agentOptions);
-  } else if (httpAgent !== !1) {
-    let isHttps = url.startsWith("https:");
-    if (isHttps && !(httpAgent instanceof Agent))
-      throw new Error("The endpoint `" + url + "` can only be paired with an `https.Agent`. You have, instead, supplied an `http.Agent` through `httpAgent`.");
-    if (!isHttps && httpAgent instanceof Agent)
-      throw new Error("The endpoint `" + url + "` can only be paired with an `http.Agent`. You have, instead, supplied an `https.Agent` through `httpAgent`.");
-    agent2 = httpAgent;
-  }
-  let fetchWithMiddleware;
-  return fetchMiddleware && (fetchWithMiddleware = async (info, init) => {
-    let modifiedFetchArgs = await new Promise((resolve, reject) => {
-      try {
-        fetchMiddleware(info, init, (modifiedInfo, modifiedInit) => resolve([modifiedInfo, modifiedInit]));
-      } catch (error) {
-        reject(error);
-      }
-    });
-    return await fetch2(...modifiedFetchArgs);
-  }), new RpcClient(async (request, callback) => {
-    let options = {
-      method: "POST",
-      body: request,
-      agent: agent2,
-      headers: Object.assign({
-        "Content-Type": "application/json"
-      }, httpHeaders || {}, COMMON_HTTP_HEADERS)
-    };
-    try {
-      let too_many_requests_retries = 5, res, waitTime = 500;
-      for (; fetchWithMiddleware ? res = await fetchWithMiddleware(url, options) : res = await fetch2(url, options), !(res.status !== 429 || disableRetryOnRateLimit === !0 || (too_many_requests_retries -= 1, too_many_requests_retries === 0)); )
-        console.error(`Server responded with ${res.status} ${res.statusText}.  Retrying after ${waitTime}ms delay...`), await sleep(waitTime), waitTime *= 2;
-      let text2 = await res.text();
-      res.ok ? callback(null, text2) : callback(new Error(`${res.status} ${res.statusText}: ${text2}`));
-    } catch (err) {
-      err instanceof Error && callback(err);
-    }
-  }, {});
-}
-function createRpcRequest(client) {
-  return (method, args) => new Promise((resolve, reject) => {
-    client.request(method, args, (err, response) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      resolve(response);
-    });
-  });
-}
-function createRpcBatchRequest(client) {
-  return (requests) => new Promise((resolve, reject) => {
-    requests.length === 0 && resolve([]);
-    let batch = requests.map((params) => client.request(params.methodName, params.args));
-    client.request(batch, (err, response) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      resolve(response);
-    });
-  });
-}
-function parseAuthorizedVoter({
-  authorizedVoter,
-  epoch
-}) {
-  return {
-    epoch,
-    authorizedVoter: new PublicKey(authorizedVoter)
-  };
-}
-function parsePriorVoters({
-  authorizedPubkey,
-  epochOfLastAuthorizedSwitch,
-  targetEpoch
-}) {
-  return {
-    authorizedPubkey: new PublicKey(authorizedPubkey),
-    epochOfLastAuthorizedSwitch,
-    targetEpoch
-  };
-}
-function getPriorVoters({
-  buf,
-  idx,
-  isEmpty
-}) {
-  return isEmpty ? [] : [...buf.slice(idx + 1).map(parsePriorVoters), ...buf.slice(0, idx).map(parsePriorVoters)];
-}
-function clusterApiUrl(cluster, tls) {
-  let key = tls === !1 ? "http" : "https";
-  if (!cluster)
-    return endpoint[key].devnet;
-  let url = endpoint[key][cluster];
-  if (!url)
-    throw new Error(`Unknown ${key} cluster: ${cluster}`);
-  return url;
-}
-async function sendAndConfirmRawTransaction(connection, rawTransaction, confirmationStrategyOrConfirmOptions, maybeConfirmOptions) {
-  let confirmationStrategy, options;
-  confirmationStrategyOrConfirmOptions && Object.prototype.hasOwnProperty.call(confirmationStrategyOrConfirmOptions, "lastValidBlockHeight") || confirmationStrategyOrConfirmOptions && Object.prototype.hasOwnProperty.call(confirmationStrategyOrConfirmOptions, "nonceValue") ? (confirmationStrategy = confirmationStrategyOrConfirmOptions, options = maybeConfirmOptions) : options = confirmationStrategyOrConfirmOptions;
-  let sendOptions = options && {
-    skipPreflight: options.skipPreflight,
-    preflightCommitment: options.preflightCommitment || options.commitment,
-    minContextSlot: options.minContextSlot
-  }, signature2 = await connection.sendRawTransaction(rawTransaction, sendOptions), commitment = options && options.commitment, status = (await (confirmationStrategy ? connection.confirmTransaction(confirmationStrategy, commitment) : connection.confirmTransaction(signature2, commitment))).value;
-  if (status.err)
-    throw signature2 != null ? new SendTransactionError({
-      action: sendOptions?.skipPreflight ? "send" : "simulate",
-      signature: signature2,
-      transactionMessage: `Status: (${JSON.stringify(status)})`
-    }) : new Error(`Raw transaction ${signature2} failed (${JSON.stringify(status)})`);
-  return signature2;
-}
-var generatePrivateKey, generateKeypair, getPublicKey, sign, verify, toBuffer, Struct, Enum, SOLANA_SCHEMA, _PublicKey, MAX_SEED_LENGTH, PUBLIC_KEY_LENGTH, uniquePublicKeyCounter, PublicKey, Account, BPF_LOADER_DEPRECATED_PROGRAM_ID, PACKET_DATA_SIZE, VERSION_PREFIX_MASK, SIGNATURE_LENGTH_IN_BYTES, TransactionExpiredBlockheightExceededError, TransactionExpiredTimeoutError, TransactionExpiredNonceInvalidError, MessageAccountKeys, publicKey, signature, rustString, authorized, lockup, voteInit, voteAuthorizeWithSeedArgs, CompiledKeys, END_OF_BUFFER_ERROR_MESSAGE, Message, MessageV0, VersionedMessage, TransactionStatus, DEFAULT_SIGNATURE, TransactionInstruction, Transaction, TransactionMessage, VersionedTransaction, NUM_TICKS_PER_SECOND, DEFAULT_TICKS_PER_SLOT, NUM_SLOTS_PER_SECOND, MS_PER_SLOT, SYSVAR_CLOCK_PUBKEY, SYSVAR_EPOCH_SCHEDULE_PUBKEY, SYSVAR_INSTRUCTIONS_PUBKEY, SYSVAR_RECENT_BLOCKHASHES_PUBKEY, SYSVAR_RENT_PUBKEY, SYSVAR_REWARDS_PUBKEY, SYSVAR_SLOT_HASHES_PUBKEY, SYSVAR_SLOT_HISTORY_PUBKEY, SYSVAR_STAKE_HISTORY_PUBKEY, SendTransactionError, SolanaJSONRPCErrorCode, SolanaJSONRPCError, FeeCalculatorLayout, NonceAccountLayout, NONCE_ACCOUNT_LENGTH, NonceAccount, SystemInstruction, SYSTEM_INSTRUCTION_LAYOUTS, SystemProgram, CHUNK_SIZE, Loader, BPF_LOADER_PROGRAM_ID, BpfLoader, agentkeepalive, ms, hasRequiredMs, humanizeMs, hasRequiredHumanizeMs, constants, hasRequiredConstants, agent, hasRequiredAgent, https_agent, hasRequiredHttps_agent, hasRequiredAgentkeepalive, agentkeepaliveExports, HttpKeepAliveAgent, fastStableStringify$1, hasRequiredFastStableStringify, fastStableStringifyExports, fastStableStringify, MINIMUM_SLOT_PER_EPOCH, EpochSchedule, fetchImpl, RpcWebSocketClient, LOOKUP_TABLE_META_SIZE, AddressLookupTableAccount, LookupTableMetaLayout, URL_RE, PublicKeyFromString, RawAccountDataResult, BufferFromRawAccountData, BLOCKHASH_CACHE_TIMEOUT_MS, UnknownRpcResult, GetInflationGovernorResult, GetInflationRewardResult, GetRecentPrioritizationFeesResult, GetInflationRateResult, GetEpochInfoResult, GetEpochScheduleResult, GetLeaderScheduleResult, TransactionErrorResult, SignatureStatusResult, SignatureReceivedResult, VersionResult, ParsedInstructionStruct, PartiallyDecodedInstructionStruct, SimulatedTransactionResponseStruct, BlockProductionResponseStruct, GetInflationGovernorRpcResult, GetInflationRateRpcResult, GetRecentPrioritizationFeesRpcResult, GetEpochInfoRpcResult, GetEpochScheduleRpcResult, GetLeaderScheduleRpcResult, SlotRpcResult, GetSupplyRpcResult, TokenAmountResult, GetTokenLargestAccountsResult, GetTokenAccountsByOwner, ParsedAccountDataResult, GetParsedTokenAccountsByOwner, GetLargestAccountsRpcResult, AccountInfoResult, KeyedAccountInfoResult, ParsedOrRawAccountData, ParsedAccountInfoResult, KeyedParsedAccountInfoResult, StakeActivationResult, GetConfirmedSignaturesForAddress2RpcResult, GetSignaturesForAddressRpcResult, AccountNotificationResult, ProgramAccountInfoResult, ProgramAccountNotificationResult, SlotInfoResult, SlotNotificationResult, SlotUpdateResult, SlotUpdateNotificationResult, SignatureNotificationResult, RootNotificationResult, ContactInfoResult, VoteAccountInfoResult, GetVoteAccounts, ConfirmationStatus, SignatureStatusResponse, GetSignatureStatusesRpcResult, GetMinimumBalanceForRentExemptionRpcResult, AddressTableLookupStruct, ConfirmedTransactionResult, AnnotatedAccountKey, ConfirmedTransactionAccountsModeResult, ParsedInstructionResult, RawInstructionResult, InstructionResult, UnknownInstructionResult, ParsedOrRawInstruction, ParsedConfirmedTransactionResult, TokenBalanceResult, LoadedAddressesResult, ConfirmedTransactionMetaResult, ParsedConfirmedTransactionMetaResult, TransactionVersionStruct, RewardsResult, GetBlockRpcResult, GetNoneModeBlockRpcResult, GetAccountsModeBlockRpcResult, GetParsedBlockRpcResult, GetParsedAccountsModeBlockRpcResult, GetParsedNoneModeBlockRpcResult, GetConfirmedBlockRpcResult, GetBlockSignaturesRpcResult, GetTransactionRpcResult, GetParsedTransactionRpcResult, GetLatestBlockhashRpcResult, IsBlockhashValidRpcResult, PerfSampleResult, GetRecentPerformanceSamplesRpcResult, GetFeeCalculatorRpcResult, RequestAirdropRpcResult, SendTransactionRpcResult, LogsResult, LogsNotificationResult, COMMON_HTTP_HEADERS, Connection, Keypair, LOOKUP_TABLE_INSTRUCTION_LAYOUTS, AddressLookupTableInstruction, AddressLookupTableProgram, ComputeBudgetInstruction, COMPUTE_BUDGET_INSTRUCTION_LAYOUTS, ComputeBudgetProgram, PRIVATE_KEY_BYTES$1, PUBLIC_KEY_BYTES$1, SIGNATURE_BYTES, ED25519_INSTRUCTION_LAYOUT, Ed25519Program, ecdsaSign, publicKeyCreate, PRIVATE_KEY_BYTES, ETHEREUM_ADDRESS_BYTES, PUBLIC_KEY_BYTES, SIGNATURE_OFFSETS_SERIALIZED_SIZE, SECP256K1_INSTRUCTION_LAYOUT, Secp256k1Program, _Lockup, STAKE_CONFIG_ID, Authorized, Lockup, StakeInstruction, STAKE_INSTRUCTION_LAYOUTS, StakeAuthorizationLayout, StakeProgram, VoteInit, VoteInstruction, VOTE_INSTRUCTION_LAYOUTS, VoteAuthorizationLayout, VoteProgram, VALIDATOR_INFO_KEY, InfoString, ValidatorInfo, VOTE_PROGRAM_ID, VoteAccountLayout, VoteAccount, endpoint, LAMPORTS_PER_SOL, init_index_esm = __esm({
-  "node_modules/@solana/web3.js/lib/index.esm.js"() {
-    generatePrivateKey = ed25519.utils.randomPrivateKey, generateKeypair = () => {
-      let privateScalar = ed25519.utils.randomPrivateKey(), publicKey5 = getPublicKey(privateScalar), secretKey = new Uint8Array(64);
-      return secretKey.set(privateScalar), secretKey.set(publicKey5, 32), {
-        publicKey: publicKey5,
-        secretKey
-      };
-    }, getPublicKey = ed25519.getPublicKey;
-    sign = (message, secretKey) => ed25519.sign(message, secretKey.slice(0, 32)), verify = ed25519.verify, toBuffer = (arr) => Buffer2.isBuffer(arr) ? arr : arr instanceof Uint8Array ? Buffer2.from(arr.buffer, arr.byteOffset, arr.byteLength) : Buffer2.from(arr), Struct = class {
-      constructor(properties) {
-        Object.assign(this, properties);
-      }
-      encode() {
-        return Buffer2.from(serialize(SOLANA_SCHEMA, this));
-      }
-      static decode(data) {
-        return deserialize(SOLANA_SCHEMA, this, data);
-      }
-      static decodeUnchecked(data) {
-        return deserializeUnchecked(SOLANA_SCHEMA, this, data);
-      }
-    }, Enum = class extends Struct {
-      constructor(properties) {
-        if (super(properties), this.enum = "", Object.keys(properties).length !== 1)
-          throw new Error("Enum can only take single value");
-        Object.keys(properties).map((key) => {
-          this.enum = key;
-        });
-      }
-    }, SOLANA_SCHEMA = /* @__PURE__ */ new Map(), MAX_SEED_LENGTH = 32, PUBLIC_KEY_LENGTH = 32;
-    uniquePublicKeyCounter = 1, PublicKey = class extends Struct {
-      /**
-       * Create a new PublicKey object
-       * @param value ed25519 public key as buffer or base-58 encoded string
-       */
-      constructor(value) {
-        if (super({}), this._bn = void 0, isPublicKeyData(value))
-          this._bn = value._bn;
-        else {
-          if (typeof value == "string") {
-            let decoded = bs58.decode(value);
-            if (decoded.length != PUBLIC_KEY_LENGTH)
-              throw new Error("Invalid public key input");
-            this._bn = new BN(decoded);
-          } else
-            this._bn = new BN(value);
-          if (this._bn.byteLength() > PUBLIC_KEY_LENGTH)
-            throw new Error("Invalid public key input");
-        }
-      }
-      /**
-       * Returns a unique PublicKey for tests and benchmarks using a counter
-       */
-      static unique() {
-        let key = new PublicKey(uniquePublicKeyCounter);
-        return uniquePublicKeyCounter += 1, new PublicKey(key.toBuffer());
-      }
-      /**
-       * Default public key value. The base58-encoded string representation is all ones (as seen below)
-       * The underlying BN number is 32 bytes that are all zeros
-       */
-      /**
-       * Checks if two publicKeys are equal
-       */
-      equals(publicKey5) {
-        return this._bn.eq(publicKey5._bn);
-      }
-      /**
-       * Return the base-58 representation of the public key
-       */
-      toBase58() {
-        return bs58.encode(this.toBytes());
-      }
-      toJSON() {
-        return this.toBase58();
-      }
-      /**
-       * Return the byte array representation of the public key in big endian
-       */
-      toBytes() {
-        let buf = this.toBuffer();
-        return new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
-      }
-      /**
-       * Return the Buffer representation of the public key in big endian
-       */
-      toBuffer() {
-        let b = this._bn.toArrayLike(Buffer2);
-        if (b.length === PUBLIC_KEY_LENGTH)
-          return b;
-        let zeroPad = Buffer2.alloc(32);
-        return b.copy(zeroPad, 32 - b.length), zeroPad;
-      }
-      get [Symbol.toStringTag]() {
-        return `PublicKey(${this.toString()})`;
-      }
-      /**
-       * Return the base-58 representation of the public key
-       */
-      toString() {
-        return this.toBase58();
-      }
-      /**
-       * Derive a public key from another key, a seed, and a program ID.
-       * The program ID will also serve as the owner of the public key, giving
-       * it permission to write data to the account.
-       */
-      /* eslint-disable require-await */
-      static async createWithSeed(fromPublicKey, seed, programId) {
-        let buffer = Buffer2.concat([fromPublicKey.toBuffer(), Buffer2.from(seed), programId.toBuffer()]), publicKeyBytes = sha256(buffer);
-        return new PublicKey(publicKeyBytes);
-      }
-      /**
-       * Derive a program address from seeds and a program ID.
-       */
-      /* eslint-disable require-await */
-      static createProgramAddressSync(seeds, programId) {
-        let buffer = Buffer2.alloc(0);
-        seeds.forEach(function(seed) {
-          if (seed.length > MAX_SEED_LENGTH)
-            throw new TypeError("Max seed length exceeded");
-          buffer = Buffer2.concat([buffer, toBuffer(seed)]);
-        }), buffer = Buffer2.concat([buffer, programId.toBuffer(), Buffer2.from("ProgramDerivedAddress")]);
-        let publicKeyBytes = sha256(buffer);
-        if (isOnCurve(publicKeyBytes))
-          throw new Error("Invalid seeds, address must fall off the curve");
-        return new PublicKey(publicKeyBytes);
-      }
-      /**
-       * Async version of createProgramAddressSync
-       * For backwards compatibility
-       *
-       * @deprecated Use {@link createProgramAddressSync} instead
-       */
-      /* eslint-disable require-await */
-      static async createProgramAddress(seeds, programId) {
-        return this.createProgramAddressSync(seeds, programId);
-      }
-      /**
-       * Find a valid program address
-       *
-       * Valid program addresses must fall off the ed25519 curve.  This function
-       * iterates a nonce until it finds one that when combined with the seeds
-       * results in a valid program address.
-       */
-      static findProgramAddressSync(seeds, programId) {
-        let nonce = 255, address;
-        for (; nonce != 0; ) {
-          try {
-            let seedsWithNonce = seeds.concat(Buffer2.from([nonce]));
-            address = this.createProgramAddressSync(seedsWithNonce, programId);
-          } catch (err) {
-            if (err instanceof TypeError)
-              throw err;
-            nonce--;
-            continue;
-          }
-          return [address, nonce];
-        }
-        throw new Error("Unable to find a viable program address nonce");
-      }
-      /**
-       * Async version of findProgramAddressSync
-       * For backwards compatibility
-       *
-       * @deprecated Use {@link findProgramAddressSync} instead
-       */
-      static async findProgramAddress(seeds, programId) {
-        return this.findProgramAddressSync(seeds, programId);
-      }
-      /**
-       * Check that a pubkey is on the ed25519 curve.
-       */
-      static isOnCurve(pubkeyData) {
-        let pubkey = new PublicKey(pubkeyData);
-        return isOnCurve(pubkey.toBytes());
-      }
-    };
-    _PublicKey = PublicKey;
-    PublicKey.default = new _PublicKey("11111111111111111111111111111111");
-    SOLANA_SCHEMA.set(PublicKey, {
-      kind: "struct",
-      fields: [["_bn", "u256"]]
-    });
-    Account = class {
-      /**
-       * Create a new Account object
-       *
-       * If the secretKey parameter is not provided a new key pair is randomly
-       * created for the account
-       *
-       * @param secretKey Secret key for the account
-       */
-      constructor(secretKey) {
-        if (this._publicKey = void 0, this._secretKey = void 0, secretKey) {
-          let secretKeyBuffer = toBuffer(secretKey);
-          if (secretKey.length !== 64)
-            throw new Error("bad secret key size");
-          this._publicKey = secretKeyBuffer.slice(32, 64), this._secretKey = secretKeyBuffer.slice(0, 32);
-        } else
-          this._secretKey = toBuffer(generatePrivateKey()), this._publicKey = toBuffer(getPublicKey(this._secretKey));
-      }
-      /**
-       * The public key for this account
-       */
-      get publicKey() {
-        return new PublicKey(this._publicKey);
-      }
-      /**
-       * The **unencrypted** secret key for this account. The first 32 bytes
-       * is the private scalar and the last 32 bytes is the public key.
-       * Read more: https://blog.mozilla.org/warner/2011/11/29/ed25519-keys/
-       */
-      get secretKey() {
-        return Buffer2.concat([this._secretKey, this._publicKey], 64);
-      }
-    }, BPF_LOADER_DEPRECATED_PROGRAM_ID = new PublicKey("BPFLoader1111111111111111111111111111111111"), PACKET_DATA_SIZE = 1280 - 40 - 8, VERSION_PREFIX_MASK = 127, SIGNATURE_LENGTH_IN_BYTES = 64, TransactionExpiredBlockheightExceededError = class extends Error {
-      constructor(signature2) {
-        super(`Signature ${signature2} has expired: block height exceeded.`), this.signature = void 0, this.signature = signature2;
-      }
-    };
-    Object.defineProperty(TransactionExpiredBlockheightExceededError.prototype, "name", {
-      value: "TransactionExpiredBlockheightExceededError"
-    });
-    TransactionExpiredTimeoutError = class extends Error {
-      constructor(signature2, timeoutSeconds) {
-        super(`Transaction was not confirmed in ${timeoutSeconds.toFixed(2)} seconds. It is unknown if it succeeded or failed. Check signature ${signature2} using the Solana Explorer or CLI tools.`), this.signature = void 0, this.signature = signature2;
-      }
-    };
-    Object.defineProperty(TransactionExpiredTimeoutError.prototype, "name", {
-      value: "TransactionExpiredTimeoutError"
-    });
-    TransactionExpiredNonceInvalidError = class extends Error {
-      constructor(signature2) {
-        super(`Signature ${signature2} has expired: the nonce is no longer valid.`), this.signature = void 0, this.signature = signature2;
-      }
-    };
-    Object.defineProperty(TransactionExpiredNonceInvalidError.prototype, "name", {
-      value: "TransactionExpiredNonceInvalidError"
-    });
-    MessageAccountKeys = class {
-      constructor(staticAccountKeys, accountKeysFromLookups) {
-        this.staticAccountKeys = void 0, this.accountKeysFromLookups = void 0, this.staticAccountKeys = staticAccountKeys, this.accountKeysFromLookups = accountKeysFromLookups;
-      }
-      keySegments() {
-        let keySegments = [this.staticAccountKeys];
-        return this.accountKeysFromLookups && (keySegments.push(this.accountKeysFromLookups.writable), keySegments.push(this.accountKeysFromLookups.readonly)), keySegments;
-      }
-      get(index) {
-        for (let keySegment of this.keySegments()) {
-          if (index < keySegment.length)
-            return keySegment[index];
-          index -= keySegment.length;
-        }
-      }
-      get length() {
-        return this.keySegments().flat().length;
-      }
-      compileInstructions(instructions) {
-        if (this.length > 255 + 1)
-          throw new Error("Account index overflow encountered during compilation");
-        let keyIndexMap = /* @__PURE__ */ new Map();
-        this.keySegments().flat().forEach((key, index) => {
-          keyIndexMap.set(key.toBase58(), index);
-        });
-        let findKeyIndex = (key) => {
-          let keyIndex = keyIndexMap.get(key.toBase58());
-          if (keyIndex === void 0)
-            throw new Error("Encountered an unknown instruction account key during compilation");
-          return keyIndex;
-        };
-        return instructions.map((instruction) => ({
-          programIdIndex: findKeyIndex(instruction.programId),
-          accountKeyIndexes: instruction.keys.map((meta12) => findKeyIndex(meta12.pubkey)),
-          data: instruction.data
-        }));
-      }
-    }, publicKey = (property = "publicKey") => BufferLayout.blob(32, property), signature = (property = "signature") => BufferLayout.blob(64, property), rustString = (property = "string") => {
-      let rsl = BufferLayout.struct([BufferLayout.u32("length"), BufferLayout.u32("lengthPadding"), BufferLayout.blob(BufferLayout.offset(BufferLayout.u32(), -8), "chars")], property), _decode = rsl.decode.bind(rsl), _encode = rsl.encode.bind(rsl), rslShim = rsl;
-      return rslShim.decode = (b, offset2) => _decode(b, offset2).chars.toString(), rslShim.encode = (str, b, offset2) => {
-        let data = {
-          chars: Buffer2.from(str, "utf8")
-        };
-        return _encode(data, b, offset2);
-      }, rslShim.alloc = (str) => BufferLayout.u32().span + BufferLayout.u32().span + Buffer2.from(str, "utf8").length, rslShim;
-    }, authorized = (property = "authorized") => BufferLayout.struct([publicKey("staker"), publicKey("withdrawer")], property), lockup = (property = "lockup") => BufferLayout.struct([BufferLayout.ns64("unixTimestamp"), BufferLayout.ns64("epoch"), publicKey("custodian")], property), voteInit = (property = "voteInit") => BufferLayout.struct([publicKey("nodePubkey"), publicKey("authorizedVoter"), publicKey("authorizedWithdrawer"), BufferLayout.u8("commission")], property), voteAuthorizeWithSeedArgs = (property = "voteAuthorizeWithSeedArgs") => BufferLayout.struct([BufferLayout.u32("voteAuthorizationType"), publicKey("currentAuthorityDerivedKeyOwnerPubkey"), rustString("currentAuthorityDerivedKeySeed"), publicKey("newAuthorized")], property);
-    CompiledKeys = class {
-      constructor(payer, keyMetaMap) {
-        this.payer = void 0, this.keyMetaMap = void 0, this.payer = payer, this.keyMetaMap = keyMetaMap;
-      }
-      static compile(instructions, payer) {
-        let keyMetaMap = /* @__PURE__ */ new Map(), getOrInsertDefault = (pubkey) => {
-          let address = pubkey.toBase58(), keyMeta = keyMetaMap.get(address);
-          return keyMeta === void 0 && (keyMeta = {
-            isSigner: !1,
-            isWritable: !1,
-            isInvoked: !1
-          }, keyMetaMap.set(address, keyMeta)), keyMeta;
-        }, payerKeyMeta = getOrInsertDefault(payer);
-        payerKeyMeta.isSigner = !0, payerKeyMeta.isWritable = !0;
-        for (let ix of instructions) {
-          getOrInsertDefault(ix.programId).isInvoked = !0;
-          for (let accountMeta of ix.keys) {
-            let keyMeta = getOrInsertDefault(accountMeta.pubkey);
-            keyMeta.isSigner ||= accountMeta.isSigner, keyMeta.isWritable ||= accountMeta.isWritable;
-          }
-        }
-        return new CompiledKeys(payer, keyMetaMap);
-      }
-      getMessageComponents() {
-        let mapEntries = [...this.keyMetaMap.entries()];
-        assert(mapEntries.length <= 256, "Max static account keys length exceeded");
-        let writableSigners = mapEntries.filter(([, meta12]) => meta12.isSigner && meta12.isWritable), readonlySigners = mapEntries.filter(([, meta12]) => meta12.isSigner && !meta12.isWritable), writableNonSigners = mapEntries.filter(([, meta12]) => !meta12.isSigner && meta12.isWritable), readonlyNonSigners = mapEntries.filter(([, meta12]) => !meta12.isSigner && !meta12.isWritable), header = {
-          numRequiredSignatures: writableSigners.length + readonlySigners.length,
-          numReadonlySignedAccounts: readonlySigners.length,
-          numReadonlyUnsignedAccounts: readonlyNonSigners.length
-        };
-        {
-          assert(writableSigners.length > 0, "Expected at least one writable signer key");
-          let [payerAddress] = writableSigners[0];
-          assert(payerAddress === this.payer.toBase58(), "Expected first writable signer key to be the fee payer");
-        }
-        let staticAccountKeys = [...writableSigners.map(([address]) => new PublicKey(address)), ...readonlySigners.map(([address]) => new PublicKey(address)), ...writableNonSigners.map(([address]) => new PublicKey(address)), ...readonlyNonSigners.map(([address]) => new PublicKey(address))];
-        return [header, staticAccountKeys];
-      }
-      extractTableLookup(lookupTable) {
-        let [writableIndexes, drainedWritableKeys] = this.drainKeysFoundInLookupTable(lookupTable.state.addresses, (keyMeta) => !keyMeta.isSigner && !keyMeta.isInvoked && keyMeta.isWritable), [readonlyIndexes, drainedReadonlyKeys] = this.drainKeysFoundInLookupTable(lookupTable.state.addresses, (keyMeta) => !keyMeta.isSigner && !keyMeta.isInvoked && !keyMeta.isWritable);
-        if (!(writableIndexes.length === 0 && readonlyIndexes.length === 0))
-          return [{
-            accountKey: lookupTable.key,
-            writableIndexes,
-            readonlyIndexes
-          }, {
-            writable: drainedWritableKeys,
-            readonly: drainedReadonlyKeys
-          }];
-      }
-      /** @internal */
-      drainKeysFoundInLookupTable(lookupTableEntries, keyMetaFilter) {
-        let lookupTableIndexes = new Array(), drainedKeys = new Array();
-        for (let [address, keyMeta] of this.keyMetaMap.entries())
-          if (keyMetaFilter(keyMeta)) {
-            let key = new PublicKey(address), lookupTableIndex = lookupTableEntries.findIndex((entry2) => entry2.equals(key));
-            lookupTableIndex >= 0 && (assert(lookupTableIndex < 256, "Max lookup table index exceeded"), lookupTableIndexes.push(lookupTableIndex), drainedKeys.push(key), this.keyMetaMap.delete(address));
-          }
-        return [lookupTableIndexes, drainedKeys];
-      }
-    }, END_OF_BUFFER_ERROR_MESSAGE = "Reached end of buffer unexpectedly";
-    Message = class {
-      constructor(args) {
-        this.header = void 0, this.accountKeys = void 0, this.recentBlockhash = void 0, this.instructions = void 0, this.indexToProgramIds = /* @__PURE__ */ new Map(), this.header = args.header, this.accountKeys = args.accountKeys.map((account) => new PublicKey(account)), this.recentBlockhash = args.recentBlockhash, this.instructions = args.instructions, this.instructions.forEach((ix) => this.indexToProgramIds.set(ix.programIdIndex, this.accountKeys[ix.programIdIndex]));
-      }
-      get version() {
-        return "legacy";
-      }
-      get staticAccountKeys() {
-        return this.accountKeys;
-      }
-      get compiledInstructions() {
-        return this.instructions.map((ix) => ({
-          programIdIndex: ix.programIdIndex,
-          accountKeyIndexes: ix.accounts,
-          data: bs58.decode(ix.data)
-        }));
-      }
-      get addressTableLookups() {
-        return [];
-      }
-      getAccountKeys() {
-        return new MessageAccountKeys(this.staticAccountKeys);
-      }
-      static compile(args) {
-        let compiledKeys = CompiledKeys.compile(args.instructions, args.payerKey), [header, staticAccountKeys] = compiledKeys.getMessageComponents(), instructions = new MessageAccountKeys(staticAccountKeys).compileInstructions(args.instructions).map((ix) => ({
-          programIdIndex: ix.programIdIndex,
-          accounts: ix.accountKeyIndexes,
-          data: bs58.encode(ix.data)
-        }));
-        return new Message({
-          header,
-          accountKeys: staticAccountKeys,
-          recentBlockhash: args.recentBlockhash,
-          instructions
-        });
-      }
-      isAccountSigner(index) {
-        return index < this.header.numRequiredSignatures;
-      }
-      isAccountWritable(index) {
-        let numSignedAccounts = this.header.numRequiredSignatures;
-        if (index >= this.header.numRequiredSignatures) {
-          let unsignedAccountIndex = index - numSignedAccounts, numWritableUnsignedAccounts = this.accountKeys.length - numSignedAccounts - this.header.numReadonlyUnsignedAccounts;
-          return unsignedAccountIndex < numWritableUnsignedAccounts;
-        } else {
-          let numWritableSignedAccounts = numSignedAccounts - this.header.numReadonlySignedAccounts;
-          return index < numWritableSignedAccounts;
-        }
-      }
-      isProgramId(index) {
-        return this.indexToProgramIds.has(index);
-      }
-      programIds() {
-        return [...this.indexToProgramIds.values()];
-      }
-      nonProgramIds() {
-        return this.accountKeys.filter((_, index) => !this.isProgramId(index));
-      }
-      serialize() {
-        let numKeys = this.accountKeys.length, keyCount = [];
-        encodeLength(keyCount, numKeys);
-        let instructions = this.instructions.map((instruction) => {
-          let {
-            accounts,
-            programIdIndex
-          } = instruction, data = Array.from(bs58.decode(instruction.data)), keyIndicesCount = [];
-          encodeLength(keyIndicesCount, accounts.length);
-          let dataCount = [];
-          return encodeLength(dataCount, data.length), {
-            programIdIndex,
-            keyIndicesCount: Buffer2.from(keyIndicesCount),
-            keyIndices: accounts,
-            dataLength: Buffer2.from(dataCount),
-            data
-          };
-        }), instructionCount = [];
-        encodeLength(instructionCount, instructions.length);
-        let instructionBuffer = Buffer2.alloc(PACKET_DATA_SIZE);
-        Buffer2.from(instructionCount).copy(instructionBuffer);
-        let instructionBufferLength = instructionCount.length;
-        instructions.forEach((instruction) => {
-          let length2 = BufferLayout.struct([BufferLayout.u8("programIdIndex"), BufferLayout.blob(instruction.keyIndicesCount.length, "keyIndicesCount"), BufferLayout.seq(BufferLayout.u8("keyIndex"), instruction.keyIndices.length, "keyIndices"), BufferLayout.blob(instruction.dataLength.length, "dataLength"), BufferLayout.seq(BufferLayout.u8("userdatum"), instruction.data.length, "data")]).encode(instruction, instructionBuffer, instructionBufferLength);
-          instructionBufferLength += length2;
-        }), instructionBuffer = instructionBuffer.slice(0, instructionBufferLength);
-        let signDataLayout = BufferLayout.struct([BufferLayout.blob(1, "numRequiredSignatures"), BufferLayout.blob(1, "numReadonlySignedAccounts"), BufferLayout.blob(1, "numReadonlyUnsignedAccounts"), BufferLayout.blob(keyCount.length, "keyCount"), BufferLayout.seq(publicKey("key"), numKeys, "keys"), publicKey("recentBlockhash")]), transaction = {
-          numRequiredSignatures: Buffer2.from([this.header.numRequiredSignatures]),
-          numReadonlySignedAccounts: Buffer2.from([this.header.numReadonlySignedAccounts]),
-          numReadonlyUnsignedAccounts: Buffer2.from([this.header.numReadonlyUnsignedAccounts]),
-          keyCount: Buffer2.from(keyCount),
-          keys: this.accountKeys.map((key) => toBuffer(key.toBytes())),
-          recentBlockhash: bs58.decode(this.recentBlockhash)
-        }, signData = Buffer2.alloc(2048), length = signDataLayout.encode(transaction, signData);
-        return instructionBuffer.copy(signData, length), signData.slice(0, length + instructionBuffer.length);
-      }
-      /**
-       * Decode a compiled message into a Message object.
-       */
-      static from(buffer) {
-        let byteArray = [...buffer], numRequiredSignatures = guardedShift(byteArray);
-        if (numRequiredSignatures !== (numRequiredSignatures & VERSION_PREFIX_MASK))
-          throw new Error("Versioned messages must be deserialized with VersionedMessage.deserialize()");
-        let numReadonlySignedAccounts = guardedShift(byteArray), numReadonlyUnsignedAccounts = guardedShift(byteArray), accountCount = decodeLength(byteArray), accountKeys = [];
-        for (let i = 0; i < accountCount; i++) {
-          let account = guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH);
-          accountKeys.push(new PublicKey(Buffer2.from(account)));
-        }
-        let recentBlockhash = guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH), instructionCount = decodeLength(byteArray), instructions = [];
-        for (let i = 0; i < instructionCount; i++) {
-          let programIdIndex = guardedShift(byteArray), accountCount2 = decodeLength(byteArray), accounts = guardedSplice(byteArray, 0, accountCount2), dataLength = decodeLength(byteArray), dataSlice = guardedSplice(byteArray, 0, dataLength), data = bs58.encode(Buffer2.from(dataSlice));
-          instructions.push({
-            programIdIndex,
-            accounts,
-            data
-          });
-        }
-        let messageArgs = {
-          header: {
-            numRequiredSignatures,
-            numReadonlySignedAccounts,
-            numReadonlyUnsignedAccounts
-          },
-          recentBlockhash: bs58.encode(Buffer2.from(recentBlockhash)),
-          accountKeys,
-          instructions
-        };
-        return new Message(messageArgs);
-      }
-    }, MessageV0 = class {
-      constructor(args) {
-        this.header = void 0, this.staticAccountKeys = void 0, this.recentBlockhash = void 0, this.compiledInstructions = void 0, this.addressTableLookups = void 0, this.header = args.header, this.staticAccountKeys = args.staticAccountKeys, this.recentBlockhash = args.recentBlockhash, this.compiledInstructions = args.compiledInstructions, this.addressTableLookups = args.addressTableLookups;
-      }
-      get version() {
-        return 0;
-      }
-      get numAccountKeysFromLookups() {
-        let count = 0;
-        for (let lookup of this.addressTableLookups)
-          count += lookup.readonlyIndexes.length + lookup.writableIndexes.length;
-        return count;
-      }
-      getAccountKeys(args) {
-        let accountKeysFromLookups;
-        if (args && "accountKeysFromLookups" in args && args.accountKeysFromLookups) {
-          if (this.numAccountKeysFromLookups != args.accountKeysFromLookups.writable.length + args.accountKeysFromLookups.readonly.length)
-            throw new Error("Failed to get account keys because of a mismatch in the number of account keys from lookups");
-          accountKeysFromLookups = args.accountKeysFromLookups;
-        } else if (args && "addressLookupTableAccounts" in args && args.addressLookupTableAccounts)
-          accountKeysFromLookups = this.resolveAddressTableLookups(args.addressLookupTableAccounts);
-        else if (this.addressTableLookups.length > 0)
-          throw new Error("Failed to get account keys because address table lookups were not resolved");
-        return new MessageAccountKeys(this.staticAccountKeys, accountKeysFromLookups);
-      }
-      isAccountSigner(index) {
-        return index < this.header.numRequiredSignatures;
-      }
-      isAccountWritable(index) {
-        let numSignedAccounts = this.header.numRequiredSignatures, numStaticAccountKeys = this.staticAccountKeys.length;
-        if (index >= numStaticAccountKeys) {
-          let lookupAccountKeysIndex = index - numStaticAccountKeys, numWritableLookupAccountKeys = this.addressTableLookups.reduce((count, lookup) => count + lookup.writableIndexes.length, 0);
-          return lookupAccountKeysIndex < numWritableLookupAccountKeys;
-        } else if (index >= this.header.numRequiredSignatures) {
-          let unsignedAccountIndex = index - numSignedAccounts, numWritableUnsignedAccounts = numStaticAccountKeys - numSignedAccounts - this.header.numReadonlyUnsignedAccounts;
-          return unsignedAccountIndex < numWritableUnsignedAccounts;
-        } else {
-          let numWritableSignedAccounts = numSignedAccounts - this.header.numReadonlySignedAccounts;
-          return index < numWritableSignedAccounts;
-        }
-      }
-      resolveAddressTableLookups(addressLookupTableAccounts) {
-        let accountKeysFromLookups = {
-          writable: [],
-          readonly: []
-        };
-        for (let tableLookup of this.addressTableLookups) {
-          let tableAccount = addressLookupTableAccounts.find((account) => account.key.equals(tableLookup.accountKey));
-          if (!tableAccount)
-            throw new Error(`Failed to find address lookup table account for table key ${tableLookup.accountKey.toBase58()}`);
-          for (let index of tableLookup.writableIndexes)
-            if (index < tableAccount.state.addresses.length)
-              accountKeysFromLookups.writable.push(tableAccount.state.addresses[index]);
-            else
-              throw new Error(`Failed to find address for index ${index} in address lookup table ${tableLookup.accountKey.toBase58()}`);
-          for (let index of tableLookup.readonlyIndexes)
-            if (index < tableAccount.state.addresses.length)
-              accountKeysFromLookups.readonly.push(tableAccount.state.addresses[index]);
-            else
-              throw new Error(`Failed to find address for index ${index} in address lookup table ${tableLookup.accountKey.toBase58()}`);
-        }
-        return accountKeysFromLookups;
-      }
-      static compile(args) {
-        let compiledKeys = CompiledKeys.compile(args.instructions, args.payerKey), addressTableLookups = new Array(), accountKeysFromLookups = {
-          writable: new Array(),
-          readonly: new Array()
-        }, lookupTableAccounts = args.addressLookupTableAccounts || [];
-        for (let lookupTable of lookupTableAccounts) {
-          let extractResult = compiledKeys.extractTableLookup(lookupTable);
-          if (extractResult !== void 0) {
-            let [addressTableLookup, {
-              writable,
-              readonly
-            }] = extractResult;
-            addressTableLookups.push(addressTableLookup), accountKeysFromLookups.writable.push(...writable), accountKeysFromLookups.readonly.push(...readonly);
-          }
-        }
-        let [header, staticAccountKeys] = compiledKeys.getMessageComponents(), compiledInstructions = new MessageAccountKeys(staticAccountKeys, accountKeysFromLookups).compileInstructions(args.instructions);
-        return new MessageV0({
-          header,
-          staticAccountKeys,
-          recentBlockhash: args.recentBlockhash,
-          compiledInstructions,
-          addressTableLookups
-        });
-      }
-      serialize() {
-        let encodedStaticAccountKeysLength = Array();
-        encodeLength(encodedStaticAccountKeysLength, this.staticAccountKeys.length);
-        let serializedInstructions = this.serializeInstructions(), encodedInstructionsLength = Array();
-        encodeLength(encodedInstructionsLength, this.compiledInstructions.length);
-        let serializedAddressTableLookups = this.serializeAddressTableLookups(), encodedAddressTableLookupsLength = Array();
-        encodeLength(encodedAddressTableLookupsLength, this.addressTableLookups.length);
-        let messageLayout = BufferLayout.struct([BufferLayout.u8("prefix"), BufferLayout.struct([BufferLayout.u8("numRequiredSignatures"), BufferLayout.u8("numReadonlySignedAccounts"), BufferLayout.u8("numReadonlyUnsignedAccounts")], "header"), BufferLayout.blob(encodedStaticAccountKeysLength.length, "staticAccountKeysLength"), BufferLayout.seq(publicKey(), this.staticAccountKeys.length, "staticAccountKeys"), publicKey("recentBlockhash"), BufferLayout.blob(encodedInstructionsLength.length, "instructionsLength"), BufferLayout.blob(serializedInstructions.length, "serializedInstructions"), BufferLayout.blob(encodedAddressTableLookupsLength.length, "addressTableLookupsLength"), BufferLayout.blob(serializedAddressTableLookups.length, "serializedAddressTableLookups")]), serializedMessage = new Uint8Array(PACKET_DATA_SIZE), MESSAGE_VERSION_0_PREFIX = 1 << 7, serializedMessageLength = messageLayout.encode({
-          prefix: MESSAGE_VERSION_0_PREFIX,
-          header: this.header,
-          staticAccountKeysLength: new Uint8Array(encodedStaticAccountKeysLength),
-          staticAccountKeys: this.staticAccountKeys.map((key) => key.toBytes()),
-          recentBlockhash: bs58.decode(this.recentBlockhash),
-          instructionsLength: new Uint8Array(encodedInstructionsLength),
-          serializedInstructions,
-          addressTableLookupsLength: new Uint8Array(encodedAddressTableLookupsLength),
-          serializedAddressTableLookups
-        }, serializedMessage);
-        return serializedMessage.slice(0, serializedMessageLength);
-      }
-      serializeInstructions() {
-        let serializedLength = 0, serializedInstructions = new Uint8Array(PACKET_DATA_SIZE);
-        for (let instruction of this.compiledInstructions) {
-          let encodedAccountKeyIndexesLength = Array();
-          encodeLength(encodedAccountKeyIndexesLength, instruction.accountKeyIndexes.length);
-          let encodedDataLength = Array();
-          encodeLength(encodedDataLength, instruction.data.length);
-          let instructionLayout = BufferLayout.struct([BufferLayout.u8("programIdIndex"), BufferLayout.blob(encodedAccountKeyIndexesLength.length, "encodedAccountKeyIndexesLength"), BufferLayout.seq(BufferLayout.u8(), instruction.accountKeyIndexes.length, "accountKeyIndexes"), BufferLayout.blob(encodedDataLength.length, "encodedDataLength"), BufferLayout.blob(instruction.data.length, "data")]);
-          serializedLength += instructionLayout.encode({
-            programIdIndex: instruction.programIdIndex,
-            encodedAccountKeyIndexesLength: new Uint8Array(encodedAccountKeyIndexesLength),
-            accountKeyIndexes: instruction.accountKeyIndexes,
-            encodedDataLength: new Uint8Array(encodedDataLength),
-            data: instruction.data
-          }, serializedInstructions, serializedLength);
-        }
-        return serializedInstructions.slice(0, serializedLength);
-      }
-      serializeAddressTableLookups() {
-        let serializedLength = 0, serializedAddressTableLookups = new Uint8Array(PACKET_DATA_SIZE);
-        for (let lookup of this.addressTableLookups) {
-          let encodedWritableIndexesLength = Array();
-          encodeLength(encodedWritableIndexesLength, lookup.writableIndexes.length);
-          let encodedReadonlyIndexesLength = Array();
-          encodeLength(encodedReadonlyIndexesLength, lookup.readonlyIndexes.length);
-          let addressTableLookupLayout = BufferLayout.struct([publicKey("accountKey"), BufferLayout.blob(encodedWritableIndexesLength.length, "encodedWritableIndexesLength"), BufferLayout.seq(BufferLayout.u8(), lookup.writableIndexes.length, "writableIndexes"), BufferLayout.blob(encodedReadonlyIndexesLength.length, "encodedReadonlyIndexesLength"), BufferLayout.seq(BufferLayout.u8(), lookup.readonlyIndexes.length, "readonlyIndexes")]);
-          serializedLength += addressTableLookupLayout.encode({
-            accountKey: lookup.accountKey.toBytes(),
-            encodedWritableIndexesLength: new Uint8Array(encodedWritableIndexesLength),
-            writableIndexes: lookup.writableIndexes,
-            encodedReadonlyIndexesLength: new Uint8Array(encodedReadonlyIndexesLength),
-            readonlyIndexes: lookup.readonlyIndexes
-          }, serializedAddressTableLookups, serializedLength);
-        }
-        return serializedAddressTableLookups.slice(0, serializedLength);
-      }
-      static deserialize(serializedMessage) {
-        let byteArray = [...serializedMessage], prefix = guardedShift(byteArray), maskedPrefix = prefix & VERSION_PREFIX_MASK;
-        assert(prefix !== maskedPrefix, "Expected versioned message but received legacy message");
-        let version2 = maskedPrefix;
-        assert(version2 === 0, `Expected versioned message with version 0 but found version ${version2}`);
-        let header = {
-          numRequiredSignatures: guardedShift(byteArray),
-          numReadonlySignedAccounts: guardedShift(byteArray),
-          numReadonlyUnsignedAccounts: guardedShift(byteArray)
-        }, staticAccountKeys = [], staticAccountKeysLength = decodeLength(byteArray);
-        for (let i = 0; i < staticAccountKeysLength; i++)
-          staticAccountKeys.push(new PublicKey(guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH)));
-        let recentBlockhash = bs58.encode(guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH)), instructionCount = decodeLength(byteArray), compiledInstructions = [];
-        for (let i = 0; i < instructionCount; i++) {
-          let programIdIndex = guardedShift(byteArray), accountKeyIndexesLength = decodeLength(byteArray), accountKeyIndexes = guardedSplice(byteArray, 0, accountKeyIndexesLength), dataLength = decodeLength(byteArray), data = new Uint8Array(guardedSplice(byteArray, 0, dataLength));
-          compiledInstructions.push({
-            programIdIndex,
-            accountKeyIndexes,
-            data
-          });
-        }
-        let addressTableLookupsCount = decodeLength(byteArray), addressTableLookups = [];
-        for (let i = 0; i < addressTableLookupsCount; i++) {
-          let accountKey = new PublicKey(guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH)), writableIndexesLength = decodeLength(byteArray), writableIndexes = guardedSplice(byteArray, 0, writableIndexesLength), readonlyIndexesLength = decodeLength(byteArray), readonlyIndexes = guardedSplice(byteArray, 0, readonlyIndexesLength);
-          addressTableLookups.push({
-            accountKey,
-            writableIndexes,
-            readonlyIndexes
-          });
-        }
-        return new MessageV0({
-          header,
-          staticAccountKeys,
-          recentBlockhash,
-          compiledInstructions,
-          addressTableLookups
-        });
-      }
-    }, VersionedMessage = {
-      deserializeMessageVersion(serializedMessage) {
-        let prefix = serializedMessage[0], maskedPrefix = prefix & VERSION_PREFIX_MASK;
-        return maskedPrefix === prefix ? "legacy" : maskedPrefix;
-      },
-      deserialize: (serializedMessage) => {
-        let version2 = VersionedMessage.deserializeMessageVersion(serializedMessage);
-        if (version2 === "legacy")
-          return Message.from(serializedMessage);
-        if (version2 === 0)
-          return MessageV0.deserialize(serializedMessage);
-        throw new Error(`Transaction message version ${version2} deserialization is not supported`);
-      }
-    }, TransactionStatus = /* @__PURE__ */ function(TransactionStatus2) {
-      return TransactionStatus2[TransactionStatus2.BLOCKHEIGHT_EXCEEDED = 0] = "BLOCKHEIGHT_EXCEEDED", TransactionStatus2[TransactionStatus2.PROCESSED = 1] = "PROCESSED", TransactionStatus2[TransactionStatus2.TIMED_OUT = 2] = "TIMED_OUT", TransactionStatus2[TransactionStatus2.NONCE_INVALID = 3] = "NONCE_INVALID", TransactionStatus2;
-    }({}), DEFAULT_SIGNATURE = Buffer2.alloc(SIGNATURE_LENGTH_IN_BYTES).fill(0), TransactionInstruction = class {
-      constructor(opts) {
-        this.keys = void 0, this.programId = void 0, this.data = Buffer2.alloc(0), this.programId = opts.programId, this.keys = opts.keys, opts.data && (this.data = opts.data);
-      }
-      /**
-       * @internal
-       */
-      toJSON() {
-        return {
-          keys: this.keys.map(({
-            pubkey,
-            isSigner,
-            isWritable
-          }) => ({
-            pubkey: pubkey.toJSON(),
-            isSigner,
-            isWritable
-          })),
-          programId: this.programId.toJSON(),
-          data: [...this.data]
-        };
-      }
-    }, Transaction = class {
-      /**
-       * The first (payer) Transaction signature
-       *
-       * @returns {Buffer | null} Buffer of payer's signature
-       */
-      get signature() {
-        return this.signatures.length > 0 ? this.signatures[0].signature : null;
-      }
-      /**
-       * The transaction fee payer
-       */
-      // Construct a transaction with a blockhash and lastValidBlockHeight
-      // Construct a transaction using a durable nonce
-      /**
-       * @deprecated `TransactionCtorFields` has been deprecated and will be removed in a future version.
-       * Please supply a `TransactionBlockhashCtor` instead.
-       */
-      /**
-       * Construct an empty Transaction
-       */
-      constructor(opts) {
-        if (this.signatures = [], this.feePayer = void 0, this.instructions = [], this.recentBlockhash = void 0, this.lastValidBlockHeight = void 0, this.nonceInfo = void 0, this.minNonceContextSlot = void 0, this._message = void 0, this._json = void 0, !!opts)
-          if (opts.feePayer && (this.feePayer = opts.feePayer), opts.signatures && (this.signatures = opts.signatures), Object.prototype.hasOwnProperty.call(opts, "nonceInfo")) {
-            let {
-              minContextSlot,
-              nonceInfo
-            } = opts;
-            this.minNonceContextSlot = minContextSlot, this.nonceInfo = nonceInfo;
-          } else if (Object.prototype.hasOwnProperty.call(opts, "lastValidBlockHeight")) {
-            let {
-              blockhash,
-              lastValidBlockHeight
-            } = opts;
-            this.recentBlockhash = blockhash, this.lastValidBlockHeight = lastValidBlockHeight;
-          } else {
-            let {
-              recentBlockhash,
-              nonceInfo
-            } = opts;
-            nonceInfo && (this.nonceInfo = nonceInfo), this.recentBlockhash = recentBlockhash;
-          }
-      }
-      /**
-       * @internal
-       */
-      toJSON() {
-        return {
-          recentBlockhash: this.recentBlockhash || null,
-          feePayer: this.feePayer ? this.feePayer.toJSON() : null,
-          nonceInfo: this.nonceInfo ? {
-            nonce: this.nonceInfo.nonce,
-            nonceInstruction: this.nonceInfo.nonceInstruction.toJSON()
-          } : null,
-          instructions: this.instructions.map((instruction) => instruction.toJSON()),
-          signers: this.signatures.map(({
-            publicKey: publicKey5
-          }) => publicKey5.toJSON())
-        };
-      }
-      /**
-       * Add one or more instructions to this Transaction
-       *
-       * @param {Array< Transaction | TransactionInstruction | TransactionInstructionCtorFields >} items - Instructions to add to the Transaction
-       */
-      add(...items) {
-        if (items.length === 0)
-          throw new Error("No instructions");
-        return items.forEach((item) => {
-          "instructions" in item ? this.instructions = this.instructions.concat(item.instructions) : "data" in item && "programId" in item && "keys" in item ? this.instructions.push(item) : this.instructions.push(new TransactionInstruction(item));
-        }), this;
-      }
-      /**
-       * Compile transaction data
-       */
-      compileMessage() {
-        if (this._message && JSON.stringify(this.toJSON()) === JSON.stringify(this._json))
-          return this._message;
-        let recentBlockhash, instructions;
-        if (this.nonceInfo ? (recentBlockhash = this.nonceInfo.nonce, this.instructions[0] != this.nonceInfo.nonceInstruction ? instructions = [this.nonceInfo.nonceInstruction, ...this.instructions] : instructions = this.instructions) : (recentBlockhash = this.recentBlockhash, instructions = this.instructions), !recentBlockhash)
-          throw new Error("Transaction recentBlockhash required");
-        instructions.length < 1 && console.warn("No instructions provided");
-        let feePayer;
-        if (this.feePayer)
-          feePayer = this.feePayer;
-        else if (this.signatures.length > 0 && this.signatures[0].publicKey)
-          feePayer = this.signatures[0].publicKey;
-        else
-          throw new Error("Transaction fee payer required");
-        for (let i = 0; i < instructions.length; i++)
-          if (instructions[i].programId === void 0)
-            throw new Error(`Transaction instruction index ${i} has undefined program id`);
-        let programIds = [], accountMetas = [];
-        instructions.forEach((instruction) => {
-          instruction.keys.forEach((accountMeta) => {
-            accountMetas.push({
-              ...accountMeta
-            });
-          });
-          let programId = instruction.programId.toString();
-          programIds.includes(programId) || programIds.push(programId);
-        }), programIds.forEach((programId) => {
-          accountMetas.push({
-            pubkey: new PublicKey(programId),
-            isSigner: !1,
-            isWritable: !1
-          });
-        });
-        let uniqueMetas = [];
-        accountMetas.forEach((accountMeta) => {
-          let pubkeyString = accountMeta.pubkey.toString(), uniqueIndex = uniqueMetas.findIndex((x) => x.pubkey.toString() === pubkeyString);
-          uniqueIndex > -1 ? (uniqueMetas[uniqueIndex].isWritable = uniqueMetas[uniqueIndex].isWritable || accountMeta.isWritable, uniqueMetas[uniqueIndex].isSigner = uniqueMetas[uniqueIndex].isSigner || accountMeta.isSigner) : uniqueMetas.push(accountMeta);
-        }), uniqueMetas.sort(function(x, y) {
-          if (x.isSigner !== y.isSigner)
-            return x.isSigner ? -1 : 1;
-          if (x.isWritable !== y.isWritable)
-            return x.isWritable ? -1 : 1;
-          let options = {
-            localeMatcher: "best fit",
-            usage: "sort",
-            sensitivity: "variant",
-            ignorePunctuation: !1,
-            numeric: !1,
-            caseFirst: "lower"
-          };
-          return x.pubkey.toBase58().localeCompare(y.pubkey.toBase58(), "en", options);
-        });
-        let feePayerIndex = uniqueMetas.findIndex((x) => x.pubkey.equals(feePayer));
-        if (feePayerIndex > -1) {
-          let [payerMeta] = uniqueMetas.splice(feePayerIndex, 1);
-          payerMeta.isSigner = !0, payerMeta.isWritable = !0, uniqueMetas.unshift(payerMeta);
-        } else
-          uniqueMetas.unshift({
-            pubkey: feePayer,
-            isSigner: !0,
-            isWritable: !0
-          });
-        for (let signature2 of this.signatures) {
-          let uniqueIndex = uniqueMetas.findIndex((x) => x.pubkey.equals(signature2.publicKey));
-          if (uniqueIndex > -1)
-            uniqueMetas[uniqueIndex].isSigner || (uniqueMetas[uniqueIndex].isSigner = !0, console.warn("Transaction references a signature that is unnecessary, only the fee payer and instruction signer accounts should sign a transaction. This behavior is deprecated and will throw an error in the next major version release."));
-          else
-            throw new Error(`unknown signer: ${signature2.publicKey.toString()}`);
-        }
-        let numRequiredSignatures = 0, numReadonlySignedAccounts = 0, numReadonlyUnsignedAccounts = 0, signedKeys = [], unsignedKeys = [];
-        uniqueMetas.forEach(({
-          pubkey,
-          isSigner,
-          isWritable
-        }) => {
-          isSigner ? (signedKeys.push(pubkey.toString()), numRequiredSignatures += 1, isWritable || (numReadonlySignedAccounts += 1)) : (unsignedKeys.push(pubkey.toString()), isWritable || (numReadonlyUnsignedAccounts += 1));
-        });
-        let accountKeys = signedKeys.concat(unsignedKeys), compiledInstructions = instructions.map((instruction) => {
-          let {
-            data,
-            programId
-          } = instruction;
-          return {
-            programIdIndex: accountKeys.indexOf(programId.toString()),
-            accounts: instruction.keys.map((meta12) => accountKeys.indexOf(meta12.pubkey.toString())),
-            data: bs58.encode(data)
-          };
-        });
-        return compiledInstructions.forEach((instruction) => {
-          assert(instruction.programIdIndex >= 0), instruction.accounts.forEach((keyIndex) => assert(keyIndex >= 0));
-        }), new Message({
-          header: {
-            numRequiredSignatures,
-            numReadonlySignedAccounts,
-            numReadonlyUnsignedAccounts
-          },
-          accountKeys,
-          recentBlockhash,
-          instructions: compiledInstructions
-        });
-      }
-      /**
-       * @internal
-       */
-      _compile() {
-        let message = this.compileMessage(), signedKeys = message.accountKeys.slice(0, message.header.numRequiredSignatures);
-        return this.signatures.length === signedKeys.length && this.signatures.every((pair, index) => signedKeys[index].equals(pair.publicKey)) || (this.signatures = signedKeys.map((publicKey5) => ({
-          signature: null,
-          publicKey: publicKey5
-        }))), message;
-      }
-      /**
-       * Get a buffer of the Transaction data that need to be covered by signatures
-       */
-      serializeMessage() {
-        return this._compile().serialize();
-      }
-      /**
-       * Get the estimated fee associated with a transaction
-       *
-       * @param {Connection} connection Connection to RPC Endpoint.
-       *
-       * @returns {Promise<number | null>} The estimated fee for the transaction
-       */
-      async getEstimatedFee(connection) {
-        return (await connection.getFeeForMessage(this.compileMessage())).value;
-      }
-      /**
-       * Specify the public keys which will be used to sign the Transaction.
-       * The first signer will be used as the transaction fee payer account.
-       *
-       * Signatures can be added with either `partialSign` or `addSignature`
-       *
-       * @deprecated Deprecated since v0.84.0. Only the fee payer needs to be
-       * specified and it can be set in the Transaction constructor or with the
-       * `feePayer` property.
-       */
-      setSigners(...signers) {
-        if (signers.length === 0)
-          throw new Error("No signers");
-        let seen = /* @__PURE__ */ new Set();
-        this.signatures = signers.filter((publicKey5) => {
-          let key = publicKey5.toString();
-          return seen.has(key) ? !1 : (seen.add(key), !0);
-        }).map((publicKey5) => ({
-          signature: null,
-          publicKey: publicKey5
-        }));
-      }
-      /**
-       * Sign the Transaction with the specified signers. Multiple signatures may
-       * be applied to a Transaction. The first signature is considered "primary"
-       * and is used identify and confirm transactions.
-       *
-       * If the Transaction `feePayer` is not set, the first signer will be used
-       * as the transaction fee payer account.
-       *
-       * Transaction fields should not be modified after the first call to `sign`,
-       * as doing so may invalidate the signature and cause the Transaction to be
-       * rejected.
-       *
-       * The Transaction must be assigned a valid `recentBlockhash` before invoking this method
-       *
-       * @param {Array<Signer>} signers Array of signers that will sign the transaction
-       */
-      sign(...signers) {
-        if (signers.length === 0)
-          throw new Error("No signers");
-        let seen = /* @__PURE__ */ new Set(), uniqueSigners = [];
-        for (let signer of signers) {
-          let key = signer.publicKey.toString();
-          seen.has(key) || (seen.add(key), uniqueSigners.push(signer));
-        }
-        this.signatures = uniqueSigners.map((signer) => ({
-          signature: null,
-          publicKey: signer.publicKey
-        }));
-        let message = this._compile();
-        this._partialSign(message, ...uniqueSigners);
-      }
-      /**
-       * Partially sign a transaction with the specified accounts. All accounts must
-       * correspond to either the fee payer or a signer account in the transaction
-       * instructions.
-       *
-       * All the caveats from the `sign` method apply to `partialSign`
-       *
-       * @param {Array<Signer>} signers Array of signers that will sign the transaction
-       */
-      partialSign(...signers) {
-        if (signers.length === 0)
-          throw new Error("No signers");
-        let seen = /* @__PURE__ */ new Set(), uniqueSigners = [];
-        for (let signer of signers) {
-          let key = signer.publicKey.toString();
-          seen.has(key) || (seen.add(key), uniqueSigners.push(signer));
-        }
-        let message = this._compile();
-        this._partialSign(message, ...uniqueSigners);
-      }
-      /**
-       * @internal
-       */
-      _partialSign(message, ...signers) {
-        let signData = message.serialize();
-        signers.forEach((signer) => {
-          let signature2 = sign(signData, signer.secretKey);
-          this._addSignature(signer.publicKey, toBuffer(signature2));
-        });
-      }
-      /**
-       * Add an externally created signature to a transaction. The public key
-       * must correspond to either the fee payer or a signer account in the transaction
-       * instructions.
-       *
-       * @param {PublicKey} pubkey Public key that will be added to the transaction.
-       * @param {Buffer} signature An externally created signature to add to the transaction.
-       */
-      addSignature(pubkey, signature2) {
-        this._compile(), this._addSignature(pubkey, signature2);
-      }
-      /**
-       * @internal
-       */
-      _addSignature(pubkey, signature2) {
-        assert(signature2.length === 64);
-        let index = this.signatures.findIndex((sigpair) => pubkey.equals(sigpair.publicKey));
-        if (index < 0)
-          throw new Error(`unknown signer: ${pubkey.toString()}`);
-        this.signatures[index].signature = Buffer2.from(signature2);
-      }
-      /**
-       * Verify signatures of a Transaction
-       * Optional parameter specifies if we're expecting a fully signed Transaction or a partially signed one.
-       * If no boolean is provided, we expect a fully signed Transaction by default.
-       *
-       * @param {boolean} [requireAllSignatures=true] Require a fully signed Transaction
-       */
-      verifySignatures(requireAllSignatures = !0) {
-        return !this._getMessageSignednessErrors(this.serializeMessage(), requireAllSignatures);
-      }
-      /**
-       * @internal
-       */
-      _getMessageSignednessErrors(message, requireAllSignatures) {
-        let errors = {};
-        for (let {
-          signature: signature2,
-          publicKey: publicKey5
-        } of this.signatures)
-          signature2 === null ? requireAllSignatures && (errors.missing ||= []).push(publicKey5) : verify(signature2, message, publicKey5.toBytes()) || (errors.invalid ||= []).push(publicKey5);
-        return errors.invalid || errors.missing ? errors : void 0;
-      }
-      /**
-       * Serialize the Transaction in the wire format.
-       *
-       * @param {Buffer} [config] Config of transaction.
-       *
-       * @returns {Buffer} Signature of transaction in wire format.
-       */
-      serialize(config) {
-        let {
-          requireAllSignatures,
-          verifySignatures
-        } = Object.assign({
-          requireAllSignatures: !0,
-          verifySignatures: !0
-        }, config), signData = this.serializeMessage();
-        if (verifySignatures) {
-          let sigErrors = this._getMessageSignednessErrors(signData, requireAllSignatures);
-          if (sigErrors) {
-            let errorMessage = "Signature verification failed.";
-            throw sigErrors.invalid && (errorMessage += `
-Invalid signature for public key${sigErrors.invalid.length === 1 ? "" : "(s)"} [\`${sigErrors.invalid.map((p) => p.toBase58()).join("`, `")}\`].`), sigErrors.missing && (errorMessage += `
-Missing signature for public key${sigErrors.missing.length === 1 ? "" : "(s)"} [\`${sigErrors.missing.map((p) => p.toBase58()).join("`, `")}\`].`), new Error(errorMessage);
-          }
-        }
-        return this._serialize(signData);
-      }
-      /**
-       * @internal
-       */
-      _serialize(signData) {
-        let {
-          signatures
-        } = this, signatureCount = [];
-        encodeLength(signatureCount, signatures.length);
-        let transactionLength = signatureCount.length + signatures.length * 64 + signData.length, wireTransaction = Buffer2.alloc(transactionLength);
-        return assert(signatures.length < 256), Buffer2.from(signatureCount).copy(wireTransaction, 0), signatures.forEach(({
-          signature: signature2
-        }, index) => {
-          signature2 !== null && (assert(signature2.length === 64, "signature has invalid length"), Buffer2.from(signature2).copy(wireTransaction, signatureCount.length + index * 64));
-        }), signData.copy(wireTransaction, signatureCount.length + signatures.length * 64), assert(wireTransaction.length <= PACKET_DATA_SIZE, `Transaction too large: ${wireTransaction.length} > ${PACKET_DATA_SIZE}`), wireTransaction;
-      }
-      /**
-       * Deprecated method
-       * @internal
-       */
-      get keys() {
-        return assert(this.instructions.length === 1), this.instructions[0].keys.map((keyObj) => keyObj.pubkey);
-      }
-      /**
-       * Deprecated method
-       * @internal
-       */
-      get programId() {
-        return assert(this.instructions.length === 1), this.instructions[0].programId;
-      }
-      /**
-       * Deprecated method
-       * @internal
-       */
-      get data() {
-        return assert(this.instructions.length === 1), this.instructions[0].data;
-      }
-      /**
-       * Parse a wire transaction into a Transaction object.
-       *
-       * @param {Buffer | Uint8Array | Array<number>} buffer Signature of wire Transaction
-       *
-       * @returns {Transaction} Transaction associated with the signature
-       */
-      static from(buffer) {
-        let byteArray = [...buffer], signatureCount = decodeLength(byteArray), signatures = [];
-        for (let i = 0; i < signatureCount; i++) {
-          let signature2 = guardedSplice(byteArray, 0, SIGNATURE_LENGTH_IN_BYTES);
-          signatures.push(bs58.encode(Buffer2.from(signature2)));
-        }
-        return Transaction.populate(Message.from(byteArray), signatures);
-      }
-      /**
-       * Populate Transaction object from message and signatures
-       *
-       * @param {Message} message Message of transaction
-       * @param {Array<string>} signatures List of signatures to assign to the transaction
-       *
-       * @returns {Transaction} The populated Transaction
-       */
-      static populate(message, signatures = []) {
-        let transaction = new Transaction();
-        return transaction.recentBlockhash = message.recentBlockhash, message.header.numRequiredSignatures > 0 && (transaction.feePayer = message.accountKeys[0]), signatures.forEach((signature2, index) => {
-          let sigPubkeyPair = {
-            signature: signature2 == bs58.encode(DEFAULT_SIGNATURE) ? null : bs58.decode(signature2),
-            publicKey: message.accountKeys[index]
-          };
-          transaction.signatures.push(sigPubkeyPair);
-        }), message.instructions.forEach((instruction) => {
-          let keys = instruction.accounts.map((account) => {
-            let pubkey = message.accountKeys[account];
-            return {
-              pubkey,
-              isSigner: transaction.signatures.some((keyObj) => keyObj.publicKey.toString() === pubkey.toString()) || message.isAccountSigner(account),
-              isWritable: message.isAccountWritable(account)
-            };
-          });
-          transaction.instructions.push(new TransactionInstruction({
-            keys,
-            programId: message.accountKeys[instruction.programIdIndex],
-            data: bs58.decode(instruction.data)
-          }));
-        }), transaction._message = message, transaction._json = transaction.toJSON(), transaction;
-      }
-    }, TransactionMessage = class {
-      constructor(args) {
-        this.payerKey = void 0, this.instructions = void 0, this.recentBlockhash = void 0, this.payerKey = args.payerKey, this.instructions = args.instructions, this.recentBlockhash = args.recentBlockhash;
-      }
-      static decompile(message, args) {
-        let {
-          header,
-          compiledInstructions,
-          recentBlockhash
-        } = message, {
-          numRequiredSignatures,
-          numReadonlySignedAccounts,
-          numReadonlyUnsignedAccounts
-        } = header, numWritableSignedAccounts = numRequiredSignatures - numReadonlySignedAccounts;
-        assert(numWritableSignedAccounts > 0, "Message header is invalid");
-        let numWritableUnsignedAccounts = message.staticAccountKeys.length - numRequiredSignatures - numReadonlyUnsignedAccounts;
-        assert(numWritableUnsignedAccounts >= 0, "Message header is invalid");
-        let accountKeys = message.getAccountKeys(args), payerKey = accountKeys.get(0);
-        if (payerKey === void 0)
-          throw new Error("Failed to decompile message because no account keys were found");
-        let instructions = [];
-        for (let compiledIx of compiledInstructions) {
-          let keys = [];
-          for (let keyIndex of compiledIx.accountKeyIndexes) {
-            let pubkey = accountKeys.get(keyIndex);
-            if (pubkey === void 0)
-              throw new Error(`Failed to find key for account key index ${keyIndex}`);
-            let isSigner = keyIndex < numRequiredSignatures, isWritable;
-            isSigner ? isWritable = keyIndex < numWritableSignedAccounts : keyIndex < accountKeys.staticAccountKeys.length ? isWritable = keyIndex - numRequiredSignatures < numWritableUnsignedAccounts : isWritable = keyIndex - accountKeys.staticAccountKeys.length < // accountKeysFromLookups cannot be undefined because we already found a pubkey for this index above
-            accountKeys.accountKeysFromLookups.writable.length, keys.push({
-              pubkey,
-              isSigner: keyIndex < header.numRequiredSignatures,
-              isWritable
-            });
-          }
-          let programId = accountKeys.get(compiledIx.programIdIndex);
-          if (programId === void 0)
-            throw new Error(`Failed to find program id for program id index ${compiledIx.programIdIndex}`);
-          instructions.push(new TransactionInstruction({
-            programId,
-            data: toBuffer(compiledIx.data),
-            keys
-          }));
-        }
-        return new TransactionMessage({
-          payerKey,
-          instructions,
-          recentBlockhash
-        });
-      }
-      compileToLegacyMessage() {
-        return Message.compile({
-          payerKey: this.payerKey,
-          recentBlockhash: this.recentBlockhash,
-          instructions: this.instructions
-        });
-      }
-      compileToV0Message(addressLookupTableAccounts) {
-        return MessageV0.compile({
-          payerKey: this.payerKey,
-          recentBlockhash: this.recentBlockhash,
-          instructions: this.instructions,
-          addressLookupTableAccounts
-        });
-      }
-    }, VersionedTransaction = class {
-      get version() {
-        return this.message.version;
-      }
-      constructor(message, signatures) {
-        if (this.signatures = void 0, this.message = void 0, signatures !== void 0)
-          assert(signatures.length === message.header.numRequiredSignatures, "Expected signatures length to be equal to the number of required signatures"), this.signatures = signatures;
-        else {
-          let defaultSignatures = [];
-          for (let i = 0; i < message.header.numRequiredSignatures; i++)
-            defaultSignatures.push(new Uint8Array(SIGNATURE_LENGTH_IN_BYTES));
-          this.signatures = defaultSignatures;
-        }
-        this.message = message;
-      }
-      serialize() {
-        let serializedMessage = this.message.serialize(), encodedSignaturesLength = Array();
-        encodeLength(encodedSignaturesLength, this.signatures.length);
-        let transactionLayout = BufferLayout.struct([BufferLayout.blob(encodedSignaturesLength.length, "encodedSignaturesLength"), BufferLayout.seq(signature(), this.signatures.length, "signatures"), BufferLayout.blob(serializedMessage.length, "serializedMessage")]), serializedTransaction = new Uint8Array(2048), serializedTransactionLength = transactionLayout.encode({
-          encodedSignaturesLength: new Uint8Array(encodedSignaturesLength),
-          signatures: this.signatures,
-          serializedMessage
-        }, serializedTransaction);
-        return serializedTransaction.slice(0, serializedTransactionLength);
-      }
-      static deserialize(serializedTransaction) {
-        let byteArray = [...serializedTransaction], signatures = [], signaturesLength = decodeLength(byteArray);
-        for (let i = 0; i < signaturesLength; i++)
-          signatures.push(new Uint8Array(guardedSplice(byteArray, 0, SIGNATURE_LENGTH_IN_BYTES)));
-        let message = VersionedMessage.deserialize(new Uint8Array(byteArray));
-        return new VersionedTransaction(message, signatures);
-      }
-      sign(signers) {
-        let messageData = this.message.serialize(), signerPubkeys = this.message.staticAccountKeys.slice(0, this.message.header.numRequiredSignatures);
-        for (let signer of signers) {
-          let signerIndex = signerPubkeys.findIndex((pubkey) => pubkey.equals(signer.publicKey));
-          assert(signerIndex >= 0, `Cannot sign with non signer key ${signer.publicKey.toBase58()}`), this.signatures[signerIndex] = sign(messageData, signer.secretKey);
-        }
-      }
-      addSignature(publicKey5, signature2) {
-        assert(signature2.byteLength === 64, "Signature must be 64 bytes long");
-        let signerIndex = this.message.staticAccountKeys.slice(0, this.message.header.numRequiredSignatures).findIndex((pubkey) => pubkey.equals(publicKey5));
-        assert(signerIndex >= 0, `Can not add signature; \`${publicKey5.toBase58()}\` is not required to sign this transaction`), this.signatures[signerIndex] = signature2;
-      }
-    }, NUM_TICKS_PER_SECOND = 160, DEFAULT_TICKS_PER_SLOT = 64, NUM_SLOTS_PER_SECOND = NUM_TICKS_PER_SECOND / DEFAULT_TICKS_PER_SLOT, MS_PER_SLOT = 1e3 / NUM_SLOTS_PER_SECOND, SYSVAR_CLOCK_PUBKEY = new PublicKey("SysvarC1ock11111111111111111111111111111111"), SYSVAR_EPOCH_SCHEDULE_PUBKEY = new PublicKey("SysvarEpochSchedu1e111111111111111111111111"), SYSVAR_INSTRUCTIONS_PUBKEY = new PublicKey("Sysvar1nstructions1111111111111111111111111"), SYSVAR_RECENT_BLOCKHASHES_PUBKEY = new PublicKey("SysvarRecentB1ockHashes11111111111111111111"), SYSVAR_RENT_PUBKEY = new PublicKey("SysvarRent111111111111111111111111111111111"), SYSVAR_REWARDS_PUBKEY = new PublicKey("SysvarRewards111111111111111111111111111111"), SYSVAR_SLOT_HASHES_PUBKEY = new PublicKey("SysvarS1otHashes111111111111111111111111111"), SYSVAR_SLOT_HISTORY_PUBKEY = new PublicKey("SysvarS1otHistory11111111111111111111111111"), SYSVAR_STAKE_HISTORY_PUBKEY = new PublicKey("SysvarStakeHistory1111111111111111111111111"), SendTransactionError = class extends Error {
-      constructor({
-        action: action26,
-        signature: signature2,
-        transactionMessage,
-        logs
-      }) {
-        let maybeLogsOutput = logs ? `Logs: 
-${JSON.stringify(logs.slice(-10), null, 2)}. ` : "", guideText = "\nCatch the `SendTransactionError` and call `getLogs()` on it for full details.", message;
-        switch (action26) {
-          case "send":
-            message = `Transaction ${signature2} resulted in an error. 
-${transactionMessage}. ` + maybeLogsOutput + guideText;
-            break;
-          case "simulate":
-            message = `Simulation failed. 
-Message: ${transactionMessage}. 
-` + maybeLogsOutput + guideText;
-            break;
-          default:
-            message = `Unknown action '${((a) => a)(action26)}'`;
-        }
-        super(message), this.signature = void 0, this.transactionMessage = void 0, this.transactionLogs = void 0, this.signature = signature2, this.transactionMessage = transactionMessage, this.transactionLogs = logs || void 0;
-      }
-      get transactionError() {
-        return {
-          message: this.transactionMessage,
-          logs: Array.isArray(this.transactionLogs) ? this.transactionLogs : void 0
-        };
-      }
-      /* @deprecated Use `await getLogs()` instead */
-      get logs() {
-        let cachedLogs = this.transactionLogs;
-        if (!(cachedLogs != null && typeof cachedLogs == "object" && "then" in cachedLogs))
-          return cachedLogs;
-      }
-      async getLogs(connection) {
-        return Array.isArray(this.transactionLogs) || (this.transactionLogs = new Promise((resolve, reject) => {
-          connection.getTransaction(this.signature).then((tx) => {
-            if (tx && tx.meta && tx.meta.logMessages) {
-              let logs = tx.meta.logMessages;
-              this.transactionLogs = logs, resolve(logs);
-            } else
-              reject(new Error("Log messages not found"));
-          }).catch(reject);
-        })), await this.transactionLogs;
-      }
-    }, SolanaJSONRPCErrorCode = {
-      JSON_RPC_SERVER_ERROR_BLOCK_CLEANED_UP: -32001,
-      JSON_RPC_SERVER_ERROR_SEND_TRANSACTION_PREFLIGHT_FAILURE: -32002,
-      JSON_RPC_SERVER_ERROR_TRANSACTION_SIGNATURE_VERIFICATION_FAILURE: -32003,
-      JSON_RPC_SERVER_ERROR_BLOCK_NOT_AVAILABLE: -32004,
-      JSON_RPC_SERVER_ERROR_NODE_UNHEALTHY: -32005,
-      JSON_RPC_SERVER_ERROR_TRANSACTION_PRECOMPILE_VERIFICATION_FAILURE: -32006,
-      JSON_RPC_SERVER_ERROR_SLOT_SKIPPED: -32007,
-      JSON_RPC_SERVER_ERROR_NO_SNAPSHOT: -32008,
-      JSON_RPC_SERVER_ERROR_LONG_TERM_STORAGE_SLOT_SKIPPED: -32009,
-      JSON_RPC_SERVER_ERROR_KEY_EXCLUDED_FROM_SECONDARY_INDEX: -32010,
-      JSON_RPC_SERVER_ERROR_TRANSACTION_HISTORY_NOT_AVAILABLE: -32011,
-      JSON_RPC_SCAN_ERROR: -32012,
-      JSON_RPC_SERVER_ERROR_TRANSACTION_SIGNATURE_LEN_MISMATCH: -32013,
-      JSON_RPC_SERVER_ERROR_BLOCK_STATUS_NOT_AVAILABLE_YET: -32014,
-      JSON_RPC_SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION: -32015,
-      JSON_RPC_SERVER_ERROR_MIN_CONTEXT_SLOT_NOT_REACHED: -32016
-    }, SolanaJSONRPCError = class extends Error {
-      constructor({
-        code,
-        message,
-        data
-      }, customMessage) {
-        super(customMessage != null ? `${customMessage}: ${message}` : message), this.code = void 0, this.data = void 0, this.code = code, this.data = data, this.name = "SolanaJSONRPCError";
-      }
-    };
-    FeeCalculatorLayout = BufferLayout.nu64("lamportsPerSignature"), NonceAccountLayout = BufferLayout.struct([BufferLayout.u32("version"), BufferLayout.u32("state"), publicKey("authorizedPubkey"), publicKey("nonce"), BufferLayout.struct([FeeCalculatorLayout], "feeCalculator")]), NONCE_ACCOUNT_LENGTH = NonceAccountLayout.span, NonceAccount = class {
-      /**
-       * @internal
-       */
-      constructor(args) {
-        this.authorizedPubkey = void 0, this.nonce = void 0, this.feeCalculator = void 0, this.authorizedPubkey = args.authorizedPubkey, this.nonce = args.nonce, this.feeCalculator = args.feeCalculator;
-      }
-      /**
-       * Deserialize NonceAccount from the account data.
-       *
-       * @param buffer account data
-       * @return NonceAccount
-       */
-      static fromAccountData(buffer) {
-        let nonceAccount = NonceAccountLayout.decode(toBuffer(buffer), 0);
-        return new NonceAccount({
-          authorizedPubkey: new PublicKey(nonceAccount.authorizedPubkey),
-          nonce: new PublicKey(nonceAccount.nonce).toString(),
-          feeCalculator: nonceAccount.feeCalculator
-        });
-      }
-    };
-    SystemInstruction = class {
-      /**
-       * @internal
-       */
-      constructor() {
-      }
-      /**
-       * Decode a system instruction and retrieve the instruction type.
-       */
-      static decodeInstructionType(instruction) {
-        this.checkProgramId(instruction.programId);
-        let typeIndex = BufferLayout.u32("instruction").decode(instruction.data), type2;
-        for (let [ixType, layout] of Object.entries(SYSTEM_INSTRUCTION_LAYOUTS))
-          if (layout.index == typeIndex) {
-            type2 = ixType;
-            break;
-          }
-        if (!type2)
-          throw new Error("Instruction type incorrect; not a SystemInstruction");
-        return type2;
-      }
-      /**
-       * Decode a create account system instruction and retrieve the instruction params.
-       */
-      static decodeCreateAccount(instruction) {
-        this.checkProgramId(instruction.programId), this.checkKeyLength(instruction.keys, 2);
-        let {
-          lamports,
-          space,
-          programId
-        } = decodeData$1(SYSTEM_INSTRUCTION_LAYOUTS.Create, instruction.data);
-        return {
-          fromPubkey: instruction.keys[0].pubkey,
-          newAccountPubkey: instruction.keys[1].pubkey,
-          lamports,
-          space,
-          programId: new PublicKey(programId)
-        };
-      }
-      /**
-       * Decode a transfer system instruction and retrieve the instruction params.
-       */
-      static decodeTransfer(instruction) {
-        this.checkProgramId(instruction.programId), this.checkKeyLength(instruction.keys, 2);
-        let {
-          lamports
-        } = decodeData$1(SYSTEM_INSTRUCTION_LAYOUTS.Transfer, instruction.data);
-        return {
-          fromPubkey: instruction.keys[0].pubkey,
-          toPubkey: instruction.keys[1].pubkey,
-          lamports
-        };
-      }
-      /**
-       * Decode a transfer with seed system instruction and retrieve the instruction params.
-       */
-      static decodeTransferWithSeed(instruction) {
-        this.checkProgramId(instruction.programId), this.checkKeyLength(instruction.keys, 3);
-        let {
-          lamports,
-          seed,
-          programId
-        } = decodeData$1(SYSTEM_INSTRUCTION_LAYOUTS.TransferWithSeed, instruction.data);
-        return {
-          fromPubkey: instruction.keys[0].pubkey,
-          basePubkey: instruction.keys[1].pubkey,
-          toPubkey: instruction.keys[2].pubkey,
-          lamports,
-          seed,
-          programId: new PublicKey(programId)
-        };
-      }
-      /**
-       * Decode an allocate system instruction and retrieve the instruction params.
-       */
-      static decodeAllocate(instruction) {
-        this.checkProgramId(instruction.programId), this.checkKeyLength(instruction.keys, 1);
-        let {
-          space
-        } = decodeData$1(SYSTEM_INSTRUCTION_LAYOUTS.Allocate, instruction.data);
-        return {
-          accountPubkey: instruction.keys[0].pubkey,
-          space
-        };
-      }
-      /**
-       * Decode an allocate with seed system instruction and retrieve the instruction params.
-       */
-      static decodeAllocateWithSeed(instruction) {
-        this.checkProgramId(instruction.programId), this.checkKeyLength(instruction.keys, 1);
-        let {
-          base,
-          seed,
-          space,
-          programId
-        } = decodeData$1(SYSTEM_INSTRUCTION_LAYOUTS.AllocateWithSeed, instruction.data);
-        return {
-          accountPubkey: instruction.keys[0].pubkey,
-          basePubkey: new PublicKey(base),
-          seed,
-          space,
-          programId: new PublicKey(programId)
-        };
-      }
-      /**
-       * Decode an assign system instruction and retrieve the instruction params.
-       */
-      static decodeAssign(instruction) {
-        this.checkProgramId(instruction.programId), this.checkKeyLength(instruction.keys, 1);
-        let {
-          programId
-        } = decodeData$1(SYSTEM_INSTRUCTION_LAYOUTS.Assign, instruction.data);
-        return {
-          accountPubkey: instruction.keys[0].pubkey,
-          programId: new PublicKey(programId)
-        };
-      }
-      /**
-       * Decode an assign with seed system instruction and retrieve the instruction params.
-       */
-      static decodeAssignWithSeed(instruction) {
-        this.checkProgramId(instruction.programId), this.checkKeyLength(instruction.keys, 1);
-        let {
-          base,
-          seed,
-          programId
-        } = decodeData$1(SYSTEM_INSTRUCTION_LAYOUTS.AssignWithSeed, instruction.data);
-        return {
-          accountPubkey: instruction.keys[0].pubkey,
-          basePubkey: new PublicKey(base),
-          seed,
-          programId: new PublicKey(programId)
-        };
-      }
-      /**
-       * Decode a create account with seed system instruction and retrieve the instruction params.
-       */
-      static decodeCreateWithSeed(instruction) {
-        this.checkProgramId(instruction.programId), this.checkKeyLength(instruction.keys, 2);
-        let {
-          base,
-          seed,
-          lamports,
-          space,
-          programId
-        } = decodeData$1(SYSTEM_INSTRUCTION_LAYOUTS.CreateWithSeed, instruction.data);
-        return {
-          fromPubkey: instruction.keys[0].pubkey,
-          newAccountPubkey: instruction.keys[1].pubkey,
-          basePubkey: new PublicKey(base),
-          seed,
-          lamports,
-          space,
-          programId: new PublicKey(programId)
-        };
-      }
-      /**
-       * Decode a nonce initialize system instruction and retrieve the instruction params.
-       */
-      static decodeNonceInitialize(instruction) {
-        this.checkProgramId(instruction.programId), this.checkKeyLength(instruction.keys, 3);
-        let {
-          authorized: authorized2
-        } = decodeData$1(SYSTEM_INSTRUCTION_LAYOUTS.InitializeNonceAccount, instruction.data);
-        return {
-          noncePubkey: instruction.keys[0].pubkey,
-          authorizedPubkey: new PublicKey(authorized2)
-        };
-      }
-      /**
-       * Decode a nonce advance system instruction and retrieve the instruction params.
-       */
-      static decodeNonceAdvance(instruction) {
-        return this.checkProgramId(instruction.programId), this.checkKeyLength(instruction.keys, 3), decodeData$1(SYSTEM_INSTRUCTION_LAYOUTS.AdvanceNonceAccount, instruction.data), {
-          noncePubkey: instruction.keys[0].pubkey,
-          authorizedPubkey: instruction.keys[2].pubkey
-        };
-      }
-      /**
-       * Decode a nonce withdraw system instruction and retrieve the instruction params.
-       */
-      static decodeNonceWithdraw(instruction) {
-        this.checkProgramId(instruction.programId), this.checkKeyLength(instruction.keys, 5);
-        let {
-          lamports
-        } = decodeData$1(SYSTEM_INSTRUCTION_LAYOUTS.WithdrawNonceAccount, instruction.data);
-        return {
-          noncePubkey: instruction.keys[0].pubkey,
-          toPubkey: instruction.keys[1].pubkey,
-          authorizedPubkey: instruction.keys[4].pubkey,
-          lamports
-        };
-      }
-      /**
-       * Decode a nonce authorize system instruction and retrieve the instruction params.
-       */
-      static decodeNonceAuthorize(instruction) {
-        this.checkProgramId(instruction.programId), this.checkKeyLength(instruction.keys, 2);
-        let {
-          authorized: authorized2
-        } = decodeData$1(SYSTEM_INSTRUCTION_LAYOUTS.AuthorizeNonceAccount, instruction.data);
-        return {
-          noncePubkey: instruction.keys[0].pubkey,
-          authorizedPubkey: instruction.keys[1].pubkey,
-          newAuthorizedPubkey: new PublicKey(authorized2)
-        };
-      }
-      /**
-       * @internal
-       */
-      static checkProgramId(programId) {
-        if (!programId.equals(SystemProgram.programId))
-          throw new Error("invalid instruction; programId is not SystemProgram");
-      }
-      /**
-       * @internal
-       */
-      static checkKeyLength(keys, expectedLength) {
-        if (keys.length < expectedLength)
-          throw new Error(`invalid instruction; found ${keys.length} keys, expected at least ${expectedLength}`);
-      }
-    }, SYSTEM_INSTRUCTION_LAYOUTS = Object.freeze({
-      Create: {
-        index: 0,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction"), BufferLayout.ns64("lamports"), BufferLayout.ns64("space"), publicKey("programId")])
-      },
-      Assign: {
-        index: 1,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction"), publicKey("programId")])
-      },
-      Transfer: {
-        index: 2,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction"), u64("lamports")])
-      },
-      CreateWithSeed: {
-        index: 3,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction"), publicKey("base"), rustString("seed"), BufferLayout.ns64("lamports"), BufferLayout.ns64("space"), publicKey("programId")])
-      },
-      AdvanceNonceAccount: {
-        index: 4,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction")])
-      },
-      WithdrawNonceAccount: {
-        index: 5,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction"), BufferLayout.ns64("lamports")])
-      },
-      InitializeNonceAccount: {
-        index: 6,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction"), publicKey("authorized")])
-      },
-      AuthorizeNonceAccount: {
-        index: 7,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction"), publicKey("authorized")])
-      },
-      Allocate: {
-        index: 8,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction"), BufferLayout.ns64("space")])
-      },
-      AllocateWithSeed: {
-        index: 9,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction"), publicKey("base"), rustString("seed"), BufferLayout.ns64("space"), publicKey("programId")])
-      },
-      AssignWithSeed: {
-        index: 10,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction"), publicKey("base"), rustString("seed"), publicKey("programId")])
-      },
-      TransferWithSeed: {
-        index: 11,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction"), u64("lamports"), rustString("seed"), publicKey("programId")])
-      },
-      UpgradeNonceAccount: {
-        index: 12,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction")])
-      }
-    }), SystemProgram = class {
-      /**
-       * @internal
-       */
-      constructor() {
-      }
-      /**
-       * Public key that identifies the System program
-       */
-      /**
-       * Generate a transaction instruction that creates a new account
-       */
-      static createAccount(params) {
-        let type2 = SYSTEM_INSTRUCTION_LAYOUTS.Create, data = encodeData(type2, {
-          lamports: params.lamports,
-          space: params.space,
-          programId: toBuffer(params.programId.toBuffer())
-        });
-        return new TransactionInstruction({
-          keys: [{
-            pubkey: params.fromPubkey,
-            isSigner: !0,
-            isWritable: !0
-          }, {
-            pubkey: params.newAccountPubkey,
-            isSigner: !0,
-            isWritable: !0
-          }],
-          programId: this.programId,
-          data
-        });
-      }
-      /**
-       * Generate a transaction instruction that transfers lamports from one account to another
-       */
-      static transfer(params) {
-        let data, keys;
-        if ("basePubkey" in params) {
-          let type2 = SYSTEM_INSTRUCTION_LAYOUTS.TransferWithSeed;
-          data = encodeData(type2, {
-            lamports: BigInt(params.lamports),
-            seed: params.seed,
-            programId: toBuffer(params.programId.toBuffer())
-          }), keys = [{
-            pubkey: params.fromPubkey,
-            isSigner: !1,
-            isWritable: !0
-          }, {
-            pubkey: params.basePubkey,
-            isSigner: !0,
-            isWritable: !1
-          }, {
-            pubkey: params.toPubkey,
-            isSigner: !1,
-            isWritable: !0
-          }];
-        } else {
-          let type2 = SYSTEM_INSTRUCTION_LAYOUTS.Transfer;
-          data = encodeData(type2, {
-            lamports: BigInt(params.lamports)
-          }), keys = [{
-            pubkey: params.fromPubkey,
-            isSigner: !0,
-            isWritable: !0
-          }, {
-            pubkey: params.toPubkey,
-            isSigner: !1,
-            isWritable: !0
-          }];
-        }
-        return new TransactionInstruction({
-          keys,
-          programId: this.programId,
-          data
-        });
-      }
-      /**
-       * Generate a transaction instruction that assigns an account to a program
-       */
-      static assign(params) {
-        let data, keys;
-        if ("basePubkey" in params) {
-          let type2 = SYSTEM_INSTRUCTION_LAYOUTS.AssignWithSeed;
-          data = encodeData(type2, {
-            base: toBuffer(params.basePubkey.toBuffer()),
-            seed: params.seed,
-            programId: toBuffer(params.programId.toBuffer())
-          }), keys = [{
-            pubkey: params.accountPubkey,
-            isSigner: !1,
-            isWritable: !0
-          }, {
-            pubkey: params.basePubkey,
-            isSigner: !0,
-            isWritable: !1
-          }];
-        } else {
-          let type2 = SYSTEM_INSTRUCTION_LAYOUTS.Assign;
-          data = encodeData(type2, {
-            programId: toBuffer(params.programId.toBuffer())
-          }), keys = [{
-            pubkey: params.accountPubkey,
-            isSigner: !0,
-            isWritable: !0
-          }];
-        }
-        return new TransactionInstruction({
-          keys,
-          programId: this.programId,
-          data
-        });
-      }
-      /**
-       * Generate a transaction instruction that creates a new account at
-       *   an address generated with `from`, a seed, and programId
-       */
-      static createAccountWithSeed(params) {
-        let type2 = SYSTEM_INSTRUCTION_LAYOUTS.CreateWithSeed, data = encodeData(type2, {
-          base: toBuffer(params.basePubkey.toBuffer()),
-          seed: params.seed,
-          lamports: params.lamports,
-          space: params.space,
-          programId: toBuffer(params.programId.toBuffer())
-        }), keys = [{
-          pubkey: params.fromPubkey,
-          isSigner: !0,
-          isWritable: !0
-        }, {
-          pubkey: params.newAccountPubkey,
-          isSigner: !1,
-          isWritable: !0
-        }];
-        return params.basePubkey.equals(params.fromPubkey) || keys.push({
-          pubkey: params.basePubkey,
-          isSigner: !0,
-          isWritable: !1
-        }), new TransactionInstruction({
-          keys,
-          programId: this.programId,
-          data
-        });
-      }
-      /**
-       * Generate a transaction that creates a new Nonce account
-       */
-      static createNonceAccount(params) {
-        let transaction = new Transaction();
-        "basePubkey" in params && "seed" in params ? transaction.add(SystemProgram.createAccountWithSeed({
-          fromPubkey: params.fromPubkey,
-          newAccountPubkey: params.noncePubkey,
-          basePubkey: params.basePubkey,
-          seed: params.seed,
-          lamports: params.lamports,
-          space: NONCE_ACCOUNT_LENGTH,
-          programId: this.programId
-        })) : transaction.add(SystemProgram.createAccount({
-          fromPubkey: params.fromPubkey,
-          newAccountPubkey: params.noncePubkey,
-          lamports: params.lamports,
-          space: NONCE_ACCOUNT_LENGTH,
-          programId: this.programId
-        }));
-        let initParams = {
-          noncePubkey: params.noncePubkey,
-          authorizedPubkey: params.authorizedPubkey
-        };
-        return transaction.add(this.nonceInitialize(initParams)), transaction;
-      }
-      /**
-       * Generate an instruction to initialize a Nonce account
-       */
-      static nonceInitialize(params) {
-        let type2 = SYSTEM_INSTRUCTION_LAYOUTS.InitializeNonceAccount, data = encodeData(type2, {
-          authorized: toBuffer(params.authorizedPubkey.toBuffer())
-        }), instructionData = {
-          keys: [{
-            pubkey: params.noncePubkey,
-            isSigner: !1,
-            isWritable: !0
-          }, {
-            pubkey: SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
-            isSigner: !1,
-            isWritable: !1
-          }, {
-            pubkey: SYSVAR_RENT_PUBKEY,
-            isSigner: !1,
-            isWritable: !1
-          }],
-          programId: this.programId,
-          data
-        };
-        return new TransactionInstruction(instructionData);
-      }
-      /**
-       * Generate an instruction to advance the nonce in a Nonce account
-       */
-      static nonceAdvance(params) {
-        let type2 = SYSTEM_INSTRUCTION_LAYOUTS.AdvanceNonceAccount, data = encodeData(type2), instructionData = {
-          keys: [{
-            pubkey: params.noncePubkey,
-            isSigner: !1,
-            isWritable: !0
-          }, {
-            pubkey: SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
-            isSigner: !1,
-            isWritable: !1
-          }, {
-            pubkey: params.authorizedPubkey,
-            isSigner: !0,
-            isWritable: !1
-          }],
-          programId: this.programId,
-          data
-        };
-        return new TransactionInstruction(instructionData);
-      }
-      /**
-       * Generate a transaction instruction that withdraws lamports from a Nonce account
-       */
-      static nonceWithdraw(params) {
-        let type2 = SYSTEM_INSTRUCTION_LAYOUTS.WithdrawNonceAccount, data = encodeData(type2, {
-          lamports: params.lamports
-        });
-        return new TransactionInstruction({
-          keys: [{
-            pubkey: params.noncePubkey,
-            isSigner: !1,
-            isWritable: !0
-          }, {
-            pubkey: params.toPubkey,
-            isSigner: !1,
-            isWritable: !0
-          }, {
-            pubkey: SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
-            isSigner: !1,
-            isWritable: !1
-          }, {
-            pubkey: SYSVAR_RENT_PUBKEY,
-            isSigner: !1,
-            isWritable: !1
-          }, {
-            pubkey: params.authorizedPubkey,
-            isSigner: !0,
-            isWritable: !1
-          }],
-          programId: this.programId,
-          data
-        });
-      }
-      /**
-       * Generate a transaction instruction that authorizes a new PublicKey as the authority
-       * on a Nonce account.
-       */
-      static nonceAuthorize(params) {
-        let type2 = SYSTEM_INSTRUCTION_LAYOUTS.AuthorizeNonceAccount, data = encodeData(type2, {
-          authorized: toBuffer(params.newAuthorizedPubkey.toBuffer())
-        });
-        return new TransactionInstruction({
-          keys: [{
-            pubkey: params.noncePubkey,
-            isSigner: !1,
-            isWritable: !0
-          }, {
-            pubkey: params.authorizedPubkey,
-            isSigner: !0,
-            isWritable: !1
-          }],
-          programId: this.programId,
-          data
-        });
-      }
-      /**
-       * Generate a transaction instruction that allocates space in an account without funding
-       */
-      static allocate(params) {
-        let data, keys;
-        if ("basePubkey" in params) {
-          let type2 = SYSTEM_INSTRUCTION_LAYOUTS.AllocateWithSeed;
-          data = encodeData(type2, {
-            base: toBuffer(params.basePubkey.toBuffer()),
-            seed: params.seed,
-            space: params.space,
-            programId: toBuffer(params.programId.toBuffer())
-          }), keys = [{
-            pubkey: params.accountPubkey,
-            isSigner: !1,
-            isWritable: !0
-          }, {
-            pubkey: params.basePubkey,
-            isSigner: !0,
-            isWritable: !1
-          }];
-        } else {
-          let type2 = SYSTEM_INSTRUCTION_LAYOUTS.Allocate;
-          data = encodeData(type2, {
-            space: params.space
-          }), keys = [{
-            pubkey: params.accountPubkey,
-            isSigner: !0,
-            isWritable: !0
-          }];
-        }
-        return new TransactionInstruction({
-          keys,
-          programId: this.programId,
-          data
-        });
-      }
-    };
-    SystemProgram.programId = new PublicKey("11111111111111111111111111111111");
-    CHUNK_SIZE = PACKET_DATA_SIZE - 300, Loader = class {
-      /**
-       * @internal
-       */
-      constructor() {
-      }
-      /**
-       * Amount of program data placed in each load Transaction
-       */
-      /**
-       * Minimum number of signatures required to load a program not including
-       * retries
-       *
-       * Can be used to calculate transaction fees
-       */
-      static getMinNumSignatures(dataLength) {
-        return 2 * // Every transaction requires two signatures (payer + program)
-        (Math.ceil(dataLength / Loader.chunkSize) + 1 + // Add one for Create transaction
-        1);
-      }
-      /**
-       * Loads a generic program
-       *
-       * @param connection The connection to use
-       * @param payer System account that pays to load the program
-       * @param program Account to load the program into
-       * @param programId Public key that identifies the loader
-       * @param data Program octets
-       * @return true if program was loaded successfully, false if program was already loaded
-       */
-      static async load(connection, payer, program, programId, data) {
-        {
-          let balanceNeeded = await connection.getMinimumBalanceForRentExemption(data.length), programInfo = await connection.getAccountInfo(program.publicKey, "confirmed"), transaction = null;
-          if (programInfo !== null) {
-            if (programInfo.executable)
-              return console.error("Program load failed, account is already executable"), !1;
-            programInfo.data.length !== data.length && (transaction = transaction || new Transaction(), transaction.add(SystemProgram.allocate({
-              accountPubkey: program.publicKey,
-              space: data.length
-            }))), programInfo.owner.equals(programId) || (transaction = transaction || new Transaction(), transaction.add(SystemProgram.assign({
-              accountPubkey: program.publicKey,
-              programId
-            }))), programInfo.lamports < balanceNeeded && (transaction = transaction || new Transaction(), transaction.add(SystemProgram.transfer({
-              fromPubkey: payer.publicKey,
-              toPubkey: program.publicKey,
-              lamports: balanceNeeded - programInfo.lamports
-            })));
-          } else
-            transaction = new Transaction().add(SystemProgram.createAccount({
-              fromPubkey: payer.publicKey,
-              newAccountPubkey: program.publicKey,
-              lamports: balanceNeeded > 0 ? balanceNeeded : 1,
-              space: data.length,
-              programId
-            }));
-          transaction !== null && await sendAndConfirmTransaction(connection, transaction, [payer, program], {
-            commitment: "confirmed"
-          });
-        }
-        let dataLayout = BufferLayout.struct([BufferLayout.u32("instruction"), BufferLayout.u32("offset"), BufferLayout.u32("bytesLength"), BufferLayout.u32("bytesLengthPadding"), BufferLayout.seq(BufferLayout.u8("byte"), BufferLayout.offset(BufferLayout.u32(), -8), "bytes")]), chunkSize = Loader.chunkSize, offset2 = 0, array2 = data, transactions = [];
-        for (; array2.length > 0; ) {
-          let bytes = array2.slice(0, chunkSize), data2 = Buffer2.alloc(chunkSize + 16);
-          dataLayout.encode({
-            instruction: 0,
-            // Load instruction
-            offset: offset2,
-            bytes,
-            bytesLength: 0,
-            bytesLengthPadding: 0
-          }, data2);
-          let transaction = new Transaction().add({
-            keys: [{
-              pubkey: program.publicKey,
-              isSigner: !0,
-              isWritable: !0
-            }],
-            programId,
-            data: data2
-          });
-          transactions.push(sendAndConfirmTransaction(connection, transaction, [payer, program], {
-            commitment: "confirmed"
-          })), connection._rpcEndpoint.includes("solana.com") && await sleep(1e3 / 4), offset2 += chunkSize, array2 = array2.slice(chunkSize);
-        }
-        await Promise.all(transactions);
-        {
-          let dataLayout2 = BufferLayout.struct([BufferLayout.u32("instruction")]), data2 = Buffer2.alloc(dataLayout2.span);
-          dataLayout2.encode({
-            instruction: 1
-            // Finalize instruction
-          }, data2);
-          let transaction = new Transaction().add({
-            keys: [{
-              pubkey: program.publicKey,
-              isSigner: !0,
-              isWritable: !0
-            }, {
-              pubkey: SYSVAR_RENT_PUBKEY,
-              isSigner: !1,
-              isWritable: !1
-            }],
-            programId,
-            data: data2
-          }), deployCommitment = "processed", finalizeSignature = await connection.sendTransaction(transaction, [payer, program], {
-            preflightCommitment: deployCommitment
-          }), {
-            context,
-            value
-          } = await connection.confirmTransaction({
-            signature: finalizeSignature,
-            lastValidBlockHeight: transaction.lastValidBlockHeight,
-            blockhash: transaction.recentBlockhash
-          }, deployCommitment);
-          if (value.err)
-            throw new Error(`Transaction ${finalizeSignature} failed (${JSON.stringify(value)})`);
-          for (; ; ) {
-            try {
-              if (await connection.getSlot({
-                commitment: deployCommitment
-              }) > context.slot)
-                break;
-            } catch {
-            }
-            await new Promise((resolve) => setTimeout(resolve, Math.round(MS_PER_SLOT / 2)));
-          }
-        }
-        return !0;
-      }
-    };
-    Loader.chunkSize = CHUNK_SIZE;
-    BPF_LOADER_PROGRAM_ID = new PublicKey("BPFLoader2111111111111111111111111111111111"), BpfLoader = class {
-      /**
-       * Minimum number of signatures required to load a program not including
-       * retries
-       *
-       * Can be used to calculate transaction fees
-       */
-      static getMinNumSignatures(dataLength) {
-        return Loader.getMinNumSignatures(dataLength);
-      }
-      /**
-       * Load a SBF program
-       *
-       * @param connection The connection to use
-       * @param payer Account that will pay program loading fees
-       * @param program Account to load the program into
-       * @param elf The entire ELF containing the SBF program
-       * @param loaderProgramId The program id of the BPF loader to use
-       * @return true if program was loaded successfully, false if program was already loaded
-       */
-      static load(connection, payer, program, elf, loaderProgramId) {
-        return Loader.load(connection, payer, program, loaderProgramId, elf);
-      }
-    };
-    agentkeepalive = { exports: {} };
-    agentkeepaliveExports = /* @__PURE__ */ requireAgentkeepalive(), HttpKeepAliveAgent = /* @__PURE__ */ getDefaultExportFromCjs(agentkeepaliveExports);
-    fastStableStringifyExports = /* @__PURE__ */ requireFastStableStringify(), fastStableStringify = /* @__PURE__ */ getDefaultExportFromCjs(fastStableStringifyExports), MINIMUM_SLOT_PER_EPOCH = 32;
-    EpochSchedule = class {
-      constructor(slotsPerEpoch, leaderScheduleSlotOffset, warmup, firstNormalEpoch, firstNormalSlot) {
-        this.slotsPerEpoch = void 0, this.leaderScheduleSlotOffset = void 0, this.warmup = void 0, this.firstNormalEpoch = void 0, this.firstNormalSlot = void 0, this.slotsPerEpoch = slotsPerEpoch, this.leaderScheduleSlotOffset = leaderScheduleSlotOffset, this.warmup = warmup, this.firstNormalEpoch = firstNormalEpoch, this.firstNormalSlot = firstNormalSlot;
-      }
-      getEpoch(slot) {
-        return this.getEpochAndSlotIndex(slot)[0];
-      }
-      getEpochAndSlotIndex(slot) {
-        if (slot < this.firstNormalSlot) {
-          let epoch = trailingZeros(nextPowerOfTwo(slot + MINIMUM_SLOT_PER_EPOCH + 1)) - trailingZeros(MINIMUM_SLOT_PER_EPOCH) - 1, epochLen = this.getSlotsInEpoch(epoch), slotIndex = slot - (epochLen - MINIMUM_SLOT_PER_EPOCH);
-          return [epoch, slotIndex];
-        } else {
-          let normalSlotIndex = slot - this.firstNormalSlot, normalEpochIndex = Math.floor(normalSlotIndex / this.slotsPerEpoch), epoch = this.firstNormalEpoch + normalEpochIndex, slotIndex = normalSlotIndex % this.slotsPerEpoch;
-          return [epoch, slotIndex];
-        }
-      }
-      getFirstSlotInEpoch(epoch) {
-        return epoch <= this.firstNormalEpoch ? (Math.pow(2, epoch) - 1) * MINIMUM_SLOT_PER_EPOCH : (epoch - this.firstNormalEpoch) * this.slotsPerEpoch + this.firstNormalSlot;
-      }
-      getLastSlotInEpoch(epoch) {
-        return this.getFirstSlotInEpoch(epoch) + this.getSlotsInEpoch(epoch) - 1;
-      }
-      getSlotsInEpoch(epoch) {
-        return epoch < this.firstNormalEpoch ? Math.pow(2, epoch + trailingZeros(MINIMUM_SLOT_PER_EPOCH)) : this.slotsPerEpoch;
-      }
-    }, fetchImpl = typeof globalThis.fetch == "function" ? (
-      // The Fetch API is supported experimentally in Node 17.5+ and natively in Node 18+.
-      globalThis.fetch
-    ) : (
-      // Otherwise use the polyfill.
-      async function(input, init) {
-        let processedInput = typeof input == "string" && input.slice(0, 2) === "//" ? "https:" + input : input;
-        return await nodeFetch.default(processedInput, init);
-      }
-    ), RpcWebSocketClient = class extends CommonClient {
-      constructor(address, options, generate_request_id) {
-        let webSocketFactory = (url) => {
-          let rpc = WebSocket(url, {
-            autoconnect: !0,
-            max_reconnects: 5,
-            reconnect: !0,
-            reconnect_interval: 1e3,
-            ...options
-          });
-          return "socket" in rpc ? this.underlyingSocket = rpc.socket : this.underlyingSocket = rpc, rpc;
-        };
-        super(webSocketFactory, address, options, generate_request_id), this.underlyingSocket = void 0;
-      }
-      call(...args) {
-        let readyState = this.underlyingSocket?.readyState;
-        return readyState === 1 ? super.call(...args) : Promise.reject(new Error("Tried to call a JSON-RPC method `" + args[0] + "` but the socket was not `CONNECTING` or `OPEN` (`readyState` was " + readyState + ")"));
-      }
-      notify(...args) {
-        let readyState = this.underlyingSocket?.readyState;
-        return readyState === 1 ? super.notify(...args) : Promise.reject(new Error("Tried to send a JSON-RPC notification `" + args[0] + "` but the socket was not `CONNECTING` or `OPEN` (`readyState` was " + readyState + ")"));
-      }
-    };
-    LOOKUP_TABLE_META_SIZE = 56, AddressLookupTableAccount = class {
-      constructor(args) {
-        this.key = void 0, this.state = void 0, this.key = args.key, this.state = args.state;
-      }
-      isActive() {
-        let U64_MAX = BigInt("0xffffffffffffffff");
-        return this.state.deactivationSlot === U64_MAX;
-      }
-      static deserialize(accountData) {
-        let meta12 = decodeData(LookupTableMetaLayout, accountData), serializedAddressesLen = accountData.length - LOOKUP_TABLE_META_SIZE;
-        assert(serializedAddressesLen >= 0, "lookup table is invalid"), assert(serializedAddressesLen % 32 === 0, "lookup table is invalid");
-        let numSerializedAddresses = serializedAddressesLen / 32, {
-          addresses
-        } = BufferLayout.struct([BufferLayout.seq(publicKey(), numSerializedAddresses, "addresses")]).decode(accountData.slice(LOOKUP_TABLE_META_SIZE));
-        return {
-          deactivationSlot: meta12.deactivationSlot,
-          lastExtendedSlot: meta12.lastExtendedSlot,
-          lastExtendedSlotStartIndex: meta12.lastExtendedStartIndex,
-          authority: meta12.authority.length !== 0 ? new PublicKey(meta12.authority[0]) : void 0,
-          addresses: addresses.map((address) => new PublicKey(address))
-        };
-      }
-    }, LookupTableMetaLayout = {
-      index: 1,
-      layout: BufferLayout.struct([
-        BufferLayout.u32("typeIndex"),
-        u64("deactivationSlot"),
-        BufferLayout.nu64("lastExtendedSlot"),
-        BufferLayout.u8("lastExtendedStartIndex"),
-        BufferLayout.u8(),
-        // option
-        BufferLayout.seq(publicKey(), BufferLayout.offset(BufferLayout.u8(), -1), "authority")
-      ])
-    }, URL_RE = /^[^:]+:\/\/([^:[]+|\[[^\]]+\])(:\d+)?(.*)/i;
-    PublicKeyFromString = coerce(instance(PublicKey), string(), (value) => new PublicKey(value)), RawAccountDataResult = tuple([string(), literal("base64")]), BufferFromRawAccountData = coerce(instance(Buffer2), RawAccountDataResult, (value) => Buffer2.from(value[0], "base64")), BLOCKHASH_CACHE_TIMEOUT_MS = 30 * 1e3;
-    UnknownRpcResult = createRpcResult(unknown());
-    GetInflationGovernorResult = type({
-      foundation: number(),
-      foundationTerm: number(),
-      initial: number(),
-      taper: number(),
-      terminal: number()
-    }), GetInflationRewardResult = jsonRpcResult(array(nullable(type({
-      epoch: number(),
-      effectiveSlot: number(),
-      amount: number(),
-      postBalance: number(),
-      commission: optional(nullable(number()))
-    })))), GetRecentPrioritizationFeesResult = array(type({
-      slot: number(),
-      prioritizationFee: number()
-    })), GetInflationRateResult = type({
-      total: number(),
-      validator: number(),
-      foundation: number(),
-      epoch: number()
-    }), GetEpochInfoResult = type({
-      epoch: number(),
-      slotIndex: number(),
-      slotsInEpoch: number(),
-      absoluteSlot: number(),
-      blockHeight: optional(number()),
-      transactionCount: optional(number())
-    }), GetEpochScheduleResult = type({
-      slotsPerEpoch: number(),
-      leaderScheduleSlotOffset: number(),
-      warmup: boolean(),
-      firstNormalEpoch: number(),
-      firstNormalSlot: number()
-    }), GetLeaderScheduleResult = record(string(), array(number())), TransactionErrorResult = nullable(union2([type({}), string()])), SignatureStatusResult = type({
-      err: TransactionErrorResult
-    }), SignatureReceivedResult = literal("receivedSignature"), VersionResult = type({
-      "solana-core": string(),
-      "feature-set": optional(number())
-    }), ParsedInstructionStruct = type({
-      program: string(),
-      programId: PublicKeyFromString,
-      parsed: unknown()
-    }), PartiallyDecodedInstructionStruct = type({
-      programId: PublicKeyFromString,
-      accounts: array(PublicKeyFromString),
-      data: string()
-    }), SimulatedTransactionResponseStruct = jsonRpcResultAndContext(type({
-      err: nullable(union2([type({}), string()])),
-      logs: nullable(array(string())),
-      accounts: optional(nullable(array(nullable(type({
-        executable: boolean(),
-        owner: string(),
-        lamports: number(),
-        data: array(string()),
-        rentEpoch: optional(number())
-      }))))),
-      unitsConsumed: optional(number()),
-      returnData: optional(nullable(type({
-        programId: string(),
-        data: tuple([string(), literal("base64")])
-      }))),
-      innerInstructions: optional(nullable(array(type({
-        index: number(),
-        instructions: array(union2([ParsedInstructionStruct, PartiallyDecodedInstructionStruct]))
-      }))))
-    })), BlockProductionResponseStruct = jsonRpcResultAndContext(type({
-      byIdentity: record(string(), array(number())),
-      range: type({
-        firstSlot: number(),
-        lastSlot: number()
-      })
-    }));
-    GetInflationGovernorRpcResult = jsonRpcResult(GetInflationGovernorResult), GetInflationRateRpcResult = jsonRpcResult(GetInflationRateResult), GetRecentPrioritizationFeesRpcResult = jsonRpcResult(GetRecentPrioritizationFeesResult), GetEpochInfoRpcResult = jsonRpcResult(GetEpochInfoResult), GetEpochScheduleRpcResult = jsonRpcResult(GetEpochScheduleResult), GetLeaderScheduleRpcResult = jsonRpcResult(GetLeaderScheduleResult), SlotRpcResult = jsonRpcResult(number()), GetSupplyRpcResult = jsonRpcResultAndContext(type({
-      total: number(),
-      circulating: number(),
-      nonCirculating: number(),
-      nonCirculatingAccounts: array(PublicKeyFromString)
-    })), TokenAmountResult = type({
-      amount: string(),
-      uiAmount: nullable(number()),
-      decimals: number(),
-      uiAmountString: optional(string())
-    }), GetTokenLargestAccountsResult = jsonRpcResultAndContext(array(type({
-      address: PublicKeyFromString,
-      amount: string(),
-      uiAmount: nullable(number()),
-      decimals: number(),
-      uiAmountString: optional(string())
-    }))), GetTokenAccountsByOwner = jsonRpcResultAndContext(array(type({
-      pubkey: PublicKeyFromString,
-      account: type({
-        executable: boolean(),
-        owner: PublicKeyFromString,
-        lamports: number(),
-        data: BufferFromRawAccountData,
-        rentEpoch: number()
-      })
-    }))), ParsedAccountDataResult = type({
-      program: string(),
-      parsed: unknown(),
-      space: number()
-    }), GetParsedTokenAccountsByOwner = jsonRpcResultAndContext(array(type({
-      pubkey: PublicKeyFromString,
-      account: type({
-        executable: boolean(),
-        owner: PublicKeyFromString,
-        lamports: number(),
-        data: ParsedAccountDataResult,
-        rentEpoch: number()
-      })
-    }))), GetLargestAccountsRpcResult = jsonRpcResultAndContext(array(type({
-      lamports: number(),
-      address: PublicKeyFromString
-    }))), AccountInfoResult = type({
-      executable: boolean(),
-      owner: PublicKeyFromString,
-      lamports: number(),
-      data: BufferFromRawAccountData,
-      rentEpoch: number()
-    }), KeyedAccountInfoResult = type({
-      pubkey: PublicKeyFromString,
-      account: AccountInfoResult
-    }), ParsedOrRawAccountData = coerce(union2([instance(Buffer2), ParsedAccountDataResult]), union2([RawAccountDataResult, ParsedAccountDataResult]), (value) => Array.isArray(value) ? create(value, BufferFromRawAccountData) : value), ParsedAccountInfoResult = type({
-      executable: boolean(),
-      owner: PublicKeyFromString,
-      lamports: number(),
-      data: ParsedOrRawAccountData,
-      rentEpoch: number()
-    }), KeyedParsedAccountInfoResult = type({
-      pubkey: PublicKeyFromString,
-      account: ParsedAccountInfoResult
-    }), StakeActivationResult = type({
-      state: union2([literal("active"), literal("inactive"), literal("activating"), literal("deactivating")]),
-      active: number(),
-      inactive: number()
-    }), GetConfirmedSignaturesForAddress2RpcResult = jsonRpcResult(array(type({
-      signature: string(),
-      slot: number(),
-      err: TransactionErrorResult,
-      memo: nullable(string()),
-      blockTime: optional(nullable(number()))
-    }))), GetSignaturesForAddressRpcResult = jsonRpcResult(array(type({
-      signature: string(),
-      slot: number(),
-      err: TransactionErrorResult,
-      memo: nullable(string()),
-      blockTime: optional(nullable(number()))
-    }))), AccountNotificationResult = type({
-      subscription: number(),
-      result: notificationResultAndContext(AccountInfoResult)
-    }), ProgramAccountInfoResult = type({
-      pubkey: PublicKeyFromString,
-      account: AccountInfoResult
-    }), ProgramAccountNotificationResult = type({
-      subscription: number(),
-      result: notificationResultAndContext(ProgramAccountInfoResult)
-    }), SlotInfoResult = type({
-      parent: number(),
-      slot: number(),
-      root: number()
-    }), SlotNotificationResult = type({
-      subscription: number(),
-      result: SlotInfoResult
-    }), SlotUpdateResult = union2([type({
-      type: union2([literal("firstShredReceived"), literal("completed"), literal("optimisticConfirmation"), literal("root")]),
-      slot: number(),
-      timestamp: number()
-    }), type({
-      type: literal("createdBank"),
-      parent: number(),
-      slot: number(),
-      timestamp: number()
-    }), type({
-      type: literal("frozen"),
-      slot: number(),
-      timestamp: number(),
-      stats: type({
-        numTransactionEntries: number(),
-        numSuccessfulTransactions: number(),
-        numFailedTransactions: number(),
-        maxTransactionsPerEntry: number()
-      })
-    }), type({
-      type: literal("dead"),
-      slot: number(),
-      timestamp: number(),
-      err: string()
-    })]), SlotUpdateNotificationResult = type({
-      subscription: number(),
-      result: SlotUpdateResult
-    }), SignatureNotificationResult = type({
-      subscription: number(),
-      result: notificationResultAndContext(union2([SignatureStatusResult, SignatureReceivedResult]))
-    }), RootNotificationResult = type({
-      subscription: number(),
-      result: number()
-    }), ContactInfoResult = type({
-      pubkey: string(),
-      gossip: nullable(string()),
-      tpu: nullable(string()),
-      rpc: nullable(string()),
-      version: nullable(string())
-    }), VoteAccountInfoResult = type({
-      votePubkey: string(),
-      nodePubkey: string(),
-      activatedStake: number(),
-      epochVoteAccount: boolean(),
-      epochCredits: array(tuple([number(), number(), number()])),
-      commission: number(),
-      lastVote: number(),
-      rootSlot: nullable(number())
-    }), GetVoteAccounts = jsonRpcResult(type({
-      current: array(VoteAccountInfoResult),
-      delinquent: array(VoteAccountInfoResult)
-    })), ConfirmationStatus = union2([literal("processed"), literal("confirmed"), literal("finalized")]), SignatureStatusResponse = type({
-      slot: number(),
-      confirmations: nullable(number()),
-      err: TransactionErrorResult,
-      confirmationStatus: optional(ConfirmationStatus)
-    }), GetSignatureStatusesRpcResult = jsonRpcResultAndContext(array(nullable(SignatureStatusResponse))), GetMinimumBalanceForRentExemptionRpcResult = jsonRpcResult(number()), AddressTableLookupStruct = type({
-      accountKey: PublicKeyFromString,
-      writableIndexes: array(number()),
-      readonlyIndexes: array(number())
-    }), ConfirmedTransactionResult = type({
-      signatures: array(string()),
-      message: type({
-        accountKeys: array(string()),
-        header: type({
-          numRequiredSignatures: number(),
-          numReadonlySignedAccounts: number(),
-          numReadonlyUnsignedAccounts: number()
-        }),
-        instructions: array(type({
-          accounts: array(number()),
-          data: string(),
-          programIdIndex: number()
-        })),
-        recentBlockhash: string(),
-        addressTableLookups: optional(array(AddressTableLookupStruct))
-      })
-    }), AnnotatedAccountKey = type({
-      pubkey: PublicKeyFromString,
-      signer: boolean(),
-      writable: boolean(),
-      source: optional(union2([literal("transaction"), literal("lookupTable")]))
-    }), ConfirmedTransactionAccountsModeResult = type({
-      accountKeys: array(AnnotatedAccountKey),
-      signatures: array(string())
-    }), ParsedInstructionResult = type({
-      parsed: unknown(),
-      program: string(),
-      programId: PublicKeyFromString
-    }), RawInstructionResult = type({
-      accounts: array(PublicKeyFromString),
-      data: string(),
-      programId: PublicKeyFromString
-    }), InstructionResult = union2([RawInstructionResult, ParsedInstructionResult]), UnknownInstructionResult = union2([type({
-      parsed: unknown(),
-      program: string(),
-      programId: string()
-    }), type({
-      accounts: array(string()),
-      data: string(),
-      programId: string()
-    })]), ParsedOrRawInstruction = coerce(InstructionResult, UnknownInstructionResult, (value) => "accounts" in value ? create(value, RawInstructionResult) : create(value, ParsedInstructionResult)), ParsedConfirmedTransactionResult = type({
-      signatures: array(string()),
-      message: type({
-        accountKeys: array(AnnotatedAccountKey),
-        instructions: array(ParsedOrRawInstruction),
-        recentBlockhash: string(),
-        addressTableLookups: optional(nullable(array(AddressTableLookupStruct)))
-      })
-    }), TokenBalanceResult = type({
-      accountIndex: number(),
-      mint: string(),
-      owner: optional(string()),
-      programId: optional(string()),
-      uiTokenAmount: TokenAmountResult
-    }), LoadedAddressesResult = type({
-      writable: array(PublicKeyFromString),
-      readonly: array(PublicKeyFromString)
-    }), ConfirmedTransactionMetaResult = type({
-      err: TransactionErrorResult,
-      fee: number(),
-      innerInstructions: optional(nullable(array(type({
-        index: number(),
-        instructions: array(type({
-          accounts: array(number()),
-          data: string(),
-          programIdIndex: number()
-        }))
-      })))),
-      preBalances: array(number()),
-      postBalances: array(number()),
-      logMessages: optional(nullable(array(string()))),
-      preTokenBalances: optional(nullable(array(TokenBalanceResult))),
-      postTokenBalances: optional(nullable(array(TokenBalanceResult))),
-      loadedAddresses: optional(LoadedAddressesResult),
-      computeUnitsConsumed: optional(number())
-    }), ParsedConfirmedTransactionMetaResult = type({
-      err: TransactionErrorResult,
-      fee: number(),
-      innerInstructions: optional(nullable(array(type({
-        index: number(),
-        instructions: array(ParsedOrRawInstruction)
-      })))),
-      preBalances: array(number()),
-      postBalances: array(number()),
-      logMessages: optional(nullable(array(string()))),
-      preTokenBalances: optional(nullable(array(TokenBalanceResult))),
-      postTokenBalances: optional(nullable(array(TokenBalanceResult))),
-      loadedAddresses: optional(LoadedAddressesResult),
-      computeUnitsConsumed: optional(number())
-    }), TransactionVersionStruct = union2([literal(0), literal("legacy")]), RewardsResult = type({
-      pubkey: string(),
-      lamports: number(),
-      postBalance: nullable(number()),
-      rewardType: nullable(string()),
-      commission: optional(nullable(number()))
-    }), GetBlockRpcResult = jsonRpcResult(nullable(type({
-      blockhash: string(),
-      previousBlockhash: string(),
-      parentSlot: number(),
-      transactions: array(type({
-        transaction: ConfirmedTransactionResult,
-        meta: nullable(ConfirmedTransactionMetaResult),
-        version: optional(TransactionVersionStruct)
-      })),
-      rewards: optional(array(RewardsResult)),
-      blockTime: nullable(number()),
-      blockHeight: nullable(number())
-    }))), GetNoneModeBlockRpcResult = jsonRpcResult(nullable(type({
-      blockhash: string(),
-      previousBlockhash: string(),
-      parentSlot: number(),
-      rewards: optional(array(RewardsResult)),
-      blockTime: nullable(number()),
-      blockHeight: nullable(number())
-    }))), GetAccountsModeBlockRpcResult = jsonRpcResult(nullable(type({
-      blockhash: string(),
-      previousBlockhash: string(),
-      parentSlot: number(),
-      transactions: array(type({
-        transaction: ConfirmedTransactionAccountsModeResult,
-        meta: nullable(ConfirmedTransactionMetaResult),
-        version: optional(TransactionVersionStruct)
-      })),
-      rewards: optional(array(RewardsResult)),
-      blockTime: nullable(number()),
-      blockHeight: nullable(number())
-    }))), GetParsedBlockRpcResult = jsonRpcResult(nullable(type({
-      blockhash: string(),
-      previousBlockhash: string(),
-      parentSlot: number(),
-      transactions: array(type({
-        transaction: ParsedConfirmedTransactionResult,
-        meta: nullable(ParsedConfirmedTransactionMetaResult),
-        version: optional(TransactionVersionStruct)
-      })),
-      rewards: optional(array(RewardsResult)),
-      blockTime: nullable(number()),
-      blockHeight: nullable(number())
-    }))), GetParsedAccountsModeBlockRpcResult = jsonRpcResult(nullable(type({
-      blockhash: string(),
-      previousBlockhash: string(),
-      parentSlot: number(),
-      transactions: array(type({
-        transaction: ConfirmedTransactionAccountsModeResult,
-        meta: nullable(ParsedConfirmedTransactionMetaResult),
-        version: optional(TransactionVersionStruct)
-      })),
-      rewards: optional(array(RewardsResult)),
-      blockTime: nullable(number()),
-      blockHeight: nullable(number())
-    }))), GetParsedNoneModeBlockRpcResult = jsonRpcResult(nullable(type({
-      blockhash: string(),
-      previousBlockhash: string(),
-      parentSlot: number(),
-      rewards: optional(array(RewardsResult)),
-      blockTime: nullable(number()),
-      blockHeight: nullable(number())
-    }))), GetConfirmedBlockRpcResult = jsonRpcResult(nullable(type({
-      blockhash: string(),
-      previousBlockhash: string(),
-      parentSlot: number(),
-      transactions: array(type({
-        transaction: ConfirmedTransactionResult,
-        meta: nullable(ConfirmedTransactionMetaResult)
-      })),
-      rewards: optional(array(RewardsResult)),
-      blockTime: nullable(number())
-    }))), GetBlockSignaturesRpcResult = jsonRpcResult(nullable(type({
-      blockhash: string(),
-      previousBlockhash: string(),
-      parentSlot: number(),
-      signatures: array(string()),
-      blockTime: nullable(number())
-    }))), GetTransactionRpcResult = jsonRpcResult(nullable(type({
-      slot: number(),
-      meta: nullable(ConfirmedTransactionMetaResult),
-      blockTime: optional(nullable(number())),
-      transaction: ConfirmedTransactionResult,
-      version: optional(TransactionVersionStruct)
-    }))), GetParsedTransactionRpcResult = jsonRpcResult(nullable(type({
-      slot: number(),
-      transaction: ParsedConfirmedTransactionResult,
-      meta: nullable(ParsedConfirmedTransactionMetaResult),
-      blockTime: optional(nullable(number())),
-      version: optional(TransactionVersionStruct)
-    }))), GetLatestBlockhashRpcResult = jsonRpcResultAndContext(type({
-      blockhash: string(),
-      lastValidBlockHeight: number()
-    })), IsBlockhashValidRpcResult = jsonRpcResultAndContext(boolean()), PerfSampleResult = type({
-      slot: number(),
-      numTransactions: number(),
-      numSlots: number(),
-      samplePeriodSecs: number()
-    }), GetRecentPerformanceSamplesRpcResult = jsonRpcResult(array(PerfSampleResult)), GetFeeCalculatorRpcResult = jsonRpcResultAndContext(nullable(type({
-      feeCalculator: type({
-        lamportsPerSignature: number()
-      })
-    }))), RequestAirdropRpcResult = jsonRpcResult(string()), SendTransactionRpcResult = jsonRpcResult(string()), LogsResult = type({
-      err: TransactionErrorResult,
-      logs: array(string()),
-      signature: string()
-    }), LogsNotificationResult = type({
-      result: notificationResultAndContext(LogsResult),
-      subscription: number()
-    }), COMMON_HTTP_HEADERS = {
-      "solana-client": "js/1.0.0-maintenance"
-    }, Connection = class {
-      /**
-       * Establish a JSON RPC connection
-       *
-       * @param endpoint URL to the fullnode JSON RPC endpoint
-       * @param commitmentOrConfig optional default commitment level or optional ConnectionConfig configuration object
-       */
-      constructor(endpoint2, _commitmentOrConfig) {
-        this._commitment = void 0, this._confirmTransactionInitialTimeout = void 0, this._rpcEndpoint = void 0, this._rpcWsEndpoint = void 0, this._rpcClient = void 0, this._rpcRequest = void 0, this._rpcBatchRequest = void 0, this._rpcWebSocket = void 0, this._rpcWebSocketConnected = !1, this._rpcWebSocketHeartbeat = null, this._rpcWebSocketIdleTimeout = null, this._rpcWebSocketGeneration = 0, this._disableBlockhashCaching = !1, this._pollingBlockhash = !1, this._blockhashInfo = {
-          latestBlockhash: null,
-          lastFetch: 0,
-          transactionSignatures: [],
-          simulatedSignatures: []
-        }, this._nextClientSubscriptionId = 0, this._subscriptionDisposeFunctionsByClientSubscriptionId = {}, this._subscriptionHashByClientSubscriptionId = {}, this._subscriptionStateChangeCallbacksByHash = {}, this._subscriptionCallbacksByServerSubscriptionId = {}, this._subscriptionsByHash = {}, this._subscriptionsAutoDisposedByRpc = /* @__PURE__ */ new Set(), this.getBlockHeight = (() => {
-          let requestPromises = {};
-          return async (commitmentOrConfig) => {
-            let {
-              commitment,
-              config
-            } = extractCommitmentFromConfig(commitmentOrConfig), args = this._buildArgs([], commitment, void 0, config), requestHash = fastStableStringify(args);
-            return requestPromises[requestHash] = requestPromises[requestHash] ?? (async () => {
-              try {
-                let unsafeRes = await this._rpcRequest("getBlockHeight", args), res = create(unsafeRes, jsonRpcResult(number()));
-                if ("error" in res)
-                  throw new SolanaJSONRPCError(res.error, "failed to get block height information");
-                return res.result;
-              } finally {
-                delete requestPromises[requestHash];
-              }
-            })(), await requestPromises[requestHash];
-          };
-        })();
-        let wsEndpoint, httpHeaders, fetch2, fetchMiddleware, disableRetryOnRateLimit, httpAgent;
-        _commitmentOrConfig && typeof _commitmentOrConfig == "string" ? this._commitment = _commitmentOrConfig : _commitmentOrConfig && (this._commitment = _commitmentOrConfig.commitment, this._confirmTransactionInitialTimeout = _commitmentOrConfig.confirmTransactionInitialTimeout, wsEndpoint = _commitmentOrConfig.wsEndpoint, httpHeaders = _commitmentOrConfig.httpHeaders, fetch2 = _commitmentOrConfig.fetch, fetchMiddleware = _commitmentOrConfig.fetchMiddleware, disableRetryOnRateLimit = _commitmentOrConfig.disableRetryOnRateLimit, httpAgent = _commitmentOrConfig.httpAgent), this._rpcEndpoint = assertEndpointUrl(endpoint2), this._rpcWsEndpoint = wsEndpoint || makeWebsocketUrl(endpoint2), this._rpcClient = createRpcClient(endpoint2, httpHeaders, fetch2, fetchMiddleware, disableRetryOnRateLimit, httpAgent), this._rpcRequest = createRpcRequest(this._rpcClient), this._rpcBatchRequest = createRpcBatchRequest(this._rpcClient), this._rpcWebSocket = new RpcWebSocketClient(this._rpcWsEndpoint, {
-          autoconnect: !1,
-          max_reconnects: 1 / 0
-        }), this._rpcWebSocket.on("open", this._wsOnOpen.bind(this)), this._rpcWebSocket.on("error", this._wsOnError.bind(this)), this._rpcWebSocket.on("close", this._wsOnClose.bind(this)), this._rpcWebSocket.on("accountNotification", this._wsOnAccountNotification.bind(this)), this._rpcWebSocket.on("programNotification", this._wsOnProgramAccountNotification.bind(this)), this._rpcWebSocket.on("slotNotification", this._wsOnSlotNotification.bind(this)), this._rpcWebSocket.on("slotsUpdatesNotification", this._wsOnSlotUpdatesNotification.bind(this)), this._rpcWebSocket.on("signatureNotification", this._wsOnSignatureNotification.bind(this)), this._rpcWebSocket.on("rootNotification", this._wsOnRootNotification.bind(this)), this._rpcWebSocket.on("logsNotification", this._wsOnLogsNotification.bind(this));
-      }
-      /**
-       * The default commitment used for requests
-       */
-      get commitment() {
-        return this._commitment;
-      }
-      /**
-       * The RPC endpoint
-       */
-      get rpcEndpoint() {
-        return this._rpcEndpoint;
-      }
-      /**
-       * Fetch the balance for the specified public key, return with context
-       */
-      async getBalanceAndContext(publicKey5, commitmentOrConfig) {
-        let {
-          commitment,
-          config
-        } = extractCommitmentFromConfig(commitmentOrConfig), args = this._buildArgs([publicKey5.toBase58()], commitment, void 0, config), unsafeRes = await this._rpcRequest("getBalance", args), res = create(unsafeRes, jsonRpcResultAndContext(number()));
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, `failed to get balance for ${publicKey5.toBase58()}`);
-        return res.result;
-      }
-      /**
-       * Fetch the balance for the specified public key
-       */
-      async getBalance(publicKey5, commitmentOrConfig) {
-        return await this.getBalanceAndContext(publicKey5, commitmentOrConfig).then((x) => x.value).catch((e) => {
-          throw new Error("failed to get balance of account " + publicKey5.toBase58() + ": " + e);
-        });
-      }
-      /**
-       * Fetch the estimated production time of a block
-       */
-      async getBlockTime(slot) {
-        let unsafeRes = await this._rpcRequest("getBlockTime", [slot]), res = create(unsafeRes, jsonRpcResult(nullable(number())));
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, `failed to get block time for slot ${slot}`);
-        return res.result;
-      }
-      /**
-       * Fetch the lowest slot that the node has information about in its ledger.
-       * This value may increase over time if the node is configured to purge older ledger data
-       */
-      async getMinimumLedgerSlot() {
-        let unsafeRes = await this._rpcRequest("minimumLedgerSlot", []), res = create(unsafeRes, jsonRpcResult(number()));
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get minimum ledger slot");
-        return res.result;
-      }
-      /**
-       * Fetch the slot of the lowest confirmed block that has not been purged from the ledger
-       */
-      async getFirstAvailableBlock() {
-        let unsafeRes = await this._rpcRequest("getFirstAvailableBlock", []), res = create(unsafeRes, SlotRpcResult);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get first available block");
-        return res.result;
-      }
-      /**
-       * Fetch information about the current supply
-       */
-      async getSupply(config) {
-        let configArg = {};
-        typeof config == "string" ? configArg = {
-          commitment: config
-        } : config ? configArg = {
-          ...config,
-          commitment: config && config.commitment || this.commitment
-        } : configArg = {
-          commitment: this.commitment
-        };
-        let unsafeRes = await this._rpcRequest("getSupply", [configArg]), res = create(unsafeRes, GetSupplyRpcResult);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get supply");
-        return res.result;
-      }
-      /**
-       * Fetch the current supply of a token mint
-       */
-      async getTokenSupply(tokenMintAddress, commitment) {
-        let args = this._buildArgs([tokenMintAddress.toBase58()], commitment), unsafeRes = await this._rpcRequest("getTokenSupply", args), res = create(unsafeRes, jsonRpcResultAndContext(TokenAmountResult));
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get token supply");
-        return res.result;
-      }
-      /**
-       * Fetch the current balance of a token account
-       */
-      async getTokenAccountBalance(tokenAddress, commitment) {
-        let args = this._buildArgs([tokenAddress.toBase58()], commitment), unsafeRes = await this._rpcRequest("getTokenAccountBalance", args), res = create(unsafeRes, jsonRpcResultAndContext(TokenAmountResult));
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get token account balance");
-        return res.result;
-      }
-      /**
-       * Fetch all the token accounts owned by the specified account
-       *
-       * @return {Promise<RpcResponseAndContext<GetProgramAccountsResponse>}
-       */
-      async getTokenAccountsByOwner(ownerAddress, filter, commitmentOrConfig) {
-        let {
-          commitment,
-          config
-        } = extractCommitmentFromConfig(commitmentOrConfig), _args = [ownerAddress.toBase58()];
-        "mint" in filter ? _args.push({
-          mint: filter.mint.toBase58()
-        }) : _args.push({
-          programId: filter.programId.toBase58()
-        });
-        let args = this._buildArgs(_args, commitment, "base64", config), unsafeRes = await this._rpcRequest("getTokenAccountsByOwner", args), res = create(unsafeRes, GetTokenAccountsByOwner);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, `failed to get token accounts owned by account ${ownerAddress.toBase58()}`);
-        return res.result;
-      }
-      /**
-       * Fetch parsed token accounts owned by the specified account
-       *
-       * @return {Promise<RpcResponseAndContext<Array<{pubkey: PublicKey, account: AccountInfo<ParsedAccountData>}>>>}
-       */
-      async getParsedTokenAccountsByOwner(ownerAddress, filter, commitment) {
-        let _args = [ownerAddress.toBase58()];
-        "mint" in filter ? _args.push({
-          mint: filter.mint.toBase58()
-        }) : _args.push({
-          programId: filter.programId.toBase58()
-        });
-        let args = this._buildArgs(_args, commitment, "jsonParsed"), unsafeRes = await this._rpcRequest("getTokenAccountsByOwner", args), res = create(unsafeRes, GetParsedTokenAccountsByOwner);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, `failed to get token accounts owned by account ${ownerAddress.toBase58()}`);
-        return res.result;
-      }
-      /**
-       * Fetch the 20 largest accounts with their current balances
-       */
-      async getLargestAccounts(config) {
-        let arg = {
-          ...config,
-          commitment: config && config.commitment || this.commitment
-        }, args = arg.filter || arg.commitment ? [arg] : [], unsafeRes = await this._rpcRequest("getLargestAccounts", args), res = create(unsafeRes, GetLargestAccountsRpcResult);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get largest accounts");
-        return res.result;
-      }
-      /**
-       * Fetch the 20 largest token accounts with their current balances
-       * for a given mint.
-       */
-      async getTokenLargestAccounts(mintAddress, commitment) {
-        let args = this._buildArgs([mintAddress.toBase58()], commitment), unsafeRes = await this._rpcRequest("getTokenLargestAccounts", args), res = create(unsafeRes, GetTokenLargestAccountsResult);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get token largest accounts");
-        return res.result;
-      }
-      /**
-       * Fetch all the account info for the specified public key, return with context
-       */
-      async getAccountInfoAndContext(publicKey5, commitmentOrConfig) {
-        let {
-          commitment,
-          config
-        } = extractCommitmentFromConfig(commitmentOrConfig), args = this._buildArgs([publicKey5.toBase58()], commitment, "base64", config), unsafeRes = await this._rpcRequest("getAccountInfo", args), res = create(unsafeRes, jsonRpcResultAndContext(nullable(AccountInfoResult)));
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, `failed to get info about account ${publicKey5.toBase58()}`);
-        return res.result;
-      }
-      /**
-       * Fetch parsed account info for the specified public key
-       */
-      async getParsedAccountInfo(publicKey5, commitmentOrConfig) {
-        let {
-          commitment,
-          config
-        } = extractCommitmentFromConfig(commitmentOrConfig), args = this._buildArgs([publicKey5.toBase58()], commitment, "jsonParsed", config), unsafeRes = await this._rpcRequest("getAccountInfo", args), res = create(unsafeRes, jsonRpcResultAndContext(nullable(ParsedAccountInfoResult)));
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, `failed to get info about account ${publicKey5.toBase58()}`);
-        return res.result;
-      }
-      /**
-       * Fetch all the account info for the specified public key
-       */
-      async getAccountInfo(publicKey5, commitmentOrConfig) {
-        try {
-          return (await this.getAccountInfoAndContext(publicKey5, commitmentOrConfig)).value;
-        } catch (e) {
-          throw new Error("failed to get info about account " + publicKey5.toBase58() + ": " + e);
-        }
-      }
-      /**
-       * Fetch all the account info for multiple accounts specified by an array of public keys, return with context
-       */
-      async getMultipleParsedAccounts(publicKeys, rawConfig) {
-        let {
-          commitment,
-          config
-        } = extractCommitmentFromConfig(rawConfig), keys = publicKeys.map((key) => key.toBase58()), args = this._buildArgs([keys], commitment, "jsonParsed", config), unsafeRes = await this._rpcRequest("getMultipleAccounts", args), res = create(unsafeRes, jsonRpcResultAndContext(array(nullable(ParsedAccountInfoResult))));
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, `failed to get info for accounts ${keys}`);
-        return res.result;
-      }
-      /**
-       * Fetch all the account info for multiple accounts specified by an array of public keys, return with context
-       */
-      async getMultipleAccountsInfoAndContext(publicKeys, commitmentOrConfig) {
-        let {
-          commitment,
-          config
-        } = extractCommitmentFromConfig(commitmentOrConfig), keys = publicKeys.map((key) => key.toBase58()), args = this._buildArgs([keys], commitment, "base64", config), unsafeRes = await this._rpcRequest("getMultipleAccounts", args), res = create(unsafeRes, jsonRpcResultAndContext(array(nullable(AccountInfoResult))));
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, `failed to get info for accounts ${keys}`);
-        return res.result;
-      }
-      /**
-       * Fetch all the account info for multiple accounts specified by an array of public keys
-       */
-      async getMultipleAccountsInfo(publicKeys, commitmentOrConfig) {
-        return (await this.getMultipleAccountsInfoAndContext(publicKeys, commitmentOrConfig)).value;
-      }
-      /**
-       * Returns epoch activation information for a stake account that has been delegated
-       *
-       * @deprecated Deprecated since RPC v1.18; will be removed in a future version.
-       */
-      async getStakeActivation(publicKey5, commitmentOrConfig, epoch) {
-        let {
-          commitment,
-          config
-        } = extractCommitmentFromConfig(commitmentOrConfig), args = this._buildArgs([publicKey5.toBase58()], commitment, void 0, {
-          ...config,
-          epoch: epoch ?? config?.epoch
-        }), unsafeRes = await this._rpcRequest("getStakeActivation", args), res = create(unsafeRes, jsonRpcResult(StakeActivationResult));
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, `failed to get Stake Activation ${publicKey5.toBase58()}`);
-        return res.result;
-      }
-      /**
-       * Fetch all the accounts owned by the specified program id
-       *
-       * @return {Promise<Array<{pubkey: PublicKey, account: AccountInfo<Buffer>}>>}
-       */
-      // eslint-disable-next-line no-dupe-class-members
-      // eslint-disable-next-line no-dupe-class-members
-      async getProgramAccounts(programId, configOrCommitment) {
-        let {
-          commitment,
-          config
-        } = extractCommitmentFromConfig(configOrCommitment), {
-          encoding,
-          ...configWithoutEncoding
-        } = config || {}, args = this._buildArgs([programId.toBase58()], commitment, encoding || "base64", {
-          ...configWithoutEncoding,
-          ...configWithoutEncoding.filters ? {
-            filters: applyDefaultMemcmpEncodingToFilters(configWithoutEncoding.filters)
-          } : null
-        }), unsafeRes = await this._rpcRequest("getProgramAccounts", args), baseSchema = array(KeyedAccountInfoResult), res = configWithoutEncoding.withContext === !0 ? create(unsafeRes, jsonRpcResultAndContext(baseSchema)) : create(unsafeRes, jsonRpcResult(baseSchema));
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, `failed to get accounts owned by program ${programId.toBase58()}`);
-        return res.result;
-      }
-      /**
-       * Fetch and parse all the accounts owned by the specified program id
-       *
-       * @return {Promise<Array<{pubkey: PublicKey, account: AccountInfo<Buffer | ParsedAccountData>}>>}
-       */
-      async getParsedProgramAccounts(programId, configOrCommitment) {
-        let {
-          commitment,
-          config
-        } = extractCommitmentFromConfig(configOrCommitment), args = this._buildArgs([programId.toBase58()], commitment, "jsonParsed", config), unsafeRes = await this._rpcRequest("getProgramAccounts", args), res = create(unsafeRes, jsonRpcResult(array(KeyedParsedAccountInfoResult)));
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, `failed to get accounts owned by program ${programId.toBase58()}`);
-        return res.result;
-      }
-      /** @deprecated Instead, call `confirmTransaction` and pass in {@link TransactionConfirmationStrategy} */
-      // eslint-disable-next-line no-dupe-class-members
-      // eslint-disable-next-line no-dupe-class-members
-      async confirmTransaction(strategy, commitment) {
-        let rawSignature;
-        if (typeof strategy == "string")
-          rawSignature = strategy;
-        else {
-          let config = strategy;
-          if (config.abortSignal?.aborted)
-            return Promise.reject(config.abortSignal.reason);
-          rawSignature = config.signature;
-        }
-        let decodedSignature;
-        try {
-          decodedSignature = bs58.decode(rawSignature);
-        } catch {
-          throw new Error("signature must be base58 encoded: " + rawSignature);
-        }
-        return assert(decodedSignature.length === 64, "signature has invalid length"), typeof strategy == "string" ? await this.confirmTransactionUsingLegacyTimeoutStrategy({
-          commitment: commitment || this.commitment,
-          signature: rawSignature
-        }) : "lastValidBlockHeight" in strategy ? await this.confirmTransactionUsingBlockHeightExceedanceStrategy({
-          commitment: commitment || this.commitment,
-          strategy
-        }) : await this.confirmTransactionUsingDurableNonceStrategy({
-          commitment: commitment || this.commitment,
-          strategy
-        });
-      }
-      getCancellationPromise(signal) {
-        return new Promise((_, reject) => {
-          signal != null && (signal.aborted ? reject(signal.reason) : signal.addEventListener("abort", () => {
-            reject(signal.reason);
-          }));
-        });
-      }
-      getTransactionConfirmationPromise({
-        commitment,
-        signature: signature2
-      }) {
-        let signatureSubscriptionId, disposeSignatureSubscriptionStateChangeObserver, done = !1, confirmationPromise = new Promise((resolve, reject) => {
-          try {
-            signatureSubscriptionId = this.onSignature(signature2, (result, context) => {
-              signatureSubscriptionId = void 0;
-              let response = {
-                context,
-                value: result
-              };
-              resolve({
-                __type: TransactionStatus.PROCESSED,
-                response
-              });
-            }, commitment);
-            let subscriptionSetupPromise = new Promise((resolveSubscriptionSetup) => {
-              signatureSubscriptionId == null ? resolveSubscriptionSetup() : disposeSignatureSubscriptionStateChangeObserver = this._onSubscriptionStateChange(signatureSubscriptionId, (nextState) => {
-                nextState === "subscribed" && resolveSubscriptionSetup();
-              });
-            });
-            (async () => {
-              if (await subscriptionSetupPromise, done)
-                return;
-              let response = await this.getSignatureStatus(signature2);
-              if (done || response == null)
-                return;
-              let {
-                context,
-                value
-              } = response;
-              if (value != null)
-                if (value?.err)
-                  reject(value.err);
-                else {
-                  switch (commitment) {
-                    case "confirmed":
-                    case "single":
-                    case "singleGossip": {
-                      if (value.confirmationStatus === "processed")
-                        return;
-                      break;
-                    }
-                    case "finalized":
-                    case "max":
-                    case "root": {
-                      if (value.confirmationStatus === "processed" || value.confirmationStatus === "confirmed")
-                        return;
-                      break;
-                    }
-                    case "processed":
-                    case "recent":
-                  }
-                  done = !0, resolve({
-                    __type: TransactionStatus.PROCESSED,
-                    response: {
-                      context,
-                      value
-                    }
-                  });
-                }
-            })();
-          } catch (err) {
-            reject(err);
-          }
-        });
-        return {
-          abortConfirmation: () => {
-            disposeSignatureSubscriptionStateChangeObserver && (disposeSignatureSubscriptionStateChangeObserver(), disposeSignatureSubscriptionStateChangeObserver = void 0), signatureSubscriptionId != null && (this.removeSignatureListener(signatureSubscriptionId), signatureSubscriptionId = void 0);
-          },
-          confirmationPromise
-        };
-      }
-      async confirmTransactionUsingBlockHeightExceedanceStrategy({
-        commitment,
-        strategy: {
-          abortSignal,
-          lastValidBlockHeight,
-          signature: signature2
-        }
-      }) {
-        let done = !1, expiryPromise = new Promise((resolve) => {
-          let checkBlockHeight = async () => {
-            try {
-              return await this.getBlockHeight(commitment);
-            } catch {
-              return -1;
-            }
-          };
-          (async () => {
-            let currentBlockHeight = await checkBlockHeight();
-            if (!done) {
-              for (; currentBlockHeight <= lastValidBlockHeight; )
-                if (await sleep(1e3), done || (currentBlockHeight = await checkBlockHeight(), done))
-                  return;
-              resolve({
-                __type: TransactionStatus.BLOCKHEIGHT_EXCEEDED
-              });
-            }
-          })();
-        }), {
-          abortConfirmation,
-          confirmationPromise
-        } = this.getTransactionConfirmationPromise({
-          commitment,
-          signature: signature2
-        }), cancellationPromise = this.getCancellationPromise(abortSignal), result;
-        try {
-          let outcome = await Promise.race([cancellationPromise, confirmationPromise, expiryPromise]);
-          if (outcome.__type === TransactionStatus.PROCESSED)
-            result = outcome.response;
-          else
-            throw new TransactionExpiredBlockheightExceededError(signature2);
-        } finally {
-          done = !0, abortConfirmation();
-        }
-        return result;
-      }
-      async confirmTransactionUsingDurableNonceStrategy({
-        commitment,
-        strategy: {
-          abortSignal,
-          minContextSlot,
-          nonceAccountPubkey,
-          nonceValue,
-          signature: signature2
-        }
-      }) {
-        let done = !1, expiryPromise = new Promise((resolve) => {
-          let currentNonceValue = nonceValue, lastCheckedSlot = null, getCurrentNonceValue = async () => {
-            try {
-              let {
-                context,
-                value: nonceAccount
-              } = await this.getNonceAndContext(nonceAccountPubkey, {
-                commitment,
-                minContextSlot
-              });
-              return lastCheckedSlot = context.slot, nonceAccount?.nonce;
-            } catch {
-              return currentNonceValue;
-            }
-          };
-          (async () => {
-            if (currentNonceValue = await getCurrentNonceValue(), !done)
-              for (; ; ) {
-                if (nonceValue !== currentNonceValue) {
-                  resolve({
-                    __type: TransactionStatus.NONCE_INVALID,
-                    slotInWhichNonceDidAdvance: lastCheckedSlot
-                  });
-                  return;
-                }
-                if (await sleep(2e3), done || (currentNonceValue = await getCurrentNonceValue(), done))
-                  return;
-              }
-          })();
-        }), {
-          abortConfirmation,
-          confirmationPromise
-        } = this.getTransactionConfirmationPromise({
-          commitment,
-          signature: signature2
-        }), cancellationPromise = this.getCancellationPromise(abortSignal), result;
-        try {
-          let outcome = await Promise.race([cancellationPromise, confirmationPromise, expiryPromise]);
-          if (outcome.__type === TransactionStatus.PROCESSED)
-            result = outcome.response;
-          else {
-            let signatureStatus;
-            for (; ; ) {
-              let status = await this.getSignatureStatus(signature2);
-              if (status == null)
-                break;
-              if (status.context.slot < (outcome.slotInWhichNonceDidAdvance ?? minContextSlot)) {
-                await sleep(400);
-                continue;
-              }
-              signatureStatus = status;
-              break;
-            }
-            if (signatureStatus?.value) {
-              let commitmentForStatus = commitment || "finalized", {
-                confirmationStatus
-              } = signatureStatus.value;
-              switch (commitmentForStatus) {
-                case "processed":
-                case "recent":
-                  if (confirmationStatus !== "processed" && confirmationStatus !== "confirmed" && confirmationStatus !== "finalized")
-                    throw new TransactionExpiredNonceInvalidError(signature2);
-                  break;
-                case "confirmed":
-                case "single":
-                case "singleGossip":
-                  if (confirmationStatus !== "confirmed" && confirmationStatus !== "finalized")
-                    throw new TransactionExpiredNonceInvalidError(signature2);
-                  break;
-                case "finalized":
-                case "max":
-                case "root":
-                  if (confirmationStatus !== "finalized")
-                    throw new TransactionExpiredNonceInvalidError(signature2);
-                  break;
-                default:
-                  ((_) => {
-                  })(commitmentForStatus);
-              }
-              result = {
-                context: signatureStatus.context,
-                value: {
-                  err: signatureStatus.value.err
-                }
-              };
-            } else
-              throw new TransactionExpiredNonceInvalidError(signature2);
-          }
-        } finally {
-          done = !0, abortConfirmation();
-        }
-        return result;
-      }
-      async confirmTransactionUsingLegacyTimeoutStrategy({
-        commitment,
-        signature: signature2
-      }) {
-        let timeoutId, expiryPromise = new Promise((resolve) => {
-          let timeoutMs = this._confirmTransactionInitialTimeout || 6e4;
-          switch (commitment) {
-            case "processed":
-            case "recent":
-            case "single":
-            case "confirmed":
-            case "singleGossip": {
-              timeoutMs = this._confirmTransactionInitialTimeout || 3e4;
-              break;
-            }
-          }
-          timeoutId = setTimeout(() => resolve({
-            __type: TransactionStatus.TIMED_OUT,
-            timeoutMs
-          }), timeoutMs);
-        }), {
-          abortConfirmation,
-          confirmationPromise
-        } = this.getTransactionConfirmationPromise({
-          commitment,
-          signature: signature2
-        }), result;
-        try {
-          let outcome = await Promise.race([confirmationPromise, expiryPromise]);
-          if (outcome.__type === TransactionStatus.PROCESSED)
-            result = outcome.response;
-          else
-            throw new TransactionExpiredTimeoutError(signature2, outcome.timeoutMs / 1e3);
-        } finally {
-          clearTimeout(timeoutId), abortConfirmation();
-        }
-        return result;
-      }
-      /**
-       * Return the list of nodes that are currently participating in the cluster
-       */
-      async getClusterNodes() {
-        let unsafeRes = await this._rpcRequest("getClusterNodes", []), res = create(unsafeRes, jsonRpcResult(array(ContactInfoResult)));
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get cluster nodes");
-        return res.result;
-      }
-      /**
-       * Return the list of nodes that are currently participating in the cluster
-       */
-      async getVoteAccounts(commitment) {
-        let args = this._buildArgs([], commitment), unsafeRes = await this._rpcRequest("getVoteAccounts", args), res = create(unsafeRes, GetVoteAccounts);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get vote accounts");
-        return res.result;
-      }
-      /**
-       * Fetch the current slot that the node is processing
-       */
-      async getSlot(commitmentOrConfig) {
-        let {
-          commitment,
-          config
-        } = extractCommitmentFromConfig(commitmentOrConfig), args = this._buildArgs([], commitment, void 0, config), unsafeRes = await this._rpcRequest("getSlot", args), res = create(unsafeRes, jsonRpcResult(number()));
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get slot");
-        return res.result;
-      }
-      /**
-       * Fetch the current slot leader of the cluster
-       */
-      async getSlotLeader(commitmentOrConfig) {
-        let {
-          commitment,
-          config
-        } = extractCommitmentFromConfig(commitmentOrConfig), args = this._buildArgs([], commitment, void 0, config), unsafeRes = await this._rpcRequest("getSlotLeader", args), res = create(unsafeRes, jsonRpcResult(string()));
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get slot leader");
-        return res.result;
-      }
-      /**
-       * Fetch `limit` number of slot leaders starting from `startSlot`
-       *
-       * @param startSlot fetch slot leaders starting from this slot
-       * @param limit number of slot leaders to return
-       */
-      async getSlotLeaders(startSlot, limit) {
-        let args = [startSlot, limit], unsafeRes = await this._rpcRequest("getSlotLeaders", args), res = create(unsafeRes, jsonRpcResult(array(PublicKeyFromString)));
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get slot leaders");
-        return res.result;
-      }
-      /**
-       * Fetch the current status of a signature
-       */
-      async getSignatureStatus(signature2, config) {
-        let {
-          context,
-          value: values
-        } = await this.getSignatureStatuses([signature2], config);
-        assert(values.length === 1);
-        let value = values[0];
-        return {
-          context,
-          value
-        };
-      }
-      /**
-       * Fetch the current statuses of a batch of signatures
-       */
-      async getSignatureStatuses(signatures, config) {
-        let params = [signatures];
-        config && params.push(config);
-        let unsafeRes = await this._rpcRequest("getSignatureStatuses", params), res = create(unsafeRes, GetSignatureStatusesRpcResult);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get signature status");
-        return res.result;
-      }
-      /**
-       * Fetch the current transaction count of the cluster
-       */
-      async getTransactionCount(commitmentOrConfig) {
-        let {
-          commitment,
-          config
-        } = extractCommitmentFromConfig(commitmentOrConfig), args = this._buildArgs([], commitment, void 0, config), unsafeRes = await this._rpcRequest("getTransactionCount", args), res = create(unsafeRes, jsonRpcResult(number()));
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get transaction count");
-        return res.result;
-      }
-      /**
-       * Fetch the current total currency supply of the cluster in lamports
-       *
-       * @deprecated Deprecated since RPC v1.2.8. Please use {@link getSupply} instead.
-       */
-      async getTotalSupply(commitment) {
-        return (await this.getSupply({
-          commitment,
-          excludeNonCirculatingAccountsList: !0
-        })).value.total;
-      }
-      /**
-       * Fetch the cluster InflationGovernor parameters
-       */
-      async getInflationGovernor(commitment) {
-        let args = this._buildArgs([], commitment), unsafeRes = await this._rpcRequest("getInflationGovernor", args), res = create(unsafeRes, GetInflationGovernorRpcResult);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get inflation");
-        return res.result;
-      }
-      /**
-       * Fetch the inflation reward for a list of addresses for an epoch
-       */
-      async getInflationReward(addresses, epoch, commitmentOrConfig) {
-        let {
-          commitment,
-          config
-        } = extractCommitmentFromConfig(commitmentOrConfig), args = this._buildArgs([addresses.map((pubkey) => pubkey.toBase58())], commitment, void 0, {
-          ...config,
-          epoch: epoch ?? config?.epoch
-        }), unsafeRes = await this._rpcRequest("getInflationReward", args), res = create(unsafeRes, GetInflationRewardResult);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get inflation reward");
-        return res.result;
-      }
-      /**
-       * Fetch the specific inflation values for the current epoch
-       */
-      async getInflationRate() {
-        let unsafeRes = await this._rpcRequest("getInflationRate", []), res = create(unsafeRes, GetInflationRateRpcResult);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get inflation rate");
-        return res.result;
-      }
-      /**
-       * Fetch the Epoch Info parameters
-       */
-      async getEpochInfo(commitmentOrConfig) {
-        let {
-          commitment,
-          config
-        } = extractCommitmentFromConfig(commitmentOrConfig), args = this._buildArgs([], commitment, void 0, config), unsafeRes = await this._rpcRequest("getEpochInfo", args), res = create(unsafeRes, GetEpochInfoRpcResult);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get epoch info");
-        return res.result;
-      }
-      /**
-       * Fetch the Epoch Schedule parameters
-       */
-      async getEpochSchedule() {
-        let unsafeRes = await this._rpcRequest("getEpochSchedule", []), res = create(unsafeRes, GetEpochScheduleRpcResult);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get epoch schedule");
-        let epochSchedule = res.result;
-        return new EpochSchedule(epochSchedule.slotsPerEpoch, epochSchedule.leaderScheduleSlotOffset, epochSchedule.warmup, epochSchedule.firstNormalEpoch, epochSchedule.firstNormalSlot);
-      }
-      /**
-       * Fetch the leader schedule for the current epoch
-       * @return {Promise<RpcResponseAndContext<LeaderSchedule>>}
-       */
-      async getLeaderSchedule() {
-        let unsafeRes = await this._rpcRequest("getLeaderSchedule", []), res = create(unsafeRes, GetLeaderScheduleRpcResult);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get leader schedule");
-        return res.result;
-      }
-      /**
-       * Fetch the minimum balance needed to exempt an account of `dataLength`
-       * size from rent
-       */
-      async getMinimumBalanceForRentExemption(dataLength, commitment) {
-        let args = this._buildArgs([dataLength], commitment), unsafeRes = await this._rpcRequest("getMinimumBalanceForRentExemption", args), res = create(unsafeRes, GetMinimumBalanceForRentExemptionRpcResult);
-        return "error" in res ? (console.warn("Unable to fetch minimum balance for rent exemption"), 0) : res.result;
-      }
-      /**
-       * Fetch a recent blockhash from the cluster, return with context
-       * @return {Promise<RpcResponseAndContext<{blockhash: Blockhash, feeCalculator: FeeCalculator}>>}
-       *
-       * @deprecated Deprecated since RPC v1.9.0. Please use {@link getLatestBlockhash} instead.
-       */
-      async getRecentBlockhashAndContext(commitment) {
-        let {
-          context,
-          value: {
-            blockhash
-          }
-        } = await this.getLatestBlockhashAndContext(commitment);
-        return {
-          context,
-          value: {
-            blockhash,
-            feeCalculator: {
-              get lamportsPerSignature() {
-                throw new Error("The capability to fetch `lamportsPerSignature` using the `getRecentBlockhash` API is no longer offered by the network. Use the `getFeeForMessage` API to obtain the fee for a given message.");
-              },
-              toJSON() {
-                return {};
-              }
-            }
-          }
-        };
-      }
-      /**
-       * Fetch recent performance samples
-       * @return {Promise<Array<PerfSample>>}
-       */
-      async getRecentPerformanceSamples(limit) {
-        let unsafeRes = await this._rpcRequest("getRecentPerformanceSamples", limit ? [limit] : []), res = create(unsafeRes, GetRecentPerformanceSamplesRpcResult);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get recent performance samples");
-        return res.result;
-      }
-      /**
-       * Fetch the fee calculator for a recent blockhash from the cluster, return with context
-       *
-       * @deprecated Deprecated since RPC v1.9.0. Please use {@link getFeeForMessage} instead.
-       */
-      async getFeeCalculatorForBlockhash(blockhash, commitment) {
-        let args = this._buildArgs([blockhash], commitment), unsafeRes = await this._rpcRequest("getFeeCalculatorForBlockhash", args), res = create(unsafeRes, GetFeeCalculatorRpcResult);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get fee calculator");
-        let {
-          context,
-          value
-        } = res.result;
-        return {
-          context,
-          value: value !== null ? value.feeCalculator : null
-        };
-      }
-      /**
-       * Fetch the fee for a message from the cluster, return with context
-       */
-      async getFeeForMessage(message, commitment) {
-        let wireMessage = toBuffer(message.serialize()).toString("base64"), args = this._buildArgs([wireMessage], commitment), unsafeRes = await this._rpcRequest("getFeeForMessage", args), res = create(unsafeRes, jsonRpcResultAndContext(nullable(number())));
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get fee for message");
-        if (res.result === null)
-          throw new Error("invalid blockhash");
-        return res.result;
-      }
-      /**
-       * Fetch a list of prioritization fees from recent blocks.
-       */
-      async getRecentPrioritizationFees(config) {
-        let accounts = config?.lockedWritableAccounts?.map((key) => key.toBase58()), args = accounts?.length ? [accounts] : [], unsafeRes = await this._rpcRequest("getRecentPrioritizationFees", args), res = create(unsafeRes, GetRecentPrioritizationFeesRpcResult);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get recent prioritization fees");
-        return res.result;
-      }
-      /**
-       * Fetch a recent blockhash from the cluster
-       * @return {Promise<{blockhash: Blockhash, feeCalculator: FeeCalculator}>}
-       *
-       * @deprecated Deprecated since RPC v1.8.0. Please use {@link getLatestBlockhash} instead.
-       */
-      async getRecentBlockhash(commitment) {
-        try {
-          return (await this.getRecentBlockhashAndContext(commitment)).value;
-        } catch (e) {
-          throw new Error("failed to get recent blockhash: " + e);
-        }
-      }
-      /**
-       * Fetch the latest blockhash from the cluster
-       * @return {Promise<BlockhashWithExpiryBlockHeight>}
-       */
-      async getLatestBlockhash(commitmentOrConfig) {
-        try {
-          return (await this.getLatestBlockhashAndContext(commitmentOrConfig)).value;
-        } catch (e) {
-          throw new Error("failed to get recent blockhash: " + e);
-        }
-      }
-      /**
-       * Fetch the latest blockhash from the cluster
-       * @return {Promise<BlockhashWithExpiryBlockHeight>}
-       */
-      async getLatestBlockhashAndContext(commitmentOrConfig) {
-        let {
-          commitment,
-          config
-        } = extractCommitmentFromConfig(commitmentOrConfig), args = this._buildArgs([], commitment, void 0, config), unsafeRes = await this._rpcRequest("getLatestBlockhash", args), res = create(unsafeRes, GetLatestBlockhashRpcResult);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get latest blockhash");
-        return res.result;
-      }
-      /**
-       * Returns whether a blockhash is still valid or not
-       */
-      async isBlockhashValid(blockhash, rawConfig) {
-        let {
-          commitment,
-          config
-        } = extractCommitmentFromConfig(rawConfig), args = this._buildArgs([blockhash], commitment, void 0, config), unsafeRes = await this._rpcRequest("isBlockhashValid", args), res = create(unsafeRes, IsBlockhashValidRpcResult);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to determine if the blockhash `" + blockhash + "`is valid");
-        return res.result;
-      }
-      /**
-       * Fetch the node version
-       */
-      async getVersion() {
-        let unsafeRes = await this._rpcRequest("getVersion", []), res = create(unsafeRes, jsonRpcResult(VersionResult));
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get version");
-        return res.result;
-      }
-      /**
-       * Fetch the genesis hash
-       */
-      async getGenesisHash() {
-        let unsafeRes = await this._rpcRequest("getGenesisHash", []), res = create(unsafeRes, jsonRpcResult(string()));
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get genesis hash");
-        return res.result;
-      }
-      /**
-       * Fetch a processed block from the cluster.
-       *
-       * @deprecated Instead, call `getBlock` using a `GetVersionedBlockConfig` by
-       * setting the `maxSupportedTransactionVersion` property.
-       */
-      /**
-       * @deprecated Instead, call `getBlock` using a `GetVersionedBlockConfig` by
-       * setting the `maxSupportedTransactionVersion` property.
-       */
-      // eslint-disable-next-line no-dupe-class-members
-      /**
-       * @deprecated Instead, call `getBlock` using a `GetVersionedBlockConfig` by
-       * setting the `maxSupportedTransactionVersion` property.
-       */
-      // eslint-disable-next-line no-dupe-class-members
-      /**
-       * Fetch a processed block from the cluster.
-       */
-      // eslint-disable-next-line no-dupe-class-members
-      // eslint-disable-next-line no-dupe-class-members
-      // eslint-disable-next-line no-dupe-class-members
-      /**
-       * Fetch a processed block from the cluster.
-       */
-      // eslint-disable-next-line no-dupe-class-members
-      async getBlock(slot, rawConfig) {
-        let {
-          commitment,
-          config
-        } = extractCommitmentFromConfig(rawConfig), args = this._buildArgsAtLeastConfirmed([slot], commitment, void 0, config), unsafeRes = await this._rpcRequest("getBlock", args);
-        try {
-          switch (config?.transactionDetails) {
-            case "accounts": {
-              let res = create(unsafeRes, GetAccountsModeBlockRpcResult);
-              if ("error" in res)
-                throw res.error;
-              return res.result;
-            }
-            case "none": {
-              let res = create(unsafeRes, GetNoneModeBlockRpcResult);
-              if ("error" in res)
-                throw res.error;
-              return res.result;
-            }
-            default: {
-              let res = create(unsafeRes, GetBlockRpcResult);
-              if ("error" in res)
-                throw res.error;
-              let {
-                result
-              } = res;
-              return result ? {
-                ...result,
-                transactions: result.transactions.map(({
-                  transaction,
-                  meta: meta12,
-                  version: version2
-                }) => ({
-                  meta: meta12,
-                  transaction: {
-                    ...transaction,
-                    message: versionedMessageFromResponse(version2, transaction.message)
-                  },
-                  version: version2
-                }))
-              } : null;
-            }
-          }
-        } catch (e) {
-          throw new SolanaJSONRPCError(e, "failed to get confirmed block");
-        }
-      }
-      /**
-       * Fetch parsed transaction details for a confirmed or finalized block
-       */
-      // eslint-disable-next-line no-dupe-class-members
-      // eslint-disable-next-line no-dupe-class-members
-      // eslint-disable-next-line no-dupe-class-members
-      async getParsedBlock(slot, rawConfig) {
-        let {
-          commitment,
-          config
-        } = extractCommitmentFromConfig(rawConfig), args = this._buildArgsAtLeastConfirmed([slot], commitment, "jsonParsed", config), unsafeRes = await this._rpcRequest("getBlock", args);
-        try {
-          switch (config?.transactionDetails) {
-            case "accounts": {
-              let res = create(unsafeRes, GetParsedAccountsModeBlockRpcResult);
-              if ("error" in res)
-                throw res.error;
-              return res.result;
-            }
-            case "none": {
-              let res = create(unsafeRes, GetParsedNoneModeBlockRpcResult);
-              if ("error" in res)
-                throw res.error;
-              return res.result;
-            }
-            default: {
-              let res = create(unsafeRes, GetParsedBlockRpcResult);
-              if ("error" in res)
-                throw res.error;
-              return res.result;
-            }
-          }
-        } catch (e) {
-          throw new SolanaJSONRPCError(e, "failed to get block");
-        }
-      }
-      /*
-       * Returns recent block production information from the current or previous epoch
-       */
-      async getBlockProduction(configOrCommitment) {
-        let extra, commitment;
-        if (typeof configOrCommitment == "string")
-          commitment = configOrCommitment;
-        else if (configOrCommitment) {
-          let {
-            commitment: c,
-            ...rest
-          } = configOrCommitment;
-          commitment = c, extra = rest;
-        }
-        let args = this._buildArgs([], commitment, "base64", extra), unsafeRes = await this._rpcRequest("getBlockProduction", args), res = create(unsafeRes, BlockProductionResponseStruct);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get block production information");
-        return res.result;
-      }
-      /**
-       * Fetch a confirmed or finalized transaction from the cluster.
-       *
-       * @deprecated Instead, call `getTransaction` using a
-       * `GetVersionedTransactionConfig` by setting the
-       * `maxSupportedTransactionVersion` property.
-       */
-      /**
-       * Fetch a confirmed or finalized transaction from the cluster.
-       */
-      // eslint-disable-next-line no-dupe-class-members
-      /**
-       * Fetch a confirmed or finalized transaction from the cluster.
-       */
-      // eslint-disable-next-line no-dupe-class-members
-      async getTransaction(signature2, rawConfig) {
-        let {
-          commitment,
-          config
-        } = extractCommitmentFromConfig(rawConfig), args = this._buildArgsAtLeastConfirmed([signature2], commitment, void 0, config), unsafeRes = await this._rpcRequest("getTransaction", args), res = create(unsafeRes, GetTransactionRpcResult);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get transaction");
-        let result = res.result;
-        return result && {
-          ...result,
-          transaction: {
-            ...result.transaction,
-            message: versionedMessageFromResponse(result.version, result.transaction.message)
-          }
-        };
-      }
-      /**
-       * Fetch parsed transaction details for a confirmed or finalized transaction
-       */
-      async getParsedTransaction(signature2, commitmentOrConfig) {
-        let {
-          commitment,
-          config
-        } = extractCommitmentFromConfig(commitmentOrConfig), args = this._buildArgsAtLeastConfirmed([signature2], commitment, "jsonParsed", config), unsafeRes = await this._rpcRequest("getTransaction", args), res = create(unsafeRes, GetParsedTransactionRpcResult);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get transaction");
-        return res.result;
-      }
-      /**
-       * Fetch parsed transaction details for a batch of confirmed transactions
-       */
-      async getParsedTransactions(signatures, commitmentOrConfig) {
-        let {
-          commitment,
-          config
-        } = extractCommitmentFromConfig(commitmentOrConfig), batch = signatures.map((signature2) => ({
-          methodName: "getTransaction",
-          args: this._buildArgsAtLeastConfirmed([signature2], commitment, "jsonParsed", config)
-        }));
-        return (await this._rpcBatchRequest(batch)).map((unsafeRes2) => {
-          let res2 = create(unsafeRes2, GetParsedTransactionRpcResult);
-          if ("error" in res2)
-            throw new SolanaJSONRPCError(res2.error, "failed to get transactions");
-          return res2.result;
-        });
-      }
-      /**
-       * Fetch transaction details for a batch of confirmed transactions.
-       * Similar to {@link getParsedTransactions} but returns a {@link TransactionResponse}.
-       *
-       * @deprecated Instead, call `getTransactions` using a
-       * `GetVersionedTransactionConfig` by setting the
-       * `maxSupportedTransactionVersion` property.
-       */
-      /**
-       * Fetch transaction details for a batch of confirmed transactions.
-       * Similar to {@link getParsedTransactions} but returns a {@link
-       * VersionedTransactionResponse}.
-       */
-      // eslint-disable-next-line no-dupe-class-members
-      /**
-       * Fetch transaction details for a batch of confirmed transactions.
-       * Similar to {@link getParsedTransactions} but returns a {@link
-       * VersionedTransactionResponse}.
-       */
-      // eslint-disable-next-line no-dupe-class-members
-      async getTransactions(signatures, commitmentOrConfig) {
-        let {
-          commitment,
-          config
-        } = extractCommitmentFromConfig(commitmentOrConfig), batch = signatures.map((signature2) => ({
-          methodName: "getTransaction",
-          args: this._buildArgsAtLeastConfirmed([signature2], commitment, void 0, config)
-        }));
-        return (await this._rpcBatchRequest(batch)).map((unsafeRes2) => {
-          let res2 = create(unsafeRes2, GetTransactionRpcResult);
-          if ("error" in res2)
-            throw new SolanaJSONRPCError(res2.error, "failed to get transactions");
-          let result = res2.result;
-          return result && {
-            ...result,
-            transaction: {
-              ...result.transaction,
-              message: versionedMessageFromResponse(result.version, result.transaction.message)
-            }
-          };
-        });
-      }
-      /**
-       * Fetch a list of Transactions and transaction statuses from the cluster
-       * for a confirmed block.
-       *
-       * @deprecated Deprecated since RPC v1.7.0. Please use {@link getBlock} instead.
-       */
-      async getConfirmedBlock(slot, commitment) {
-        let args = this._buildArgsAtLeastConfirmed([slot], commitment), unsafeRes = await this._rpcRequest("getBlock", args), res = create(unsafeRes, GetConfirmedBlockRpcResult);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get confirmed block");
-        let result = res.result;
-        if (!result)
-          throw new Error("Confirmed block " + slot + " not found");
-        let block = {
-          ...result,
-          transactions: result.transactions.map(({
-            transaction,
-            meta: meta12
-          }) => {
-            let message = new Message(transaction.message);
-            return {
-              meta: meta12,
-              transaction: {
-                ...transaction,
-                message
-              }
-            };
-          })
-        };
-        return {
-          ...block,
-          transactions: block.transactions.map(({
-            transaction,
-            meta: meta12
-          }) => ({
-            meta: meta12,
-            transaction: Transaction.populate(transaction.message, transaction.signatures)
-          }))
-        };
-      }
-      /**
-       * Fetch confirmed blocks between two slots
-       */
-      async getBlocks(startSlot, endSlot, commitment) {
-        let args = this._buildArgsAtLeastConfirmed(endSlot !== void 0 ? [startSlot, endSlot] : [startSlot], commitment), unsafeRes = await this._rpcRequest("getBlocks", args), res = create(unsafeRes, jsonRpcResult(array(number())));
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get blocks");
-        return res.result;
-      }
-      /**
-       * Fetch a list of Signatures from the cluster for a block, excluding rewards
-       */
-      async getBlockSignatures(slot, commitment) {
-        let args = this._buildArgsAtLeastConfirmed([slot], commitment, void 0, {
-          transactionDetails: "signatures",
-          rewards: !1
-        }), unsafeRes = await this._rpcRequest("getBlock", args), res = create(unsafeRes, GetBlockSignaturesRpcResult);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get block");
-        let result = res.result;
-        if (!result)
-          throw new Error("Block " + slot + " not found");
-        return result;
-      }
-      /**
-       * Fetch a list of Signatures from the cluster for a confirmed block, excluding rewards
-       *
-       * @deprecated Deprecated since RPC v1.7.0. Please use {@link getBlockSignatures} instead.
-       */
-      async getConfirmedBlockSignatures(slot, commitment) {
-        let args = this._buildArgsAtLeastConfirmed([slot], commitment, void 0, {
-          transactionDetails: "signatures",
-          rewards: !1
-        }), unsafeRes = await this._rpcRequest("getBlock", args), res = create(unsafeRes, GetBlockSignaturesRpcResult);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get confirmed block");
-        let result = res.result;
-        if (!result)
-          throw new Error("Confirmed block " + slot + " not found");
-        return result;
-      }
-      /**
-       * Fetch a transaction details for a confirmed transaction
-       *
-       * @deprecated Deprecated since RPC v1.7.0. Please use {@link getTransaction} instead.
-       */
-      async getConfirmedTransaction(signature2, commitment) {
-        let args = this._buildArgsAtLeastConfirmed([signature2], commitment), unsafeRes = await this._rpcRequest("getTransaction", args), res = create(unsafeRes, GetTransactionRpcResult);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get transaction");
-        let result = res.result;
-        if (!result)
-          return result;
-        let message = new Message(result.transaction.message), signatures = result.transaction.signatures;
-        return {
-          ...result,
-          transaction: Transaction.populate(message, signatures)
-        };
-      }
-      /**
-       * Fetch parsed transaction details for a confirmed transaction
-       *
-       * @deprecated Deprecated since RPC v1.7.0. Please use {@link getParsedTransaction} instead.
-       */
-      async getParsedConfirmedTransaction(signature2, commitment) {
-        let args = this._buildArgsAtLeastConfirmed([signature2], commitment, "jsonParsed"), unsafeRes = await this._rpcRequest("getTransaction", args), res = create(unsafeRes, GetParsedTransactionRpcResult);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get confirmed transaction");
-        return res.result;
-      }
-      /**
-       * Fetch parsed transaction details for a batch of confirmed transactions
-       *
-       * @deprecated Deprecated since RPC v1.7.0. Please use {@link getParsedTransactions} instead.
-       */
-      async getParsedConfirmedTransactions(signatures, commitment) {
-        let batch = signatures.map((signature2) => ({
-          methodName: "getTransaction",
-          args: this._buildArgsAtLeastConfirmed([signature2], commitment, "jsonParsed")
-        }));
-        return (await this._rpcBatchRequest(batch)).map((unsafeRes2) => {
-          let res2 = create(unsafeRes2, GetParsedTransactionRpcResult);
-          if ("error" in res2)
-            throw new SolanaJSONRPCError(res2.error, "failed to get confirmed transactions");
-          return res2.result;
-        });
-      }
-      /**
-       * Fetch a list of all the confirmed signatures for transactions involving an address
-       * within a specified slot range. Max range allowed is 10,000 slots.
-       *
-       * @deprecated Deprecated since RPC v1.3. Please use {@link getConfirmedSignaturesForAddress2} instead.
-       *
-       * @param address queried address
-       * @param startSlot start slot, inclusive
-       * @param endSlot end slot, inclusive
-       */
-      async getConfirmedSignaturesForAddress(address, startSlot, endSlot) {
-        let options = {}, firstAvailableBlock = await this.getFirstAvailableBlock();
-        for (; !("until" in options) && (startSlot--, !(startSlot <= 0 || startSlot < firstAvailableBlock)); )
-          try {
-            let block = await this.getConfirmedBlockSignatures(startSlot, "finalized");
-            block.signatures.length > 0 && (options.until = block.signatures[block.signatures.length - 1].toString());
-          } catch (err) {
-            if (err instanceof Error && err.message.includes("skipped"))
-              continue;
-            throw err;
-          }
-        let highestConfirmedRoot = await this.getSlot("finalized");
-        for (; !("before" in options) && (endSlot++, !(endSlot > highestConfirmedRoot)); )
-          try {
-            let block = await this.getConfirmedBlockSignatures(endSlot);
-            block.signatures.length > 0 && (options.before = block.signatures[block.signatures.length - 1].toString());
-          } catch (err) {
-            if (err instanceof Error && err.message.includes("skipped"))
-              continue;
-            throw err;
-          }
-        return (await this.getConfirmedSignaturesForAddress2(address, options)).map((info) => info.signature);
-      }
-      /**
-       * Returns confirmed signatures for transactions involving an
-       * address backwards in time from the provided signature or most recent confirmed block
-       *
-       * @deprecated Deprecated since RPC v1.7.0. Please use {@link getSignaturesForAddress} instead.
-       */
-      async getConfirmedSignaturesForAddress2(address, options, commitment) {
-        let args = this._buildArgsAtLeastConfirmed([address.toBase58()], commitment, void 0, options), unsafeRes = await this._rpcRequest("getConfirmedSignaturesForAddress2", args), res = create(unsafeRes, GetConfirmedSignaturesForAddress2RpcResult);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get confirmed signatures for address");
-        return res.result;
-      }
-      /**
-       * Returns confirmed signatures for transactions involving an
-       * address backwards in time from the provided signature or most recent confirmed block
-       *
-       *
-       * @param address queried address
-       * @param options
-       */
-      async getSignaturesForAddress(address, options, commitment) {
-        let args = this._buildArgsAtLeastConfirmed([address.toBase58()], commitment, void 0, options), unsafeRes = await this._rpcRequest("getSignaturesForAddress", args), res = create(unsafeRes, GetSignaturesForAddressRpcResult);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get signatures for address");
-        return res.result;
-      }
-      async getAddressLookupTable(accountKey, config) {
-        let {
-          context,
-          value: accountInfo
-        } = await this.getAccountInfoAndContext(accountKey, config), value = null;
-        return accountInfo !== null && (value = new AddressLookupTableAccount({
-          key: accountKey,
-          state: AddressLookupTableAccount.deserialize(accountInfo.data)
-        })), {
-          context,
-          value
-        };
-      }
-      /**
-       * Fetch the contents of a Nonce account from the cluster, return with context
-       */
-      async getNonceAndContext(nonceAccount, commitmentOrConfig) {
-        let {
-          context,
-          value: accountInfo
-        } = await this.getAccountInfoAndContext(nonceAccount, commitmentOrConfig), value = null;
-        return accountInfo !== null && (value = NonceAccount.fromAccountData(accountInfo.data)), {
-          context,
-          value
-        };
-      }
-      /**
-       * Fetch the contents of a Nonce account from the cluster
-       */
-      async getNonce(nonceAccount, commitmentOrConfig) {
-        return await this.getNonceAndContext(nonceAccount, commitmentOrConfig).then((x) => x.value).catch((e) => {
-          throw new Error("failed to get nonce for account " + nonceAccount.toBase58() + ": " + e);
-        });
-      }
-      /**
-       * Request an allocation of lamports to the specified address
-       *
-       * ```typescript
-       * import { Connection, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
-       *
-       * (async () => {
-       *   const connection = new Connection("https://api.testnet.solana.com", "confirmed");
-       *   const myAddress = new PublicKey("2nr1bHFT86W9tGnyvmYW4vcHKsQB3sVQfnddasz4kExM");
-       *   const signature = await connection.requestAirdrop(myAddress, LAMPORTS_PER_SOL);
-       *   await connection.confirmTransaction(signature);
-       * })();
-       * ```
-       */
-      async requestAirdrop(to, lamports) {
-        let unsafeRes = await this._rpcRequest("requestAirdrop", [to.toBase58(), lamports]), res = create(unsafeRes, RequestAirdropRpcResult);
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, `airdrop to ${to.toBase58()} failed`);
-        return res.result;
-      }
-      /**
-       * @internal
-       */
-      async _blockhashWithExpiryBlockHeight(disableCache) {
-        if (!disableCache) {
-          for (; this._pollingBlockhash; )
-            await sleep(100);
-          let expired = Date.now() - this._blockhashInfo.lastFetch >= BLOCKHASH_CACHE_TIMEOUT_MS;
-          if (this._blockhashInfo.latestBlockhash !== null && !expired)
-            return this._blockhashInfo.latestBlockhash;
-        }
-        return await this._pollNewBlockhash();
-      }
-      /**
-       * @internal
-       */
-      async _pollNewBlockhash() {
-        this._pollingBlockhash = !0;
-        try {
-          let startTime = Date.now(), cachedLatestBlockhash = this._blockhashInfo.latestBlockhash, cachedBlockhash = cachedLatestBlockhash ? cachedLatestBlockhash.blockhash : null;
-          for (let i = 0; i < 50; i++) {
-            let latestBlockhash = await this.getLatestBlockhash("finalized");
-            if (cachedBlockhash !== latestBlockhash.blockhash)
-              return this._blockhashInfo = {
-                latestBlockhash,
-                lastFetch: Date.now(),
-                transactionSignatures: [],
-                simulatedSignatures: []
-              }, latestBlockhash;
-            await sleep(MS_PER_SLOT / 2);
-          }
-          throw new Error(`Unable to obtain a new blockhash after ${Date.now() - startTime}ms`);
-        } finally {
-          this._pollingBlockhash = !1;
-        }
-      }
-      /**
-       * get the stake minimum delegation
-       */
-      async getStakeMinimumDelegation(config) {
-        let {
-          commitment,
-          config: configArg
-        } = extractCommitmentFromConfig(config), args = this._buildArgs([], commitment, "base64", configArg), unsafeRes = await this._rpcRequest("getStakeMinimumDelegation", args), res = create(unsafeRes, jsonRpcResultAndContext(number()));
-        if ("error" in res)
-          throw new SolanaJSONRPCError(res.error, "failed to get stake minimum delegation");
-        return res.result;
-      }
-      /**
-       * Simulate a transaction
-       *
-       * @deprecated Instead, call {@link simulateTransaction} with {@link
-       * VersionedTransaction} and {@link SimulateTransactionConfig} parameters
-       */
-      /**
-       * Simulate a transaction
-       */
-      // eslint-disable-next-line no-dupe-class-members
-      /**
-       * Simulate a transaction
-       */
-      // eslint-disable-next-line no-dupe-class-members
-      async simulateTransaction(transactionOrMessage, configOrSigners, includeAccounts) {
-        if ("message" in transactionOrMessage) {
-          let wireTransaction2 = transactionOrMessage.serialize(), encodedTransaction2 = Buffer2.from(wireTransaction2).toString("base64");
-          if (Array.isArray(configOrSigners) || includeAccounts !== void 0)
-            throw new Error("Invalid arguments");
-          let config2 = configOrSigners || {};
-          config2.encoding = "base64", "commitment" in config2 || (config2.commitment = this.commitment), configOrSigners && typeof configOrSigners == "object" && "innerInstructions" in configOrSigners && (config2.innerInstructions = configOrSigners.innerInstructions);
-          let args2 = [encodedTransaction2, config2], unsafeRes2 = await this._rpcRequest("simulateTransaction", args2), res2 = create(unsafeRes2, SimulatedTransactionResponseStruct);
-          if ("error" in res2)
-            throw new Error("failed to simulate transaction: " + res2.error.message);
-          return res2.result;
-        }
-        let transaction;
-        if (transactionOrMessage instanceof Transaction) {
-          let originalTx = transactionOrMessage;
-          transaction = new Transaction(), transaction.feePayer = originalTx.feePayer, transaction.instructions = transactionOrMessage.instructions, transaction.nonceInfo = originalTx.nonceInfo, transaction.signatures = originalTx.signatures;
-        } else
-          transaction = Transaction.populate(transactionOrMessage), transaction._message = transaction._json = void 0;
-        if (configOrSigners !== void 0 && !Array.isArray(configOrSigners))
-          throw new Error("Invalid arguments");
-        let signers = configOrSigners;
-        if (transaction.nonceInfo && signers)
-          transaction.sign(...signers);
-        else {
-          let disableCache = this._disableBlockhashCaching;
-          for (; ; ) {
-            let latestBlockhash = await this._blockhashWithExpiryBlockHeight(disableCache);
-            if (transaction.lastValidBlockHeight = latestBlockhash.lastValidBlockHeight, transaction.recentBlockhash = latestBlockhash.blockhash, !signers)
-              break;
-            if (transaction.sign(...signers), !transaction.signature)
-              throw new Error("!signature");
-            let signature2 = transaction.signature.toString("base64");
-            if (!this._blockhashInfo.simulatedSignatures.includes(signature2) && !this._blockhashInfo.transactionSignatures.includes(signature2)) {
-              this._blockhashInfo.simulatedSignatures.push(signature2);
-              break;
-            } else
-              disableCache = !0;
-          }
-        }
-        let message = transaction._compile(), signData = message.serialize(), encodedTransaction = transaction._serialize(signData).toString("base64"), config = {
-          encoding: "base64",
-          commitment: this.commitment
-        };
-        if (includeAccounts) {
-          let addresses = (Array.isArray(includeAccounts) ? includeAccounts : message.nonProgramIds()).map((key) => key.toBase58());
-          config.accounts = {
-            encoding: "base64",
-            addresses
-          };
-        }
-        signers && (config.sigVerify = !0), configOrSigners && typeof configOrSigners == "object" && "innerInstructions" in configOrSigners && (config.innerInstructions = configOrSigners.innerInstructions);
-        let args = [encodedTransaction, config], unsafeRes = await this._rpcRequest("simulateTransaction", args), res = create(unsafeRes, SimulatedTransactionResponseStruct);
-        if ("error" in res) {
-          let logs;
-          if ("data" in res.error && (logs = res.error.data.logs, logs && Array.isArray(logs))) {
-            let traceIndent = `
-    `, logTrace = traceIndent + logs.join(traceIndent);
-            console.error(res.error.message, logTrace);
-          }
-          throw new SendTransactionError({
-            action: "simulate",
-            signature: "",
-            transactionMessage: res.error.message,
-            logs
-          });
-        }
-        return res.result;
-      }
-      /**
-       * Sign and send a transaction
-       *
-       * @deprecated Instead, call {@link sendTransaction} with a {@link
-       * VersionedTransaction}
-       */
-      /**
-       * Send a signed transaction
-       */
-      // eslint-disable-next-line no-dupe-class-members
-      /**
-       * Sign and send a transaction
-       */
-      // eslint-disable-next-line no-dupe-class-members
-      async sendTransaction(transaction, signersOrOptions, options) {
-        if ("version" in transaction) {
-          if (signersOrOptions && Array.isArray(signersOrOptions))
-            throw new Error("Invalid arguments");
-          let wireTransaction2 = transaction.serialize();
-          return await this.sendRawTransaction(wireTransaction2, signersOrOptions);
-        }
-        if (signersOrOptions === void 0 || !Array.isArray(signersOrOptions))
-          throw new Error("Invalid arguments");
-        let signers = signersOrOptions;
-        if (transaction.nonceInfo)
-          transaction.sign(...signers);
-        else {
-          let disableCache = this._disableBlockhashCaching;
-          for (; ; ) {
-            let latestBlockhash = await this._blockhashWithExpiryBlockHeight(disableCache);
-            if (transaction.lastValidBlockHeight = latestBlockhash.lastValidBlockHeight, transaction.recentBlockhash = latestBlockhash.blockhash, transaction.sign(...signers), !transaction.signature)
-              throw new Error("!signature");
-            let signature2 = transaction.signature.toString("base64");
-            if (this._blockhashInfo.transactionSignatures.includes(signature2))
-              disableCache = !0;
-            else {
-              this._blockhashInfo.transactionSignatures.push(signature2);
-              break;
-            }
-          }
-        }
-        let wireTransaction = transaction.serialize();
-        return await this.sendRawTransaction(wireTransaction, options);
-      }
-      /**
-       * Send a transaction that has already been signed and serialized into the
-       * wire format
-       */
-      async sendRawTransaction(rawTransaction, options) {
-        let encodedTransaction = toBuffer(rawTransaction).toString("base64");
-        return await this.sendEncodedTransaction(encodedTransaction, options);
-      }
-      /**
-       * Send a transaction that has already been signed, serialized into the
-       * wire format, and encoded as a base64 string
-       */
-      async sendEncodedTransaction(encodedTransaction, options) {
-        let config = {
-          encoding: "base64"
-        }, skipPreflight = options && options.skipPreflight, preflightCommitment = skipPreflight === !0 ? "processed" : options && options.preflightCommitment || this.commitment;
-        options && options.maxRetries != null && (config.maxRetries = options.maxRetries), options && options.minContextSlot != null && (config.minContextSlot = options.minContextSlot), skipPreflight && (config.skipPreflight = skipPreflight), preflightCommitment && (config.preflightCommitment = preflightCommitment);
-        let args = [encodedTransaction, config], unsafeRes = await this._rpcRequest("sendTransaction", args), res = create(unsafeRes, SendTransactionRpcResult);
-        if ("error" in res) {
-          let logs;
-          throw "data" in res.error && (logs = res.error.data.logs), new SendTransactionError({
-            action: skipPreflight ? "send" : "simulate",
-            signature: "",
-            transactionMessage: res.error.message,
-            logs
-          });
-        }
-        return res.result;
-      }
-      /**
-       * @internal
-       */
-      _wsOnOpen() {
-        this._rpcWebSocketConnected = !0, this._rpcWebSocketHeartbeat = setInterval(() => {
-          (async () => {
-            try {
-              await this._rpcWebSocket.notify("ping");
-            } catch {
-            }
-          })();
-        }, 5e3), this._updateSubscriptions();
-      }
-      /**
-       * @internal
-       */
-      _wsOnError(err) {
-        this._rpcWebSocketConnected = !1, console.error("ws error:", err.message);
-      }
-      /**
-       * @internal
-       */
-      _wsOnClose(code) {
-        if (this._rpcWebSocketConnected = !1, this._rpcWebSocketGeneration = (this._rpcWebSocketGeneration + 1) % Number.MAX_SAFE_INTEGER, this._rpcWebSocketIdleTimeout && (clearTimeout(this._rpcWebSocketIdleTimeout), this._rpcWebSocketIdleTimeout = null), this._rpcWebSocketHeartbeat && (clearInterval(this._rpcWebSocketHeartbeat), this._rpcWebSocketHeartbeat = null), code === 1e3) {
-          this._updateSubscriptions();
-          return;
-        }
-        this._subscriptionCallbacksByServerSubscriptionId = {}, Object.entries(this._subscriptionsByHash).forEach(([hash, subscription]) => {
-          this._setSubscription(hash, {
-            ...subscription,
-            state: "pending"
-          });
-        });
-      }
-      /**
-       * @internal
-       */
-      _setSubscription(hash, nextSubscription) {
-        let prevState = this._subscriptionsByHash[hash]?.state;
-        if (this._subscriptionsByHash[hash] = nextSubscription, prevState !== nextSubscription.state) {
-          let stateChangeCallbacks = this._subscriptionStateChangeCallbacksByHash[hash];
-          stateChangeCallbacks && stateChangeCallbacks.forEach((cb) => {
-            try {
-              cb(nextSubscription.state);
-            } catch {
-            }
-          });
-        }
-      }
-      /**
-       * @internal
-       */
-      _onSubscriptionStateChange(clientSubscriptionId, callback) {
-        let hash = this._subscriptionHashByClientSubscriptionId[clientSubscriptionId];
-        if (hash == null)
-          return () => {
-          };
-        let stateChangeCallbacks = this._subscriptionStateChangeCallbacksByHash[hash] ||= /* @__PURE__ */ new Set();
-        return stateChangeCallbacks.add(callback), () => {
-          stateChangeCallbacks.delete(callback), stateChangeCallbacks.size === 0 && delete this._subscriptionStateChangeCallbacksByHash[hash];
-        };
-      }
-      /**
-       * @internal
-       */
-      async _updateSubscriptions() {
-        if (Object.keys(this._subscriptionsByHash).length === 0) {
-          this._rpcWebSocketConnected && (this._rpcWebSocketConnected = !1, this._rpcWebSocketIdleTimeout = setTimeout(() => {
-            this._rpcWebSocketIdleTimeout = null;
-            try {
-              this._rpcWebSocket.close();
-            } catch (err) {
-              err instanceof Error && console.log(`Error when closing socket connection: ${err.message}`);
-            }
-          }, 500));
-          return;
-        }
-        if (this._rpcWebSocketIdleTimeout !== null && (clearTimeout(this._rpcWebSocketIdleTimeout), this._rpcWebSocketIdleTimeout = null, this._rpcWebSocketConnected = !0), !this._rpcWebSocketConnected) {
-          this._rpcWebSocket.connect();
-          return;
-        }
-        let activeWebSocketGeneration = this._rpcWebSocketGeneration, isCurrentConnectionStillActive = () => activeWebSocketGeneration === this._rpcWebSocketGeneration;
-        await Promise.all(
-          // Don't be tempted to change this to `Object.entries`. We call
-          // `_updateSubscriptions` recursively when processing the state,
-          // so it's important that we look up the *current* version of
-          // each subscription, every time we process a hash.
-          Object.keys(this._subscriptionsByHash).map(async (hash) => {
-            let subscription = this._subscriptionsByHash[hash];
-            if (subscription !== void 0)
-              switch (subscription.state) {
-                case "pending":
-                case "unsubscribed":
-                  if (subscription.callbacks.size === 0) {
-                    delete this._subscriptionsByHash[hash], subscription.state === "unsubscribed" && delete this._subscriptionCallbacksByServerSubscriptionId[subscription.serverSubscriptionId], await this._updateSubscriptions();
-                    return;
-                  }
-                  await (async () => {
-                    let {
-                      args,
-                      method
-                    } = subscription;
-                    try {
-                      this._setSubscription(hash, {
-                        ...subscription,
-                        state: "subscribing"
-                      });
-                      let serverSubscriptionId = await this._rpcWebSocket.call(method, args);
-                      this._setSubscription(hash, {
-                        ...subscription,
-                        serverSubscriptionId,
-                        state: "subscribed"
-                      }), this._subscriptionCallbacksByServerSubscriptionId[serverSubscriptionId] = subscription.callbacks, await this._updateSubscriptions();
-                    } catch (e) {
-                      if (console.error(`Received ${e instanceof Error ? "" : "JSON-RPC "}error calling \`${method}\``, {
-                        args,
-                        error: e
-                      }), !isCurrentConnectionStillActive())
-                        return;
-                      this._setSubscription(hash, {
-                        ...subscription,
-                        state: "pending"
-                      }), await this._updateSubscriptions();
-                    }
-                  })();
-                  break;
-                case "subscribed":
-                  subscription.callbacks.size === 0 && await (async () => {
-                    let {
-                      serverSubscriptionId,
-                      unsubscribeMethod
-                    } = subscription;
-                    if (this._subscriptionsAutoDisposedByRpc.has(serverSubscriptionId))
-                      this._subscriptionsAutoDisposedByRpc.delete(serverSubscriptionId);
-                    else {
-                      this._setSubscription(hash, {
-                        ...subscription,
-                        state: "unsubscribing"
-                      }), this._setSubscription(hash, {
-                        ...subscription,
-                        state: "unsubscribing"
-                      });
-                      try {
-                        await this._rpcWebSocket.call(unsubscribeMethod, [serverSubscriptionId]);
-                      } catch (e) {
-                        if (e instanceof Error && console.error(`${unsubscribeMethod} error:`, e.message), !isCurrentConnectionStillActive())
-                          return;
-                        this._setSubscription(hash, {
-                          ...subscription,
-                          state: "subscribed"
-                        }), await this._updateSubscriptions();
-                        return;
-                      }
-                    }
-                    this._setSubscription(hash, {
-                      ...subscription,
-                      state: "unsubscribed"
-                    }), await this._updateSubscriptions();
-                  })();
-                  break;
-              }
-          })
-        );
-      }
-      /**
-       * @internal
-       */
-      _handleServerNotification(serverSubscriptionId, callbackArgs) {
-        let callbacks = this._subscriptionCallbacksByServerSubscriptionId[serverSubscriptionId];
-        callbacks !== void 0 && callbacks.forEach((cb) => {
-          try {
-            cb(
-              ...callbackArgs
-            );
-          } catch (e) {
-            console.error(e);
-          }
-        });
-      }
-      /**
-       * @internal
-       */
-      _wsOnAccountNotification(notification) {
-        let {
-          result,
-          subscription
-        } = create(notification, AccountNotificationResult);
-        this._handleServerNotification(subscription, [result.value, result.context]);
-      }
-      /**
-       * @internal
-       */
-      _makeSubscription(subscriptionConfig, args) {
-        let clientSubscriptionId = this._nextClientSubscriptionId++, hash = fastStableStringify([subscriptionConfig.method, args]), existingSubscription = this._subscriptionsByHash[hash];
-        return existingSubscription === void 0 ? this._subscriptionsByHash[hash] = {
-          ...subscriptionConfig,
-          args,
-          callbacks: /* @__PURE__ */ new Set([subscriptionConfig.callback]),
-          state: "pending"
-        } : existingSubscription.callbacks.add(subscriptionConfig.callback), this._subscriptionHashByClientSubscriptionId[clientSubscriptionId] = hash, this._subscriptionDisposeFunctionsByClientSubscriptionId[clientSubscriptionId] = async () => {
-          delete this._subscriptionDisposeFunctionsByClientSubscriptionId[clientSubscriptionId], delete this._subscriptionHashByClientSubscriptionId[clientSubscriptionId];
-          let subscription = this._subscriptionsByHash[hash];
-          assert(subscription !== void 0, `Could not find a \`Subscription\` when tearing down client subscription #${clientSubscriptionId}`), subscription.callbacks.delete(subscriptionConfig.callback), await this._updateSubscriptions();
-        }, this._updateSubscriptions(), clientSubscriptionId;
-      }
-      /**
-       * Register a callback to be invoked whenever the specified account changes
-       *
-       * @param publicKey Public key of the account to monitor
-       * @param callback Function to invoke whenever the account is changed
-       * @param config
-       * @return subscription id
-       */
-      /** @deprecated Instead, pass in an {@link AccountSubscriptionConfig} */
-      // eslint-disable-next-line no-dupe-class-members
-      // eslint-disable-next-line no-dupe-class-members
-      onAccountChange(publicKey5, callback, commitmentOrConfig) {
-        let {
-          commitment,
-          config
-        } = extractCommitmentFromConfig(commitmentOrConfig), args = this._buildArgs(
-          [publicKey5.toBase58()],
-          commitment || this._commitment || "finalized",
-          // Apply connection/server default.
-          "base64",
-          config
-        );
-        return this._makeSubscription({
-          callback,
-          method: "accountSubscribe",
-          unsubscribeMethod: "accountUnsubscribe"
-        }, args);
-      }
-      /**
-       * Deregister an account notification callback
-       *
-       * @param clientSubscriptionId client subscription id to deregister
-       */
-      async removeAccountChangeListener(clientSubscriptionId) {
-        await this._unsubscribeClientSubscription(clientSubscriptionId, "account change");
-      }
-      /**
-       * @internal
-       */
-      _wsOnProgramAccountNotification(notification) {
-        let {
-          result,
-          subscription
-        } = create(notification, ProgramAccountNotificationResult);
-        this._handleServerNotification(subscription, [{
-          accountId: result.value.pubkey,
-          accountInfo: result.value.account
-        }, result.context]);
-      }
-      /**
-       * Register a callback to be invoked whenever accounts owned by the
-       * specified program change
-       *
-       * @param programId Public key of the program to monitor
-       * @param callback Function to invoke whenever the account is changed
-       * @param config
-       * @return subscription id
-       */
-      /** @deprecated Instead, pass in a {@link ProgramAccountSubscriptionConfig} */
-      // eslint-disable-next-line no-dupe-class-members
-      // eslint-disable-next-line no-dupe-class-members
-      onProgramAccountChange(programId, callback, commitmentOrConfig, maybeFilters) {
-        let {
-          commitment,
-          config
-        } = extractCommitmentFromConfig(commitmentOrConfig), args = this._buildArgs(
-          [programId.toBase58()],
-          commitment || this._commitment || "finalized",
-          // Apply connection/server default.
-          "base64",
-          config || (maybeFilters ? {
-            filters: applyDefaultMemcmpEncodingToFilters(maybeFilters)
-          } : void 0)
-          /* extra */
-        );
-        return this._makeSubscription({
-          callback,
-          method: "programSubscribe",
-          unsubscribeMethod: "programUnsubscribe"
-        }, args);
-      }
-      /**
-       * Deregister an account notification callback
-       *
-       * @param clientSubscriptionId client subscription id to deregister
-       */
-      async removeProgramAccountChangeListener(clientSubscriptionId) {
-        await this._unsubscribeClientSubscription(clientSubscriptionId, "program account change");
-      }
-      /**
-       * Registers a callback to be invoked whenever logs are emitted.
-       */
-      onLogs(filter, callback, commitment) {
-        let args = this._buildArgs(
-          [typeof filter == "object" ? {
-            mentions: [filter.toString()]
-          } : filter],
-          commitment || this._commitment || "finalized"
-          // Apply connection/server default.
-        );
-        return this._makeSubscription({
-          callback,
-          method: "logsSubscribe",
-          unsubscribeMethod: "logsUnsubscribe"
-        }, args);
-      }
-      /**
-       * Deregister a logs callback.
-       *
-       * @param clientSubscriptionId client subscription id to deregister.
-       */
-      async removeOnLogsListener(clientSubscriptionId) {
-        await this._unsubscribeClientSubscription(clientSubscriptionId, "logs");
-      }
-      /**
-       * @internal
-       */
-      _wsOnLogsNotification(notification) {
-        let {
-          result,
-          subscription
-        } = create(notification, LogsNotificationResult);
-        this._handleServerNotification(subscription, [result.value, result.context]);
-      }
-      /**
-       * @internal
-       */
-      _wsOnSlotNotification(notification) {
-        let {
-          result,
-          subscription
-        } = create(notification, SlotNotificationResult);
-        this._handleServerNotification(subscription, [result]);
-      }
-      /**
-       * Register a callback to be invoked upon slot changes
-       *
-       * @param callback Function to invoke whenever the slot changes
-       * @return subscription id
-       */
-      onSlotChange(callback) {
-        return this._makeSubscription(
-          {
-            callback,
-            method: "slotSubscribe",
-            unsubscribeMethod: "slotUnsubscribe"
-          },
-          []
-          /* args */
-        );
-      }
-      /**
-       * Deregister a slot notification callback
-       *
-       * @param clientSubscriptionId client subscription id to deregister
-       */
-      async removeSlotChangeListener(clientSubscriptionId) {
-        await this._unsubscribeClientSubscription(clientSubscriptionId, "slot change");
-      }
-      /**
-       * @internal
-       */
-      _wsOnSlotUpdatesNotification(notification) {
-        let {
-          result,
-          subscription
-        } = create(notification, SlotUpdateNotificationResult);
-        this._handleServerNotification(subscription, [result]);
-      }
-      /**
-       * Register a callback to be invoked upon slot updates. {@link SlotUpdate}'s
-       * may be useful to track live progress of a cluster.
-       *
-       * @param callback Function to invoke whenever the slot updates
-       * @return subscription id
-       */
-      onSlotUpdate(callback) {
-        return this._makeSubscription(
-          {
-            callback,
-            method: "slotsUpdatesSubscribe",
-            unsubscribeMethod: "slotsUpdatesUnsubscribe"
-          },
-          []
-          /* args */
-        );
-      }
-      /**
-       * Deregister a slot update notification callback
-       *
-       * @param clientSubscriptionId client subscription id to deregister
-       */
-      async removeSlotUpdateListener(clientSubscriptionId) {
-        await this._unsubscribeClientSubscription(clientSubscriptionId, "slot update");
-      }
-      /**
-       * @internal
-       */
-      async _unsubscribeClientSubscription(clientSubscriptionId, subscriptionName) {
-        let dispose = this._subscriptionDisposeFunctionsByClientSubscriptionId[clientSubscriptionId];
-        dispose ? await dispose() : console.warn(`Ignored unsubscribe request because an active subscription with id \`${clientSubscriptionId}\` for '${subscriptionName}' events could not be found.`);
-      }
-      _buildArgs(args, override, encoding, extra) {
-        let commitment = override || this._commitment;
-        if (commitment || encoding || extra) {
-          let options = {};
-          encoding && (options.encoding = encoding), commitment && (options.commitment = commitment), extra && (options = Object.assign(options, extra)), args.push(options);
-        }
-        return args;
-      }
-      /**
-       * @internal
-       */
-      _buildArgsAtLeastConfirmed(args, override, encoding, extra) {
-        let commitment = override || this._commitment;
-        if (commitment && !["confirmed", "finalized"].includes(commitment))
-          throw new Error("Using Connection with default commitment: `" + this._commitment + "`, but method requires at least `confirmed`");
-        return this._buildArgs(args, override, encoding, extra);
-      }
-      /**
-       * @internal
-       */
-      _wsOnSignatureNotification(notification) {
-        let {
-          result,
-          subscription
-        } = create(notification, SignatureNotificationResult);
-        result.value !== "receivedSignature" && this._subscriptionsAutoDisposedByRpc.add(subscription), this._handleServerNotification(subscription, result.value === "receivedSignature" ? [{
-          type: "received"
-        }, result.context] : [{
-          type: "status",
-          result: result.value
-        }, result.context]);
-      }
-      /**
-       * Register a callback to be invoked upon signature updates
-       *
-       * @param signature Transaction signature string in base 58
-       * @param callback Function to invoke on signature notifications
-       * @param commitment Specify the commitment level signature must reach before notification
-       * @return subscription id
-       */
-      onSignature(signature2, callback, commitment) {
-        let args = this._buildArgs(
-          [signature2],
-          commitment || this._commitment || "finalized"
-          // Apply connection/server default.
-        ), clientSubscriptionId = this._makeSubscription({
-          callback: (notification, context) => {
-            if (notification.type === "status") {
-              callback(notification.result, context);
-              try {
-                this.removeSignatureListener(clientSubscriptionId);
-              } catch {
-              }
-            }
-          },
-          method: "signatureSubscribe",
-          unsubscribeMethod: "signatureUnsubscribe"
-        }, args);
-        return clientSubscriptionId;
-      }
-      /**
-       * Register a callback to be invoked when a transaction is
-       * received and/or processed.
-       *
-       * @param signature Transaction signature string in base 58
-       * @param callback Function to invoke on signature notifications
-       * @param options Enable received notifications and set the commitment
-       *   level that signature must reach before notification
-       * @return subscription id
-       */
-      onSignatureWithOptions(signature2, callback, options) {
-        let {
-          commitment,
-          ...extra
-        } = {
-          ...options,
-          commitment: options && options.commitment || this._commitment || "finalized"
-          // Apply connection/server default.
-        }, args = this._buildArgs([signature2], commitment, void 0, extra), clientSubscriptionId = this._makeSubscription({
-          callback: (notification, context) => {
-            callback(notification, context);
-            try {
-              this.removeSignatureListener(clientSubscriptionId);
-            } catch {
-            }
-          },
-          method: "signatureSubscribe",
-          unsubscribeMethod: "signatureUnsubscribe"
-        }, args);
-        return clientSubscriptionId;
-      }
-      /**
-       * Deregister a signature notification callback
-       *
-       * @param clientSubscriptionId client subscription id to deregister
-       */
-      async removeSignatureListener(clientSubscriptionId) {
-        await this._unsubscribeClientSubscription(clientSubscriptionId, "signature result");
-      }
-      /**
-       * @internal
-       */
-      _wsOnRootNotification(notification) {
-        let {
-          result,
-          subscription
-        } = create(notification, RootNotificationResult);
-        this._handleServerNotification(subscription, [result]);
-      }
-      /**
-       * Register a callback to be invoked upon root changes
-       *
-       * @param callback Function to invoke whenever the root changes
-       * @return subscription id
-       */
-      onRootChange(callback) {
-        return this._makeSubscription(
-          {
-            callback,
-            method: "rootSubscribe",
-            unsubscribeMethod: "rootUnsubscribe"
-          },
-          []
-          /* args */
-        );
-      }
-      /**
-       * Deregister a root notification callback
-       *
-       * @param clientSubscriptionId client subscription id to deregister
-       */
-      async removeRootChangeListener(clientSubscriptionId) {
-        await this._unsubscribeClientSubscription(clientSubscriptionId, "root change");
-      }
-    }, Keypair = class {
-      /**
-       * Create a new keypair instance.
-       * Generate random keypair if no {@link Ed25519Keypair} is provided.
-       *
-       * @param {Ed25519Keypair} keypair ed25519 keypair
-       */
-      constructor(keypair) {
-        this._keypair = void 0, this._keypair = keypair ?? generateKeypair();
-      }
-      /**
-       * Generate a new random keypair
-       *
-       * @returns {Keypair} Keypair
-       */
-      static generate() {
-        return new Keypair(generateKeypair());
-      }
-      /**
-       * Create a keypair from a raw secret key byte array.
-       *
-       * This method should only be used to recreate a keypair from a previously
-       * generated secret key. Generating keypairs from a random seed should be done
-       * with the {@link Keypair.fromSeed} method.
-       *
-       * @throws error if the provided secret key is invalid and validation is not skipped.
-       *
-       * @param secretKey secret key byte array
-       * @param options skip secret key validation
-       *
-       * @returns {Keypair} Keypair
-       */
-      static fromSecretKey(secretKey, options) {
-        if (secretKey.byteLength !== 64)
-          throw new Error("bad secret key size");
-        let publicKey5 = secretKey.slice(32, 64);
-        if (!options || !options.skipValidation) {
-          let privateScalar = secretKey.slice(0, 32), computedPublicKey = getPublicKey(privateScalar);
-          for (let ii = 0; ii < 32; ii++)
-            if (publicKey5[ii] !== computedPublicKey[ii])
-              throw new Error("provided secretKey is invalid");
-        }
-        return new Keypair({
-          publicKey: publicKey5,
-          secretKey
-        });
-      }
-      /**
-       * Generate a keypair from a 32 byte seed.
-       *
-       * @param seed seed byte array
-       *
-       * @returns {Keypair} Keypair
-       */
-      static fromSeed(seed) {
-        let publicKey5 = getPublicKey(seed), secretKey = new Uint8Array(64);
-        return secretKey.set(seed), secretKey.set(publicKey5, 32), new Keypair({
-          publicKey: publicKey5,
-          secretKey
-        });
-      }
-      /**
-       * The public key for this keypair
-       *
-       * @returns {PublicKey} PublicKey
-       */
-      get publicKey() {
-        return new PublicKey(this._keypair.publicKey);
-      }
-      /**
-       * The raw secret key for this keypair
-       * @returns {Uint8Array} Secret key in an array of Uint8 bytes
-       */
-      get secretKey() {
-        return new Uint8Array(this._keypair.secretKey);
-      }
-    }, LOOKUP_TABLE_INSTRUCTION_LAYOUTS = Object.freeze({
-      CreateLookupTable: {
-        index: 0,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction"), u64("recentSlot"), BufferLayout.u8("bumpSeed")])
-      },
-      FreezeLookupTable: {
-        index: 1,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction")])
-      },
-      ExtendLookupTable: {
-        index: 2,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction"), u64(), BufferLayout.seq(publicKey(), BufferLayout.offset(BufferLayout.u32(), -8), "addresses")])
-      },
-      DeactivateLookupTable: {
-        index: 3,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction")])
-      },
-      CloseLookupTable: {
-        index: 4,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction")])
-      }
-    }), AddressLookupTableInstruction = class {
-      /**
-       * @internal
-       */
-      constructor() {
-      }
-      static decodeInstructionType(instruction) {
-        this.checkProgramId(instruction.programId);
-        let index = BufferLayout.u32("instruction").decode(instruction.data), type2;
-        for (let [layoutType, layout] of Object.entries(LOOKUP_TABLE_INSTRUCTION_LAYOUTS))
-          if (layout.index == index) {
-            type2 = layoutType;
-            break;
-          }
-        if (!type2)
-          throw new Error("Invalid Instruction. Should be a LookupTable Instruction");
-        return type2;
-      }
-      static decodeCreateLookupTable(instruction) {
-        this.checkProgramId(instruction.programId), this.checkKeysLength(instruction.keys, 4);
-        let {
-          recentSlot
-        } = decodeData$1(LOOKUP_TABLE_INSTRUCTION_LAYOUTS.CreateLookupTable, instruction.data);
-        return {
-          authority: instruction.keys[1].pubkey,
-          payer: instruction.keys[2].pubkey,
-          recentSlot: Number(recentSlot)
-        };
-      }
-      static decodeExtendLookupTable(instruction) {
-        if (this.checkProgramId(instruction.programId), instruction.keys.length < 2)
-          throw new Error(`invalid instruction; found ${instruction.keys.length} keys, expected at least 2`);
-        let {
-          addresses
-        } = decodeData$1(LOOKUP_TABLE_INSTRUCTION_LAYOUTS.ExtendLookupTable, instruction.data);
-        return {
-          lookupTable: instruction.keys[0].pubkey,
-          authority: instruction.keys[1].pubkey,
-          payer: instruction.keys.length > 2 ? instruction.keys[2].pubkey : void 0,
-          addresses: addresses.map((buffer) => new PublicKey(buffer))
-        };
-      }
-      static decodeCloseLookupTable(instruction) {
-        return this.checkProgramId(instruction.programId), this.checkKeysLength(instruction.keys, 3), {
-          lookupTable: instruction.keys[0].pubkey,
-          authority: instruction.keys[1].pubkey,
-          recipient: instruction.keys[2].pubkey
-        };
-      }
-      static decodeFreezeLookupTable(instruction) {
-        return this.checkProgramId(instruction.programId), this.checkKeysLength(instruction.keys, 2), {
-          lookupTable: instruction.keys[0].pubkey,
-          authority: instruction.keys[1].pubkey
-        };
-      }
-      static decodeDeactivateLookupTable(instruction) {
-        return this.checkProgramId(instruction.programId), this.checkKeysLength(instruction.keys, 2), {
-          lookupTable: instruction.keys[0].pubkey,
-          authority: instruction.keys[1].pubkey
-        };
-      }
-      /**
-       * @internal
-       */
-      static checkProgramId(programId) {
-        if (!programId.equals(AddressLookupTableProgram.programId))
-          throw new Error("invalid instruction; programId is not AddressLookupTable Program");
-      }
-      /**
-       * @internal
-       */
-      static checkKeysLength(keys, expectedLength) {
-        if (keys.length < expectedLength)
-          throw new Error(`invalid instruction; found ${keys.length} keys, expected at least ${expectedLength}`);
-      }
-    }, AddressLookupTableProgram = class {
-      /**
-       * @internal
-       */
-      constructor() {
-      }
-      static createLookupTable(params) {
-        let [lookupTableAddress, bumpSeed] = PublicKey.findProgramAddressSync([params.authority.toBuffer(), getU64Encoder().encode(params.recentSlot)], this.programId), type2 = LOOKUP_TABLE_INSTRUCTION_LAYOUTS.CreateLookupTable, data = encodeData(type2, {
-          recentSlot: BigInt(params.recentSlot),
-          bumpSeed
-        }), keys = [{
-          pubkey: lookupTableAddress,
-          isSigner: !1,
-          isWritable: !0
-        }, {
-          pubkey: params.authority,
-          isSigner: !0,
-          isWritable: !1
-        }, {
-          pubkey: params.payer,
-          isSigner: !0,
-          isWritable: !0
-        }, {
-          pubkey: SystemProgram.programId,
-          isSigner: !1,
-          isWritable: !1
-        }];
-        return [new TransactionInstruction({
-          programId: this.programId,
-          keys,
-          data
-        }), lookupTableAddress];
-      }
-      static freezeLookupTable(params) {
-        let type2 = LOOKUP_TABLE_INSTRUCTION_LAYOUTS.FreezeLookupTable, data = encodeData(type2), keys = [{
-          pubkey: params.lookupTable,
-          isSigner: !1,
-          isWritable: !0
-        }, {
-          pubkey: params.authority,
-          isSigner: !0,
-          isWritable: !1
-        }];
-        return new TransactionInstruction({
-          programId: this.programId,
-          keys,
-          data
-        });
-      }
-      static extendLookupTable(params) {
-        let type2 = LOOKUP_TABLE_INSTRUCTION_LAYOUTS.ExtendLookupTable, data = encodeData(type2, {
-          addresses: params.addresses.map((addr) => addr.toBytes())
-        }), keys = [{
-          pubkey: params.lookupTable,
-          isSigner: !1,
-          isWritable: !0
-        }, {
-          pubkey: params.authority,
-          isSigner: !0,
-          isWritable: !1
-        }];
-        return params.payer && keys.push({
-          pubkey: params.payer,
-          isSigner: !0,
-          isWritable: !0
-        }, {
-          pubkey: SystemProgram.programId,
-          isSigner: !1,
-          isWritable: !1
-        }), new TransactionInstruction({
-          programId: this.programId,
-          keys,
-          data
-        });
-      }
-      static deactivateLookupTable(params) {
-        let type2 = LOOKUP_TABLE_INSTRUCTION_LAYOUTS.DeactivateLookupTable, data = encodeData(type2), keys = [{
-          pubkey: params.lookupTable,
-          isSigner: !1,
-          isWritable: !0
-        }, {
-          pubkey: params.authority,
-          isSigner: !0,
-          isWritable: !1
-        }];
-        return new TransactionInstruction({
-          programId: this.programId,
-          keys,
-          data
-        });
-      }
-      static closeLookupTable(params) {
-        let type2 = LOOKUP_TABLE_INSTRUCTION_LAYOUTS.CloseLookupTable, data = encodeData(type2), keys = [{
-          pubkey: params.lookupTable,
-          isSigner: !1,
-          isWritable: !0
-        }, {
-          pubkey: params.authority,
-          isSigner: !0,
-          isWritable: !1
-        }, {
-          pubkey: params.recipient,
-          isSigner: !1,
-          isWritable: !0
-        }];
-        return new TransactionInstruction({
-          programId: this.programId,
-          keys,
-          data
-        });
-      }
-    };
-    AddressLookupTableProgram.programId = new PublicKey("AddressLookupTab1e1111111111111111111111111");
-    ComputeBudgetInstruction = class {
-      /**
-       * @internal
-       */
-      constructor() {
-      }
-      /**
-       * Decode a compute budget instruction and retrieve the instruction type.
-       */
-      static decodeInstructionType(instruction) {
-        this.checkProgramId(instruction.programId);
-        let typeIndex = BufferLayout.u8("instruction").decode(instruction.data), type2;
-        for (let [ixType, layout] of Object.entries(COMPUTE_BUDGET_INSTRUCTION_LAYOUTS))
-          if (layout.index == typeIndex) {
-            type2 = ixType;
-            break;
-          }
-        if (!type2)
-          throw new Error("Instruction type incorrect; not a ComputeBudgetInstruction");
-        return type2;
-      }
-      /**
-       * Decode request units compute budget instruction and retrieve the instruction params.
-       */
-      static decodeRequestUnits(instruction) {
-        this.checkProgramId(instruction.programId);
-        let {
-          units,
-          additionalFee
-        } = decodeData$1(COMPUTE_BUDGET_INSTRUCTION_LAYOUTS.RequestUnits, instruction.data);
-        return {
-          units,
-          additionalFee
-        };
-      }
-      /**
-       * Decode request heap frame compute budget instruction and retrieve the instruction params.
-       */
-      static decodeRequestHeapFrame(instruction) {
-        this.checkProgramId(instruction.programId);
-        let {
-          bytes
-        } = decodeData$1(COMPUTE_BUDGET_INSTRUCTION_LAYOUTS.RequestHeapFrame, instruction.data);
-        return {
-          bytes
-        };
-      }
-      /**
-       * Decode set compute unit limit compute budget instruction and retrieve the instruction params.
-       */
-      static decodeSetComputeUnitLimit(instruction) {
-        this.checkProgramId(instruction.programId);
-        let {
-          units
-        } = decodeData$1(COMPUTE_BUDGET_INSTRUCTION_LAYOUTS.SetComputeUnitLimit, instruction.data);
-        return {
-          units
-        };
-      }
-      /**
-       * Decode set compute unit price compute budget instruction and retrieve the instruction params.
-       */
-      static decodeSetComputeUnitPrice(instruction) {
-        this.checkProgramId(instruction.programId);
-        let {
-          microLamports
-        } = decodeData$1(COMPUTE_BUDGET_INSTRUCTION_LAYOUTS.SetComputeUnitPrice, instruction.data);
-        return {
-          microLamports
-        };
-      }
-      /**
-       * @internal
-       */
-      static checkProgramId(programId) {
-        if (!programId.equals(ComputeBudgetProgram.programId))
-          throw new Error("invalid instruction; programId is not ComputeBudgetProgram");
-      }
-    }, COMPUTE_BUDGET_INSTRUCTION_LAYOUTS = Object.freeze({
-      RequestUnits: {
-        index: 0,
-        layout: BufferLayout.struct([BufferLayout.u8("instruction"), BufferLayout.u32("units"), BufferLayout.u32("additionalFee")])
-      },
-      RequestHeapFrame: {
-        index: 1,
-        layout: BufferLayout.struct([BufferLayout.u8("instruction"), BufferLayout.u32("bytes")])
-      },
-      SetComputeUnitLimit: {
-        index: 2,
-        layout: BufferLayout.struct([BufferLayout.u8("instruction"), BufferLayout.u32("units")])
-      },
-      SetComputeUnitPrice: {
-        index: 3,
-        layout: BufferLayout.struct([BufferLayout.u8("instruction"), u64("microLamports")])
-      }
-    }), ComputeBudgetProgram = class {
-      /**
-       * @internal
-       */
-      constructor() {
-      }
-      /**
-       * Public key that identifies the Compute Budget program
-       */
-      /**
-       * @deprecated Instead, call {@link setComputeUnitLimit} and/or {@link setComputeUnitPrice}
-       */
-      static requestUnits(params) {
-        let type2 = COMPUTE_BUDGET_INSTRUCTION_LAYOUTS.RequestUnits, data = encodeData(type2, params);
-        return new TransactionInstruction({
-          keys: [],
-          programId: this.programId,
-          data
-        });
-      }
-      static requestHeapFrame(params) {
-        let type2 = COMPUTE_BUDGET_INSTRUCTION_LAYOUTS.RequestHeapFrame, data = encodeData(type2, params);
-        return new TransactionInstruction({
-          keys: [],
-          programId: this.programId,
-          data
-        });
-      }
-      static setComputeUnitLimit(params) {
-        let type2 = COMPUTE_BUDGET_INSTRUCTION_LAYOUTS.SetComputeUnitLimit, data = encodeData(type2, params);
-        return new TransactionInstruction({
-          keys: [],
-          programId: this.programId,
-          data
-        });
-      }
-      static setComputeUnitPrice(params) {
-        let type2 = COMPUTE_BUDGET_INSTRUCTION_LAYOUTS.SetComputeUnitPrice, data = encodeData(type2, {
-          microLamports: BigInt(params.microLamports)
-        });
-        return new TransactionInstruction({
-          keys: [],
-          programId: this.programId,
-          data
-        });
-      }
-    };
-    ComputeBudgetProgram.programId = new PublicKey("ComputeBudget111111111111111111111111111111");
-    PRIVATE_KEY_BYTES$1 = 64, PUBLIC_KEY_BYTES$1 = 32, SIGNATURE_BYTES = 64, ED25519_INSTRUCTION_LAYOUT = BufferLayout.struct([BufferLayout.u8("numSignatures"), BufferLayout.u8("padding"), BufferLayout.u16("signatureOffset"), BufferLayout.u16("signatureInstructionIndex"), BufferLayout.u16("publicKeyOffset"), BufferLayout.u16("publicKeyInstructionIndex"), BufferLayout.u16("messageDataOffset"), BufferLayout.u16("messageDataSize"), BufferLayout.u16("messageInstructionIndex")]), Ed25519Program = class {
-      /**
-       * @internal
-       */
-      constructor() {
-      }
-      /**
-       * Public key that identifies the ed25519 program
-       */
-      /**
-       * Create an ed25519 instruction with a public key and signature. The
-       * public key must be a buffer that is 32 bytes long, and the signature
-       * must be a buffer of 64 bytes.
-       */
-      static createInstructionWithPublicKey(params) {
-        let {
-          publicKey: publicKey5,
-          message,
-          signature: signature2,
-          instructionIndex
-        } = params;
-        assert(publicKey5.length === PUBLIC_KEY_BYTES$1, `Public Key must be ${PUBLIC_KEY_BYTES$1} bytes but received ${publicKey5.length} bytes`), assert(signature2.length === SIGNATURE_BYTES, `Signature must be ${SIGNATURE_BYTES} bytes but received ${signature2.length} bytes`);
-        let publicKeyOffset = ED25519_INSTRUCTION_LAYOUT.span, signatureOffset = publicKeyOffset + publicKey5.length, messageDataOffset = signatureOffset + signature2.length, numSignatures = 1, instructionData = Buffer2.alloc(messageDataOffset + message.length), index = instructionIndex ?? 65535;
-        return ED25519_INSTRUCTION_LAYOUT.encode({
-          numSignatures,
-          padding: 0,
-          signatureOffset,
-          signatureInstructionIndex: index,
-          publicKeyOffset,
-          publicKeyInstructionIndex: index,
-          messageDataOffset,
-          messageDataSize: message.length,
-          messageInstructionIndex: index
-        }, instructionData), instructionData.fill(publicKey5, publicKeyOffset), instructionData.fill(signature2, signatureOffset), instructionData.fill(message, messageDataOffset), new TransactionInstruction({
-          keys: [],
-          programId: Ed25519Program.programId,
-          data: instructionData
-        });
-      }
-      /**
-       * Create an ed25519 instruction with a private key. The private key
-       * must be a buffer that is 64 bytes long.
-       */
-      static createInstructionWithPrivateKey(params) {
-        let {
-          privateKey,
-          message,
-          instructionIndex
-        } = params;
-        assert(privateKey.length === PRIVATE_KEY_BYTES$1, `Private key must be ${PRIVATE_KEY_BYTES$1} bytes but received ${privateKey.length} bytes`);
-        try {
-          let keypair = Keypair.fromSecretKey(privateKey), publicKey5 = keypair.publicKey.toBytes(), signature2 = sign(message, keypair.secretKey);
-          return this.createInstructionWithPublicKey({
-            publicKey: publicKey5,
-            message,
-            signature: signature2,
-            instructionIndex
-          });
-        } catch (error) {
-          throw new Error(`Error creating instruction; ${error}`);
-        }
-      }
-    };
-    Ed25519Program.programId = new PublicKey("Ed25519SigVerify111111111111111111111111111");
-    ecdsaSign = (msgHash, privKey) => {
-      let signature2 = secp256k1.sign(msgHash, privKey);
-      return [signature2.toCompactRawBytes(), signature2.recovery];
-    };
-    secp256k1.utils.isValidPrivateKey;
-    publicKeyCreate = secp256k1.getPublicKey, PRIVATE_KEY_BYTES = 32, ETHEREUM_ADDRESS_BYTES = 20, PUBLIC_KEY_BYTES = 64, SIGNATURE_OFFSETS_SERIALIZED_SIZE = 11, SECP256K1_INSTRUCTION_LAYOUT = BufferLayout.struct([BufferLayout.u8("numSignatures"), BufferLayout.u16("signatureOffset"), BufferLayout.u8("signatureInstructionIndex"), BufferLayout.u16("ethAddressOffset"), BufferLayout.u8("ethAddressInstructionIndex"), BufferLayout.u16("messageDataOffset"), BufferLayout.u16("messageDataSize"), BufferLayout.u8("messageInstructionIndex"), BufferLayout.blob(20, "ethAddress"), BufferLayout.blob(64, "signature"), BufferLayout.u8("recoveryId")]), Secp256k1Program = class {
-      /**
-       * @internal
-       */
-      constructor() {
-      }
-      /**
-       * Public key that identifies the secp256k1 program
-       */
-      /**
-       * Construct an Ethereum address from a secp256k1 public key buffer.
-       * @param {Buffer} publicKey a 64 byte secp256k1 public key buffer
-       */
-      static publicKeyToEthAddress(publicKey5) {
-        assert(publicKey5.length === PUBLIC_KEY_BYTES, `Public key must be ${PUBLIC_KEY_BYTES} bytes but received ${publicKey5.length} bytes`);
-        try {
-          return Buffer2.from(keccak_256(toBuffer(publicKey5))).slice(-ETHEREUM_ADDRESS_BYTES);
-        } catch (error) {
-          throw new Error(`Error constructing Ethereum address: ${error}`);
-        }
-      }
-      /**
-       * Create an secp256k1 instruction with a public key. The public key
-       * must be a buffer that is 64 bytes long.
-       */
-      static createInstructionWithPublicKey(params) {
-        let {
-          publicKey: publicKey5,
-          message,
-          signature: signature2,
-          recoveryId,
-          instructionIndex
-        } = params;
-        return Secp256k1Program.createInstructionWithEthAddress({
-          ethAddress: Secp256k1Program.publicKeyToEthAddress(publicKey5),
-          message,
-          signature: signature2,
-          recoveryId,
-          instructionIndex
-        });
-      }
-      /**
-       * Create an secp256k1 instruction with an Ethereum address. The address
-       * must be a hex string or a buffer that is 20 bytes long.
-       */
-      static createInstructionWithEthAddress(params) {
-        let {
-          ethAddress: rawAddress,
-          message,
-          signature: signature2,
-          recoveryId,
-          instructionIndex = 0
-        } = params, ethAddress;
-        typeof rawAddress == "string" ? rawAddress.startsWith("0x") ? ethAddress = Buffer2.from(rawAddress.substr(2), "hex") : ethAddress = Buffer2.from(rawAddress, "hex") : ethAddress = rawAddress, assert(ethAddress.length === ETHEREUM_ADDRESS_BYTES, `Address must be ${ETHEREUM_ADDRESS_BYTES} bytes but received ${ethAddress.length} bytes`);
-        let dataStart = 1 + SIGNATURE_OFFSETS_SERIALIZED_SIZE, ethAddressOffset = dataStart, signatureOffset = dataStart + ethAddress.length, messageDataOffset = signatureOffset + signature2.length + 1, numSignatures = 1, instructionData = Buffer2.alloc(SECP256K1_INSTRUCTION_LAYOUT.span + message.length);
-        return SECP256K1_INSTRUCTION_LAYOUT.encode({
-          numSignatures,
-          signatureOffset,
-          signatureInstructionIndex: instructionIndex,
-          ethAddressOffset,
-          ethAddressInstructionIndex: instructionIndex,
-          messageDataOffset,
-          messageDataSize: message.length,
-          messageInstructionIndex: instructionIndex,
-          signature: toBuffer(signature2),
-          ethAddress: toBuffer(ethAddress),
-          recoveryId
-        }, instructionData), instructionData.fill(toBuffer(message), SECP256K1_INSTRUCTION_LAYOUT.span), new TransactionInstruction({
-          keys: [],
-          programId: Secp256k1Program.programId,
-          data: instructionData
-        });
-      }
-      /**
-       * Create an secp256k1 instruction with a private key. The private key
-       * must be a buffer that is 32 bytes long.
-       */
-      static createInstructionWithPrivateKey(params) {
-        let {
-          privateKey: pkey,
-          message,
-          instructionIndex
-        } = params;
-        assert(pkey.length === PRIVATE_KEY_BYTES, `Private key must be ${PRIVATE_KEY_BYTES} bytes but received ${pkey.length} bytes`);
-        try {
-          let privateKey = toBuffer(pkey), publicKey5 = publicKeyCreate(
-            privateKey,
-            !1
-            /* isCompressed */
-          ).slice(1), messageHash = Buffer2.from(keccak_256(toBuffer(message))), [signature2, recoveryId] = ecdsaSign(messageHash, privateKey);
-          return this.createInstructionWithPublicKey({
-            publicKey: publicKey5,
-            message,
-            signature: signature2,
-            recoveryId,
-            instructionIndex
-          });
-        } catch (error) {
-          throw new Error(`Error creating instruction; ${error}`);
-        }
-      }
-    };
-    Secp256k1Program.programId = new PublicKey("KeccakSecp256k11111111111111111111111111111");
-    STAKE_CONFIG_ID = new PublicKey("StakeConfig11111111111111111111111111111111"), Authorized = class {
-      /**
-       * Create a new Authorized object
-       * @param staker the stake authority
-       * @param withdrawer the withdraw authority
-       */
-      constructor(staker, withdrawer) {
-        this.staker = void 0, this.withdrawer = void 0, this.staker = staker, this.withdrawer = withdrawer;
-      }
-    }, Lockup = class {
-      /**
-       * Create a new Lockup object
-       */
-      constructor(unixTimestamp, epoch, custodian) {
-        this.unixTimestamp = void 0, this.epoch = void 0, this.custodian = void 0, this.unixTimestamp = unixTimestamp, this.epoch = epoch, this.custodian = custodian;
-      }
-      /**
-       * Default, inactive Lockup value
-       */
-    };
-    _Lockup = Lockup;
-    Lockup.default = new _Lockup(0, 0, PublicKey.default);
-    StakeInstruction = class {
-      /**
-       * @internal
-       */
-      constructor() {
-      }
-      /**
-       * Decode a stake instruction and retrieve the instruction type.
-       */
-      static decodeInstructionType(instruction) {
-        this.checkProgramId(instruction.programId);
-        let typeIndex = BufferLayout.u32("instruction").decode(instruction.data), type2;
-        for (let [ixType, layout] of Object.entries(STAKE_INSTRUCTION_LAYOUTS))
-          if (layout.index == typeIndex) {
-            type2 = ixType;
-            break;
-          }
-        if (!type2)
-          throw new Error("Instruction type incorrect; not a StakeInstruction");
-        return type2;
-      }
-      /**
-       * Decode a initialize stake instruction and retrieve the instruction params.
-       */
-      static decodeInitialize(instruction) {
-        this.checkProgramId(instruction.programId), this.checkKeyLength(instruction.keys, 2);
-        let {
-          authorized: authorized2,
-          lockup: lockup2
-        } = decodeData$1(STAKE_INSTRUCTION_LAYOUTS.Initialize, instruction.data);
-        return {
-          stakePubkey: instruction.keys[0].pubkey,
-          authorized: new Authorized(new PublicKey(authorized2.staker), new PublicKey(authorized2.withdrawer)),
-          lockup: new Lockup(lockup2.unixTimestamp, lockup2.epoch, new PublicKey(lockup2.custodian))
-        };
-      }
-      /**
-       * Decode a delegate stake instruction and retrieve the instruction params.
-       */
-      static decodeDelegate(instruction) {
-        return this.checkProgramId(instruction.programId), this.checkKeyLength(instruction.keys, 6), decodeData$1(STAKE_INSTRUCTION_LAYOUTS.Delegate, instruction.data), {
-          stakePubkey: instruction.keys[0].pubkey,
-          votePubkey: instruction.keys[1].pubkey,
-          authorizedPubkey: instruction.keys[5].pubkey
-        };
-      }
-      /**
-       * Decode an authorize stake instruction and retrieve the instruction params.
-       */
-      static decodeAuthorize(instruction) {
-        this.checkProgramId(instruction.programId), this.checkKeyLength(instruction.keys, 3);
-        let {
-          newAuthorized,
-          stakeAuthorizationType
-        } = decodeData$1(STAKE_INSTRUCTION_LAYOUTS.Authorize, instruction.data), o = {
-          stakePubkey: instruction.keys[0].pubkey,
-          authorizedPubkey: instruction.keys[2].pubkey,
-          newAuthorizedPubkey: new PublicKey(newAuthorized),
-          stakeAuthorizationType: {
-            index: stakeAuthorizationType
-          }
-        };
-        return instruction.keys.length > 3 && (o.custodianPubkey = instruction.keys[3].pubkey), o;
-      }
-      /**
-       * Decode an authorize-with-seed stake instruction and retrieve the instruction params.
-       */
-      static decodeAuthorizeWithSeed(instruction) {
-        this.checkProgramId(instruction.programId), this.checkKeyLength(instruction.keys, 2);
-        let {
-          newAuthorized,
-          stakeAuthorizationType,
-          authoritySeed,
-          authorityOwner
-        } = decodeData$1(STAKE_INSTRUCTION_LAYOUTS.AuthorizeWithSeed, instruction.data), o = {
-          stakePubkey: instruction.keys[0].pubkey,
-          authorityBase: instruction.keys[1].pubkey,
-          authoritySeed,
-          authorityOwner: new PublicKey(authorityOwner),
-          newAuthorizedPubkey: new PublicKey(newAuthorized),
-          stakeAuthorizationType: {
-            index: stakeAuthorizationType
-          }
-        };
-        return instruction.keys.length > 3 && (o.custodianPubkey = instruction.keys[3].pubkey), o;
-      }
-      /**
-       * Decode a split stake instruction and retrieve the instruction params.
-       */
-      static decodeSplit(instruction) {
-        this.checkProgramId(instruction.programId), this.checkKeyLength(instruction.keys, 3);
-        let {
-          lamports
-        } = decodeData$1(STAKE_INSTRUCTION_LAYOUTS.Split, instruction.data);
-        return {
-          stakePubkey: instruction.keys[0].pubkey,
-          splitStakePubkey: instruction.keys[1].pubkey,
-          authorizedPubkey: instruction.keys[2].pubkey,
-          lamports
-        };
-      }
-      /**
-       * Decode a merge stake instruction and retrieve the instruction params.
-       */
-      static decodeMerge(instruction) {
-        return this.checkProgramId(instruction.programId), this.checkKeyLength(instruction.keys, 3), decodeData$1(STAKE_INSTRUCTION_LAYOUTS.Merge, instruction.data), {
-          stakePubkey: instruction.keys[0].pubkey,
-          sourceStakePubKey: instruction.keys[1].pubkey,
-          authorizedPubkey: instruction.keys[4].pubkey
-        };
-      }
-      /**
-       * Decode a withdraw stake instruction and retrieve the instruction params.
-       */
-      static decodeWithdraw(instruction) {
-        this.checkProgramId(instruction.programId), this.checkKeyLength(instruction.keys, 5);
-        let {
-          lamports
-        } = decodeData$1(STAKE_INSTRUCTION_LAYOUTS.Withdraw, instruction.data), o = {
-          stakePubkey: instruction.keys[0].pubkey,
-          toPubkey: instruction.keys[1].pubkey,
-          authorizedPubkey: instruction.keys[4].pubkey,
-          lamports
-        };
-        return instruction.keys.length > 5 && (o.custodianPubkey = instruction.keys[5].pubkey), o;
-      }
-      /**
-       * Decode a deactivate stake instruction and retrieve the instruction params.
-       */
-      static decodeDeactivate(instruction) {
-        return this.checkProgramId(instruction.programId), this.checkKeyLength(instruction.keys, 3), decodeData$1(STAKE_INSTRUCTION_LAYOUTS.Deactivate, instruction.data), {
-          stakePubkey: instruction.keys[0].pubkey,
-          authorizedPubkey: instruction.keys[2].pubkey
-        };
-      }
-      /**
-       * @internal
-       */
-      static checkProgramId(programId) {
-        if (!programId.equals(StakeProgram.programId))
-          throw new Error("invalid instruction; programId is not StakeProgram");
-      }
-      /**
-       * @internal
-       */
-      static checkKeyLength(keys, expectedLength) {
-        if (keys.length < expectedLength)
-          throw new Error(`invalid instruction; found ${keys.length} keys, expected at least ${expectedLength}`);
-      }
-    }, STAKE_INSTRUCTION_LAYOUTS = Object.freeze({
-      Initialize: {
-        index: 0,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction"), authorized(), lockup()])
-      },
-      Authorize: {
-        index: 1,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction"), publicKey("newAuthorized"), BufferLayout.u32("stakeAuthorizationType")])
-      },
-      Delegate: {
-        index: 2,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction")])
-      },
-      Split: {
-        index: 3,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction"), BufferLayout.ns64("lamports")])
-      },
-      Withdraw: {
-        index: 4,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction"), BufferLayout.ns64("lamports")])
-      },
-      Deactivate: {
-        index: 5,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction")])
-      },
-      Merge: {
-        index: 7,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction")])
-      },
-      AuthorizeWithSeed: {
-        index: 8,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction"), publicKey("newAuthorized"), BufferLayout.u32("stakeAuthorizationType"), rustString("authoritySeed"), publicKey("authorityOwner")])
-      }
-    }), StakeAuthorizationLayout = Object.freeze({
-      Staker: {
-        index: 0
-      },
-      Withdrawer: {
-        index: 1
-      }
-    }), StakeProgram = class {
-      /**
-       * @internal
-       */
-      constructor() {
-      }
-      /**
-       * Public key that identifies the Stake program
-       */
-      /**
-       * Generate an Initialize instruction to add to a Stake Create transaction
-       */
-      static initialize(params) {
-        let {
-          stakePubkey,
-          authorized: authorized2,
-          lockup: maybeLockup
-        } = params, lockup2 = maybeLockup || Lockup.default, type2 = STAKE_INSTRUCTION_LAYOUTS.Initialize, data = encodeData(type2, {
-          authorized: {
-            staker: toBuffer(authorized2.staker.toBuffer()),
-            withdrawer: toBuffer(authorized2.withdrawer.toBuffer())
-          },
-          lockup: {
-            unixTimestamp: lockup2.unixTimestamp,
-            epoch: lockup2.epoch,
-            custodian: toBuffer(lockup2.custodian.toBuffer())
-          }
-        }), instructionData = {
-          keys: [{
-            pubkey: stakePubkey,
-            isSigner: !1,
-            isWritable: !0
-          }, {
-            pubkey: SYSVAR_RENT_PUBKEY,
-            isSigner: !1,
-            isWritable: !1
-          }],
-          programId: this.programId,
-          data
-        };
-        return new TransactionInstruction(instructionData);
-      }
-      /**
-       * Generate a Transaction that creates a new Stake account at
-       *   an address generated with `from`, a seed, and the Stake programId
-       */
-      static createAccountWithSeed(params) {
-        let transaction = new Transaction();
-        transaction.add(SystemProgram.createAccountWithSeed({
-          fromPubkey: params.fromPubkey,
-          newAccountPubkey: params.stakePubkey,
-          basePubkey: params.basePubkey,
-          seed: params.seed,
-          lamports: params.lamports,
-          space: this.space,
-          programId: this.programId
-        }));
-        let {
-          stakePubkey,
-          authorized: authorized2,
-          lockup: lockup2
-        } = params;
-        return transaction.add(this.initialize({
-          stakePubkey,
-          authorized: authorized2,
-          lockup: lockup2
-        }));
-      }
-      /**
-       * Generate a Transaction that creates a new Stake account
-       */
-      static createAccount(params) {
-        let transaction = new Transaction();
-        transaction.add(SystemProgram.createAccount({
-          fromPubkey: params.fromPubkey,
-          newAccountPubkey: params.stakePubkey,
-          lamports: params.lamports,
-          space: this.space,
-          programId: this.programId
-        }));
-        let {
-          stakePubkey,
-          authorized: authorized2,
-          lockup: lockup2
-        } = params;
-        return transaction.add(this.initialize({
-          stakePubkey,
-          authorized: authorized2,
-          lockup: lockup2
-        }));
-      }
-      /**
-       * Generate a Transaction that delegates Stake tokens to a validator
-       * Vote PublicKey. This transaction can also be used to redelegate Stake
-       * to a new validator Vote PublicKey.
-       */
-      static delegate(params) {
-        let {
-          stakePubkey,
-          authorizedPubkey,
-          votePubkey
-        } = params, type2 = STAKE_INSTRUCTION_LAYOUTS.Delegate, data = encodeData(type2);
-        return new Transaction().add({
-          keys: [{
-            pubkey: stakePubkey,
-            isSigner: !1,
-            isWritable: !0
-          }, {
-            pubkey: votePubkey,
-            isSigner: !1,
-            isWritable: !1
-          }, {
-            pubkey: SYSVAR_CLOCK_PUBKEY,
-            isSigner: !1,
-            isWritable: !1
-          }, {
-            pubkey: SYSVAR_STAKE_HISTORY_PUBKEY,
-            isSigner: !1,
-            isWritable: !1
-          }, {
-            pubkey: STAKE_CONFIG_ID,
-            isSigner: !1,
-            isWritable: !1
-          }, {
-            pubkey: authorizedPubkey,
-            isSigner: !0,
-            isWritable: !1
-          }],
-          programId: this.programId,
-          data
-        });
-      }
-      /**
-       * Generate a Transaction that authorizes a new PublicKey as Staker
-       * or Withdrawer on the Stake account.
-       */
-      static authorize(params) {
-        let {
-          stakePubkey,
-          authorizedPubkey,
-          newAuthorizedPubkey,
-          stakeAuthorizationType,
-          custodianPubkey
-        } = params, type2 = STAKE_INSTRUCTION_LAYOUTS.Authorize, data = encodeData(type2, {
-          newAuthorized: toBuffer(newAuthorizedPubkey.toBuffer()),
-          stakeAuthorizationType: stakeAuthorizationType.index
-        }), keys = [{
-          pubkey: stakePubkey,
-          isSigner: !1,
-          isWritable: !0
-        }, {
-          pubkey: SYSVAR_CLOCK_PUBKEY,
-          isSigner: !1,
-          isWritable: !0
-        }, {
-          pubkey: authorizedPubkey,
-          isSigner: !0,
-          isWritable: !1
-        }];
-        return custodianPubkey && keys.push({
-          pubkey: custodianPubkey,
-          isSigner: !0,
-          isWritable: !1
-        }), new Transaction().add({
-          keys,
-          programId: this.programId,
-          data
-        });
-      }
-      /**
-       * Generate a Transaction that authorizes a new PublicKey as Staker
-       * or Withdrawer on the Stake account.
-       */
-      static authorizeWithSeed(params) {
-        let {
-          stakePubkey,
-          authorityBase,
-          authoritySeed,
-          authorityOwner,
-          newAuthorizedPubkey,
-          stakeAuthorizationType,
-          custodianPubkey
-        } = params, type2 = STAKE_INSTRUCTION_LAYOUTS.AuthorizeWithSeed, data = encodeData(type2, {
-          newAuthorized: toBuffer(newAuthorizedPubkey.toBuffer()),
-          stakeAuthorizationType: stakeAuthorizationType.index,
-          authoritySeed,
-          authorityOwner: toBuffer(authorityOwner.toBuffer())
-        }), keys = [{
-          pubkey: stakePubkey,
-          isSigner: !1,
-          isWritable: !0
-        }, {
-          pubkey: authorityBase,
-          isSigner: !0,
-          isWritable: !1
-        }, {
-          pubkey: SYSVAR_CLOCK_PUBKEY,
-          isSigner: !1,
-          isWritable: !1
-        }];
-        return custodianPubkey && keys.push({
-          pubkey: custodianPubkey,
-          isSigner: !0,
-          isWritable: !1
-        }), new Transaction().add({
-          keys,
-          programId: this.programId,
-          data
-        });
-      }
-      /**
-       * @internal
-       */
-      static splitInstruction(params) {
-        let {
-          stakePubkey,
-          authorizedPubkey,
-          splitStakePubkey,
-          lamports
-        } = params, type2 = STAKE_INSTRUCTION_LAYOUTS.Split, data = encodeData(type2, {
-          lamports
-        });
-        return new TransactionInstruction({
-          keys: [{
-            pubkey: stakePubkey,
-            isSigner: !1,
-            isWritable: !0
-          }, {
-            pubkey: splitStakePubkey,
-            isSigner: !1,
-            isWritable: !0
-          }, {
-            pubkey: authorizedPubkey,
-            isSigner: !0,
-            isWritable: !1
-          }],
-          programId: this.programId,
-          data
-        });
-      }
-      /**
-       * Generate a Transaction that splits Stake tokens into another stake account
-       */
-      static split(params, rentExemptReserve) {
-        let transaction = new Transaction();
-        return transaction.add(SystemProgram.createAccount({
-          fromPubkey: params.authorizedPubkey,
-          newAccountPubkey: params.splitStakePubkey,
-          lamports: rentExemptReserve,
-          space: this.space,
-          programId: this.programId
-        })), transaction.add(this.splitInstruction(params));
-      }
-      /**
-       * Generate a Transaction that splits Stake tokens into another account
-       * derived from a base public key and seed
-       */
-      static splitWithSeed(params, rentExemptReserve) {
-        let {
-          stakePubkey,
-          authorizedPubkey,
-          splitStakePubkey,
-          basePubkey,
-          seed,
-          lamports
-        } = params, transaction = new Transaction();
-        return transaction.add(SystemProgram.allocate({
-          accountPubkey: splitStakePubkey,
-          basePubkey,
-          seed,
-          space: this.space,
-          programId: this.programId
-        })), rentExemptReserve && rentExemptReserve > 0 && transaction.add(SystemProgram.transfer({
-          fromPubkey: params.authorizedPubkey,
-          toPubkey: splitStakePubkey,
-          lamports: rentExemptReserve
-        })), transaction.add(this.splitInstruction({
-          stakePubkey,
-          authorizedPubkey,
-          splitStakePubkey,
-          lamports
-        }));
-      }
-      /**
-       * Generate a Transaction that merges Stake accounts.
-       */
-      static merge(params) {
-        let {
-          stakePubkey,
-          sourceStakePubKey,
-          authorizedPubkey
-        } = params, type2 = STAKE_INSTRUCTION_LAYOUTS.Merge, data = encodeData(type2);
-        return new Transaction().add({
-          keys: [{
-            pubkey: stakePubkey,
-            isSigner: !1,
-            isWritable: !0
-          }, {
-            pubkey: sourceStakePubKey,
-            isSigner: !1,
-            isWritable: !0
-          }, {
-            pubkey: SYSVAR_CLOCK_PUBKEY,
-            isSigner: !1,
-            isWritable: !1
-          }, {
-            pubkey: SYSVAR_STAKE_HISTORY_PUBKEY,
-            isSigner: !1,
-            isWritable: !1
-          }, {
-            pubkey: authorizedPubkey,
-            isSigner: !0,
-            isWritable: !1
-          }],
-          programId: this.programId,
-          data
-        });
-      }
-      /**
-       * Generate a Transaction that withdraws deactivated Stake tokens.
-       */
-      static withdraw(params) {
-        let {
-          stakePubkey,
-          authorizedPubkey,
-          toPubkey,
-          lamports,
-          custodianPubkey
-        } = params, type2 = STAKE_INSTRUCTION_LAYOUTS.Withdraw, data = encodeData(type2, {
-          lamports
-        }), keys = [{
-          pubkey: stakePubkey,
-          isSigner: !1,
-          isWritable: !0
-        }, {
-          pubkey: toPubkey,
-          isSigner: !1,
-          isWritable: !0
-        }, {
-          pubkey: SYSVAR_CLOCK_PUBKEY,
-          isSigner: !1,
-          isWritable: !1
-        }, {
-          pubkey: SYSVAR_STAKE_HISTORY_PUBKEY,
-          isSigner: !1,
-          isWritable: !1
-        }, {
-          pubkey: authorizedPubkey,
-          isSigner: !0,
-          isWritable: !1
-        }];
-        return custodianPubkey && keys.push({
-          pubkey: custodianPubkey,
-          isSigner: !0,
-          isWritable: !1
-        }), new Transaction().add({
-          keys,
-          programId: this.programId,
-          data
-        });
-      }
-      /**
-       * Generate a Transaction that deactivates Stake tokens.
-       */
-      static deactivate(params) {
-        let {
-          stakePubkey,
-          authorizedPubkey
-        } = params, type2 = STAKE_INSTRUCTION_LAYOUTS.Deactivate, data = encodeData(type2);
-        return new Transaction().add({
-          keys: [{
-            pubkey: stakePubkey,
-            isSigner: !1,
-            isWritable: !0
-          }, {
-            pubkey: SYSVAR_CLOCK_PUBKEY,
-            isSigner: !1,
-            isWritable: !1
-          }, {
-            pubkey: authorizedPubkey,
-            isSigner: !0,
-            isWritable: !1
-          }],
-          programId: this.programId,
-          data
-        });
-      }
-    };
-    StakeProgram.programId = new PublicKey("Stake11111111111111111111111111111111111111");
-    StakeProgram.space = 200;
-    VoteInit = class {
-      /** [0, 100] */
-      constructor(nodePubkey, authorizedVoter, authorizedWithdrawer, commission) {
-        this.nodePubkey = void 0, this.authorizedVoter = void 0, this.authorizedWithdrawer = void 0, this.commission = void 0, this.nodePubkey = nodePubkey, this.authorizedVoter = authorizedVoter, this.authorizedWithdrawer = authorizedWithdrawer, this.commission = commission;
-      }
-    }, VoteInstruction = class {
-      /**
-       * @internal
-       */
-      constructor() {
-      }
-      /**
-       * Decode a vote instruction and retrieve the instruction type.
-       */
-      static decodeInstructionType(instruction) {
-        this.checkProgramId(instruction.programId);
-        let typeIndex = BufferLayout.u32("instruction").decode(instruction.data), type2;
-        for (let [ixType, layout] of Object.entries(VOTE_INSTRUCTION_LAYOUTS))
-          if (layout.index == typeIndex) {
-            type2 = ixType;
-            break;
-          }
-        if (!type2)
-          throw new Error("Instruction type incorrect; not a VoteInstruction");
-        return type2;
-      }
-      /**
-       * Decode an initialize vote instruction and retrieve the instruction params.
-       */
-      static decodeInitializeAccount(instruction) {
-        this.checkProgramId(instruction.programId), this.checkKeyLength(instruction.keys, 4);
-        let {
-          voteInit: voteInit2
-        } = decodeData$1(VOTE_INSTRUCTION_LAYOUTS.InitializeAccount, instruction.data);
-        return {
-          votePubkey: instruction.keys[0].pubkey,
-          nodePubkey: instruction.keys[3].pubkey,
-          voteInit: new VoteInit(new PublicKey(voteInit2.nodePubkey), new PublicKey(voteInit2.authorizedVoter), new PublicKey(voteInit2.authorizedWithdrawer), voteInit2.commission)
-        };
-      }
-      /**
-       * Decode an authorize instruction and retrieve the instruction params.
-       */
-      static decodeAuthorize(instruction) {
-        this.checkProgramId(instruction.programId), this.checkKeyLength(instruction.keys, 3);
-        let {
-          newAuthorized,
-          voteAuthorizationType
-        } = decodeData$1(VOTE_INSTRUCTION_LAYOUTS.Authorize, instruction.data);
-        return {
-          votePubkey: instruction.keys[0].pubkey,
-          authorizedPubkey: instruction.keys[2].pubkey,
-          newAuthorizedPubkey: new PublicKey(newAuthorized),
-          voteAuthorizationType: {
-            index: voteAuthorizationType
-          }
-        };
-      }
-      /**
-       * Decode an authorize instruction and retrieve the instruction params.
-       */
-      static decodeAuthorizeWithSeed(instruction) {
-        this.checkProgramId(instruction.programId), this.checkKeyLength(instruction.keys, 3);
-        let {
-          voteAuthorizeWithSeedArgs: {
-            currentAuthorityDerivedKeyOwnerPubkey,
-            currentAuthorityDerivedKeySeed,
-            newAuthorized,
-            voteAuthorizationType
-          }
-        } = decodeData$1(VOTE_INSTRUCTION_LAYOUTS.AuthorizeWithSeed, instruction.data);
-        return {
-          currentAuthorityDerivedKeyBasePubkey: instruction.keys[2].pubkey,
-          currentAuthorityDerivedKeyOwnerPubkey: new PublicKey(currentAuthorityDerivedKeyOwnerPubkey),
-          currentAuthorityDerivedKeySeed,
-          newAuthorizedPubkey: new PublicKey(newAuthorized),
-          voteAuthorizationType: {
-            index: voteAuthorizationType
-          },
-          votePubkey: instruction.keys[0].pubkey
-        };
-      }
-      /**
-       * Decode a withdraw instruction and retrieve the instruction params.
-       */
-      static decodeWithdraw(instruction) {
-        this.checkProgramId(instruction.programId), this.checkKeyLength(instruction.keys, 3);
-        let {
-          lamports
-        } = decodeData$1(VOTE_INSTRUCTION_LAYOUTS.Withdraw, instruction.data);
-        return {
-          votePubkey: instruction.keys[0].pubkey,
-          authorizedWithdrawerPubkey: instruction.keys[2].pubkey,
-          lamports,
-          toPubkey: instruction.keys[1].pubkey
-        };
-      }
-      /**
-       * @internal
-       */
-      static checkProgramId(programId) {
-        if (!programId.equals(VoteProgram.programId))
-          throw new Error("invalid instruction; programId is not VoteProgram");
-      }
-      /**
-       * @internal
-       */
-      static checkKeyLength(keys, expectedLength) {
-        if (keys.length < expectedLength)
-          throw new Error(`invalid instruction; found ${keys.length} keys, expected at least ${expectedLength}`);
-      }
-    }, VOTE_INSTRUCTION_LAYOUTS = Object.freeze({
-      InitializeAccount: {
-        index: 0,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction"), voteInit()])
-      },
-      Authorize: {
-        index: 1,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction"), publicKey("newAuthorized"), BufferLayout.u32("voteAuthorizationType")])
-      },
-      Withdraw: {
-        index: 3,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction"), BufferLayout.ns64("lamports")])
-      },
-      UpdateValidatorIdentity: {
-        index: 4,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction")])
-      },
-      AuthorizeWithSeed: {
-        index: 10,
-        layout: BufferLayout.struct([BufferLayout.u32("instruction"), voteAuthorizeWithSeedArgs()])
-      }
-    }), VoteAuthorizationLayout = Object.freeze({
-      Voter: {
-        index: 0
-      },
-      Withdrawer: {
-        index: 1
-      }
-    }), VoteProgram = class {
-      /**
-       * @internal
-       */
-      constructor() {
-      }
-      /**
-       * Public key that identifies the Vote program
-       */
-      /**
-       * Generate an Initialize instruction.
-       */
-      static initializeAccount(params) {
-        let {
-          votePubkey,
-          nodePubkey,
-          voteInit: voteInit2
-        } = params, type2 = VOTE_INSTRUCTION_LAYOUTS.InitializeAccount, data = encodeData(type2, {
-          voteInit: {
-            nodePubkey: toBuffer(voteInit2.nodePubkey.toBuffer()),
-            authorizedVoter: toBuffer(voteInit2.authorizedVoter.toBuffer()),
-            authorizedWithdrawer: toBuffer(voteInit2.authorizedWithdrawer.toBuffer()),
-            commission: voteInit2.commission
-          }
-        }), instructionData = {
-          keys: [{
-            pubkey: votePubkey,
-            isSigner: !1,
-            isWritable: !0
-          }, {
-            pubkey: SYSVAR_RENT_PUBKEY,
-            isSigner: !1,
-            isWritable: !1
-          }, {
-            pubkey: SYSVAR_CLOCK_PUBKEY,
-            isSigner: !1,
-            isWritable: !1
-          }, {
-            pubkey: nodePubkey,
-            isSigner: !0,
-            isWritable: !1
-          }],
-          programId: this.programId,
-          data
-        };
-        return new TransactionInstruction(instructionData);
-      }
-      /**
-       * Generate a transaction that creates a new Vote account.
-       */
-      static createAccount(params) {
-        let transaction = new Transaction();
-        return transaction.add(SystemProgram.createAccount({
-          fromPubkey: params.fromPubkey,
-          newAccountPubkey: params.votePubkey,
-          lamports: params.lamports,
-          space: this.space,
-          programId: this.programId
-        })), transaction.add(this.initializeAccount({
-          votePubkey: params.votePubkey,
-          nodePubkey: params.voteInit.nodePubkey,
-          voteInit: params.voteInit
-        }));
-      }
-      /**
-       * Generate a transaction that authorizes a new Voter or Withdrawer on the Vote account.
-       */
-      static authorize(params) {
-        let {
-          votePubkey,
-          authorizedPubkey,
-          newAuthorizedPubkey,
-          voteAuthorizationType
-        } = params, type2 = VOTE_INSTRUCTION_LAYOUTS.Authorize, data = encodeData(type2, {
-          newAuthorized: toBuffer(newAuthorizedPubkey.toBuffer()),
-          voteAuthorizationType: voteAuthorizationType.index
-        }), keys = [{
-          pubkey: votePubkey,
-          isSigner: !1,
-          isWritable: !0
-        }, {
-          pubkey: SYSVAR_CLOCK_PUBKEY,
-          isSigner: !1,
-          isWritable: !1
-        }, {
-          pubkey: authorizedPubkey,
-          isSigner: !0,
-          isWritable: !1
-        }];
-        return new Transaction().add({
-          keys,
-          programId: this.programId,
-          data
-        });
-      }
-      /**
-       * Generate a transaction that authorizes a new Voter or Withdrawer on the Vote account
-       * where the current Voter or Withdrawer authority is a derived key.
-       */
-      static authorizeWithSeed(params) {
-        let {
-          currentAuthorityDerivedKeyBasePubkey,
-          currentAuthorityDerivedKeyOwnerPubkey,
-          currentAuthorityDerivedKeySeed,
-          newAuthorizedPubkey,
-          voteAuthorizationType,
-          votePubkey
-        } = params, type2 = VOTE_INSTRUCTION_LAYOUTS.AuthorizeWithSeed, data = encodeData(type2, {
-          voteAuthorizeWithSeedArgs: {
-            currentAuthorityDerivedKeyOwnerPubkey: toBuffer(currentAuthorityDerivedKeyOwnerPubkey.toBuffer()),
-            currentAuthorityDerivedKeySeed,
-            newAuthorized: toBuffer(newAuthorizedPubkey.toBuffer()),
-            voteAuthorizationType: voteAuthorizationType.index
-          }
-        }), keys = [{
-          pubkey: votePubkey,
-          isSigner: !1,
-          isWritable: !0
-        }, {
-          pubkey: SYSVAR_CLOCK_PUBKEY,
-          isSigner: !1,
-          isWritable: !1
-        }, {
-          pubkey: currentAuthorityDerivedKeyBasePubkey,
-          isSigner: !0,
-          isWritable: !1
-        }];
-        return new Transaction().add({
-          keys,
-          programId: this.programId,
-          data
-        });
-      }
-      /**
-       * Generate a transaction to withdraw from a Vote account.
-       */
-      static withdraw(params) {
-        let {
-          votePubkey,
-          authorizedWithdrawerPubkey,
-          lamports,
-          toPubkey
-        } = params, type2 = VOTE_INSTRUCTION_LAYOUTS.Withdraw, data = encodeData(type2, {
-          lamports
-        }), keys = [{
-          pubkey: votePubkey,
-          isSigner: !1,
-          isWritable: !0
-        }, {
-          pubkey: toPubkey,
-          isSigner: !1,
-          isWritable: !0
-        }, {
-          pubkey: authorizedWithdrawerPubkey,
-          isSigner: !0,
-          isWritable: !1
-        }];
-        return new Transaction().add({
-          keys,
-          programId: this.programId,
-          data
-        });
-      }
-      /**
-       * Generate a transaction to withdraw safely from a Vote account.
-       *
-       * This function was created as a safeguard for vote accounts running validators, `safeWithdraw`
-       * checks that the withdraw amount will not exceed the specified balance while leaving enough left
-       * to cover rent. If you wish to close the vote account by withdrawing the full amount, call the
-       * `withdraw` method directly.
-       */
-      static safeWithdraw(params, currentVoteAccountBalance, rentExemptMinimum) {
-        if (params.lamports > currentVoteAccountBalance - rentExemptMinimum)
-          throw new Error("Withdraw will leave vote account with insufficient funds.");
-        return VoteProgram.withdraw(params);
-      }
-      /**
-       * Generate a transaction to update the validator identity (node pubkey) of a Vote account.
-       */
-      static updateValidatorIdentity(params) {
-        let {
-          votePubkey,
-          authorizedWithdrawerPubkey,
-          nodePubkey
-        } = params, type2 = VOTE_INSTRUCTION_LAYOUTS.UpdateValidatorIdentity, data = encodeData(type2), keys = [{
-          pubkey: votePubkey,
-          isSigner: !1,
-          isWritable: !0
-        }, {
-          pubkey: nodePubkey,
-          isSigner: !0,
-          isWritable: !1
-        }, {
-          pubkey: authorizedWithdrawerPubkey,
-          isSigner: !0,
-          isWritable: !1
-        }];
-        return new Transaction().add({
-          keys,
-          programId: this.programId,
-          data
-        });
-      }
-    };
-    VoteProgram.programId = new PublicKey("Vote111111111111111111111111111111111111111");
-    VoteProgram.space = 3762;
-    VALIDATOR_INFO_KEY = new PublicKey("Va1idator1nfo111111111111111111111111111111"), InfoString = type({
-      name: string(),
-      website: optional(string()),
-      details: optional(string()),
-      iconUrl: optional(string()),
-      keybaseUsername: optional(string())
-    }), ValidatorInfo = class {
-      /**
-       * Construct a valid ValidatorInfo
-       *
-       * @param key validator public key
-       * @param info validator information
-       */
-      constructor(key, info) {
-        this.key = void 0, this.info = void 0, this.key = key, this.info = info;
-      }
-      /**
-       * Deserialize ValidatorInfo from the config account data. Exactly two config
-       * keys are required in the data.
-       *
-       * @param buffer config account data
-       * @return null if info was not found
-       */
-      static fromConfigData(buffer) {
-        let byteArray = [...buffer];
-        if (decodeLength(byteArray) !== 2)
-          return null;
-        let configKeys = [];
-        for (let i = 0; i < 2; i++) {
-          let publicKey5 = new PublicKey(guardedSplice(byteArray, 0, PUBLIC_KEY_LENGTH)), isSigner = guardedShift(byteArray) === 1;
-          configKeys.push({
-            publicKey: publicKey5,
-            isSigner
-          });
-        }
-        if (configKeys[0].publicKey.equals(VALIDATOR_INFO_KEY) && configKeys[1].isSigner) {
-          let rawInfo = rustString().decode(Buffer2.from(byteArray)), info = JSON.parse(rawInfo);
-          return assert$1(info, InfoString), new ValidatorInfo(configKeys[1].publicKey, info);
-        }
-        return null;
-      }
-    }, VOTE_PROGRAM_ID = new PublicKey("Vote111111111111111111111111111111111111111"), VoteAccountLayout = BufferLayout.struct([
-      publicKey("nodePubkey"),
-      publicKey("authorizedWithdrawer"),
-      BufferLayout.u8("commission"),
-      BufferLayout.nu64(),
-      // votes.length
-      BufferLayout.seq(BufferLayout.struct([BufferLayout.nu64("slot"), BufferLayout.u32("confirmationCount")]), BufferLayout.offset(BufferLayout.u32(), -8), "votes"),
-      BufferLayout.u8("rootSlotValid"),
-      BufferLayout.nu64("rootSlot"),
-      BufferLayout.nu64(),
-      // authorizedVoters.length
-      BufferLayout.seq(BufferLayout.struct([BufferLayout.nu64("epoch"), publicKey("authorizedVoter")]), BufferLayout.offset(BufferLayout.u32(), -8), "authorizedVoters"),
-      BufferLayout.struct([BufferLayout.seq(BufferLayout.struct([publicKey("authorizedPubkey"), BufferLayout.nu64("epochOfLastAuthorizedSwitch"), BufferLayout.nu64("targetEpoch")]), 32, "buf"), BufferLayout.nu64("idx"), BufferLayout.u8("isEmpty")], "priorVoters"),
-      BufferLayout.nu64(),
-      // epochCredits.length
-      BufferLayout.seq(BufferLayout.struct([BufferLayout.nu64("epoch"), BufferLayout.nu64("credits"), BufferLayout.nu64("prevCredits")]), BufferLayout.offset(BufferLayout.u32(), -8), "epochCredits"),
-      BufferLayout.struct([BufferLayout.nu64("slot"), BufferLayout.nu64("timestamp")], "lastTimestamp")
-    ]), VoteAccount = class {
-      /**
-       * @internal
-       */
-      constructor(args) {
-        this.nodePubkey = void 0, this.authorizedWithdrawer = void 0, this.commission = void 0, this.rootSlot = void 0, this.votes = void 0, this.authorizedVoters = void 0, this.priorVoters = void 0, this.epochCredits = void 0, this.lastTimestamp = void 0, this.nodePubkey = args.nodePubkey, this.authorizedWithdrawer = args.authorizedWithdrawer, this.commission = args.commission, this.rootSlot = args.rootSlot, this.votes = args.votes, this.authorizedVoters = args.authorizedVoters, this.priorVoters = args.priorVoters, this.epochCredits = args.epochCredits, this.lastTimestamp = args.lastTimestamp;
-      }
-      /**
-       * Deserialize VoteAccount from the account data.
-       *
-       * @param buffer account data
-       * @return VoteAccount
-       */
-      static fromAccountData(buffer) {
-        let va = VoteAccountLayout.decode(toBuffer(buffer), 4), rootSlot = va.rootSlot;
-        return va.rootSlotValid || (rootSlot = null), new VoteAccount({
-          nodePubkey: new PublicKey(va.nodePubkey),
-          authorizedWithdrawer: new PublicKey(va.authorizedWithdrawer),
-          commission: va.commission,
-          votes: va.votes,
-          rootSlot,
-          authorizedVoters: va.authorizedVoters.map(parseAuthorizedVoter),
-          priorVoters: getPriorVoters(va.priorVoters),
-          epochCredits: va.epochCredits,
-          lastTimestamp: va.lastTimestamp
-        });
-      }
-    };
-    endpoint = {
-      http: {
-        devnet: "http://api.devnet.solana.com",
-        testnet: "http://api.testnet.solana.com",
-        "mainnet-beta": "http://api.mainnet-beta.solana.com/"
-      },
-      https: {
-        devnet: "https://api.devnet.solana.com",
-        testnet: "https://api.testnet.solana.com",
-        "mainnet-beta": "https://api.mainnet-beta.solana.com/"
-      }
-    };
-    LAMPORTS_PER_SOL = 1e9;
-  }
-});
-
 // bounty-bucks-info.json
 var bounty_bucks_info_default, init_bounty_bucks_info = __esm({
   "bounty-bucks-info.json"() {
@@ -14149,10 +1968,11 @@ __export(virtual_wallet_server_exports, {
   refundBounty: () => refundBounty,
   updateWalletBalance: () => updateWalletBalance
 });
+import { eq as eq4, and as and3, desc as desc4, sql as sql5 } from "drizzle-orm";
 async function getVirtualWallet(db, userId) {
   try {
     return await db.query.virtualWallets.findFirst({
-      where: eq(virtualWallets.userId, userId)
+      where: eq4(virtualWallets.userId, userId)
     }) || null;
   } catch (error) {
     return console.error("Error getting virtual wallet:", error), null;
@@ -14211,7 +2031,7 @@ async function updateWalletBalance(db, userId, amount, transactionType, descript
       totalWithdrawn: transactionType === "WITHDRAW" ? wallet.totalWithdrawn + amount : wallet.totalWithdrawn,
       totalEarned: ["BOUNTY_CLAIMED", "BOUNTY_EARNED", "COMPENSATION"].includes(transactionType) ? wallet.totalEarned + amount : wallet.totalEarned,
       totalSpent: ["BOUNTY_CREATED", "WITHDRAW"].includes(transactionType) ? wallet.totalSpent + amount : wallet.totalSpent
-    }).where(eq(virtualWallets.userId, userId)).run(), await db.insert(walletTransactions).values({
+    }).where(eq4(virtualWallets.userId, userId)).run(), await db.insert(walletTransactions).values({
       id: crypto.randomUUID(),
       userId,
       walletId: wallet.id,
@@ -14227,13 +2047,13 @@ async function updateWalletBalance(db, userId, amount, transactionType, descript
     return console.error("Error updating wallet balance:", error), !1;
   }
 }
-async function getWalletTransactions(db, userId, limit = 50, offset2 = 0) {
+async function getWalletTransactions(db, userId, limit = 50, offset = 0) {
   try {
     return await db.query.walletTransactions.findMany({
-      where: eq(walletTransactions.userId, userId),
-      orderBy: [desc(walletTransactions.createdAt)],
+      where: eq4(walletTransactions.userId, userId),
+      orderBy: [desc4(walletTransactions.createdAt)],
       limit,
-      offset: offset2
+      offset
     });
   } catch (error) {
     return console.error("Error getting wallet transactions:", error), [];
@@ -14242,7 +2062,7 @@ async function getWalletTransactions(db, userId, limit = 50, offset2 = 0) {
 async function getTransactionById(db, transactionId) {
   try {
     return await db.query.walletTransactions.findFirst({
-      where: eq(walletTransactions.id, transactionId)
+      where: eq4(walletTransactions.id, transactionId)
     }) || null;
   } catch (error) {
     return console.error("Error getting transaction by ID:", error), null;
@@ -14260,7 +2080,7 @@ async function cancelTransaction(db, transactionId) {
       reverseType,
       `Cancelled: ${transaction.description}`
     );
-    return success && await db.update(walletTransactions).set({ status: "CANCELLED" }).where(eq(walletTransactions.id, transactionId)).run(), success;
+    return success && await db.update(walletTransactions).set({ status: "CANCELLED" }).where(eq4(walletTransactions.id, transactionId)).run(), success;
   } catch (error) {
     return console.error("Error cancelling transaction:", error), !1;
   }
@@ -14270,19 +2090,19 @@ async function getWalletDetails(db, userId) {
   return { wallet, transactions };
 }
 async function getAllTransactions(db, userId, page = 1, limit = 50) {
-  let wallet = await getVirtualWallet(db, userId), offset2 = (page - 1) * limit, [transactions, totalCountResult] = await Promise.all([
-    getWalletTransactions(db, userId, limit, offset2),
-    db.select({ count: sql`count(*)` }).from(walletTransactions).where(eq(walletTransactions.userId, userId)).get()
+  let wallet = await getVirtualWallet(db, userId), offset = (page - 1) * limit, [transactions, totalCountResult] = await Promise.all([
+    getWalletTransactions(db, userId, limit, offset),
+    db.select({ count: sql5`count(*)` }).from(walletTransactions).where(eq4(walletTransactions.userId, userId)).get()
   ]), totalCount = totalCountResult?.count || 0;
   return { transactions, totalCount, wallet };
 }
 async function getPendingTransactions(db, userId) {
   return await db.query.walletTransactions.findMany({
-    where: and(
-      eq(walletTransactions.userId, userId),
-      eq(walletTransactions.status, "PENDING")
+    where: and3(
+      eq4(walletTransactions.userId, userId),
+      eq4(walletTransactions.status, "PENDING")
     ),
-    orderBy: [desc(walletTransactions.createdAt)]
+    orderBy: [desc4(walletTransactions.createdAt)]
   });
 }
 async function createDepositRequest(db, userId, amount) {
@@ -14311,14 +2131,14 @@ async function confirmDeposit(db, transactionId, solanaSignature) {
   await db.update(walletTransactions).set({
     status: "COMPLETED",
     solanaSignature
-  }).where(eq(walletTransactions.id, transactionId)).run();
+  }).where(eq4(walletTransactions.id, transactionId)).run();
   let wallet = await getVirtualWallet(db, transaction.userId);
   if (!wallet)
     throw new Error("Wallet not found");
   return await db.update(virtualWallets).set({
     balance: wallet.balance + transaction.amount,
     totalDeposited: wallet.totalDeposited + transaction.amount
-  }).where(eq(virtualWallets.id, wallet.id)).run(), await getTransactionById(db, transactionId);
+  }).where(eq4(virtualWallets.id, wallet.id)).run(), await getTransactionById(db, transactionId);
 }
 async function createWithdrawalRequest(db, userId, amount, metadata) {
   let wallet = await getVirtualWallet(db, userId);
@@ -14347,7 +2167,7 @@ async function confirmWithdrawal(db, transactionId, solanaSignature) {
   return await db.update(walletTransactions).set({
     status: "COMPLETED",
     solanaSignature
-  }).where(eq(walletTransactions.id, transactionId)).run(), await getTransactionById(db, transactionId);
+  }).where(eq4(walletTransactions.id, transactionId)).run(), await getTransactionById(db, transactionId);
 }
 async function createBounty(db, userId, amount, bountyId) {
   let wallet = await getVirtualWallet(db, userId);
@@ -14415,7 +2235,6 @@ var TOKEN_SYMBOL, init_virtual_wallet_server = __esm({
   "app/utils/virtual-wallet.server.ts"() {
     "use strict";
     init_bounty_bucks_info();
-    init_drizzle_orm();
     init_schema();
     TOKEN_SYMBOL = bounty_bucks_info_default.symbol;
   }
@@ -14544,8 +2363,8 @@ var import_bcryptjs = __toESM(require_bcryptjs(), 1);
 
 // app/utils/reputation.server.ts
 init_schema();
-init_drizzle_orm();
-init_drizzle_orm();
+import { eq, desc } from "drizzle-orm";
+import { sql as sql2 } from "drizzle-orm";
 var REPUTATION_POINTS = {
   POST_CREATED: 10,
   POST_UPVOTED: 2,
@@ -14564,7 +2383,7 @@ var REPUTATION_POINTS = {
 async function addReputationPoints(db, userId, points, action26, referenceId) {
   try {
     await db.update(users).set({
-      reputationPoints: sql`${users.reputationPoints} + ${points}`
+      reputationPoints: sql2`${users.reputationPoints} + ${points}`
     }).where(eq(users.id, userId)).run(), action26 && referenceId && await db.insert(reputationHistory).values({
       id: crypto.randomUUID(),
       userId,
@@ -14577,146 +2396,9 @@ async function addReputationPoints(db, userId, points, action26, referenceId) {
 }
 
 // app/utils/solana-address.server.ts
-init_index_esm();
-
-// node_modules/@solana/spl-token/lib/esm/constants.js
-init_index_esm();
-var TOKEN_PROGRAM_ID = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"), TOKEN_2022_PROGRAM_ID = new PublicKey("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"), ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"), NATIVE_MINT = new PublicKey("So11111111111111111111111111111111111111112"), NATIVE_MINT_2022 = new PublicKey("9pan9bMn5HatX4EJdBwg9VgCa7Uz5HL8N1m5D3NdXejP");
-
-// node_modules/@solana/spl-token/lib/esm/errors.js
-var TokenError = class extends Error {
-  constructor(message) {
-    super(message);
-  }
-}, TokenAccountNotFoundError = class extends TokenError {
-  constructor() {
-    super(...arguments), this.name = "TokenAccountNotFoundError";
-  }
-};
-var TokenInvalidAccountOwnerError = class extends TokenError {
-  constructor() {
-    super(...arguments), this.name = "TokenInvalidAccountOwnerError";
-  }
-}, TokenInvalidAccountSizeError = class extends TokenError {
-  constructor() {
-    super(...arguments), this.name = "TokenInvalidAccountSizeError";
-  }
-}, TokenInvalidMintError = class extends TokenError {
-  constructor() {
-    super(...arguments), this.name = "TokenInvalidMintError";
-  }
-};
-var TokenOwnerOffCurveError = class extends TokenError {
-  constructor() {
-    super(...arguments), this.name = "TokenOwnerOffCurveError";
-  }
-};
-
-// node_modules/@solana/spl-token/lib/esm/state/mint.js
-init_index_esm();
-import { struct as struct4, u32 as u323, u8 as u84 } from "@solana/buffer-layout";
-import { bool as bool2, publicKey as publicKey4, u64 as u643 } from "@solana/buffer-layout-utils";
-
-// node_modules/@solana/spl-token/lib/esm/extensions/accountType.js
-var AccountType;
-(function(AccountType2) {
-  AccountType2[AccountType2.Uninitialized = 0] = "Uninitialized", AccountType2[AccountType2.Mint = 1] = "Mint", AccountType2[AccountType2.Account = 2] = "Account";
-})(AccountType || (AccountType = {}));
-var ACCOUNT_TYPE_SIZE = 1;
-
-// node_modules/@solana/spl-token/lib/esm/state/account.js
-import { struct as struct3, u32 as u322, u8 as u83 } from "@solana/buffer-layout";
-import { publicKey as publicKey3, u64 as u642 } from "@solana/buffer-layout-utils";
-
-// node_modules/@solana/spl-token/lib/esm/state/multisig.js
-import { struct as struct2, u8 as u82 } from "@solana/buffer-layout";
-import { bool, publicKey as publicKey2 } from "@solana/buffer-layout-utils";
-var MultisigLayout = struct2([
-  u82("m"),
-  u82("n"),
-  bool("isInitialized"),
-  publicKey2("signer1"),
-  publicKey2("signer2"),
-  publicKey2("signer3"),
-  publicKey2("signer4"),
-  publicKey2("signer5"),
-  publicKey2("signer6"),
-  publicKey2("signer7"),
-  publicKey2("signer8"),
-  publicKey2("signer9"),
-  publicKey2("signer10"),
-  publicKey2("signer11")
-]), MULTISIG_SIZE = MultisigLayout.span;
-
-// node_modules/@solana/spl-token/lib/esm/state/account.js
-var AccountState;
-(function(AccountState2) {
-  AccountState2[AccountState2.Uninitialized = 0] = "Uninitialized", AccountState2[AccountState2.Initialized = 1] = "Initialized", AccountState2[AccountState2.Frozen = 2] = "Frozen";
-})(AccountState || (AccountState = {}));
-var AccountLayout = struct3([
-  publicKey3("mint"),
-  publicKey3("owner"),
-  u642("amount"),
-  u322("delegateOption"),
-  publicKey3("delegate"),
-  u83("state"),
-  u322("isNativeOption"),
-  u642("isNative"),
-  u642("delegatedAmount"),
-  u322("closeAuthorityOption"),
-  publicKey3("closeAuthority")
-]), ACCOUNT_SIZE = AccountLayout.span;
-
-// node_modules/@solana/spl-token/lib/esm/state/mint.js
-var MintLayout = struct4([
-  u323("mintAuthorityOption"),
-  publicKey4("mintAuthority"),
-  u643("supply"),
-  u84("decimals"),
-  bool2("isInitialized"),
-  u323("freezeAuthorityOption"),
-  publicKey4("freezeAuthority")
-]), MINT_SIZE = MintLayout.span;
-async function getMint(connection, address, commitment, programId = TOKEN_PROGRAM_ID) {
-  let info = await connection.getAccountInfo(address, commitment);
-  return unpackMint(address, info, programId);
-}
-function unpackMint(address, info, programId = TOKEN_PROGRAM_ID) {
-  if (!info)
-    throw new TokenAccountNotFoundError();
-  if (!info.owner.equals(programId))
-    throw new TokenInvalidAccountOwnerError();
-  if (info.data.length < MINT_SIZE)
-    throw new TokenInvalidAccountSizeError();
-  let rawMint = MintLayout.decode(info.data.slice(0, MINT_SIZE)), tlvData = Buffer.alloc(0);
-  if (info.data.length > MINT_SIZE) {
-    if (info.data.length <= ACCOUNT_SIZE)
-      throw new TokenInvalidAccountSizeError();
-    if (info.data.length === MULTISIG_SIZE)
-      throw new TokenInvalidAccountSizeError();
-    if (info.data[ACCOUNT_SIZE] != AccountType.Mint)
-      throw new TokenInvalidMintError();
-    tlvData = info.data.slice(ACCOUNT_SIZE + ACCOUNT_TYPE_SIZE);
-  }
-  return {
-    address,
-    mintAuthority: rawMint.mintAuthorityOption ? rawMint.mintAuthority : null,
-    supply: rawMint.supply,
-    decimals: rawMint.decimals,
-    isInitialized: rawMint.isInitialized,
-    freezeAuthority: rawMint.freezeAuthorityOption ? rawMint.freezeAuthority : null,
-    tlvData
-  };
-}
-async function getAssociatedTokenAddress(mint, owner, allowOwnerOffCurve = !1, programId = TOKEN_PROGRAM_ID, associatedTokenProgramId = ASSOCIATED_TOKEN_PROGRAM_ID) {
-  if (!allowOwnerOffCurve && !PublicKey.isOnCurve(owner.toBuffer()))
-    throw new TokenOwnerOffCurveError();
-  let [address] = await PublicKey.findProgramAddress([owner.toBuffer(), programId.toBuffer(), mint.toBuffer()], associatedTokenProgramId);
-  return address;
-}
-
-// app/utils/solana-address.server.ts
 init_bounty_bucks_info();
+import { Keypair, PublicKey } from "@solana/web3.js";
+import { getAssociatedTokenAddress } from "@solana/spl-token";
 var TOKEN_MINT = bounty_bucks_info_default.mint, SolanaAddressService = class {
   /**
    * Generate a new Solana keypair for a user
@@ -14762,7 +2444,7 @@ var TOKEN_MINT = bounty_bucks_info_default.mint, SolanaAddressService = class {
 
 // app/utils/user.server.ts
 init_schema();
-init_drizzle_orm();
+import { eq as eq2, desc as desc2 } from "drizzle-orm";
 async function createUser(db, { email, password, username }) {
   let hashedPassword = await import_bcryptjs.default.hash(password, 10), { solanaAddress, tokenAccountAddress } = await SolanaAddressService.generateUserAddresses(), userId = crypto.randomUUID(), [user] = await db.insert(users).values({
     id: userId,
@@ -14788,13 +2470,13 @@ async function createUser(db, { email, password, username }) {
   }).run(), user;
 }
 async function getUserById(db, userId) {
-  return db.query.users.findFirst({ where: eq(users.id, userId) });
+  return db.query.users.findFirst({ where: eq2(users.id, userId) });
 }
 async function getUserByEmail(db, email) {
-  return db.query.users.findFirst({ where: eq(users.email, email) });
+  return db.query.users.findFirst({ where: eq2(users.email, email) });
 }
 async function getUserByUsername(db, username) {
-  return db.query.users.findFirst({ where: eq(users.username, username) });
+  return db.query.users.findFirst({ where: eq2(users.username, username) });
 }
 
 // app/utils/auth.server.ts
@@ -14888,14 +2570,14 @@ function ClientWalletProvider({ children }) {
       import("@solana/wallet-adapter-react-ui"),
       import("@solana/wallet-adapter-phantom"),
       import("@solana/wallet-adapter-solflare"),
-      Promise.resolve().then(() => (init_index_esm(), index_esm_exports))
+      import("@solana/web3.js")
     ]).then(([
       { WalletAdapterNetwork },
       { ConnectionProvider: ConnectionProvider2, WalletProvider: SolanaWalletProvider2 },
       { WalletModalProvider: WalletModalProvider2 },
       { PhantomWalletAdapter },
       { SolflareWalletAdapter },
-      { clusterApiUrl: clusterApiUrl2 }
+      { clusterApiUrl }
     ]) => {
       let wallets2 = [
         new PhantomWalletAdapter(),
@@ -14906,15 +2588,15 @@ function ClientWalletProvider({ children }) {
         SolanaWalletProvider: SolanaWalletProvider2,
         WalletModalProvider: WalletModalProvider2,
         wallets: wallets2,
-        endpoint: clusterApiUrl2(WalletAdapterNetwork.Devnet)
+        endpoint: clusterApiUrl(WalletAdapterNetwork.Devnet)
       }), setIsLoading(!1);
     }).catch((error) => {
       console.error("Failed to load wallet components:", error), setIsLoading(!1);
     });
   }, []), isLoading || !walletComponents)
     return /* @__PURE__ */ jsx2(Fragment, { children });
-  let { ConnectionProvider, SolanaWalletProvider, WalletModalProvider, wallets, endpoint: endpoint2 } = walletComponents;
-  return /* @__PURE__ */ jsx2(ConnectionProvider, { endpoint: endpoint2, children: /* @__PURE__ */ jsx2(SolanaWalletProvider, { wallets, autoConnect: !0, children: /* @__PURE__ */ jsx2(WalletModalProvider, { children }) }) });
+  let { ConnectionProvider, SolanaWalletProvider, WalletModalProvider, wallets, endpoint } = walletComponents;
+  return /* @__PURE__ */ jsx2(ConnectionProvider, { endpoint, children: /* @__PURE__ */ jsx2(SolanaWalletProvider, { wallets, autoConnect: !0, children: /* @__PURE__ */ jsx2(WalletModalProvider, { children }) }) });
 }
 function WalletProvider({ children }) {
   let [mounted, setMounted] = useState(!1);
@@ -14923,21 +2605,3815 @@ function WalletProvider({ children }) {
   }, []), typeof window > "u" ? /* @__PURE__ */ jsx2(Fragment, { children }) : mounted ? /* @__PURE__ */ jsx2(ClientWalletProvider, { children }) : /* @__PURE__ */ jsx2(Fragment, { children });
 }
 
-// node_modules/drizzle-orm/d1/driver.js
-init_entity();
-init_logger();
-init_relations();
-init_db();
-init_dialect();
+// node_modules/drizzle-orm/entity.js
+var entityKind = Symbol.for("drizzle:entityKind"), hasOwnEntityKind = Symbol.for("drizzle:hasOwnEntityKind");
+function is(value, type) {
+  if (!value || typeof value != "object")
+    return !1;
+  if (value instanceof type)
+    return !0;
+  if (!Object.prototype.hasOwnProperty.call(type, entityKind))
+    throw new Error(
+      `Class "${type.name ?? "<unknown>"}" doesn't look like a Drizzle entity. If this is incorrect and the class is provided by Drizzle, please report this as a bug.`
+    );
+  let cls = Object.getPrototypeOf(value).constructor;
+  if (cls)
+    for (; cls; ) {
+      if (entityKind in cls && cls[entityKind] === type[entityKind])
+        return !0;
+      cls = Object.getPrototypeOf(cls);
+    }
+  return !1;
+}
+
+// node_modules/drizzle-orm/logger.js
+var _a, ConsoleLogWriter = class {
+  write(message) {
+    console.log(message);
+  }
+};
+_a = entityKind, __publicField(ConsoleLogWriter, _a, "ConsoleLogWriter");
+var _a2, DefaultLogger = class {
+  writer;
+  constructor(config) {
+    this.writer = config?.writer ?? new ConsoleLogWriter();
+  }
+  logQuery(query, params) {
+    let stringifiedParams = params.map((p) => {
+      try {
+        return JSON.stringify(p);
+      } catch {
+        return String(p);
+      }
+    }), paramsStr = stringifiedParams.length ? ` -- params: [${stringifiedParams.join(", ")}]` : "";
+    this.writer.write(`Query: ${query}${paramsStr}`);
+  }
+};
+_a2 = entityKind, __publicField(DefaultLogger, _a2, "DefaultLogger");
+var _a3, NoopLogger = class {
+  logQuery() {
+  }
+};
+_a3 = entityKind, __publicField(NoopLogger, _a3, "NoopLogger");
+
+// node_modules/drizzle-orm/table.utils.js
+var TableName = Symbol.for("drizzle:Name");
+
+// node_modules/drizzle-orm/table.js
+var Schema = Symbol.for("drizzle:Schema"), Columns = Symbol.for("drizzle:Columns"), ExtraConfigColumns = Symbol.for("drizzle:ExtraConfigColumns"), OriginalName = Symbol.for("drizzle:OriginalName"), BaseName = Symbol.for("drizzle:BaseName"), IsAlias = Symbol.for("drizzle:IsAlias"), ExtraConfigBuilder = Symbol.for("drizzle:ExtraConfigBuilder"), IsDrizzleTable = Symbol.for("drizzle:IsDrizzleTable"), _a4, Table = class {
+  /**
+   * @internal
+   * Can be changed if the table is aliased.
+   */
+  [(_a4 = entityKind, TableName)];
+  /**
+   * @internal
+   * Used to store the original name of the table, before any aliasing.
+   */
+  [OriginalName];
+  /** @internal */
+  [Schema];
+  /** @internal */
+  [Columns];
+  /** @internal */
+  [ExtraConfigColumns];
+  /**
+   *  @internal
+   * Used to store the table name before the transformation via the `tableCreator` functions.
+   */
+  [BaseName];
+  /** @internal */
+  [IsAlias] = !1;
+  /** @internal */
+  [IsDrizzleTable] = !0;
+  /** @internal */
+  [ExtraConfigBuilder] = void 0;
+  constructor(name, schema3, baseName) {
+    this[TableName] = this[OriginalName] = name, this[Schema] = schema3, this[BaseName] = baseName;
+  }
+};
+__publicField(Table, _a4, "Table"), /** @internal */
+__publicField(Table, "Symbol", {
+  Name: TableName,
+  Schema,
+  OriginalName,
+  Columns,
+  ExtraConfigColumns,
+  BaseName,
+  IsAlias,
+  ExtraConfigBuilder
+});
+function getTableName(table) {
+  return table[TableName];
+}
+function getTableUniqueName(table) {
+  return `${table[Schema] ?? "public"}.${table[TableName]}`;
+}
+
+// node_modules/drizzle-orm/column.js
+var _a5, Column = class {
+  constructor(table, config) {
+    this.table = table, this.config = config, this.name = config.name, this.keyAsName = config.keyAsName, this.notNull = config.notNull, this.default = config.default, this.defaultFn = config.defaultFn, this.onUpdateFn = config.onUpdateFn, this.hasDefault = config.hasDefault, this.primary = config.primaryKey, this.isUnique = config.isUnique, this.uniqueName = config.uniqueName, this.uniqueType = config.uniqueType, this.dataType = config.dataType, this.columnType = config.columnType, this.generated = config.generated, this.generatedIdentity = config.generatedIdentity;
+  }
+  name;
+  keyAsName;
+  primary;
+  notNull;
+  default;
+  defaultFn;
+  onUpdateFn;
+  hasDefault;
+  isUnique;
+  uniqueName;
+  uniqueType;
+  dataType;
+  columnType;
+  enumValues = void 0;
+  generated = void 0;
+  generatedIdentity = void 0;
+  config;
+  mapFromDriverValue(value) {
+    return value;
+  }
+  mapToDriverValue(value) {
+    return value;
+  }
+  // ** @internal */
+  shouldDisableInsert() {
+    return this.config.generated !== void 0 && this.config.generated.type !== "byDefault";
+  }
+};
+_a5 = entityKind, __publicField(Column, _a5, "Column");
+
+// node_modules/drizzle-orm/column-builder.js
+var _a6, ColumnBuilder = class {
+  config;
+  constructor(name, dataType, columnType) {
+    this.config = {
+      name,
+      keyAsName: name === "",
+      notNull: !1,
+      default: void 0,
+      hasDefault: !1,
+      primaryKey: !1,
+      isUnique: !1,
+      uniqueName: void 0,
+      uniqueType: void 0,
+      dataType,
+      columnType,
+      generated: void 0
+    };
+  }
+  /**
+   * Changes the data type of the column. Commonly used with `json` columns. Also, useful for branded types.
+   *
+   * @example
+   * ```ts
+   * const users = pgTable('users', {
+   * 	id: integer('id').$type<UserId>().primaryKey(),
+   * 	details: json('details').$type<UserDetails>().notNull(),
+   * });
+   * ```
+   */
+  $type() {
+    return this;
+  }
+  /**
+   * Adds a `not null` clause to the column definition.
+   *
+   * Affects the `select` model of the table - columns *without* `not null` will be nullable on select.
+   */
+  notNull() {
+    return this.config.notNull = !0, this;
+  }
+  /**
+   * Adds a `default <value>` clause to the column definition.
+   *
+   * Affects the `insert` model of the table - columns *with* `default` are optional on insert.
+   *
+   * If you need to set a dynamic default value, use {@link $defaultFn} instead.
+   */
+  default(value) {
+    return this.config.default = value, this.config.hasDefault = !0, this;
+  }
+  /**
+   * Adds a dynamic default value to the column.
+   * The function will be called when the row is inserted, and the returned value will be used as the column value.
+   *
+   * **Note:** This value does not affect the `drizzle-kit` behavior, it is only used at runtime in `drizzle-orm`.
+   */
+  $defaultFn(fn) {
+    return this.config.defaultFn = fn, this.config.hasDefault = !0, this;
+  }
+  /**
+   * Alias for {@link $defaultFn}.
+   */
+  $default = this.$defaultFn;
+  /**
+   * Adds a dynamic update value to the column.
+   * The function will be called when the row is updated, and the returned value will be used as the column value if none is provided.
+   * If no `default` (or `$defaultFn`) value is provided, the function will be called when the row is inserted as well, and the returned value will be used as the column value.
+   *
+   * **Note:** This value does not affect the `drizzle-kit` behavior, it is only used at runtime in `drizzle-orm`.
+   */
+  $onUpdateFn(fn) {
+    return this.config.onUpdateFn = fn, this.config.hasDefault = !0, this;
+  }
+  /**
+   * Alias for {@link $onUpdateFn}.
+   */
+  $onUpdate = this.$onUpdateFn;
+  /**
+   * Adds a `primary key` clause to the column definition. This implicitly makes the column `not null`.
+   *
+   * In SQLite, `integer primary key` implicitly makes the column auto-incrementing.
+   */
+  primaryKey() {
+    return this.config.primaryKey = !0, this.config.notNull = !0, this;
+  }
+  /** @internal Sets the name of the column to the key within the table definition if a name was not given. */
+  setName(name) {
+    this.config.name === "" && (this.config.name = name);
+  }
+};
+_a6 = entityKind, __publicField(ColumnBuilder, _a6, "ColumnBuilder");
+
+// node_modules/drizzle-orm/pg-core/foreign-keys.js
+var _a7, ForeignKeyBuilder = class {
+  /** @internal */
+  reference;
+  /** @internal */
+  _onUpdate = "no action";
+  /** @internal */
+  _onDelete = "no action";
+  constructor(config, actions) {
+    this.reference = () => {
+      let { name, columns, foreignColumns } = config();
+      return { name, columns, foreignTable: foreignColumns[0].table, foreignColumns };
+    }, actions && (this._onUpdate = actions.onUpdate, this._onDelete = actions.onDelete);
+  }
+  onUpdate(action26) {
+    return this._onUpdate = action26 === void 0 ? "no action" : action26, this;
+  }
+  onDelete(action26) {
+    return this._onDelete = action26 === void 0 ? "no action" : action26, this;
+  }
+  /** @internal */
+  build(table) {
+    return new ForeignKey(table, this);
+  }
+};
+_a7 = entityKind, __publicField(ForeignKeyBuilder, _a7, "PgForeignKeyBuilder");
+var _a8, ForeignKey = class {
+  constructor(table, builder) {
+    this.table = table, this.reference = builder.reference, this.onUpdate = builder._onUpdate, this.onDelete = builder._onDelete;
+  }
+  reference;
+  onUpdate;
+  onDelete;
+  getName() {
+    let { name, columns, foreignColumns } = this.reference(), columnNames = columns.map((column) => column.name), foreignColumnNames = foreignColumns.map((column) => column.name), chunks = [
+      this.table[TableName],
+      ...columnNames,
+      foreignColumns[0].table[TableName],
+      ...foreignColumnNames
+    ];
+    return name ?? `${chunks.join("_")}_fk`;
+  }
+};
+_a8 = entityKind, __publicField(ForeignKey, _a8, "PgForeignKey");
+
+// node_modules/drizzle-orm/tracing-utils.js
+function iife(fn, ...args) {
+  return fn(...args);
+}
+
+// node_modules/drizzle-orm/pg-core/unique-constraint.js
+function uniqueKeyName(table, columns) {
+  return `${table[TableName]}_${columns.join("_")}_unique`;
+}
+var _a9, UniqueConstraintBuilder = class {
+  constructor(columns, name) {
+    this.name = name, this.columns = columns;
+  }
+  /** @internal */
+  columns;
+  /** @internal */
+  nullsNotDistinctConfig = !1;
+  nullsNotDistinct() {
+    return this.nullsNotDistinctConfig = !0, this;
+  }
+  /** @internal */
+  build(table) {
+    return new UniqueConstraint(table, this.columns, this.nullsNotDistinctConfig, this.name);
+  }
+};
+_a9 = entityKind, __publicField(UniqueConstraintBuilder, _a9, "PgUniqueConstraintBuilder");
+var _a10, UniqueOnConstraintBuilder = class {
+  /** @internal */
+  name;
+  constructor(name) {
+    this.name = name;
+  }
+  on(...columns) {
+    return new UniqueConstraintBuilder(columns, this.name);
+  }
+};
+_a10 = entityKind, __publicField(UniqueOnConstraintBuilder, _a10, "PgUniqueOnConstraintBuilder");
+var _a11, UniqueConstraint = class {
+  constructor(table, columns, nullsNotDistinct, name) {
+    this.table = table, this.columns = columns, this.name = name ?? uniqueKeyName(this.table, this.columns.map((column) => column.name)), this.nullsNotDistinct = nullsNotDistinct;
+  }
+  columns;
+  name;
+  nullsNotDistinct = !1;
+  getName() {
+    return this.name;
+  }
+};
+_a11 = entityKind, __publicField(UniqueConstraint, _a11, "PgUniqueConstraint");
+
+// node_modules/drizzle-orm/pg-core/utils/array.js
+function parsePgArrayValue(arrayString, startFrom, inQuotes) {
+  for (let i = startFrom; i < arrayString.length; i++) {
+    let char = arrayString[i];
+    if (char === "\\") {
+      i++;
+      continue;
+    }
+    if (char === '"')
+      return [arrayString.slice(startFrom, i).replace(/\\/g, ""), i + 1];
+    if (!inQuotes && (char === "," || char === "}"))
+      return [arrayString.slice(startFrom, i).replace(/\\/g, ""), i];
+  }
+  return [arrayString.slice(startFrom).replace(/\\/g, ""), arrayString.length];
+}
+function parsePgNestedArray(arrayString, startFrom = 0) {
+  let result = [], i = startFrom, lastCharIsComma = !1;
+  for (; i < arrayString.length; ) {
+    let char = arrayString[i];
+    if (char === ",") {
+      (lastCharIsComma || i === startFrom) && result.push(""), lastCharIsComma = !0, i++;
+      continue;
+    }
+    if (lastCharIsComma = !1, char === "\\") {
+      i += 2;
+      continue;
+    }
+    if (char === '"') {
+      let [value2, startFrom2] = parsePgArrayValue(arrayString, i + 1, !0);
+      result.push(value2), i = startFrom2;
+      continue;
+    }
+    if (char === "}")
+      return [result, i + 1];
+    if (char === "{") {
+      let [value2, startFrom2] = parsePgNestedArray(arrayString, i + 1);
+      result.push(value2), i = startFrom2;
+      continue;
+    }
+    let [value, newStartFrom] = parsePgArrayValue(arrayString, i, !1);
+    result.push(value), i = newStartFrom;
+  }
+  return [result, i];
+}
+function parsePgArray(arrayString) {
+  let [result] = parsePgNestedArray(arrayString, 1);
+  return result;
+}
+function makePgArray(array) {
+  return `{${array.map((item) => Array.isArray(item) ? makePgArray(item) : typeof item == "string" ? `"${item.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"` : `${item}`).join(",")}}`;
+}
+
+// node_modules/drizzle-orm/pg-core/columns/common.js
+var _a12, PgColumnBuilder = class extends ColumnBuilder {
+  foreignKeyConfigs = [];
+  array(size) {
+    return new PgArrayBuilder(this.config.name, this, size);
+  }
+  references(ref, actions = {}) {
+    return this.foreignKeyConfigs.push({ ref, actions }), this;
+  }
+  unique(name, config) {
+    return this.config.isUnique = !0, this.config.uniqueName = name, this.config.uniqueType = config?.nulls, this;
+  }
+  generatedAlwaysAs(as) {
+    return this.config.generated = {
+      as,
+      type: "always",
+      mode: "stored"
+    }, this;
+  }
+  /** @internal */
+  buildForeignKeys(column, table) {
+    return this.foreignKeyConfigs.map(({ ref, actions }) => iife(
+      (ref2, actions2) => {
+        let builder = new ForeignKeyBuilder(() => {
+          let foreignColumn = ref2();
+          return { columns: [column], foreignColumns: [foreignColumn] };
+        });
+        return actions2.onUpdate && builder.onUpdate(actions2.onUpdate), actions2.onDelete && builder.onDelete(actions2.onDelete), builder.build(table);
+      },
+      ref,
+      actions
+    ));
+  }
+  /** @internal */
+  buildExtraConfigColumn(table) {
+    return new ExtraConfigColumn(table, this.config);
+  }
+};
+_a12 = entityKind, __publicField(PgColumnBuilder, _a12, "PgColumnBuilder");
+var _a13, PgColumn = class extends Column {
+  constructor(table, config) {
+    config.uniqueName || (config.uniqueName = uniqueKeyName(table, [config.name])), super(table, config), this.table = table;
+  }
+};
+_a13 = entityKind, __publicField(PgColumn, _a13, "PgColumn");
+var _a14, ExtraConfigColumn = class extends PgColumn {
+  getSQLType() {
+    return this.getSQLType();
+  }
+  indexConfig = {
+    order: this.config.order ?? "asc",
+    nulls: this.config.nulls ?? "last",
+    opClass: this.config.opClass
+  };
+  defaultConfig = {
+    order: "asc",
+    nulls: "last",
+    opClass: void 0
+  };
+  asc() {
+    return this.indexConfig.order = "asc", this;
+  }
+  desc() {
+    return this.indexConfig.order = "desc", this;
+  }
+  nullsFirst() {
+    return this.indexConfig.nulls = "first", this;
+  }
+  nullsLast() {
+    return this.indexConfig.nulls = "last", this;
+  }
+  /**
+   * ### PostgreSQL documentation quote
+   *
+   * > An operator class with optional parameters can be specified for each column of an index.
+   * The operator class identifies the operators to be used by the index for that column.
+   * For example, a B-tree index on four-byte integers would use the int4_ops class;
+   * this operator class includes comparison functions for four-byte integers.
+   * In practice the default operator class for the column's data type is usually sufficient.
+   * The main point of having operator classes is that for some data types, there could be more than one meaningful ordering.
+   * For example, we might want to sort a complex-number data type either by absolute value or by real part.
+   * We could do this by defining two operator classes for the data type and then selecting the proper class when creating an index.
+   * More information about operator classes check:
+   *
+   * ### Useful links
+   * https://www.postgresql.org/docs/current/sql-createindex.html
+   *
+   * https://www.postgresql.org/docs/current/indexes-opclass.html
+   *
+   * https://www.postgresql.org/docs/current/xindex.html
+   *
+   * ### Additional types
+   * If you have the `pg_vector` extension installed in your database, you can use the
+   * `vector_l2_ops`, `vector_ip_ops`, `vector_cosine_ops`, `vector_l1_ops`, `bit_hamming_ops`, `bit_jaccard_ops`, `halfvec_l2_ops`, `sparsevec_l2_ops` options, which are predefined types.
+   *
+   * **You can always specify any string you want in the operator class, in case Drizzle doesn't have it natively in its types**
+   *
+   * @param opClass
+   * @returns
+   */
+  op(opClass) {
+    return this.indexConfig.opClass = opClass, this;
+  }
+};
+_a14 = entityKind, __publicField(ExtraConfigColumn, _a14, "ExtraConfigColumn");
+var _a15, IndexedColumn = class {
+  constructor(name, keyAsName, type, indexConfig) {
+    this.name = name, this.keyAsName = keyAsName, this.type = type, this.indexConfig = indexConfig;
+  }
+  name;
+  keyAsName;
+  type;
+  indexConfig;
+};
+_a15 = entityKind, __publicField(IndexedColumn, _a15, "IndexedColumn");
+var _a16, PgArrayBuilder = class extends PgColumnBuilder {
+  constructor(name, baseBuilder, size) {
+    super(name, "array", "PgArray"), this.config.baseBuilder = baseBuilder, this.config.size = size;
+  }
+  /** @internal */
+  build(table) {
+    let baseColumn = this.config.baseBuilder.build(table);
+    return new PgArray(
+      table,
+      this.config,
+      baseColumn
+    );
+  }
+};
+_a16 = entityKind, __publicField(PgArrayBuilder, _a16, "PgArrayBuilder");
+var _a17, _PgArray = class extends PgColumn {
+  constructor(table, config, baseColumn, range) {
+    super(table, config), this.baseColumn = baseColumn, this.range = range, this.size = config.size;
+  }
+  size;
+  getSQLType() {
+    return `${this.baseColumn.getSQLType()}[${typeof this.size == "number" ? this.size : ""}]`;
+  }
+  mapFromDriverValue(value) {
+    return typeof value == "string" && (value = parsePgArray(value)), value.map((v) => this.baseColumn.mapFromDriverValue(v));
+  }
+  mapToDriverValue(value, isNestedArray = !1) {
+    let a = value.map(
+      (v) => v === null ? null : is(this.baseColumn, _PgArray) ? this.baseColumn.mapToDriverValue(v, !0) : this.baseColumn.mapToDriverValue(v)
+    );
+    return isNestedArray ? a : makePgArray(a);
+  }
+}, PgArray = _PgArray;
+_a17 = entityKind, __publicField(PgArray, _a17, "PgArray");
+
+// node_modules/drizzle-orm/pg-core/columns/enum.js
+var _a18, PgEnumObjectColumnBuilder = class extends PgColumnBuilder {
+  constructor(name, enumInstance) {
+    super(name, "string", "PgEnumObjectColumn"), this.config.enum = enumInstance;
+  }
+  /** @internal */
+  build(table) {
+    return new PgEnumObjectColumn(
+      table,
+      this.config
+    );
+  }
+};
+_a18 = entityKind, __publicField(PgEnumObjectColumnBuilder, _a18, "PgEnumObjectColumnBuilder");
+var _a19, PgEnumObjectColumn = class extends PgColumn {
+  enum;
+  enumValues = this.config.enum.enumValues;
+  constructor(table, config) {
+    super(table, config), this.enum = config.enum;
+  }
+  getSQLType() {
+    return this.enum.enumName;
+  }
+};
+_a19 = entityKind, __publicField(PgEnumObjectColumn, _a19, "PgEnumObjectColumn");
+var isPgEnumSym = Symbol.for("drizzle:isPgEnum");
+function isPgEnum(obj) {
+  return !!obj && typeof obj == "function" && isPgEnumSym in obj && obj[isPgEnumSym] === !0;
+}
+var _a20, PgEnumColumnBuilder = class extends PgColumnBuilder {
+  constructor(name, enumInstance) {
+    super(name, "string", "PgEnumColumn"), this.config.enum = enumInstance;
+  }
+  /** @internal */
+  build(table) {
+    return new PgEnumColumn(
+      table,
+      this.config
+    );
+  }
+};
+_a20 = entityKind, __publicField(PgEnumColumnBuilder, _a20, "PgEnumColumnBuilder");
+var _a21, PgEnumColumn = class extends PgColumn {
+  enum = this.config.enum;
+  enumValues = this.config.enum.enumValues;
+  constructor(table, config) {
+    super(table, config), this.enum = config.enum;
+  }
+  getSQLType() {
+    return this.enum.enumName;
+  }
+};
+_a21 = entityKind, __publicField(PgEnumColumn, _a21, "PgEnumColumn");
+
+// node_modules/drizzle-orm/subquery.js
+var _a22, Subquery = class {
+  constructor(sql11, fields, alias, isWith = !1, usedTables = []) {
+    this._ = {
+      brand: "Subquery",
+      sql: sql11,
+      selectedFields: fields,
+      alias,
+      isWith,
+      usedTables
+    };
+  }
+  // getSQL(): SQL<unknown> {
+  // 	return new SQL([this]);
+  // }
+};
+_a22 = entityKind, __publicField(Subquery, _a22, "Subquery");
+var _a23, WithSubquery = class extends Subquery {
+};
+_a23 = entityKind, __publicField(WithSubquery, _a23, "WithSubquery");
+
+// node_modules/drizzle-orm/version.js
+var version = "0.44.2";
+
+// node_modules/drizzle-orm/tracing.js
+var otel, rawTracer, tracer = {
+  startActiveSpan(name, fn) {
+    return otel ? (rawTracer || (rawTracer = otel.trace.getTracer("drizzle-orm", version)), iife(
+      (otel2, rawTracer2) => rawTracer2.startActiveSpan(
+        name,
+        (span) => {
+          try {
+            return fn(span);
+          } catch (e) {
+            throw span.setStatus({
+              code: otel2.SpanStatusCode.ERROR,
+              message: e instanceof Error ? e.message : "Unknown error"
+              // eslint-disable-line no-instanceof/no-instanceof
+            }), e;
+          } finally {
+            span.end();
+          }
+        }
+      ),
+      otel,
+      rawTracer
+    )) : fn();
+  }
+};
+
+// node_modules/drizzle-orm/view-common.js
+var ViewBaseConfig = Symbol.for("drizzle:ViewBaseConfig");
+
+// node_modules/drizzle-orm/sql/sql.js
+var _a24, FakePrimitiveParam = class {
+};
+_a24 = entityKind, __publicField(FakePrimitiveParam, _a24, "FakePrimitiveParam");
+function isSQLWrapper(value) {
+  return value != null && typeof value.getSQL == "function";
+}
+function mergeQueries(queries) {
+  let result = { sql: "", params: [] };
+  for (let query of queries)
+    result.sql += query.sql, result.params.push(...query.params), query.typings?.length && (result.typings || (result.typings = []), result.typings.push(...query.typings));
+  return result;
+}
+var _a25, StringChunk = class {
+  value;
+  constructor(value) {
+    this.value = Array.isArray(value) ? value : [value];
+  }
+  getSQL() {
+    return new SQL([this]);
+  }
+};
+_a25 = entityKind, __publicField(StringChunk, _a25, "StringChunk");
+var _a26, _SQL = class {
+  constructor(queryChunks) {
+    this.queryChunks = queryChunks;
+    for (let chunk of queryChunks)
+      if (is(chunk, Table)) {
+        let schemaName = chunk[Table.Symbol.Schema];
+        this.usedTables.push(
+          schemaName === void 0 ? chunk[Table.Symbol.Name] : schemaName + "." + chunk[Table.Symbol.Name]
+        );
+      }
+  }
+  /** @internal */
+  decoder = noopDecoder;
+  shouldInlineParams = !1;
+  /** @internal */
+  usedTables = [];
+  append(query) {
+    return this.queryChunks.push(...query.queryChunks), this;
+  }
+  toQuery(config) {
+    return tracer.startActiveSpan("drizzle.buildSQL", (span) => {
+      let query = this.buildQueryFromSourceParams(this.queryChunks, config);
+      return span?.setAttributes({
+        "drizzle.query.text": query.sql,
+        "drizzle.query.params": JSON.stringify(query.params)
+      }), query;
+    });
+  }
+  buildQueryFromSourceParams(chunks, _config) {
+    let config = Object.assign({}, _config, {
+      inlineParams: _config.inlineParams || this.shouldInlineParams,
+      paramStartIndex: _config.paramStartIndex || { value: 0 }
+    }), {
+      casing,
+      escapeName,
+      escapeParam,
+      prepareTyping,
+      inlineParams,
+      paramStartIndex
+    } = config;
+    return mergeQueries(chunks.map((chunk) => {
+      if (is(chunk, StringChunk))
+        return { sql: chunk.value.join(""), params: [] };
+      if (is(chunk, Name))
+        return { sql: escapeName(chunk.value), params: [] };
+      if (chunk === void 0)
+        return { sql: "", params: [] };
+      if (Array.isArray(chunk)) {
+        let result = [new StringChunk("(")];
+        for (let [i, p] of chunk.entries())
+          result.push(p), i < chunk.length - 1 && result.push(new StringChunk(", "));
+        return result.push(new StringChunk(")")), this.buildQueryFromSourceParams(result, config);
+      }
+      if (is(chunk, _SQL))
+        return this.buildQueryFromSourceParams(chunk.queryChunks, {
+          ...config,
+          inlineParams: inlineParams || chunk.shouldInlineParams
+        });
+      if (is(chunk, Table)) {
+        let schemaName = chunk[Table.Symbol.Schema], tableName = chunk[Table.Symbol.Name];
+        return {
+          sql: schemaName === void 0 || chunk[IsAlias] ? escapeName(tableName) : escapeName(schemaName) + "." + escapeName(tableName),
+          params: []
+        };
+      }
+      if (is(chunk, Column)) {
+        let columnName = casing.getColumnCasing(chunk);
+        if (_config.invokeSource === "indexes")
+          return { sql: escapeName(columnName), params: [] };
+        let schemaName = chunk.table[Table.Symbol.Schema];
+        return {
+          sql: chunk.table[IsAlias] || schemaName === void 0 ? escapeName(chunk.table[Table.Symbol.Name]) + "." + escapeName(columnName) : escapeName(schemaName) + "." + escapeName(chunk.table[Table.Symbol.Name]) + "." + escapeName(columnName),
+          params: []
+        };
+      }
+      if (is(chunk, View)) {
+        let schemaName = chunk[ViewBaseConfig].schema, viewName = chunk[ViewBaseConfig].name;
+        return {
+          sql: schemaName === void 0 || chunk[ViewBaseConfig].isAlias ? escapeName(viewName) : escapeName(schemaName) + "." + escapeName(viewName),
+          params: []
+        };
+      }
+      if (is(chunk, Param)) {
+        if (is(chunk.value, Placeholder))
+          return { sql: escapeParam(paramStartIndex.value++, chunk), params: [chunk], typings: ["none"] };
+        let mappedValue = chunk.value === null ? null : chunk.encoder.mapToDriverValue(chunk.value);
+        if (is(mappedValue, _SQL))
+          return this.buildQueryFromSourceParams([mappedValue], config);
+        if (inlineParams)
+          return { sql: this.mapInlineParam(mappedValue, config), params: [] };
+        let typings = ["none"];
+        return prepareTyping && (typings = [prepareTyping(chunk.encoder)]), { sql: escapeParam(paramStartIndex.value++, mappedValue), params: [mappedValue], typings };
+      }
+      return is(chunk, Placeholder) ? { sql: escapeParam(paramStartIndex.value++, chunk), params: [chunk], typings: ["none"] } : is(chunk, _SQL.Aliased) && chunk.fieldAlias !== void 0 ? { sql: escapeName(chunk.fieldAlias), params: [] } : is(chunk, Subquery) ? chunk._.isWith ? { sql: escapeName(chunk._.alias), params: [] } : this.buildQueryFromSourceParams([
+        new StringChunk("("),
+        chunk._.sql,
+        new StringChunk(") "),
+        new Name(chunk._.alias)
+      ], config) : isPgEnum(chunk) ? chunk.schema ? { sql: escapeName(chunk.schema) + "." + escapeName(chunk.enumName), params: [] } : { sql: escapeName(chunk.enumName), params: [] } : isSQLWrapper(chunk) ? chunk.shouldOmitSQLParens?.() ? this.buildQueryFromSourceParams([chunk.getSQL()], config) : this.buildQueryFromSourceParams([
+        new StringChunk("("),
+        chunk.getSQL(),
+        new StringChunk(")")
+      ], config) : inlineParams ? { sql: this.mapInlineParam(chunk, config), params: [] } : { sql: escapeParam(paramStartIndex.value++, chunk), params: [chunk], typings: ["none"] };
+    }));
+  }
+  mapInlineParam(chunk, { escapeString }) {
+    if (chunk === null)
+      return "null";
+    if (typeof chunk == "number" || typeof chunk == "boolean")
+      return chunk.toString();
+    if (typeof chunk == "string")
+      return escapeString(chunk);
+    if (typeof chunk == "object") {
+      let mappedValueAsString = chunk.toString();
+      return escapeString(mappedValueAsString === "[object Object]" ? JSON.stringify(chunk) : mappedValueAsString);
+    }
+    throw new Error("Unexpected param value: " + chunk);
+  }
+  getSQL() {
+    return this;
+  }
+  as(alias) {
+    return alias === void 0 ? this : new _SQL.Aliased(this, alias);
+  }
+  mapWith(decoder) {
+    return this.decoder = typeof decoder == "function" ? { mapFromDriverValue: decoder } : decoder, this;
+  }
+  inlineParams() {
+    return this.shouldInlineParams = !0, this;
+  }
+  /**
+   * This method is used to conditionally include a part of the query.
+   *
+   * @param condition - Condition to check
+   * @returns itself if the condition is `true`, otherwise `undefined`
+   */
+  if(condition) {
+    return condition ? this : void 0;
+  }
+}, SQL = _SQL;
+_a26 = entityKind, __publicField(SQL, _a26, "SQL");
+var _a27, Name = class {
+  constructor(value) {
+    this.value = value;
+  }
+  brand;
+  getSQL() {
+    return new SQL([this]);
+  }
+};
+_a27 = entityKind, __publicField(Name, _a27, "Name");
+function isDriverValueEncoder(value) {
+  return typeof value == "object" && value !== null && "mapToDriverValue" in value && typeof value.mapToDriverValue == "function";
+}
+var noopDecoder = {
+  mapFromDriverValue: (value) => value
+}, noopEncoder = {
+  mapToDriverValue: (value) => value
+}, noopMapper = {
+  ...noopDecoder,
+  ...noopEncoder
+}, _a28, Param = class {
+  /**
+   * @param value - Parameter value
+   * @param encoder - Encoder to convert the value to a driver parameter
+   */
+  constructor(value, encoder = noopEncoder) {
+    this.value = value, this.encoder = encoder;
+  }
+  brand;
+  getSQL() {
+    return new SQL([this]);
+  }
+};
+_a28 = entityKind, __publicField(Param, _a28, "Param");
+function sql4(strings, ...params) {
+  let queryChunks = [];
+  (params.length > 0 || strings.length > 0 && strings[0] !== "") && queryChunks.push(new StringChunk(strings[0]));
+  for (let [paramIndex, param2] of params.entries())
+    queryChunks.push(param2, new StringChunk(strings[paramIndex + 1]));
+  return new SQL(queryChunks);
+}
+((sql22) => {
+  function empty() {
+    return new SQL([]);
+  }
+  sql22.empty = empty;
+  function fromList(list) {
+    return new SQL(list);
+  }
+  sql22.fromList = fromList;
+  function raw(str) {
+    return new SQL([new StringChunk(str)]);
+  }
+  sql22.raw = raw;
+  function join(chunks, separator) {
+    let result = [];
+    for (let [i, chunk] of chunks.entries())
+      i > 0 && separator !== void 0 && result.push(separator), result.push(chunk);
+    return new SQL(result);
+  }
+  sql22.join = join;
+  function identifier(value) {
+    return new Name(value);
+  }
+  sql22.identifier = identifier;
+  function placeholder2(name2) {
+    return new Placeholder(name2);
+  }
+  sql22.placeholder = placeholder2;
+  function param2(value, encoder) {
+    return new Param(value, encoder);
+  }
+  sql22.param = param2;
+})(sql4 || (sql4 = {}));
+((SQL2) => {
+  class Aliased {
+    constructor(sql22, fieldAlias) {
+      this.sql = sql22, this.fieldAlias = fieldAlias;
+    }
+    static [entityKind] = "SQL.Aliased";
+    /** @internal */
+    isSelectionField = !1;
+    getSQL() {
+      return this.sql;
+    }
+    /** @internal */
+    clone() {
+      return new Aliased(this.sql, this.fieldAlias);
+    }
+  }
+  SQL2.Aliased = Aliased;
+})(SQL || (SQL = {}));
+var _a29, Placeholder = class {
+  constructor(name2) {
+    this.name = name2;
+  }
+  getSQL() {
+    return new SQL([this]);
+  }
+};
+_a29 = entityKind, __publicField(Placeholder, _a29, "Placeholder");
+function fillPlaceholders(params, values) {
+  return params.map((p) => {
+    if (is(p, Placeholder)) {
+      if (!(p.name in values))
+        throw new Error(`No value for placeholder "${p.name}" was provided`);
+      return values[p.name];
+    }
+    if (is(p, Param) && is(p.value, Placeholder)) {
+      if (!(p.value.name in values))
+        throw new Error(`No value for placeholder "${p.value.name}" was provided`);
+      return p.encoder.mapToDriverValue(values[p.value.name]);
+    }
+    return p;
+  });
+}
+var IsDrizzleView = Symbol.for("drizzle:IsDrizzleView"), _a30, View = class {
+  /** @internal */
+  [(_a30 = entityKind, ViewBaseConfig)];
+  /** @internal */
+  [IsDrizzleView] = !0;
+  constructor({ name: name2, schema: schema3, selectedFields, query }) {
+    this[ViewBaseConfig] = {
+      name: name2,
+      originalName: name2,
+      schema: schema3,
+      selectedFields,
+      query,
+      isExisting: !query,
+      isAlias: !1
+    };
+  }
+  getSQL() {
+    return new SQL([this]);
+  }
+};
+__publicField(View, _a30, "View");
+Column.prototype.getSQL = function() {
+  return new SQL([this]);
+};
+Table.prototype.getSQL = function() {
+  return new SQL([this]);
+};
+Subquery.prototype.getSQL = function() {
+  return new SQL([this]);
+};
+
+// node_modules/drizzle-orm/utils.js
+function mapResultRow(columns, row, joinsNotNullableMap) {
+  let nullifyMap = {}, result = columns.reduce(
+    (result2, { path, field }, columnIndex) => {
+      let decoder;
+      is(field, Column) ? decoder = field : is(field, SQL) ? decoder = field.decoder : decoder = field.sql.decoder;
+      let node = result2;
+      for (let [pathChunkIndex, pathChunk] of path.entries())
+        if (pathChunkIndex < path.length - 1)
+          pathChunk in node || (node[pathChunk] = {}), node = node[pathChunk];
+        else {
+          let rawValue = row[columnIndex], value = node[pathChunk] = rawValue === null ? null : decoder.mapFromDriverValue(rawValue);
+          if (joinsNotNullableMap && is(field, Column) && path.length === 2) {
+            let objectName = path[0];
+            objectName in nullifyMap ? typeof nullifyMap[objectName] == "string" && nullifyMap[objectName] !== getTableName(field.table) && (nullifyMap[objectName] = !1) : nullifyMap[objectName] = value === null ? getTableName(field.table) : !1;
+          }
+        }
+      return result2;
+    },
+    {}
+  );
+  if (joinsNotNullableMap && Object.keys(nullifyMap).length > 0)
+    for (let [objectName, tableName] of Object.entries(nullifyMap))
+      typeof tableName == "string" && !joinsNotNullableMap[tableName] && (result[objectName] = null);
+  return result;
+}
+function orderSelectedFields(fields, pathPrefix) {
+  return Object.entries(fields).reduce((result, [name, field]) => {
+    if (typeof name != "string")
+      return result;
+    let newPath = pathPrefix ? [...pathPrefix, name] : [name];
+    return is(field, Column) || is(field, SQL) || is(field, SQL.Aliased) ? result.push({ path: newPath, field }) : is(field, Table) ? result.push(...orderSelectedFields(field[Table.Symbol.Columns], newPath)) : result.push(...orderSelectedFields(field, newPath)), result;
+  }, []);
+}
+function haveSameKeys(left, right) {
+  let leftKeys = Object.keys(left), rightKeys = Object.keys(right);
+  if (leftKeys.length !== rightKeys.length)
+    return !1;
+  for (let [index, key] of leftKeys.entries())
+    if (key !== rightKeys[index])
+      return !1;
+  return !0;
+}
+function mapUpdateSet(table, values) {
+  let entries = Object.entries(values).filter(([, value]) => value !== void 0).map(([key, value]) => is(value, SQL) || is(value, Column) ? [key, value] : [key, new Param(value, table[Table.Symbol.Columns][key])]);
+  if (entries.length === 0)
+    throw new Error("No values to set");
+  return Object.fromEntries(entries);
+}
+function applyMixins(baseClass, extendedClasses) {
+  for (let extendedClass of extendedClasses)
+    for (let name of Object.getOwnPropertyNames(extendedClass.prototype))
+      name !== "constructor" && Object.defineProperty(
+        baseClass.prototype,
+        name,
+        Object.getOwnPropertyDescriptor(extendedClass.prototype, name) || /* @__PURE__ */ Object.create(null)
+      );
+}
+function getTableColumns(table) {
+  return table[Table.Symbol.Columns];
+}
+function getTableLikeName(table) {
+  return is(table, Subquery) ? table._.alias : is(table, View) ? table[ViewBaseConfig].name : is(table, SQL) ? void 0 : table[Table.Symbol.IsAlias] ? table[Table.Symbol.Name] : table[Table.Symbol.BaseName];
+}
+
+// node_modules/drizzle-orm/pg-core/table.js
+var InlineForeignKeys = Symbol.for("drizzle:PgInlineForeignKeys"), EnableRLS = Symbol.for("drizzle:EnableRLS"), _a31, PgTable = class extends Table {
+  /**@internal */
+  [(_a31 = entityKind, InlineForeignKeys)] = [];
+  /** @internal */
+  [EnableRLS] = !1;
+  /** @internal */
+  [Table.Symbol.ExtraConfigBuilder] = void 0;
+  /** @internal */
+  [Table.Symbol.ExtraConfigColumns] = {};
+};
+__publicField(PgTable, _a31, "PgTable"), /** @internal */
+__publicField(PgTable, "Symbol", Object.assign({}, Table.Symbol, {
+  InlineForeignKeys,
+  EnableRLS
+}));
+
+// node_modules/drizzle-orm/pg-core/primary-keys.js
+var _a32, PrimaryKeyBuilder = class {
+  /** @internal */
+  columns;
+  /** @internal */
+  name;
+  constructor(columns, name) {
+    this.columns = columns, this.name = name;
+  }
+  /** @internal */
+  build(table) {
+    return new PrimaryKey(table, this.columns, this.name);
+  }
+};
+_a32 = entityKind, __publicField(PrimaryKeyBuilder, _a32, "PgPrimaryKeyBuilder");
+var _a33, PrimaryKey = class {
+  constructor(table, columns, name) {
+    this.table = table, this.columns = columns, this.name = name;
+  }
+  columns;
+  name;
+  getName() {
+    return this.name ?? `${this.table[PgTable.Symbol.Name]}_${this.columns.map((column) => column.name).join("_")}_pk`;
+  }
+};
+_a33 = entityKind, __publicField(PrimaryKey, _a33, "PgPrimaryKey");
+
+// node_modules/drizzle-orm/sql/expressions/conditions.js
+function bindIfParam(value, column) {
+  return isDriverValueEncoder(column) && !isSQLWrapper(value) && !is(value, Param) && !is(value, Placeholder) && !is(value, Column) && !is(value, Table) && !is(value, View) ? new Param(value, column) : value;
+}
+var eq3 = (left, right) => sql4`${left} = ${bindIfParam(right, left)}`, ne = (left, right) => sql4`${left} <> ${bindIfParam(right, left)}`;
+function and2(...unfilteredConditions) {
+  let conditions = unfilteredConditions.filter(
+    (c) => c !== void 0
+  );
+  if (conditions.length !== 0)
+    return conditions.length === 1 ? new SQL(conditions) : new SQL([
+      new StringChunk("("),
+      sql4.join(conditions, new StringChunk(" and ")),
+      new StringChunk(")")
+    ]);
+}
+function or(...unfilteredConditions) {
+  let conditions = unfilteredConditions.filter(
+    (c) => c !== void 0
+  );
+  if (conditions.length !== 0)
+    return conditions.length === 1 ? new SQL(conditions) : new SQL([
+      new StringChunk("("),
+      sql4.join(conditions, new StringChunk(" or ")),
+      new StringChunk(")")
+    ]);
+}
+function not(condition) {
+  return sql4`not ${condition}`;
+}
+var gt = (left, right) => sql4`${left} > ${bindIfParam(right, left)}`, gte = (left, right) => sql4`${left} >= ${bindIfParam(right, left)}`, lt = (left, right) => sql4`${left} < ${bindIfParam(right, left)}`, lte = (left, right) => sql4`${left} <= ${bindIfParam(right, left)}`;
+function inArray(column, values) {
+  return Array.isArray(values) ? values.length === 0 ? sql4`false` : sql4`${column} in ${values.map((v) => bindIfParam(v, column))}` : sql4`${column} in ${bindIfParam(values, column)}`;
+}
+function notInArray(column, values) {
+  return Array.isArray(values) ? values.length === 0 ? sql4`true` : sql4`${column} not in ${values.map((v) => bindIfParam(v, column))}` : sql4`${column} not in ${bindIfParam(values, column)}`;
+}
+function isNull(value) {
+  return sql4`${value} is null`;
+}
+function isNotNull(value) {
+  return sql4`${value} is not null`;
+}
+function exists(subquery) {
+  return sql4`exists ${subquery}`;
+}
+function notExists(subquery) {
+  return sql4`not exists ${subquery}`;
+}
+function between(column, min, max) {
+  return sql4`${column} between ${bindIfParam(min, column)} and ${bindIfParam(
+    max,
+    column
+  )}`;
+}
+function notBetween(column, min, max) {
+  return sql4`${column} not between ${bindIfParam(
+    min,
+    column
+  )} and ${bindIfParam(max, column)}`;
+}
+function like(column, value) {
+  return sql4`${column} like ${value}`;
+}
+function notLike(column, value) {
+  return sql4`${column} not like ${value}`;
+}
+function ilike(column, value) {
+  return sql4`${column} ilike ${value}`;
+}
+function notIlike(column, value) {
+  return sql4`${column} not ilike ${value}`;
+}
+
+// node_modules/drizzle-orm/sql/expressions/select.js
+function asc(column) {
+  return sql4`${column} asc`;
+}
+function desc3(column) {
+  return sql4`${column} desc`;
+}
+
+// node_modules/drizzle-orm/relations.js
+var _a34, Relation = class {
+  constructor(sourceTable, referencedTable, relationName) {
+    this.sourceTable = sourceTable, this.referencedTable = referencedTable, this.relationName = relationName, this.referencedTableName = referencedTable[Table.Symbol.Name];
+  }
+  referencedTableName;
+  fieldName;
+};
+_a34 = entityKind, __publicField(Relation, _a34, "Relation");
+var _a35, Relations = class {
+  constructor(table, config) {
+    this.table = table, this.config = config;
+  }
+};
+_a35 = entityKind, __publicField(Relations, _a35, "Relations");
+var _a36, _One = class extends Relation {
+  constructor(sourceTable, referencedTable, config, isNullable) {
+    super(sourceTable, referencedTable, config?.relationName), this.config = config, this.isNullable = isNullable;
+  }
+  withFieldName(fieldName) {
+    let relation = new _One(
+      this.sourceTable,
+      this.referencedTable,
+      this.config,
+      this.isNullable
+    );
+    return relation.fieldName = fieldName, relation;
+  }
+}, One = _One;
+_a36 = entityKind, __publicField(One, _a36, "One");
+var _a37, _Many = class extends Relation {
+  constructor(sourceTable, referencedTable, config) {
+    super(sourceTable, referencedTable, config?.relationName), this.config = config;
+  }
+  withFieldName(fieldName) {
+    let relation = new _Many(
+      this.sourceTable,
+      this.referencedTable,
+      this.config
+    );
+    return relation.fieldName = fieldName, relation;
+  }
+}, Many = _Many;
+_a37 = entityKind, __publicField(Many, _a37, "Many");
+function getOperators() {
+  return {
+    and: and2,
+    between,
+    eq: eq3,
+    exists,
+    gt,
+    gte,
+    ilike,
+    inArray,
+    isNull,
+    isNotNull,
+    like,
+    lt,
+    lte,
+    ne,
+    not,
+    notBetween,
+    notExists,
+    notLike,
+    notIlike,
+    notInArray,
+    or,
+    sql: sql4
+  };
+}
+function getOrderByOperators() {
+  return {
+    sql: sql4,
+    asc,
+    desc: desc3
+  };
+}
+function extractTablesRelationalConfig(schema3, configHelpers) {
+  Object.keys(schema3).length === 1 && "default" in schema3 && !is(schema3.default, Table) && (schema3 = schema3.default);
+  let tableNamesMap = {}, relationsBuffer = {}, tablesConfig = {};
+  for (let [key, value] of Object.entries(schema3))
+    if (is(value, Table)) {
+      let dbName = getTableUniqueName(value), bufferedRelations = relationsBuffer[dbName];
+      tableNamesMap[dbName] = key, tablesConfig[key] = {
+        tsName: key,
+        dbName: value[Table.Symbol.Name],
+        schema: value[Table.Symbol.Schema],
+        columns: value[Table.Symbol.Columns],
+        relations: bufferedRelations?.relations ?? {},
+        primaryKey: bufferedRelations?.primaryKey ?? []
+      };
+      for (let column of Object.values(
+        value[Table.Symbol.Columns]
+      ))
+        column.primary && tablesConfig[key].primaryKey.push(column);
+      let extraConfig = value[Table.Symbol.ExtraConfigBuilder]?.(value[Table.Symbol.ExtraConfigColumns]);
+      if (extraConfig)
+        for (let configEntry of Object.values(extraConfig))
+          is(configEntry, PrimaryKeyBuilder) && tablesConfig[key].primaryKey.push(...configEntry.columns);
+    } else if (is(value, Relations)) {
+      let dbName = getTableUniqueName(value.table), tableName = tableNamesMap[dbName], relations2 = value.config(
+        configHelpers(value.table)
+      ), primaryKey;
+      for (let [relationName, relation] of Object.entries(relations2))
+        if (tableName) {
+          let tableConfig = tablesConfig[tableName];
+          tableConfig.relations[relationName] = relation, primaryKey && tableConfig.primaryKey.push(...primaryKey);
+        } else
+          dbName in relationsBuffer || (relationsBuffer[dbName] = {
+            relations: {},
+            primaryKey
+          }), relationsBuffer[dbName].relations[relationName] = relation;
+    }
+  return { tables: tablesConfig, tableNamesMap };
+}
+function createOne(sourceTable) {
+  return function(table, config) {
+    return new One(
+      sourceTable,
+      table,
+      config,
+      config?.fields.reduce((res, f) => res && f.notNull, !0) ?? !1
+    );
+  };
+}
+function createMany(sourceTable) {
+  return function(referencedTable, config) {
+    return new Many(sourceTable, referencedTable, config);
+  };
+}
+function normalizeRelation(schema3, tableNamesMap, relation) {
+  if (is(relation, One) && relation.config)
+    return {
+      fields: relation.config.fields,
+      references: relation.config.references
+    };
+  let referencedTableTsName = tableNamesMap[getTableUniqueName(relation.referencedTable)];
+  if (!referencedTableTsName)
+    throw new Error(
+      `Table "${relation.referencedTable[Table.Symbol.Name]}" not found in schema`
+    );
+  let referencedTableConfig = schema3[referencedTableTsName];
+  if (!referencedTableConfig)
+    throw new Error(`Table "${referencedTableTsName}" not found in schema`);
+  let sourceTable = relation.sourceTable, sourceTableTsName = tableNamesMap[getTableUniqueName(sourceTable)];
+  if (!sourceTableTsName)
+    throw new Error(
+      `Table "${sourceTable[Table.Symbol.Name]}" not found in schema`
+    );
+  let reverseRelations = [];
+  for (let referencedTableRelation of Object.values(
+    referencedTableConfig.relations
+  ))
+    (relation.relationName && relation !== referencedTableRelation && referencedTableRelation.relationName === relation.relationName || !relation.relationName && referencedTableRelation.referencedTable === relation.sourceTable) && reverseRelations.push(referencedTableRelation);
+  if (reverseRelations.length > 1)
+    throw relation.relationName ? new Error(
+      `There are multiple relations with name "${relation.relationName}" in table "${referencedTableTsName}"`
+    ) : new Error(
+      `There are multiple relations between "${referencedTableTsName}" and "${relation.sourceTable[Table.Symbol.Name]}". Please specify relation name`
+    );
+  if (reverseRelations[0] && is(reverseRelations[0], One) && reverseRelations[0].config)
+    return {
+      fields: reverseRelations[0].config.references,
+      references: reverseRelations[0].config.fields
+    };
+  throw new Error(
+    `There is not enough information to infer relation "${sourceTableTsName}.${relation.fieldName}"`
+  );
+}
+function createTableRelationsHelpers(sourceTable) {
+  return {
+    one: createOne(sourceTable),
+    many: createMany(sourceTable)
+  };
+}
+function mapRelationalRow(tablesConfig, tableConfig, row, buildQueryResultSelection, mapColumnValue = (value) => value) {
+  let result = {};
+  for (let [
+    selectionItemIndex,
+    selectionItem
+  ] of buildQueryResultSelection.entries())
+    if (selectionItem.isJson) {
+      let relation = tableConfig.relations[selectionItem.tsKey], rawSubRows = row[selectionItemIndex], subRows = typeof rawSubRows == "string" ? JSON.parse(rawSubRows) : rawSubRows;
+      result[selectionItem.tsKey] = is(relation, One) ? subRows && mapRelationalRow(
+        tablesConfig,
+        tablesConfig[selectionItem.relationTableTsKey],
+        subRows,
+        selectionItem.selection,
+        mapColumnValue
+      ) : subRows.map(
+        (subRow) => mapRelationalRow(
+          tablesConfig,
+          tablesConfig[selectionItem.relationTableTsKey],
+          subRow,
+          selectionItem.selection,
+          mapColumnValue
+        )
+      );
+    } else {
+      let value = mapColumnValue(row[selectionItemIndex]), field = selectionItem.field, decoder;
+      is(field, Column) ? decoder = field : is(field, SQL) ? decoder = field.decoder : decoder = field.sql.decoder, result[selectionItem.tsKey] = value === null ? null : decoder.mapFromDriverValue(value);
+    }
+  return result;
+}
+
+// node_modules/drizzle-orm/alias.js
+var _a38, ColumnAliasProxyHandler = class {
+  constructor(table) {
+    this.table = table;
+  }
+  get(columnObj, prop) {
+    return prop === "table" ? this.table : columnObj[prop];
+  }
+};
+_a38 = entityKind, __publicField(ColumnAliasProxyHandler, _a38, "ColumnAliasProxyHandler");
+var _a39, TableAliasProxyHandler = class {
+  constructor(alias, replaceOriginalName) {
+    this.alias = alias, this.replaceOriginalName = replaceOriginalName;
+  }
+  get(target, prop) {
+    if (prop === Table.Symbol.IsAlias)
+      return !0;
+    if (prop === Table.Symbol.Name)
+      return this.alias;
+    if (this.replaceOriginalName && prop === Table.Symbol.OriginalName)
+      return this.alias;
+    if (prop === ViewBaseConfig)
+      return {
+        ...target[ViewBaseConfig],
+        name: this.alias,
+        isAlias: !0
+      };
+    if (prop === Table.Symbol.Columns) {
+      let columns = target[Table.Symbol.Columns];
+      if (!columns)
+        return columns;
+      let proxiedColumns = {};
+      return Object.keys(columns).map((key) => {
+        proxiedColumns[key] = new Proxy(
+          columns[key],
+          new ColumnAliasProxyHandler(new Proxy(target, this))
+        );
+      }), proxiedColumns;
+    }
+    let value = target[prop];
+    return is(value, Column) ? new Proxy(value, new ColumnAliasProxyHandler(new Proxy(target, this))) : value;
+  }
+};
+_a39 = entityKind, __publicField(TableAliasProxyHandler, _a39, "TableAliasProxyHandler");
+var _a40, RelationTableAliasProxyHandler = class {
+  constructor(alias) {
+    this.alias = alias;
+  }
+  get(target, prop) {
+    return prop === "sourceTable" ? aliasedTable(target.sourceTable, this.alias) : target[prop];
+  }
+};
+_a40 = entityKind, __publicField(RelationTableAliasProxyHandler, _a40, "RelationTableAliasProxyHandler");
+function aliasedTable(table, tableAlias) {
+  return new Proxy(table, new TableAliasProxyHandler(tableAlias, !1));
+}
+function aliasedTableColumn(column, tableAlias) {
+  return new Proxy(
+    column,
+    new ColumnAliasProxyHandler(new Proxy(column.table, new TableAliasProxyHandler(tableAlias, !1)))
+  );
+}
+function mapColumnsInAliasedSQLToAlias(query, alias) {
+  return new SQL.Aliased(mapColumnsInSQLToAlias(query.sql, alias), query.fieldAlias);
+}
+function mapColumnsInSQLToAlias(query, alias) {
+  return sql4.join(query.queryChunks.map((c) => is(c, Column) ? aliasedTableColumn(c, alias) : is(c, SQL) ? mapColumnsInSQLToAlias(c, alias) : is(c, SQL.Aliased) ? mapColumnsInAliasedSQLToAlias(c, alias) : c));
+}
+
+// node_modules/drizzle-orm/selection-proxy.js
+var _a41, _SelectionProxyHandler = class {
+  config;
+  constructor(config) {
+    this.config = { ...config };
+  }
+  get(subquery, prop) {
+    if (prop === "_")
+      return {
+        ...subquery._,
+        selectedFields: new Proxy(
+          subquery._.selectedFields,
+          this
+        )
+      };
+    if (prop === ViewBaseConfig)
+      return {
+        ...subquery[ViewBaseConfig],
+        selectedFields: new Proxy(
+          subquery[ViewBaseConfig].selectedFields,
+          this
+        )
+      };
+    if (typeof prop == "symbol")
+      return subquery[prop];
+    let value = (is(subquery, Subquery) ? subquery._.selectedFields : is(subquery, View) ? subquery[ViewBaseConfig].selectedFields : subquery)[prop];
+    if (is(value, SQL.Aliased)) {
+      if (this.config.sqlAliasedBehavior === "sql" && !value.isSelectionField)
+        return value.sql;
+      let newValue = value.clone();
+      return newValue.isSelectionField = !0, newValue;
+    }
+    if (is(value, SQL)) {
+      if (this.config.sqlBehavior === "sql")
+        return value;
+      throw new Error(
+        `You tried to reference "${prop}" field from a subquery, which is a raw SQL field, but it doesn't have an alias declared. Please add an alias to the field using ".as('alias')" method.`
+      );
+    }
+    return is(value, Column) ? this.config.alias ? new Proxy(
+      value,
+      new ColumnAliasProxyHandler(
+        new Proxy(
+          value.table,
+          new TableAliasProxyHandler(this.config.alias, this.config.replaceOriginalName ?? !1)
+        )
+      )
+    ) : value : typeof value != "object" || value === null ? value : new Proxy(value, new _SelectionProxyHandler(this.config));
+  }
+}, SelectionProxyHandler = _SelectionProxyHandler;
+_a41 = entityKind, __publicField(SelectionProxyHandler, _a41, "SelectionProxyHandler");
+
+// node_modules/drizzle-orm/query-promise.js
+var _a42, QueryPromise = class {
+  [(_a42 = entityKind, Symbol.toStringTag)] = "QueryPromise";
+  catch(onRejected) {
+    return this.then(void 0, onRejected);
+  }
+  finally(onFinally) {
+    return this.then(
+      (value) => (onFinally?.(), value),
+      (reason) => {
+        throw onFinally?.(), reason;
+      }
+    );
+  }
+  then(onFulfilled, onRejected) {
+    return this.execute().then(onFulfilled, onRejected);
+  }
+};
+__publicField(QueryPromise, _a42, "QueryPromise");
+
+// node_modules/drizzle-orm/sqlite-core/foreign-keys.js
+var _a43, ForeignKeyBuilder2 = class {
+  /** @internal */
+  reference;
+  /** @internal */
+  _onUpdate;
+  /** @internal */
+  _onDelete;
+  constructor(config, actions) {
+    this.reference = () => {
+      let { name, columns, foreignColumns } = config();
+      return { name, columns, foreignTable: foreignColumns[0].table, foreignColumns };
+    }, actions && (this._onUpdate = actions.onUpdate, this._onDelete = actions.onDelete);
+  }
+  onUpdate(action26) {
+    return this._onUpdate = action26, this;
+  }
+  onDelete(action26) {
+    return this._onDelete = action26, this;
+  }
+  /** @internal */
+  build(table) {
+    return new ForeignKey2(table, this);
+  }
+};
+_a43 = entityKind, __publicField(ForeignKeyBuilder2, _a43, "SQLiteForeignKeyBuilder");
+var _a44, ForeignKey2 = class {
+  constructor(table, builder) {
+    this.table = table, this.reference = builder.reference, this.onUpdate = builder._onUpdate, this.onDelete = builder._onDelete;
+  }
+  reference;
+  onUpdate;
+  onDelete;
+  getName() {
+    let { name, columns, foreignColumns } = this.reference(), columnNames = columns.map((column) => column.name), foreignColumnNames = foreignColumns.map((column) => column.name), chunks = [
+      this.table[TableName],
+      ...columnNames,
+      foreignColumns[0].table[TableName],
+      ...foreignColumnNames
+    ];
+    return name ?? `${chunks.join("_")}_fk`;
+  }
+};
+_a44 = entityKind, __publicField(ForeignKey2, _a44, "SQLiteForeignKey");
+
+// node_modules/drizzle-orm/sqlite-core/unique-constraint.js
+function uniqueKeyName2(table, columns) {
+  return `${table[TableName]}_${columns.join("_")}_unique`;
+}
+var _a45, UniqueConstraintBuilder2 = class {
+  constructor(columns, name) {
+    this.name = name, this.columns = columns;
+  }
+  /** @internal */
+  columns;
+  /** @internal */
+  build(table) {
+    return new UniqueConstraint2(table, this.columns, this.name);
+  }
+};
+_a45 = entityKind, __publicField(UniqueConstraintBuilder2, _a45, "SQLiteUniqueConstraintBuilder");
+var _a46, UniqueOnConstraintBuilder2 = class {
+  /** @internal */
+  name;
+  constructor(name) {
+    this.name = name;
+  }
+  on(...columns) {
+    return new UniqueConstraintBuilder2(columns, this.name);
+  }
+};
+_a46 = entityKind, __publicField(UniqueOnConstraintBuilder2, _a46, "SQLiteUniqueOnConstraintBuilder");
+var _a47, UniqueConstraint2 = class {
+  constructor(table, columns, name) {
+    this.table = table, this.columns = columns, this.name = name ?? uniqueKeyName2(this.table, this.columns.map((column) => column.name));
+  }
+  columns;
+  name;
+  getName() {
+    return this.name;
+  }
+};
+_a47 = entityKind, __publicField(UniqueConstraint2, _a47, "SQLiteUniqueConstraint");
+
+// node_modules/drizzle-orm/sqlite-core/columns/common.js
+var _a48, SQLiteColumnBuilder = class extends ColumnBuilder {
+  foreignKeyConfigs = [];
+  references(ref, actions = {}) {
+    return this.foreignKeyConfigs.push({ ref, actions }), this;
+  }
+  unique(name) {
+    return this.config.isUnique = !0, this.config.uniqueName = name, this;
+  }
+  generatedAlwaysAs(as, config) {
+    return this.config.generated = {
+      as,
+      type: "always",
+      mode: config?.mode ?? "virtual"
+    }, this;
+  }
+  /** @internal */
+  buildForeignKeys(column, table) {
+    return this.foreignKeyConfigs.map(({ ref, actions }) => ((ref2, actions2) => {
+      let builder = new ForeignKeyBuilder2(() => {
+        let foreignColumn = ref2();
+        return { columns: [column], foreignColumns: [foreignColumn] };
+      });
+      return actions2.onUpdate && builder.onUpdate(actions2.onUpdate), actions2.onDelete && builder.onDelete(actions2.onDelete), builder.build(table);
+    })(ref, actions));
+  }
+};
+_a48 = entityKind, __publicField(SQLiteColumnBuilder, _a48, "SQLiteColumnBuilder");
+var _a49, SQLiteColumn = class extends Column {
+  constructor(table, config) {
+    config.uniqueName || (config.uniqueName = uniqueKeyName2(table, [config.name])), super(table, config), this.table = table;
+  }
+};
+_a49 = entityKind, __publicField(SQLiteColumn, _a49, "SQLiteColumn");
+
+// node_modules/drizzle-orm/sqlite-core/table.js
+var InlineForeignKeys2 = Symbol.for("drizzle:SQLiteInlineForeignKeys"), _a50, SQLiteTable = class extends Table {
+  /** @internal */
+  [(_a50 = entityKind, Table.Symbol.Columns)];
+  /** @internal */
+  [InlineForeignKeys2] = [];
+  /** @internal */
+  [Table.Symbol.ExtraConfigBuilder] = void 0;
+};
+__publicField(SQLiteTable, _a50, "SQLiteTable"), /** @internal */
+__publicField(SQLiteTable, "Symbol", Object.assign({}, Table.Symbol, {
+  InlineForeignKeys: InlineForeignKeys2
+}));
+
+// node_modules/drizzle-orm/sqlite-core/utils.js
+function extractUsedTable(table) {
+  return is(table, SQLiteTable) ? [`${table[Table.Symbol.BaseName]}`] : is(table, Subquery) ? table._.usedTables ?? [] : is(table, SQL) ? table.usedTables ?? [] : [];
+}
+
+// node_modules/drizzle-orm/sqlite-core/query-builders/delete.js
+var _a51, SQLiteDeleteBase = class extends QueryPromise {
+  constructor(table, session, dialect, withList) {
+    super(), this.table = table, this.session = session, this.dialect = dialect, this.config = { table, withList };
+  }
+  /** @internal */
+  config;
+  /**
+   * Adds a `where` clause to the query.
+   *
+   * Calling this method will delete only those rows that fulfill a specified condition.
+   *
+   * See docs: {@link https://orm.drizzle.team/docs/delete}
+   *
+   * @param where the `where` clause.
+   *
+   * @example
+   * You can use conditional operators and `sql function` to filter the rows to be deleted.
+   *
+   * ```ts
+   * // Delete all cars with green color
+   * db.delete(cars).where(eq(cars.color, 'green'));
+   * // or
+   * db.delete(cars).where(sql`${cars.color} = 'green'`)
+   * ```
+   *
+   * You can logically combine conditional operators with `and()` and `or()` operators:
+   *
+   * ```ts
+   * // Delete all BMW cars with a green color
+   * db.delete(cars).where(and(eq(cars.color, 'green'), eq(cars.brand, 'BMW')));
+   *
+   * // Delete all cars with the green or blue color
+   * db.delete(cars).where(or(eq(cars.color, 'green'), eq(cars.color, 'blue')));
+   * ```
+   */
+  where(where) {
+    return this.config.where = where, this;
+  }
+  orderBy(...columns) {
+    if (typeof columns[0] == "function") {
+      let orderBy = columns[0](
+        new Proxy(
+          this.config.table[Table.Symbol.Columns],
+          new SelectionProxyHandler({ sqlAliasedBehavior: "alias", sqlBehavior: "sql" })
+        )
+      ), orderByArray = Array.isArray(orderBy) ? orderBy : [orderBy];
+      this.config.orderBy = orderByArray;
+    } else {
+      let orderByArray = columns;
+      this.config.orderBy = orderByArray;
+    }
+    return this;
+  }
+  limit(limit) {
+    return this.config.limit = limit, this;
+  }
+  returning(fields = this.table[SQLiteTable.Symbol.Columns]) {
+    return this.config.returning = orderSelectedFields(fields), this;
+  }
+  /** @internal */
+  getSQL() {
+    return this.dialect.buildDeleteQuery(this.config);
+  }
+  toSQL() {
+    let { typings: _typings, ...rest } = this.dialect.sqlToQuery(this.getSQL());
+    return rest;
+  }
+  /** @internal */
+  _prepare(isOneTimeQuery = !0) {
+    return this.session[isOneTimeQuery ? "prepareOneTimeQuery" : "prepareQuery"](
+      this.dialect.sqlToQuery(this.getSQL()),
+      this.config.returning,
+      this.config.returning ? "all" : "run",
+      !0,
+      void 0,
+      {
+        type: "delete",
+        tables: extractUsedTable(this.config.table)
+      }
+    );
+  }
+  prepare() {
+    return this._prepare(!1);
+  }
+  run = (placeholderValues) => this._prepare().run(placeholderValues);
+  all = (placeholderValues) => this._prepare().all(placeholderValues);
+  get = (placeholderValues) => this._prepare().get(placeholderValues);
+  values = (placeholderValues) => this._prepare().values(placeholderValues);
+  async execute(placeholderValues) {
+    return this._prepare().execute(placeholderValues);
+  }
+  $dynamic() {
+    return this;
+  }
+};
+_a51 = entityKind, __publicField(SQLiteDeleteBase, _a51, "SQLiteDelete");
+
+// node_modules/drizzle-orm/casing.js
+function toSnakeCase(input) {
+  return (input.replace(/['\u2019]/g, "").match(/[\da-z]+|[A-Z]+(?![a-z])|[A-Z][\da-z]+/g) ?? []).map((word) => word.toLowerCase()).join("_");
+}
+function toCamelCase(input) {
+  return (input.replace(/['\u2019]/g, "").match(/[\da-z]+|[A-Z]+(?![a-z])|[A-Z][\da-z]+/g) ?? []).reduce((acc, word, i) => {
+    let formattedWord = i === 0 ? word.toLowerCase() : `${word[0].toUpperCase()}${word.slice(1)}`;
+    return acc + formattedWord;
+  }, "");
+}
+function noopCase(input) {
+  return input;
+}
+var _a52, CasingCache = class {
+  /** @internal */
+  cache = {};
+  cachedTables = {};
+  convert;
+  constructor(casing) {
+    this.convert = casing === "snake_case" ? toSnakeCase : casing === "camelCase" ? toCamelCase : noopCase;
+  }
+  getColumnCasing(column) {
+    if (!column.keyAsName)
+      return column.name;
+    let schema3 = column.table[Table.Symbol.Schema] ?? "public", tableName = column.table[Table.Symbol.OriginalName], key = `${schema3}.${tableName}.${column.name}`;
+    return this.cache[key] || this.cacheTable(column.table), this.cache[key];
+  }
+  cacheTable(table) {
+    let schema3 = table[Table.Symbol.Schema] ?? "public", tableName = table[Table.Symbol.OriginalName], tableKey = `${schema3}.${tableName}`;
+    if (!this.cachedTables[tableKey]) {
+      for (let column of Object.values(table[Table.Symbol.Columns])) {
+        let columnKey = `${tableKey}.${column.name}`;
+        this.cache[columnKey] = this.convert(column.name);
+      }
+      this.cachedTables[tableKey] = !0;
+    }
+  }
+  clearCache() {
+    this.cache = {}, this.cachedTables = {};
+  }
+};
+_a52 = entityKind, __publicField(CasingCache, _a52, "CasingCache");
+
+// node_modules/drizzle-orm/errors.js
+var _a53, DrizzleError = class extends Error {
+  constructor({ message, cause }) {
+    super(message), this.name = "DrizzleError", this.cause = cause;
+  }
+};
+_a53 = entityKind, __publicField(DrizzleError, _a53, "DrizzleError");
+var _a54, TransactionRollbackError = class extends DrizzleError {
+  constructor() {
+    super({ message: "Rollback" });
+  }
+};
+_a54 = entityKind, __publicField(TransactionRollbackError, _a54, "TransactionRollbackError");
+
+// node_modules/drizzle-orm/sqlite-core/view-base.js
+var _a55, SQLiteViewBase = class extends View {
+};
+_a55 = entityKind, __publicField(SQLiteViewBase, _a55, "SQLiteViewBase");
+
+// node_modules/drizzle-orm/sqlite-core/dialect.js
+var _a56, SQLiteDialect = class {
+  /** @internal */
+  casing;
+  constructor(config) {
+    this.casing = new CasingCache(config?.casing);
+  }
+  escapeName(name) {
+    return `"${name}"`;
+  }
+  escapeParam(_num) {
+    return "?";
+  }
+  escapeString(str) {
+    return `'${str.replace(/'/g, "''")}'`;
+  }
+  buildWithCTE(queries) {
+    if (!queries?.length)
+      return;
+    let withSqlChunks = [sql4`with `];
+    for (let [i, w] of queries.entries())
+      withSqlChunks.push(sql4`${sql4.identifier(w._.alias)} as (${w._.sql})`), i < queries.length - 1 && withSqlChunks.push(sql4`, `);
+    return withSqlChunks.push(sql4` `), sql4.join(withSqlChunks);
+  }
+  buildDeleteQuery({ table, where, returning, withList, limit, orderBy }) {
+    let withSql = this.buildWithCTE(withList), returningSql = returning ? sql4` returning ${this.buildSelection(returning, { isSingleTable: !0 })}` : void 0, whereSql = where ? sql4` where ${where}` : void 0, orderBySql = this.buildOrderBy(orderBy), limitSql = this.buildLimit(limit);
+    return sql4`${withSql}delete from ${table}${whereSql}${returningSql}${orderBySql}${limitSql}`;
+  }
+  buildUpdateSet(table, set) {
+    let tableColumns = table[Table.Symbol.Columns], columnNames = Object.keys(tableColumns).filter(
+      (colName) => set[colName] !== void 0 || tableColumns[colName]?.onUpdateFn !== void 0
+    ), setSize = columnNames.length;
+    return sql4.join(columnNames.flatMap((colName, i) => {
+      let col = tableColumns[colName], value = set[colName] ?? sql4.param(col.onUpdateFn(), col), res = sql4`${sql4.identifier(this.casing.getColumnCasing(col))} = ${value}`;
+      return i < setSize - 1 ? [res, sql4.raw(", ")] : [res];
+    }));
+  }
+  buildUpdateQuery({ table, set, where, returning, withList, joins, from, limit, orderBy }) {
+    let withSql = this.buildWithCTE(withList), setSql = this.buildUpdateSet(table, set), fromSql = from && sql4.join([sql4.raw(" from "), this.buildFromTable(from)]), joinsSql = this.buildJoins(joins), returningSql = returning ? sql4` returning ${this.buildSelection(returning, { isSingleTable: !0 })}` : void 0, whereSql = where ? sql4` where ${where}` : void 0, orderBySql = this.buildOrderBy(orderBy), limitSql = this.buildLimit(limit);
+    return sql4`${withSql}update ${table} set ${setSql}${fromSql}${joinsSql}${whereSql}${returningSql}${orderBySql}${limitSql}`;
+  }
+  /**
+   * Builds selection SQL with provided fields/expressions
+   *
+   * Examples:
+   *
+   * `select <selection> from`
+   *
+   * `insert ... returning <selection>`
+   *
+   * If `isSingleTable` is true, then columns won't be prefixed with table name
+   */
+  buildSelection(fields, { isSingleTable = !1 } = {}) {
+    let columnsLen = fields.length, chunks = fields.flatMap(({ field }, i) => {
+      let chunk = [];
+      if (is(field, SQL.Aliased) && field.isSelectionField)
+        chunk.push(sql4.identifier(field.fieldAlias));
+      else if (is(field, SQL.Aliased) || is(field, SQL)) {
+        let query = is(field, SQL.Aliased) ? field.sql : field;
+        isSingleTable ? chunk.push(
+          new SQL(
+            query.queryChunks.map((c) => is(c, Column) ? sql4.identifier(this.casing.getColumnCasing(c)) : c)
+          )
+        ) : chunk.push(query), is(field, SQL.Aliased) && chunk.push(sql4` as ${sql4.identifier(field.fieldAlias)}`);
+      } else if (is(field, Column)) {
+        let tableName = field.table[Table.Symbol.Name];
+        field.columnType === "SQLiteNumericBigInt" ? isSingleTable ? chunk.push(sql4`cast(${sql4.identifier(this.casing.getColumnCasing(field))} as text)`) : chunk.push(
+          sql4`cast(${sql4.identifier(tableName)}.${sql4.identifier(this.casing.getColumnCasing(field))} as text)`
+        ) : isSingleTable ? chunk.push(sql4.identifier(this.casing.getColumnCasing(field))) : chunk.push(sql4`${sql4.identifier(tableName)}.${sql4.identifier(this.casing.getColumnCasing(field))}`);
+      }
+      return i < columnsLen - 1 && chunk.push(sql4`, `), chunk;
+    });
+    return sql4.join(chunks);
+  }
+  buildJoins(joins) {
+    if (!joins || joins.length === 0)
+      return;
+    let joinsArray = [];
+    if (joins)
+      for (let [index, joinMeta] of joins.entries()) {
+        index === 0 && joinsArray.push(sql4` `);
+        let table = joinMeta.table, onSql = joinMeta.on ? sql4` on ${joinMeta.on}` : void 0;
+        if (is(table, SQLiteTable)) {
+          let tableName = table[SQLiteTable.Symbol.Name], tableSchema = table[SQLiteTable.Symbol.Schema], origTableName = table[SQLiteTable.Symbol.OriginalName], alias = tableName === origTableName ? void 0 : joinMeta.alias;
+          joinsArray.push(
+            sql4`${sql4.raw(joinMeta.joinType)} join ${tableSchema ? sql4`${sql4.identifier(tableSchema)}.` : void 0}${sql4.identifier(origTableName)}${alias && sql4` ${sql4.identifier(alias)}`}${onSql}`
+          );
+        } else
+          joinsArray.push(
+            sql4`${sql4.raw(joinMeta.joinType)} join ${table}${onSql}`
+          );
+        index < joins.length - 1 && joinsArray.push(sql4` `);
+      }
+    return sql4.join(joinsArray);
+  }
+  buildLimit(limit) {
+    return typeof limit == "object" || typeof limit == "number" && limit >= 0 ? sql4` limit ${limit}` : void 0;
+  }
+  buildOrderBy(orderBy) {
+    let orderByList = [];
+    if (orderBy)
+      for (let [index, orderByValue] of orderBy.entries())
+        orderByList.push(orderByValue), index < orderBy.length - 1 && orderByList.push(sql4`, `);
+    return orderByList.length > 0 ? sql4` order by ${sql4.join(orderByList)}` : void 0;
+  }
+  buildFromTable(table) {
+    return is(table, Table) && table[Table.Symbol.IsAlias] ? sql4`${sql4`${sql4.identifier(table[Table.Symbol.Schema] ?? "")}.`.if(table[Table.Symbol.Schema])}${sql4.identifier(table[Table.Symbol.OriginalName])} ${sql4.identifier(table[Table.Symbol.Name])}` : table;
+  }
+  buildSelectQuery({
+    withList,
+    fields,
+    fieldsFlat,
+    where,
+    having,
+    table,
+    joins,
+    orderBy,
+    groupBy,
+    limit,
+    offset,
+    distinct,
+    setOperators
+  }) {
+    let fieldsList = fieldsFlat ?? orderSelectedFields(fields);
+    for (let f of fieldsList)
+      if (is(f.field, Column) && getTableName(f.field.table) !== (is(table, Subquery) ? table._.alias : is(table, SQLiteViewBase) ? table[ViewBaseConfig].name : is(table, SQL) ? void 0 : getTableName(table)) && !((table2) => joins?.some(
+        ({ alias }) => alias === (table2[Table.Symbol.IsAlias] ? getTableName(table2) : table2[Table.Symbol.BaseName])
+      ))(f.field.table)) {
+        let tableName = getTableName(f.field.table);
+        throw new Error(
+          `Your "${f.path.join("->")}" field references a column "${tableName}"."${f.field.name}", but the table "${tableName}" is not part of the query! Did you forget to join it?`
+        );
+      }
+    let isSingleTable = !joins || joins.length === 0, withSql = this.buildWithCTE(withList), distinctSql = distinct ? sql4` distinct` : void 0, selection = this.buildSelection(fieldsList, { isSingleTable }), tableSql = this.buildFromTable(table), joinsSql = this.buildJoins(joins), whereSql = where ? sql4` where ${where}` : void 0, havingSql = having ? sql4` having ${having}` : void 0, groupByList = [];
+    if (groupBy)
+      for (let [index, groupByValue] of groupBy.entries())
+        groupByList.push(groupByValue), index < groupBy.length - 1 && groupByList.push(sql4`, `);
+    let groupBySql = groupByList.length > 0 ? sql4` group by ${sql4.join(groupByList)}` : void 0, orderBySql = this.buildOrderBy(orderBy), limitSql = this.buildLimit(limit), offsetSql = offset ? sql4` offset ${offset}` : void 0, finalQuery = sql4`${withSql}select${distinctSql} ${selection} from ${tableSql}${joinsSql}${whereSql}${groupBySql}${havingSql}${orderBySql}${limitSql}${offsetSql}`;
+    return setOperators.length > 0 ? this.buildSetOperations(finalQuery, setOperators) : finalQuery;
+  }
+  buildSetOperations(leftSelect, setOperators) {
+    let [setOperator, ...rest] = setOperators;
+    if (!setOperator)
+      throw new Error("Cannot pass undefined values to any set operator");
+    return rest.length === 0 ? this.buildSetOperationQuery({ leftSelect, setOperator }) : this.buildSetOperations(
+      this.buildSetOperationQuery({ leftSelect, setOperator }),
+      rest
+    );
+  }
+  buildSetOperationQuery({
+    leftSelect,
+    setOperator: { type, isAll, rightSelect, limit, orderBy, offset }
+  }) {
+    let leftChunk = sql4`${leftSelect.getSQL()} `, rightChunk = sql4`${rightSelect.getSQL()}`, orderBySql;
+    if (orderBy && orderBy.length > 0) {
+      let orderByValues = [];
+      for (let singleOrderBy of orderBy)
+        if (is(singleOrderBy, SQLiteColumn))
+          orderByValues.push(sql4.identifier(singleOrderBy.name));
+        else if (is(singleOrderBy, SQL)) {
+          for (let i = 0; i < singleOrderBy.queryChunks.length; i++) {
+            let chunk = singleOrderBy.queryChunks[i];
+            is(chunk, SQLiteColumn) && (singleOrderBy.queryChunks[i] = sql4.identifier(this.casing.getColumnCasing(chunk)));
+          }
+          orderByValues.push(sql4`${singleOrderBy}`);
+        } else
+          orderByValues.push(sql4`${singleOrderBy}`);
+      orderBySql = sql4` order by ${sql4.join(orderByValues, sql4`, `)}`;
+    }
+    let limitSql = typeof limit == "object" || typeof limit == "number" && limit >= 0 ? sql4` limit ${limit}` : void 0, operatorChunk = sql4.raw(`${type} ${isAll ? "all " : ""}`), offsetSql = offset ? sql4` offset ${offset}` : void 0;
+    return sql4`${leftChunk}${operatorChunk}${rightChunk}${orderBySql}${limitSql}${offsetSql}`;
+  }
+  buildInsertQuery({ table, values: valuesOrSelect, onConflict, returning, withList, select }) {
+    let valuesSqlList = [], columns = table[Table.Symbol.Columns], colEntries = Object.entries(columns).filter(
+      ([_, col]) => !col.shouldDisableInsert()
+    ), insertOrder = colEntries.map(([, column]) => sql4.identifier(this.casing.getColumnCasing(column)));
+    if (select) {
+      let select2 = valuesOrSelect;
+      is(select2, SQL) ? valuesSqlList.push(select2) : valuesSqlList.push(select2.getSQL());
+    } else {
+      let values = valuesOrSelect;
+      valuesSqlList.push(sql4.raw("values "));
+      for (let [valueIndex, value] of values.entries()) {
+        let valueList = [];
+        for (let [fieldName, col] of colEntries) {
+          let colValue = value[fieldName];
+          if (colValue === void 0 || is(colValue, Param) && colValue.value === void 0) {
+            let defaultValue;
+            if (col.default !== null && col.default !== void 0)
+              defaultValue = is(col.default, SQL) ? col.default : sql4.param(col.default, col);
+            else if (col.defaultFn !== void 0) {
+              let defaultFnResult = col.defaultFn();
+              defaultValue = is(defaultFnResult, SQL) ? defaultFnResult : sql4.param(defaultFnResult, col);
+            } else if (!col.default && col.onUpdateFn !== void 0) {
+              let onUpdateFnResult = col.onUpdateFn();
+              defaultValue = is(onUpdateFnResult, SQL) ? onUpdateFnResult : sql4.param(onUpdateFnResult, col);
+            } else
+              defaultValue = sql4`null`;
+            valueList.push(defaultValue);
+          } else
+            valueList.push(colValue);
+        }
+        valuesSqlList.push(valueList), valueIndex < values.length - 1 && valuesSqlList.push(sql4`, `);
+      }
+    }
+    let withSql = this.buildWithCTE(withList), valuesSql = sql4.join(valuesSqlList), returningSql = returning ? sql4` returning ${this.buildSelection(returning, { isSingleTable: !0 })}` : void 0, onConflictSql = onConflict?.length ? sql4.join(onConflict) : void 0;
+    return sql4`${withSql}insert into ${table} ${insertOrder} ${valuesSql}${onConflictSql}${returningSql}`;
+  }
+  sqlToQuery(sql22, invokeSource) {
+    return sql22.toQuery({
+      casing: this.casing,
+      escapeName: this.escapeName,
+      escapeParam: this.escapeParam,
+      escapeString: this.escapeString,
+      invokeSource
+    });
+  }
+  buildRelationalQuery({
+    fullSchema,
+    schema: schema3,
+    tableNamesMap,
+    table,
+    tableConfig,
+    queryConfig: config,
+    tableAlias,
+    nestedQueryRelation,
+    joinOn
+  }) {
+    let selection = [], limit, offset, orderBy = [], where, joins = [];
+    if (config === !0)
+      selection = Object.entries(tableConfig.columns).map(([key, value]) => ({
+        dbKey: value.name,
+        tsKey: key,
+        field: aliasedTableColumn(value, tableAlias),
+        relationTableTsKey: void 0,
+        isJson: !1,
+        selection: []
+      }));
+    else {
+      let aliasedColumns = Object.fromEntries(
+        Object.entries(tableConfig.columns).map(([key, value]) => [key, aliasedTableColumn(value, tableAlias)])
+      );
+      if (config.where) {
+        let whereSql = typeof config.where == "function" ? config.where(aliasedColumns, getOperators()) : config.where;
+        where = whereSql && mapColumnsInSQLToAlias(whereSql, tableAlias);
+      }
+      let fieldsSelection = [], selectedColumns = [];
+      if (config.columns) {
+        let isIncludeMode = !1;
+        for (let [field, value] of Object.entries(config.columns))
+          value !== void 0 && field in tableConfig.columns && (!isIncludeMode && value === !0 && (isIncludeMode = !0), selectedColumns.push(field));
+        selectedColumns.length > 0 && (selectedColumns = isIncludeMode ? selectedColumns.filter((c) => config.columns?.[c] === !0) : Object.keys(tableConfig.columns).filter((key) => !selectedColumns.includes(key)));
+      } else
+        selectedColumns = Object.keys(tableConfig.columns);
+      for (let field of selectedColumns) {
+        let column = tableConfig.columns[field];
+        fieldsSelection.push({ tsKey: field, value: column });
+      }
+      let selectedRelations = [];
+      config.with && (selectedRelations = Object.entries(config.with).filter((entry2) => !!entry2[1]).map(([tsKey, queryConfig]) => ({ tsKey, queryConfig, relation: tableConfig.relations[tsKey] })));
+      let extras;
+      if (config.extras) {
+        extras = typeof config.extras == "function" ? config.extras(aliasedColumns, { sql: sql4 }) : config.extras;
+        for (let [tsKey, value] of Object.entries(extras))
+          fieldsSelection.push({
+            tsKey,
+            value: mapColumnsInAliasedSQLToAlias(value, tableAlias)
+          });
+      }
+      for (let { tsKey, value } of fieldsSelection)
+        selection.push({
+          dbKey: is(value, SQL.Aliased) ? value.fieldAlias : tableConfig.columns[tsKey].name,
+          tsKey,
+          field: is(value, Column) ? aliasedTableColumn(value, tableAlias) : value,
+          relationTableTsKey: void 0,
+          isJson: !1,
+          selection: []
+        });
+      let orderByOrig = typeof config.orderBy == "function" ? config.orderBy(aliasedColumns, getOrderByOperators()) : config.orderBy ?? [];
+      Array.isArray(orderByOrig) || (orderByOrig = [orderByOrig]), orderBy = orderByOrig.map((orderByValue) => is(orderByValue, Column) ? aliasedTableColumn(orderByValue, tableAlias) : mapColumnsInSQLToAlias(orderByValue, tableAlias)), limit = config.limit, offset = config.offset;
+      for (let {
+        tsKey: selectedRelationTsKey,
+        queryConfig: selectedRelationConfigValue,
+        relation
+      } of selectedRelations) {
+        let normalizedRelation = normalizeRelation(schema3, tableNamesMap, relation), relationTableName = getTableUniqueName(relation.referencedTable), relationTableTsName = tableNamesMap[relationTableName], relationTableAlias = `${tableAlias}_${selectedRelationTsKey}`, joinOn2 = and2(
+          ...normalizedRelation.fields.map(
+            (field2, i) => eq3(
+              aliasedTableColumn(normalizedRelation.references[i], relationTableAlias),
+              aliasedTableColumn(field2, tableAlias)
+            )
+          )
+        ), builtRelation = this.buildRelationalQuery({
+          fullSchema,
+          schema: schema3,
+          tableNamesMap,
+          table: fullSchema[relationTableTsName],
+          tableConfig: schema3[relationTableTsName],
+          queryConfig: is(relation, One) ? selectedRelationConfigValue === !0 ? { limit: 1 } : { ...selectedRelationConfigValue, limit: 1 } : selectedRelationConfigValue,
+          tableAlias: relationTableAlias,
+          joinOn: joinOn2,
+          nestedQueryRelation: relation
+        }), field = sql4`(${builtRelation.sql})`.as(selectedRelationTsKey);
+        selection.push({
+          dbKey: selectedRelationTsKey,
+          tsKey: selectedRelationTsKey,
+          field,
+          relationTableTsKey: relationTableTsName,
+          isJson: !0,
+          selection: builtRelation.selection
+        });
+      }
+    }
+    if (selection.length === 0)
+      throw new DrizzleError({
+        message: `No fields selected for table "${tableConfig.tsName}" ("${tableAlias}"). You need to have at least one item in "columns", "with" or "extras". If you need to select all columns, omit the "columns" key or set it to undefined.`
+      });
+    let result;
+    if (where = and2(joinOn, where), nestedQueryRelation) {
+      let field = sql4`json_array(${sql4.join(
+        selection.map(
+          ({ field: field2 }) => is(field2, SQLiteColumn) ? sql4.identifier(this.casing.getColumnCasing(field2)) : is(field2, SQL.Aliased) ? field2.sql : field2
+        ),
+        sql4`, `
+      )})`;
+      is(nestedQueryRelation, Many) && (field = sql4`coalesce(json_group_array(${field}), json_array())`);
+      let nestedSelection = [{
+        dbKey: "data",
+        tsKey: "data",
+        field: field.as("data"),
+        isJson: !0,
+        relationTableTsKey: tableConfig.tsName,
+        selection
+      }];
+      limit !== void 0 || offset !== void 0 || orderBy.length > 0 ? (result = this.buildSelectQuery({
+        table: aliasedTable(table, tableAlias),
+        fields: {},
+        fieldsFlat: [
+          {
+            path: [],
+            field: sql4.raw("*")
+          }
+        ],
+        where,
+        limit,
+        offset,
+        orderBy,
+        setOperators: []
+      }), where = void 0, limit = void 0, offset = void 0, orderBy = void 0) : result = aliasedTable(table, tableAlias), result = this.buildSelectQuery({
+        table: is(result, SQLiteTable) ? result : new Subquery(result, {}, tableAlias),
+        fields: {},
+        fieldsFlat: nestedSelection.map(({ field: field2 }) => ({
+          path: [],
+          field: is(field2, Column) ? aliasedTableColumn(field2, tableAlias) : field2
+        })),
+        joins,
+        where,
+        limit,
+        offset,
+        orderBy,
+        setOperators: []
+      });
+    } else
+      result = this.buildSelectQuery({
+        table: aliasedTable(table, tableAlias),
+        fields: {},
+        fieldsFlat: selection.map(({ field }) => ({
+          path: [],
+          field: is(field, Column) ? aliasedTableColumn(field, tableAlias) : field
+        })),
+        joins,
+        where,
+        limit,
+        offset,
+        orderBy,
+        setOperators: []
+      });
+    return {
+      tableTsKey: tableConfig.tsName,
+      sql: result,
+      selection
+    };
+  }
+};
+_a56 = entityKind, __publicField(SQLiteDialect, _a56, "SQLiteDialect");
+var _a57, SQLiteSyncDialect = class extends SQLiteDialect {
+  migrate(migrations, session, config) {
+    let migrationsTable = config === void 0 || typeof config == "string" ? "__drizzle_migrations" : config.migrationsTable ?? "__drizzle_migrations", migrationTableCreate = sql4`
+			CREATE TABLE IF NOT EXISTS ${sql4.identifier(migrationsTable)} (
+				id SERIAL PRIMARY KEY,
+				hash text NOT NULL,
+				created_at numeric
+			)
+		`;
+    session.run(migrationTableCreate);
+    let lastDbMigration = session.values(
+      sql4`SELECT id, hash, created_at FROM ${sql4.identifier(migrationsTable)} ORDER BY created_at DESC LIMIT 1`
+    )[0] ?? void 0;
+    session.run(sql4`BEGIN`);
+    try {
+      for (let migration of migrations)
+        if (!lastDbMigration || Number(lastDbMigration[2]) < migration.folderMillis) {
+          for (let stmt of migration.sql)
+            session.run(sql4.raw(stmt));
+          session.run(
+            sql4`INSERT INTO ${sql4.identifier(migrationsTable)} ("hash", "created_at") VALUES(${migration.hash}, ${migration.folderMillis})`
+          );
+        }
+      session.run(sql4`COMMIT`);
+    } catch (e) {
+      throw session.run(sql4`ROLLBACK`), e;
+    }
+  }
+};
+_a57 = entityKind, __publicField(SQLiteSyncDialect, _a57, "SQLiteSyncDialect");
+var _a58, SQLiteAsyncDialect = class extends SQLiteDialect {
+  async migrate(migrations, session, config) {
+    let migrationsTable = config === void 0 || typeof config == "string" ? "__drizzle_migrations" : config.migrationsTable ?? "__drizzle_migrations", migrationTableCreate = sql4`
+			CREATE TABLE IF NOT EXISTS ${sql4.identifier(migrationsTable)} (
+				id SERIAL PRIMARY KEY,
+				hash text NOT NULL,
+				created_at numeric
+			)
+		`;
+    await session.run(migrationTableCreate);
+    let lastDbMigration = (await session.values(
+      sql4`SELECT id, hash, created_at FROM ${sql4.identifier(migrationsTable)} ORDER BY created_at DESC LIMIT 1`
+    ))[0] ?? void 0;
+    await session.transaction(async (tx) => {
+      for (let migration of migrations)
+        if (!lastDbMigration || Number(lastDbMigration[2]) < migration.folderMillis) {
+          for (let stmt of migration.sql)
+            await tx.run(sql4.raw(stmt));
+          await tx.run(
+            sql4`INSERT INTO ${sql4.identifier(migrationsTable)} ("hash", "created_at") VALUES(${migration.hash}, ${migration.folderMillis})`
+          );
+        }
+    });
+  }
+};
+_a58 = entityKind, __publicField(SQLiteAsyncDialect, _a58, "SQLiteAsyncDialect");
+
+// node_modules/drizzle-orm/query-builders/query-builder.js
+var _a59, TypedQueryBuilder = class {
+  /** @internal */
+  getSelectedFields() {
+    return this._.selectedFields;
+  }
+};
+_a59 = entityKind, __publicField(TypedQueryBuilder, _a59, "TypedQueryBuilder");
+
+// node_modules/drizzle-orm/sqlite-core/query-builders/select.js
+var _a60, SQLiteSelectBuilder = class {
+  fields;
+  session;
+  dialect;
+  withList;
+  distinct;
+  constructor(config) {
+    this.fields = config.fields, this.session = config.session, this.dialect = config.dialect, this.withList = config.withList, this.distinct = config.distinct;
+  }
+  from(source) {
+    let isPartialSelect = !!this.fields, fields;
+    return this.fields ? fields = this.fields : is(source, Subquery) ? fields = Object.fromEntries(
+      Object.keys(source._.selectedFields).map((key) => [key, source[key]])
+    ) : is(source, SQLiteViewBase) ? fields = source[ViewBaseConfig].selectedFields : is(source, SQL) ? fields = {} : fields = getTableColumns(source), new SQLiteSelectBase({
+      table: source,
+      fields,
+      isPartialSelect,
+      session: this.session,
+      dialect: this.dialect,
+      withList: this.withList,
+      distinct: this.distinct
+    });
+  }
+};
+_a60 = entityKind, __publicField(SQLiteSelectBuilder, _a60, "SQLiteSelectBuilder");
+var _a61, SQLiteSelectQueryBuilderBase = class extends TypedQueryBuilder {
+  _;
+  /** @internal */
+  config;
+  joinsNotNullableMap;
+  tableName;
+  isPartialSelect;
+  session;
+  dialect;
+  cacheConfig = void 0;
+  usedTables = /* @__PURE__ */ new Set();
+  constructor({ table, fields, isPartialSelect, session, dialect, withList, distinct }) {
+    super(), this.config = {
+      withList,
+      table,
+      fields: { ...fields },
+      distinct,
+      setOperators: []
+    }, this.isPartialSelect = isPartialSelect, this.session = session, this.dialect = dialect, this._ = {
+      selectedFields: fields,
+      config: this.config
+    }, this.tableName = getTableLikeName(table), this.joinsNotNullableMap = typeof this.tableName == "string" ? { [this.tableName]: !0 } : {};
+    for (let item of extractUsedTable(table))
+      this.usedTables.add(item);
+  }
+  /** @internal */
+  getUsedTables() {
+    return [...this.usedTables];
+  }
+  createJoin(joinType) {
+    return (table, on) => {
+      let baseTableName = this.tableName, tableName = getTableLikeName(table);
+      for (let item of extractUsedTable(table))
+        this.usedTables.add(item);
+      if (typeof tableName == "string" && this.config.joins?.some((join) => join.alias === tableName))
+        throw new Error(`Alias "${tableName}" is already used in this query`);
+      if (!this.isPartialSelect && (Object.keys(this.joinsNotNullableMap).length === 1 && typeof baseTableName == "string" && (this.config.fields = {
+        [baseTableName]: this.config.fields
+      }), typeof tableName == "string" && !is(table, SQL))) {
+        let selection = is(table, Subquery) ? table._.selectedFields : is(table, View) ? table[ViewBaseConfig].selectedFields : table[Table.Symbol.Columns];
+        this.config.fields[tableName] = selection;
+      }
+      if (typeof on == "function" && (on = on(
+        new Proxy(
+          this.config.fields,
+          new SelectionProxyHandler({ sqlAliasedBehavior: "sql", sqlBehavior: "sql" })
+        )
+      )), this.config.joins || (this.config.joins = []), this.config.joins.push({ on, table, joinType, alias: tableName }), typeof tableName == "string")
+        switch (joinType) {
+          case "left": {
+            this.joinsNotNullableMap[tableName] = !1;
+            break;
+          }
+          case "right": {
+            this.joinsNotNullableMap = Object.fromEntries(
+              Object.entries(this.joinsNotNullableMap).map(([key]) => [key, !1])
+            ), this.joinsNotNullableMap[tableName] = !0;
+            break;
+          }
+          case "cross":
+          case "inner": {
+            this.joinsNotNullableMap[tableName] = !0;
+            break;
+          }
+          case "full": {
+            this.joinsNotNullableMap = Object.fromEntries(
+              Object.entries(this.joinsNotNullableMap).map(([key]) => [key, !1])
+            ), this.joinsNotNullableMap[tableName] = !1;
+            break;
+          }
+        }
+      return this;
+    };
+  }
+  /**
+   * Executes a `left join` operation by adding another table to the current query.
+   *
+   * Calling this method associates each row of the table with the corresponding row from the joined table, if a match is found. If no matching row exists, it sets all columns of the joined table to null.
+   *
+   * See docs: {@link https://orm.drizzle.team/docs/joins#left-join}
+   *
+   * @param table the table to join.
+   * @param on the `on` clause.
+   *
+   * @example
+   *
+   * ```ts
+   * // Select all users and their pets
+   * const usersWithPets: { user: User; pets: Pet | null; }[] = await db.select()
+   *   .from(users)
+   *   .leftJoin(pets, eq(users.id, pets.ownerId))
+   *
+   * // Select userId and petId
+   * const usersIdsAndPetIds: { userId: number; petId: number | null; }[] = await db.select({
+   *   userId: users.id,
+   *   petId: pets.id,
+   * })
+   *   .from(users)
+   *   .leftJoin(pets, eq(users.id, pets.ownerId))
+   * ```
+   */
+  leftJoin = this.createJoin("left");
+  /**
+   * Executes a `right join` operation by adding another table to the current query.
+   *
+   * Calling this method associates each row of the joined table with the corresponding row from the main table, if a match is found. If no matching row exists, it sets all columns of the main table to null.
+   *
+   * See docs: {@link https://orm.drizzle.team/docs/joins#right-join}
+   *
+   * @param table the table to join.
+   * @param on the `on` clause.
+   *
+   * @example
+   *
+   * ```ts
+   * // Select all users and their pets
+   * const usersWithPets: { user: User | null; pets: Pet; }[] = await db.select()
+   *   .from(users)
+   *   .rightJoin(pets, eq(users.id, pets.ownerId))
+   *
+   * // Select userId and petId
+   * const usersIdsAndPetIds: { userId: number | null; petId: number; }[] = await db.select({
+   *   userId: users.id,
+   *   petId: pets.id,
+   * })
+   *   .from(users)
+   *   .rightJoin(pets, eq(users.id, pets.ownerId))
+   * ```
+   */
+  rightJoin = this.createJoin("right");
+  /**
+   * Executes an `inner join` operation, creating a new table by combining rows from two tables that have matching values.
+   *
+   * Calling this method retrieves rows that have corresponding entries in both joined tables. Rows without matching entries in either table are excluded, resulting in a table that includes only matching pairs.
+   *
+   * See docs: {@link https://orm.drizzle.team/docs/joins#inner-join}
+   *
+   * @param table the table to join.
+   * @param on the `on` clause.
+   *
+   * @example
+   *
+   * ```ts
+   * // Select all users and their pets
+   * const usersWithPets: { user: User; pets: Pet; }[] = await db.select()
+   *   .from(users)
+   *   .innerJoin(pets, eq(users.id, pets.ownerId))
+   *
+   * // Select userId and petId
+   * const usersIdsAndPetIds: { userId: number; petId: number; }[] = await db.select({
+   *   userId: users.id,
+   *   petId: pets.id,
+   * })
+   *   .from(users)
+   *   .innerJoin(pets, eq(users.id, pets.ownerId))
+   * ```
+   */
+  innerJoin = this.createJoin("inner");
+  /**
+   * Executes a `full join` operation by combining rows from two tables into a new table.
+   *
+   * Calling this method retrieves all rows from both main and joined tables, merging rows with matching values and filling in `null` for non-matching columns.
+   *
+   * See docs: {@link https://orm.drizzle.team/docs/joins#full-join}
+   *
+   * @param table the table to join.
+   * @param on the `on` clause.
+   *
+   * @example
+   *
+   * ```ts
+   * // Select all users and their pets
+   * const usersWithPets: { user: User | null; pets: Pet | null; }[] = await db.select()
+   *   .from(users)
+   *   .fullJoin(pets, eq(users.id, pets.ownerId))
+   *
+   * // Select userId and petId
+   * const usersIdsAndPetIds: { userId: number | null; petId: number | null; }[] = await db.select({
+   *   userId: users.id,
+   *   petId: pets.id,
+   * })
+   *   .from(users)
+   *   .fullJoin(pets, eq(users.id, pets.ownerId))
+   * ```
+   */
+  fullJoin = this.createJoin("full");
+  /**
+   * Executes a `cross join` operation by combining rows from two tables into a new table.
+   *
+   * Calling this method retrieves all rows from both main and joined tables, merging all rows from each table.
+   *
+   * See docs: {@link https://orm.drizzle.team/docs/joins#cross-join}
+   *
+   * @param table the table to join.
+   *
+   * @example
+   *
+   * ```ts
+   * // Select all users, each user with every pet
+   * const usersWithPets: { user: User; pets: Pet; }[] = await db.select()
+   *   .from(users)
+   *   .crossJoin(pets)
+   *
+   * // Select userId and petId
+   * const usersIdsAndPetIds: { userId: number; petId: number; }[] = await db.select({
+   *   userId: users.id,
+   *   petId: pets.id,
+   * })
+   *   .from(users)
+   *   .crossJoin(pets)
+   * ```
+   */
+  crossJoin = this.createJoin("cross");
+  createSetOperator(type, isAll) {
+    return (rightSelection) => {
+      let rightSelect = typeof rightSelection == "function" ? rightSelection(getSQLiteSetOperators()) : rightSelection;
+      if (!haveSameKeys(this.getSelectedFields(), rightSelect.getSelectedFields()))
+        throw new Error(
+          "Set operator error (union / intersect / except): selected fields are not the same or are in a different order"
+        );
+      return this.config.setOperators.push({ type, isAll, rightSelect }), this;
+    };
+  }
+  /**
+   * Adds `union` set operator to the query.
+   *
+   * Calling this method will combine the result sets of the `select` statements and remove any duplicate rows that appear across them.
+   *
+   * See docs: {@link https://orm.drizzle.team/docs/set-operations#union}
+   *
+   * @example
+   *
+   * ```ts
+   * // Select all unique names from customers and users tables
+   * await db.select({ name: users.name })
+   *   .from(users)
+   *   .union(
+   *     db.select({ name: customers.name }).from(customers)
+   *   );
+   * // or
+   * import { union } from 'drizzle-orm/sqlite-core'
+   *
+   * await union(
+   *   db.select({ name: users.name }).from(users),
+   *   db.select({ name: customers.name }).from(customers)
+   * );
+   * ```
+   */
+  union = this.createSetOperator("union", !1);
+  /**
+   * Adds `union all` set operator to the query.
+   *
+   * Calling this method will combine the result-set of the `select` statements and keep all duplicate rows that appear across them.
+   *
+   * See docs: {@link https://orm.drizzle.team/docs/set-operations#union-all}
+   *
+   * @example
+   *
+   * ```ts
+   * // Select all transaction ids from both online and in-store sales
+   * await db.select({ transaction: onlineSales.transactionId })
+   *   .from(onlineSales)
+   *   .unionAll(
+   *     db.select({ transaction: inStoreSales.transactionId }).from(inStoreSales)
+   *   );
+   * // or
+   * import { unionAll } from 'drizzle-orm/sqlite-core'
+   *
+   * await unionAll(
+   *   db.select({ transaction: onlineSales.transactionId }).from(onlineSales),
+   *   db.select({ transaction: inStoreSales.transactionId }).from(inStoreSales)
+   * );
+   * ```
+   */
+  unionAll = this.createSetOperator("union", !0);
+  /**
+   * Adds `intersect` set operator to the query.
+   *
+   * Calling this method will retain only the rows that are present in both result sets and eliminate duplicates.
+   *
+   * See docs: {@link https://orm.drizzle.team/docs/set-operations#intersect}
+   *
+   * @example
+   *
+   * ```ts
+   * // Select course names that are offered in both departments A and B
+   * await db.select({ courseName: depA.courseName })
+   *   .from(depA)
+   *   .intersect(
+   *     db.select({ courseName: depB.courseName }).from(depB)
+   *   );
+   * // or
+   * import { intersect } from 'drizzle-orm/sqlite-core'
+   *
+   * await intersect(
+   *   db.select({ courseName: depA.courseName }).from(depA),
+   *   db.select({ courseName: depB.courseName }).from(depB)
+   * );
+   * ```
+   */
+  intersect = this.createSetOperator("intersect", !1);
+  /**
+   * Adds `except` set operator to the query.
+   *
+   * Calling this method will retrieve all unique rows from the left query, except for the rows that are present in the result set of the right query.
+   *
+   * See docs: {@link https://orm.drizzle.team/docs/set-operations#except}
+   *
+   * @example
+   *
+   * ```ts
+   * // Select all courses offered in department A but not in department B
+   * await db.select({ courseName: depA.courseName })
+   *   .from(depA)
+   *   .except(
+   *     db.select({ courseName: depB.courseName }).from(depB)
+   *   );
+   * // or
+   * import { except } from 'drizzle-orm/sqlite-core'
+   *
+   * await except(
+   *   db.select({ courseName: depA.courseName }).from(depA),
+   *   db.select({ courseName: depB.courseName }).from(depB)
+   * );
+   * ```
+   */
+  except = this.createSetOperator("except", !1);
+  /** @internal */
+  addSetOperators(setOperators) {
+    return this.config.setOperators.push(...setOperators), this;
+  }
+  /**
+   * Adds a `where` clause to the query.
+   *
+   * Calling this method will select only those rows that fulfill a specified condition.
+   *
+   * See docs: {@link https://orm.drizzle.team/docs/select#filtering}
+   *
+   * @param where the `where` clause.
+   *
+   * @example
+   * You can use conditional operators and `sql function` to filter the rows to be selected.
+   *
+   * ```ts
+   * // Select all cars with green color
+   * await db.select().from(cars).where(eq(cars.color, 'green'));
+   * // or
+   * await db.select().from(cars).where(sql`${cars.color} = 'green'`)
+   * ```
+   *
+   * You can logically combine conditional operators with `and()` and `or()` operators:
+   *
+   * ```ts
+   * // Select all BMW cars with a green color
+   * await db.select().from(cars).where(and(eq(cars.color, 'green'), eq(cars.brand, 'BMW')));
+   *
+   * // Select all cars with the green or blue color
+   * await db.select().from(cars).where(or(eq(cars.color, 'green'), eq(cars.color, 'blue')));
+   * ```
+   */
+  where(where) {
+    return typeof where == "function" && (where = where(
+      new Proxy(
+        this.config.fields,
+        new SelectionProxyHandler({ sqlAliasedBehavior: "sql", sqlBehavior: "sql" })
+      )
+    )), this.config.where = where, this;
+  }
+  /**
+   * Adds a `having` clause to the query.
+   *
+   * Calling this method will select only those rows that fulfill a specified condition. It is typically used with aggregate functions to filter the aggregated data based on a specified condition.
+   *
+   * See docs: {@link https://orm.drizzle.team/docs/select#aggregations}
+   *
+   * @param having the `having` clause.
+   *
+   * @example
+   *
+   * ```ts
+   * // Select all brands with more than one car
+   * await db.select({
+   * 	brand: cars.brand,
+   * 	count: sql<number>`cast(count(${cars.id}) as int)`,
+   * })
+   *   .from(cars)
+   *   .groupBy(cars.brand)
+   *   .having(({ count }) => gt(count, 1));
+   * ```
+   */
+  having(having) {
+    return typeof having == "function" && (having = having(
+      new Proxy(
+        this.config.fields,
+        new SelectionProxyHandler({ sqlAliasedBehavior: "sql", sqlBehavior: "sql" })
+      )
+    )), this.config.having = having, this;
+  }
+  groupBy(...columns) {
+    if (typeof columns[0] == "function") {
+      let groupBy = columns[0](
+        new Proxy(
+          this.config.fields,
+          new SelectionProxyHandler({ sqlAliasedBehavior: "alias", sqlBehavior: "sql" })
+        )
+      );
+      this.config.groupBy = Array.isArray(groupBy) ? groupBy : [groupBy];
+    } else
+      this.config.groupBy = columns;
+    return this;
+  }
+  orderBy(...columns) {
+    if (typeof columns[0] == "function") {
+      let orderBy = columns[0](
+        new Proxy(
+          this.config.fields,
+          new SelectionProxyHandler({ sqlAliasedBehavior: "alias", sqlBehavior: "sql" })
+        )
+      ), orderByArray = Array.isArray(orderBy) ? orderBy : [orderBy];
+      this.config.setOperators.length > 0 ? this.config.setOperators.at(-1).orderBy = orderByArray : this.config.orderBy = orderByArray;
+    } else {
+      let orderByArray = columns;
+      this.config.setOperators.length > 0 ? this.config.setOperators.at(-1).orderBy = orderByArray : this.config.orderBy = orderByArray;
+    }
+    return this;
+  }
+  /**
+   * Adds a `limit` clause to the query.
+   *
+   * Calling this method will set the maximum number of rows that will be returned by this query.
+   *
+   * See docs: {@link https://orm.drizzle.team/docs/select#limit--offset}
+   *
+   * @param limit the `limit` clause.
+   *
+   * @example
+   *
+   * ```ts
+   * // Get the first 10 people from this query.
+   * await db.select().from(people).limit(10);
+   * ```
+   */
+  limit(limit) {
+    return this.config.setOperators.length > 0 ? this.config.setOperators.at(-1).limit = limit : this.config.limit = limit, this;
+  }
+  /**
+   * Adds an `offset` clause to the query.
+   *
+   * Calling this method will skip a number of rows when returning results from this query.
+   *
+   * See docs: {@link https://orm.drizzle.team/docs/select#limit--offset}
+   *
+   * @param offset the `offset` clause.
+   *
+   * @example
+   *
+   * ```ts
+   * // Get the 10th-20th people from this query.
+   * await db.select().from(people).offset(10).limit(10);
+   * ```
+   */
+  offset(offset) {
+    return this.config.setOperators.length > 0 ? this.config.setOperators.at(-1).offset = offset : this.config.offset = offset, this;
+  }
+  /** @internal */
+  getSQL() {
+    return this.dialect.buildSelectQuery(this.config);
+  }
+  toSQL() {
+    let { typings: _typings, ...rest } = this.dialect.sqlToQuery(this.getSQL());
+    return rest;
+  }
+  as(alias) {
+    let usedTables = [];
+    if (usedTables.push(...extractUsedTable(this.config.table)), this.config.joins)
+      for (let it of this.config.joins)
+        usedTables.push(...extractUsedTable(it.table));
+    return new Proxy(
+      new Subquery(this.getSQL(), this.config.fields, alias, !1, [...new Set(usedTables)]),
+      new SelectionProxyHandler({ alias, sqlAliasedBehavior: "alias", sqlBehavior: "error" })
+    );
+  }
+  /** @internal */
+  getSelectedFields() {
+    return new Proxy(
+      this.config.fields,
+      new SelectionProxyHandler({ alias: this.tableName, sqlAliasedBehavior: "alias", sqlBehavior: "error" })
+    );
+  }
+  $dynamic() {
+    return this;
+  }
+};
+_a61 = entityKind, __publicField(SQLiteSelectQueryBuilderBase, _a61, "SQLiteSelectQueryBuilder");
+var _a62, SQLiteSelectBase = class extends SQLiteSelectQueryBuilderBase {
+  /** @internal */
+  _prepare(isOneTimeQuery = !0) {
+    if (!this.session)
+      throw new Error("Cannot execute a query on a query builder. Please use a database instance instead.");
+    let fieldsList = orderSelectedFields(this.config.fields), query = this.session[isOneTimeQuery ? "prepareOneTimeQuery" : "prepareQuery"](
+      this.dialect.sqlToQuery(this.getSQL()),
+      fieldsList,
+      "all",
+      !0,
+      void 0,
+      {
+        type: "select",
+        tables: [...this.usedTables]
+      },
+      this.cacheConfig
+    );
+    return query.joinsNotNullableMap = this.joinsNotNullableMap, query;
+  }
+  $withCache(config) {
+    return this.cacheConfig = config === void 0 ? { config: {}, enable: !0, autoInvalidate: !0 } : config === !1 ? { enable: !1 } : { enable: !0, autoInvalidate: !0, ...config }, this;
+  }
+  prepare() {
+    return this._prepare(!1);
+  }
+  run = (placeholderValues) => this._prepare().run(placeholderValues);
+  all = (placeholderValues) => this._prepare().all(placeholderValues);
+  get = (placeholderValues) => this._prepare().get(placeholderValues);
+  values = (placeholderValues) => this._prepare().values(placeholderValues);
+  async execute() {
+    return this.all();
+  }
+};
+_a62 = entityKind, __publicField(SQLiteSelectBase, _a62, "SQLiteSelect");
+applyMixins(SQLiteSelectBase, [QueryPromise]);
+function createSetOperator(type, isAll) {
+  return (leftSelect, rightSelect, ...restSelects) => {
+    let setOperators = [rightSelect, ...restSelects].map((select) => ({
+      type,
+      isAll,
+      rightSelect: select
+    }));
+    for (let setOperator of setOperators)
+      if (!haveSameKeys(leftSelect.getSelectedFields(), setOperator.rightSelect.getSelectedFields()))
+        throw new Error(
+          "Set operator error (union / intersect / except): selected fields are not the same or are in a different order"
+        );
+    return leftSelect.addSetOperators(setOperators);
+  };
+}
+var getSQLiteSetOperators = () => ({
+  union,
+  unionAll,
+  intersect,
+  except
+}), union = createSetOperator("union", !1), unionAll = createSetOperator("union", !0), intersect = createSetOperator("intersect", !1), except = createSetOperator("except", !1);
+
+// node_modules/drizzle-orm/sqlite-core/query-builders/query-builder.js
+var _a63, QueryBuilder = class {
+  dialect;
+  dialectConfig;
+  constructor(dialect) {
+    this.dialect = is(dialect, SQLiteDialect) ? dialect : void 0, this.dialectConfig = is(dialect, SQLiteDialect) ? void 0 : dialect;
+  }
+  $with = (alias, selection) => {
+    let queryBuilder = this;
+    return { as: (qb) => (typeof qb == "function" && (qb = qb(queryBuilder)), new Proxy(
+      new WithSubquery(
+        qb.getSQL(),
+        selection ?? ("getSelectedFields" in qb ? qb.getSelectedFields() ?? {} : {}),
+        alias,
+        !0
+      ),
+      new SelectionProxyHandler({ alias, sqlAliasedBehavior: "alias", sqlBehavior: "error" })
+    )) };
+  };
+  with(...queries) {
+    let self2 = this;
+    function select(fields) {
+      return new SQLiteSelectBuilder({
+        fields: fields ?? void 0,
+        session: void 0,
+        dialect: self2.getDialect(),
+        withList: queries
+      });
+    }
+    function selectDistinct(fields) {
+      return new SQLiteSelectBuilder({
+        fields: fields ?? void 0,
+        session: void 0,
+        dialect: self2.getDialect(),
+        withList: queries,
+        distinct: !0
+      });
+    }
+    return { select, selectDistinct };
+  }
+  select(fields) {
+    return new SQLiteSelectBuilder({ fields: fields ?? void 0, session: void 0, dialect: this.getDialect() });
+  }
+  selectDistinct(fields) {
+    return new SQLiteSelectBuilder({
+      fields: fields ?? void 0,
+      session: void 0,
+      dialect: this.getDialect(),
+      distinct: !0
+    });
+  }
+  // Lazy load dialect to avoid circular dependency
+  getDialect() {
+    return this.dialect || (this.dialect = new SQLiteSyncDialect(this.dialectConfig)), this.dialect;
+  }
+};
+_a63 = entityKind, __publicField(QueryBuilder, _a63, "SQLiteQueryBuilder");
+
+// node_modules/drizzle-orm/sqlite-core/query-builders/insert.js
+var _a64, SQLiteInsertBuilder = class {
+  constructor(table, session, dialect, withList) {
+    this.table = table, this.session = session, this.dialect = dialect, this.withList = withList;
+  }
+  values(values) {
+    if (values = Array.isArray(values) ? values : [values], values.length === 0)
+      throw new Error("values() must be called with at least one value");
+    let mappedValues = values.map((entry2) => {
+      let result = {}, cols = this.table[Table.Symbol.Columns];
+      for (let colKey of Object.keys(entry2)) {
+        let colValue = entry2[colKey];
+        result[colKey] = is(colValue, SQL) ? colValue : new Param(colValue, cols[colKey]);
+      }
+      return result;
+    });
+    return new SQLiteInsertBase(this.table, mappedValues, this.session, this.dialect, this.withList);
+  }
+  select(selectQuery) {
+    let select = typeof selectQuery == "function" ? selectQuery(new QueryBuilder()) : selectQuery;
+    if (!is(select, SQL) && !haveSameKeys(this.table[Columns], select._.selectedFields))
+      throw new Error(
+        "Insert select error: selected fields are not the same or are in a different order compared to the table definition"
+      );
+    return new SQLiteInsertBase(this.table, select, this.session, this.dialect, this.withList, !0);
+  }
+};
+_a64 = entityKind, __publicField(SQLiteInsertBuilder, _a64, "SQLiteInsertBuilder");
+var _a65, SQLiteInsertBase = class extends QueryPromise {
+  constructor(table, values, session, dialect, withList, select) {
+    super(), this.session = session, this.dialect = dialect, this.config = { table, values, withList, select };
+  }
+  /** @internal */
+  config;
+  returning(fields = this.config.table[SQLiteTable.Symbol.Columns]) {
+    return this.config.returning = orderSelectedFields(fields), this;
+  }
+  /**
+   * Adds an `on conflict do nothing` clause to the query.
+   *
+   * Calling this method simply avoids inserting a row as its alternative action.
+   *
+   * See docs: {@link https://orm.drizzle.team/docs/insert#on-conflict-do-nothing}
+   *
+   * @param config The `target` and `where` clauses.
+   *
+   * @example
+   * ```ts
+   * // Insert one row and cancel the insert if there's a conflict
+   * await db.insert(cars)
+   *   .values({ id: 1, brand: 'BMW' })
+   *   .onConflictDoNothing();
+   *
+   * // Explicitly specify conflict target
+   * await db.insert(cars)
+   *   .values({ id: 1, brand: 'BMW' })
+   *   .onConflictDoNothing({ target: cars.id });
+   * ```
+   */
+  onConflictDoNothing(config = {}) {
+    if (this.config.onConflict || (this.config.onConflict = []), config.target === void 0)
+      this.config.onConflict.push(sql4` on conflict do nothing`);
+    else {
+      let targetSql = Array.isArray(config.target) ? sql4`${config.target}` : sql4`${[config.target]}`, whereSql = config.where ? sql4` where ${config.where}` : sql4``;
+      this.config.onConflict.push(sql4` on conflict ${targetSql} do nothing${whereSql}`);
+    }
+    return this;
+  }
+  /**
+   * Adds an `on conflict do update` clause to the query.
+   *
+   * Calling this method will update the existing row that conflicts with the row proposed for insertion as its alternative action.
+   *
+   * See docs: {@link https://orm.drizzle.team/docs/insert#upserts-and-conflicts}
+   *
+   * @param config The `target`, `set` and `where` clauses.
+   *
+   * @example
+   * ```ts
+   * // Update the row if there's a conflict
+   * await db.insert(cars)
+   *   .values({ id: 1, brand: 'BMW' })
+   *   .onConflictDoUpdate({
+   *     target: cars.id,
+   *     set: { brand: 'Porsche' }
+   *   });
+   *
+   * // Upsert with 'where' clause
+   * await db.insert(cars)
+   *   .values({ id: 1, brand: 'BMW' })
+   *   .onConflictDoUpdate({
+   *     target: cars.id,
+   *     set: { brand: 'newBMW' },
+   *     where: sql`${cars.createdAt} > '2023-01-01'::date`,
+   *   });
+   * ```
+   */
+  onConflictDoUpdate(config) {
+    if (config.where && (config.targetWhere || config.setWhere))
+      throw new Error(
+        'You cannot use both "where" and "targetWhere"/"setWhere" at the same time - "where" is deprecated, use "targetWhere" or "setWhere" instead.'
+      );
+    this.config.onConflict || (this.config.onConflict = []);
+    let whereSql = config.where ? sql4` where ${config.where}` : void 0, targetWhereSql = config.targetWhere ? sql4` where ${config.targetWhere}` : void 0, setWhereSql = config.setWhere ? sql4` where ${config.setWhere}` : void 0, targetSql = Array.isArray(config.target) ? sql4`${config.target}` : sql4`${[config.target]}`, setSql = this.dialect.buildUpdateSet(this.config.table, mapUpdateSet(this.config.table, config.set));
+    return this.config.onConflict.push(
+      sql4` on conflict ${targetSql}${targetWhereSql} do update set ${setSql}${whereSql}${setWhereSql}`
+    ), this;
+  }
+  /** @internal */
+  getSQL() {
+    return this.dialect.buildInsertQuery(this.config);
+  }
+  toSQL() {
+    let { typings: _typings, ...rest } = this.dialect.sqlToQuery(this.getSQL());
+    return rest;
+  }
+  /** @internal */
+  _prepare(isOneTimeQuery = !0) {
+    return this.session[isOneTimeQuery ? "prepareOneTimeQuery" : "prepareQuery"](
+      this.dialect.sqlToQuery(this.getSQL()),
+      this.config.returning,
+      this.config.returning ? "all" : "run",
+      !0,
+      void 0,
+      {
+        type: "insert",
+        tables: extractUsedTable(this.config.table)
+      }
+    );
+  }
+  prepare() {
+    return this._prepare(!1);
+  }
+  run = (placeholderValues) => this._prepare().run(placeholderValues);
+  all = (placeholderValues) => this._prepare().all(placeholderValues);
+  get = (placeholderValues) => this._prepare().get(placeholderValues);
+  values = (placeholderValues) => this._prepare().values(placeholderValues);
+  async execute() {
+    return this.config.returning ? this.all() : this.run();
+  }
+  $dynamic() {
+    return this;
+  }
+};
+_a65 = entityKind, __publicField(SQLiteInsertBase, _a65, "SQLiteInsert");
+
+// node_modules/drizzle-orm/sqlite-core/query-builders/update.js
+var _a66, SQLiteUpdateBuilder = class {
+  constructor(table, session, dialect, withList) {
+    this.table = table, this.session = session, this.dialect = dialect, this.withList = withList;
+  }
+  set(values) {
+    return new SQLiteUpdateBase(
+      this.table,
+      mapUpdateSet(this.table, values),
+      this.session,
+      this.dialect,
+      this.withList
+    );
+  }
+};
+_a66 = entityKind, __publicField(SQLiteUpdateBuilder, _a66, "SQLiteUpdateBuilder");
+var _a67, SQLiteUpdateBase = class extends QueryPromise {
+  constructor(table, set, session, dialect, withList) {
+    super(), this.session = session, this.dialect = dialect, this.config = { set, table, withList, joins: [] };
+  }
+  /** @internal */
+  config;
+  from(source) {
+    return this.config.from = source, this;
+  }
+  createJoin(joinType) {
+    return (table, on) => {
+      let tableName = getTableLikeName(table);
+      if (typeof tableName == "string" && this.config.joins.some((join) => join.alias === tableName))
+        throw new Error(`Alias "${tableName}" is already used in this query`);
+      if (typeof on == "function") {
+        let from = this.config.from ? is(table, SQLiteTable) ? table[Table.Symbol.Columns] : is(table, Subquery) ? table._.selectedFields : is(table, SQLiteViewBase) ? table[ViewBaseConfig].selectedFields : void 0 : void 0;
+        on = on(
+          new Proxy(
+            this.config.table[Table.Symbol.Columns],
+            new SelectionProxyHandler({ sqlAliasedBehavior: "sql", sqlBehavior: "sql" })
+          ),
+          from && new Proxy(
+            from,
+            new SelectionProxyHandler({ sqlAliasedBehavior: "sql", sqlBehavior: "sql" })
+          )
+        );
+      }
+      return this.config.joins.push({ on, table, joinType, alias: tableName }), this;
+    };
+  }
+  leftJoin = this.createJoin("left");
+  rightJoin = this.createJoin("right");
+  innerJoin = this.createJoin("inner");
+  fullJoin = this.createJoin("full");
+  /**
+   * Adds a 'where' clause to the query.
+   *
+   * Calling this method will update only those rows that fulfill a specified condition.
+   *
+   * See docs: {@link https://orm.drizzle.team/docs/update}
+   *
+   * @param where the 'where' clause.
+   *
+   * @example
+   * You can use conditional operators and `sql function` to filter the rows to be updated.
+   *
+   * ```ts
+   * // Update all cars with green color
+   * db.update(cars).set({ color: 'red' })
+   *   .where(eq(cars.color, 'green'));
+   * // or
+   * db.update(cars).set({ color: 'red' })
+   *   .where(sql`${cars.color} = 'green'`)
+   * ```
+   *
+   * You can logically combine conditional operators with `and()` and `or()` operators:
+   *
+   * ```ts
+   * // Update all BMW cars with a green color
+   * db.update(cars).set({ color: 'red' })
+   *   .where(and(eq(cars.color, 'green'), eq(cars.brand, 'BMW')));
+   *
+   * // Update all cars with the green or blue color
+   * db.update(cars).set({ color: 'red' })
+   *   .where(or(eq(cars.color, 'green'), eq(cars.color, 'blue')));
+   * ```
+   */
+  where(where) {
+    return this.config.where = where, this;
+  }
+  orderBy(...columns) {
+    if (typeof columns[0] == "function") {
+      let orderBy = columns[0](
+        new Proxy(
+          this.config.table[Table.Symbol.Columns],
+          new SelectionProxyHandler({ sqlAliasedBehavior: "alias", sqlBehavior: "sql" })
+        )
+      ), orderByArray = Array.isArray(orderBy) ? orderBy : [orderBy];
+      this.config.orderBy = orderByArray;
+    } else {
+      let orderByArray = columns;
+      this.config.orderBy = orderByArray;
+    }
+    return this;
+  }
+  limit(limit) {
+    return this.config.limit = limit, this;
+  }
+  returning(fields = this.config.table[SQLiteTable.Symbol.Columns]) {
+    return this.config.returning = orderSelectedFields(fields), this;
+  }
+  /** @internal */
+  getSQL() {
+    return this.dialect.buildUpdateQuery(this.config);
+  }
+  toSQL() {
+    let { typings: _typings, ...rest } = this.dialect.sqlToQuery(this.getSQL());
+    return rest;
+  }
+  /** @internal */
+  _prepare(isOneTimeQuery = !0) {
+    return this.session[isOneTimeQuery ? "prepareOneTimeQuery" : "prepareQuery"](
+      this.dialect.sqlToQuery(this.getSQL()),
+      this.config.returning,
+      this.config.returning ? "all" : "run",
+      !0,
+      void 0,
+      {
+        type: "insert",
+        tables: extractUsedTable(this.config.table)
+      }
+    );
+  }
+  prepare() {
+    return this._prepare(!1);
+  }
+  run = (placeholderValues) => this._prepare().run(placeholderValues);
+  all = (placeholderValues) => this._prepare().all(placeholderValues);
+  get = (placeholderValues) => this._prepare().get(placeholderValues);
+  values = (placeholderValues) => this._prepare().values(placeholderValues);
+  async execute() {
+    return this.config.returning ? this.all() : this.run();
+  }
+  $dynamic() {
+    return this;
+  }
+};
+_a67 = entityKind, __publicField(SQLiteUpdateBase, _a67, "SQLiteUpdate");
+
+// node_modules/drizzle-orm/sqlite-core/query-builders/count.js
+var _a68, _SQLiteCountBuilder = class extends SQL {
+  constructor(params) {
+    super(_SQLiteCountBuilder.buildEmbeddedCount(params.source, params.filters).queryChunks), this.params = params, this.session = params.session, this.sql = _SQLiteCountBuilder.buildCount(
+      params.source,
+      params.filters
+    );
+  }
+  sql;
+  [(_a68 = entityKind, Symbol.toStringTag)] = "SQLiteCountBuilderAsync";
+  session;
+  static buildEmbeddedCount(source, filters) {
+    return sql4`(select count(*) from ${source}${sql4.raw(" where ").if(filters)}${filters})`;
+  }
+  static buildCount(source, filters) {
+    return sql4`select count(*) from ${source}${sql4.raw(" where ").if(filters)}${filters}`;
+  }
+  then(onfulfilled, onrejected) {
+    return Promise.resolve(this.session.count(this.sql)).then(
+      onfulfilled,
+      onrejected
+    );
+  }
+  catch(onRejected) {
+    return this.then(void 0, onRejected);
+  }
+  finally(onFinally) {
+    return this.then(
+      (value) => (onFinally?.(), value),
+      (reason) => {
+        throw onFinally?.(), reason;
+      }
+    );
+  }
+}, SQLiteCountBuilder = _SQLiteCountBuilder;
+__publicField(SQLiteCountBuilder, _a68, "SQLiteCountBuilderAsync");
+
+// node_modules/drizzle-orm/sqlite-core/query-builders/query.js
+var _a69, RelationalQueryBuilder = class {
+  constructor(mode2, fullSchema, schema3, tableNamesMap, table, tableConfig, dialect, session) {
+    this.mode = mode2, this.fullSchema = fullSchema, this.schema = schema3, this.tableNamesMap = tableNamesMap, this.table = table, this.tableConfig = tableConfig, this.dialect = dialect, this.session = session;
+  }
+  findMany(config) {
+    return this.mode === "sync" ? new SQLiteSyncRelationalQuery(
+      this.fullSchema,
+      this.schema,
+      this.tableNamesMap,
+      this.table,
+      this.tableConfig,
+      this.dialect,
+      this.session,
+      config || {},
+      "many"
+    ) : new SQLiteRelationalQuery(
+      this.fullSchema,
+      this.schema,
+      this.tableNamesMap,
+      this.table,
+      this.tableConfig,
+      this.dialect,
+      this.session,
+      config || {},
+      "many"
+    );
+  }
+  findFirst(config) {
+    return this.mode === "sync" ? new SQLiteSyncRelationalQuery(
+      this.fullSchema,
+      this.schema,
+      this.tableNamesMap,
+      this.table,
+      this.tableConfig,
+      this.dialect,
+      this.session,
+      config ? { ...config, limit: 1 } : { limit: 1 },
+      "first"
+    ) : new SQLiteRelationalQuery(
+      this.fullSchema,
+      this.schema,
+      this.tableNamesMap,
+      this.table,
+      this.tableConfig,
+      this.dialect,
+      this.session,
+      config ? { ...config, limit: 1 } : { limit: 1 },
+      "first"
+    );
+  }
+};
+_a69 = entityKind, __publicField(RelationalQueryBuilder, _a69, "SQLiteAsyncRelationalQueryBuilder");
+var _a70, SQLiteRelationalQuery = class extends QueryPromise {
+  constructor(fullSchema, schema3, tableNamesMap, table, tableConfig, dialect, session, config, mode2) {
+    super(), this.fullSchema = fullSchema, this.schema = schema3, this.tableNamesMap = tableNamesMap, this.table = table, this.tableConfig = tableConfig, this.dialect = dialect, this.session = session, this.config = config, this.mode = mode2;
+  }
+  /** @internal */
+  mode;
+  /** @internal */
+  getSQL() {
+    return this.dialect.buildRelationalQuery({
+      fullSchema: this.fullSchema,
+      schema: this.schema,
+      tableNamesMap: this.tableNamesMap,
+      table: this.table,
+      tableConfig: this.tableConfig,
+      queryConfig: this.config,
+      tableAlias: this.tableConfig.tsName
+    }).sql;
+  }
+  /** @internal */
+  _prepare(isOneTimeQuery = !1) {
+    let { query, builtQuery } = this._toSQL();
+    return this.session[isOneTimeQuery ? "prepareOneTimeQuery" : "prepareQuery"](
+      builtQuery,
+      void 0,
+      this.mode === "first" ? "get" : "all",
+      !0,
+      (rawRows, mapColumnValue) => {
+        let rows = rawRows.map(
+          (row) => mapRelationalRow(this.schema, this.tableConfig, row, query.selection, mapColumnValue)
+        );
+        return this.mode === "first" ? rows[0] : rows;
+      }
+    );
+  }
+  prepare() {
+    return this._prepare(!1);
+  }
+  _toSQL() {
+    let query = this.dialect.buildRelationalQuery({
+      fullSchema: this.fullSchema,
+      schema: this.schema,
+      tableNamesMap: this.tableNamesMap,
+      table: this.table,
+      tableConfig: this.tableConfig,
+      queryConfig: this.config,
+      tableAlias: this.tableConfig.tsName
+    }), builtQuery = this.dialect.sqlToQuery(query.sql);
+    return { query, builtQuery };
+  }
+  toSQL() {
+    return this._toSQL().builtQuery;
+  }
+  /** @internal */
+  executeRaw() {
+    return this.mode === "first" ? this._prepare(!1).get() : this._prepare(!1).all();
+  }
+  async execute() {
+    return this.executeRaw();
+  }
+};
+_a70 = entityKind, __publicField(SQLiteRelationalQuery, _a70, "SQLiteAsyncRelationalQuery");
+var _a71, SQLiteSyncRelationalQuery = class extends SQLiteRelationalQuery {
+  sync() {
+    return this.executeRaw();
+  }
+};
+_a71 = entityKind, __publicField(SQLiteSyncRelationalQuery, _a71, "SQLiteSyncRelationalQuery");
+
+// node_modules/drizzle-orm/sqlite-core/query-builders/raw.js
+var _a72, SQLiteRaw = class extends QueryPromise {
+  constructor(execute, getSQL, action26, dialect, mapBatchResult) {
+    super(), this.execute = execute, this.getSQL = getSQL, this.dialect = dialect, this.mapBatchResult = mapBatchResult, this.config = { action: action26 };
+  }
+  /** @internal */
+  config;
+  getQuery() {
+    return { ...this.dialect.sqlToQuery(this.getSQL()), method: this.config.action };
+  }
+  mapResult(result, isFromBatch) {
+    return isFromBatch ? this.mapBatchResult(result) : result;
+  }
+  _prepare() {
+    return this;
+  }
+  /** @internal */
+  isResponseInArrayMode() {
+    return !1;
+  }
+};
+_a72 = entityKind, __publicField(SQLiteRaw, _a72, "SQLiteRaw");
+
+// node_modules/drizzle-orm/sqlite-core/db.js
+var _a73, BaseSQLiteDatabase = class {
+  constructor(resultKind, dialect, session, schema3) {
+    this.resultKind = resultKind, this.dialect = dialect, this.session = session, this._ = schema3 ? {
+      schema: schema3.schema,
+      fullSchema: schema3.fullSchema,
+      tableNamesMap: schema3.tableNamesMap
+    } : {
+      schema: void 0,
+      fullSchema: {},
+      tableNamesMap: {}
+    }, this.query = {};
+    let query = this.query;
+    if (this._.schema)
+      for (let [tableName, columns] of Object.entries(this._.schema))
+        query[tableName] = new RelationalQueryBuilder(
+          resultKind,
+          schema3.fullSchema,
+          this._.schema,
+          this._.tableNamesMap,
+          schema3.fullSchema[tableName],
+          columns,
+          dialect,
+          session
+        );
+    this.$cache = { invalidate: async (_params) => {
+    } };
+  }
+  query;
+  /**
+   * Creates a subquery that defines a temporary named result set as a CTE.
+   *
+   * It is useful for breaking down complex queries into simpler parts and for reusing the result set in subsequent parts of the query.
+   *
+   * See docs: {@link https://orm.drizzle.team/docs/select#with-clause}
+   *
+   * @param alias The alias for the subquery.
+   *
+   * Failure to provide an alias will result in a DrizzleTypeError, preventing the subquery from being referenced in other queries.
+   *
+   * @example
+   *
+   * ```ts
+   * // Create a subquery with alias 'sq' and use it in the select query
+   * const sq = db.$with('sq').as(db.select().from(users).where(eq(users.id, 42)));
+   *
+   * const result = await db.with(sq).select().from(sq);
+   * ```
+   *
+   * To select arbitrary SQL values as fields in a CTE and reference them in other CTEs or in the main query, you need to add aliases to them:
+   *
+   * ```ts
+   * // Select an arbitrary SQL value as a field in a CTE and reference it in the main query
+   * const sq = db.$with('sq').as(db.select({
+   *   name: sql<string>`upper(${users.name})`.as('name'),
+   * })
+   * .from(users));
+   *
+   * const result = await db.with(sq).select({ name: sq.name }).from(sq);
+   * ```
+   */
+  $with = (alias, selection) => {
+    let self2 = this;
+    return { as: (qb) => (typeof qb == "function" && (qb = qb(new QueryBuilder(self2.dialect))), new Proxy(
+      new WithSubquery(
+        qb.getSQL(),
+        selection ?? ("getSelectedFields" in qb ? qb.getSelectedFields() ?? {} : {}),
+        alias,
+        !0
+      ),
+      new SelectionProxyHandler({ alias, sqlAliasedBehavior: "alias", sqlBehavior: "error" })
+    )) };
+  };
+  $count(source, filters) {
+    return new SQLiteCountBuilder({ source, filters, session: this.session });
+  }
+  /**
+   * Incorporates a previously defined CTE (using `$with`) into the main query.
+   *
+   * This method allows the main query to reference a temporary named result set.
+   *
+   * See docs: {@link https://orm.drizzle.team/docs/select#with-clause}
+   *
+   * @param queries The CTEs to incorporate into the main query.
+   *
+   * @example
+   *
+   * ```ts
+   * // Define a subquery 'sq' as a CTE using $with
+   * const sq = db.$with('sq').as(db.select().from(users).where(eq(users.id, 42)));
+   *
+   * // Incorporate the CTE 'sq' into the main query and select from it
+   * const result = await db.with(sq).select().from(sq);
+   * ```
+   */
+  with(...queries) {
+    let self2 = this;
+    function select(fields) {
+      return new SQLiteSelectBuilder({
+        fields: fields ?? void 0,
+        session: self2.session,
+        dialect: self2.dialect,
+        withList: queries
+      });
+    }
+    function selectDistinct(fields) {
+      return new SQLiteSelectBuilder({
+        fields: fields ?? void 0,
+        session: self2.session,
+        dialect: self2.dialect,
+        withList: queries,
+        distinct: !0
+      });
+    }
+    function update(table) {
+      return new SQLiteUpdateBuilder(table, self2.session, self2.dialect, queries);
+    }
+    function insert(into) {
+      return new SQLiteInsertBuilder(into, self2.session, self2.dialect, queries);
+    }
+    function delete_(from) {
+      return new SQLiteDeleteBase(from, self2.session, self2.dialect, queries);
+    }
+    return { select, selectDistinct, update, insert, delete: delete_ };
+  }
+  select(fields) {
+    return new SQLiteSelectBuilder({ fields: fields ?? void 0, session: this.session, dialect: this.dialect });
+  }
+  selectDistinct(fields) {
+    return new SQLiteSelectBuilder({
+      fields: fields ?? void 0,
+      session: this.session,
+      dialect: this.dialect,
+      distinct: !0
+    });
+  }
+  /**
+   * Creates an update query.
+   *
+   * Calling this method without `.where()` clause will update all rows in a table. The `.where()` clause specifies which rows should be updated.
+   *
+   * Use `.set()` method to specify which values to update.
+   *
+   * See docs: {@link https://orm.drizzle.team/docs/update}
+   *
+   * @param table The table to update.
+   *
+   * @example
+   *
+   * ```ts
+   * // Update all rows in the 'cars' table
+   * await db.update(cars).set({ color: 'red' });
+   *
+   * // Update rows with filters and conditions
+   * await db.update(cars).set({ color: 'red' }).where(eq(cars.brand, 'BMW'));
+   *
+   * // Update with returning clause
+   * const updatedCar: Car[] = await db.update(cars)
+   *   .set({ color: 'red' })
+   *   .where(eq(cars.id, 1))
+   *   .returning();
+   * ```
+   */
+  update(table) {
+    return new SQLiteUpdateBuilder(table, this.session, this.dialect);
+  }
+  $cache;
+  /**
+   * Creates an insert query.
+   *
+   * Calling this method will create new rows in a table. Use `.values()` method to specify which values to insert.
+   *
+   * See docs: {@link https://orm.drizzle.team/docs/insert}
+   *
+   * @param table The table to insert into.
+   *
+   * @example
+   *
+   * ```ts
+   * // Insert one row
+   * await db.insert(cars).values({ brand: 'BMW' });
+   *
+   * // Insert multiple rows
+   * await db.insert(cars).values([{ brand: 'BMW' }, { brand: 'Porsche' }]);
+   *
+   * // Insert with returning clause
+   * const insertedCar: Car[] = await db.insert(cars)
+   *   .values({ brand: 'BMW' })
+   *   .returning();
+   * ```
+   */
+  insert(into) {
+    return new SQLiteInsertBuilder(into, this.session, this.dialect);
+  }
+  /**
+   * Creates a delete query.
+   *
+   * Calling this method without `.where()` clause will delete all rows in a table. The `.where()` clause specifies which rows should be deleted.
+   *
+   * See docs: {@link https://orm.drizzle.team/docs/delete}
+   *
+   * @param table The table to delete from.
+   *
+   * @example
+   *
+   * ```ts
+   * // Delete all rows in the 'cars' table
+   * await db.delete(cars);
+   *
+   * // Delete rows with filters and conditions
+   * await db.delete(cars).where(eq(cars.color, 'green'));
+   *
+   * // Delete with returning clause
+   * const deletedCar: Car[] = await db.delete(cars)
+   *   .where(eq(cars.id, 1))
+   *   .returning();
+   * ```
+   */
+  delete(from) {
+    return new SQLiteDeleteBase(from, this.session, this.dialect);
+  }
+  run(query) {
+    let sequel = typeof query == "string" ? sql4.raw(query) : query.getSQL();
+    return this.resultKind === "async" ? new SQLiteRaw(
+      async () => this.session.run(sequel),
+      () => sequel,
+      "run",
+      this.dialect,
+      this.session.extractRawRunValueFromBatchResult.bind(this.session)
+    ) : this.session.run(sequel);
+  }
+  all(query) {
+    let sequel = typeof query == "string" ? sql4.raw(query) : query.getSQL();
+    return this.resultKind === "async" ? new SQLiteRaw(
+      async () => this.session.all(sequel),
+      () => sequel,
+      "all",
+      this.dialect,
+      this.session.extractRawAllValueFromBatchResult.bind(this.session)
+    ) : this.session.all(sequel);
+  }
+  get(query) {
+    let sequel = typeof query == "string" ? sql4.raw(query) : query.getSQL();
+    return this.resultKind === "async" ? new SQLiteRaw(
+      async () => this.session.get(sequel),
+      () => sequel,
+      "get",
+      this.dialect,
+      this.session.extractRawGetValueFromBatchResult.bind(this.session)
+    ) : this.session.get(sequel);
+  }
+  values(query) {
+    let sequel = typeof query == "string" ? sql4.raw(query) : query.getSQL();
+    return this.resultKind === "async" ? new SQLiteRaw(
+      async () => this.session.values(sequel),
+      () => sequel,
+      "values",
+      this.dialect,
+      this.session.extractRawValuesValueFromBatchResult.bind(this.session)
+    ) : this.session.values(sequel);
+  }
+  transaction(transaction, config) {
+    return this.session.transaction(transaction, config);
+  }
+};
+_a73 = entityKind, __publicField(BaseSQLiteDatabase, _a73, "BaseSQLiteDatabase");
+
+// node_modules/drizzle-orm/cache/core/cache.js
+var _a74, Cache = class {
+};
+_a74 = entityKind, __publicField(Cache, _a74, "Cache");
+var _a75, NoopCache = class extends Cache {
+  strategy() {
+    return "all";
+  }
+  async get(_key) {
+  }
+  async put(_hashedQuery, _response, _tables, _config) {
+  }
+  async onMutate(_params) {
+  }
+};
+_a75 = entityKind, __publicField(NoopCache, _a75, "NoopCache");
+async function hashQuery(sql11, params) {
+  let dataToHash = `${sql11}-${JSON.stringify(params)}`, data = new TextEncoder().encode(dataToHash), hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  return [...new Uint8Array(hashBuffer)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+// node_modules/drizzle-orm/errors/index.js
+var DrizzleQueryError = class extends Error {
+  constructor(query, params, cause) {
+    super(`Failed query: ${query}
+params: ${params}`), this.query = query, this.params = params, this.cause = cause, Error.captureStackTrace(this, DrizzleQueryError), cause && (this.cause = cause);
+  }
+};
+
+// node_modules/drizzle-orm/sqlite-core/session.js
+var _a76, ExecuteResultSync = class extends QueryPromise {
+  constructor(resultCb) {
+    super(), this.resultCb = resultCb;
+  }
+  async execute() {
+    return this.resultCb();
+  }
+  sync() {
+    return this.resultCb();
+  }
+};
+_a76 = entityKind, __publicField(ExecuteResultSync, _a76, "ExecuteResultSync");
+var _a77, SQLitePreparedQuery = class {
+  constructor(mode2, executeMethod, query, cache, queryMetadata, cacheConfig) {
+    this.mode = mode2, this.executeMethod = executeMethod, this.query = query, this.cache = cache, this.queryMetadata = queryMetadata, this.cacheConfig = cacheConfig, cache && cache.strategy() === "all" && cacheConfig === void 0 && (this.cacheConfig = { enable: !0, autoInvalidate: !0 }), this.cacheConfig?.enable || (this.cacheConfig = void 0);
+  }
+  /** @internal */
+  joinsNotNullableMap;
+  /** @internal */
+  async queryWithCache(queryString, params, query) {
+    if (this.cache === void 0 || is(this.cache, NoopCache) || this.queryMetadata === void 0)
+      try {
+        return await query();
+      } catch (e) {
+        throw new DrizzleQueryError(queryString, params, e);
+      }
+    if (this.cacheConfig && !this.cacheConfig.enable)
+      try {
+        return await query();
+      } catch (e) {
+        throw new DrizzleQueryError(queryString, params, e);
+      }
+    if ((this.queryMetadata.type === "insert" || this.queryMetadata.type === "update" || this.queryMetadata.type === "delete") && this.queryMetadata.tables.length > 0)
+      try {
+        let [res] = await Promise.all([
+          query(),
+          this.cache.onMutate({ tables: this.queryMetadata.tables })
+        ]);
+        return res;
+      } catch (e) {
+        throw new DrizzleQueryError(queryString, params, e);
+      }
+    if (!this.cacheConfig)
+      try {
+        return await query();
+      } catch (e) {
+        throw new DrizzleQueryError(queryString, params, e);
+      }
+    if (this.queryMetadata.type === "select") {
+      let fromCache = await this.cache.get(
+        this.cacheConfig.tag ?? await hashQuery(queryString, params),
+        this.queryMetadata.tables,
+        this.cacheConfig.tag !== void 0,
+        this.cacheConfig.autoInvalidate
+      );
+      if (fromCache === void 0) {
+        let result;
+        try {
+          result = await query();
+        } catch (e) {
+          throw new DrizzleQueryError(queryString, params, e);
+        }
+        return await this.cache.put(
+          this.cacheConfig.tag ?? await hashQuery(queryString, params),
+          result,
+          // make sure we send tables that were used in a query only if user wants to invalidate it on each write
+          this.cacheConfig.autoInvalidate ? this.queryMetadata.tables : [],
+          this.cacheConfig.tag !== void 0,
+          this.cacheConfig.config
+        ), result;
+      }
+      return fromCache;
+    }
+    try {
+      return await query();
+    } catch (e) {
+      throw new DrizzleQueryError(queryString, params, e);
+    }
+  }
+  getQuery() {
+    return this.query;
+  }
+  mapRunResult(result, _isFromBatch) {
+    return result;
+  }
+  mapAllResult(_result, _isFromBatch) {
+    throw new Error("Not implemented");
+  }
+  mapGetResult(_result, _isFromBatch) {
+    throw new Error("Not implemented");
+  }
+  execute(placeholderValues) {
+    return this.mode === "async" ? this[this.executeMethod](placeholderValues) : new ExecuteResultSync(() => this[this.executeMethod](placeholderValues));
+  }
+  mapResult(response, isFromBatch) {
+    switch (this.executeMethod) {
+      case "run":
+        return this.mapRunResult(response, isFromBatch);
+      case "all":
+        return this.mapAllResult(response, isFromBatch);
+      case "get":
+        return this.mapGetResult(response, isFromBatch);
+    }
+  }
+};
+_a77 = entityKind, __publicField(SQLitePreparedQuery, _a77, "PreparedQuery");
+var _a78, SQLiteSession = class {
+  constructor(dialect) {
+    this.dialect = dialect;
+  }
+  prepareOneTimeQuery(query, fields, executeMethod, isResponseInArrayMode, customResultMapper, queryMetadata, cacheConfig) {
+    return this.prepareQuery(
+      query,
+      fields,
+      executeMethod,
+      isResponseInArrayMode,
+      customResultMapper,
+      queryMetadata,
+      cacheConfig
+    );
+  }
+  run(query) {
+    let staticQuery = this.dialect.sqlToQuery(query);
+    try {
+      return this.prepareOneTimeQuery(staticQuery, void 0, "run", !1).run();
+    } catch (err) {
+      throw new DrizzleError({ cause: err, message: `Failed to run the query '${staticQuery.sql}'` });
+    }
+  }
+  /** @internal */
+  extractRawRunValueFromBatchResult(result) {
+    return result;
+  }
+  all(query) {
+    return this.prepareOneTimeQuery(this.dialect.sqlToQuery(query), void 0, "run", !1).all();
+  }
+  /** @internal */
+  extractRawAllValueFromBatchResult(_result) {
+    throw new Error("Not implemented");
+  }
+  get(query) {
+    return this.prepareOneTimeQuery(this.dialect.sqlToQuery(query), void 0, "run", !1).get();
+  }
+  /** @internal */
+  extractRawGetValueFromBatchResult(_result) {
+    throw new Error("Not implemented");
+  }
+  values(query) {
+    return this.prepareOneTimeQuery(this.dialect.sqlToQuery(query), void 0, "run", !1).values();
+  }
+  async count(sql11) {
+    return (await this.values(sql11))[0][0];
+  }
+  /** @internal */
+  extractRawValuesValueFromBatchResult(_result) {
+    throw new Error("Not implemented");
+  }
+};
+_a78 = entityKind, __publicField(SQLiteSession, _a78, "SQLiteSession");
+var _a79, SQLiteTransaction = class extends BaseSQLiteDatabase {
+  constructor(resultType, dialect, session, schema3, nestedIndex = 0) {
+    super(resultType, dialect, session, schema3), this.schema = schema3, this.nestedIndex = nestedIndex;
+  }
+  rollback() {
+    throw new TransactionRollbackError();
+  }
+};
+_a79 = entityKind, __publicField(SQLiteTransaction, _a79, "SQLiteTransaction");
 
 // node_modules/drizzle-orm/d1/session.js
-init_entity();
-init_logger();
-init_sql();
-init_sqlite_core();
-init_session();
-init_utils();
-var _a119, SQLiteD1Session = class extends SQLiteSession {
+var _a80, SQLiteD1Session = class extends SQLiteSession {
   constructor(client, dialect, schema3, options = {}) {
     super(dialect), this.client = client, this.schema = schema3, this.options = options, this.logger = options.logger ?? new NoopLogger(), this.cache = options.cache ?? new NoopCache();
   }
@@ -14984,29 +6460,29 @@ var _a119, SQLiteD1Session = class extends SQLiteSession {
   }
   async transaction(transaction, config) {
     let tx = new D1Transaction("async", this.dialect, this, this.schema);
-    await this.run(sql.raw(`begin${config?.behavior ? " " + config.behavior : ""}`));
+    await this.run(sql4.raw(`begin${config?.behavior ? " " + config.behavior : ""}`));
     try {
       let result = await transaction(tx);
-      return await this.run(sql`commit`), result;
+      return await this.run(sql4`commit`), result;
     } catch (err) {
-      throw await this.run(sql`rollback`), err;
+      throw await this.run(sql4`rollback`), err;
     }
   }
 };
-_a119 = entityKind, __publicField(SQLiteD1Session, _a119, "SQLiteD1Session");
-var _a120, _D1Transaction = class extends SQLiteTransaction {
+_a80 = entityKind, __publicField(SQLiteD1Session, _a80, "SQLiteD1Session");
+var _a81, _D1Transaction = class extends SQLiteTransaction {
   async transaction(transaction) {
     let savepointName = `sp${this.nestedIndex}`, tx = new _D1Transaction("async", this.dialect, this.session, this.schema, this.nestedIndex + 1);
-    await this.session.run(sql.raw(`savepoint ${savepointName}`));
+    await this.session.run(sql4.raw(`savepoint ${savepointName}`));
     try {
       let result = await transaction(tx);
-      return await this.session.run(sql.raw(`release savepoint ${savepointName}`)), result;
+      return await this.session.run(sql4.raw(`release savepoint ${savepointName}`)), result;
     } catch (err) {
-      throw await this.session.run(sql.raw(`rollback to savepoint ${savepointName}`)), err;
+      throw await this.session.run(sql4.raw(`rollback to savepoint ${savepointName}`)), err;
     }
   }
 }, D1Transaction = _D1Transaction;
-_a120 = entityKind, __publicField(D1Transaction, _a120, "D1Transaction");
+_a81 = entityKind, __publicField(D1Transaction, _a81, "D1Transaction");
 function d1ToRawMapping(results) {
   let rows = [];
   for (let row of results) {
@@ -15015,7 +6491,7 @@ function d1ToRawMapping(results) {
   }
   return rows;
 }
-var _a121, D1PreparedQuery = class extends SQLitePreparedQuery {
+var _a82, D1PreparedQuery = class extends SQLitePreparedQuery {
   constructor(stmt, query, logger, cache, queryMetadata, cacheConfig, fields, executeMethod, _isResponseInArrayMode, customResultMapper) {
     super("async", executeMethod, query, cache, queryMetadata, cacheConfig), this.logger = logger, this._isResponseInArrayMode = _isResponseInArrayMode, this.customResultMapper = customResultMapper, this.fields = fields, this.stmt = stmt;
   }
@@ -15063,15 +6539,15 @@ var _a121, D1PreparedQuery = class extends SQLitePreparedQuery {
     return this._isResponseInArrayMode;
   }
 };
-_a121 = entityKind, __publicField(D1PreparedQuery, _a121, "D1PreparedQuery");
+_a82 = entityKind, __publicField(D1PreparedQuery, _a82, "D1PreparedQuery");
 
 // node_modules/drizzle-orm/d1/driver.js
-var _a122, DrizzleD1Database = class extends BaseSQLiteDatabase {
+var _a83, DrizzleD1Database = class extends BaseSQLiteDatabase {
   async batch(batch) {
     return this.session.batch(batch);
   }
 };
-_a122 = entityKind, __publicField(DrizzleD1Database, _a122, "D1Database");
+_a83 = entityKind, __publicField(DrizzleD1Database, _a83, "D1Database");
 function drizzle(client, config = {}) {
   let dialect = new SQLiteAsyncDialect({ casing: config.casing }), logger;
   config.logger === !0 ? logger = new DefaultLogger() : config.logger !== !1 && (logger = config.logger);
@@ -15189,8 +6665,10 @@ function ErrorBoundary() {
   ] });
 }
 var loader = async ({ request, context }) => {
+  if (!context || !context.env || !context.env.DB)
+    throw new Error("D1 Database binding is missing from context.env.DB");
   let db = createDb(context.env.DB);
-  return json({
+  return context.env.SESSION_SECRET && (global.SESSION_SECRET = context.env.SESSION_SECRET), json({
     user: await getUser(request, db)
   });
 };
@@ -15267,9 +6745,9 @@ var api_comments_commentId_vote_exports = {};
 __export(api_comments_commentId_vote_exports, {
   action: () => action2
 });
-init_drizzle_orm();
 init_schema();
 import { json as json3 } from "@remix-run/cloudflare";
+import { eq as eq5, and as and4 } from "drizzle-orm";
 async function action2({ request, params, context }) {
   let { commentId } = params;
   if (!commentId)
@@ -15279,16 +6757,16 @@ async function action2({ request, params, context }) {
     return json3({ error: "Missing required fields" }, { status: 400 });
   try {
     let db = context.env.DB, existingVote = await db.select().from(votes).where(
-      and(
-        eq(votes.commentId, commentId),
-        eq(votes.userId, userId),
-        eq(votes.voteType, voteType)
+      and4(
+        eq5(votes.commentId, commentId),
+        eq5(votes.userId, userId),
+        eq5(votes.voteType, voteType)
       )
     ).limit(1), totalVotes = 0, upvotes = 0, downvotes = 0;
     existingVote.length > 0 ? await db.update(votes).set({
       value,
       updatedAt: /* @__PURE__ */ new Date()
-    }).where(eq(votes.id, existingVote[0].id)) : await db.insert(votes).values({
+    }).where(eq5(votes.id, existingVote[0].id)) : await db.insert(votes).values({
       id: crypto.randomUUID(),
       commentId,
       userId,
@@ -15302,15 +6780,15 @@ async function action2({ request, params, context }) {
       upvotes: votes.value,
       downvotes: votes.value
     }).from(votes).where(
-      and(
-        eq(votes.commentId, commentId),
-        eq(votes.voteType, voteType)
+      and4(
+        eq5(votes.commentId, commentId),
+        eq5(votes.voteType, voteType)
       )
     )).forEach((vote) => {
       totalVotes += vote.totalVotes, vote.upvotes > 0 && (upvotes += vote.upvotes), vote.downvotes < 0 && (downvotes += Math.abs(vote.downvotes));
     });
     let updateData = {};
-    return voteType === "comment" && (updateData.upvotes = upvotes, updateData.downvotes = downvotes), await db.update(comments).set(updateData).where(eq(comments.id, commentId)), json3({
+    return voteType === "comment" && (updateData.upvotes = upvotes, updateData.downvotes = downvotes), await db.update(comments).set(updateData).where(eq5(comments.id, commentId)), json3({
       success: !0,
       totalVotes,
       upvotes,
@@ -15326,9 +6804,9 @@ var api_answers_answerId_vote_exports = {};
 __export(api_answers_answerId_vote_exports, {
   action: () => action3
 });
-init_drizzle_orm();
 init_schema();
 import { json as json4 } from "@remix-run/cloudflare";
+import { eq as eq6, and as and5 } from "drizzle-orm";
 async function action3({ request, params, context }) {
   let { answerId } = params;
   if (!answerId)
@@ -15338,16 +6816,16 @@ async function action3({ request, params, context }) {
     return json4({ error: "Missing required fields" }, { status: 400 });
   try {
     let db = context.env.DB, existingVote = await db.select().from(votes).where(
-      and(
-        eq(votes.answerId, answerId),
-        eq(votes.userId, userId),
-        eq(votes.voteType, voteType)
+      and5(
+        eq6(votes.answerId, answerId),
+        eq6(votes.userId, userId),
+        eq6(votes.voteType, voteType)
       )
     ).limit(1), totalVotes = 0, upvotes = 0, downvotes = 0;
     existingVote.length > 0 ? await db.update(votes).set({
       value,
       updatedAt: /* @__PURE__ */ new Date()
-    }).where(eq(votes.id, existingVote[0].id)) : await db.insert(votes).values({
+    }).where(eq6(votes.id, existingVote[0].id)) : await db.insert(votes).values({
       id: crypto.randomUUID(),
       answerId,
       userId,
@@ -15361,15 +6839,15 @@ async function action3({ request, params, context }) {
       upvotes: votes.value,
       downvotes: votes.value
     }).from(votes).where(
-      and(
-        eq(votes.answerId, answerId),
-        eq(votes.voteType, voteType)
+      and5(
+        eq6(votes.answerId, answerId),
+        eq6(votes.voteType, voteType)
       )
     )).forEach((vote) => {
       totalVotes += vote.totalVotes, vote.upvotes > 0 && (upvotes += vote.upvotes), vote.downvotes < 0 && (downvotes += Math.abs(vote.downvotes));
     });
     let updateData = {};
-    return voteType === "answer" && (updateData.upvotes = upvotes, updateData.downvotes = downvotes), await db.update(answers).set(updateData).where(eq(answers.id, answerId)), json4({
+    return voteType === "answer" && (updateData.upvotes = upvotes, updateData.downvotes = downvotes), await db.update(answers).set(updateData).where(eq6(answers.id, answerId)), json4({
       success: !0,
       totalVotes,
       upvotes,
@@ -15416,9 +6894,9 @@ var api_posts_postId_vote_exports = {};
 __export(api_posts_postId_vote_exports, {
   action: () => action5
 });
-init_drizzle_orm();
 init_schema();
 import { json as json6 } from "@remix-run/cloudflare";
+import { eq as eq7, and as and6 } from "drizzle-orm";
 async function action5({ request, params, context }) {
   let { postId } = params;
   if (!postId)
@@ -15428,16 +6906,16 @@ async function action5({ request, params, context }) {
     return json6({ error: "Missing required fields" }, { status: 400 });
   try {
     let db = context.env.DB, existingVote = await db.select().from(votes).where(
-      and(
-        eq(votes.postId, postId),
-        eq(votes.userId, userId),
-        eq(votes.voteType, voteType)
+      and6(
+        eq7(votes.postId, postId),
+        eq7(votes.userId, userId),
+        eq7(votes.voteType, voteType)
       )
     ).limit(1), totalVotes = 0, qualityUpvotes = 0, qualityDownvotes = 0;
     existingVote.length > 0 ? await db.update(votes).set({
       value,
       updatedAt: /* @__PURE__ */ new Date()
-    }).where(eq(votes.id, existingVote[0].id)) : await db.insert(votes).values({
+    }).where(eq7(votes.id, existingVote[0].id)) : await db.insert(votes).values({
       id: crypto.randomUUID(),
       postId,
       userId,
@@ -15451,15 +6929,15 @@ async function action5({ request, params, context }) {
       qualityUpvotes: votes.value,
       qualityDownvotes: votes.value
     }).from(votes).where(
-      and(
-        eq(votes.postId, postId),
-        eq(votes.voteType, voteType)
+      and6(
+        eq7(votes.postId, postId),
+        eq7(votes.voteType, voteType)
       )
     )).forEach((vote) => {
       totalVotes += vote.totalVotes, vote.qualityUpvotes > 0 && (qualityUpvotes += vote.qualityUpvotes), vote.qualityDownvotes < 0 && (qualityDownvotes += Math.abs(vote.qualityDownvotes));
     });
     let updateData = {};
-    return voteType === "visibility" ? updateData.visibilityVotes = totalVotes : voteType === "quality" && (updateData.qualityUpvotes = qualityUpvotes, updateData.qualityDownvotes = qualityDownvotes), await db.update(posts).set(updateData).where(eq(posts.id, postId)), json6({
+    return voteType === "visibility" ? updateData.visibilityVotes = totalVotes : voteType === "quality" && (updateData.qualityUpvotes = qualityUpvotes, updateData.qualityDownvotes = qualityDownvotes), await db.update(posts).set(updateData).where(eq7(posts.id, postId)), json6({
       success: !0,
       totalVotes,
       qualityUpvotes,
@@ -15476,9 +6954,9 @@ __export(api_bookmarks_status_exports, {
   action: () => action6,
   loader: () => loader2
 });
-init_drizzle_orm();
 init_schema();
 import { json as json7 } from "@remix-run/cloudflare";
+import { eq as eq8, and as and7 } from "drizzle-orm";
 async function loader2({ request, context }) {
   let url = new URL(request.url), postId = url.searchParams.get("postId"), userId = url.searchParams.get("userId");
   if (!postId || !userId)
@@ -15488,9 +6966,9 @@ async function loader2({ request, context }) {
     if (!db)
       return console.error("Database is undefined in bookmarks-status loader"), json7({ error: "Database connection not available" }, { status: 500 });
     let isBookmarked = (await db.select().from(bookmarks).where(
-      and(
-        eq(bookmarks.postId, postId),
-        eq(bookmarks.userId, userId)
+      and7(
+        eq8(bookmarks.postId, postId),
+        eq8(bookmarks.userId, userId)
       )
     ).limit(1)).length > 0;
     return json7({ isBookmarked });
@@ -15505,14 +6983,14 @@ async function action6({ request, context }) {
   try {
     let db = context.env.DB;
     return db ? action26 === "toggle" ? (await db.select().from(bookmarks).where(
-      and(
-        eq(bookmarks.postId, postId),
-        eq(bookmarks.userId, userId)
+      and7(
+        eq8(bookmarks.postId, postId),
+        eq8(bookmarks.userId, userId)
       )
     ).limit(1)).length > 0 ? (await db.delete(bookmarks).where(
-      and(
-        eq(bookmarks.postId, postId),
-        eq(bookmarks.userId, userId)
+      and7(
+        eq8(bookmarks.postId, postId),
+        eq8(bookmarks.userId, userId)
       )
     ), json7({ isBookmarked: !1 })) : (await db.insert(bookmarks).values({
       id: crypto.randomUUID(),
@@ -15528,24 +7006,23 @@ async function action6({ request, context }) {
 // app/routes/api.bookmarks-toggle.tsx
 var api_bookmarks_toggle_exports = {};
 __export(api_bookmarks_toggle_exports, {
-  action: () => action7,
-  default: () => api_bookmarks_toggle_default
+  action: () => action7
 });
-import { json as json8 } from "@remix-run/node";
+import { json as json8 } from "@remix-run/cloudflare";
 
 // app/utils/bookmark.server.ts
-init_drizzle_orm();
 init_schema();
+import { eq as eq9, and as and8 } from "drizzle-orm";
 async function toggleBookmark(db, postId, userId) {
   return (await db.select().from(bookmarks).where(
-    and(
-      eq(bookmarks.postId, postId),
-      eq(bookmarks.userId, userId)
+    and8(
+      eq9(bookmarks.postId, postId),
+      eq9(bookmarks.userId, userId)
     )
   ).limit(1)).length > 0 ? (await db.delete(bookmarks).where(
-    and(
-      eq(bookmarks.postId, postId),
-      eq(bookmarks.userId, userId)
+    and8(
+      eq9(bookmarks.postId, postId),
+      eq9(bookmarks.userId, userId)
     )
   ), { bookmarked: !1 }) : (await db.insert(bookmarks).values({
     id: crypto.randomUUID(),
@@ -15576,7 +7053,7 @@ async function getUserBookmarks(db, userId) {
       profile: {
         profilePicture: profiles.profilePicture
       }
-    }).from(bookmarks).innerJoin(posts, eq(bookmarks.postId, posts.id)).innerJoin(users, eq(posts.authorId, users.id)).leftJoin(profiles, eq(users.id, profiles.userId)).where(eq(bookmarks.userId, userId)).orderBy(bookmarks.createdAt);
+    }).from(bookmarks).innerJoin(posts, eq9(bookmarks.postId, posts.id)).innerJoin(users, eq9(posts.authorId, users.id)).leftJoin(profiles, eq9(users.id, profiles.userId)).where(eq9(bookmarks.userId, userId)).orderBy(bookmarks.createdAt);
   } catch (error) {
     return console.error("Error fetching user bookmarks:", error), [];
   }
@@ -15590,9 +7067,6 @@ var action7 = async ({ request, context }) => {
   let db = context.env.DB, result = await toggleBookmark(db, postId, userId);
   return json8(result);
 };
-function api_bookmarks_toggle_default() {
-  return null;
-}
 
 // app/routes/api.integrity.report.tsx
 var api_integrity_report_exports = {};
@@ -15603,14 +7077,14 @@ import { json as json9 } from "@remix-run/cloudflare";
 import { z as z2 } from "zod";
 
 // app/utils/integrity.server.ts
-init_drizzle_orm();
 init_schema();
+import { eq as eq10, and as and9, desc as desc5, isNull as isNull2 } from "drizzle-orm";
 async function rateUser(db, user, ratingData) {
   try {
-    if ((await db.select().from(userRatings).where(and(
-      eq(userRatings.raterId, user.id),
-      eq(userRatings.ratedUserId, ratingData.ratedUserId),
-      ratingData.referenceId ? eq(userRatings.referenceId, ratingData.referenceId) : isNull(userRatings.referenceId)
+    if ((await db.select().from(userRatings).where(and9(
+      eq10(userRatings.raterId, user.id),
+      eq10(userRatings.ratedUserId, ratingData.ratedUserId),
+      ratingData.referenceId ? eq10(userRatings.referenceId, ratingData.referenceId) : isNull2(userRatings.referenceId)
     )).limit(1)).length > 0)
       throw new Error("Already rated this user for this reference");
     await db.insert(userRatings).values({
@@ -15639,11 +7113,11 @@ async function reportViolation(db, user, violationData) {
   if (user.id === violationData.targetUserId)
     throw new Error("Cannot report yourself");
   try {
-    if ((await db.select().from(integrityViolations).where(and(
-      eq(integrityViolations.reporterId, user.id),
-      eq(integrityViolations.targetUserId, violationData.targetUserId),
-      eq(integrityViolations.violationType, violationData.violationType),
-      violationData.referenceId ? eq(integrityViolations.referenceId, violationData.referenceId) : isNull(integrityViolations.referenceId)
+    if ((await db.select().from(integrityViolations).where(and9(
+      eq10(integrityViolations.reporterId, user.id),
+      eq10(integrityViolations.targetUserId, violationData.targetUserId),
+      eq10(integrityViolations.violationType, violationData.violationType),
+      violationData.referenceId ? eq10(integrityViolations.referenceId, violationData.referenceId) : isNull2(integrityViolations.referenceId)
     )).limit(1)).length > 0)
       throw new Error("You have already reported this user for this violation");
     let violation = await db.insert(integrityViolations).values({
@@ -15672,14 +7146,14 @@ async function reportViolation(db, user, violationData) {
 }
 async function updateUserIntegrityScore(db, userId) {
   try {
-    let ratings = await db.select({ rating: userRatings.rating }).from(userRatings).where(eq(userRatings.ratedUserId, userId));
+    let ratings = await db.select({ rating: userRatings.rating }).from(userRatings).where(eq10(userRatings.ratedUserId, userId));
     if (ratings.length === 0)
       return;
     let averageRating = ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length;
     await db.update(users).set({
       integrityScore: averageRating,
       totalRatings: ratings.length
-    }).where(eq(users.id, userId));
+    }).where(eq10(users.id, userId));
   } catch (error) {
     console.error("Error updating integrity score:", error);
   }
@@ -15730,7 +7204,7 @@ var api_profile_picture_exports = {};
 __export(api_profile_picture_exports, {
   action: () => action9
 });
-import { json as json10 } from "@remix-run/node";
+import { json as json10 } from "@remix-run/cloudflare";
 
 // app/utils/cloudinary.server.ts
 async function uploadToCloudinary(base64Data, options) {
@@ -15740,14 +7214,14 @@ async function uploadToCloudinary(base64Data, options) {
       throw new Error("Cloudinary configuration missing");
     let formData = new FormData();
     formData.append("file", `data:${options.resourceType}/${options.resourceType === "video" ? "mp4" : "jpeg"};base64,${base64String}`), formData.append("resource_type", options.resourceType), formData.append("folder", options.folder || "portal"), options.publicId && formData.append("public_id", options.publicId), formData.append("overwrite", "true");
-    let timestamp = Math.round((/* @__PURE__ */ new Date()).getTime() / 1e3), signature2 = await generateSignature({
+    let timestamp = Math.round((/* @__PURE__ */ new Date()).getTime() / 1e3), signature = await generateSignature({
       timestamp,
       folder: options.folder || "portal",
       overwrite: "true",
       resourceType: options.resourceType,
       apiSecret
     });
-    formData.append("timestamp", timestamp.toString()), formData.append("signature", signature2);
+    formData.append("timestamp", timestamp.toString()), formData.append("signature", signature);
     let response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/${options.resourceType}/upload`, {
       method: "POST",
       body: formData
@@ -15770,7 +7244,7 @@ async function generateSignature(params) {
 
 // app/routes/api.profile.picture.tsx
 init_schema();
-init_drizzle_orm();
+import { eq as eq11 } from "drizzle-orm";
 async function action9({ request, context }) {
   try {
     let db = createDb(context.env.DB), user = await getUser(request, db);
@@ -15785,7 +7259,7 @@ async function action9({ request, context }) {
     });
     if (!uploadResult.secure_url)
       throw new Error("Failed to upload image");
-    return await db.update(profiles).set({ profilePicture: uploadResult.secure_url }).where(eq(profiles.userId, user.id)).run(), json10({
+    return await db.update(profiles).set({ profilePicture: uploadResult.secure_url }).where(eq11(profiles.userId, user.id)).run(), json10({
       success: !0,
       profilePicture: uploadResult.secure_url
     });
@@ -15802,16 +7276,16 @@ var api_refund_requests_exports = {};
 __export(api_refund_requests_exports, {
   loader: () => loader3
 });
-import { json as json11 } from "@remix-run/node";
+import { json as json11 } from "@remix-run/cloudflare";
 init_schema();
-init_drizzle_orm();
+import { eq as eq12 } from "drizzle-orm";
 async function loader3({ request, context }) {
   let db = createDb(context.env.DB), user = await getUser(request, db);
   if (!user)
     return json11({ error: "Unauthorized" }, { status: 401 });
   try {
     let userRefundRequests = await db.query.refundRequests.findMany({
-      where: eq(refundRequests.requesterId, user.id),
+      where: eq12(refundRequests.requesterId, user.id),
       orderBy: [refundRequests.createdAt]
     });
     return json11({ refundRequests: userRefundRequests });
@@ -15895,14 +7369,7 @@ var RateUserSchema = z4.object({
       message: "User rated successfully"
     });
   } catch (error) {
-    return console.error("Rating error:", error), error instanceof z4.ZodError ? json13({
-      error: "Validation error",
-      details: error.errors
-    }, { status: 400 }) : error instanceof Error ? json13({
-      error: error.message
-    }, { status: 400 }) : json13({
-      error: "An unexpected error occurred. Please try again."
-    }, { status: 500 });
+    return console.error("Error processing integrity rating:", error), json13({ error: "Failed to process rating" }, { status: 500 });
   }
 };
 
@@ -15911,26 +7378,26 @@ var api_refund_request_exports = {};
 __export(api_refund_request_exports, {
   action: () => action12
 });
-import { json as json14 } from "@remix-run/node";
+import { json as json14 } from "@remix-run/cloudflare";
 
 // app/utils/refund-system.server.ts
 init_virtual_wallet_server();
 init_schema();
-init_drizzle_orm();
+import { eq as eq13, and as and10, desc as desc6, sql as sql6 } from "drizzle-orm";
 async function createRefundRequest(db, bountyId, requesterId, reason) {
   try {
     let bounty = await db.query.bounties.findFirst({
-      where: eq(bounties.id, bountyId)
+      where: eq13(bounties.id, bountyId)
     });
     if (!bounty)
       throw new Error("Bounty not found");
     if (bounty.status !== "ACTIVE")
       throw new Error("Bounty is not active");
     if (await db.query.refundRequests.findFirst({
-      where: and(
-        eq(refundRequests.bountyId, bountyId),
-        eq(refundRequests.requesterId, requesterId),
-        eq(refundRequests.status, "PENDING")
+      where: and10(
+        eq13(refundRequests.bountyId, bountyId),
+        eq13(refundRequests.requesterId, requesterId),
+        eq13(refundRequests.status, "PENDING")
       )
     }))
       throw new Error("Refund request already exists for this bounty");
@@ -15952,7 +7419,7 @@ async function createRefundRequest(db, bountyId, requesterId, reason) {
 async function voteOnRefundRequest(db, refundRequestId, voterId, vote, reason) {
   try {
     let refundRequest = await db.query.refundRequests.findFirst({
-      where: eq(refundRequests.id, refundRequestId)
+      where: eq13(refundRequests.id, refundRequestId)
     });
     if (!refundRequest)
       throw new Error("Refund request not found");
@@ -15961,9 +7428,9 @@ async function voteOnRefundRequest(db, refundRequestId, voterId, vote, reason) {
     if (refundRequest.requesterId === voterId)
       throw new Error("Cannot vote on your own refund request");
     if (await db.query.refundRequestVotes.findFirst({
-      where: and(
-        eq(refundRequestVotes.refundRequestId, refundRequestId),
-        eq(refundRequestVotes.voterId, voterId)
+      where: and10(
+        eq13(refundRequestVotes.refundRequestId, refundRequestId),
+        eq13(refundRequestVotes.voterId, voterId)
       )
     }))
       throw new Error("Already voted on this refund request");
@@ -15974,11 +7441,11 @@ async function voteOnRefundRequest(db, refundRequestId, voterId, vote, reason) {
       vote,
       reason: reason || void 0,
       rewardAmount
-    }).returning().all(), voteCount = (await db.select({ count: sql`count(*)` }).from(refundRequestVotes).where(eq(refundRequestVotes.refundRequestId, refundRequestId)).get())?.count || 0;
-    await db.update(refundRequests).set({ communityVotes: voteCount }).where(eq(refundRequests.id, refundRequestId)).run(), await addCompensation(db, voterId, rewardAmount, "Voting on refund request");
-    let approvalCount = (await db.select({ count: sql`count(*)` }).from(refundRequestVotes).where(and(
-      eq(refundRequestVotes.refundRequestId, refundRequestId),
-      eq(refundRequestVotes.vote, !0)
+    }).returning().all(), voteCount = (await db.select({ count: sql6`count(*)` }).from(refundRequestVotes).where(eq13(refundRequestVotes.refundRequestId, refundRequestId)).get())?.count || 0;
+    await db.update(refundRequests).set({ communityVotes: voteCount }).where(eq13(refundRequests.id, refundRequestId)).run(), await addCompensation(db, voterId, rewardAmount, "Voting on refund request");
+    let approvalCount = (await db.select({ count: sql6`count(*)` }).from(refundRequestVotes).where(and10(
+      eq13(refundRequestVotes.refundRequestId, refundRequestId),
+      eq13(refundRequestVotes.vote, !0)
     )).get())?.count || 0, rejectionCount = voteCount - approvalCount;
     return approvalCount >= refundRequest.requiredVotes ? await approveRefundRequest(db, refundRequestId) : rejectionCount >= refundRequest.requiredVotes && await rejectRefundRequest(db, refundRequestId), voteRecord;
   } catch (error) {
@@ -15988,21 +7455,21 @@ async function voteOnRefundRequest(db, refundRequestId, voterId, vote, reason) {
 async function approveRefundRequest(db, refundRequestId) {
   try {
     let refundRequest = await db.query.refundRequests.findFirst({
-      where: eq(refundRequests.id, refundRequestId)
+      where: eq13(refundRequests.id, refundRequestId)
     });
     if (!refundRequest)
       throw new Error("Refund request not found");
     let bounty = await db.query.bounties.findFirst({
-      where: eq(bounties.id, refundRequest.bountyId)
+      where: eq13(bounties.id, refundRequest.bountyId)
     });
     if (!bounty)
       throw new Error("Bounty not found");
     let refundAmount = bounty.amount * (1 - bounty.refundPenalty);
-    await refundBounty(db, refundRequest.requesterId, refundAmount, bounty.id), await db.update(refundRequests).set({ status: "APPROVED" }).where(eq(refundRequests.id, refundRequestId)).run();
+    await refundBounty(db, refundRequest.requesterId, refundAmount, bounty.id), await db.update(refundRequests).set({ status: "APPROVED" }).where(eq13(refundRequests.id, refundRequestId)).run();
     let correctVotes = await db.query.refundRequestVotes.findMany({
-      where: and(
-        eq(refundRequestVotes.refundRequestId, refundRequestId),
-        eq(refundRequestVotes.vote, !0)
+      where: and10(
+        eq13(refundRequestVotes.refundRequestId, refundRequestId),
+        eq13(refundRequestVotes.vote, !0)
       )
     });
     for (let vote of correctVotes)
@@ -16019,11 +7486,11 @@ async function approveRefundRequest(db, refundRequestId) {
 }
 async function rejectRefundRequest(db, refundRequestId) {
   try {
-    await db.update(refundRequests).set({ status: "REJECTED" }).where(eq(refundRequests.id, refundRequestId)).run();
+    await db.update(refundRequests).set({ status: "REJECTED" }).where(eq13(refundRequests.id, refundRequestId)).run();
     let correctVotes = await db.query.refundRequestVotes.findMany({
-      where: and(
-        eq(refundRequestVotes.refundRequestId, refundRequestId),
-        eq(refundRequestVotes.vote, !1)
+      where: and10(
+        eq13(refundRequestVotes.refundRequestId, refundRequestId),
+        eq13(refundRequestVotes.vote, !1)
       )
     });
     for (let vote of correctVotes)
@@ -16829,15 +8296,15 @@ __export(api_posts_postId_exports, {
   action: () => action14,
   loader: () => loader6
 });
-init_drizzle_orm();
 init_schema();
 import { json as json17 } from "@remix-run/cloudflare";
+import { eq as eq14, and as and11 } from "drizzle-orm";
 async function loader6({ params, context }) {
   let { postId } = params;
   if (!postId)
     return json17({ error: "Post ID is required" }, { status: 400 });
   try {
-    let post = await context.env.DB.select().from(posts).where(eq(posts.id, postId)).limit(1);
+    let post = await context.env.DB.select().from(posts).where(eq14(posts.id, postId)).limit(1);
     return post.length ? json17({ post: post[0] }) : json17({ error: "Post not found" }, { status: 404 });
   } catch (error) {
     return console.error("Error fetching post:", error), json17({ error: "Failed to fetch post" }, { status: 500 });
@@ -16885,16 +8352,16 @@ async function action14({ request, params, context }) {
         if (!userId || isNaN(value) || !voteType)
           return json17({ error: "Missing required fields" }, { status: 400 });
         let existingVote = await db.select().from(votes).where(
-          and(
-            eq(votes.postId, postId),
-            eq(votes.userId, userId),
-            eq(votes.voteType, voteType)
+          and11(
+            eq14(votes.postId, postId),
+            eq14(votes.userId, userId),
+            eq14(votes.voteType, voteType)
           )
         ).limit(1);
         existingVote.length > 0 ? await db.update(votes).set({
           value,
           updatedAt: /* @__PURE__ */ new Date()
-        }).where(eq(votes.id, existingVote[0].id)) : await db.insert(votes).values({
+        }).where(eq14(votes.id, existingVote[0].id)) : await db.insert(votes).values({
           id: crypto.randomUUID(),
           postId,
           userId,
@@ -16907,9 +8374,9 @@ async function action14({ request, params, context }) {
         let voteCounts = await db.select({
           totalVotes: votes.value
         }).from(votes).where(
-          and(
-            eq(votes.postId, postId),
-            eq(votes.voteType, voteType)
+          and11(
+            eq14(votes.postId, postId),
+            eq14(votes.voteType, voteType)
           )
         ), totalVotes = voteCounts.reduce((sum, vote) => sum + vote.totalVotes, 0), updateData = {};
         if (voteType === "visibility")
@@ -16918,38 +8385,38 @@ async function action14({ request, params, context }) {
           let upvotes = voteCounts.filter((v) => v.totalVotes > 0).reduce((sum, v) => sum + v.totalVotes, 0), downvotes = voteCounts.filter((v) => v.totalVotes < 0).reduce((sum, v) => sum + Math.abs(v.totalVotes), 0);
           updateData.qualityUpvotes = upvotes, updateData.qualityDownvotes = downvotes;
         }
-        return await db.update(posts).set(updateData).where(eq(posts.id, postId)), json17({ success: !0, totalVotes });
+        return await db.update(posts).set(updateData).where(eq14(posts.id, postId)), json17({ success: !0, totalVotes });
       }
       case "updatePost": {
         let title = formData.get("title"), content = formData.get("content"), userId = formData.get("userId");
         if (!title || !content || !userId)
           return json17({ error: "Missing required fields" }, { status: 400 });
-        let post = await db.select().from(posts).where(eq(posts.id, postId)).limit(1);
+        let post = await db.select().from(posts).where(eq14(posts.id, postId)).limit(1);
         return !post.length || post[0].authorId !== userId ? json17({ error: "Unauthorized" }, { status: 401 }) : (await db.update(posts).set({
           title,
           content,
           updatedAt: /* @__PURE__ */ new Date()
-        }).where(eq(posts.id, postId)), json17({ success: !0 }));
+        }).where(eq14(posts.id, postId)), json17({ success: !0 }));
       }
       case "updateComment": {
         let content = formData.get("content"), commentId = formData.get("commentId"), userId = formData.get("userId");
         if (!content || !commentId || !userId)
           return json17({ error: "Missing required fields" }, { status: 400 });
-        let comment = await db.select().from(comments).where(eq(comments.id, commentId)).limit(1);
+        let comment = await db.select().from(comments).where(eq14(comments.id, commentId)).limit(1);
         return !comment.length || comment[0].authorId !== userId ? json17({ error: "Unauthorized" }, { status: 401 }) : (await db.update(comments).set({
           content,
           updatedAt: /* @__PURE__ */ new Date()
-        }).where(eq(comments.id, commentId)), json17({ success: !0 }));
+        }).where(eq14(comments.id, commentId)), json17({ success: !0 }));
       }
       case "updateAnswer": {
         let content = formData.get("content"), answerId = formData.get("answerId"), userId = formData.get("userId");
         if (!content || !answerId || !userId)
           return json17({ error: "Missing required fields" }, { status: 400 });
-        let answer = await db.select().from(answers).where(eq(answers.id, answerId)).limit(1);
+        let answer = await db.select().from(answers).where(eq14(answers.id, answerId)).limit(1);
         return !answer.length || answer[0].authorId !== userId ? json17({ error: "Unauthorized" }, { status: 401 }) : (await db.update(answers).set({
           content,
           updatedAt: /* @__PURE__ */ new Date()
-        }).where(eq(answers.id, answerId)), json17({ success: !0 }));
+        }).where(eq14(answers.id, answerId)), json17({ success: !0 }));
       }
       default:
         return json17({ error: "Invalid action" }, { status: 400 });
@@ -16967,7 +8434,7 @@ __export(api_bounty_claim_exports, {
 import { json as json18 } from "@remix-run/cloudflare";
 init_virtual_wallet_server();
 init_schema();
-init_drizzle_orm();
+import { eq as eq15 } from "drizzle-orm";
 import { z as z7 } from "zod";
 var claimBountySchema = z7.object({
   bountyId: z7.string().min(1, "Bounty ID is required")
@@ -16980,19 +8447,19 @@ async function action15({ request, context }) {
     if (!validation.success)
       return json18({ error: validation.error.errors[0].message }, { status: 400 });
     let { bountyId } = validation.data, db = createDb(context.env.DB), bounty = await db.query.bounties.findFirst({
-      where: eq(bounties.id, bountyId)
+      where: eq15(bounties.id, bountyId)
     });
     if (!bounty)
       return json18({ error: "Bounty not found" }, { status: 404 });
     if (bounty.status !== "ACTIVE")
       return json18({ error: "Bounty is not active" }, { status: 400 });
     let post = await db.query.posts.findFirst({
-      where: eq(posts.id, bounty.postId)
+      where: eq15(posts.id, bounty.postId)
     });
     return post && post.authorId === userId ? json18({ error: "You cannot claim your own bounty" }, { status: 400 }) : (await claimBounty(db, userId, bounty.amount, bounty.id), await db.update(bounties).set({
       status: "CLAIMED",
       winnerId: userId
-    }).where(eq(bounties.id, bountyId)).run(), json18({
+    }).where(eq15(bounties.id, bountyId)).run(), json18({
       success: !0,
       message: `Successfully claimed bounty of ${bounty.amount} tokens`
     }));
@@ -17004,12 +8471,11 @@ async function action15({ request, context }) {
 // app/routes/api.posts.delete.tsx
 var api_posts_delete_exports = {};
 __export(api_posts_delete_exports, {
-  action: () => action16,
-  default: () => api_posts_delete_default
+  action: () => action16
 });
-import { json as json19 } from "@remix-run/node";
-init_drizzle_orm();
+import { json as json19 } from "@remix-run/cloudflare";
 init_schema();
+import { eq as eq16 } from "drizzle-orm";
 var action16 = async ({ request, context }) => {
   if (request.method !== "POST")
     return json19({ error: "Method not allowed" }, { status: 405 });
@@ -17017,15 +8483,12 @@ var action16 = async ({ request, context }) => {
     let userId = await requireUserId(request), { postId } = await request.json();
     if (!postId)
       return json19({ error: "Post ID is required" }, { status: 400 });
-    let db = context.env.DB, post = await db.select().from(posts).where(eq(posts.id, postId)).limit(1);
-    return !post.length || post[0].authorId !== userId ? json19({ error: "Unauthorized" }, { status: 401 }) : (await db.delete(posts).where(eq(posts.id, postId)), json19({ success: !0 }));
+    let db = context.env.DB, post = await db.select().from(posts).where(eq16(posts.id, postId)).limit(1);
+    return !post.length || post[0].authorId !== userId ? json19({ error: "Unauthorized" }, { status: 401 }) : (await db.delete(posts).where(eq16(posts.id, postId)), json19({ success: !0 }));
   } catch (error) {
     return console.error("Delete post error:", error), json19({ error: "Failed to delete post" }, { status: 500 });
   }
 };
-function api_posts_delete_default() {
-  return null;
-}
 
 // app/routes/profile.activity.tsx
 var profile_activity_exports = {};
@@ -17034,18 +8497,18 @@ __export(profile_activity_exports, {
   loader: () => loader7
 });
 import { json as json20 } from "@remix-run/node";
-init_drizzle_orm();
 init_schema();
+import { eq as eq17, desc as desc7 } from "drizzle-orm";
 import { useLoaderData as useLoaderData3, Link as Link4 } from "@remix-run/react";
 import { FiMessageSquare, FiThumbsUp, FiCheckCircle, FiEdit2 } from "react-icons/fi";
 import { jsx as jsx9, jsxs as jsxs6 } from "react/jsx-runtime";
 var loader7 = async ({ request, context }) => {
   try {
     let userId = await requireUserId(request), db = context.env.DB, [userPosts, userComments, userAnswers, userReputationHistory] = await Promise.all([
-      db.select().from(posts).where(eq(posts.authorId, userId)).orderBy(desc(posts.createdAt)).limit(100),
-      db.select().from(comments).where(eq(comments.authorId, userId)).orderBy(desc(comments.createdAt)).limit(100),
-      db.select().from(answers).where(eq(answers.authorId, userId)).orderBy(desc(answers.createdAt)).limit(100),
-      db.select().from(reputationHistory).where(eq(reputationHistory.userId, userId)).orderBy(desc(reputationHistory.createdAt)).limit(100)
+      db.select().from(posts).where(eq17(posts.authorId, userId)).orderBy(desc7(posts.createdAt)).limit(100),
+      db.select().from(comments).where(eq17(comments.authorId, userId)).orderBy(desc7(comments.createdAt)).limit(100),
+      db.select().from(answers).where(eq17(answers.authorId, userId)).orderBy(desc7(answers.createdAt)).limit(100),
+      db.select().from(reputationHistory).where(eq17(reputationHistory.userId, userId)).orderBy(desc7(reputationHistory.createdAt)).limit(100)
     ]), activityItems = [
       ...userPosts.map((post) => ({
         id: post.id,
@@ -17115,8 +8578,8 @@ function getActivityDescription(action26) {
   }[action26] || action26;
 }
 function ProfileActivity() {
-  let { activities } = useLoaderData3(), getActivityIcon = (type2) => {
-    switch (type2) {
+  let { activities } = useLoaderData3(), getActivityIcon = (type) => {
+    switch (type) {
       case "post":
         return /* @__PURE__ */ jsx9(FiEdit2, { className: "w-5 h-5" });
       case "comment":
@@ -17187,10 +8650,10 @@ __export(username_posts_exports, {
 import { useState as useState4 } from "react";
 import { useLoaderData as useLoaderData4, Link as Link5, useActionData, useNavigate, useSubmit, useSearchParams } from "@remix-run/react";
 import { json as json21 } from "@remix-run/node";
-init_drizzle_orm();
 init_schema();
 import { FiThumbsUp as FiThumbsUp2, FiMessageSquare as FiMessageSquare2 } from "react-icons/fi";
 import { json as cloudflareJson } from "@remix-run/cloudflare";
+import { eq as eq18, inArray as inArray2, sql as sql7 } from "drizzle-orm";
 import { jsx as jsx10, jsxs as jsxs7 } from "react/jsx-runtime";
 async function loader8({ params, context, request }) {
   let { username } = params;
@@ -17205,7 +8668,7 @@ async function loader8({ params, context, request }) {
       reputationPoints: users.reputationPoints,
       integrityScore: users.integrityScore,
       totalRatings: users.totalRatings
-    }).from(users).where(eq(users.username, username)).limit(1);
+    }).from(users).where(eq18(users.username, username)).limit(1);
     if (!user.length)
       throw new Response("User not found", { status: 404 });
     let userPosts = await db.select({
@@ -17226,10 +8689,10 @@ async function loader8({ params, context, request }) {
       profile: {
         profilePicture: profiles.profilePicture
       }
-    }).from(posts).innerJoin(users, eq(posts.authorId, users.id)).leftJoin(profiles, eq(users.id, profiles.userId)).where(eq(posts.authorId, user[0].id)).orderBy(posts.createdAt), postIds = userPosts.map((post) => post.id), commentCounts = postIds.length > 0 ? await db.select({
+    }).from(posts).innerJoin(users, eq18(posts.authorId, users.id)).leftJoin(profiles, eq18(users.id, profiles.userId)).where(eq18(posts.authorId, user[0].id)).orderBy(posts.createdAt), postIds = userPosts.map((post) => post.id), commentCounts = postIds.length > 0 ? await db.select({
       postId: comments.postId,
-      count: sql`count(${comments.id})`
-    }).from(comments).where(inArray(comments.postId, postIds)).groupBy(comments.postId) : [], transformedPosts = userPosts.map((post) => ({
+      count: sql7`count(${comments.id})`
+    }).from(comments).where(inArray2(comments.postId, postIds)).groupBy(comments.postId) : [], transformedPosts = userPosts.map((post) => ({
       id: post.id,
       title: post.title,
       content: post.content,
@@ -17265,8 +8728,8 @@ async function action17({ request, params, context }) {
         let postId = formData.get("postId");
         if (!postId)
           return cloudflareJson({ error: "Post ID is required" }, { status: 400 });
-        let post = await db.select().from(posts).where(eq(posts.id, postId)).limit(1);
-        return !post.length || post[0].authorId !== user.id ? cloudflareJson({ error: "Unauthorized" }, { status: 401 }) : (await db.delete(posts).where(eq(posts.id, postId)), cloudflareJson({ success: !0 }));
+        let post = await db.select().from(posts).where(eq18(posts.id, postId)).limit(1);
+        return !post.length || post[0].authorId !== user.id ? cloudflareJson({ error: "Unauthorized" }, { status: 401 }) : (await db.delete(posts).where(eq18(posts.id, postId)), cloudflareJson({ success: !0 }));
       }
       default:
         return cloudflareJson({ error: "Invalid action" }, { status: 400 });
@@ -17381,7 +8844,7 @@ var api_privacy_pdf_exports = {};
 __export(api_privacy_pdf_exports, {
   loader: () => loader9
 });
-import { json as json22 } from "@remix-run/node";
+import { json as json22 } from "@remix-run/cloudflare";
 
 // app/utils/pdf.server.ts
 import { renderToString } from "react-dom/server";
@@ -17740,7 +9203,7 @@ var api_refund_vote_exports = {};
 __export(api_refund_vote_exports, {
   action: () => action18
 });
-import { json as json23 } from "@remix-run/node";
+import { json as json23 } from "@remix-run/cloudflare";
 import { z as z8 } from "zod";
 var refundVoteSchema = z8.object({
   refundRequestId: z8.string(),
@@ -17783,7 +9246,7 @@ import { useState as useState5 } from "react";
 import { Form as Form3, useActionData as useActionData2, useNavigation } from "@remix-run/react";
 import { jsx as jsx11, jsxs as jsxs8 } from "react/jsx-runtime";
 function RefundRequestsList({ refundRequests: refundRequests2 }) {
-  let actionData = useActionData2(), navigation = useNavigation(), [selectedRequest, setSelectedRequest] = useState5(null), [voteReason, setVoteReason] = useState5(""), isSubmitting = navigation.state === "submitting", handleVote = (requestId, vote) => {
+  let actionData = useActionData2(), navigation = useNavigation(), [selectedRequest, setSelectedRequest] = useState5(null), [voteReason, setVoteReason] = useState5(""), isSubmitting = navigation.state === "submitting", handleVote = (requestId) => {
     setSelectedRequest(requestId), setVoteReason("");
   }, formatTimeRemaining = (expiresAt) => {
     let now = /* @__PURE__ */ new Date(), diff = new Date(expiresAt).getTime() - now.getTime();
@@ -17843,7 +9306,7 @@ function RefundRequestsList({ refundRequests: refundRequests2 }) {
           /* @__PURE__ */ jsx11(
             "button",
             {
-              onClick: () => handleVote(request.id, !0),
+              onClick: () => handleVote(request.id),
               disabled: isSubmitting,
               className: "px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors disabled:opacity-50",
               children: "Approve"
@@ -17852,7 +9315,7 @@ function RefundRequestsList({ refundRequests: refundRequests2 }) {
           /* @__PURE__ */ jsx11(
             "button",
             {
-              onClick: () => handleVote(request.id, !1),
+              onClick: () => handleVote(request.id),
               disabled: isSubmitting,
               className: "px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors disabled:opacity-50",
               children: "Reject"
@@ -17942,8 +9405,8 @@ function RefundRequestsList({ refundRequests: refundRequests2 }) {
 }
 
 // app/routes/refund-requests.tsx
-init_drizzle_orm();
 init_schema();
+import { eq as eq19 } from "drizzle-orm";
 import { jsx as jsx12, jsxs as jsxs9 } from "react/jsx-runtime";
 async function loader10({ request, context }) {
   let userId = await requireUserId(request);
@@ -17958,30 +9421,30 @@ async function loader10({ request, context }) {
       requiredVotes: refundRequests.requiredVotes,
       bountyId: refundRequests.bountyId,
       requesterId: refundRequests.requesterId
-    }).from(refundRequests).where(eq(refundRequests.status, "PENDING")).orderBy(refundRequests.createdAt), validRequests = (await Promise.all(
+    }).from(refundRequests).where(eq19(refundRequests.status, "PENDING")).orderBy(refundRequests.createdAt), validRequests = (await Promise.all(
       requests.map(async (request2) => {
         let bounty = await db.select({
           amount: bounties.amount,
           postId: bounties.postId
-        }).from(bounties).where(eq(bounties.id, request2.bountyId)).get();
+        }).from(bounties).where(eq19(bounties.id, request2.bountyId)).get();
         if (!bounty)
           return null;
         let post = await db.select({
           title: posts.title,
           authorId: posts.authorId
-        }).from(posts).where(eq(posts.id, bounty.postId)).get();
+        }).from(posts).where(eq19(posts.id, bounty.postId)).get();
         if (!post)
           return null;
-        let answersCount = await db.select({ count: answers.id }).from(answers).where(eq(answers.postId, bounty.postId)).all(), requester = await db.select({
+        let answersCount = await db.select({ count: answers.id }).from(answers).where(eq19(answers.postId, bounty.postId)).all(), requester = await db.select({
           username: users.username
-        }).from(users).where(eq(users.id, request2.requesterId)).get(), votes3 = await db.select({
+        }).from(users).where(eq19(users.id, request2.requesterId)).get(), votes3 = await db.select({
           id: refundRequestVotes.id,
           vote: refundRequestVotes.vote,
           voterId: refundRequestVotes.voterId,
           reason: refundRequestVotes.reason,
           createdAt: refundRequestVotes.createdAt,
           rewardAmount: refundRequestVotes.rewardAmount
-        }).from(refundRequestVotes).where(eq(refundRequestVotes.refundRequestId, request2.id)).all();
+        }).from(refundRequestVotes).where(eq19(refundRequestVotes.refundRequestId, request2.id)).all();
         return {
           id: request2.id,
           reason: request2.reason,
@@ -18059,7 +9522,7 @@ var api_terms_pdf_exports = {};
 __export(api_terms_pdf_exports, {
   loader: () => loader11
 });
-import { json as json25 } from "@remix-run/node";
+import { json as json25 } from "@remix-run/cloudflare";
 var loader11 = async ({ request }) => {
   try {
     let pdfBuffer = await createSimplePDF(
@@ -18782,8 +10245,8 @@ __export(posts_postId_exports, {
 import { useEffect as useEffect6, useState as useState8 } from "react";
 import { useLoaderData as useLoaderData7, useSubmit as useSubmit2, useFetcher as useFetcher2, Form as Form4, useRouteError as useRouteError2, isRouteErrorResponse as isRouteErrorResponse2, Link as Link7, useActionData as useActionData3 } from "@remix-run/react";
 import { json as json27, redirect as redirect2 } from "@remix-run/node";
-init_drizzle_orm();
 init_schema();
+import { eq as eq20, and as and15, desc as desc8, sql as sql8 } from "drizzle-orm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import { FiTrash2 as FiTrash22, FiArrowUp, FiArrowDown } from "react-icons/fi";
@@ -19039,7 +10502,7 @@ var meta = ({ data }) => {
     if (!postId)
       throw new Response("Post ID is required", { status: 400 });
     let post = await db.query.posts.findFirst({
-      where: eq(posts.id, postId),
+      where: eq20(posts.id, postId),
       with: {
         author: {
           columns: {
@@ -19056,7 +10519,7 @@ var meta = ({ data }) => {
         },
         media: !0,
         comments: {
-          orderBy: [desc(comments.upvotes), desc(comments.createdAt)],
+          orderBy: [desc8(comments.upvotes), desc8(comments.createdAt)],
           limit: perPage,
           offset: (page - 1) * perPage,
           with: {
@@ -19076,7 +10539,7 @@ var meta = ({ data }) => {
           }
         },
         answers: {
-          orderBy: [desc(answers.isAccepted), desc(answers.upvotes), desc(answers.createdAt)],
+          orderBy: [desc8(answers.isAccepted), desc8(answers.upvotes), desc8(answers.createdAt)],
           with: {
             author: {
               columns: {
@@ -19095,7 +10558,7 @@ var meta = ({ data }) => {
         },
         codeBlocks: !0,
         votes: user ? {
-          where: and(eq(votes.userId, user.id), eq(votes.isQualityVote, !0))
+          where: and15(eq20(votes.userId, user.id), eq20(votes.isQualityVote, !0))
         } : void 0,
         bounty: !0
       }
@@ -19103,14 +10566,14 @@ var meta = ({ data }) => {
     if (!post)
       throw new Response("Post not found", { status: 404 });
     let userVotes = user ? await db.query.votes.findMany({
-      where: and(eq(votes.userId, user.id), eq(votes.postId, postId))
+      where: and15(eq20(votes.userId, user.id), eq20(votes.postId, postId))
     }) : [], allVotes = await db.query.votes.findMany({
-      where: and(eq(votes.postId, postId), eq(votes.voteType, "POST"), eq(votes.isQualityVote, !0))
-    }), qualityUpvotes = allVotes.filter((v) => v.value === 1).length, qualityDownvotes = allVotes.filter((v) => v.value === -1).length, userQualityVote = userVotes.find((v) => v.isQualityVote)?.value || 0, userVisibilityVote = userVotes.find((v) => !v.isQualityVote)?.value || 0, totalComments = (await db.query.comments.findMany({ where: eq(comments.postId, postId) })).length, totalAnswers = (await db.query.answers.findMany({ where: eq(answers.postId, postId) })).length, commentIds = post?.comments?.map((c) => c.id) || [], answerIds = post?.answers?.map((a) => a.id) || [], commentVotes = [], answerVotes = [];
+      where: and15(eq20(votes.postId, postId), eq20(votes.voteType, "POST"), eq20(votes.isQualityVote, !0))
+    }), qualityUpvotes = allVotes.filter((v) => v.value === 1).length, qualityDownvotes = allVotes.filter((v) => v.value === -1).length, userQualityVote = userVotes.find((v) => v.isQualityVote)?.value || 0, userVisibilityVote = userVotes.find((v) => !v.isQualityVote)?.value || 0, totalComments = (await db.query.comments.findMany({ where: eq20(comments.postId, postId) })).length, totalAnswers = (await db.query.answers.findMany({ where: eq20(answers.postId, postId) })).length, commentIds = post?.comments?.map((c) => c.id) || [], answerIds = post?.answers?.map((a) => a.id) || [], commentVotes = [], answerVotes = [];
     user && (commentIds.length > 0 && (commentVotes = (await db.query.votes.findMany({
-      where: and(eq(votes.userId, user.id), eq(votes.voteType, "COMMENT"), eq(votes.isQualityVote, !0))
+      where: and15(eq20(votes.userId, user.id), eq20(votes.voteType, "COMMENT"), eq20(votes.isQualityVote, !0))
     })).filter((v) => commentIds.includes(v.commentId)).map((v) => ({ commentId: v.commentId, value: v.value }))), answerIds.length > 0 && (answerVotes = (await db.query.votes.findMany({
-      where: and(eq(votes.userId, user.id), eq(votes.voteType, "ANSWER"), eq(votes.isQualityVote, !0))
+      where: and15(eq20(votes.userId, user.id), eq20(votes.voteType, "ANSWER"), eq20(votes.isQualityVote, !0))
     })).filter((v) => answerIds.includes(v.answerId)).map((v) => ({ answerId: v.answerId, value: v.value }))));
     let transformedPost = {
       id: post.id,
@@ -19202,14 +10665,14 @@ var meta = ({ data }) => {
   switch (formData.get("action")) {
     case "deletePost": {
       let post = await db.query.posts.findFirst({
-        where: eq(posts.id, postId)
+        where: eq20(posts.id, postId)
       });
-      return post ? post.authorId !== user.id ? json27({ error: "You can only delete your own posts" }, { status: 403 }) : (await db.delete(posts).where(eq(posts.id, postId)), redirect2("/community")) : json27({ error: "Post not found" }, { status: 404 });
+      return post ? post.authorId !== user.id ? json27({ error: "You can only delete your own posts" }, { status: 403 }) : (await db.delete(posts).where(eq20(posts.id, postId)), redirect2("/community")) : json27({ error: "Post not found" }, { status: 404 });
     }
     case "qualityVote": {
       let value = parseInt(formData.get("value"));
       return [-1, 0, 1].includes(value) ? await db.transaction(async () => {
-        await db.delete(votes).where(and(eq(votes.userId, user.id), eq(votes.postId, postId), eq(votes.voteType, "POST"), eq(votes.isQualityVote, !0))), value !== 0 && await db.insert(votes).values({
+        await db.delete(votes).where(and15(eq20(votes.userId, user.id), eq20(votes.postId, postId), eq20(votes.voteType, "POST"), eq20(votes.isQualityVote, !0))), value !== 0 && await db.insert(votes).values({
           id: crypto.randomUUID(),
           userId: user.id,
           postId,
@@ -19220,12 +10683,12 @@ var meta = ({ data }) => {
           answerId: null
         });
         let allVotes = await db.query.votes.findMany({
-          where: and(eq(votes.postId, postId), eq(votes.voteType, "POST"), eq(votes.isQualityVote, !0))
+          where: and15(eq20(votes.postId, postId), eq20(votes.voteType, "POST"), eq20(votes.isQualityVote, !0))
         }), qualityUpvotes = allVotes.filter((v) => v.value === 1).length, qualityDownvotes = allVotes.filter((v) => v.value === -1).length;
         return await db.update(posts).set({
           qualityUpvotes,
           qualityDownvotes
-        }).where(eq(posts.id, postId)), json27({
+        }).where(eq20(posts.id, postId)), json27({
           success: !0,
           qualityUpvotes,
           qualityDownvotes,
@@ -19235,7 +10698,7 @@ var meta = ({ data }) => {
     }
     case "visibilityVote": {
       let isVoting = formData.get("isVoting") === "true", result = await db.transaction(async () => {
-        let existingVote = await db.select().from(votes).where(and(eq(votes.userId, user.id), eq(votes.postId, postId), eq(votes.voteType, "POST"), eq(votes.isQualityVote, !1))).limit(1);
+        let existingVote = await db.select().from(votes).where(and15(eq20(votes.userId, user.id), eq20(votes.postId, postId), eq20(votes.voteType, "POST"), eq20(votes.isQualityVote, !1))).limit(1);
         isVoting ? existingVote.length || await db.insert(votes).values({
           id: crypto.randomUUID(),
           userId: user.id,
@@ -19246,12 +10709,12 @@ var meta = ({ data }) => {
           isQualityVote: !1,
           commentId: null,
           answerId: null
-        }) : existingVote.length && await db.delete(votes).where(eq(votes.id, existingVote[0].id));
-        let visibilityVotesResult = await db.select({ count: sql`count(*)` }).from(votes).where(and(eq(votes.postId, postId), eq(votes.voteType, "POST"), eq(votes.isQualityVote, !1), eq(votes.value, 1)));
+        }) : existingVote.length && await db.delete(votes).where(eq20(votes.id, existingVote[0].id));
+        let visibilityVotesResult = await db.select({ count: sql8`count(*)` }).from(votes).where(and15(eq20(votes.postId, postId), eq20(votes.voteType, "POST"), eq20(votes.isQualityVote, !1), eq20(votes.value, 1)));
         return {
           post: (await db.update(posts).set({
             visibilityVotes: visibilityVotesResult[0]?.count || 0
-          }).where(eq(posts.id, postId)).returning())[0],
+          }).where(eq20(posts.id, postId)).returning())[0],
           userVisibilityVote: isVoting
         };
       });
@@ -19277,7 +10740,7 @@ var meta = ({ data }) => {
         downvotes: 0,
         answerId: null
       });
-      let author = await db.select().from(users).where(eq(users.id, user.id)).limit(1), profile = await db.select().from(profiles).where(eq(profiles.userId, user.id)).limit(1);
+      let author = await db.select().from(users).where(eq20(users.id, user.id)).limit(1), profile = await db.select().from(profiles).where(eq20(profiles.userId, user.id)).limit(1);
       return await addReputationPoints(
         db,
         user.id,
@@ -19319,7 +10782,7 @@ var meta = ({ data }) => {
         upvotes: 0,
         downvotes: 0
       });
-      let author = await db.select().from(users).where(eq(users.id, user.id)).limit(1), profile = await db.select().from(profiles).where(eq(profiles.userId, user.id)).limit(1);
+      let author = await db.select().from(users).where(eq20(users.id, user.id)).limit(1), profile = await db.select().from(profiles).where(eq20(profiles.userId, user.id)).limit(1);
       return await addReputationPoints(
         db,
         user.id,
@@ -19351,7 +10814,7 @@ var meta = ({ data }) => {
       if (!answerId)
         return json27({ error: "Answer ID is required" }, { status: 400 });
       let answer = await db.query.answers.findFirst({
-        where: eq(answers.id, answerId),
+        where: eq20(answers.id, answerId),
         with: {
           author: {
             columns: {
@@ -19364,16 +10827,16 @@ var meta = ({ data }) => {
       if (!answer)
         return json27({ error: "Answer not found" }, { status: 404 });
       let post = await db.query.posts.findFirst({
-        where: eq(posts.id, answer.postId),
+        where: eq20(posts.id, answer.postId),
         with: {
           bounty: !0
         }
       });
       return post ? post.authorId !== user.id ? json27({ error: "Only the post author can accept answers" }, { status: 403 }) : post.bounty ? post.bounty.status !== "ACTIVE" ? json27({ error: "Bounty is not active" }, { status: 400 }) : await db.transaction(async () => {
-        await db.update(answers).set({ isAccepted: !0 }).where(eq(answers.id, answerId)), await db.update(posts).set({ status: "COMPLETED" }).where(eq(posts.id, answer.postId)), await db.update(bounties).set({
+        await db.update(answers).set({ isAccepted: !0 }).where(eq20(answers.id, answerId)), await db.update(posts).set({ status: "COMPLETED" }).where(eq20(posts.id, answer.postId)), await db.update(bounties).set({
           status: "CLAIMED",
           winnerId: answer.authorId
-        }).where(eq(bounties.postId, answer.postId));
+        }).where(eq20(bounties.postId, answer.postId));
         let { claimBounty: claimBounty2 } = await Promise.resolve().then(() => (init_virtual_wallet_server(), virtual_wallet_server_exports)), bountyAmount = post.bounty.amount;
         return await claimBounty2(
           db,
@@ -19398,7 +10861,7 @@ var meta = ({ data }) => {
       for (; retryCount < maxRetries; )
         try {
           return await db.transaction(async () => {
-            await db.delete(votes).where(and(eq(votes.userId, user.id), eq(votes.commentId, commentId), eq(votes.voteType, "COMMENT"), eq(votes.isQualityVote, !0))), value !== 0 && await db.insert(votes).values({
+            await db.delete(votes).where(and15(eq20(votes.userId, user.id), eq20(votes.commentId, commentId), eq20(votes.voteType, "COMMENT"), eq20(votes.isQualityVote, !0))), value !== 0 && await db.insert(votes).values({
               id: crypto.randomUUID(),
               userId: user.id,
               commentId,
@@ -19409,13 +10872,13 @@ var meta = ({ data }) => {
               answerId: null
             });
             let [upvotesResult, downvotesResult] = await Promise.all([
-              db.select({ count: sql`count(*)` }).from(votes).where(and(eq(votes.commentId, commentId), eq(votes.voteType, "COMMENT"), eq(votes.isQualityVote, !0), eq(votes.value, 1))),
-              db.select({ count: sql`count(*)` }).from(votes).where(and(eq(votes.commentId, commentId), eq(votes.voteType, "COMMENT"), eq(votes.isQualityVote, !0), eq(votes.value, -1)))
+              db.select({ count: sql8`count(*)` }).from(votes).where(and15(eq20(votes.commentId, commentId), eq20(votes.voteType, "COMMENT"), eq20(votes.isQualityVote, !0), eq20(votes.value, 1))),
+              db.select({ count: sql8`count(*)` }).from(votes).where(and15(eq20(votes.commentId, commentId), eq20(votes.voteType, "COMMENT"), eq20(votes.isQualityVote, !0), eq20(votes.value, -1)))
             ]);
             return await db.update(comments).set({
               upvotes: upvotesResult[0]?.count || 0,
               downvotes: downvotesResult[0]?.count || 0
-            }).where(eq(comments.id, commentId)), json27({
+            }).where(eq20(comments.id, commentId)), json27({
               success: !0,
               upvotes: upvotesResult[0]?.count || 0,
               downvotes: downvotesResult[0]?.count || 0,
@@ -19439,7 +10902,7 @@ var meta = ({ data }) => {
       for (; retryCount < maxRetries; )
         try {
           return await db.transaction(async () => {
-            await db.delete(votes).where(and(eq(votes.userId, user.id), eq(votes.answerId, answerId), eq(votes.voteType, "ANSWER"), eq(votes.isQualityVote, !0))), value !== 0 && await db.insert(votes).values({
+            await db.delete(votes).where(and15(eq20(votes.userId, user.id), eq20(votes.answerId, answerId), eq20(votes.voteType, "ANSWER"), eq20(votes.isQualityVote, !0))), value !== 0 && await db.insert(votes).values({
               id: crypto.randomUUID(),
               userId: user.id,
               answerId,
@@ -19450,13 +10913,13 @@ var meta = ({ data }) => {
               commentId: null
             });
             let [upvotesResult, downvotesResult] = await Promise.all([
-              db.select({ count: sql`count(*)` }).from(votes).where(and(eq(votes.answerId, answerId), eq(votes.voteType, "ANSWER"), eq(votes.isQualityVote, !0), eq(votes.value, 1))),
-              db.select({ count: sql`count(*)` }).from(votes).where(and(eq(votes.answerId, answerId), eq(votes.voteType, "ANSWER"), eq(votes.isQualityVote, !0), eq(votes.value, -1)))
+              db.select({ count: sql8`count(*)` }).from(votes).where(and15(eq20(votes.answerId, answerId), eq20(votes.voteType, "ANSWER"), eq20(votes.isQualityVote, !0), eq20(votes.value, 1))),
+              db.select({ count: sql8`count(*)` }).from(votes).where(and15(eq20(votes.answerId, answerId), eq20(votes.voteType, "ANSWER"), eq20(votes.isQualityVote, !0), eq20(votes.value, -1)))
             ]);
             return await db.update(answers).set({
               upvotes: upvotesResult[0]?.count || 0,
               downvotes: downvotesResult[0]?.count || 0
-            }).where(eq(answers.id, answerId)), json27({
+            }).where(eq20(answers.id, answerId)), json27({
               success: !0,
               upvotes: upvotesResult[0]?.count || 0,
               downvotes: downvotesResult[0]?.count || 0,
@@ -19477,7 +10940,7 @@ var meta = ({ data }) => {
       if (!answerId)
         return json27({ error: "Answer ID is required" }, { status: 400 });
       let answer = await db.query.answers.findFirst({
-        where: eq(answers.id, answerId),
+        where: eq20(answers.id, answerId),
         with: {
           author: {
             columns: {
@@ -19490,16 +10953,16 @@ var meta = ({ data }) => {
       if (!answer)
         return json27({ error: "Answer not found" }, { status: 404 });
       let post = await db.query.posts.findFirst({
-        where: eq(posts.id, answer.postId),
+        where: eq20(posts.id, answer.postId),
         with: {
           bounty: !0
         }
       });
       return post ? post.authorId !== user.id ? json27({ error: "Only the post author can claim the bounty" }, { status: 403 }) : post.bounty ? post.bounty.status !== "ACTIVE" ? json27({ error: "Bounty is not active" }, { status: 400 }) : await db.transaction(async () => {
-        await db.update(answers).set({ isAccepted: !0 }).where(eq(answers.id, answerId)), await db.update(posts).set({ status: "COMPLETED" }).where(eq(posts.id, answer.postId)), await db.update(bounties).set({
+        await db.update(answers).set({ isAccepted: !0 }).where(eq20(answers.id, answerId)), await db.update(posts).set({ status: "COMPLETED" }).where(eq20(posts.id, answer.postId)), await db.update(bounties).set({
           status: "CLAIMED",
           winnerId: answer.authorId
-        }).where(eq(bounties.postId, answer.postId));
+        }).where(eq20(bounties.postId, answer.postId));
         let { claimBounty: claimBounty2 } = await Promise.resolve().then(() => (init_virtual_wallet_server(), virtual_wallet_server_exports)), bountyAmount = post.bounty.amount;
         return await claimBounty2(
           db,
@@ -19518,19 +10981,19 @@ var meta = ({ data }) => {
     }
     case "refund_bounty": {
       let post = await db.query.posts.findFirst({
-        where: eq(posts.id, postId),
+        where: eq20(posts.id, postId),
         with: { bounty: !0 }
       });
       return post?.bounty ? post.authorId !== user.id ? json27({ error: "Only the post author can refund the bounty" }, { status: 403 }) : (await db.update(bounties).set({
         status: "REFUNDED"
-      }).where(eq(bounties.postId, postId)), json27({ success: !0 })) : json27({ error: "No bounty found" }, { status: 404 });
+      }).where(eq20(bounties.postId, postId)), json27({ success: !0 })) : json27({ error: "No bounty found" }, { status: 404 });
     }
     case "accept_answer": {
       let answerId = formData.get("answerId");
       if (!answerId)
         return json27({ error: "Answer ID is required" }, { status: 400 });
       let answer = await db.query.answers.findFirst({
-        where: eq(answers.id, answerId),
+        where: eq20(answers.id, answerId),
         with: {
           author: {
             columns: {
@@ -19543,9 +11006,9 @@ var meta = ({ data }) => {
       if (!answer)
         return json27({ error: "Answer not found" }, { status: 404 });
       let post = await db.query.posts.findFirst({
-        where: eq(posts.id, answer.postId)
+        where: eq20(posts.id, answer.postId)
       });
-      return post ? post.authorId !== user.id ? json27({ error: "Only the post author can accept answers" }, { status: 403 }) : await db.transaction(async () => (await db.update(answers).set({ isAccepted: !0 }).where(eq(answers.id, answerId)), await db.update(posts).set({ status: "COMPLETED" }).where(eq(posts.id, answer.postId)), json27({
+      return post ? post.authorId !== user.id ? json27({ error: "Only the post author can accept answers" }, { status: 403 }) : await db.transaction(async () => (await db.update(answers).set({ isAccepted: !0 }).where(eq20(answers.id, answerId)), await db.update(posts).set({ status: "COMPLETED" }).where(eq20(posts.id, answer.postId)), json27({
         success: !0,
         message: `Answer accepted by ${answer.author.username}`,
         answer: {
@@ -19555,22 +11018,22 @@ var meta = ({ data }) => {
       }))) : json27({ error: "Post not found" }, { status: 404 });
     }
     case "deleteComment": {
-      let commentId = formData.get("commentId"), comment = await db.select().from(comments).where(eq(comments.id, commentId)).limit(1);
+      let commentId = formData.get("commentId"), comment = await db.select().from(comments).where(eq20(comments.id, commentId)).limit(1);
       if (!comment.length || comment[0].authorId !== user.id)
         throw new Response("Unauthorized", { status: 401 });
-      return await db.delete(comments).where(eq(comments.id, commentId)), { success: !0 };
+      return await db.delete(comments).where(eq20(comments.id, commentId)), { success: !0 };
     }
     case "deleteAnswer": {
-      let answerId = formData.get("answerId"), answer = await db.select().from(answers).where(eq(answers.id, answerId)).limit(1);
+      let answerId = formData.get("answerId"), answer = await db.select().from(answers).where(eq20(answers.id, answerId)).limit(1);
       if (!answer.length || answer[0].authorId !== user.id)
         throw new Response("Unauthorized", { status: 401 });
-      return await db.delete(answers).where(eq(answers.id, answerId)), { success: !0 };
+      return await db.delete(answers).where(eq20(answers.id, answerId)), { success: !0 };
     }
     case "updatePost": {
       let title = formData.get("title"), content = formData.get("content"), tags3 = formData.getAll("tags"), bountyAmount = formData.get("bountyAmount");
       if (!user.id)
         throw new Response("Unauthorized", { status: 401 });
-      let post = await db.select().from(posts).where(eq(posts.id, postId)).limit(1);
+      let post = await db.select().from(posts).where(eq20(posts.id, postId)).limit(1);
       if (!post.length || post[0].authorId !== user.id)
         throw new Response("Unauthorized", { status: 401 });
       return await db.transaction(async () => {
@@ -19578,7 +11041,7 @@ var meta = ({ data }) => {
           title,
           content,
           updatedAt: /* @__PURE__ */ new Date()
-        }).where(eq(posts.id, postId)), await db.delete(postTags).where(eq(postTags.postId, postId)), tags3 && tags3.length > 0) {
+        }).where(eq20(posts.id, postId)), await db.delete(postTags).where(eq20(postTags.postId, postId)), tags3 && tags3.length > 0) {
           let tagValues = tags3.map((tag) => ({
             id: crypto.randomUUID(),
             postId,
@@ -19593,9 +11056,9 @@ var meta = ({ data }) => {
       if (!user.id)
         throw new Response("Unauthorized", { status: 401 });
       if ((await db.select().from(reports).where(
-        and(
-          eq(reports.postId, postId),
-          eq(reports.reporterId, user.id)
+        and15(
+          eq20(reports.postId, postId),
+          eq20(reports.reporterId, user.id)
         )
       ).limit(1)).length > 0)
         throw new Response("Already reported", { status: 400 });
@@ -19613,9 +11076,9 @@ var meta = ({ data }) => {
       if (!user.id)
         throw new Response("Unauthorized", { status: 401 });
       if ((await db.select().from(reports).where(
-        and(
-          eq(reports.commentId, commentId),
-          eq(reports.reporterId, user.id)
+        and15(
+          eq20(reports.commentId, commentId),
+          eq20(reports.reporterId, user.id)
         )
       ).limit(1)).length > 0)
         throw new Response("Already reported", { status: 400 });
@@ -19633,9 +11096,9 @@ var meta = ({ data }) => {
       if (!user.id)
         throw new Response("Unauthorized", { status: 401 });
       if ((await db.select().from(reports).where(
-        and(
-          eq(reports.answerId, answerId),
-          eq(reports.reporterId, user.id)
+        and15(
+          eq20(reports.answerId, answerId),
+          eq20(reports.reporterId, user.id)
         )
       ).limit(1)).length > 0)
         throw new Response("Already reported", { status: 400 });
@@ -19652,14 +11115,14 @@ var meta = ({ data }) => {
       if (!user.id)
         throw new Response("Unauthorized", { status: 401 });
       return (await db.select().from(bookmarks).where(
-        and(
-          eq(bookmarks.postId, postId),
-          eq(bookmarks.userId, user.id)
+        and15(
+          eq20(bookmarks.postId, postId),
+          eq20(bookmarks.userId, user.id)
         )
       ).limit(1)).length > 0 ? (await db.delete(bookmarks).where(
-        and(
-          eq(bookmarks.postId, postId),
-          eq(bookmarks.userId, user.id)
+        and15(
+          eq20(bookmarks.postId, postId),
+          eq20(bookmarks.userId, user.id)
         )
       ), { bookmarked: !1 }) : (await db.insert(bookmarks).values({
         id: crypto.randomUUID(),
@@ -19673,18 +11136,18 @@ var meta = ({ data }) => {
       if (!user.id)
         throw new Response("Unauthorized", { status: 401 });
       return (await db.select().from(integrityRatings).where(
-        and(
-          eq(integrityRatings.postId, postId),
-          eq(integrityRatings.raterId, user.id)
+        and15(
+          eq20(integrityRatings.postId, postId),
+          eq20(integrityRatings.raterId, user.id)
         )
       ).limit(1)).length > 0 ? await db.update(integrityRatings).set({
         rating,
         reason,
         updatedAt: /* @__PURE__ */ new Date()
       }).where(
-        and(
-          eq(integrityRatings.postId, postId),
-          eq(integrityRatings.raterId, user.id)
+        and15(
+          eq20(integrityRatings.postId, postId),
+          eq20(integrityRatings.raterId, user.id)
         )
       ) : await db.insert(integrityRatings).values({
         id: crypto.randomUUID(),
@@ -19700,17 +11163,17 @@ var meta = ({ data }) => {
       let answerId = formData.get("answerId");
       if (!user.id)
         throw new Response("Unauthorized", { status: 401 });
-      let post = await db.select().from(posts).where(eq(posts.id, postId)).limit(1);
+      let post = await db.select().from(posts).where(eq20(posts.id, postId)).limit(1);
       if (!post.length)
         throw new Response("Post not found", { status: 404 });
       if (post[0].authorId === user.id)
         throw new Response("Cannot claim your own bounty", { status: 400 });
-      let answer = await db.select().from(answers).where(eq(answers.id, answerId)).limit(1);
+      let answer = await db.select().from(answers).where(eq20(answers.id, answerId)).limit(1);
       if (!answer.length || answer[0].postId !== postId)
         throw new Response("Answer not found", { status: 404 });
       if (answer[0].authorId !== user.id)
         throw new Response("Cannot claim bounty for another user's answer", { status: 400 });
-      if ((await db.select().from(bountyClaims).where(eq(bountyClaims.postId, postId)).limit(1)).length > 0)
+      if ((await db.select().from(bountyClaims).where(eq20(bountyClaims.postId, postId)).limit(1)).length > 0)
         throw new Response("Bounty already claimed", { status: 400 });
       return await db.transaction(async () => {
         await db.insert(bountyClaims).values({
@@ -19724,7 +11187,7 @@ var meta = ({ data }) => {
           createdAt: /* @__PURE__ */ new Date()
         }), await db.update(posts).set({
           updatedAt: /* @__PURE__ */ new Date()
-        }).where(eq(posts.id, postId));
+        }).where(eq20(posts.id, postId));
       }), { success: !0 };
     }
     default:
@@ -20366,7 +11829,7 @@ import { jsx as jsx18, jsxs as jsxs15 } from "react/jsx-runtime";
 async function uploadToCloudinary2(file, resourceType, uploadPreset, cloudName, folder) {
   let formData = new FormData();
   formData.append("file", file), formData.append("upload_preset", uploadPreset), formData.append("folder", folder);
-  let endpoint2 = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`, response = await fetch(endpoint2, {
+  let endpoint = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`, response = await fetch(endpoint, {
     method: "POST",
     body: formData
   });
@@ -20375,8 +11838,8 @@ async function uploadToCloudinary2(file, resourceType, uploadPreset, cloudName, 
   return response.json();
 }
 function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }) {
-  let [isRecording, setIsRecording] = useState10(!1), [isUploading, setIsUploading] = useState10(!1), [uploadType, setUploadType] = useState10(null), mediaRecorderRef = useRef(null), recordedChunksRef = useRef([]), fileInputRef = useRef(null), streamRef = useRef(null), cleanupRecording = useCallback2(() => {
-    mediaRecorderRef.current && (mediaRecorderRef.current.state !== "inactive" && mediaRecorderRef.current.stop(), mediaRecorderRef.current = null), streamRef.current && (streamRef.current.getTracks().forEach((track) => track.stop()), streamRef.current = null), recordedChunksRef.current = [], setIsRecording(!1), setUploadType(null);
+  let [isRecording, setIsRecording] = useState10(!1), [isUploading, setIsUploading] = useState10(!1), mediaRecorderRef = useRef(null), recordedChunksRef = useRef([]), fileInputRef = useRef(null), streamRef = useRef(null), cleanupRecording = useCallback2(() => {
+    mediaRecorderRef.current && (mediaRecorderRef.current.state !== "inactive" && mediaRecorderRef.current.stop(), mediaRecorderRef.current = null), streamRef.current && (streamRef.current.getTracks().forEach((track) => track.stop()), streamRef.current = null), recordedChunksRef.current = [], setIsRecording(!1);
   }, []);
   useEffect7(() => () => {
     cleanupRecording();
@@ -20395,13 +11858,13 @@ function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }) {
           cleanupRecording();
           return;
         }
-        let blob5 = new Blob(recordedChunksRef.current, { type: "video/webm" });
+        let blob2 = new Blob(recordedChunksRef.current, { type: "video/webm" });
         setIsUploading(!0);
         try {
           let uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || "portal", cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || "dqobhvk07";
           if (!uploadPreset || !cloudName)
             throw new Error("Cloudinary config missing");
-          let url = (await uploadToCloudinary2(blob5, "video", uploadPreset, cloudName, "portal/posts")).secure_url;
+          let url = (await uploadToCloudinary2(blob2, "video", uploadPreset, cloudName, "portal/posts")).secure_url;
           try {
             let video = document.createElement("video");
             video.src = url, video.crossOrigin = "anonymous", video.onloadeddata = () => {
@@ -20453,7 +11916,7 @@ function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }) {
         }
       }, stream.getVideoTracks()[0].onended = () => {
         mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive" && mediaRecorderRef.current.stop();
-      }, mediaRecorder.start(), setIsRecording(!0), setUploadType("screen");
+      }, mediaRecorder.start(), setIsRecording(!0);
     } catch (error) {
       alert(error instanceof Error ? error.message : "Failed to start screen recording"), cleanupRecording();
     }
@@ -20498,7 +11961,7 @@ function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }) {
           onChange: async (e) => {
             let file = e.target.files?.[0];
             if (file) {
-              setIsUploading(!0), setUploadType("file");
+              setIsUploading(!0);
               try {
                 let isVideo = file.type.startsWith("video/"), isImage = file.type.startsWith("image/");
                 if (!isVideo && !isImage)
@@ -20566,7 +12029,7 @@ function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }) {
                 let errorMessage = error instanceof Error ? error.message : "Failed to upload file";
                 alert(errorMessage);
               } finally {
-                setIsUploading(!1), setUploadType(null), fileInputRef.current && (fileInputRef.current.value = "");
+                setIsUploading(!1), fileInputRef.current && (fileInputRef.current.value = "");
               }
             }
           },
@@ -20613,7 +12076,7 @@ function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }) {
 // app/routes/posts.create.tsx
 init_virtual_wallet_server();
 init_schema();
-init_drizzle_orm();
+import { eq as eq21, asc as asc2 } from "drizzle-orm";
 import { z as z9 } from "zod";
 
 // app/components/TagSelector.tsx
@@ -20722,8 +12185,7 @@ function TagSelector({
             value: searchTerm,
             onChange: (e) => setSearchTerm(e.target.value),
             onKeyDown: handleKeyDown,
-            className: "w-full px-3 py-2 bg-neutral-700/50 border border-violet-500/20 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-violet-500",
-            autoFocus: !0
+            className: "w-full px-3 py-2 bg-neutral-700/50 border border-violet-500/20 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-violet-500"
           }
         ) }),
         /* @__PURE__ */ jsx19("div", { className: "max-h-48 overflow-y-auto", children: filteredTags.length === 0 ? /* @__PURE__ */ jsxs16("div", { className: "p-4 text-center text-gray-400", children: [
@@ -20782,7 +12244,7 @@ var TOKEN_SYMBOL3 = bounty_bucks_info_default.symbol, meta2 = () => [
   { title: "Create Post - portal.ask" },
   { name: "description", content: "Create a new question or discussion post on portal.ask" }
 ], loader14 = async ({ request, context }) => {
-  let userId = await requireUserId(request), db = createDb(context.env.DB), user = (await db.select({ id: users.id, username: users.username }).from(users).where(eq(users.id, userId)).limit(1))[0];
+  let userId = await requireUserId(request), db = createDb(context.env.DB), user = (await db.select({ id: users.id, username: users.username }).from(users).where(eq21(users.id, userId)).limit(1))[0];
   if (!user)
     throw new Error("User not found");
   let availableTags = await db.select({
@@ -20790,7 +12252,7 @@ var TOKEN_SYMBOL3 = bounty_bucks_info_default.symbol, meta2 = () => [
     name: tags.name,
     description: tags.description,
     color: tags.color
-  }).from(tags).orderBy(asc(tags.name));
+  }).from(tags).orderBy(asc2(tags.name));
   return json28({ user, availableTags });
 };
 async function action20({ request, context }) {
@@ -21544,8 +13006,8 @@ function getIntegrityBadgeStyle(score) {
 }
 
 // app/routes/$username.tsx
-init_drizzle_orm();
 init_schema();
+import { eq as eq22, desc as desc9, inArray as inArray3, sql as sql9 } from "drizzle-orm";
 import { jsx as jsx24, jsxs as jsxs21 } from "react/jsx-runtime";
 var DEFAULT_PROFILE_PICTURE2 = "https://api.dicebear.com/7.x/initials/svg?seed=";
 function getProfilePicture2(profilePicture, username) {
@@ -21630,7 +13092,7 @@ async function loader17({ params, context, request }) {
         website: profiles.website,
         github: profiles.github
       }
-    }).from(users).leftJoin(profiles, eq(users.id, profiles.userId)).where(eq(users.username, username)).limit(1);
+    }).from(users).leftJoin(profiles, eq22(users.id, profiles.userId)).where(eq22(users.username, username)).limit(1);
     if (!user.length)
       throw new Response("User not found", { status: 404 });
     let userPosts = await db.select({
@@ -21639,15 +13101,15 @@ async function loader17({ params, context, request }) {
       content: posts.content,
       createdAt: posts.createdAt,
       visibilityVotes: posts.visibilityVotes
-    }).from(posts).where(eq(posts.authorId, user[0].id)).orderBy(desc(posts.createdAt)).limit(5), postIds = userPosts.map((post) => post.id), commentCounts = postIds.length > 0 ? await db.select({
+    }).from(posts).where(eq22(posts.authorId, user[0].id)).orderBy(desc9(posts.createdAt)).limit(5), postIds = userPosts.map((post) => post.id), commentCounts = postIds.length > 0 ? await db.select({
       postId: comments.postId,
-      count: sql`count(${comments.id})`
-    }).from(comments).where(inArray(comments.postId, postIds)).groupBy(comments.postId) : [], userReputationHistory = await db.select({
+      count: sql9`count(${comments.id})`
+    }).from(comments).where(inArray3(comments.postId, postIds)).groupBy(comments.postId) : [], userReputationHistory = await db.select({
       id: reputationHistory.id,
       points: reputationHistory.points,
       action: reputationHistory.action,
       createdAt: reputationHistory.createdAt
-    }).from(reputationHistory).where(eq(reputationHistory.userId, user[0].id)).orderBy(desc(reputationHistory.createdAt)).limit(10), transformedPosts = userPosts.map((post) => ({
+    }).from(reputationHistory).where(eq22(reputationHistory.userId, user[0].id)).orderBy(desc9(reputationHistory.createdAt)).limit(10), transformedPosts = userPosts.map((post) => ({
       id: post.id,
       title: post.title,
       content: post.content,
@@ -21806,9 +13268,9 @@ __export(community_exports, {
 import { useEffect as useEffect10, useState as useState14 } from "react";
 import { useLoaderData as useLoaderData12, Link as Link12, useSubmit as useSubmit4, useNavigate as useNavigate4, useSearchParams as useSearchParams3 } from "@remix-run/react";
 import { json as json32 } from "@remix-run/node";
-init_drizzle_orm();
 init_schema();
-import { FiTrendingUp as FiTrendingUp2 } from "react-icons/fi";
+import { eq as eq23, and as and16, desc as desc10, sql as sql10, or as or3 } from "drizzle-orm";
+import { FiTrendingUp } from "react-icons/fi";
 import { FaSearch, FaBookmark } from "react-icons/fa";
 import { jsx as jsx25, jsxs as jsxs22 } from "react/jsx-runtime";
 var DEFAULT_PROFILE_PICTURE3 = "https://api.dicebear.com/7.x/initials/svg?seed=";
@@ -21821,14 +13283,14 @@ var meta4 = () => [
 ], loader18 = async ({ request, context }) => {
   try {
     let user = await getUser(request), db = context.env.DB, url = new URL(request.url), page = parseInt(url.searchParams.get("page") || "1"), selectedTags = url.searchParams.get("tags")?.split(",").filter(Boolean) || [], searchQuery = url.searchParams.get("search") || "", perPage = 20, skip = (page - 1) * perPage, whereConditions = [];
-    selectedTags.length > 0 && whereConditions.push(sql`EXISTS (
+    selectedTags.length > 0 && whereConditions.push(sql10`EXISTS (
         SELECT 1 FROM post_tags pt 
         JOIN tags t ON pt.tag_id = t.id 
         WHERE pt.post_id = posts.id AND t.name IN (${selectedTags.join(",")})
       )`), searchQuery && whereConditions.push(
-      or(
-        sql`posts.title LIKE ${`%${searchQuery}%`}`,
-        sql`posts.content LIKE ${`%${searchQuery}%`}`
+      or3(
+        sql10`posts.title LIKE ${`%${searchQuery}%`}`,
+        sql10`posts.content LIKE ${`%${searchQuery}%`}`
       )
     );
     let baseQuery = db.select({
@@ -21842,27 +13304,27 @@ var meta4 = () => [
       qualityDownvotes: posts.qualityDownvotes,
       hasBounty: posts.hasBounty,
       status: posts.status
-    }).from(posts).orderBy(desc(posts.createdAt)).limit(perPage).offset(skip), postsData = await (whereConditions.length > 0 ? baseQuery.where(and(...whereConditions)) : baseQuery), postsWithData = await Promise.all(
+    }).from(posts).orderBy(desc10(posts.createdAt)).limit(perPage).offset(skip), postsData = await (whereConditions.length > 0 ? baseQuery.where(and16(...whereConditions)) : baseQuery), postsWithData = await Promise.all(
       postsData.map(async (post) => {
         let author = (await db.select({
           id: users.id,
           username: users.username
-        }).from(users).where(eq(users.id, post.authorId)).limit(1))[0] || { id: "", username: "Unknown" }, profilePicture = (await db.select({
+        }).from(users).where(eq23(users.id, post.authorId)).limit(1))[0] || { id: "", username: "Unknown" }, profilePicture = (await db.select({
           profilePicture: profiles.profilePicture
-        }).from(profiles).where(eq(profiles.userId, post.authorId)).limit(1))[0]?.profilePicture || null, postTagsArr = await db.select({
+        }).from(profiles).where(eq23(profiles.userId, post.authorId)).limit(1))[0]?.profilePicture || null, postTagsArr = await db.select({
           tagId: postTags.tagId
-        }).from(postTags).where(eq(postTags.postId, post.id)), tagNames = await Promise.all(
+        }).from(postTags).where(eq23(postTags.postId, post.id)), tagNames = await Promise.all(
           postTagsArr.map(async (pt) => (await db.select({
             id: tags.id,
             name: tags.name,
             color: tags.color
-          }).from(tags).where(eq(tags.id, pt.tagId)).limit(1))[0] || null)
-        ), commentsCount = (await db.select({ count: sql`count(*)` }).from(comments).where(eq(comments.postId, post.id)))[0]?.count || 0, bounty = null;
+          }).from(tags).where(eq23(tags.id, pt.tagId)).limit(1))[0] || null)
+        ), commentsCount = (await db.select({ count: sql10`count(*)` }).from(comments).where(eq23(comments.postId, post.id)))[0]?.count || 0, bounty = null;
         return post.hasBounty && (bounty = (await db.select({
           id: bounties.id,
           amount: bounties.amount,
           status: bounties.status
-        }).from(bounties).where(eq(bounties.postId, post.id)).limit(1))[0] || null), {
+        }).from(bounties).where(eq23(bounties.postId, post.id)).limit(1))[0] || null), {
           ...post,
           author: {
             id: author.id,
@@ -21875,7 +13337,7 @@ var meta4 = () => [
           bounty
         };
       })
-    ), totalCount = (await db.select({ count: sql`count(*)` }).from(posts))[0]?.count || 0;
+    ), totalCount = (await db.select({ count: sql10`count(*)` }).from(posts))[0]?.count || 0;
     return json32({
       posts: postsWithData,
       totalPosts: totalCount,
@@ -21910,11 +13372,11 @@ var meta4 = () => [
     if (action26 === "vote")
       try {
         let result = await db.transaction(async (tx) => {
-          await tx.delete(votes).where(and(
-            eq(votes.userId, user.id),
-            eq(votes.postId, postId),
-            eq(votes.voteType, "POST"),
-            eq(votes.isQualityVote, !1)
+          await tx.delete(votes).where(and16(
+            eq23(votes.userId, user.id),
+            eq23(votes.postId, postId),
+            eq23(votes.voteType, "POST"),
+            eq23(votes.isQualityVote, !1)
           )), isVoting && await tx.insert(votes).values({
             id: crypto.randomUUID(),
             userId: user.id,
@@ -21925,16 +13387,16 @@ var meta4 = () => [
             commentId: null,
             answerId: null
           });
-          let visibilityVotes = (await tx.select({ count: sql`count(*)` }).from(votes).where(and(
-            eq(votes.postId, postId),
-            eq(votes.voteType, "POST"),
-            eq(votes.isQualityVote, !1),
-            eq(votes.value, 1)
+          let visibilityVotes = (await tx.select({ count: sql10`count(*)` }).from(votes).where(and16(
+            eq23(votes.postId, postId),
+            eq23(votes.voteType, "POST"),
+            eq23(votes.isQualityVote, !1),
+            eq23(votes.value, 1)
           )))[0]?.count || 0;
           return {
             post: (await tx.update(posts).set({
               visibilityVotes
-            }).where(eq(posts.id, postId)).returning())[0],
+            }).where(eq23(posts.id, postId)).returning())[0],
             userVoted: isVoting
           };
         });
@@ -21951,8 +13413,8 @@ var meta4 = () => [
         }, 500);
       }
     else if (action26 === "delete") {
-      let post = (await db.select().from(posts).where(eq(posts.id, postId)).limit(1))[0];
-      return post ? post.authorId !== user.id ? json32({ error: "You can only delete your own posts" }, { status: 403 }) : (await db.delete(posts).where(eq(posts.id, postId)), json32({ success: !0 })) : json32({ error: "Post not found" }, { status: 404 });
+      let post = (await db.select().from(posts).where(eq23(posts.id, postId)).limit(1))[0];
+      return post ? post.authorId !== user.id ? json32({ error: "You can only delete your own posts" }, { status: 403 }) : (await db.delete(posts).where(eq23(posts.id, postId)), json32({ success: !0 })) : json32({ error: "Post not found" }, { status: 404 });
     }
     return json32({ error: "Invalid action" }, { status: 400 });
   } catch (error) {
@@ -22218,7 +13680,7 @@ function Community() {
                   onClick: () => handleVote(post.id, post.userVoted ? 0 : 1),
                   className: `flex items-center space-x-1 transition-colors ${post.userVoted ? "text-violet-400" : "text-gray-400 hover:text-violet-400"}`,
                   children: [
-                    /* @__PURE__ */ jsx25(FiTrendingUp2, { className: `w-5 h-5 ${post.userVoted ? "fill-current" : "fill-none"}` }),
+                    /* @__PURE__ */ jsx25(FiTrendingUp, { className: `w-5 h-5 ${post.userVoted ? "fill-current" : "fill-none"}` }),
                     /* @__PURE__ */ jsx25("span", { children: post.visibilityVotes })
                   ]
                 }
@@ -22330,9 +13792,9 @@ function AuthNotice() {
 }
 
 // app/routes/settings.tsx
-init_drizzle_orm();
 init_schema();
 import { FiUser, FiLink, FiMail, FiLock, FiSave, FiCheck as FiCheck2 } from "react-icons/fi";
+import { eq as eq24 } from "drizzle-orm";
 import { jsx as jsx27, jsxs as jsxs24 } from "react/jsx-runtime";
 var meta5 = () => [
   { title: "Settings - portal.ask" },
@@ -22372,7 +13834,7 @@ async function loader19({ request, context }) {
         stackoverflow: profiles.stackoverflow,
         devto: profiles.devto
       }
-    }).from(users).leftJoin(profiles, eq(users.id, profiles.userId)).where(eq(users.id, user.id)).limit(1);
+    }).from(users).leftJoin(profiles, eq24(users.id, profiles.userId)).where(eq24(users.id, user.id)).limit(1);
     if (!userData.length)
       throw new Response("User not found", { status: 404 });
     return json33({ user: userData[0] });
@@ -22390,7 +13852,7 @@ async function action22({ request, context }) {
     switch (action26) {
       case "updateProfile": {
         let firstName = formData.get("firstName"), lastName = formData.get("lastName"), bio = formData.get("bio"), location = formData.get("location"), website = formData.get("website"), facebook = formData.get("facebook"), twitter = formData.get("twitter"), instagram = formData.get("instagram"), linkedin = formData.get("linkedin"), github = formData.get("github"), youtube = formData.get("youtube"), tiktok = formData.get("tiktok"), discord = formData.get("discord"), reddit = formData.get("reddit"), medium = formData.get("medium"), stackoverflow = formData.get("stackoverflow"), devto = formData.get("devto");
-        return (await db.select().from(profiles).where(eq(profiles.userId, user.id)).limit(1)).length > 0 ? await db.update(profiles).set({
+        return (await db.select().from(profiles).where(eq24(profiles.userId, user.id)).limit(1)).length > 0 ? await db.update(profiles).set({
           firstName,
           lastName,
           bio,
@@ -22409,7 +13871,7 @@ async function action22({ request, context }) {
           stackoverflow,
           devto,
           updatedAt: /* @__PURE__ */ new Date()
-        }).where(eq(profiles.userId, user.id)) : await db.insert(profiles).values({
+        }).where(eq24(profiles.userId, user.id)) : await db.insert(profiles).values({
           id: crypto.randomUUID(),
           userId: user.id,
           firstName,
@@ -23102,8 +14564,8 @@ import {
   FaDev as FaDev2
 } from "react-icons/fa";
 import { FiThumbsUp as FiThumbsUp4, FiEdit2 as FiEdit24 } from "react-icons/fi";
-init_drizzle_orm();
 init_schema();
+import { eq as eq25, desc as desc11 } from "drizzle-orm";
 import { jsx as jsx30, jsxs as jsxs27 } from "react/jsx-runtime";
 var meta6 = ({ data }) => {
   let username = data?.user?.username || "Profile";
@@ -23119,20 +14581,20 @@ function getProfilePicture4(profilePicture, username) {
   return profilePicture || `${DEFAULT_PROFILE_PICTURE5}${encodeURIComponent(username)}`;
 }
 var loader21 = async ({ request, context }) => {
-  let userId = await requireUserId(request), db = createDb(context.env.DB), userRows = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  let userId = await requireUserId(request), db = createDb(context.env.DB), userRows = await db.select().from(users).where(eq25(users.id, userId)).limit(1);
   if (!userRows.length)
     throw new Response("User not found", { status: 404 });
-  let user = userRows[0], profile = (await db.select().from(profiles).where(eq(profiles.userId, userId)).limit(1))[0] || null, userPosts = await db.select({
+  let user = userRows[0], profile = (await db.select().from(profiles).where(eq25(profiles.userId, userId)).limit(1))[0] || null, userPosts = await db.select({
     id: posts.id,
     title: posts.title,
     content: posts.content,
     createdAt: posts.createdAt
-  }).from(posts).where(eq(posts.authorId, userId)).orderBy(desc(posts.createdAt)), repHistory = await db.select({
+  }).from(posts).where(eq25(posts.authorId, userId)).orderBy(desc11(posts.createdAt)), repHistory = await db.select({
     id: reputationHistory.id,
     points: reputationHistory.points,
     action: reputationHistory.action,
     createdAt: reputationHistory.createdAt
-  }).from(reputationHistory).where(eq(reputationHistory.userId, userId)).orderBy(desc(reputationHistory.createdAt)).limit(10), bookmarks2 = [];
+  }).from(reputationHistory).where(eq25(reputationHistory.userId, userId)).orderBy(desc11(reputationHistory.createdAt)).limit(10), bookmarks2 = [];
   try {
     bookmarks2 = (await getUserBookmarks(db, userId)).map((bm) => ({
       id: bm.id,
@@ -23538,24 +15000,24 @@ import { useLoaderData as useLoaderData15, useActionData as useActionData7, useR
 import { useState as useState18 } from "react";
 
 // app/components/DirectDeposit.tsx
-import { useState as useState17 } from "react";
+import { useState as useState17, useEffect as useEffect13 } from "react";
 import { jsx as jsx32, jsxs as jsxs29 } from "react/jsx-runtime";
 var TOKEN_SYMBOL5 = "BBUX";
-function DirectDeposit({ onSuccess, onError }) {
-  let [amount, setAmount] = useState17(""), [isLoading, setIsLoading] = useState17(!1), [walletHooks, setWalletHooks] = useState17(null);
-  return useState17(() => {
+function DirectDeposit({ onError }) {
+  let [amount, setAmount] = useState17(""), [walletHooks, setWalletHooks] = useState17(null);
+  return useEffect13(() => {
     typeof window < "u" && Promise.all([
       import("@solana/wallet-adapter-react"),
-      Promise.resolve().then(() => (init_index_esm(), index_esm_exports))
+      import("@solana/web3.js")
     ]).then(([
       { useWallet },
-      { SystemProgram: SystemProgram2, Transaction: Transaction2, LAMPORTS_PER_SOL: LAMPORTS_PER_SOL2, PublicKey: PublicKey2 }
+      { SystemProgram, Transaction, LAMPORTS_PER_SOL, PublicKey: PublicKey3 }
     ]) => {
-      setWalletHooks({ useWallet, SystemProgram: SystemProgram2, Transaction: Transaction2, LAMPORTS_PER_SOL: LAMPORTS_PER_SOL2, PublicKey: PublicKey2 });
+      setWalletHooks({ useWallet, SystemProgram, Transaction, LAMPORTS_PER_SOL, PublicKey: PublicKey3 });
     }).catch((error) => {
       console.error("Failed to load wallet hooks:", error);
     });
-  }), /* @__PURE__ */ jsxs29("div", { className: "bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]", children: [
+  }, []), /* @__PURE__ */ jsxs29("div", { className: "bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]", children: [
     /* @__PURE__ */ jsxs29("h3", { className: "text-xl font-bold text-white mb-4", children: [
       "Direct ",
       TOKEN_SYMBOL5,
@@ -23583,7 +15045,7 @@ function DirectDeposit({ onSuccess, onError }) {
           }
         )
       ] }),
-      /* @__PURE__ */ jsx32(
+      /* @__PURE__ */ jsxs29(
         "button",
         {
           onClick: async () => {
@@ -23591,36 +15053,14 @@ function DirectDeposit({ onSuccess, onError }) {
               onError?.("Wallet not available");
               return;
             }
-            let { useWallet, SystemProgram: SystemProgram2, Transaction: Transaction2, LAMPORTS_PER_SOL: LAMPORTS_PER_SOL2, PublicKey: PublicKey2 } = walletHooks, { wallet, sendTransaction } = useWallet();
-            if (!wallet || !sendTransaction) {
-              onError?.("Please connect your wallet first");
-              return;
-            }
-            let depositAmount = parseFloat(amount);
-            if (isNaN(depositAmount) || depositAmount <= 0) {
-              onError?.("Please enter a valid amount");
-              return;
-            }
-            setIsLoading(!0);
-            try {
-              let transaction = new Transaction2().add(
-                SystemProgram2.transfer({
-                  fromPubkey: wallet.publicKey,
-                  toPubkey: new PublicKey2("8TxxzfEUbQcMTmsC5z1SS9TuLNzbL2iBVTLvb5JaKR6M"),
-                  // Platform wallet
-                  lamports: depositAmount * LAMPORTS_PER_SOL2
-                })
-              ), signature2 = await sendTransaction(transaction, wallet.adapter);
-              console.log("Transaction sent:", signature2), onSuccess?.(), setAmount("");
-            } catch (error) {
-              console.error("Deposit error:", error), onError?.(error instanceof Error ? error.message : "Failed to process deposit");
-            } finally {
-              setIsLoading(!1);
-            }
+            onError?.("Wallet integration needs to be refactored");
           },
-          disabled: isLoading || !walletHooks,
+          disabled: !walletHooks,
           className: "w-full py-2 px-4 bg-violet-600 text-white rounded-md hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors",
-          children: isLoading ? "Processing..." : `Deposit ${amount ? amount + " SOL" : ""}`
+          children: [
+            "Deposit ",
+            amount ? amount + " SOL" : ""
+          ]
         }
       )
     ] })
@@ -23631,15 +15071,16 @@ function DirectDeposit({ onSuccess, onError }) {
 init_bounty_bucks_info();
 
 // app/utils/token-supply.server.ts
-init_index_esm();
 init_bounty_bucks_info();
-var SOLANA_RPC_URL = process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com", TOKEN_MINT2 = new PublicKey(bounty_bucks_info_default.mint), INITIAL_SUPPLY = 1e9, TOKEN_DECIMALS = 9, TokenSupplyService = class {
+import { Connection as Connection2, PublicKey as PublicKey2 } from "@solana/web3.js";
+import { getMint } from "@solana/spl-token";
+var SOLANA_RPC_URL = process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com", TOKEN_MINT2 = new PublicKey2(bounty_bucks_info_default.mint), INITIAL_SUPPLY = 1e9, TOKEN_DECIMALS = 9, TokenSupplyService = class {
   /**
    * Get current token supply information
    */
   static async getSupplyInfo() {
     try {
-      let mintPubkey = new PublicKey(TOKEN_MINT2), mintInfo = await getMint(this.connection, mintPubkey), currentSupply = Number(mintInfo.supply) / Math.pow(10, TOKEN_DECIMALS), burnedAmount = INITIAL_SUPPLY - currentSupply, burnPercentage = burnedAmount / INITIAL_SUPPLY * 100;
+      let mintPubkey = new PublicKey2(TOKEN_MINT2), mintInfo = await getMint(this.connection, mintPubkey), currentSupply = Number(mintInfo.supply) / Math.pow(10, TOKEN_DECIMALS), burnedAmount = INITIAL_SUPPLY - currentSupply, burnPercentage = burnedAmount / INITIAL_SUPPLY * 100;
       return {
         initialSupply: INITIAL_SUPPLY,
         currentSupply,
@@ -23711,7 +15152,7 @@ var SOLANA_RPC_URL = process.env.SOLANA_RPC_URL || "https://api.devnet.solana.co
     }
   }
 };
-__publicField(TokenSupplyService, "connection", new Connection(SOLANA_RPC_URL));
+__publicField(TokenSupplyService, "connection", new Connection2(SOLANA_RPC_URL));
 
 // app/routes/wallet.tsx
 import { jsx as jsx33, jsxs as jsxs30 } from "react/jsx-runtime";
@@ -23734,8 +15175,8 @@ function WalletPage() {
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit"
-  }), getTransactionIcon = (type2) => {
-    switch (type2) {
+  }), getTransactionIcon = (type) => {
+    switch (type) {
       case "DEPOSIT":
         return "\u{1F4B0}";
       case "WITHDRAW":
@@ -23749,8 +15190,8 @@ function WalletPage() {
       default:
         return "\u{1F4CA}";
     }
-  }, getTransactionColor = (type2) => {
-    switch (type2) {
+  }, getTransactionColor = (type) => {
+    switch (type) {
       case "DEPOSIT":
       case "BOUNTY_CLAIMED":
       case "BOUNTY_REFUNDED":
@@ -23963,9 +15404,6 @@ function WalletPage() {
       depositMode === "direct" && /* @__PURE__ */ jsx33(
         DirectDeposit,
         {
-          onSuccess: () => {
-            setShowDepositModal(!1), setTimeout(() => window.location.reload(), 1e3);
-          },
           onError: (error) => {
             error !== "cancelled" && alert(error), setShowDepositModal(!1);
           }
@@ -24358,21 +15796,22 @@ function ErrorBoundary4() {
 // app/routes/_index.tsx
 var index_exports = {};
 __export(index_exports, {
-  default: () => Index2,
+  default: () => Index,
   loader: () => loader24,
   meta: () => meta9
 });
 import { redirect as redirect7 } from "@remix-run/node";
-import { jsx as jsx34 } from "react/jsx-runtime";
 var meta9 = () => [
   { title: "portal.ask" },
   { name: "description", content: "Welcome to portal.ask!" }
-], loader24 = async ({ request }) => {
-  console.log("Index loader called, method:", request.method), console.log("Index loader called, headers:", Object.fromEntries(request.headers.entries()));
-  let user = await getUser(request);
+], loader24 = async ({ request, context }) => {
+  if (console.log("Index loader called, method:", request.method), console.log("Index loader called, context exists:", !!context), console.log("Index loader called, context.env exists:", !!context?.env), !context || !context.env || !context.env.DB)
+    throw new Error("D1 Database binding is missing from context.env.DB");
+  context.env.SESSION_SECRET && (global.SESSION_SECRET = context.env.SESSION_SECRET);
+  let db = createDb(context.env.DB), user = await getUser(request, db);
   return console.log("Index loader - user found:", !!user), user ? (console.log("Index loader - redirecting to /profile"), redirect7("/profile")) : (console.log("Index loader - redirecting to /login"), redirect7("/login"));
 };
-function Index2() {
+function Index() {
   return null;
 }
 
@@ -24386,8 +15825,8 @@ __export(login_exports, {
 });
 import { json as json38, redirect as redirect8 } from "@remix-run/node";
 import { Form as Form11, useActionData as useActionData8, useSearchParams as useSearchParams5, Link as Link17 } from "@remix-run/react";
-import { useEffect as useEffect13, useRef as useRef6 } from "react";
-import { jsx as jsx35, jsxs as jsxs31 } from "react/jsx-runtime";
+import { useEffect as useEffect14, useRef as useRef6 } from "react";
+import { jsx as jsx34, jsxs as jsxs31 } from "react/jsx-runtime";
 var meta10 = () => [
   { title: "Login - BountyHub" },
   { name: "description", content: "Login to your BountyHub account" }
@@ -24405,15 +15844,15 @@ async function action25({ request, context }) {
 }
 function Login() {
   let actionData = useActionData8(), [searchParams] = useSearchParams5(), emailRef = useRef6(null), passwordRef = useRef6(null);
-  return useEffect13(() => {
+  return useEffect14(() => {
     actionData?.error && (actionData.error === "Invalid credentials" ? passwordRef.current?.focus() : emailRef.current?.focus());
-  }, [actionData]), /* @__PURE__ */ jsx35(Layout, { children: /* @__PURE__ */ jsx35("div", { className: "min-h-screen flex items-center justify-center bg-neutral-900/95 py-12 px-4 sm:px-6 lg:px-8", children: /* @__PURE__ */ jsxs31("div", { className: "max-w-md w-full space-y-8", children: [
+  }, [actionData]), /* @__PURE__ */ jsx34(Layout, { children: /* @__PURE__ */ jsx34("div", { className: "min-h-screen flex items-center justify-center bg-neutral-900/95 py-12 px-4 sm:px-6 lg:px-8", children: /* @__PURE__ */ jsxs31("div", { className: "max-w-md w-full space-y-8", children: [
     /* @__PURE__ */ jsxs31("div", { children: [
-      /* @__PURE__ */ jsx35("h2", { className: "mt-6 text-center text-3xl font-extrabold text-white", children: "Sign in to your account" }),
+      /* @__PURE__ */ jsx34("h2", { className: "mt-6 text-center text-3xl font-extrabold text-white", children: "Sign in to your account" }),
       /* @__PURE__ */ jsxs31("p", { className: "mt-2 text-center text-sm text-gray-400", children: [
         "Or",
         " ",
-        /* @__PURE__ */ jsx35(
+        /* @__PURE__ */ jsx34(
           Link17,
           {
             to: "/signup",
@@ -24424,7 +15863,7 @@ function Login() {
       ] })
     ] }),
     /* @__PURE__ */ jsxs31(Form11, { method: "post", className: "mt-8 space-y-6", children: [
-      /* @__PURE__ */ jsx35(
+      /* @__PURE__ */ jsx34(
         "input",
         {
           type: "hidden",
@@ -24434,8 +15873,8 @@ function Login() {
       ),
       /* @__PURE__ */ jsxs31("div", { className: "rounded-md shadow-sm -space-y-px", children: [
         /* @__PURE__ */ jsxs31("div", { children: [
-          /* @__PURE__ */ jsx35("label", { htmlFor: "email", className: "sr-only", children: "Email address" }),
-          /* @__PURE__ */ jsx35(
+          /* @__PURE__ */ jsx34("label", { htmlFor: "email", className: "sr-only", children: "Email address" }),
+          /* @__PURE__ */ jsx34(
             "input",
             {
               ref: emailRef,
@@ -24453,8 +15892,8 @@ function Login() {
           )
         ] }),
         /* @__PURE__ */ jsxs31("div", { children: [
-          /* @__PURE__ */ jsx35("label", { htmlFor: "password", className: "sr-only", children: "Password" }),
-          /* @__PURE__ */ jsx35(
+          /* @__PURE__ */ jsx34("label", { htmlFor: "password", className: "sr-only", children: "Password" }),
+          /* @__PURE__ */ jsx34(
             "input",
             {
               ref: passwordRef,
@@ -24471,8 +15910,8 @@ function Login() {
           )
         ] })
       ] }),
-      actionData?.error ? /* @__PURE__ */ jsx35("div", { className: "rounded-md bg-red-500/10 border border-red-500/20 p-4", children: /* @__PURE__ */ jsx35("div", { className: "text-sm text-red-400", children: actionData.error }) }) : null,
-      /* @__PURE__ */ jsx35("div", { children: /* @__PURE__ */ jsx35(
+      actionData?.error ? /* @__PURE__ */ jsx34("div", { className: "rounded-md bg-red-500/10 border border-red-500/20 p-4", children: /* @__PURE__ */ jsx34("div", { className: "text-sm text-red-400", children: actionData.error }) }) : null,
+      /* @__PURE__ */ jsx34("div", { children: /* @__PURE__ */ jsx34(
         "button",
         {
           type: "submit",
@@ -24480,7 +15919,7 @@ function Login() {
           children: "Sign in"
         }
       ) }),
-      /* @__PURE__ */ jsx35("div", { className: "flex items-center justify-between", children: /* @__PURE__ */ jsx35("div", { className: "text-sm", children: /* @__PURE__ */ jsx35(
+      /* @__PURE__ */ jsx34("div", { className: "flex items-center justify-between", children: /* @__PURE__ */ jsx34("div", { className: "text-sm", children: /* @__PURE__ */ jsx34(
         Link17,
         {
           to: "/forgot-password",
@@ -24499,12 +15938,12 @@ __export(terms_exports, {
   loader: () => loader26
 });
 import { json as json39 } from "@remix-run/node";
-import { jsx as jsx36, jsxs as jsxs32 } from "react/jsx-runtime";
+import { jsx as jsx35, jsxs as jsxs32 } from "react/jsx-runtime";
 var loader26 = async ({ request }) => json39({});
 function TermsOfService() {
-  return /* @__PURE__ */ jsx36(Layout, { showNav: !1, children: /* @__PURE__ */ jsxs32("div", { className: "max-w-4xl mx-auto p-6", children: [
+  return /* @__PURE__ */ jsx35(Layout, { showNav: !1, children: /* @__PURE__ */ jsxs32("div", { className: "max-w-4xl mx-auto p-6", children: [
     /* @__PURE__ */ jsxs32("div", { className: "mb-6 flex justify-between items-center mt-16", children: [
-      /* @__PURE__ */ jsx36("h1", { className: "text-3xl font-bold text-white", children: "Terms of Service" }),
+      /* @__PURE__ */ jsx35("h1", { className: "text-3xl font-bold text-white", children: "Terms of Service" }),
       /* @__PURE__ */ jsxs32("div", { className: "flex gap-3", children: [
         /* @__PURE__ */ jsxs32(
           "a",
@@ -24512,7 +15951,7 @@ function TermsOfService() {
             href: "/api/terms.pdf",
             className: "px-4 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-colors flex items-center gap-2",
             children: [
-              /* @__PURE__ */ jsx36("svg", { className: "w-5 h-5", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24", children: /* @__PURE__ */ jsx36("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" }) }),
+              /* @__PURE__ */ jsx35("svg", { className: "w-5 h-5", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24", children: /* @__PURE__ */ jsx35("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" }) }),
               "Download PDF"
             ]
           }
@@ -24523,16 +15962,16 @@ function TermsOfService() {
             onClick: () => window.print(),
             className: "px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2",
             children: [
-              /* @__PURE__ */ jsx36("svg", { className: "w-5 h-5", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24", children: /* @__PURE__ */ jsx36("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" }) }),
+              /* @__PURE__ */ jsx35("svg", { className: "w-5 h-5", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24", children: /* @__PURE__ */ jsx35("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" }) }),
               "Print"
             ]
           }
         )
       ] })
     ] }),
-    /* @__PURE__ */ jsx36("div", { className: "bg-white text-gray-900 rounded-lg shadow-lg p-8 print:shadow-none", children: /* @__PURE__ */ jsxs32("div", { className: "max-w-3xl mx-auto", children: [
+    /* @__PURE__ */ jsx35("div", { className: "bg-white text-gray-900 rounded-lg shadow-lg p-8 print:shadow-none", children: /* @__PURE__ */ jsxs32("div", { className: "max-w-3xl mx-auto", children: [
       /* @__PURE__ */ jsxs32("div", { className: "text-center mb-8", children: [
-        /* @__PURE__ */ jsx36("h1", { className: "text-3xl font-bold text-gray-900 mb-4", children: "Terms of Service" }),
+        /* @__PURE__ */ jsx35("h1", { className: "text-3xl font-bold text-gray-900 mb-4", children: "Terms of Service" }),
         /* @__PURE__ */ jsxs32("p", { className: "text-gray-600", children: [
           "Last updated: ",
           (/* @__PURE__ */ new Date()).toLocaleDateString()
@@ -24540,185 +15979,185 @@ function TermsOfService() {
       ] }),
       /* @__PURE__ */ jsxs32("div", { className: "space-y-6 text-sm leading-relaxed", children: [
         /* @__PURE__ */ jsxs32("section", { children: [
-          /* @__PURE__ */ jsx36("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "1. Acceptance of Terms" }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700 mb-3", children: 'By accessing and using portal.ask ("the Platform"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.' }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700", children: 'These Terms of Service ("Terms") govern your use of our decentralized platform for knowledge sharing, community building, and reputation-based interactions.' })
+          /* @__PURE__ */ jsx35("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "1. Acceptance of Terms" }),
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700 mb-3", children: 'By accessing and using portal.ask ("the Platform"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.' }),
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700", children: 'These Terms of Service ("Terms") govern your use of our decentralized platform for knowledge sharing, community building, and reputation-based interactions.' })
         ] }),
         /* @__PURE__ */ jsxs32("section", { children: [
-          /* @__PURE__ */ jsx36("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "2. Description of Service" }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700 mb-3", children: "portal.ask is a decentralized platform that provides:" }),
+          /* @__PURE__ */ jsx35("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "2. Description of Service" }),
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700 mb-3", children: "portal.ask is a decentralized platform that provides:" }),
           /* @__PURE__ */ jsxs32("ul", { className: "list-disc list-inside text-gray-700 mb-4 space-y-1", children: [
-            /* @__PURE__ */ jsx36("li", { children: "Knowledge sharing and Q&A functionality" }),
-            /* @__PURE__ */ jsx36("li", { children: "Community building and interaction tools" }),
-            /* @__PURE__ */ jsx36("li", { children: "Reputation and integrity scoring systems" }),
-            /* @__PURE__ */ jsx36("li", { children: "Virtual wallet and token management" }),
-            /* @__PURE__ */ jsx36("li", { children: "Bounty and reward mechanisms" }),
-            /* @__PURE__ */ jsx36("li", { children: "Blockchain-based transaction processing" })
+            /* @__PURE__ */ jsx35("li", { children: "Knowledge sharing and Q&A functionality" }),
+            /* @__PURE__ */ jsx35("li", { children: "Community building and interaction tools" }),
+            /* @__PURE__ */ jsx35("li", { children: "Reputation and integrity scoring systems" }),
+            /* @__PURE__ */ jsx35("li", { children: "Virtual wallet and token management" }),
+            /* @__PURE__ */ jsx35("li", { children: "Bounty and reward mechanisms" }),
+            /* @__PURE__ */ jsx35("li", { children: "Blockchain-based transaction processing" })
           ] })
         ] }),
         /* @__PURE__ */ jsxs32("section", { children: [
-          /* @__PURE__ */ jsx36("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "3. User Accounts and Registration" }),
-          /* @__PURE__ */ jsx36("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "3.1 Account Creation" }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700 mb-3", children: "To access certain features of the Platform, you must create an account. You agree to:" }),
+          /* @__PURE__ */ jsx35("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "3. User Accounts and Registration" }),
+          /* @__PURE__ */ jsx35("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "3.1 Account Creation" }),
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700 mb-3", children: "To access certain features of the Platform, you must create an account. You agree to:" }),
           /* @__PURE__ */ jsxs32("ul", { className: "list-disc list-inside text-gray-700 mb-4 space-y-1", children: [
-            /* @__PURE__ */ jsx36("li", { children: "Provide accurate, current, and complete information" }),
-            /* @__PURE__ */ jsx36("li", { children: "Maintain and update your account information" }),
-            /* @__PURE__ */ jsx36("li", { children: "Keep your account credentials secure" }),
-            /* @__PURE__ */ jsx36("li", { children: "Accept responsibility for all activities under your account" }),
-            /* @__PURE__ */ jsx36("li", { children: "Notify us immediately of any unauthorized use" })
+            /* @__PURE__ */ jsx35("li", { children: "Provide accurate, current, and complete information" }),
+            /* @__PURE__ */ jsx35("li", { children: "Maintain and update your account information" }),
+            /* @__PURE__ */ jsx35("li", { children: "Keep your account credentials secure" }),
+            /* @__PURE__ */ jsx35("li", { children: "Accept responsibility for all activities under your account" }),
+            /* @__PURE__ */ jsx35("li", { children: "Notify us immediately of any unauthorized use" })
           ] }),
-          /* @__PURE__ */ jsx36("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "3.2 Account Eligibility" }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700", children: "You must be at least 13 years old to create an account. By creating an account, you represent and warrant that you meet this age requirement." })
+          /* @__PURE__ */ jsx35("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "3.2 Account Eligibility" }),
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700", children: "You must be at least 13 years old to create an account. By creating an account, you represent and warrant that you meet this age requirement." })
         ] }),
         /* @__PURE__ */ jsxs32("section", { children: [
-          /* @__PURE__ */ jsx36("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "4. User Conduct and Responsibilities" }),
-          /* @__PURE__ */ jsx36("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "4.1 Acceptable Use" }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700 mb-3", children: "You agree to use the Platform only for lawful purposes and in accordance with these Terms. You agree not to:" }),
+          /* @__PURE__ */ jsx35("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "4. User Conduct and Responsibilities" }),
+          /* @__PURE__ */ jsx35("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "4.1 Acceptable Use" }),
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700 mb-3", children: "You agree to use the Platform only for lawful purposes and in accordance with these Terms. You agree not to:" }),
           /* @__PURE__ */ jsxs32("ul", { className: "list-disc list-inside text-gray-700 mb-4 space-y-1", children: [
-            /* @__PURE__ */ jsx36("li", { children: "Violate any applicable laws or regulations" }),
-            /* @__PURE__ */ jsx36("li", { children: "Infringe on intellectual property rights" }),
-            /* @__PURE__ */ jsx36("li", { children: "Harass, abuse, or harm other users" }),
-            /* @__PURE__ */ jsx36("li", { children: "Post false, misleading, or fraudulent content" }),
-            /* @__PURE__ */ jsx36("li", { children: "Attempt to gain unauthorized access to the Platform" }),
-            /* @__PURE__ */ jsx36("li", { children: "Interfere with the Platform's operation or security" }),
-            /* @__PURE__ */ jsx36("li", { children: "Use automated systems to access the Platform" }),
-            /* @__PURE__ */ jsx36("li", { children: "Engage in spam or unsolicited communications" })
+            /* @__PURE__ */ jsx35("li", { children: "Violate any applicable laws or regulations" }),
+            /* @__PURE__ */ jsx35("li", { children: "Infringe on intellectual property rights" }),
+            /* @__PURE__ */ jsx35("li", { children: "Harass, abuse, or harm other users" }),
+            /* @__PURE__ */ jsx35("li", { children: "Post false, misleading, or fraudulent content" }),
+            /* @__PURE__ */ jsx35("li", { children: "Attempt to gain unauthorized access to the Platform" }),
+            /* @__PURE__ */ jsx35("li", { children: "Interfere with the Platform's operation or security" }),
+            /* @__PURE__ */ jsx35("li", { children: "Use automated systems to access the Platform" }),
+            /* @__PURE__ */ jsx35("li", { children: "Engage in spam or unsolicited communications" })
           ] }),
-          /* @__PURE__ */ jsx36("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "4.2 Content Standards" }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700 mb-3", children: "All content you post must:" }),
+          /* @__PURE__ */ jsx35("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "4.2 Content Standards" }),
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700 mb-3", children: "All content you post must:" }),
           /* @__PURE__ */ jsxs32("ul", { className: "list-disc list-inside text-gray-700 mb-4 space-y-1", children: [
-            /* @__PURE__ */ jsx36("li", { children: "Be accurate and truthful" }),
-            /* @__PURE__ */ jsx36("li", { children: "Respect intellectual property rights" }),
-            /* @__PURE__ */ jsx36("li", { children: "Not contain harmful, offensive, or inappropriate material" }),
-            /* @__PURE__ */ jsx36("li", { children: "Comply with community guidelines" }),
-            /* @__PURE__ */ jsx36("li", { children: "Not violate any third-party rights" })
+            /* @__PURE__ */ jsx35("li", { children: "Be accurate and truthful" }),
+            /* @__PURE__ */ jsx35("li", { children: "Respect intellectual property rights" }),
+            /* @__PURE__ */ jsx35("li", { children: "Not contain harmful, offensive, or inappropriate material" }),
+            /* @__PURE__ */ jsx35("li", { children: "Comply with community guidelines" }),
+            /* @__PURE__ */ jsx35("li", { children: "Not violate any third-party rights" })
           ] })
         ] }),
         /* @__PURE__ */ jsxs32("section", { children: [
-          /* @__PURE__ */ jsx36("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "5. Virtual Currency and Transactions" }),
-          /* @__PURE__ */ jsx36("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "5.1 PORTAL Tokens" }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700 mb-3", children: "The Platform uses PORTAL tokens as virtual currency for:" }),
+          /* @__PURE__ */ jsx35("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "5. Virtual Currency and Transactions" }),
+          /* @__PURE__ */ jsx35("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "5.1 PORTAL Tokens" }),
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700 mb-3", children: "The Platform uses PORTAL tokens as virtual currency for:" }),
           /* @__PURE__ */ jsxs32("ul", { className: "list-disc list-inside text-gray-700 mb-4 space-y-1", children: [
-            /* @__PURE__ */ jsx36("li", { children: "Creating bounties and rewards" }),
-            /* @__PURE__ */ jsx36("li", { children: "Community transactions" }),
-            /* @__PURE__ */ jsx36("li", { children: "Platform governance" }),
-            /* @__PURE__ */ jsx36("li", { children: "Reputation and integrity systems" })
+            /* @__PURE__ */ jsx35("li", { children: "Creating bounties and rewards" }),
+            /* @__PURE__ */ jsx35("li", { children: "Community transactions" }),
+            /* @__PURE__ */ jsx35("li", { children: "Platform governance" }),
+            /* @__PURE__ */ jsx35("li", { children: "Reputation and integrity systems" })
           ] }),
-          /* @__PURE__ */ jsx36("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "5.2 Transaction Terms" }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700 mb-3", children: "By using the Platform's transaction features, you agree to:" }),
+          /* @__PURE__ */ jsx35("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "5.2 Transaction Terms" }),
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700 mb-3", children: "By using the Platform's transaction features, you agree to:" }),
           /* @__PURE__ */ jsxs32("ul", { className: "list-disc list-inside text-gray-700 mb-4 space-y-1", children: [
-            /* @__PURE__ */ jsx36("li", { children: "Understand that transactions are irreversible" }),
-            /* @__PURE__ */ jsx36("li", { children: "Accept responsibility for all transactions initiated from your account" }),
-            /* @__PURE__ */ jsx36("li", { children: "Comply with applicable financial regulations" }),
-            /* @__PURE__ */ jsx36("li", { children: "Not engage in fraudulent or manipulative trading" }),
-            /* @__PURE__ */ jsx36("li", { children: "Pay any applicable fees or charges" })
+            /* @__PURE__ */ jsx35("li", { children: "Understand that transactions are irreversible" }),
+            /* @__PURE__ */ jsx35("li", { children: "Accept responsibility for all transactions initiated from your account" }),
+            /* @__PURE__ */ jsx35("li", { children: "Comply with applicable financial regulations" }),
+            /* @__PURE__ */ jsx35("li", { children: "Not engage in fraudulent or manipulative trading" }),
+            /* @__PURE__ */ jsx35("li", { children: "Pay any applicable fees or charges" })
           ] }),
-          /* @__PURE__ */ jsx36("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "5.3 No Financial Advice" }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700", children: "The Platform does not provide financial, investment, or legal advice. All transactions are at your own risk." })
+          /* @__PURE__ */ jsx35("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "5.3 No Financial Advice" }),
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700", children: "The Platform does not provide financial, investment, or legal advice. All transactions are at your own risk." })
         ] }),
         /* @__PURE__ */ jsxs32("section", { children: [
-          /* @__PURE__ */ jsx36("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "6. Intellectual Property Rights" }),
-          /* @__PURE__ */ jsx36("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "6.1 Platform Rights" }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700 mb-3", children: "The Platform and its original content, features, and functionality are owned by portal.ask and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws." }),
-          /* @__PURE__ */ jsx36("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "6.2 User Content" }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700 mb-3", children: "You retain ownership of content you post, but grant us a license to:" }),
+          /* @__PURE__ */ jsx35("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "6. Intellectual Property Rights" }),
+          /* @__PURE__ */ jsx35("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "6.1 Platform Rights" }),
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700 mb-3", children: "The Platform and its original content, features, and functionality are owned by portal.ask and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws." }),
+          /* @__PURE__ */ jsx35("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "6.2 User Content" }),
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700 mb-3", children: "You retain ownership of content you post, but grant us a license to:" }),
           /* @__PURE__ */ jsxs32("ul", { className: "list-disc list-inside text-gray-700 mb-4 space-y-1", children: [
-            /* @__PURE__ */ jsx36("li", { children: "Display and distribute your content on the Platform" }),
-            /* @__PURE__ */ jsx36("li", { children: "Use your content for Platform improvement" }),
-            /* @__PURE__ */ jsx36("li", { children: "Store and backup your content" }),
-            /* @__PURE__ */ jsx36("li", { children: "Share your content as required by law" })
+            /* @__PURE__ */ jsx35("li", { children: "Display and distribute your content on the Platform" }),
+            /* @__PURE__ */ jsx35("li", { children: "Use your content for Platform improvement" }),
+            /* @__PURE__ */ jsx35("li", { children: "Store and backup your content" }),
+            /* @__PURE__ */ jsx35("li", { children: "Share your content as required by law" })
           ] }),
-          /* @__PURE__ */ jsx36("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "6.3 License Terms" }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700", children: "This license is worldwide, non-exclusive, royalty-free, and transferable. It terminates when you delete your content or account, except where your content has been shared with others." })
+          /* @__PURE__ */ jsx35("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "6.3 License Terms" }),
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700", children: "This license is worldwide, non-exclusive, royalty-free, and transferable. It terminates when you delete your content or account, except where your content has been shared with others." })
         ] }),
         /* @__PURE__ */ jsxs32("section", { children: [
-          /* @__PURE__ */ jsx36("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "7. Privacy and Data Protection" }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700 mb-3", children: "Your privacy is important to us. Our collection and use of personal information is governed by our Privacy Policy, which is incorporated into these Terms by reference." }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700", children: "By using the Platform, you consent to the collection and use of your information as described in our Privacy Policy." })
+          /* @__PURE__ */ jsx35("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "7. Privacy and Data Protection" }),
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700 mb-3", children: "Your privacy is important to us. Our collection and use of personal information is governed by our Privacy Policy, which is incorporated into these Terms by reference." }),
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700", children: "By using the Platform, you consent to the collection and use of your information as described in our Privacy Policy." })
         ] }),
         /* @__PURE__ */ jsxs32("section", { children: [
-          /* @__PURE__ */ jsx36("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "8. Disclaimers and Limitations" }),
-          /* @__PURE__ */ jsx36("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "8.1 Service Availability" }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700 mb-3", children: "We strive to maintain Platform availability but do not guarantee uninterrupted access. The Platform may be temporarily unavailable due to maintenance, updates, or technical issues." }),
-          /* @__PURE__ */ jsx36("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "8.2 Content Accuracy" }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700 mb-3", children: "We do not guarantee the accuracy, completeness, or usefulness of any content on the Platform. Users are responsible for verifying information and making their own decisions." }),
-          /* @__PURE__ */ jsx36("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "8.3 Limitation of Liability" }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700 mb-3", children: "To the maximum extent permitted by law, portal.ask shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to:" }),
+          /* @__PURE__ */ jsx35("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "8. Disclaimers and Limitations" }),
+          /* @__PURE__ */ jsx35("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "8.1 Service Availability" }),
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700 mb-3", children: "We strive to maintain Platform availability but do not guarantee uninterrupted access. The Platform may be temporarily unavailable due to maintenance, updates, or technical issues." }),
+          /* @__PURE__ */ jsx35("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "8.2 Content Accuracy" }),
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700 mb-3", children: "We do not guarantee the accuracy, completeness, or usefulness of any content on the Platform. Users are responsible for verifying information and making their own decisions." }),
+          /* @__PURE__ */ jsx35("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "8.3 Limitation of Liability" }),
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700 mb-3", children: "To the maximum extent permitted by law, portal.ask shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to:" }),
           /* @__PURE__ */ jsxs32("ul", { className: "list-disc list-inside text-gray-700 mb-4 space-y-1", children: [
-            /* @__PURE__ */ jsx36("li", { children: "Loss of profits, data, or use" }),
-            /* @__PURE__ */ jsx36("li", { children: "Business interruption" }),
-            /* @__PURE__ */ jsx36("li", { children: "Personal injury or property damage" }),
-            /* @__PURE__ */ jsx36("li", { children: "Emotional distress" }),
-            /* @__PURE__ */ jsx36("li", { children: "Any other damages arising from your use of the Platform" })
+            /* @__PURE__ */ jsx35("li", { children: "Loss of profits, data, or use" }),
+            /* @__PURE__ */ jsx35("li", { children: "Business interruption" }),
+            /* @__PURE__ */ jsx35("li", { children: "Personal injury or property damage" }),
+            /* @__PURE__ */ jsx35("li", { children: "Emotional distress" }),
+            /* @__PURE__ */ jsx35("li", { children: "Any other damages arising from your use of the Platform" })
           ] })
         ] }),
         /* @__PURE__ */ jsxs32("section", { children: [
-          /* @__PURE__ */ jsx36("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "9. Indemnification" }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700 mb-3", children: "You agree to defend, indemnify, and hold harmless portal.ask and its affiliates from and against any claims, damages, obligations, losses, liabilities, costs, or debt arising from:" }),
+          /* @__PURE__ */ jsx35("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "9. Indemnification" }),
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700 mb-3", children: "You agree to defend, indemnify, and hold harmless portal.ask and its affiliates from and against any claims, damages, obligations, losses, liabilities, costs, or debt arising from:" }),
           /* @__PURE__ */ jsxs32("ul", { className: "list-disc list-inside text-gray-700 mb-4 space-y-1", children: [
-            /* @__PURE__ */ jsx36("li", { children: "Your use of the Platform" }),
-            /* @__PURE__ */ jsx36("li", { children: "Your violation of these Terms" }),
-            /* @__PURE__ */ jsx36("li", { children: "Your violation of any third-party rights" }),
-            /* @__PURE__ */ jsx36("li", { children: "Your content posted on the Platform" })
+            /* @__PURE__ */ jsx35("li", { children: "Your use of the Platform" }),
+            /* @__PURE__ */ jsx35("li", { children: "Your violation of these Terms" }),
+            /* @__PURE__ */ jsx35("li", { children: "Your violation of any third-party rights" }),
+            /* @__PURE__ */ jsx35("li", { children: "Your content posted on the Platform" })
           ] })
         ] }),
         /* @__PURE__ */ jsxs32("section", { children: [
-          /* @__PURE__ */ jsx36("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "10. Termination" }),
-          /* @__PURE__ */ jsx36("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "10.1 Termination by You" }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700 mb-3", children: "You may terminate your account at any time by contacting us or using the account deletion feature. Upon termination:" }),
+          /* @__PURE__ */ jsx35("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "10. Termination" }),
+          /* @__PURE__ */ jsx35("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "10.1 Termination by You" }),
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700 mb-3", children: "You may terminate your account at any time by contacting us or using the account deletion feature. Upon termination:" }),
           /* @__PURE__ */ jsxs32("ul", { className: "list-disc list-inside text-gray-700 mb-4 space-y-1", children: [
-            /* @__PURE__ */ jsx36("li", { children: "Your account will be deactivated" }),
-            /* @__PURE__ */ jsx36("li", { children: "Your public content may remain visible" }),
-            /* @__PURE__ */ jsx36("li", { children: "Blockchain transactions cannot be reversed" }),
-            /* @__PURE__ */ jsx36("li", { children: "Some data may be retained for legal compliance" })
+            /* @__PURE__ */ jsx35("li", { children: "Your account will be deactivated" }),
+            /* @__PURE__ */ jsx35("li", { children: "Your public content may remain visible" }),
+            /* @__PURE__ */ jsx35("li", { children: "Blockchain transactions cannot be reversed" }),
+            /* @__PURE__ */ jsx35("li", { children: "Some data may be retained for legal compliance" })
           ] }),
-          /* @__PURE__ */ jsx36("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "10.2 Termination by Us" }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700", children: "We may terminate or suspend your account immediately, without prior notice, for conduct that we believe violates these Terms or is harmful to other users or the Platform." })
+          /* @__PURE__ */ jsx35("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "10.2 Termination by Us" }),
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700", children: "We may terminate or suspend your account immediately, without prior notice, for conduct that we believe violates these Terms or is harmful to other users or the Platform." })
         ] }),
         /* @__PURE__ */ jsxs32("section", { children: [
-          /* @__PURE__ */ jsx36("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "11. Governing Law and Disputes" }),
-          /* @__PURE__ */ jsx36("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "11.1 Governing Law" }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700 mb-3", children: "These Terms shall be governed by and construed in accordance with the laws of the jurisdiction in which portal.ask operates, without regard to its conflict of law provisions." }),
-          /* @__PURE__ */ jsx36("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "11.2 Dispute Resolution" }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700 mb-3", children: "Any disputes arising from these Terms or your use of the Platform shall be resolved through:" }),
+          /* @__PURE__ */ jsx35("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "11. Governing Law and Disputes" }),
+          /* @__PURE__ */ jsx35("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "11.1 Governing Law" }),
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700 mb-3", children: "These Terms shall be governed by and construed in accordance with the laws of the jurisdiction in which portal.ask operates, without regard to its conflict of law provisions." }),
+          /* @__PURE__ */ jsx35("h3", { className: "text-lg font-medium text-gray-900 mb-2", children: "11.2 Dispute Resolution" }),
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700 mb-3", children: "Any disputes arising from these Terms or your use of the Platform shall be resolved through:" }),
           /* @__PURE__ */ jsxs32("ul", { className: "list-disc list-inside text-gray-700 mb-4 space-y-1", children: [
-            /* @__PURE__ */ jsx36("li", { children: "Good faith negotiations between parties" }),
-            /* @__PURE__ */ jsx36("li", { children: "Mediation if negotiations fail" }),
-            /* @__PURE__ */ jsx36("li", { children: "Binding arbitration as a last resort" }),
-            /* @__PURE__ */ jsx36("li", { children: "Court proceedings only if arbitration is not available" })
+            /* @__PURE__ */ jsx35("li", { children: "Good faith negotiations between parties" }),
+            /* @__PURE__ */ jsx35("li", { children: "Mediation if negotiations fail" }),
+            /* @__PURE__ */ jsx35("li", { children: "Binding arbitration as a last resort" }),
+            /* @__PURE__ */ jsx35("li", { children: "Court proceedings only if arbitration is not available" })
           ] })
         ] }),
         /* @__PURE__ */ jsxs32("section", { children: [
-          /* @__PURE__ */ jsx36("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "12. Changes to Terms" }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700 mb-3", children: "We reserve the right to modify these Terms at any time. We will notify users of material changes by:" }),
+          /* @__PURE__ */ jsx35("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "12. Changes to Terms" }),
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700 mb-3", children: "We reserve the right to modify these Terms at any time. We will notify users of material changes by:" }),
           /* @__PURE__ */ jsxs32("ul", { className: "list-disc list-inside text-gray-700 mb-4 space-y-1", children: [
-            /* @__PURE__ */ jsx36("li", { children: "Posting updated Terms on the Platform" }),
-            /* @__PURE__ */ jsx36("li", { children: "Sending email notifications to registered users" }),
-            /* @__PURE__ */ jsx36("li", { children: "Displaying prominent notices on our website" })
+            /* @__PURE__ */ jsx35("li", { children: "Posting updated Terms on the Platform" }),
+            /* @__PURE__ */ jsx35("li", { children: "Sending email notifications to registered users" }),
+            /* @__PURE__ */ jsx35("li", { children: "Displaying prominent notices on our website" })
           ] }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700", children: "Your continued use of the Platform after changes become effective constitutes acceptance of the updated Terms." })
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700", children: "Your continued use of the Platform after changes become effective constitutes acceptance of the updated Terms." })
         ] }),
         /* @__PURE__ */ jsxs32("section", { children: [
-          /* @__PURE__ */ jsx36("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "13. Severability" }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700", children: "If any provision of these Terms is found to be unenforceable or invalid, that provision will be limited or eliminated to the minimum extent necessary so that the Terms will otherwise remain in full force and effect." })
+          /* @__PURE__ */ jsx35("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "13. Severability" }),
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700", children: "If any provision of these Terms is found to be unenforceable or invalid, that provision will be limited or eliminated to the minimum extent necessary so that the Terms will otherwise remain in full force and effect." })
         ] }),
         /* @__PURE__ */ jsxs32("section", { children: [
-          /* @__PURE__ */ jsx36("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "14. Entire Agreement" }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700", children: "These Terms, together with our Privacy Policy, constitute the entire agreement between you and portal.ask regarding your use of the Platform and supersede all prior agreements and understandings." })
+          /* @__PURE__ */ jsx35("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "14. Entire Agreement" }),
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700", children: "These Terms, together with our Privacy Policy, constitute the entire agreement between you and portal.ask regarding your use of the Platform and supersede all prior agreements and understandings." })
         ] }),
         /* @__PURE__ */ jsxs32("section", { children: [
-          /* @__PURE__ */ jsx36("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "15. Contact Information" }),
-          /* @__PURE__ */ jsx36("p", { className: "text-gray-700 mb-3", children: "If you have any questions about these Terms of Service, please contact us:" }),
+          /* @__PURE__ */ jsx35("h2", { className: "text-xl font-semibold text-gray-900 mb-3", children: "15. Contact Information" }),
+          /* @__PURE__ */ jsx35("p", { className: "text-gray-700 mb-3", children: "If you have any questions about these Terms of Service, please contact us:" }),
           /* @__PURE__ */ jsxs32("div", { className: "bg-gray-50 p-4 rounded-lg", children: [
             /* @__PURE__ */ jsxs32("p", { className: "text-gray-700 mb-2", children: [
-              /* @__PURE__ */ jsx36("strong", { children: "Email:" }),
+              /* @__PURE__ */ jsx35("strong", { children: "Email:" }),
               " bountybucks524@gmail.com"
             ] }),
             /* @__PURE__ */ jsxs32("p", { className: "text-gray-700 mb-2", children: [
-              /* @__PURE__ */ jsx36("strong", { children: "Platform:" }),
+              /* @__PURE__ */ jsx35("strong", { children: "Platform:" }),
               " portal.ask"
             ] }),
-            /* @__PURE__ */ jsx36("p", { className: "text-gray-700", children: "We will respond to your inquiry within a reasonable timeframe." })
+            /* @__PURE__ */ jsx35("p", { className: "text-gray-700", children: "We will respond to your inquiry within a reasonable timeframe." })
           ] })
         ] })
       ] })
@@ -24746,7 +16185,7 @@ import {
   FiMessageSquare as FiMessageSquare3,
   FiMail as FiMail2
 } from "react-icons/fi";
-import { jsx as jsx37, jsxs as jsxs33 } from "react/jsx-runtime";
+import { jsx as jsx36, jsxs as jsxs33 } from "react/jsx-runtime";
 var meta11 = () => [
   { title: "Documentation - portal.ask" },
   { name: "description", content: "Learn how to use portal.ask and explore our documentation" }
@@ -24835,56 +16274,56 @@ function DocsPage() {
     { ...docs[5], icon: FiShield5 },
     { ...docs[6], icon: FiShield5 }
   ], getCategoryDocs = (categoryName) => docsWithIcons.filter((doc) => doc.category === categoryName);
-  return /* @__PURE__ */ jsx37(Layout, { children: /* @__PURE__ */ jsxs33("div", { className: "w-auto max-w-8xl mx-auto mt-4 px-4 ml-24 pb-16", children: [
+  return /* @__PURE__ */ jsx36(Layout, { children: /* @__PURE__ */ jsxs33("div", { className: "w-auto max-w-8xl mx-auto mt-4 px-4 ml-24 pb-16", children: [
     /* @__PURE__ */ jsxs33("div", { className: "mb-8 mt-16", children: [
-      /* @__PURE__ */ jsx37("h1", { className: "text-4xl font-bold text-white mb-4", children: "Documentation" }),
-      /* @__PURE__ */ jsx37("p", { className: "text-gray-400 text-lg max-w-3xl", children: "Welcome to the portal.ask documentation. Find everything you need to understand, use, and develop with our platform." })
+      /* @__PURE__ */ jsx36("h1", { className: "text-4xl font-bold text-white mb-4", children: "Documentation" }),
+      /* @__PURE__ */ jsx36("p", { className: "text-gray-400 text-lg max-w-3xl", children: "Welcome to the portal.ask documentation. Find everything you need to understand, use, and develop with our platform." })
     ] }),
     /* @__PURE__ */ jsxs33("div", { className: "mb-20", children: [
-      /* @__PURE__ */ jsx37("h2", { className: "text-2xl font-semibold text-white mb-6", children: "Getting Started" }),
-      /* @__PURE__ */ jsx37("div", { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6", children: (() => docsWithIcons.filter((doc) => doc.featured))().map((doc) => /* @__PURE__ */ jsxs33(
+      /* @__PURE__ */ jsx36("h2", { className: "text-2xl font-semibold text-white mb-6", children: "Getting Started" }),
+      /* @__PURE__ */ jsx36("div", { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6", children: (() => docsWithIcons.filter((doc) => doc.featured))().map((doc) => /* @__PURE__ */ jsxs33(
         Link18,
         {
           to: doc.href,
           className: "group block p-6 bg-neutral-800/80 rounded-lg border-2 border-violet-500/30 hover:border-violet-500/60 transition-all duration-300 shadow-lg hover:shadow-violet-500/20",
           children: [
             /* @__PURE__ */ jsxs33("div", { className: "flex items-center mb-4", children: [
-              /* @__PURE__ */ jsx37(doc.icon, { className: "w-8 h-8 text-violet-400 mr-4" }),
-              /* @__PURE__ */ jsx37("h3", { className: "text-xl font-semibold text-white group-hover:text-violet-300 transition-colors", children: doc.title })
+              /* @__PURE__ */ jsx36(doc.icon, { className: "w-8 h-8 text-violet-400 mr-4" }),
+              /* @__PURE__ */ jsx36("h3", { className: "text-xl font-semibold text-white group-hover:text-violet-300 transition-colors", children: doc.title })
             ] }),
-            /* @__PURE__ */ jsx37("p", { className: "text-gray-400 group-hover:text-gray-300 transition-colors", children: doc.description }),
+            /* @__PURE__ */ jsx36("p", { className: "text-gray-400 group-hover:text-gray-300 transition-colors", children: doc.description }),
             /* @__PURE__ */ jsxs33("div", { className: "mt-4 flex items-center text-violet-400 group-hover:text-violet-300 transition-colors", children: [
-              /* @__PURE__ */ jsx37("span", { className: "text-sm font-medium", children: "Read more" }),
-              /* @__PURE__ */ jsx37(FiExternalLink3, { className: "w-4 h-4 ml-2" })
+              /* @__PURE__ */ jsx36("span", { className: "text-sm font-medium", children: "Read more" }),
+              /* @__PURE__ */ jsx36(FiExternalLink3, { className: "w-4 h-4 ml-2" })
             ] })
           ]
         },
         doc.href
       )) })
     ] }),
-    /* @__PURE__ */ jsx37("div", { className: "space-y-20", children: categories.map((category) => /* @__PURE__ */ jsxs33("div", { children: [
+    /* @__PURE__ */ jsx36("div", { className: "space-y-20", children: categories.map((category) => /* @__PURE__ */ jsxs33("div", { children: [
       /* @__PURE__ */ jsxs33("div", { className: "mb-8", children: [
-        /* @__PURE__ */ jsx37("h2", { className: "text-2xl font-semibold text-white mb-3", children: category.title }),
-        /* @__PURE__ */ jsx37("p", { className: "text-gray-400", children: category.description })
+        /* @__PURE__ */ jsx36("h2", { className: "text-2xl font-semibold text-white mb-3", children: category.title }),
+        /* @__PURE__ */ jsx36("p", { className: "text-gray-400", children: category.description })
       ] }),
-      /* @__PURE__ */ jsx37("div", { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6", children: getCategoryDocs(category.name).map((doc) => /* @__PURE__ */ jsxs33(
+      /* @__PURE__ */ jsx36("div", { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6", children: getCategoryDocs(category.name).map((doc) => /* @__PURE__ */ jsxs33(
         Link18,
         {
           to: doc.href,
           className: "group block p-6 bg-neutral-800/60 rounded-lg border border-violet-500/20 hover:border-violet-500/40 transition-all duration-300",
           children: [
             /* @__PURE__ */ jsxs33("div", { className: "flex items-center mb-3", children: [
-              /* @__PURE__ */ jsx37(doc.icon, { className: "w-6 h-6 text-violet-400 mr-4" }),
-              /* @__PURE__ */ jsx37("h3", { className: "text-lg font-medium text-white group-hover:text-violet-300 transition-colors", children: doc.title })
+              /* @__PURE__ */ jsx36(doc.icon, { className: "w-6 h-6 text-violet-400 mr-4" }),
+              /* @__PURE__ */ jsx36("h3", { className: "text-lg font-medium text-white group-hover:text-violet-300 transition-colors", children: doc.title })
             ] }),
-            /* @__PURE__ */ jsx37("p", { className: "text-gray-400 text-sm group-hover:text-gray-300 transition-colors", children: doc.description })
+            /* @__PURE__ */ jsx36("p", { className: "text-gray-400 text-sm group-hover:text-gray-300 transition-colors", children: doc.description })
           ]
         },
         doc.href
       )) })
     ] }, category.name)) }),
     /* @__PURE__ */ jsxs33("div", { className: "mt-20 p-8 bg-gradient-to-r from-violet-500/10 to-blue-500/10 rounded-lg border border-violet-500/30", children: [
-      /* @__PURE__ */ jsx37("h2", { className: "text-2xl font-semibold text-white mb-6", children: "Quick Links" }),
+      /* @__PURE__ */ jsx36("h2", { className: "text-2xl font-semibold text-white mb-6", children: "Quick Links" }),
       /* @__PURE__ */ jsxs33("div", { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6", children: [
         /* @__PURE__ */ jsxs33(
           Link18,
@@ -24892,8 +16331,8 @@ function DocsPage() {
             to: "/community",
             className: "flex items-center p-4 bg-neutral-800/60 rounded-lg hover:bg-neutral-700/60 transition-colors",
             children: [
-              /* @__PURE__ */ jsx37(FiUser2, { className: "w-5 h-5 text-violet-400 mr-3" }),
-              /* @__PURE__ */ jsx37("span", { className: "text-white", children: "Community" })
+              /* @__PURE__ */ jsx36(FiUser2, { className: "w-5 h-5 text-violet-400 mr-3" }),
+              /* @__PURE__ */ jsx36("span", { className: "text-white", children: "Community" })
             ]
           }
         ),
@@ -24903,8 +16342,8 @@ function DocsPage() {
             to: "/posts/create",
             className: "flex items-center p-4 bg-neutral-800/60 rounded-lg hover:bg-neutral-700/60 transition-colors",
             children: [
-              /* @__PURE__ */ jsx37(FiCode, { className: "w-5 h-5 text-violet-400 mr-3" }),
-              /* @__PURE__ */ jsx37("span", { className: "text-white", children: "Create Post" })
+              /* @__PURE__ */ jsx36(FiCode, { className: "w-5 h-5 text-violet-400 mr-3" }),
+              /* @__PURE__ */ jsx36("span", { className: "text-white", children: "Create Post" })
             ]
           }
         ),
@@ -24914,8 +16353,8 @@ function DocsPage() {
             to: "/wallet",
             className: "flex items-center p-4 bg-neutral-800/60 rounded-lg hover:bg-neutral-700/60 transition-colors",
             children: [
-              /* @__PURE__ */ jsx37(FiCloud, { className: "w-5 h-5 text-violet-400 mr-3" }),
-              /* @__PURE__ */ jsx37("span", { className: "text-white", children: "Wallet" })
+              /* @__PURE__ */ jsx36(FiCloud, { className: "w-5 h-5 text-violet-400 mr-3" }),
+              /* @__PURE__ */ jsx36("span", { className: "text-white", children: "Wallet" })
             ]
           }
         ),
@@ -24925,40 +16364,40 @@ function DocsPage() {
             to: "/settings",
             className: "flex items-center p-4 bg-neutral-800/60 rounded-lg hover:bg-neutral-700/60 transition-colors",
             children: [
-              /* @__PURE__ */ jsx37(FiShield5, { className: "w-5 h-5 text-violet-400 mr-3" }),
-              /* @__PURE__ */ jsx37("span", { className: "text-white", children: "Settings" })
+              /* @__PURE__ */ jsx36(FiShield5, { className: "w-5 h-5 text-violet-400 mr-3" }),
+              /* @__PURE__ */ jsx36("span", { className: "text-white", children: "Settings" })
             ]
           }
         )
       ] })
     ] }),
     /* @__PURE__ */ jsxs33("div", { className: "mt-20 p-8 bg-neutral-800/60 rounded-lg border border-violet-500/20", children: [
-      /* @__PURE__ */ jsx37("h2", { className: "text-2xl font-semibold text-white mb-6", children: "Need Help?" }),
+      /* @__PURE__ */ jsx36("h2", { className: "text-2xl font-semibold text-white mb-6", children: "Need Help?" }),
       /* @__PURE__ */ jsxs33("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-6", children: [
         /* @__PURE__ */ jsxs33("div", { className: "flex items-center p-4 bg-neutral-700/40 rounded-lg", children: [
-          /* @__PURE__ */ jsx37(FiMessageSquare3, { className: "w-6 h-6 text-violet-400 mr-3" }),
+          /* @__PURE__ */ jsx36(FiMessageSquare3, { className: "w-6 h-6 text-violet-400 mr-3" }),
           /* @__PURE__ */ jsxs33("div", { children: [
-            /* @__PURE__ */ jsx37("h3", { className: "text-white font-medium", children: "Discord Community" }),
-            /* @__PURE__ */ jsx37("p", { className: "text-gray-400 text-sm", children: "Join our community for real-time help" })
+            /* @__PURE__ */ jsx36("h3", { className: "text-white font-medium", children: "Discord Community" }),
+            /* @__PURE__ */ jsx36("p", { className: "text-gray-400 text-sm", children: "Join our community for real-time help" })
           ] })
         ] }),
         /* @__PURE__ */ jsxs33("div", { className: "flex items-center p-4 bg-neutral-700/40 rounded-lg", children: [
-          /* @__PURE__ */ jsx37(FiMessageSquare3, { className: "w-6 h-6 text-violet-400 mr-3" }),
+          /* @__PURE__ */ jsx36(FiMessageSquare3, { className: "w-6 h-6 text-violet-400 mr-3" }),
           /* @__PURE__ */ jsxs33("div", { children: [
-            /* @__PURE__ */ jsx37("h3", { className: "text-white font-medium", children: "GitHub Issues" }),
-            /* @__PURE__ */ jsx37("p", { className: "text-gray-400 text-sm", children: "Report bugs and request features" })
+            /* @__PURE__ */ jsx36("h3", { className: "text-white font-medium", children: "GitHub Issues" }),
+            /* @__PURE__ */ jsx36("p", { className: "text-gray-400 text-sm", children: "Report bugs and request features" })
           ] })
         ] }),
         /* @__PURE__ */ jsxs33("div", { className: "flex items-center p-4 bg-neutral-700/40 rounded-lg", children: [
-          /* @__PURE__ */ jsx37(FiMail2, { className: "w-6 h-6 text-violet-400 mr-3" }),
+          /* @__PURE__ */ jsx36(FiMail2, { className: "w-6 h-6 text-violet-400 mr-3" }),
           /* @__PURE__ */ jsxs33("div", { children: [
-            /* @__PURE__ */ jsx37("h3", { className: "text-white font-medium", children: "Email Support" }),
-            /* @__PURE__ */ jsx37("p", { className: "text-gray-400 text-sm", children: "Get direct support via email" })
+            /* @__PURE__ */ jsx36("h3", { className: "text-white font-medium", children: "Email Support" }),
+            /* @__PURE__ */ jsx36("p", { className: "text-gray-400 text-sm", children: "Get direct support via email" })
           ] })
         ] })
       ] }),
       /* @__PURE__ */ jsxs33("div", { className: "mt-6 text-center", children: [
-        /* @__PURE__ */ jsx37("p", { className: "text-gray-400 mb-4", children: "Can't find what you're looking for? Our team is here to help!" }),
+        /* @__PURE__ */ jsx36("p", { className: "text-gray-400 mb-4", children: "Can't find what you're looking for? Our team is here to help!" }),
         /* @__PURE__ */ jsxs33("div", { className: "flex justify-center space-x-4", children: [
           /* @__PURE__ */ jsxs33(
             "a",
@@ -24968,7 +16407,7 @@ function DocsPage() {
               rel: "noopener noreferrer",
               className: "inline-flex items-center px-4 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-colors",
               children: [
-                /* @__PURE__ */ jsx37(FiMessageSquare3, { className: "w-4 h-4 mr-2" }),
+                /* @__PURE__ */ jsx36(FiMessageSquare3, { className: "w-4 h-4 mr-2" }),
                 "Join Discord"
               ]
             }
@@ -24979,7 +16418,7 @@ function DocsPage() {
               href: "mailto:bountybucks524@gmail.com",
               className: "inline-flex items-center px-4 py-2 bg-neutral-700 text-white rounded-lg hover:bg-neutral-600 transition-colors",
               children: [
-                /* @__PURE__ */ jsx37(FiMail2, { className: "w-4 h-4 mr-2" }),
+                /* @__PURE__ */ jsx36(FiMail2, { className: "w-4 h-4 mr-2" }),
                 "Contact Support"
               ]
             }
@@ -24991,10 +16430,10 @@ function DocsPage() {
 }
 
 // server-assets-manifest:@remix-run/dev/assets-manifest
-var assets_manifest_default = { entry: { module: "/build/entry.client-PT3EFJTM.js", imports: ["/build/_shared/chunk-P6N2SVWT.js", "/build/_shared/chunk-NR5QZJLH.js", "/build/_shared/chunk-M52IJKKB.js", "/build/_shared/chunk-7ZSQYYGQ.js", "/build/_shared/chunk-G5WX4PPA.js"] }, routes: { root: { id: "root", parentId: void 0, path: "", index: void 0, caseSensitive: void 0, module: "/build/root-4XYZ4QIK.js", imports: ["/build/_shared/chunk-6S2QUAFR.js", "/build/_shared/chunk-MQYEVBU3.js", "/build/_shared/chunk-5TRFQBKG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !0 }, "routes/$username": { id: "routes/$username", parentId: "root", path: ":username", index: void 0, caseSensitive: void 0, module: "/build/routes/$username-4A7YL4B2.js", imports: ["/build/_shared/chunk-GU4OLFEG.js", "/build/_shared/chunk-VI4IRXJP.js", "/build/_shared/chunk-5FQ6WLFO.js", "/build/_shared/chunk-GE4ZJASY.js", "/build/_shared/chunk-HL7JUMQL.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/$username.posts": { id: "routes/$username.posts", parentId: "routes/$username", path: "posts", index: void 0, caseSensitive: void 0, module: "/build/routes/$username.posts-VGW7BOIP.js", imports: ["/build/_shared/chunk-MQYEVBU3.js", "/build/_shared/chunk-5TRFQBKG.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/_index": { id: "routes/_index", parentId: "root", path: void 0, index: !0, caseSensitive: void 0, module: "/build/routes/_index-LAZ6MS5V.js", imports: void 0, hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.answers.$answerId.vote": { id: "routes/api.answers.$answerId.vote", parentId: "root", path: "api/answers/:answerId/vote", index: void 0, caseSensitive: void 0, module: "/build/routes/api.answers.$answerId.vote-UW54CVND.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.bookmarks-status": { id: "routes/api.bookmarks-status", parentId: "root", path: "api/bookmarks-status", index: void 0, caseSensitive: void 0, module: "/build/routes/api.bookmarks-status-SUQV6H62.js", imports: void 0, hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.bookmarks-toggle": { id: "routes/api.bookmarks-toggle", parentId: "root", path: "api/bookmarks-toggle", index: void 0, caseSensitive: void 0, module: "/build/routes/api.bookmarks-toggle-YB4XFGT6.js", imports: ["/build/_shared/chunk-SADEDPWE.js"], hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.bounty.claim": { id: "routes/api.bounty.claim", parentId: "root", path: "api/bounty/claim", index: void 0, caseSensitive: void 0, module: "/build/routes/api.bounty.claim-4ZEDX5T5.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.comments.$commentId.vote": { id: "routes/api.comments.$commentId.vote", parentId: "root", path: "api/comments/:commentId/vote", index: void 0, caseSensitive: void 0, module: "/build/routes/api.comments.$commentId.vote-CZSD4KS5.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.integrity.rate": { id: "routes/api.integrity.rate", parentId: "root", path: "api/integrity/rate", index: void 0, caseSensitive: void 0, module: "/build/routes/api.integrity.rate-IMSSEOHP.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.integrity.report": { id: "routes/api.integrity.report", parentId: "root", path: "api/integrity/report", index: void 0, caseSensitive: void 0, module: "/build/routes/api.integrity.report-RSA6WKMA.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.posts.$postId": { id: "routes/api.posts.$postId", parentId: "root", path: "api/posts/:postId", index: void 0, caseSensitive: void 0, module: "/build/routes/api.posts.$postId-YGBZFLPW.js", imports: void 0, hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.posts.$postId.vote": { id: "routes/api.posts.$postId.vote", parentId: "routes/api.posts.$postId", path: "vote", index: void 0, caseSensitive: void 0, module: "/build/routes/api.posts.$postId.vote-NBKAYBLE.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.posts.delete": { id: "routes/api.posts.delete", parentId: "root", path: "api/posts/delete", index: void 0, caseSensitive: void 0, module: "/build/routes/api.posts.delete-J6ROIFGK.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.privacy.pdf": { id: "routes/api.privacy.pdf", parentId: "root", path: "api/privacy/pdf", index: void 0, caseSensitive: void 0, module: "/build/routes/api.privacy.pdf-KQJ6I5V7.js", imports: void 0, hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.profile.picture": { id: "routes/api.profile.picture", parentId: "root", path: "api/profile/picture", index: void 0, caseSensitive: void 0, module: "/build/routes/api.profile.picture-YAPKYI3V.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.refund.request": { id: "routes/api.refund.request", parentId: "root", path: "api/refund/request", index: void 0, caseSensitive: void 0, module: "/build/routes/api.refund.request-RUBNJAZZ.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.refund.requests": { id: "routes/api.refund.requests", parentId: "root", path: "api/refund/requests", index: void 0, caseSensitive: void 0, module: "/build/routes/api.refund.requests-O5BE6NVO.js", imports: void 0, hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.refund.vote": { id: "routes/api.refund.vote", parentId: "root", path: "api/refund/vote", index: void 0, caseSensitive: void 0, module: "/build/routes/api.refund.vote-BVIXA4VT.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.terms.pdf": { id: "routes/api.terms.pdf", parentId: "root", path: "api/terms/pdf", index: void 0, caseSensitive: void 0, module: "/build/routes/api.terms.pdf-HIAO46YQ.js", imports: void 0, hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.wallet.cancel-transaction": { id: "routes/api.wallet.cancel-transaction", parentId: "root", path: "api/wallet/cancel-transaction", index: void 0, caseSensitive: void 0, module: "/build/routes/api.wallet.cancel-transaction-QSFVUSIE.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.wallet.confirm-deposit": { id: "routes/api.wallet.confirm-deposit", parentId: "root", path: "api/wallet/confirm-deposit", index: void 0, caseSensitive: void 0, module: "/build/routes/api.wallet.confirm-deposit-MOIF5EVU.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.wallet.deposit": { id: "routes/api.wallet.deposit", parentId: "root", path: "api/wallet/deposit", index: void 0, caseSensitive: void 0, module: "/build/routes/api.wallet.deposit-5FTD6S54.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.wallet.withdraw": { id: "routes/api.wallet.withdraw", parentId: "root", path: "api/wallet/withdraw", index: void 0, caseSensitive: void 0, module: "/build/routes/api.wallet.withdraw-DZQ53G34.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/community": { id: "routes/community", parentId: "root", path: "community", index: void 0, caseSensitive: void 0, module: "/build/routes/community-4Q4PV35Y.js", imports: ["/build/_shared/chunk-VI4IRXJP.js", "/build/_shared/chunk-E7WN742L.js", "/build/_shared/chunk-5FQ6WLFO.js", "/build/_shared/chunk-23VXHKGP.js", "/build/_shared/chunk-HL7JUMQL.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/default-avatar.png": { id: "routes/default-avatar.png", parentId: "root", path: "default-avatar/png", index: void 0, caseSensitive: void 0, module: "/build/routes/default-avatar.png-AHJ7WDHH.js", imports: void 0, hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/docs": { id: "routes/docs", parentId: "root", path: "docs", index: void 0, caseSensitive: void 0, module: "/build/routes/docs-QKSJ43CB.js", imports: ["/build/_shared/chunk-23VXHKGP.js", "/build/_shared/chunk-HL7JUMQL.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/docs.legal": { id: "routes/docs.legal", parentId: "routes/docs", path: "legal", index: void 0, caseSensitive: void 0, module: "/build/routes/docs.legal-ODHNBLBI.js", imports: ["/build/_shared/chunk-5TRFQBKG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/docs.platform": { id: "routes/docs.platform", parentId: "routes/docs", path: "platform", index: void 0, caseSensitive: void 0, module: "/build/routes/docs.platform-43WKPR5U.js", imports: ["/build/_shared/chunk-5TRFQBKG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/docs.refund-system": { id: "routes/docs.refund-system", parentId: "routes/docs", path: "refund-system", index: void 0, caseSensitive: void 0, module: "/build/routes/docs.refund-system-G5VKUCW7.js", imports: ["/build/_shared/chunk-5TRFQBKG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/login": { id: "routes/login", parentId: "root", path: "login", index: void 0, caseSensitive: void 0, module: "/build/routes/login-6SOWDWM4.js", imports: ["/build/_shared/chunk-23VXHKGP.js", "/build/_shared/chunk-HL7JUMQL.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/logout": { id: "routes/logout", parentId: "root", path: "logout", index: void 0, caseSensitive: void 0, module: "/build/routes/logout-5YZOOWKM.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/posts.$postId": { id: "routes/posts.$postId", parentId: "root", path: "posts/:postId", index: void 0, caseSensitive: void 0, module: "/build/routes/posts.$postId-S3DFTQ7P.js", imports: ["/build/_shared/chunk-54UN6YQK.js", "/build/_shared/chunk-SICW524A.js", "/build/_shared/chunk-FUZFIQN5.js", "/build/_shared/chunk-2YZ7TZSG.js", "/build/_shared/chunk-FGS6CPL7.js", "/build/_shared/chunk-GW7FZVM5.js", "/build/_shared/chunk-DGXI5RJE.js", "/build/_shared/chunk-RM73K6RH.js", "/build/_shared/chunk-TV6J5LVP.js", "/build/_shared/chunk-F7QMDYXS.js", "/build/_shared/chunk-A6ZVAP33.js", "/build/_shared/chunk-KOU7KXJE.js", "/build/_shared/chunk-ZVDYBXYH.js", "/build/_shared/chunk-NWTBI763.js", "/build/_shared/chunk-RV3KCD2Q.js", "/build/_shared/chunk-FQTK4I2O.js", "/build/_shared/chunk-NCPUIDGO.js", "/build/_shared/chunk-EUY7HEKH.js", "/build/_shared/chunk-JVOZNRBH.js", "/build/_shared/chunk-XHVR4ZVO.js", "/build/_shared/chunk-G74JO6TW.js", "/build/_shared/chunk-OJWRQYFE.js", "/build/_shared/chunk-P6R5TE4B.js", "/build/_shared/chunk-3QEU627O.js", "/build/_shared/chunk-EMUF5WYA.js", "/build/_shared/chunk-MUCI2AX4.js", "/build/_shared/chunk-3SZQ2EU6.js", "/build/_shared/chunk-EJUGCY4O.js", "/build/_shared/chunk-RPN7754G.js", "/build/_shared/chunk-GE3LEUT5.js", "/build/_shared/chunk-3MPNIHC6.js", "/build/_shared/chunk-QUKSBBKR.js", "/build/_shared/chunk-Y56G7LIZ.js", "/build/_shared/chunk-W2BATQOT.js", "/build/_shared/chunk-4T2T64QM.js", "/build/_shared/chunk-D2YWGCXL.js", "/build/_shared/chunk-T6J2XV4P.js", "/build/_shared/chunk-V6GYY67B.js", "/build/_shared/chunk-VILKH7TY.js", "/build/_shared/chunk-RR4NJ5KE.js", "/build/_shared/chunk-6HSG7XTY.js", "/build/_shared/chunk-XYUYOA7A.js", "/build/_shared/chunk-NCEHAU4L.js", "/build/_shared/chunk-Z7YULZIH.js", "/build/_shared/chunk-YQXBHU4J.js", "/build/_shared/chunk-MR4RNV3R.js", "/build/_shared/chunk-GI2N4KBY.js", "/build/_shared/chunk-SZPWMCO5.js", "/build/_shared/chunk-2GDX3YAH.js", "/build/_shared/chunk-HTUCWV64.js", "/build/_shared/chunk-TCEARVXY.js", "/build/_shared/chunk-Z6AXIWND.js", "/build/_shared/chunk-LMCMPUVQ.js", "/build/_shared/chunk-5FXFPOX2.js", "/build/_shared/chunk-WYP3H2FD.js", "/build/_shared/chunk-774OMCZR.js", "/build/_shared/chunk-NBSC6XW7.js", "/build/_shared/chunk-CQ24AUPW.js", "/build/_shared/chunk-5ZSDEH4N.js", "/build/_shared/chunk-GMGJK3MR.js", "/build/_shared/chunk-4UOIOKXZ.js", "/build/_shared/chunk-E3BJX6GI.js", "/build/_shared/chunk-GGNTVNB7.js", "/build/_shared/chunk-I65YJ4QN.js", "/build/_shared/chunk-7GUBRWIJ.js", "/build/_shared/chunk-4WS66JBF.js", "/build/_shared/chunk-BFXNYLGG.js", "/build/_shared/chunk-TN2225VX.js", "/build/_shared/chunk-7ME3AMXU.js", "/build/_shared/chunk-3EFZLDUL.js", "/build/_shared/chunk-ZXNGIWOR.js", "/build/_shared/chunk-PJUNGHBU.js", "/build/_shared/chunk-F6SN3YQX.js", "/build/_shared/chunk-JJNOZJPV.js", "/build/_shared/chunk-SUP4S7DH.js", "/build/_shared/chunk-7QV7I6DD.js", "/build/_shared/chunk-JRSTKQLZ.js", "/build/_shared/chunk-6XRRSE7J.js", "/build/_shared/chunk-QED6EHTL.js", "/build/_shared/chunk-OOQIBJPY.js", "/build/_shared/chunk-LGU53J7E.js", "/build/_shared/chunk-JS7RKSJJ.js", "/build/_shared/chunk-TCN7IX6E.js", "/build/_shared/chunk-E4HQ5DYO.js", "/build/_shared/chunk-KXPPKHDA.js", "/build/_shared/chunk-J34RT64S.js", "/build/_shared/chunk-27UCNQHB.js", "/build/_shared/chunk-NIWVQP4L.js", "/build/_shared/chunk-2MQBF6KW.js", "/build/_shared/chunk-CVJWMYET.js", "/build/_shared/chunk-GKZPOANK.js", "/build/_shared/chunk-X4BBBUCM.js", "/build/_shared/chunk-YQ6A7ZUM.js", "/build/_shared/chunk-6UXMWLTK.js", "/build/_shared/chunk-CQR4IMFE.js", "/build/_shared/chunk-BDU2ZUML.js", "/build/_shared/chunk-G7YRGAP3.js", "/build/_shared/chunk-NQKFGVLM.js", "/build/_shared/chunk-I3D7JRIP.js", "/build/_shared/chunk-M2OZFYN7.js", "/build/_shared/chunk-QTNSPCLO.js", "/build/_shared/chunk-742BHR2L.js", "/build/_shared/chunk-CV5S5VRI.js", "/build/_shared/chunk-HHCX4CCT.js", "/build/_shared/chunk-25YI2XQS.js", "/build/_shared/chunk-BJDBBCOY.js", "/build/_shared/chunk-BHVITGKY.js", "/build/_shared/chunk-OYBZT2QD.js", "/build/_shared/chunk-ZDG2VPXG.js", "/build/_shared/chunk-AVJ366R7.js", "/build/_shared/chunk-72ZIPJCL.js", "/build/_shared/chunk-ZTPUC4LI.js", "/build/_shared/chunk-CHSUQ4ND.js", "/build/_shared/chunk-NAH44UAY.js", "/build/_shared/chunk-EHANKJMY.js", "/build/_shared/chunk-UMTVKZO5.js", "/build/_shared/chunk-4MH22FYW.js", "/build/_shared/chunk-FFQ2WFQV.js", "/build/_shared/chunk-YL6HEDYI.js", "/build/_shared/chunk-TZ3SBXU3.js", "/build/_shared/chunk-OBW6ELRI.js", "/build/_shared/chunk-CVVYYINL.js", "/build/_shared/chunk-STSVAWTV.js", "/build/_shared/chunk-TDCS52LA.js", "/build/_shared/chunk-GPD2HVBH.js", "/build/_shared/chunk-7VOVYIOR.js", "/build/_shared/chunk-GG2DVLU7.js", "/build/_shared/chunk-NKZ7WG2F.js", "/build/_shared/chunk-Q644C3ZM.js", "/build/_shared/chunk-R5YHXAJB.js", "/build/_shared/chunk-J77YZUUH.js", "/build/_shared/chunk-FQGFV7S6.js", "/build/_shared/chunk-MLRMLC5W.js", "/build/_shared/chunk-PFX42ENT.js", "/build/_shared/chunk-4MTAX3B7.js", "/build/_shared/chunk-GRACLWR7.js", "/build/_shared/chunk-IN5QRP4J.js", "/build/_shared/chunk-4OI3ONMS.js", "/build/_shared/chunk-HUM7GDMQ.js", "/build/_shared/chunk-EVMRHFSA.js", "/build/_shared/chunk-55J7H5PV.js", "/build/_shared/chunk-5BABC63H.js", "/build/_shared/chunk-EJA7S7FL.js", "/build/_shared/chunk-4F3DN6C2.js", "/build/_shared/chunk-ORHVMQEZ.js", "/build/_shared/chunk-QMIMEQQ7.js", "/build/_shared/chunk-QKHBSJO6.js", "/build/_shared/chunk-5RGFQ75H.js", "/build/_shared/chunk-BZRQRNKW.js", "/build/_shared/chunk-7VE54VCW.js", "/build/_shared/chunk-FLH4NYKM.js", "/build/_shared/chunk-BKYH4IG5.js", "/build/_shared/chunk-CNX46JYZ.js", "/build/_shared/chunk-WZFBIFLU.js", "/build/_shared/chunk-AGFX4QKM.js", "/build/_shared/chunk-NXFCNEHI.js", "/build/_shared/chunk-UCWRDS43.js", "/build/_shared/chunk-JYJVETIU.js", "/build/_shared/chunk-55CWZDEP.js", "/build/_shared/chunk-RNDXAVPV.js", "/build/_shared/chunk-TAMVGRME.js", "/build/_shared/chunk-BVGME64Y.js", "/build/_shared/chunk-SVPVNNLM.js", "/build/_shared/chunk-NEW3EYLA.js", "/build/_shared/chunk-JDD25MLV.js", "/build/_shared/chunk-EI5U3EWW.js", "/build/_shared/chunk-BCTKXJNK.js", "/build/_shared/chunk-NADSVA3P.js", "/build/_shared/chunk-D4C5GOMX.js", "/build/_shared/chunk-TB4MFSJU.js", "/build/_shared/chunk-2UE62OQV.js", "/build/_shared/chunk-QK7F7LV6.js", "/build/_shared/chunk-YOPGZ7DT.js", "/build/_shared/chunk-AWNESVSD.js", "/build/_shared/chunk-FHJKORSF.js", "/build/_shared/chunk-KTKIUP2N.js", "/build/_shared/chunk-FY2MEKS6.js", "/build/_shared/chunk-P3SQ7ISC.js", "/build/_shared/chunk-LDI56K2W.js", "/build/_shared/chunk-7VRO3RGC.js", "/build/_shared/chunk-YE6ZZKFE.js", "/build/_shared/chunk-5CHFHD27.js", "/build/_shared/chunk-EI4MJFEB.js", "/build/_shared/chunk-Y5OC5LXJ.js", "/build/_shared/chunk-QOFGSUOJ.js", "/build/_shared/chunk-ROD7YPKB.js", "/build/_shared/chunk-GJDLOPOZ.js", "/build/_shared/chunk-MDQESUKV.js", "/build/_shared/chunk-B27PKJLJ.js", "/build/_shared/chunk-SZLALUS7.js", "/build/_shared/chunk-3W3CG4HI.js", "/build/_shared/chunk-ILS2U7FD.js", "/build/_shared/chunk-PG45EBB7.js", "/build/_shared/chunk-NWWDDSG6.js", "/build/_shared/chunk-XSUTIV3F.js", "/build/_shared/chunk-4U4XFUZE.js", "/build/_shared/chunk-IEOKYWPS.js", "/build/_shared/chunk-WPQOHXYU.js", "/build/_shared/chunk-2KPSQ4JI.js", "/build/_shared/chunk-MCTX47TO.js", "/build/_shared/chunk-SYHMWHDH.js", "/build/_shared/chunk-UCSE3GNE.js", "/build/_shared/chunk-HRWYEMU3.js", "/build/_shared/chunk-H326XFSM.js", "/build/_shared/chunk-ZS7IAGLI.js", "/build/_shared/chunk-ABOB5II4.js", "/build/_shared/chunk-R7RQKAMU.js", "/build/_shared/chunk-VEOB2ARX.js", "/build/_shared/chunk-PMMWWJWD.js", "/build/_shared/chunk-SI3VXBJI.js", "/build/_shared/chunk-2MJQ2YTJ.js", "/build/_shared/chunk-DNGVS2K7.js", "/build/_shared/chunk-YF5VVCNL.js", "/build/_shared/chunk-YFHAFOGR.js", "/build/_shared/chunk-2XFGHJI5.js", "/build/_shared/chunk-KNBS4RWG.js", "/build/_shared/chunk-ZEL6RK6O.js", "/build/_shared/chunk-JHVZS4LF.js", "/build/_shared/chunk-MGWDYMTH.js", "/build/_shared/chunk-X3WUQR32.js", "/build/_shared/chunk-LO6GUOQO.js", "/build/_shared/chunk-RAV4OOIY.js", "/build/_shared/chunk-VRFV7LT2.js", "/build/_shared/chunk-ZKQKTAHO.js", "/build/_shared/chunk-3ZVNNSWE.js", "/build/_shared/chunk-BKZNFNZU.js", "/build/_shared/chunk-HB7O5XHF.js", "/build/_shared/chunk-QSDWSUKD.js", "/build/_shared/chunk-J76ULVJH.js", "/build/_shared/chunk-VLV5YAZ2.js", "/build/_shared/chunk-W3ECI43U.js", "/build/_shared/chunk-EX7JJ6Y4.js", "/build/_shared/chunk-ULVG3JS3.js", "/build/_shared/chunk-KSHVLVS4.js", "/build/_shared/chunk-E7HOBNAQ.js", "/build/_shared/chunk-PCFBRKVM.js", "/build/_shared/chunk-T43YGBBD.js", "/build/_shared/chunk-IGBJM24X.js", "/build/_shared/chunk-5FZDWD2A.js", "/build/_shared/chunk-VYOFQU6T.js", "/build/_shared/chunk-BFHEGUBO.js", "/build/_shared/chunk-LPB7OZKI.js", "/build/_shared/chunk-R4ZYW5HH.js", "/build/_shared/chunk-L5FZOWGA.js", "/build/_shared/chunk-BDHYV3IN.js", "/build/_shared/chunk-EXD2J3LC.js", "/build/_shared/chunk-O6QJCV2C.js", "/build/_shared/chunk-FDTMDRM4.js", "/build/_shared/chunk-XWZVQ2U2.js", "/build/_shared/chunk-IMMG5R2N.js", "/build/_shared/chunk-35PTE5Y2.js", "/build/_shared/chunk-C56HP5U3.js", "/build/_shared/chunk-2NCJ2OMO.js", "/build/_shared/chunk-WCUTGYEN.js", "/build/_shared/chunk-3I5JAIUQ.js", "/build/_shared/chunk-QXSEZ7RM.js", "/build/_shared/chunk-LWWGEE4G.js", "/build/_shared/chunk-FD65PSGW.js", "/build/_shared/chunk-T33PLEBE.js", "/build/_shared/chunk-5W2S54DT.js", "/build/_shared/chunk-KQFSTETP.js", "/build/_shared/chunk-JJNCUEZF.js", "/build/_shared/chunk-KGF6T672.js", "/build/_shared/chunk-SB57TS6O.js", "/build/_shared/chunk-E2JX3IFB.js", "/build/_shared/chunk-23K75456.js", "/build/_shared/chunk-CTO7HTKE.js", "/build/_shared/chunk-R57USJQ5.js", "/build/_shared/chunk-AVPKQCTS.js", "/build/_shared/chunk-5XV75YAP.js", "/build/_shared/chunk-YRSNOJZW.js", "/build/_shared/chunk-S4LAUDDS.js", "/build/_shared/chunk-JVMWRVME.js", "/build/_shared/chunk-GN2HRNWN.js", "/build/_shared/chunk-V2JHYFQI.js", "/build/_shared/chunk-27E6SFQY.js", "/build/_shared/chunk-IN6KKION.js", "/build/_shared/chunk-TXO2PBRC.js", "/build/_shared/chunk-PIOHKUGS.js", "/build/_shared/chunk-E7WN742L.js", "/build/_shared/chunk-5FQ6WLFO.js", "/build/_shared/chunk-HL7JUMQL.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !0 }, "routes/posts.create": { id: "routes/posts.create", parentId: "root", path: "posts/create", index: void 0, caseSensitive: void 0, module: "/build/routes/posts.create-7MIRGKNQ.js", imports: ["/build/_shared/chunk-L6YYDTYS.js", "/build/_shared/chunk-XAB7PCAA.js", "/build/_shared/chunk-23VXHKGP.js", "/build/_shared/chunk-HL7JUMQL.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !0 }, "routes/privacy": { id: "routes/privacy", parentId: "root", path: "privacy", index: void 0, caseSensitive: void 0, module: "/build/routes/privacy-T56D3NHP.js", imports: ["/build/_shared/chunk-23VXHKGP.js", "/build/_shared/chunk-HL7JUMQL.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/profile": { id: "routes/profile", parentId: "root", path: "profile", index: void 0, caseSensitive: void 0, module: "/build/routes/profile-5DMXK5WP.js", imports: ["/build/_shared/chunk-GU4OLFEG.js", "/build/_shared/chunk-VI4IRXJP.js", "/build/_shared/chunk-5QSLTVAY.js", "/build/_shared/chunk-5FQ6WLFO.js", "/build/_shared/chunk-23VXHKGP.js", "/build/_shared/chunk-HL7JUMQL.js", "/build/_shared/chunk-3N6QMJTG.js", "/build/_shared/chunk-SADEDPWE.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/profile.activity": { id: "routes/profile.activity", parentId: "routes/profile", path: "activity", index: void 0, caseSensitive: void 0, module: "/build/routes/profile.activity-F7CRREBB.js", imports: ["/build/_shared/chunk-MQYEVBU3.js", "/build/_shared/chunk-5TRFQBKG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/refund-requests": { id: "routes/refund-requests", parentId: "root", path: "refund-requests", index: void 0, caseSensitive: void 0, module: "/build/routes/refund-requests-NL63JMZ3.js", imports: ["/build/_shared/chunk-23VXHKGP.js", "/build/_shared/chunk-HL7JUMQL.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/settings": { id: "routes/settings", parentId: "root", path: "settings", index: void 0, caseSensitive: void 0, module: "/build/routes/settings-EECMHM3H.js", imports: ["/build/_shared/chunk-5QSLTVAY.js", "/build/_shared/chunk-23VXHKGP.js", "/build/_shared/chunk-HL7JUMQL.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/signup": { id: "routes/signup", parentId: "root", path: "signup", index: void 0, caseSensitive: void 0, module: "/build/routes/signup-RUZ2DXUU.js", imports: ["/build/_shared/chunk-23VXHKGP.js", "/build/_shared/chunk-HL7JUMQL.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/terms": { id: "routes/terms", parentId: "root", path: "terms", index: void 0, caseSensitive: void 0, module: "/build/routes/terms-OAANBNC2.js", imports: ["/build/_shared/chunk-23VXHKGP.js", "/build/_shared/chunk-HL7JUMQL.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/transactions": { id: "routes/transactions", parentId: "root", path: "transactions", index: void 0, caseSensitive: void 0, module: "/build/routes/transactions-4X7HER3K.js", imports: ["/build/_shared/chunk-23VXHKGP.js", "/build/_shared/chunk-HL7JUMQL.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/wallet": { id: "routes/wallet", parentId: "root", path: "wallet", index: void 0, caseSensitive: void 0, module: "/build/routes/wallet-IDMLR6YG.js", imports: ["/build/_shared/chunk-L6YYDTYS.js", "/build/_shared/chunk-XAB7PCAA.js", "/build/_shared/chunk-23VXHKGP.js", "/build/_shared/chunk-HL7JUMQL.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !0 } }, version: "bc338152", hmr: void 0, url: "/build/manifest-BC338152.js" };
+var assets_manifest_default = { entry: { module: "/build/entry.client-GWH4SNRQ.js", imports: ["/build/_shared/chunk-NE4BQMTE.js", "/build/_shared/chunk-M52IJKKB.js", "/build/_shared/chunk-7ZSQYYGQ.js", "/build/_shared/chunk-G5WX4PPA.js"] }, routes: { root: { id: "root", parentId: void 0, path: "", index: void 0, caseSensitive: void 0, module: "/build/root-HTAYJXMP.js", imports: ["/build/_shared/chunk-6S2QUAFR.js", "/build/_shared/chunk-MQYEVBU3.js", "/build/_shared/chunk-5TRFQBKG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !0 }, "routes/$username": { id: "routes/$username", parentId: "root", path: ":username", index: void 0, caseSensitive: void 0, module: "/build/routes/$username-VN5M7RSP.js", imports: ["/build/_shared/chunk-PC65EDHQ.js", "/build/_shared/chunk-VI4IRXJP.js", "/build/_shared/chunk-DGIOIJIX.js", "/build/_shared/chunk-GE4ZJASY.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/$username.posts": { id: "routes/$username.posts", parentId: "routes/$username", path: "posts", index: void 0, caseSensitive: void 0, module: "/build/routes/$username.posts-CGN6HCUM.js", imports: ["/build/_shared/chunk-MQYEVBU3.js", "/build/_shared/chunk-5TRFQBKG.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/_index": { id: "routes/_index", parentId: "root", path: void 0, index: !0, caseSensitive: void 0, module: "/build/routes/_index-FSXDSYOK.js", imports: void 0, hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.answers.$answerId.vote": { id: "routes/api.answers.$answerId.vote", parentId: "root", path: "api/answers/:answerId/vote", index: void 0, caseSensitive: void 0, module: "/build/routes/api.answers.$answerId.vote-UW54CVND.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.bookmarks-status": { id: "routes/api.bookmarks-status", parentId: "root", path: "api/bookmarks-status", index: void 0, caseSensitive: void 0, module: "/build/routes/api.bookmarks-status-SUQV6H62.js", imports: void 0, hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.bookmarks-toggle": { id: "routes/api.bookmarks-toggle", parentId: "root", path: "api/bookmarks-toggle", index: void 0, caseSensitive: void 0, module: "/build/routes/api.bookmarks-toggle-Z6Y2EOUA.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.bounty.claim": { id: "routes/api.bounty.claim", parentId: "root", path: "api/bounty/claim", index: void 0, caseSensitive: void 0, module: "/build/routes/api.bounty.claim-4ZEDX5T5.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.comments.$commentId.vote": { id: "routes/api.comments.$commentId.vote", parentId: "root", path: "api/comments/:commentId/vote", index: void 0, caseSensitive: void 0, module: "/build/routes/api.comments.$commentId.vote-CZSD4KS5.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.integrity.rate": { id: "routes/api.integrity.rate", parentId: "root", path: "api/integrity/rate", index: void 0, caseSensitive: void 0, module: "/build/routes/api.integrity.rate-IMSSEOHP.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.integrity.report": { id: "routes/api.integrity.report", parentId: "root", path: "api/integrity/report", index: void 0, caseSensitive: void 0, module: "/build/routes/api.integrity.report-RSA6WKMA.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.posts.$postId": { id: "routes/api.posts.$postId", parentId: "root", path: "api/posts/:postId", index: void 0, caseSensitive: void 0, module: "/build/routes/api.posts.$postId-YGBZFLPW.js", imports: void 0, hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.posts.$postId.vote": { id: "routes/api.posts.$postId.vote", parentId: "routes/api.posts.$postId", path: "vote", index: void 0, caseSensitive: void 0, module: "/build/routes/api.posts.$postId.vote-NBKAYBLE.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.posts.delete": { id: "routes/api.posts.delete", parentId: "root", path: "api/posts/delete", index: void 0, caseSensitive: void 0, module: "/build/routes/api.posts.delete-FKKMFTNB.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.privacy.pdf": { id: "routes/api.privacy.pdf", parentId: "root", path: "api/privacy/pdf", index: void 0, caseSensitive: void 0, module: "/build/routes/api.privacy.pdf-KQJ6I5V7.js", imports: void 0, hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.profile.picture": { id: "routes/api.profile.picture", parentId: "root", path: "api/profile/picture", index: void 0, caseSensitive: void 0, module: "/build/routes/api.profile.picture-YAPKYI3V.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.refund.request": { id: "routes/api.refund.request", parentId: "root", path: "api/refund/request", index: void 0, caseSensitive: void 0, module: "/build/routes/api.refund.request-RUBNJAZZ.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.refund.requests": { id: "routes/api.refund.requests", parentId: "root", path: "api/refund/requests", index: void 0, caseSensitive: void 0, module: "/build/routes/api.refund.requests-O5BE6NVO.js", imports: void 0, hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.refund.vote": { id: "routes/api.refund.vote", parentId: "root", path: "api/refund/vote", index: void 0, caseSensitive: void 0, module: "/build/routes/api.refund.vote-BVIXA4VT.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.terms.pdf": { id: "routes/api.terms.pdf", parentId: "root", path: "api/terms/pdf", index: void 0, caseSensitive: void 0, module: "/build/routes/api.terms.pdf-HIAO46YQ.js", imports: void 0, hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.wallet.cancel-transaction": { id: "routes/api.wallet.cancel-transaction", parentId: "root", path: "api/wallet/cancel-transaction", index: void 0, caseSensitive: void 0, module: "/build/routes/api.wallet.cancel-transaction-QSFVUSIE.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.wallet.confirm-deposit": { id: "routes/api.wallet.confirm-deposit", parentId: "root", path: "api/wallet/confirm-deposit", index: void 0, caseSensitive: void 0, module: "/build/routes/api.wallet.confirm-deposit-MOIF5EVU.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.wallet.deposit": { id: "routes/api.wallet.deposit", parentId: "root", path: "api/wallet/deposit", index: void 0, caseSensitive: void 0, module: "/build/routes/api.wallet.deposit-5FTD6S54.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.wallet.withdraw": { id: "routes/api.wallet.withdraw", parentId: "root", path: "api/wallet/withdraw", index: void 0, caseSensitive: void 0, module: "/build/routes/api.wallet.withdraw-DZQ53G34.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/community": { id: "routes/community", parentId: "root", path: "community", index: void 0, caseSensitive: void 0, module: "/build/routes/community-666LOC7C.js", imports: ["/build/_shared/chunk-VI4IRXJP.js", "/build/_shared/chunk-QJHMVXXJ.js", "/build/_shared/chunk-DGIOIJIX.js", "/build/_shared/chunk-NTHRJKQW.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/default-avatar.png": { id: "routes/default-avatar.png", parentId: "root", path: "default-avatar/png", index: void 0, caseSensitive: void 0, module: "/build/routes/default-avatar.png-AHJ7WDHH.js", imports: void 0, hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/docs": { id: "routes/docs", parentId: "root", path: "docs", index: void 0, caseSensitive: void 0, module: "/build/routes/docs-O7EXHWWY.js", imports: ["/build/_shared/chunk-NTHRJKQW.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/docs.legal": { id: "routes/docs.legal", parentId: "routes/docs", path: "legal", index: void 0, caseSensitive: void 0, module: "/build/routes/docs.legal-YGONMULE.js", imports: ["/build/_shared/chunk-5TRFQBKG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/docs.platform": { id: "routes/docs.platform", parentId: "routes/docs", path: "platform", index: void 0, caseSensitive: void 0, module: "/build/routes/docs.platform-C3ALHO6X.js", imports: ["/build/_shared/chunk-5TRFQBKG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/docs.refund-system": { id: "routes/docs.refund-system", parentId: "routes/docs", path: "refund-system", index: void 0, caseSensitive: void 0, module: "/build/routes/docs.refund-system-CDPZHHG3.js", imports: ["/build/_shared/chunk-5TRFQBKG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/login": { id: "routes/login", parentId: "root", path: "login", index: void 0, caseSensitive: void 0, module: "/build/routes/login-HIVH4L2B.js", imports: ["/build/_shared/chunk-NTHRJKQW.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/logout": { id: "routes/logout", parentId: "root", path: "logout", index: void 0, caseSensitive: void 0, module: "/build/routes/logout-5YZOOWKM.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/posts.$postId": { id: "routes/posts.$postId", parentId: "root", path: "posts/:postId", index: void 0, caseSensitive: void 0, module: "/build/routes/posts.$postId-TDJKXYQ7.js", imports: ["/build/_shared/chunk-54UN6YQK.js", "/build/_shared/chunk-SICW524A.js", "/build/_shared/chunk-FUZFIQN5.js", "/build/_shared/chunk-2YZ7TZSG.js", "/build/_shared/chunk-FGS6CPL7.js", "/build/_shared/chunk-GW7FZVM5.js", "/build/_shared/chunk-DGXI5RJE.js", "/build/_shared/chunk-RM73K6RH.js", "/build/_shared/chunk-TV6J5LVP.js", "/build/_shared/chunk-F7QMDYXS.js", "/build/_shared/chunk-A6ZVAP33.js", "/build/_shared/chunk-KOU7KXJE.js", "/build/_shared/chunk-ZVDYBXYH.js", "/build/_shared/chunk-NWTBI763.js", "/build/_shared/chunk-RV3KCD2Q.js", "/build/_shared/chunk-FQTK4I2O.js", "/build/_shared/chunk-NCPUIDGO.js", "/build/_shared/chunk-EUY7HEKH.js", "/build/_shared/chunk-JVOZNRBH.js", "/build/_shared/chunk-XHVR4ZVO.js", "/build/_shared/chunk-G74JO6TW.js", "/build/_shared/chunk-OJWRQYFE.js", "/build/_shared/chunk-P6R5TE4B.js", "/build/_shared/chunk-3QEU627O.js", "/build/_shared/chunk-EMUF5WYA.js", "/build/_shared/chunk-MUCI2AX4.js", "/build/_shared/chunk-3SZQ2EU6.js", "/build/_shared/chunk-EJUGCY4O.js", "/build/_shared/chunk-RPN7754G.js", "/build/_shared/chunk-GE3LEUT5.js", "/build/_shared/chunk-3MPNIHC6.js", "/build/_shared/chunk-QUKSBBKR.js", "/build/_shared/chunk-Y56G7LIZ.js", "/build/_shared/chunk-W2BATQOT.js", "/build/_shared/chunk-4T2T64QM.js", "/build/_shared/chunk-D2YWGCXL.js", "/build/_shared/chunk-T6J2XV4P.js", "/build/_shared/chunk-V6GYY67B.js", "/build/_shared/chunk-VILKH7TY.js", "/build/_shared/chunk-RR4NJ5KE.js", "/build/_shared/chunk-6HSG7XTY.js", "/build/_shared/chunk-XYUYOA7A.js", "/build/_shared/chunk-NCEHAU4L.js", "/build/_shared/chunk-Z7YULZIH.js", "/build/_shared/chunk-YQXBHU4J.js", "/build/_shared/chunk-MR4RNV3R.js", "/build/_shared/chunk-GI2N4KBY.js", "/build/_shared/chunk-SZPWMCO5.js", "/build/_shared/chunk-2GDX3YAH.js", "/build/_shared/chunk-HTUCWV64.js", "/build/_shared/chunk-TCEARVXY.js", "/build/_shared/chunk-Z6AXIWND.js", "/build/_shared/chunk-LMCMPUVQ.js", "/build/_shared/chunk-5FXFPOX2.js", "/build/_shared/chunk-WYP3H2FD.js", "/build/_shared/chunk-774OMCZR.js", "/build/_shared/chunk-NBSC6XW7.js", "/build/_shared/chunk-CQ24AUPW.js", "/build/_shared/chunk-5ZSDEH4N.js", "/build/_shared/chunk-GMGJK3MR.js", "/build/_shared/chunk-4UOIOKXZ.js", "/build/_shared/chunk-E3BJX6GI.js", "/build/_shared/chunk-GGNTVNB7.js", "/build/_shared/chunk-I65YJ4QN.js", "/build/_shared/chunk-7GUBRWIJ.js", "/build/_shared/chunk-4WS66JBF.js", "/build/_shared/chunk-BFXNYLGG.js", "/build/_shared/chunk-TN2225VX.js", "/build/_shared/chunk-7ME3AMXU.js", "/build/_shared/chunk-3EFZLDUL.js", "/build/_shared/chunk-ZXNGIWOR.js", "/build/_shared/chunk-PJUNGHBU.js", "/build/_shared/chunk-F6SN3YQX.js", "/build/_shared/chunk-JJNOZJPV.js", "/build/_shared/chunk-SUP4S7DH.js", "/build/_shared/chunk-7QV7I6DD.js", "/build/_shared/chunk-JRSTKQLZ.js", "/build/_shared/chunk-6XRRSE7J.js", "/build/_shared/chunk-QED6EHTL.js", "/build/_shared/chunk-OOQIBJPY.js", "/build/_shared/chunk-LGU53J7E.js", "/build/_shared/chunk-JS7RKSJJ.js", "/build/_shared/chunk-TCN7IX6E.js", "/build/_shared/chunk-E4HQ5DYO.js", "/build/_shared/chunk-KXPPKHDA.js", "/build/_shared/chunk-J34RT64S.js", "/build/_shared/chunk-27UCNQHB.js", "/build/_shared/chunk-NIWVQP4L.js", "/build/_shared/chunk-2MQBF6KW.js", "/build/_shared/chunk-CVJWMYET.js", "/build/_shared/chunk-GKZPOANK.js", "/build/_shared/chunk-X4BBBUCM.js", "/build/_shared/chunk-YQ6A7ZUM.js", "/build/_shared/chunk-6UXMWLTK.js", "/build/_shared/chunk-CQR4IMFE.js", "/build/_shared/chunk-BDU2ZUML.js", "/build/_shared/chunk-G7YRGAP3.js", "/build/_shared/chunk-NQKFGVLM.js", "/build/_shared/chunk-I3D7JRIP.js", "/build/_shared/chunk-M2OZFYN7.js", "/build/_shared/chunk-QTNSPCLO.js", "/build/_shared/chunk-742BHR2L.js", "/build/_shared/chunk-CV5S5VRI.js", "/build/_shared/chunk-HHCX4CCT.js", "/build/_shared/chunk-25YI2XQS.js", "/build/_shared/chunk-BJDBBCOY.js", "/build/_shared/chunk-BHVITGKY.js", "/build/_shared/chunk-OYBZT2QD.js", "/build/_shared/chunk-ZDG2VPXG.js", "/build/_shared/chunk-AVJ366R7.js", "/build/_shared/chunk-72ZIPJCL.js", "/build/_shared/chunk-ZTPUC4LI.js", "/build/_shared/chunk-CHSUQ4ND.js", "/build/_shared/chunk-NAH44UAY.js", "/build/_shared/chunk-EHANKJMY.js", "/build/_shared/chunk-UMTVKZO5.js", "/build/_shared/chunk-4MH22FYW.js", "/build/_shared/chunk-FFQ2WFQV.js", "/build/_shared/chunk-YL6HEDYI.js", "/build/_shared/chunk-TZ3SBXU3.js", "/build/_shared/chunk-OBW6ELRI.js", "/build/_shared/chunk-CVVYYINL.js", "/build/_shared/chunk-STSVAWTV.js", "/build/_shared/chunk-TDCS52LA.js", "/build/_shared/chunk-GPD2HVBH.js", "/build/_shared/chunk-7VOVYIOR.js", "/build/_shared/chunk-GG2DVLU7.js", "/build/_shared/chunk-NKZ7WG2F.js", "/build/_shared/chunk-Q644C3ZM.js", "/build/_shared/chunk-R5YHXAJB.js", "/build/_shared/chunk-J77YZUUH.js", "/build/_shared/chunk-FQGFV7S6.js", "/build/_shared/chunk-MLRMLC5W.js", "/build/_shared/chunk-PFX42ENT.js", "/build/_shared/chunk-4MTAX3B7.js", "/build/_shared/chunk-GRACLWR7.js", "/build/_shared/chunk-IN5QRP4J.js", "/build/_shared/chunk-4OI3ONMS.js", "/build/_shared/chunk-HUM7GDMQ.js", "/build/_shared/chunk-EVMRHFSA.js", "/build/_shared/chunk-55J7H5PV.js", "/build/_shared/chunk-5BABC63H.js", "/build/_shared/chunk-EJA7S7FL.js", "/build/_shared/chunk-4F3DN6C2.js", "/build/_shared/chunk-ORHVMQEZ.js", "/build/_shared/chunk-QMIMEQQ7.js", "/build/_shared/chunk-QKHBSJO6.js", "/build/_shared/chunk-5RGFQ75H.js", "/build/_shared/chunk-BZRQRNKW.js", "/build/_shared/chunk-7VE54VCW.js", "/build/_shared/chunk-FLH4NYKM.js", "/build/_shared/chunk-BKYH4IG5.js", "/build/_shared/chunk-CNX46JYZ.js", "/build/_shared/chunk-WZFBIFLU.js", "/build/_shared/chunk-AGFX4QKM.js", "/build/_shared/chunk-NXFCNEHI.js", "/build/_shared/chunk-UCWRDS43.js", "/build/_shared/chunk-JYJVETIU.js", "/build/_shared/chunk-55CWZDEP.js", "/build/_shared/chunk-RNDXAVPV.js", "/build/_shared/chunk-TAMVGRME.js", "/build/_shared/chunk-BVGME64Y.js", "/build/_shared/chunk-SVPVNNLM.js", "/build/_shared/chunk-NEW3EYLA.js", "/build/_shared/chunk-JDD25MLV.js", "/build/_shared/chunk-EI5U3EWW.js", "/build/_shared/chunk-BCTKXJNK.js", "/build/_shared/chunk-NADSVA3P.js", "/build/_shared/chunk-D4C5GOMX.js", "/build/_shared/chunk-TB4MFSJU.js", "/build/_shared/chunk-2UE62OQV.js", "/build/_shared/chunk-QK7F7LV6.js", "/build/_shared/chunk-YOPGZ7DT.js", "/build/_shared/chunk-AWNESVSD.js", "/build/_shared/chunk-FHJKORSF.js", "/build/_shared/chunk-KTKIUP2N.js", "/build/_shared/chunk-FY2MEKS6.js", "/build/_shared/chunk-P3SQ7ISC.js", "/build/_shared/chunk-LDI56K2W.js", "/build/_shared/chunk-7VRO3RGC.js", "/build/_shared/chunk-YE6ZZKFE.js", "/build/_shared/chunk-5CHFHD27.js", "/build/_shared/chunk-EI4MJFEB.js", "/build/_shared/chunk-Y5OC5LXJ.js", "/build/_shared/chunk-QOFGSUOJ.js", "/build/_shared/chunk-ROD7YPKB.js", "/build/_shared/chunk-GJDLOPOZ.js", "/build/_shared/chunk-MDQESUKV.js", "/build/_shared/chunk-B27PKJLJ.js", "/build/_shared/chunk-SZLALUS7.js", "/build/_shared/chunk-3W3CG4HI.js", "/build/_shared/chunk-ILS2U7FD.js", "/build/_shared/chunk-PG45EBB7.js", "/build/_shared/chunk-NWWDDSG6.js", "/build/_shared/chunk-XSUTIV3F.js", "/build/_shared/chunk-4U4XFUZE.js", "/build/_shared/chunk-IEOKYWPS.js", "/build/_shared/chunk-WPQOHXYU.js", "/build/_shared/chunk-2KPSQ4JI.js", "/build/_shared/chunk-MCTX47TO.js", "/build/_shared/chunk-SYHMWHDH.js", "/build/_shared/chunk-UCSE3GNE.js", "/build/_shared/chunk-HRWYEMU3.js", "/build/_shared/chunk-H326XFSM.js", "/build/_shared/chunk-ZS7IAGLI.js", "/build/_shared/chunk-ABOB5II4.js", "/build/_shared/chunk-R7RQKAMU.js", "/build/_shared/chunk-VEOB2ARX.js", "/build/_shared/chunk-PMMWWJWD.js", "/build/_shared/chunk-SI3VXBJI.js", "/build/_shared/chunk-2MJQ2YTJ.js", "/build/_shared/chunk-DNGVS2K7.js", "/build/_shared/chunk-YF5VVCNL.js", "/build/_shared/chunk-YFHAFOGR.js", "/build/_shared/chunk-2XFGHJI5.js", "/build/_shared/chunk-KNBS4RWG.js", "/build/_shared/chunk-ZEL6RK6O.js", "/build/_shared/chunk-JHVZS4LF.js", "/build/_shared/chunk-MGWDYMTH.js", "/build/_shared/chunk-X3WUQR32.js", "/build/_shared/chunk-LO6GUOQO.js", "/build/_shared/chunk-RAV4OOIY.js", "/build/_shared/chunk-VRFV7LT2.js", "/build/_shared/chunk-ZKQKTAHO.js", "/build/_shared/chunk-3ZVNNSWE.js", "/build/_shared/chunk-BKZNFNZU.js", "/build/_shared/chunk-HB7O5XHF.js", "/build/_shared/chunk-QSDWSUKD.js", "/build/_shared/chunk-J76ULVJH.js", "/build/_shared/chunk-VLV5YAZ2.js", "/build/_shared/chunk-W3ECI43U.js", "/build/_shared/chunk-EX7JJ6Y4.js", "/build/_shared/chunk-ULVG3JS3.js", "/build/_shared/chunk-KSHVLVS4.js", "/build/_shared/chunk-E7HOBNAQ.js", "/build/_shared/chunk-PCFBRKVM.js", "/build/_shared/chunk-T43YGBBD.js", "/build/_shared/chunk-IGBJM24X.js", "/build/_shared/chunk-5FZDWD2A.js", "/build/_shared/chunk-VYOFQU6T.js", "/build/_shared/chunk-BFHEGUBO.js", "/build/_shared/chunk-LPB7OZKI.js", "/build/_shared/chunk-R4ZYW5HH.js", "/build/_shared/chunk-L5FZOWGA.js", "/build/_shared/chunk-BDHYV3IN.js", "/build/_shared/chunk-EXD2J3LC.js", "/build/_shared/chunk-O6QJCV2C.js", "/build/_shared/chunk-FDTMDRM4.js", "/build/_shared/chunk-XWZVQ2U2.js", "/build/_shared/chunk-IMMG5R2N.js", "/build/_shared/chunk-35PTE5Y2.js", "/build/_shared/chunk-C56HP5U3.js", "/build/_shared/chunk-2NCJ2OMO.js", "/build/_shared/chunk-WCUTGYEN.js", "/build/_shared/chunk-3I5JAIUQ.js", "/build/_shared/chunk-QXSEZ7RM.js", "/build/_shared/chunk-LWWGEE4G.js", "/build/_shared/chunk-FD65PSGW.js", "/build/_shared/chunk-T33PLEBE.js", "/build/_shared/chunk-5W2S54DT.js", "/build/_shared/chunk-KQFSTETP.js", "/build/_shared/chunk-JJNCUEZF.js", "/build/_shared/chunk-KGF6T672.js", "/build/_shared/chunk-SB57TS6O.js", "/build/_shared/chunk-E2JX3IFB.js", "/build/_shared/chunk-23K75456.js", "/build/_shared/chunk-CTO7HTKE.js", "/build/_shared/chunk-R57USJQ5.js", "/build/_shared/chunk-AVPKQCTS.js", "/build/_shared/chunk-5XV75YAP.js", "/build/_shared/chunk-YRSNOJZW.js", "/build/_shared/chunk-S4LAUDDS.js", "/build/_shared/chunk-JVMWRVME.js", "/build/_shared/chunk-GN2HRNWN.js", "/build/_shared/chunk-V2JHYFQI.js", "/build/_shared/chunk-27E6SFQY.js", "/build/_shared/chunk-IN6KKION.js", "/build/_shared/chunk-TXO2PBRC.js", "/build/_shared/chunk-PIOHKUGS.js", "/build/_shared/chunk-QJHMVXXJ.js", "/build/_shared/chunk-DGIOIJIX.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !0 }, "routes/posts.create": { id: "routes/posts.create", parentId: "root", path: "posts/create", index: void 0, caseSensitive: void 0, module: "/build/routes/posts.create-ZRWXMLEH.js", imports: ["/build/_shared/chunk-L6YYDTYS.js", "/build/_shared/chunk-XAB7PCAA.js", "/build/_shared/chunk-NTHRJKQW.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !0 }, "routes/privacy": { id: "routes/privacy", parentId: "root", path: "privacy", index: void 0, caseSensitive: void 0, module: "/build/routes/privacy-QJLP4XCL.js", imports: ["/build/_shared/chunk-NTHRJKQW.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/profile": { id: "routes/profile", parentId: "root", path: "profile", index: void 0, caseSensitive: void 0, module: "/build/routes/profile-AIJ6ECJZ.js", imports: ["/build/_shared/chunk-PC65EDHQ.js", "/build/_shared/chunk-VI4IRXJP.js", "/build/_shared/chunk-6NZWBXS4.js", "/build/_shared/chunk-DGIOIJIX.js", "/build/_shared/chunk-NTHRJKQW.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/profile.activity": { id: "routes/profile.activity", parentId: "routes/profile", path: "activity", index: void 0, caseSensitive: void 0, module: "/build/routes/profile.activity-PJZ4Q5DP.js", imports: ["/build/_shared/chunk-MQYEVBU3.js", "/build/_shared/chunk-5TRFQBKG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/refund-requests": { id: "routes/refund-requests", parentId: "root", path: "refund-requests", index: void 0, caseSensitive: void 0, module: "/build/routes/refund-requests-ZJBNIB5U.js", imports: ["/build/_shared/chunk-NTHRJKQW.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/settings": { id: "routes/settings", parentId: "root", path: "settings", index: void 0, caseSensitive: void 0, module: "/build/routes/settings-5SK5WBJM.js", imports: ["/build/_shared/chunk-6NZWBXS4.js", "/build/_shared/chunk-NTHRJKQW.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/signup": { id: "routes/signup", parentId: "root", path: "signup", index: void 0, caseSensitive: void 0, module: "/build/routes/signup-Q6DG73QS.js", imports: ["/build/_shared/chunk-NTHRJKQW.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/terms": { id: "routes/terms", parentId: "root", path: "terms", index: void 0, caseSensitive: void 0, module: "/build/routes/terms-C6NN623D.js", imports: ["/build/_shared/chunk-NTHRJKQW.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/transactions": { id: "routes/transactions", parentId: "root", path: "transactions", index: void 0, caseSensitive: void 0, module: "/build/routes/transactions-JPOT2WV4.js", imports: ["/build/_shared/chunk-NTHRJKQW.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/wallet": { id: "routes/wallet", parentId: "root", path: "wallet", index: void 0, caseSensitive: void 0, module: "/build/routes/wallet-B3U7YQGG.js", imports: ["/build/_shared/chunk-L6YYDTYS.js", "/build/_shared/chunk-XAB7PCAA.js", "/build/_shared/chunk-NTHRJKQW.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !0 } }, version: "a9b4c7b0", hmr: void 0, url: "/build/manifest-A9B4C7B0.js" };
 
 // server-entry-module:@remix-run/dev/server-build
-var mode = "production", assetsBuildDirectory = "public\\build", future = { v3_fetcherPersist: !0, v3_relativeSplatPath: !0, v3_throwAbortReason: !1 }, publicPath = "/build/", entry = { module: entry_server_exports }, routes = {
+var mode = "production", assetsBuildDirectory = "public\\build", future = { v3_fetcherPersist: !1, v3_relativeSplatPath: !1, v3_throwAbortReason: !1, v3_routeConfig: !1, v3_singleFetch: !1, v3_lazyRouteDiscovery: !1, unstable_optimizeDeps: !1 }, publicPath = "/build/", entry = { module: entry_server_exports }, routes = {
   root: {
     id: "root",
     parentId: void 0,
@@ -25356,12 +16795,5 @@ bcryptjs/dist/bcrypt.js:
    * @license bcrypt.js (c) 2013 Daniel Wirtz <dcode@dcode.io>
    * Released under the Apache License, Version 2.0
    * see: https://github.com/dcodeIO/bcrypt.js for details
-   *)
-
-@solana/web3.js/lib/index.esm.js:
-  (*!
-   * humanize-ms - index.js
-   * Copyright(c) 2014 dead_horse <dead_horse@qq.com>
-   * MIT Licensed
    *)
 */

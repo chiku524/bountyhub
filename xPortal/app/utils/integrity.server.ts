@@ -1,7 +1,6 @@
 import { eq, and, desc, isNull } from 'drizzle-orm';
 import { userRatings, integrityHistory, integrityViolations, users } from '../../drizzle/schema';
 import type { Db } from './db.server';
-import { getUser } from './auth.server';
 
 export interface RatingData {
   ratedUserId: string;

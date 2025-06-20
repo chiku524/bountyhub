@@ -1,4 +1,4 @@
-import { LoaderFunction, json } from '@remix-run/node';
+import { json, type LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { requireUserId } from '~/utils/auth.server';
 import { createDb } from '~/utils/db.server';
 import { eq, and, desc } from 'drizzle-orm';
@@ -21,7 +21,7 @@ interface LoaderData {
   activities: Activity[];
 }
 
-export const loader: LoaderFunction = async ({ request, context }) => {
+export const loader = async ({ request, context }: LoaderFunctionArgs) => {
   try {
     const userId = await requireUserId(request);
     const db = (context as any).env.DB;
@@ -36,34 +36,28 @@ export const loader: LoaderFunction = async ({ request, context }) => {
 
     // Transform data for the frontend
     const activityItems = [
-      ...userPosts.map((post: any) => ({
-        id: post.id,
+      ...userPosts.map((post: unknown) => ({
+        id: (post as any).id,
         type: 'post' as const,
-        title: post.title,
-        content: post.content,
-        createdAt: post.createdAt,
-        points: 0,
-        action: 'Created post',
+        title: (post as any).title,
+        createdAt: (post as any).createdAt.toISOString(),
+        action: 'POST_CREATED'
       })),
-      ...userComments.map((comment: any) => ({
-        id: comment.id,
+      ...userComments.map((comment: unknown) => ({
+        id: (comment as any).id,
         type: 'comment' as const,
-        title: 'Comment',
-        content: comment.content,
-        createdAt: comment.createdAt,
-        points: 0,
-        action: 'Added comment',
+        title: (comment as any).post?.title || 'Unknown Post',
+        createdAt: (comment as any).createdAt.toISOString(),
+        action: 'COMMENT_CREATED'
       })),
-      ...userAnswers.map((answer: any) => ({
-        id: answer.id,
+      ...userAnswers.map((answer: unknown) => ({
+        id: (answer as any).id,
         type: 'answer' as const,
-        title: 'Answer',
-        content: answer.content,
-        createdAt: answer.createdAt,
-        points: 0,
-        action: 'Provided answer',
+        title: (answer as any).post?.title || 'Unknown Post',
+        createdAt: (answer as any).createdAt.toISOString(),
+        action: 'ANSWER_CREATED'
       })),
-      ...userReputationHistory.map((history: any) => ({
+      ...userReputationHistory.map((history: unknown) => ({
         id: history.id,
         type: 'reputation' as const,
         title: history.action,

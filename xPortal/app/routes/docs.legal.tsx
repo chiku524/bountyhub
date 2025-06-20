@@ -8,7 +8,7 @@ interface LoaderData {
   description: string;
 }
 
-export const loader: LoaderFunction = async (): Promise<Response> => {
+export const loader = async (): Promise<Response> => {
   return json<LoaderData>({
     title: "Legal Documents",
     description: "Privacy policy and terms of service with PDF download options"
@@ -190,7 +190,7 @@ export default function LegalDocsPage() {
               </div>
 
               <div className="bg-neutral-700/40 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-white mb-3">Blockchain & Cryptocurrency</h3>
+                <h3 className="text-lg font-semibold text-white mb-3">Blockchain &amp; Cryptocurrency</h3>
                 <p className="text-gray-400 text-sm mb-4">
                   Our platform uses blockchain technology and cryptocurrency. Please understand the risks 
                   and regulatory considerations.
@@ -218,7 +218,7 @@ export default function LegalDocsPage() {
               </div>
 
               <div className="bg-neutral-700/40 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-white mb-3">Updates & Changes</h3>
+                <h3 className="text-lg font-semibold text-white mb-3">Updates &amp; Changes</h3>
                 <p className="text-gray-400 text-sm mb-4">
                   We may update our legal documents from time to time. Users will be notified of 
                   significant changes.

@@ -14,7 +14,7 @@ export const meta: MetaFunction = () => {
 }
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
-  const db = createDb((context as any).env.DB)
+  const db = createDb((context as { env: { DB: D1Database } }).env.DB)
   const user = await getUser(request, db)
   if (user) return redirect('/profile')
   return json({})
@@ -30,7 +30,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return json({ error: 'Email and password are required' }, { status: 400 })
   }
 
-  const db = createDb((context as any).env.DB)
+  const db = createDb((context as { env: { DB: D1Database } }).env.DB)
   const result = await login(db, { email, password, redirectTo })
 
   if (result instanceof Response) {

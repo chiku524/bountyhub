@@ -6,7 +6,7 @@
 
 import { PassThrough } from "node:stream";
 
-import type { AppLoadContext, EntryContext } from "@remix-run/node";
+import type { EntryContext } from "@remix-run/node";
 import { createReadableStreamFromReadable } from "@remix-run/node";
 import { RemixServer } from "@remix-run/react";
 import { isbot } from "isbot";
@@ -18,8 +18,7 @@ export default function handleRequest(
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
-  remixContext: EntryContext,
-  loadContext: AppLoadContext
+  remixContext: EntryContext
 ) {
   return isbot(request.headers.get("user-agent") || "")
     ? handleBotRequest(
@@ -67,13 +66,13 @@ function handleBotRequest(
 
           pipe(body);
         },
-        onShellError(error: unknown) {
-          reject(error);
+        onShellError() {
+          reject(new Error('Shell error occurred'));
         },
-        onError(error: unknown) {
+        onError() {
           responseStatusCode = 500;
           if (shellRendered) {
-            // console.error(error);
+            // console.error('Error occurred');
           }
         },
       }
@@ -114,13 +113,13 @@ function handleBrowserRequest(
 
           pipe(body);
         },
-        onShellError(error: unknown) {
-          reject(error);
+        onShellError() {
+          reject(new Error('Shell error occurred'));
         },
-        onError(error: unknown) {
+        onError() {
           responseStatusCode = 500;
           if (shellRendered) {
-            // console.error(error);
+            // console.error('Error occurred');
           }
         },
       }

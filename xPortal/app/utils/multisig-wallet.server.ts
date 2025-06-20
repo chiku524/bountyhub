@@ -1,4 +1,5 @@
-import { Connection, PublicKey, Transaction, Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { Connection, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { getAssociatedTokenAddress } from '@solana/spl-token';
 
 export interface MultisigConfig {
   threshold: number; // Number of signatures required

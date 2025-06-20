@@ -26,7 +26,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     }
 
     const { amount, solanaAddress } = validation.data;
-    const db = createDb((context as any).env.DB);
+    const db = createDb((context as { env: { DB: D1Database } }).env.DB);
 
     // Get or create user's wallet
     let wallet = await getVirtualWallet(db, userId);
@@ -58,4 +58,5 @@ export async function action({ request, context }: ActionFunctionArgs) {
     console.error("Withdrawal error:", error);
     return json({ error: "Failed to process withdrawal" }, { status: 500 });
   }
-} 
+}
+

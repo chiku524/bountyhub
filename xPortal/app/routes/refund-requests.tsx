@@ -1,14 +1,14 @@
-import { json, type LoaderFunctionArgs } from "@remix-run/node";
+import { json, type LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { useLoaderData } from "@remix-run/react";
 import { Layout } from "~/components/Layout";
 import { RefundRequestsList } from "~/components/RefundRequestsList";
-import { getRefundRequests } from "~/utils/refund-system.server";
-import { requireUserId } from "~/utils/auth.server";
-import { eq, and } from 'drizzle-orm';
+import { createDb } from "~/utils/db.server";
+import { getUser } from "~/utils/auth.server";
+import { eq, desc } from "drizzle-orm";
 import { refundRequests, bounties, posts, users, refundRequestVotes, answers } from '../../drizzle/schema';
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
-  const userId = await requireUserId(request);
+  const userId = await getUser(request);
   
   try {
     const db = (context as any).env.DB;
@@ -32,7 +32,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
     // Fetch related data for each request
     const refundRequestsWithData = await Promise.all(
-      requests.map(async (request: any) => {
+      requests.map(async (request: unknown) => {
         // Get bounty and post data
         const bounty = await db
           .select({
@@ -73,18 +73,9 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
           .get();
 
         // Get votes
-        const votes = await db
-          .select({
-            id: refundRequestVotes.id,
-            vote: refundRequestVotes.vote,
-            voterId: refundRequestVotes.voterId,
-            reason: refundRequestVotes.reason,
-            createdAt: refundRequestVotes.createdAt,
-            rewardAmount: refundRequestVotes.rewardAmount,
-          })
-          .from(refundRequestVotes)
-          .where(eq(refundRequestVotes.refundRequestId, request.id))
-          .all();
+        const votes = await db.query.refundRequestVotes.findMany({
+          where: eq(refundRequestVotes.refundRequestId, request.id),
+        });
 
         return {
           id: request.id,
@@ -103,7 +94,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
             },
           },
           requester: { username: requester?.username || 'Unknown' },
-          votes: votes.map((vote: any) => ({
+          votes: votes.map((vote: unknown) => ({
             ...vote,
             createdAt: vote.createdAt.toISOString(),
           })),

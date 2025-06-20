@@ -3,13 +3,11 @@ import { Form } from '@remix-run/react';
 import bountyBucksInfo from '../../bounty-bucks-info.json';
 
 const TOKEN_SYMBOL = bountyBucksInfo.symbol;
-const TOKEN_DECIMALS = 9; // From the attributes in the JSON
 
 interface BountyModalProps {
   isOpen: boolean;
   onClose: () => void;
   postId: string;
-  onSubmit: (amount: number, expiresAt: Date | null) => Promise<void>;
   existingBounty?: {
     id: string;
     amount: string;
@@ -18,7 +16,7 @@ interface BountyModalProps {
   } | null;
 }
 
-export function BountyModal({ isOpen, onClose, postId, onSubmit, existingBounty }: BountyModalProps) {
+export function BountyModal({ isOpen, onClose, postId, existingBounty }: BountyModalProps) {
   const [amount, setAmount] = useState<string>(existingBounty?.amount || '');
   const [expiresAt, setExpiresAt] = useState<string>(existingBounty?.expiresAt ? new Date(existingBounty.expiresAt).toISOString().slice(0, 16) : '');
   const [error, setError] = useState<string | null>(null);

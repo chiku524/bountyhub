@@ -1,12 +1,10 @@
-import { useEffect, useState, useCallback } from 'react';
-import { useLoaderData, useParams, useSubmit, useFetcher, Form, useRouteError, isRouteErrorResponse, Link, useActionData, useNavigate, useSearchParams } from '@remix-run/react';
-import { json, LoaderFunction, ActionFunction, redirect, MetaFunction } from '@remix-run/node';
-import { getUser } from '~/utils/auth.server';
+import { useState, useEffect } from 'react';
+import { useLoaderData, useActionData, useFetcher, useRouteError, isRouteErrorResponse, useSubmit, Link, Form } from '@remix-run/react';
+import { json, type ActionFunctionArgs, type LoaderFunctionArgs, redirect, type MetaFunction } from '@remix-run/cloudflare';
+import { getUser, requireUserId } from '~/utils/auth.server';
 import { createDb } from '~/utils/db.server';
 import { eq, and, desc, or, sql } from 'drizzle-orm';
 import { posts, users, profiles, media, comments, answers, codeBlocks, votes, bounties, virtualWallets, postTags, tags, reports, bookmarks, integrityRatings, bountyClaims } from '../../drizzle/schema';
-import { requireUserId } from '~/utils/auth.server';
-import PostInteractions from '~/components/PostInteractions';
 import { Nav } from '~/components/nav';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
@@ -16,7 +14,6 @@ import IntegrityRatingButton from '~/components/IntegrityRatingButton';
 import { Layout } from '~/components/Layout';
 import { AuthNotice } from '~/components/auth-notice';
 import { FaThumbsUp, FaThumbsDown, FaComment, FaReply, FaEdit, FaTrash, FaFlag, FaCheck, FaTimes, FaEye, FaClock, FaUser, FaTag, FaDollarSign, FaGift, FaLock, FaUnlock } from 'react-icons/fa';
-import { FiTrendingUp, FiAward, FiStar } from 'react-icons/fi';
 import CodeBlockEditor from '~/components/CodeBlockEditor';
 import { MediaUpload } from '~/components/MediaUpload';
 import TagSelector from '~/components/TagSelector';
@@ -165,9 +162,9 @@ export const meta: MetaFunction = ({ data }) => {
   ];
 };
 
-export const loader: LoaderFunction = async ({ request, params, context }) => {
+export const loader = async ({ request, params, context }: LoaderFunctionArgs) => {
   try {
-    const db = createDb((context as any).env.DB);
+    const db = createDb((context as { env: { DB: D1Database } }).env.DB);
     const user = await getUser(request, db);
     const { postId } = params;
     const url = new URL(request.url);
@@ -382,7 +379,7 @@ export const loader: LoaderFunction = async ({ request, params, context }) => {
   }
 };
 
-export const action: ActionFunction = async ({ request, params, context }) => {
+export const action = async ({ request, params, context }: ActionFunctionArgs) => {
   const db = createDb((context as any).env.DB);
   const user = await getUser(request, db);
   if (!user) {
@@ -1985,7 +1982,7 @@ export default function PostDetail() {
                               }`}
                             >
                               {post.bounty && post.bounty.status === 'ACTIVE' 
-                                ? 'Accept Answer & Claim Bounty' 
+                                ? 'Accept Answer &amp; Claim Bounty'
                                 : 'Accept Answer'
                               }
                             </button>

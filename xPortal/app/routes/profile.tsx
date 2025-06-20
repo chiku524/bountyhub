@@ -1,33 +1,21 @@
 // app/routes/profile.tsx
 import { Form, useLoaderData, Link, Outlet, useLocation } from "@remix-run/react"
-import { LoaderFunction, json, redirect, MetaFunction } from '@remix-run/node'
-import { getUser } from '~/utils/auth.server'
+import { LoaderFunction, json, redirect, MetaFunction, LoaderFunctionArgs } from '@remix-run/node'
+import { getUser, requireUserId } from '~/utils/auth.server'
 import { Layout } from '../components/Layout'
-import { requireUserId } from '~/utils/auth.server'
+
 import { ProfilePictureUpload } from '~/components/ProfilePictureUpload'
 import { getReputationLevel } from '~/utils/reputationLevel'
-import { LoaderFunctionArgs } from '@remix-run/node'
+
 import { AuthNotice } from '~/components/auth-notice'
-import { 
-    FaGithub, 
-    FaTwitter, 
-    FaLinkedin, 
-    FaInstagram, 
-    FaFacebook, 
-    FaYoutube, 
-    FaTiktok, 
-    FaDiscord, 
-    FaReddit, 
-    FaMedium, 
-    FaStackOverflow, 
-    FaDev 
-} from 'react-icons/fa'
+import { FaUser, FaEdit, FaEye, FaEyeSlash, FaSave, FaTimes, FaCheck, FaGithub, FaTwitter, FaLinkedin, FaInstagram, FaFacebook, FaYoutube, FaTiktok, FaDiscord, FaReddit, FaMedium, FaStackOverflow, FaDev } from 'react-icons/fa'
 import { FiThumbsUp, FiEdit2 } from 'react-icons/fi'
 import IntegrityDisplay from '~/components/IntegrityDisplay'
 import { getUserBookmarks } from '~/utils/bookmark.server'
 import { eq, desc } from 'drizzle-orm'
 import { users, profiles, posts, reputationHistory } from '../../drizzle/schema'
 import { createDb } from '~/utils/db.server'
+import { useState } from "react"
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   const username = data?.user?.username || 'Profile';

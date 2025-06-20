@@ -1,14 +1,8 @@
-import { json } from '@remix-run/cloudflare';
-import { eq, and } from 'drizzle-orm';
-import { votes, comments } from '../../drizzle/schema';
-import type { DrizzleD1Database } from 'drizzle-orm/d1';
-import type { ActionFunctionArgs } from '@remix-run/cloudflare';
-
-interface CloudflareContext {
-  env: {
-    DB: DrizzleD1Database<typeof import('../../drizzle/schema')>;
-  };
-}
+import { json, type ActionFunctionArgs } from "@remix-run/cloudflare";
+import { getUser } from "~/utils/auth.server";
+import { eq, and } from "drizzle-orm";
+import { votes, comments } from "../../drizzle/schema";
+import { createDb } from "~/utils/db.server";
 
 export async function action({ request, params, context }: ActionFunctionArgs) {
   const { commentId } = params;
@@ -28,7 +22,7 @@ export async function action({ request, params, context }: ActionFunctionArgs) {
   }
 
   try {
-    const db = (context as unknown as CloudflareContext).env.DB;
+    const db = createDb((context as { env: { DB: D1Database } }).env.DB);
 
     // Check if user already voted
     const existingVote = await db
@@ -93,7 +87,7 @@ export async function action({ request, params, context }: ActionFunctionArgs) {
     });
 
     // Update comment with new vote counts
-    const updateData: any = {};
+    const updateData: { upvotes?: number; downvotes?: number } = {};
     if (voteType === 'comment') {
       updateData.upvotes = upvotes;
       updateData.downvotes = downvotes;
@@ -114,4 +108,5 @@ export async function action({ request, params, context }: ActionFunctionArgs) {
     console.error('Error processing comment vote:', error);
     return json({ error: 'Failed to process vote' }, { status: 500 });
   }
-} 
+}
+

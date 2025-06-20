@@ -160,7 +160,6 @@ export default function TagSelector({
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={handleKeyDown}
                 className="w-full px-3 py-2 bg-neutral-700/50 border border-violet-500/20 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-violet-500"
-                autoFocus
               />
             </div>
 
@@ -168,7 +167,7 @@ export default function TagSelector({
             <div className="max-h-48 overflow-y-auto">
               {filteredTags.length === 0 ? (
                 <div className="p-4 text-center text-gray-400">
-                  No tags found matching "{searchTerm}"
+                  No tags found matching &quot;{searchTerm}&quot;
                 </div>
               ) : (
                 <div className="p-2">

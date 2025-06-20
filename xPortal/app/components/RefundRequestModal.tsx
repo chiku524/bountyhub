@@ -1,13 +1,19 @@
 import { useState } from "react";
 import { Form, useActionData, useNavigation } from "@remix-run/react";
 
+interface ActionData {
+  error?: string;
+  success?: boolean;
+  message?: string;
+  waitTime?: number;
+}
+
 interface RefundRequestModalProps {
   isOpen: boolean;
   onClose: () => void;
   bountyId: string;
   bountyAmount: number;
   canRefund: boolean;
-  waitTime?: number;
 }
 
 export function RefundRequestModal({
@@ -15,11 +21,10 @@ export function RefundRequestModal({
   onClose,
   bountyId,
   bountyAmount,
-  canRefund,
-  waitTime
+  canRefund
 }: RefundRequestModalProps) {
   const [reason, setReason] = useState("");
-  const actionData = useActionData<any>();
+  const actionData = useActionData<ActionData>();
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
 
@@ -55,7 +60,7 @@ export function RefundRequestModal({
           </p>
           <p className="text-gray-400 text-xs">
             Community will vote on your refund request within 48 hours. 
-            If approved, you'll receive a refund minus any penalties for helpful answers.
+            If approved, you&apos;ll receive a refund minus any penalties for helpful answers.
             A 5% fee goes to community governance rewards.
           </p>
         </div>

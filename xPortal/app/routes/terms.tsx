@@ -1,7 +1,10 @@
-import { json, type LoaderFunctionArgs } from "@remix-run/node";
+import { json, type LoaderFunctionArgs } from "@remix-run/cloudflare";
+import { redirect } from "@remix-run/node";
+import { createDb } from "~/utils/db.server";
+import { getUser } from "~/utils/auth.server";
+import type { MetaFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { Layout } from "~/components/Layout";
-import { requireUserId } from "~/utils/auth.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   // For now, we'll allow public access to terms of service

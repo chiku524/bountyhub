@@ -1,19 +1,14 @@
-import { Connection, PublicKey, Transaction, Keypair } from '@solana/web3.js';
-import { 
-  getAssociatedTokenAddress, 
-  createAssociatedTokenAccountInstruction,
-  createTransferInstruction,
-  TOKEN_PROGRAM_ID 
-} from '@solana/spl-token';
+import { Connection, PublicKey } from '@solana/web3.js';
+import { getAssociatedTokenAddress } from '@solana/spl-token';
+import bountyBucksInfo from '../../bounty-bucks-info.json';
 import { 
   Program, 
   AnchorProvider, 
   web3, 
-  utils, 
-  BN 
+  BN, 
+  Idl 
 } from '@coral-xyz/anchor';
 import { GovernanceProgram as GovernanceIDL } from '../types/governance_program';
-import bountyBucksInfo from '../../bounty-bucks-info.json';
 
 // Governance program ID
 const GOVERNANCE_PROGRAM_ID = new PublicKey('GovPool111111111111111111111111111111111111');

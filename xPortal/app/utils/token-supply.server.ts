@@ -1,5 +1,5 @@
 import { Connection, PublicKey } from "@solana/web3.js";
-import { getAccount, getMint } from "@solana/spl-token";
+import { getAssociatedTokenAddress, getMint } from '@solana/spl-token';
 import bountyBucksInfo from '../../bounty-bucks-info.json';
 
 const SOLANA_RPC_URL = process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com";

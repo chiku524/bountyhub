@@ -1,4 +1,4 @@
-import { json, type ActionFunctionArgs } from '@remix-run/node';
+import { json, type ActionFunctionArgs } from '@remix-run/cloudflare';
 import { getUser } from '~/utils/auth.server';
 import { createDb } from '~/utils/db.server';
 import { uploadToCloudinary } from '~/utils/cloudinary.server';
@@ -7,7 +7,7 @@ import { eq } from 'drizzle-orm';
 
 export async function action({ request, context }: ActionFunctionArgs) {
   try {
-    const db = createDb((context as any).env.DB)
+    const db = createDb((context as { env: { DB: D1Database } }).env.DB)
     const user = await getUser(request, db);
     if (!user) {
       return json({ error: 'You must be logged in to perform this action' }, { status: 401 });
@@ -51,4 +51,5 @@ export async function action({ request, context }: ActionFunctionArgs) {
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
-}; 
+}
+

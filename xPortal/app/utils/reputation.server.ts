@@ -1,7 +1,7 @@
 import type { Db } from './db.server';
 import { users, reputationHistory } from '../../drizzle/schema';
-import { eq, desc } from 'drizzle-orm';
-import { sql } from 'drizzle-orm';
+import { eq, desc , sql } from 'drizzle-orm';
+
 
 // Reputation point values for different actions
 export const REPUTATION_POINTS = {

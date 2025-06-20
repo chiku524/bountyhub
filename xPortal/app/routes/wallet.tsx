@@ -1,13 +1,18 @@
-import { json, type LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { useLoaderData, Form, useActionData, useNavigation, useRouteError, isRouteErrorResponse } from "@remix-run/react";
-import { getWalletDetails } from "~/utils/virtual-wallet.server";
-import { getUser } from "~/utils/auth.server";
+import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
+import { useLoaderData, useActionData, useRouteError, isRouteErrorResponse } from "@remix-run/react";
 import { createDb } from "~/utils/db.server";
-import { useState } from "react";
+import { getUser } from "~/utils/auth.server";
+import { eq } from "drizzle-orm";
+import { virtualWallets, walletTransactions, users } from "../../drizzle/schema";
 import { Layout } from "~/components/Layout";
+import { AuthNotice } from "~/components/auth-notice";
 import { DirectDeposit } from "~/components/DirectDeposit";
-import bountyBucksInfo from '../../bounty-bucks-info.json';
+import { FaWallet, FaCoins, FaArrowUp, FaArrowDown, FaHistory, FaCopy, FaExternalLinkAlt } from "react-icons/fa";
+import { FiRefreshCw, FiCheck, FiX } from "react-icons/fi";
+import { useState } from "react";
+import { getWalletDetails } from "~/utils/virtual-wallet.server";
 import { TokenSupplyService } from "../utils/token-supply.server";
+import bountyBucksInfo from '../../bounty-bucks-info.json';
 
 const TOKEN_SYMBOL = bountyBucksInfo.symbol;
 const TOKEN_DECIMALS = 9; // From the attributes in the JSON
@@ -313,10 +318,6 @@ export default function WalletPage() {
               {/* Direct Deposit */}
               {depositMode === 'direct' && (
                 <DirectDeposit
-                  onSuccess={() => {
-                    setShowDepositModal(false);
-                    setTimeout(() => window.location.reload(), 1000);
-                  }}
                   onError={(error) => {
                     if (error !== 'cancelled') {
                       alert(error);
@@ -655,7 +656,7 @@ export default function WalletPage() {
             <p className="text-gray-400 text-center py-8">No transactions yet</p>
           ) : (
             <div className="space-y-3">
-              {transactions.map((transaction: any) => (
+              {transactions.map((transaction: unknown) => (
                 <div
                   key={transaction.id}
                   className="flex items-center justify-between p-4 border border-neutral-700 rounded-lg hover:bg-neutral-700"

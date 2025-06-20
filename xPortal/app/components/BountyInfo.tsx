@@ -1,5 +1,10 @@
 import { useState } from 'react';
 
+interface WalletHooks {
+  useWallet: () => unknown;
+  PublicKey: unknown;
+}
+
 interface BountyInfoProps {
   bounty: {
     id: string;
@@ -14,7 +19,7 @@ interface BountyInfoProps {
 
 export function BountyInfo({ bounty, onClaim }: BountyInfoProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [walletHooks, setWalletHooks] = useState<any>(null);
+  const [walletHooks, setWalletHooks] = useState<WalletHooks | null>(null);
 
   // Dynamically load wallet hooks
   useState(() => {

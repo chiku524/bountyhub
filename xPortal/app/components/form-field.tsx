@@ -1,15 +1,14 @@
 // app/components/form-field.tsx
-import { useEffect } from "react"
 
 interface FormFieldProps {
     textarea: boolean
     htmlFor: string
     label: string
     type?: string
-    value: any
-    onChange?: (...args: any) => any,
+    value: string
+    onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
     error?: string
-    onClick?: (...args: any) => any
+    onClick?: () => void
     autocomplete?: string
   }
   

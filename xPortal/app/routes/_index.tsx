@@ -1,6 +1,7 @@
-import { LoaderFunction, redirect } from "@remix-run/node";
+import { type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
+import { redirect } from "@remix-run/cloudflare";
+import { createDb } from "~/utils/db.server";
 import { getUser } from "~/utils/auth.server";
-import type { MetaFunction } from "@remix-run/node";
 
 export const meta: MetaFunction = () => {
   return [
@@ -9,11 +10,23 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export const loader: LoaderFunction = async ({ request }) => {
+export const loader = async ({ request, context }: LoaderFunctionArgs) => {
+  const typedContext = context as { env: { DB: D1Database; SESSION_SECRET?: string } };
   console.log('Index loader called, method:', request.method);
-  console.log('Index loader called, headers:', Object.fromEntries(request.headers.entries()));
+  console.log('Index loader called, context exists:', !!context);
+  console.log('Index loader called, context.env exists:', !!typedContext?.env);
   
-  const user = await getUser(request);
+  if (!typedContext?.env?.DB) {
+    throw new Error("D1 Database binding is missing from context.env.DB");
+  }
+  
+  // Set the session secret for the auth system
+  if (typedContext.env.SESSION_SECRET) {
+    (global as unknown as { SESSION_SECRET: string }).SESSION_SECRET = typedContext.env.SESSION_SECRET;
+  }
+  
+  const db = createDb(typedContext.env.DB);
+  const user = await getUser(request, db);
   console.log('Index loader - user found:', !!user);
   
   if (user) {
@@ -27,25 +40,3 @@ export const loader: LoaderFunction = async ({ request }) => {
 export default function Index() {
   return null;
 }
-
-const resources = [
-  {
-    href: "/login",
-    text: "Login / Signup",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth="1.5"
-        className="stroke-gray-600 group-hover:stroke-current dark:stroke-gray-300 w-6 h-6"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"
-        />
-      </svg>
-    ),
-  },
-];

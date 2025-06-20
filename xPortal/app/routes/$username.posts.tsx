@@ -1,16 +1,13 @@
 // app/routes/profile.tsx
-import { useState } from 'react'
-import { Form, useLoaderData, Link, useActionData, useNavigate, useSubmit, useSearchParams } from "@remix-run/react"
-import { LoaderFunction, ActionFunction, json } from '@remix-run/node'
-import { getUser } from '~/utils/auth.server'
-import { getUserPosts, deletePost } from '~/utils/user.server'
-import { Nav } from '../components/nav'
-import { FiTrash2, FiEdit2, FiThumbsUp, FiMessageSquare } from 'react-icons/fi'
-import { getProfilePicture } from '~/utils/profile.server'
+import { Link, useSearchParams, useLoaderData } from "@remix-run/react"
+import { json } from '@remix-run/node'
+import { FiThumbsUp, FiMessageSquare } from 'react-icons/fi'
 import { json as cloudflareJson, LoaderFunctionArgs, ActionFunctionArgs } from '@remix-run/cloudflare'
-import { eq, and, inArray, sql } from 'drizzle-orm'
-import { users, posts, profiles, votes, comments } from '../../drizzle/schema'
+import { eq, inArray, sql, desc } from 'drizzle-orm'
+import { users, posts, profiles, comments } from '../../drizzle/schema'
 import type { DrizzleD1Database } from 'drizzle-orm/d1'
+import { getUser } from '~/utils/auth.server'
+import { createDb } from "~/utils/db.server"
 
 type Post = {
     id: string;
@@ -28,125 +25,145 @@ type Post = {
     };
 };
 
-type User = {
-    id: string;
-    username: string;
-    email: string;
-    createdAt: Date;
-    reputationPoints: number;
-    integrityScore: number;
-    totalRatings: number;
-};
-
-interface LoaderData {
-    user: User;
-    posts: Post[];
-    currentUser?: User;
-}
-
 interface CloudflareContext {
   env: {
     DB: DrizzleD1Database<typeof import('../../drizzle/schema')>;
   };
 }
 
+// Define the type for userPosts
+interface UserPostDb {
+  id: string;
+  title: string;
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
+  visibilityVotes: number;
+  qualityUpvotes: number;
+  qualityDownvotes: number;
+  hasBounty: boolean;
+  status: string;
+  author: {
+    id: string;
+    username: string;
+  };
+  profile: {
+    profilePicture: string | null;
+  } | null;
+}
+
 export async function loader({ params, context, request }: LoaderFunctionArgs) {
   const { username } = params;
-  
+  const url = new URL(request.url);
+  const searchParams = url.searchParams;
+
   if (!username) {
     throw new Response('Username is required', { status: 400 });
   }
 
   try {
-    const db = (context as unknown as CloudflareContext).env.DB;
-    const currentUser = await getUser(request);
+    const db = createDb((context as { env: { DB: D1Database } }).env.DB);
+    const currentUser = await getUser(request, db);
 
-    // First, find the user
-    const user = await db
+    // Get user data
+    const userData = await db
       .select({
         id: users.id,
         username: users.username,
         email: users.email,
+        solanaAddress: users.solanaAddress,
         createdAt: users.createdAt,
         reputationPoints: users.reputationPoints,
         integrityScore: users.integrityScore,
         totalRatings: users.totalRatings,
+        profile: {
+          firstName: profiles.firstName,
+          lastName: profiles.lastName,
+          profilePicture: profiles.profilePicture,
+          bio: profiles.bio,
+          location: profiles.location,
+          website: profiles.website,
+          facebook: profiles.facebook,
+          twitter: profiles.twitter,
+          instagram: profiles.instagram,
+          linkedin: profiles.linkedin,
+          github: profiles.github,
+          youtube: profiles.youtube,
+          tiktok: profiles.tiktok,
+          discord: profiles.discord,
+          reddit: profiles.reddit,
+          medium: profiles.medium,
+          stackoverflow: profiles.stackoverflow,
+          devto: profiles.devto,
+        },
       })
       .from(users)
+      .leftJoin(profiles, eq(users.id, profiles.userId))
       .where(eq(users.username, username))
       .limit(1);
 
-    if (!user.length) {
+    if (!userData.length) {
       throw new Response('User not found', { status: 404 });
     }
 
-    // Get user's posts with vote counts
-    const userPosts = await db
+    const user = userData[0];
+
+    // Get user's posts with pagination
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = 10;
+    const offset = (page - 1) * limit;
+
+    const postsData = await db
       .select({
         id: posts.id,
         title: posts.title,
         content: posts.content,
         createdAt: posts.createdAt,
-        updatedAt: posts.updatedAt,
         visibilityVotes: posts.visibilityVotes,
         qualityUpvotes: posts.qualityUpvotes,
         qualityDownvotes: posts.qualityDownvotes,
-        hasBounty: posts.hasBounty,
-        status: posts.status,
-        author: {
-          id: users.id,
-          username: users.username,
-        },
-        profile: {
-          profilePicture: profiles.profilePicture,
-        },
+        comments: sql<number>`(
+          SELECT COUNT(*) FROM ${comments} 
+          WHERE ${comments.postId} = ${posts.id}
+        )`.as('comments'),
       })
       .from(posts)
-      .innerJoin(users, eq(posts.authorId, users.id))
-      .leftJoin(profiles, eq(users.id, profiles.userId))
-      .where(eq(posts.authorId, user[0].id))
-      .orderBy(posts.createdAt);
+      .where(eq(posts.authorId, user.id))
+      .orderBy(desc(posts.createdAt))
+      .limit(limit)
+      .offset(offset);
 
-    // Get comment counts for each post
-    const postIds = userPosts.map((post: any) => post.id);
-    const commentCounts = postIds.length > 0 ? await db
-      .select({
-        postId: comments.postId,
-        count: sql<number>`count(${comments.id})`,
-      })
-      .from(comments)
-      .where(inArray(comments.postId, postIds))
-      .groupBy(comments.postId) : [];
+    // Get total count for pagination
+    const totalPosts = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(posts)
+      .where(eq(posts.authorId, user.id));
 
-    // Transform the data to match expected format
-    const transformedPosts = userPosts.map((post: any) => ({
-      id: post.id,
-      title: post.title,
-      content: post.content,
-      createdAt: post.createdAt.toISOString(),
-      visibilityVotes: post.visibilityVotes,
-      upvotes: post.qualityUpvotes,
-      comments: commentCounts.find((c: any) => c.postId === post.id)?.count || 0,
-      hasBounty: post.hasBounty,
-      author: {
-        id: post.author.id,
-        username: post.author.username,
-        profilePicture: post.profile?.profilePicture || null,
-      },
-    }));
+    const totalPages = Math.ceil(totalPosts[0].count / limit);
 
-    return json({ 
-      user: user[0],
-      posts: transformedPosts,
-      currentUser,
+    return json({
+      user,
+      posts: postsData,
+      currentPage: page,
+      totalPages,
+      currentUser: currentUser ? {
+        id: currentUser.id,
+        username: currentUser.username,
+        email: currentUser.email,
+        solanaAddress: currentUser.solanaAddress,
+        createdAt: currentUser.createdAt,
+        reputationPoints: currentUser.reputationPoints,
+        integrityScore: currentUser.integrityScore,
+        totalRatings: currentUser.totalRatings,
+      } : null,
     });
   } catch (error) {
-    console.error('Error fetching user posts:', error);
-    throw new Response('Failed to fetch user posts', { status: 500 });
+    console.error('Error loading user posts:', error);
+    throw new Response('Failed to load user posts', { status: 500 });
   }
 }
 
-export async function action({ request, params, context }: ActionFunctionArgs) {
+export async function action({ request, context }: ActionFunctionArgs) {
   const user = await getUser(request);
   
   if (!user) {
@@ -157,7 +174,7 @@ export async function action({ request, params, context }: ActionFunctionArgs) {
   const action = formData.get('action') as string;
 
   try {
-    const db = (context as unknown as CloudflareContext).env.DB;
+    const db = createDb((context as { env: { DB: D1Database } }).env.DB);
 
     switch (action) {
       case 'deletePost': {
@@ -194,11 +211,7 @@ export async function action({ request, params, context }: ActionFunctionArgs) {
 }
 
 export default function UserPosts() {
-    const { user, posts, currentUser } = useLoaderData<typeof loader>();
-    const [videoErrors, setVideoErrors] = useState<Record<string, string>>({});
-    const submit = useSubmit();
-    const navigate = useNavigate();
-    const actionData = useActionData();
+    const { user, posts } = useLoaderData<typeof loader>();
     const [searchParams, setSearchParams] = useSearchParams();
 
     // Pagination logic
@@ -208,29 +221,17 @@ export default function UserPosts() {
     const totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE);
     const paginatedPosts = posts.slice((page - 1) * POSTS_PER_PAGE, page * POSTS_PER_PAGE);
 
-    const handleVideoError = (postId: string, error: string) => {
-        setVideoErrors(prev => ({ ...prev, [postId]: error }));
-    };
-
-    const handleVote = (postId: string) => {
-        const formData = new FormData();
-        formData.append('action', 'vote');
-        formData.append('postId', postId);
-        submit(formData, { method: 'post' });
-    };
-
-    const handleDelete = (postId: string) => {
-        if (window.confirm('Are you sure you want to delete this post?')) {
-            const formData = new FormData();
-            formData.append('action', 'deletePost');
-            formData.append('postId', postId);
-            submit(formData, { method: 'post' });
-        }
-    };
-
-    const isPostOwner = (post: Post) => {
-        return currentUser?.id === post.author.id;
-    };
+    // Map posts to the Post type
+    const mappedPosts = paginatedPosts.map((post) => ({
+        ...post,
+        hasBounty: false, // or get from post if available
+        upvotes: post.qualityUpvotes ?? 0, // or another upvote field
+        author: {
+            id: user.id,
+            username: user.username,
+            profilePicture: user.profile?.profilePicture || null,
+        },
+    }));
 
     const renderPost = (post: Post) => (
         <div key={post.id} className="bg-neutral-800 rounded-lg p-6 mb-6">
@@ -274,7 +275,6 @@ export default function UserPosts() {
 
     return (
         <div className="h-screen w-full bg-neutral-900/95 flex flex-row">
-            <Nav />
             <div className="flex-1 overflow-y-auto">
                 <div className="w-auto max-w-8xl mx-auto mt-4 px-4 ml-24 pb-16">
                     <div className="mb-6 flex justify-between items-center mt-16">
@@ -296,9 +296,9 @@ export default function UserPosts() {
 
                     {/* Responsive grid for posts */}
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
-                        {paginatedPosts.map((post) => (
-                            renderPost(post as Post))
-                        )}
+                        {mappedPosts.map((post) => (
+                            renderPost(post)
+                        ))}
                     </div>
 
                     {/* Pagination controls */}

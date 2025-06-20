@@ -1,8 +1,8 @@
-import { ActionFunction, redirect } from "@remix-run/node";
+import { type ActionFunctionArgs } from "@remix-run/cloudflare";
 import { logout } from "~/utils/auth.server";
 
-export const action: ActionFunction = async ({ request }) => {
-  return await logout(request);
+export const action = async ({ request }: ActionFunctionArgs) => {
+  return logout(request);
 };
 
 // This route should never be rendered

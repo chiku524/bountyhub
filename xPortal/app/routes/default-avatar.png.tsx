@@ -1,7 +1,7 @@
 import { LoaderFunction } from '@remix-run/node';
-import { json } from '@remix-run/node';
 
-export const loader: LoaderFunction = async () => {
+
+export const loader = async () => {
   // Return a simple SVG avatar as the default
   const svg = `
     <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">

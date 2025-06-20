@@ -1,54 +1,32 @@
-import { ReactNode, useMemo, useEffect, useState } from 'react';
+import { FC, ReactNode, useMemo } from 'react';
+import { ConnectionProvider, WalletProvider as SolanaWalletProvider } from '@solana/wallet-adapter-react';
+import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
+import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
+import { SolflareWalletAdapter } from '@solana/wallet-adapter-solflare';
+import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
+import { clusterApiUrl } from '@solana/web3.js';
 
-// Create config outside of component to prevent recreation
-const network = 'devnet';
-const endpoint = 'https://api.devnet.solana.com';
+// Default styles that can be overridden by your app
+require('@solana/wallet-adapter-react-ui/styles.css');
 
-function ClientWalletProvider({ children }: { children: ReactNode }) {
-  const [walletComponents, setWalletComponents] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+interface Props {
+  children: ReactNode;
+}
 
-  useEffect(() => {
-    // Dynamically import all wallet dependencies
-    Promise.all([
-      import('@solana/wallet-adapter-base'),
-      import('@solana/wallet-adapter-react'),
-      import('@solana/wallet-adapter-react-ui'),
-      import('@solana/wallet-adapter-phantom'),
-      import('@solana/wallet-adapter-solflare'),
-      import('@solana/web3.js')
-    ]).then(([
-      { WalletAdapterNetwork },
-      { ConnectionProvider, WalletProvider: SolanaWalletProvider },
-      { WalletModalProvider },
-      { PhantomWalletAdapter },
-      { SolflareWalletAdapter },
-      { clusterApiUrl }
-    ]) => {
-      const wallets = [
-        new PhantomWalletAdapter(),
-        new SolflareWalletAdapter(),
-      ];
+export const WalletProvider: FC<Props> = ({ children }) => {
+  // The network can be set to 'devnet', 'testnet', or 'mainnet-beta'.
+  const network = WalletAdapterNetwork.Devnet;
 
-      setWalletComponents({
-        ConnectionProvider,
-        SolanaWalletProvider,
-        WalletModalProvider,
-        wallets,
-        endpoint: clusterApiUrl(WalletAdapterNetwork.Devnet)
-      });
-      setIsLoading(false);
-    }).catch(error => {
-      console.error('Failed to load wallet components:', error);
-      setIsLoading(false);
-    });
-  }, []);
+  // You can also provide a custom RPC endpoint.
+  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
 
-  if (isLoading || !walletComponents) {
-    return <>{children}</>;
-  }
-
-  const { ConnectionProvider, SolanaWalletProvider, WalletModalProvider, wallets, endpoint } = walletComponents;
+  const wallets = useMemo(
+    () => [
+      new PhantomWalletAdapter(),
+      new SolflareWalletAdapter(),
+    ],
+    []
+  );
 
   return (
     <ConnectionProvider endpoint={endpoint}>
@@ -59,24 +37,4 @@ function ClientWalletProvider({ children }: { children: ReactNode }) {
       </SolanaWalletProvider>
     </ConnectionProvider>
   );
-}
-
-export function WalletProvider({ children }: { children: ReactNode }) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // During SSR, just render the children without the providers
-  if (typeof window === 'undefined') {
-    return <>{children}</>;
-  }
-
-  // On the client, only render the providers after mounting
-  if (!mounted) {
-    return <>{children}</>;
-  }
-
-  return <ClientWalletProvider>{children}</ClientWalletProvider>;
-} 
+}; 

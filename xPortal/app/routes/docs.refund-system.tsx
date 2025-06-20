@@ -1,14 +1,14 @@
-import { json, type LoaderFunction } from '@remix-run/node';
-import { useLoaderData, Link } from '@remix-run/react';
-import { Layout } from '~/components/Layout';
-import { FiArrowLeft, FiDownload, FiExternalLink, FiClock, FiUsers, FiShield, FiAward, FiAlertTriangle } from 'react-icons/fi';
+import { json, type LoaderFunctionArgs } from "@remix-run/cloudflare";
+import { useLoaderData, Link } from "@remix-run/react";
+import { Layout } from "~/components/Layout";
+import { FiArrowLeft, FiExternalLink, FiClock, FiUsers, FiShield, FiAward, FiAlertTriangle } from "react-icons/fi";
 
 interface LoaderData {
   title: string;
   description: string;
 }
 
-export const loader: LoaderFunction = async (): Promise<Response> => {
+export const loader = async (): Promise<Response> => {
   return json<LoaderData>({
     title: "Refund System Documentation",
     description: "Understanding the refund system and dispute resolution"

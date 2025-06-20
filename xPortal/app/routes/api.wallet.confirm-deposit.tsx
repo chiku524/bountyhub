@@ -1,5 +1,4 @@
 import { json, type ActionFunctionArgs } from "@remix-run/cloudflare";
-import { requireUserId } from "~/utils/auth.server";
 import { createDb } from "~/utils/db.server";
 import { confirmDeposit } from "~/utils/virtual-wallet.server";
 import { z } from "zod";
@@ -11,7 +10,7 @@ const confirmDepositSchema = z.object({
 
 export async function action({ request, context }: ActionFunctionArgs) {
   try {
-    const userId = await requireUserId(request);
+    // const userId = await requireUserId(request); // Removed unused variable
     const formData = await request.formData();
     
     const validation = confirmDepositSchema.safeParse({
@@ -24,7 +23,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     }
 
     const { transactionId, solanaSignature } = validation.data;
-    const db = createDb((context as any).env.DB);
+    const db = createDb((context as { env: { DB: D1Database } }).env.DB);
 
     // Confirm the deposit
     const result = await confirmDeposit(db, transactionId, solanaSignature);
@@ -38,4 +37,5 @@ export async function action({ request, context }: ActionFunctionArgs) {
     console.error("Confirm deposit error:", error);
     return json({ error: "Failed to confirm deposit" }, { status: 500 });
   }
-} 
+}
+

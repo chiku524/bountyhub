@@ -14,7 +14,7 @@ interface BubbleConfig {
 // Client-only wallet component
 function WalletButton() {
   const [mounted, setMounted] = useState(false);
-  const [walletHooks, setWalletHooks] = useState<any>(null);
+  const [walletHooks, setWalletHooks] = useState<{ useWallet: () => unknown; useWalletModal: () => unknown } | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -49,11 +49,11 @@ function WalletButton() {
 }
 
 // Separate component that uses the wallet hooks
-function WalletButtonWithHooks({ walletHooks }: { walletHooks: any }) {
+function WalletButtonWithHooks({ walletHooks }: { walletHooks: { useWallet: () => unknown; useWalletModal: () => unknown } }) {
   const { useWallet, useWalletModal } = walletHooks;
   
-  const { wallet, connected, disconnect } = useWallet();
-  const { setVisible } = useWalletModal();
+  const { wallet, connected, disconnect } = useWallet() as { wallet: { adapter?: { publicKey?: { toString(): string } } } | null; connected: boolean; disconnect: () => void };
+  const { setVisible } = useWalletModal() as { setVisible: (visible: boolean) => void };
 
   const handleWalletClick = () => {
     if (connected) {
@@ -120,7 +120,6 @@ export function Nav() {
         const nav = document.querySelector(".nav-container");
         if (!nav) return;
 
-        const navWidth = nav.clientWidth;
         const navHeight = nav.clientHeight;
 
         // Create and append bubbles

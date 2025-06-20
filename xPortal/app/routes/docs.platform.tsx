@@ -1,17 +1,17 @@
-import { json, type LoaderFunction } from '@remix-run/node';
-import { useLoaderData, Link } from '@remix-run/react';
-import { Layout } from '~/components/Layout';
-import { FiArrowLeft, FiDownload, FiExternalLink } from 'react-icons/fi';
+import { json, type LoaderFunctionArgs } from "@remix-run/cloudflare";
+import { useLoaderData, Link } from "@remix-run/react";
+import { Layout } from "~/components/Layout";
+import { FiArrowLeft, FiDownload } from "react-icons/fi";
 
 interface LoaderData {
   title: string;
   description: string;
 }
 
-export const loader: LoaderFunction = async (): Promise<Response> => {
+export const loader = async (): Promise<Response> => {
   return json<LoaderData>({
     title: "Platform Documentation",
-    description: "Complete overview of portal.ask platform features, architecture, and functionality"
+    description: "Learn about portal.ask platform features and capabilities"
   });
 };
 
@@ -67,14 +67,9 @@ export default function PlatformDocsPage() {
 
             <h2>Features</h2>
 
-            <h3>1. User Authentication & Profiles</h3>
-            <h4>Registration & Login</h4>
-            <ul>
-              <li>Email-based authentication</li>
-              <li>Username uniqueness validation</li>
-              <li>Password security with bcrypt</li>
-              <li>Session management with JWT</li>
-            </ul>
+            <h3>1. User Authentication &amp; Profiles</h3>
+            <h4>Registration &amp; Login</h4>
+            <p>Users can register and login using email/password authentication.</p>
 
             <h4>Profile Management</h4>
             <ul>
@@ -85,7 +80,9 @@ export default function PlatformDocsPage() {
               <li>Activity history</li>
             </ul>
 
-            <h3>2. Content Creation & Management</h3>
+            <h3>2. Content Creation &amp; Management</h3>
+            <p>Users can create posts, comments, and answers with rich text formatting.</p>
+
             <h4>Posts (Questions)</h4>
             <ul>
               <li>Rich text editor with markdown support</li>
@@ -225,7 +222,9 @@ export default function PlatformDocsPage() {
               <li>Format validation</li>
             </ul>
 
-            <h3>9. Search & Discovery</h3>
+            <h3>9. Search &amp; Discovery</h3>
+            <p>Advanced search functionality with filters and sorting options.</p>
+
             <h4>Content Discovery</h4>
             <ul>
               <li>Community feed</li>
@@ -262,7 +261,7 @@ export default function PlatformDocsPage() {
               <li><strong>Scalable</strong>: Modular architecture for easy extension</li>
             </ul>
 
-            <h2>Support & Resources</h2>
+            <h2>Support &amp; Resources</h2>
 
             <h3>Documentation</h3>
             <ul>

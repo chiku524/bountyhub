@@ -1,6 +1,6 @@
-import { json, LoaderFunctionArgs } from '@remix-run/cloudflare'
-import { useLoaderData, Link } from '@remix-run/react'
-import { getUser } from '~/utils/auth.server'
+import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
+import { useLoaderData, Link } from "@remix-run/react";
+import { getUser } from "~/utils/auth.server";
 import { Nav } from '~/components/nav'
 import { getReputationLevel } from '~/utils/reputationLevel'
 import { 
@@ -19,9 +19,9 @@ import {
 } from 'react-icons/fa'
 import { FiThumbsUp, FiEdit2 } from 'react-icons/fi'
 import IntegrityDisplay from '~/components/IntegrityDisplay'
-import { eq, desc, inArray, sql } from 'drizzle-orm'
+import { eq, desc, inArray, sql } from "drizzle-orm";
 import { users, profiles, posts, comments, reputationHistory } from '../../drizzle/schema'
-import type { DrizzleD1Database } from 'drizzle-orm/d1'
+import { createDb } from "~/utils/db.server";
 
 const DEFAULT_PROFILE_PICTURE = 'https://api.dicebear.com/7.x/initials/svg?seed=';
 
@@ -65,7 +65,8 @@ function getActivityDescription(action: string): string {
     return descriptions[action] || action;
 }
 
-const SocialMediaIcons = ({ profile }: { profile: any }) => {
+const SocialMediaIcons = ({ profile }: { profile: NonNullable<LoaderData["user"]["profile"]> }) => {
+    if (!profile) return null;
     const socialLinks = [
         { icon: FaGithub, url: profile.github, label: 'GitHub', color: 'hover:text-[#333]' },
         { icon: FaTwitter, url: profile.twitter, label: 'Twitter', color: 'hover:text-[#1DA1F2]' },
@@ -151,12 +152,6 @@ interface LoaderData {
     } | null;
 }
 
-interface CloudflareContext {
-  env: {
-    DB: DrizzleD1Database<typeof import('../../drizzle/schema')>;
-  };
-}
-
 export async function loader({ params, context, request }: LoaderFunctionArgs) {
   const { username } = params;
   
@@ -165,7 +160,7 @@ export async function loader({ params, context, request }: LoaderFunctionArgs) {
   }
 
   try {
-    const db = (context as unknown as CloudflareContext).env.DB;
+    const db = createDb((context as { env: { DB: D1Database } }).env.DB);
     const currentUser = await getUser(request);
 
     const user = await db
@@ -186,6 +181,17 @@ export async function loader({ params, context, request }: LoaderFunctionArgs) {
           location: profiles.location,
           website: profiles.website,
           github: profiles.github,
+          twitter: profiles.twitter,
+          linkedin: profiles.linkedin,
+          instagram: profiles.instagram,
+          facebook: profiles.facebook,
+          youtube: profiles.youtube,
+          tiktok: profiles.tiktok,
+          discord: profiles.discord,
+          reddit: profiles.reddit,
+          medium: profiles.medium,
+          stackoverflow: profiles.stackoverflow,
+          devto: profiles.devto,
         },
       })
       .from(users)
@@ -244,7 +250,7 @@ export async function loader({ params, context, request }: LoaderFunctionArgs) {
       comments: commentCounts.find(c => c.postId === post.id)?.count || 0,
     }));
 
-    const transformedReputationHistory = userReputationHistory.map((history: any) => ({
+    const transformedReputationHistory = userReputationHistory.map((history: { id: string; points: number; action: string; createdAt: Date }) => ({
       id: history.id,
       points: history.points,
       action: history.action,
@@ -264,6 +270,20 @@ export async function loader({ params, context, request }: LoaderFunctionArgs) {
     throw new Response('Failed to fetch user', { status: 500 });
   }
 }
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  if (!data) {
+    return [
+      { title: "User Profile" },
+      { name: "description", content: "User profile page" },
+    ];
+  }
+  
+  return [
+    { title: `User Profile - ${data.user.username}` },
+    { name: "description", content: `View the profile of ${data.user.username}` },
+  ];
+};
 
 export default function UserProfile() {
     const { user, currentUser } = useLoaderData<typeof loader>();
@@ -311,15 +331,15 @@ export default function UserProfile() {
                             <h2 className="text-lg font-semibold text-violet-300 mb-4">Profile Information</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
-                                    <label className="block text-sm font-medium text-violet-300">Bio</label>
+                                    <span className="block text-sm font-medium text-violet-300">Bio</span>
                                     <p className="mt-1 text-sm text-gray-300">{user.profile?.bio || 'No bio provided'}</p>
                                 </div>
                                 <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
-                                    <label className="block text-sm font-medium text-violet-300">Location</label>
+                                    <span className="block text-sm font-medium text-violet-300">Location</span>
                                     <p className="mt-1 text-sm text-gray-300">{user.profile?.location || 'No location provided'}</p>
                                 </div>
                                 <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
-                                    <label className="block text-sm font-medium text-violet-300">Website</label>
+                                    <span className="block text-sm font-medium text-violet-300">Website</span>
                                     <p className="mt-1 text-sm text-gray-300">
                                         {user.profile?.website ? (
                                             <a href={user.profile.website} target="_blank" rel="noopener noreferrer" 
@@ -330,7 +350,7 @@ export default function UserProfile() {
                                     </p>
                                 </div>
                                 <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
-                                    <label className="block text-sm font-medium text-violet-300">Social Media</label>
+                                    <span className="block text-sm font-medium text-violet-300">Social Media</span>
                                     <div className="mt-2">
                                         {user.profile ? (
                                             <SocialMediaIcons profile={user.profile} />
@@ -360,7 +380,7 @@ export default function UserProfile() {
                                 <h2 className="text-lg font-semibold text-violet-300 mb-4">Recent Activity</h2>
                                 <div className="space-y-2">
                                     {user.reputationHistory.length > 0 ? (
-                                        user.reputationHistory.map((history: any) => (
+                                        user.reputationHistory.map((history) => (
                                             <div key={history.id} className="flex items-center justify-between p-3 bg-neutral-700/50 rounded-lg border border-violet-500/30">
                                                 <div className="flex items-center gap-2">
                                                     <div className="p-1.5 bg-violet-500/20 rounded-lg">
@@ -390,7 +410,7 @@ export default function UserProfile() {
                                 <h2 className="text-lg font-semibold text-violet-300 mb-4">Recent Posts</h2>
                                 <div className="space-y-2">
                                     {user.posts.length > 0 ? (
-                                        user.posts.map((post: any) => (
+                                        user.posts.map((post) => (
                                             <div key={post.id} className="p-3 bg-neutral-700/50 rounded-lg border border-violet-500/30">
                                                 <Link to={`/posts/${post.id}`} className="block hover:bg-neutral-600/50 rounded-lg p-1.5 -m-1.5 transition-colors">
                                                     <div className="flex items-center gap-2 mb-1">

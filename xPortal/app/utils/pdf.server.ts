@@ -1,6 +1,7 @@
 // Conditional import for puppeteer - will be undefined in Workers environment
 let puppeteer: any = null;
 try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   puppeteer = require('puppeteer');
 } catch (error) {
   // Puppeteer not available in Workers environment
@@ -9,6 +10,8 @@ try {
 
 import { renderToString } from 'react-dom/server';
 import React from 'react';
+import { createDb } from './db.server';
+import { getUser } from './auth.server';
 
 export interface PDFOptions {
   format?: 'A4' | 'Letter' | 'Legal';

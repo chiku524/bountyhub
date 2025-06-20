@@ -1,17 +1,35 @@
 import { useState } from 'react';
 import { Form, Link } from '@remix-run/react';
-import { FiThumbsUp, FiThumbsDown, FiMessageSquare, FiCheck } from 'react-icons/fi';
+import { FiThumbsUp, FiThumbsDown, FiCheck } from 'react-icons/fi';
+
+interface Comment {
+  id: string;
+  content: string;
+  createdAt: string;
+  author: {
+    username: string;
+  };
+}
+
+interface Answer {
+  id: string;
+  content: string;
+  createdAt: string;
+  author: {
+    username: string;
+  };
+  isAccepted?: boolean;
+}
 
 interface PostInteractionsProps {
-  postId: string;
   isAuthor: boolean;
   initialQualityUpvotes: number;
   initialQualityDownvotes: number;
   initialVisibilityVotes: number;
   userQualityVote: number;
   userVisibilityVote: boolean;
-  comments: any[];
-  answers: any[];
+  comments: Comment[];
+  answers: Answer[];
   onQualityVote: (value: number) => Promise<void>;
   onVisibilityVote: (isVoting: boolean) => Promise<void>;
   onComment: (content: string) => Promise<void>;
@@ -20,7 +38,6 @@ interface PostInteractionsProps {
 }
 
 export default function PostInteractions({
-  postId,
   isAuthor,
   initialQualityUpvotes,
   initialQualityDownvotes,

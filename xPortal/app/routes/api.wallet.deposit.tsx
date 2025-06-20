@@ -1,25 +1,10 @@
-import { createDepositRequest, getTransactionById } from "~/utils/virtual-wallet.server";
+import { createDepositRequest, confirmDeposit } from "~/utils/virtual-wallet.server";
 import { getUser } from "~/utils/auth.server";
 import { createDb } from "~/utils/db.server";
 import { json, type ActionFunctionArgs } from "@remix-run/cloudflare";
-import { z } from "zod";
-import bountyBucksInfo from '../../bounty-bucks-info.json';
-import { confirmDeposit } from '~/utils/virtual-wallet.server';
-
-const TOKEN_SYMBOL = bountyBucksInfo.symbol;
-
-const depositSchema = z.object({
-  amount: z.number().positive().max(10000),
-  transactionId: z.string().optional(),
-});
-
-const confirmDepositSchema = z.object({
-  transactionId: z.string(),
-  solanaSignature: z.string(),
-});
 
 export async function action({ request, context }: ActionFunctionArgs) {
-  const db = createDb((context as any).env.DB)
+  const db = createDb((context as { env: { DB: D1Database } }).env.DB);
   const user = await getUser(request, db);
   if (!user) {
     return json({ success: false, error: 'Unauthorized' }, { status: 401 });
@@ -55,4 +40,5 @@ export async function action({ request, context }: ActionFunctionArgs) {
   } catch (error) {
     return json({ success: false, error: error instanceof Error ? error.message : 'Failed to create deposit request' }, { status: 500 });
   }
-} 
+}
+

@@ -1,26 +1,18 @@
 // app/routes/profile.tsx
-import { Form, useLoaderData, Link, useActionData, useNavigation, useFetcher } from "@remix-run/react"
-import { LoaderFunction, ActionFunction, json, redirect, ActionFunctionArgs, MetaFunction } from '@remix-run/node'
-import { logout, getUser } from '~/utils/auth.server'
-import { editUser } from '~/utils/user.server'
-import { useEffect, useState } from 'react'
-import { Layout } from '../components/Layout'
-import { LoaderFunctionArgs } from '@remix-run/node'
-import { requireUserId } from '~/utils/auth.server'
+import { json, type LoaderFunctionArgs, type ActionFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
+import { useLoaderData, useActionData, useNavigation, useFetcher } from "@remix-run/react";
+import { getUser } from "~/utils/auth.server";
+import { editUser } from "~/utils/user.server";
+import { useEffect, useState } from "react";
+import { Layout } from "../components/Layout";
 import { validateUsername } from "~/utils/validators.client";
-import { AuthNotice } from '~/components/auth-notice';
-import type { Profile, User } from '~/utils/types.server';
-import { FiUser, FiLink, FiMail, FiLock, FiSave, FiCheck } from 'react-icons/fi';
-import { FaUser, FaLock, FaBell, FaPalette, FaGlobe, FaTrash, FaSave, FaTimes, FaCheck, FaEdit, FaEye, FaEyeSlash } from 'react-icons/fa'
-import { eq } from 'drizzle-orm';
-import { users, profiles } from '../../drizzle/schema';
-import type { DrizzleD1Database } from 'drizzle-orm/d1';
-
-interface CloudflareContext {
-  env: {
-    DB: DrizzleD1Database<typeof import('../../drizzle/schema')>;
-  };
-}
+import { AuthNotice } from "~/components/auth-notice";
+import type { Profile, User } from "~/utils/types.server";
+import { FiUser, FiLink, FiMail, FiLock, FiSave, FiCheck } from "react-icons/fi";
+import { FaUser, FaLock, FaBell, FaPalette, FaGlobe, FaTrash, FaSave, FaTimes, FaCheck, FaEdit, FaEye, FaEyeSlash } from "react-icons/fa";
+import { eq } from "drizzle-orm";
+import { users, profiles } from "../../drizzle/schema";
+import { createDb } from "~/utils/db.server";
 
 type UserData = {
   id: string;
@@ -78,7 +70,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   }
 
   try {
-    const db = (context as unknown as CloudflareContext).env.DB;
+    const db = createDb((context as { env: { DB: D1Database } }).env.DB);
 
     const userData = await db
       .select({
@@ -138,7 +130,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const action = formData.get('action') as string;
 
   try {
-    const db = (context as unknown as CloudflareContext).env.DB;
+    const db = createDb((context as { env: { DB: D1Database } }).env.DB);
 
     switch (action) {
       case 'updateProfile': {

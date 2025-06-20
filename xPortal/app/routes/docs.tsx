@@ -1,4 +1,4 @@
-import { json, type LoaderFunction, MetaFunction } from '@remix-run/node';
+import { json, type MetaFunction } from '@remix-run/node';
 import { useLoaderData, Link } from '@remix-run/react';
 import { Layout } from '~/components/Layout';
 import { 
@@ -8,7 +8,6 @@ import {
   FiServer, 
   FiCloud, 
   FiShield,
-  FiDownload,
   FiExternalLink,
   FiMessageSquare,
   FiMail
@@ -47,7 +46,7 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export const loader: LoaderFunction = async (): Promise<Response> => {
+export const loader = async (): Promise<Response> => {
   return json<LoaderData>({
     docs: [
       {
@@ -118,7 +117,7 @@ export const loader: LoaderFunction = async (): Promise<Response> => {
       },
       {
         name: "legal",
-        title: "Legal & Compliance",
+        title: "Legal &amp; Compliance",
         description: "Legal documents and compliance information"
       }
     ]

@@ -3,17 +3,14 @@ import { Form } from '@remix-run/react';
 import bountyBucksInfo from '../../bounty-bucks-info.json';
 
 const TOKEN_SYMBOL = bountyBucksInfo.symbol;
-const TOKEN_DECIMALS = 9; // From the attributes in the JSON
 
 interface BountyFormProps {
   postId: string;
-  onSubmit: (amount: number, expiresAt: Date | null) => Promise<void>;
 }
 
-export function BountyForm({ postId, onSubmit }: BountyFormProps) {
+export function BountyForm({ postId }: BountyFormProps) {
   const [amount, setAmount] = useState<string>('');
   const [expiresAt, setExpiresAt] = useState<string>('');
-  const [error, setError] = useState<string | null>(null);
 
   return (
     <Form method="post" className="space-y-6">
@@ -53,12 +50,6 @@ export function BountyForm({ postId, onSubmit }: BountyFormProps) {
         />
         <p className="mt-1 text-sm text-gray-500">Leave empty for no expiration</p>
       </div>
-
-      {error && (
-        <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200">
-          {error}
-        </div>
-      )}
 
       <button
         type="submit"

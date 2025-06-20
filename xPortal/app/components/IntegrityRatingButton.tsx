@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { FiShield, FiStar } from 'react-icons/fi';
 import IntegrityRatingModal from './IntegrityRatingModal';
 

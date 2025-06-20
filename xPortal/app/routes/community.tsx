@@ -1,15 +1,14 @@
-import { useEffect, useState } from 'react'
-import { Form, useLoaderData, Link, useSubmit, useNavigate, useSearchParams } from "@remix-run/react"
-import { LoaderFunction, json, ActionFunction, MetaFunction } from '@remix-run/node'
-import { getUser } from '~/utils/auth.server'
-import { Layout } from '../components/Layout'
-import { createDb } from '~/utils/db.server'
-import { eq, and, desc, sql, inArray, or } from 'drizzle-orm'
-import { posts, tags, users, bounties, comments, votes, profiles, postTags } from '../../drizzle/schema'
-import { FiTrendingUp } from 'react-icons/fi'
-import IntegrityRatingButton from '~/components/IntegrityRatingButton'
-import { AuthNotice } from '~/components/auth-notice'
-import { FaSearch, FaFilter, FaSort, FaEye, FaComment, FaThumbsUp, FaClock, FaUser, FaTag, FaBookmark } from 'react-icons/fa'
+import { json, type LoaderFunctionArgs } from "@remix-run/cloudflare";
+import { useLoaderData, useSearchParams, useSubmit } from "@remix-run/react";
+import { createDb } from "~/utils/db.server";
+import { getUser } from "~/utils/auth.server";
+import { eq, desc, and, or, sql } from "drizzle-orm";
+import { users, posts, tags, profiles, postTags, comments, bounties, votes } from "../../drizzle/schema";
+import { Layout } from "~/components/Layout";
+import { FaSearch, FaBookmark } from "react-icons/fa";
+import { FiTrendingUp } from "react-icons/fi";
+import { useState, useEffect } from "react";
+import { Link } from "@remix-run/react";
 
 const DEFAULT_PROFILE_PICTURE = 'https://api.dicebear.com/7.x/initials/svg?seed=';
 
@@ -72,50 +71,17 @@ interface LoaderData {
   searchQuery: string;
 }
 
-const POSTS_PER_PAGE = 5;
-
-interface Post {
-  id: string;
-  title: string;
-  content: string;
-  media: {
-    id: string;
-    type: string;
-    url: string;
-    thumbnailUrl?: string;
-    isScreenRecording: boolean;
-  } | null;
-  createdAt: Date;
-  updatedAt: Date;
-  author: {
-    id: string;
-    username: string;
-    profile: {
-      profilePicture: string | null;
-    } | null;
-  };
-  visibilityVotes: number;
-  userVoted: boolean;
-  comments: number;
-  hasBounty: boolean;
-  bounty: {
-    id: string;
-    amount: number;
-    status: string;
-  } | null;
-}
-
-export const meta: MetaFunction = () => {
+export const meta = () => {
   return [
     { title: "Community - portal.ask" },
     { name: "description", content: "Explore the portal.ask community and discover questions, answers, and discussions" },
   ];
 };
 
-export const loader: LoaderFunction = async ({ request, context }) => {
+export const loader = async ({ request, context }: LoaderFunctionArgs) => {
   try {
     const user = await getUser(request);
-    const db = (context as any).env.DB;
+    const db = (context as { env: { DB: D1Database } }).env.DB;
     
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -125,7 +91,7 @@ export const loader: LoaderFunction = async ({ request, context }) => {
     const skip = (page - 1) * perPage;
 
     // Build where clause for tag filtering and search
-    let whereConditions: any[] = [];
+    const whereConditions: (ReturnType<typeof sql> | ReturnType<typeof or>)[] = [];
     
     if (selectedTags.length > 0) {
       whereConditions.push(sql`EXISTS (
@@ -171,7 +137,18 @@ export const loader: LoaderFunction = async ({ request, context }) => {
 
     // Fetch related data for each post
     const postsWithData = await Promise.all(
-      postsData.map(async (post: any) => {
+      postsData.map(async (post: {
+        id: string;
+        title: string;
+        content: string;
+        createdAt: Date;
+        authorId: string;
+        visibilityVotes: number;
+        qualityUpvotes: number;
+        qualityDownvotes: number;
+        hasBounty: boolean;
+        status: string;
+      }) => {
         // Get author info
         const authorArr = await db
           .select({
@@ -284,14 +261,14 @@ export const loader: LoaderFunction = async ({ request, context }) => {
   }
 };
 
-export const action: ActionFunction = async ({ request, context }) => {
+export const action = async ({ request, context }: LoaderFunctionArgs) => {
   try {
     const user = await getUser(request);
     if (!user) {
       return json({ error: 'You must be logged in to perform this action' }, { status: 401 });
     }
 
-    const db = createDb((context as any).env.DB);
+    const db = createDb((context as unknown as { env: { DB: D1Database } }).env.DB);
     const formData = await request.formData();
     const action = formData.get('action');
     const postIdRaw = formData.get('postId');
@@ -391,14 +368,10 @@ export const action: ActionFunction = async ({ request, context }) => {
 export default function Community() {
   const { user, posts: initialPosts, totalPosts, currentPage, totalPages, availableTags, selectedTags, searchQuery } = useLoaderData<LoaderData>();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [localPosts, setLocalPosts] = useState<any[]>(initialPosts);
-  const [videoErrors, setVideoErrors] = useState<Record<string, string>>({});
+  const [localPosts, setLocalPosts] = useState<LoaderData['posts']>(initialPosts);
   const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
   const [isSearching, setIsSearching] = useState(false);
   const submit = useSubmit();
-  const navigate = useNavigate();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [bookmarkedPosts, setBookmarkedPosts] = useState<{ [postId: string]: boolean }>({});
 
   // Update localPosts when posts from loader changes
@@ -432,11 +405,6 @@ export default function Community() {
 
     return () => clearTimeout(timeoutId);
   }, [localSearchQuery, searchQuery, searchParams, setSearchParams]);
-
-  // Debug: Log bookmark state changes
-  useEffect(() => {
-    // Removed debugging
-  }, [bookmarkedPosts]);
 
   // Fetch bookmark status for visible posts when user or posts change
   useEffect(() => {
@@ -477,21 +445,12 @@ export default function Community() {
     fetchBookmarks();
   }, [user, localPosts]); // Run when user or posts change
 
-  const handleVideoError = (postId: string, error: string) => {
-    setVideoErrors(prev => ({ ...prev, [postId]: error }));
-  };
-
   const handleVote = async (postId: string, voteValue: number) => {
     if (!user) {
-      setError('Please log in to vote');
       return;
     }
 
     try {
-      if (isSubmitting) return;
-      setIsSubmitting(true);
-      setError(null);
-
       const formData = new FormData();
       formData.append('action', 'vote');
       formData.append('postId', postId);
@@ -499,9 +458,7 @@ export default function Community() {
 
       submit(formData, { method: 'post' });
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to process vote');
-    } finally {
-      setIsSubmitting(false);
+      console.error('Failed to process vote:', error);
     }
   };
 
@@ -661,7 +618,7 @@ export default function Community() {
         {/* Responsive grid for posts */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
           {localPosts.length > 0 ? (
-            localPosts.map((post: any) => (
+            localPosts.map((post: LoaderData['posts'][0]) => (
               <div 
                 key={post.id}
                 className={`bg-neutral-800/80 rounded-lg p-6 border-2 shadow-lg relative ${
@@ -756,7 +713,6 @@ export default function Community() {
                             poster={post.media.thumbnailUrl}
                             controls
                             className="w-full h-48 object-cover rounded-lg"
-                            onError={(e) => handleVideoError(post.id, e.currentTarget.error?.message || 'Video error')}
                           />
                         )}
                       </div>
@@ -775,75 +731,18 @@ export default function Community() {
                       }`}
                     >
                       <FiTrendingUp className={`w-5 h-5 ${post.userVoted ? 'fill-current' : 'fill-none'}`} />
-                      <span>{post.visibilityVotes}</span>
                     </button>
-                    <span className="text-gray-400">
-                      {post.comments} {post.comments === 1 ? 'comment' : 'comments'}
-                    </span>
                   </div>
-                  
-                  {/* Integrity Rating Button */}
-                  {user && user.id !== post.author.id && (
-                    <IntegrityRatingButton
-                      targetUser={post.author}
-                      context={post.hasBounty ? 'BOUNTY_REJECTION' : 'GENERAL'}
-                      referenceId={post.id}
-                      referenceType="POST"
-                      variant="icon"
-                      className="ml-2"
-                    />
-                  )}
                 </div>
               </div>
             ))
           ) : (
-            <div className="col-span-full text-center py-12">
-              <p className="text-gray-500">No posts found</p>
+            <div className="col-span-full text-center text-gray-400">
+              No posts found.
             </div>
           )}
         </div>
-
-        {/* Pagination controls */}
-        {totalPages > 1 && (
-          <div className="flex justify-center mt-8 space-x-2">
-            <button
-              onClick={() => {
-                const newParams = new URLSearchParams(searchParams);
-                newParams.set('page', String(currentPage - 1));
-                setSearchParams(newParams);
-              }}
-              disabled={currentPage === 1}
-              className="px-3 py-1 rounded bg-gray-700 text-white disabled:opacity-50"
-            >
-              Previous
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i + 1}
-                onClick={() => {
-                  const newParams = new URLSearchParams(searchParams);
-                  newParams.set('page', String(i + 1));
-                  setSearchParams(newParams);
-                }}
-                className={`px-3 py-1 rounded ${currentPage === i + 1 ? 'bg-violet-500 text-white' : 'bg-gray-700 text-white'}`}
-              >
-                {i + 1}
-              </button>
-            ))}
-            <button
-              onClick={() => {
-                const newParams = new URLSearchParams(searchParams);
-                newParams.set('page', String(currentPage + 1));
-                setSearchParams(newParams);
-              }}
-              disabled={currentPage === totalPages}
-              className="px-3 py-1 rounded bg-gray-700 text-white disabled:opacity-50"
-            >
-              Next
-            </button>
-          </div>
-        )}
       </div>
     </Layout>
   );
-} 
+}

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { FiStar, FiTrendingUp, FiTrendingDown, FiShield } from 'react-icons/fi';
+import { useState } from 'react';
+import { FiStar, FiShield } from 'react-icons/fi';
 import IntegrityRatingModal from './IntegrityRatingModal';
 
 interface IntegrityDisplayProps {

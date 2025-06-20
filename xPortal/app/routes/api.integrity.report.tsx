@@ -1,9 +1,8 @@
-import { ActionFunction, json } from '@remix-run/cloudflare';
+import { json, type ActionFunctionArgs } from '@remix-run/cloudflare';
 import { z } from 'zod';
 import { reportViolation } from '~/utils/integrity.server';
 import { createDb } from '~/utils/db.server';
 import { getUser } from '~/utils/auth.server';
-import type { ActionFunctionArgs } from '@remix-run/cloudflare';
 
 const ReportViolationSchema = z.object({
   targetUserId: z.string().min(1, 'Target user ID is required'),
@@ -14,13 +13,13 @@ const ReportViolationSchema = z.object({
   referenceType: z.string().optional(),
 });
 
-export const action: ActionFunction = async ({ request, context }: ActionFunctionArgs) => {
+export const action = async ({ request, context }: ActionFunctionArgs) => {
   if (request.method !== 'POST') {
     return json({ error: 'Method not allowed' }, { status: 405 });
   }
 
   try {
-    const db = createDb((context as any).env.DB);
+    const db = createDb((context as { env: { DB: D1Database } }).env.DB);
     const user = await getUser(request, db);
     if (!user) {
       return json({ error: 'User not authenticated' }, { status: 401 });
@@ -63,4 +62,5 @@ export const action: ActionFunction = async ({ request, context }: ActionFunctio
       error: 'An unexpected error occurred' 
     }, { status: 500 });
   }
-}; 
+};
+

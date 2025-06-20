@@ -8,7 +8,7 @@ import type { Db } from './db.server'
 
 // Declare global interface for SESSION_SECRET
 declare global {
-  var SESSION_SECRET: string | undefined;
+  let SESSION_SECRET: string | undefined;
 }
 
 // Define session data type
@@ -19,8 +19,8 @@ interface SessionData {
 // Lazy initialization of session secret
 function getSessionSecret(): string {
   // Check global variable first (for Workers environment)
-  if (typeof global !== 'undefined' && global.SESSION_SECRET) {
-    return global.SESSION_SECRET;
+  if (typeof global !== 'undefined' && (global as { SESSION_SECRET?: string }).SESSION_SECRET) {
+    return (global as { SESSION_SECRET: string }).SESSION_SECRET;
   }
 
   // Fallback to process.env (for Node.js environment)

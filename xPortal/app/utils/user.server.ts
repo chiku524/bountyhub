@@ -6,8 +6,8 @@ import { addReputationPoints, REPUTATION_POINTS } from './reputation.server'
 import { getProfilePicture } from './profile.server'
 import { SolanaAddressService } from './solana-address.server'
 import type { Db } from './db.server';
-import { users, profiles, posts as postsTable, virtualWallets, codeBlocks, media as mediaTable } from '../../drizzle/schema';
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { users, posts, comments, votes, bounties, tags, postTags, profiles, virtualWallets, refundRequests, media, codeBlocks } from '../../drizzle/schema';
+import { eq, desc, asc } from 'drizzle-orm';
 
 export async function createUser(db: Db, { email, password, username }: RegisterForm) {
     const hashedPassword = await bcrypt.hash(password, 10)
@@ -99,7 +99,7 @@ export const getUserPosts = async (db: Db, username: string) => {
       where: eq(users.username, username),
       with: {
         posts: {
-          orderBy: [desc(postsTable.createdAt)]
+          orderBy: [desc(posts.createdAt)]
         }
       }
     });
@@ -113,7 +113,7 @@ export const getUserPosts = async (db: Db, username: string) => {
 export const createPost = async (db: Db, post: PostForm) => {
   try {
     const postId = crypto.randomUUID();
-    const [newPost] = await db.insert(postsTable).values({
+    const [newPost] = await db.insert(posts).values({
       id: postId,
       title: post.title,
       content: post.content,
@@ -129,7 +129,7 @@ export const createPost = async (db: Db, post: PostForm) => {
       }).run();
     }
     for (const m of post.media) {
-      await db.insert(mediaTable).values({
+      await db.insert(media).values({
         id: crypto.randomUUID(),
         postId: newPost.id,
         type: m.type,
@@ -147,7 +147,7 @@ export const createPost = async (db: Db, post: PostForm) => {
 };
 
 export async function deletePost(db: Db, postId: string) {
-    await db.delete(postsTable).where(eq(postsTable.id, postId)).run();
+    await db.delete(posts).where(eq(posts.id, postId)).run();
     return { success: true };
 }
 

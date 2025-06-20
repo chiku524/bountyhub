@@ -1,4 +1,4 @@
-import { Keypair, PublicKey, Connection } from "@solana/web3.js";
+import { Keypair, PublicKey } from "@solana/web3.js";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
 import bountyBucksInfo from '../../bounty-bucks-info.json';
 

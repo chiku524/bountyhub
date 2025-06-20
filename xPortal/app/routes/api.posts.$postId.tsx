@@ -1,29 +1,28 @@
-import { json } from '@remix-run/cloudflare';
-import { eq, and } from 'drizzle-orm';
-import { posts, comments, answers, votes, users, profiles } from '../../drizzle/schema';
-import type { DrizzleD1Database } from 'drizzle-orm/d1';
-import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/cloudflare';
+import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/cloudflare";
+import { getUser } from "~/utils/auth.server";
+import { eq, and, desc } from "drizzle-orm";
+import { posts, comments, answers, votes, users, profiles } from "../../drizzle/schema";
+import { createDb } from "~/utils/db.server";
+import { addReputationPoints, REPUTATION_POINTS } from "~/utils/reputation.server";
 
-interface CloudflareContext {
-  env: {
-    DB: DrizzleD1Database<typeof import('../../drizzle/schema')>;
-  };
+interface UpdateData {
+  visibilityVotes?: number;
+  qualityUpvotes?: number;
+  qualityDownvotes?: number;
 }
 
 export async function loader({ params, context }: LoaderFunctionArgs) {
-  const { postId } = params;
-  
-  if (!postId) {
-    return json({ error: 'Post ID is required' }, { status: 400 });
+  if (!params.postId) {
+    throw new Response('Post ID is required', { status: 400 });
   }
 
   try {
-    const db = (context as unknown as CloudflareContext).env.DB;
+    const db = createDb((context as { env: { DB: D1Database } }).env.DB);
 
     const post = await db
       .select()
       .from(posts)
-      .where(eq(posts.id, postId))
+      .where(eq(posts.id, params.postId))
       .limit(1);
 
     if (!post.length) {
@@ -44,11 +43,15 @@ export async function action({ request, params, context }: ActionFunctionArgs) {
     return json({ error: 'Post ID is required' }, { status: 400 });
   }
 
-  const formData = await request.formData();
-  const action = formData.get('action') as string;
-
   try {
-    const db = (context as unknown as CloudflareContext).env.DB;
+    const db = createDb((context as { env: { DB: D1Database } }).env.DB);
+    const user = await getUser(request, db);
+    if (!user) {
+      return json({ error: 'User not authenticated' }, { status: 401 });
+    }
+
+    const formData = await request.formData();
+    const action = formData.get('action') as string;
 
     switch (action) {
       case 'addComment': {
@@ -152,7 +155,7 @@ export async function action({ request, params, context }: ActionFunctionArgs) {
         const totalVotes = voteCounts.reduce((sum, vote) => sum + vote.totalVotes, 0);
 
         // Update post with new vote counts
-        const updateData: any = {};
+        const updateData: UpdateData = {};
         if (voteType === 'visibility') {
           updateData.visibilityVotes = totalVotes;
         } else if (voteType === 'quality') {
@@ -261,11 +264,111 @@ export async function action({ request, params, context }: ActionFunctionArgs) {
         return json({ success: true });
       }
 
+      case 'comment': {
+        const content = formData.get('content') as string;
+        if (!content) {
+          return json({ error: 'Comment content is required' }, { status: 400 });
+        }
+        if (!params.postId) {
+          return json({ error: 'Post ID is required' }, { status: 400 });
+        }
+        const commentId = crypto.randomUUID();
+        await db.insert(comments).values({
+          id: commentId,
+          content,
+          authorId: user.id,
+          postId: params.postId,
+          upvotes: 0,
+          downvotes: 0,
+          answerId: null
+        });
+        // Fetch author and profile
+        const author = await db.select().from(users).where(eq(users.id, user.id)).limit(1);
+        const profile = await db.select().from(profiles).where(eq(profiles.userId, user.id)).limit(1);
+        // Award reputation points for commenting
+        await addReputationPoints(
+          db,
+          user.id,
+          REPUTATION_POINTS.COMMENT_CREATED,
+          'COMMENT_CREATED',
+          commentId
+        );
+        return json({
+          success: true,
+          comment: {
+            id: commentId,
+            content,
+            author: {
+              id: author[0]?.id,
+              username: author[0]?.username,
+              profilePicture: profile[0]?.profilePicture || null,
+              profile: profile[0] ? { profilePicture: profile[0].profilePicture } : null
+            },
+            upvotes: 0,
+            downvotes: 0,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            userVote: 0
+          }
+        });
+      }
+
+      case 'answer': {
+        const content = formData.get('content') as string;
+        if (!content) {
+          return json({ error: 'Answer content is required' }, { status: 400 });
+        }
+        if (!params.postId) {
+          return json({ error: 'Post ID is required' }, { status: 400 });
+        }
+        const answerId = crypto.randomUUID();
+        await db.insert(answers).values({
+          id: answerId,
+          content,
+          postId: params.postId,
+          authorId: user.id,
+          isAccepted: false,
+          upvotes: 0,
+          downvotes: 0
+        });
+        // Fetch author and profile
+        const author = await db.select().from(users).where(eq(users.id, user.id)).limit(1);
+        const profile = await db.select().from(profiles).where(eq(profiles.userId, user.id)).limit(1);
+        // Award reputation points for answering
+        await addReputationPoints(
+          db,
+          user.id,
+          REPUTATION_POINTS.ANSWER_CREATED,
+          'ANSWER_CREATED',
+          answerId
+        );
+        return json({
+          success: true,
+          answer: {
+            id: answerId,
+            content,
+            author: {
+              id: author[0]?.id,
+              username: author[0]?.username,
+              profilePicture: profile[0]?.profilePicture || null,
+              profile: profile[0] ? { profilePicture: profile[0].profilePicture } : null
+            },
+            upvotes: 0,
+            downvotes: 0,
+            isAccepted: false,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            userVote: 0
+          }
+        });
+      }
+
       default:
         return json({ error: 'Invalid action' }, { status: 400 });
     }
   } catch (error) {
-    console.error('Error processing post action:', error);
+    console.error('Error processing action:', error);
     return json({ error: 'Failed to process action' }, { status: 500 });
   }
-} 
+}
+

@@ -1,7 +1,8 @@
-import { json, type ActionFunctionArgs } from "@remix-run/node";
+import { json, type ActionFunctionArgs } from "@remix-run/cloudflare";
 import { voteOnRefundRequest } from "~/utils/refund-system.server";
 import { requireUserId } from "~/utils/auth.server";
 import { z } from "zod";
+import { createDb } from "~/utils/db.server";
 
 const refundVoteSchema = z.object({
   refundRequestId: z.string(),
@@ -25,7 +26,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const validatedData = refundVoteSchema.parse({ refundRequestId, vote, reason });
 
     // Vote on refund request
-    const db = (context as any).env.DB;
+    const db = createDb((context as { env: { DB: D1Database } }).env.DB);
     const voteRecord = await voteOnRefundRequest(
       db,
       validatedData.refundRequestId,
@@ -52,4 +53,5 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
     return json({ error: "Failed to vote on refund request" }, { status: 500 });
   }
-} 
+}
+

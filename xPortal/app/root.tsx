@@ -9,16 +9,17 @@ import {
   isRouteErrorResponse,
   useLoaderData,
 } from "@remix-run/react";
-import type { LinksFunction } from "@remix-run/node";
+import { LinksFunction, json, LoaderFunctionArgs } from "@remix-run/node";
 import { useEffect } from "react";
-import { Nav } from "~/components/nav";
-import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { getUser } from "~/utils/auth.server";
 import { WalletProvider } from './components/WalletProvider';
 import { createDb } from "~/utils/db.server";
 
 import "./tailwind.css";
 import "./styles/wallet-adapter.css";
+
+// Add Cloudflare Workers types
+import type { D1Database } from '@cloudflare/workers-types';
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -53,11 +54,9 @@ export function ErrorBoundary() {
   // Determine error type and message
   let errorTitle = "Something went wrong";
   let errorMessage = "An unexpected error occurred. Please try again later.";
-  let errorStatus = 500;
   let is404 = false;
   
   if (isRouteErrorResponse(error)) {
-    errorStatus = error.status;
     is404 = error.status === 404;
     
     if (is404) {
@@ -178,8 +177,26 @@ export function ErrorBoundary() {
   );
 }
 
+interface Env {
+  DB: D1Database;
+  SESSION_SECRET?: string;
+  [key: string]: unknown;
+}
+
+interface CustomContext {
+  env: Env;
+}
+
 export const loader = async ({ request, context }: LoaderFunctionArgs) => {
-  const db = createDb((context as any).env.DB)
+  const ctx = context as unknown as CustomContext;
+  if (!ctx.env || !ctx.env.DB) {
+    throw new Error("D1 Database binding is missing from context.env.DB");
+  }
+  const db = createDb(ctx.env.DB);
+  // Set the session secret for the auth system
+  if (ctx.env.SESSION_SECRET) {
+    global.SESSION_SECRET = ctx.env.SESSION_SECRET;
+  }
   return json({
     user: await getUser(request, db),
   });

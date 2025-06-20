@@ -28,19 +28,25 @@ interface RefundRequest {
   }>;
 }
 
+interface ActionData {
+  success?: boolean;
+  message?: string;
+  error?: string;
+}
+
 interface RefundRequestsListProps {
   refundRequests: RefundRequest[];
 }
 
 export function RefundRequestsList({ refundRequests }: RefundRequestsListProps) {
-  const actionData = useActionData<any>();
+  const actionData = useActionData<ActionData>();
   const navigation = useNavigation();
   const [selectedRequest, setSelectedRequest] = useState<string | null>(null);
   const [voteReason, setVoteReason] = useState("");
 
   const isSubmitting = navigation.state === "submitting";
 
-  const handleVote = (requestId: string, vote: boolean) => {
+  const handleVote = (requestId: string) => {
     setSelectedRequest(requestId);
     setVoteReason("");
   };
@@ -112,14 +118,14 @@ export function RefundRequestsList({ refundRequests }: RefundRequestsListProps) 
           <div className="flex items-center justify-between">
             <div className="flex gap-2">
               <button
-                onClick={() => handleVote(request.id, true)}
+                onClick={() => handleVote(request.id)}
                 disabled={isSubmitting}
                 className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors disabled:opacity-50"
               >
                 Approve
               </button>
               <button
-                onClick={() => handleVote(request.id, false)}
+                onClick={() => handleVote(request.id)}
                 disabled={isSubmitting}
                 className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors disabled:opacity-50"
               >

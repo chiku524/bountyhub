@@ -1,9 +1,20 @@
 // app/routes/profile.tsx
-import { useEffect, useState, useRef } from 'react'
-import { Form, useLoaderData, Link, useActionData, redirect, useNavigate, useSubmit, useRouteError, useNavigation, MetaFunction } from "@remix-run/react"
-import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from '@remix-run/node'
+import { useState } from 'react'
+import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/cloudflare";
+import { useLoaderData, useActionData } from "@remix-run/react";
+import { redirect } from "@remix-run/node";
+import { createDb } from "~/utils/db.server";
+import { getUser } from "~/utils/auth.server";
+import { createPost } from "~/utils/user.server";
+import { eq } from "drizzle-orm";
+import { posts, users } from "~/drizzle/schema";
+import { Layout } from "~/components/Layout";
+import { AuthNotice } from "~/components/auth-notice";
+import { FaSave, FaTimes, FaEye, FaEyeSlash, FaTag, FaDollarSign, FaGift } from "react-icons/fa";
+import { FiUpload, FiLink } from "react-icons/fi";
+import { useEffect, useRef } from 'react'
+import { Link, useNavigate, useSubmit, useRouteError, useNavigation, MetaFunction } from "@remix-run/react"
 import { requireUserId } from '~/utils/auth.server'
-import { Layout } from '~/components/Layout'
 import { validateTitle, validateContent } from '~/utils/validators.server'
 import type { CodeBlockForm } from '~/utils/types.server'
 import { addReputationPoints, REPUTATION_POINTS } from '~/utils/reputation.server'
@@ -11,14 +22,14 @@ import CodeBlockEditor from '~/components/CodeBlockEditor'
 import { MediaUpload } from '~/components/MediaUpload'
 import { uploadToCloudinary } from '~/utils/cloudinary.server'
 import { getVirtualWallet, createVirtualWallet, createBounty } from "~/utils/virtual-wallet.server"
-import { createDb } from "~/utils/db.server"
-import { posts, bounties, tags, users } from "../../drizzle/schema"
-import { eq, asc } from "drizzle-orm"
+import { tags } from "../../drizzle/schema"
+import { asc } from "drizzle-orm"
 import { z } from "zod"
 import TagSelector from '~/components/TagSelector'
 import bountyBucksInfo from '../../bounty-bucks-info.json'
 import { BountyForm } from '~/components/BountyForm'
-import { FiGift, FiDollarSign, FiClock, FiInfo } from 'react-icons/fi'
+import { FiClock, FiInfo } from 'react-icons/fi'
+import { FaClock as FaClockIcon } from "react-icons/fa"
 
 const TOKEN_SYMBOL = bountyBucksInfo.symbol
 
@@ -240,7 +251,7 @@ export default function CreatePost() {
           <div>
             <label className="block text-sm font-medium text-violet-300 mb-3">
               <div className="flex items-center gap-2">
-                <FiGift className="w-4 h-4" />
+                <FaGift className="w-4 h-4" />
                 Bounty Settings
               </div>
             </label>
@@ -280,7 +291,7 @@ export default function CreatePost() {
                 
                 {hasBounty && (
                   <div className="flex items-center gap-2 px-3 py-1 bg-violet-500/20 border border-violet-500/30 rounded-full">
-                    <FiGift className="w-4 h-4 text-violet-300" />
+                    <FaGift className="w-4 h-4 text-violet-300" />
                     <span className="text-violet-300 text-sm font-medium">Active</span>
                   </div>
                 )}
@@ -292,7 +303,7 @@ export default function CreatePost() {
                   {/* Amount Section */}
                   <div className="bg-neutral-700/30 rounded-lg p-4 border border-neutral-600/50">
                     <div className="flex items-center gap-2 mb-3">
-                      <FiDollarSign className="w-4 h-4 text-yellow-400" />
+                      <FaDollarSign className="w-4 h-4 text-yellow-400" />
                       <label className="text-white font-medium">Bounty Amount</label>
                     </div>
                     <div className="relative">
@@ -319,7 +330,7 @@ export default function CreatePost() {
                   {/* Duration Section */}
                   <div className="bg-neutral-700/30 rounded-lg p-4 border border-neutral-600/50">
                     <div className="flex items-center gap-2 mb-3">
-                      <FiClock className="w-4 h-4 text-blue-400" />
+                      <FaClockIcon className="w-4 h-4 text-blue-400" />
                       <label className="text-white font-medium">Bounty Duration</label>
                     </div>
                     <div className="grid grid-cols-2 gap-3">

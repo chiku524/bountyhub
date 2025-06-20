@@ -1,22 +1,27 @@
-import { json, type ActionFunctionArgs } from '@remix-run/node';
-import { requireUserId } from '~/utils/auth.server';
+import { json, type ActionFunctionArgs } from '@remix-run/cloudflare';
+import { getUser } from '~/utils/auth.server';
 import { eq } from 'drizzle-orm';
 import { posts } from '../../drizzle/schema';
+import { createDb } from '~/utils/db.server';
 
-export const action = async ({ request, context }: ActionFunctionArgs) => {
-    if (request.method !== 'POST') {
+export async function action({ request, context }: ActionFunctionArgs) {
+    if (request.method !== 'DELETE') {
         return json({ error: 'Method not allowed' }, { status: 405 });
     }
 
     try {
-        const userId = await requireUserId(request);
+        const db = createDb((context as { env: { DB: D1Database } }).env.DB);
+        const user = await getUser(request, db);
+        
+        if (!user) {
+            return json({ error: 'User not authenticated' }, { status: 401 });
+        }
+
         const { postId } = await request.json() as { postId: string };
         
         if (!postId) {
             return json({ error: 'Post ID is required' }, { status: 400 });
         }
-
-        const db = (context as any).env.DB;
 
         // Check if user owns the post
         const post = await db
@@ -25,7 +30,7 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
             .where(eq(posts.id, postId))
             .limit(1);
 
-        if (!post.length || post[0].authorId !== userId) {
+        if (!post.length || post[0].authorId !== user.id) {
             return json({ error: 'Unauthorized' }, { status: 401 });
         }
 
@@ -37,6 +42,5 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
         console.error('Delete post error:', error);
         return json({ error: 'Failed to delete post' }, { status: 500 });
     }
-};
+}
 
-export default function () { return null; } 

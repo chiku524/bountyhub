@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { FiUpload, FiVideo, FiImage, FiX } from 'react-icons/fi';
+import { FiUpload, FiVideo, FiX } from 'react-icons/fi';
 
 interface MediaUploadProps {
   onMediaUpload: (media: { type: string; url: string; thumbnailUrl?: string; isScreenRecording: boolean }) => void;
@@ -36,7 +36,6 @@ async function uploadToCloudinary(file: File | Blob, resourceType: 'image' | 'vi
 export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: MediaUploadProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadType, setUploadType] = useState<'screen' | 'file' | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -56,7 +55,6 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
     }
     recordedChunksRef.current = [];
     setIsRecording(false);
-    setUploadType(null);
   }, []);
 
   // Cleanup on unmount
@@ -158,7 +156,6 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
       };
       mediaRecorder.start();
       setIsRecording(true);
-      setUploadType('screen');
     } catch (error) {
       alert(error instanceof Error ? error.message : 'Failed to start screen recording');
       cleanupRecording();
@@ -176,7 +173,6 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
     if (!file) return;
 
     setIsUploading(true);
-    setUploadType('file');
 
     try {
       // Validate file type
@@ -275,7 +271,6 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
       alert(errorMessage);
     } finally {
       setIsUploading(false);
-      setUploadType(null);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -332,7 +327,9 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
                   poster={media.thumbnailUrl}
                   className="w-full h-48 object-cover rounded-lg"
                   controls
-                />
+                >
+                  <track kind="captions" />
+                </video>
               ) : (
                 <img
                   src={media.url}

@@ -1,4 +1,4 @@
-import { json, type LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
 import { useLoaderData, Link } from "@remix-run/react";
 import { getUser } from "~/utils/auth.server";
 import { createDb } from "~/utils/db.server";
@@ -14,14 +14,14 @@ export const meta: MetaFunction = () => {
 };
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
-  const db = createDb((context as any).env.DB)
+  const db = createDb((context as { env: { DB: D1Database } }).env.DB);
   const user = await getUser(request, db);
   if (!user) {
     throw new Response("Unauthorized", { status: 401 });
   }
 
   // For now, return empty transactions until we implement the transaction service
-  const transactions: any[] = [];
+  const transactions: unknown[] = [];
 
   return json({ user, transactions });
 }

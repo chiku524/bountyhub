@@ -32,7 +32,6 @@ export class RateLimiterService {
    * Check if a request is within rate limits
    */
   static async checkRateLimit(
-    request: Request,
     type: keyof typeof RateLimiterService.DEFAULT_CONFIGS = 'general'
   ): Promise<{ allowed: boolean; remaining: number; resetTime: number }> {
     const config = this.DEFAULT_CONFIGS[type];
@@ -83,9 +82,7 @@ export class RateLimiterService {
     // Try to get user ID from the request
     const url = new URL(request.url);
     const userId = url.searchParams.get('userId') || 'anonymous';
-    
-    // For production, you might want to get user ID from session/token
-    return `${type}:${userId}:${this.getClientIP(request)}`;
+    return `${type}:${userId}`;
   }
 
   /**

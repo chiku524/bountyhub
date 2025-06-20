@@ -1,8 +1,10 @@
-import { json } from '@remix-run/cloudflare';
+import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { eq, and } from 'drizzle-orm';
 import { bookmarks } from '../../drizzle/schema';
 import type { DrizzleD1Database } from 'drizzle-orm/d1';
-import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/cloudflare';
+import { requireUserId } from "~/utils/auth.server";
+import { checkBookmarkStatus } from "~/utils/bookmark.server";
+import { createDb } from "~/utils/db.server";
 
 interface CloudflareContext {
   env: {
@@ -20,7 +22,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   }
 
   try {
-    const db = (context as unknown as CloudflareContext).env.DB;
+    const db = createDb((context as { env: { DB: DrizzleD1Database<typeof import('../../drizzle/schema')> } }).env.DB);
     
     if (!db) {
       console.error('Database is undefined in bookmarks-status loader');
@@ -48,18 +50,14 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 }
 
 export async function action({ request, context }: ActionFunctionArgs) {
-  const formData = await request.formData();
-  const postId = formData.get('postId') as string;
-  const userId = formData.get('userId') as string;
-  const action = formData.get('action') as string;
-
-  if (!postId || !userId || !action) {
-    return json({ error: 'Missing required fields' }, { status: 400 });
-  }
-
   try {
-    const db = (context as unknown as CloudflareContext).env.DB;
+    const userId = await requireUserId(request);
+    const { postId } = await request.json() as { postId: string };
     
+    if (!postId) return json({ error: 'Missing postId' }, { status: 400 });
+    
+    const db = createDb((context as { env: { DB: DrizzleD1Database<typeof import('../../drizzle/schema')> } }).env.DB);
+
     if (!db) {
       console.error('Database is undefined in bookmarks-status action');
       return json({ error: 'Database connection not available' }, { status: 500 });
@@ -103,4 +101,5 @@ export async function action({ request, context }: ActionFunctionArgs) {
     console.error('Error toggling bookmark:', error);
     return json({ error: 'Failed to toggle bookmark' }, { status: 500 });
   }
-} 
+}
+

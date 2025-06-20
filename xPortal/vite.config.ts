@@ -54,8 +54,7 @@ export default defineConfig({
           'utils-vendor': ['bcryptjs', 'zod', 'cloudinary'],
           'drizzle-vendor': ['drizzle-orm', 'drizzle-orm/sqlite-core', 'drizzle-orm/d1'],
         },
-        chunkFileNames: (chunkInfo: any) => {
-          const facadeModuleId = chunkInfo.facadeModuleId ? chunkInfo.facadeModuleId.split('/').pop() : 'chunk';
+        chunkFileNames: () => {
           return `js/[name]-[hash].js`;
         },
       }

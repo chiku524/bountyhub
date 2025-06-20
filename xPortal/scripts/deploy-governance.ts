@@ -1,14 +1,23 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
-import { PublicKey, Keypair, SystemProgram, SYSVAR_RENT_PUBKEY } from "@solana/web3.js";
-import { TOKEN_PROGRAM_ID, createMint, createAccount } from "@solana/spl-token";
+import { PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from "@solana/web3.js";
+import { TOKEN_PROGRAM_ID, createMint } from "@solana/spl-token";
 import fs from "fs";
+import { GovernanceProgram } from "../app/types/governance_program";
 
 async function main() {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
-  const program = anchor.workspace.Governance as Program<any>;
+  // For now, use a placeholder program ID - this should be replaced with actual deployment
+  const programId = new PublicKey("your_program_id_here");
+  
+  // Create a minimal program instance for deployment
+  const program = new Program(
+    {} as any, // Placeholder IDL
+    programId,
+    provider
+  );
   
   console.log("Deploying governance program...");
   console.log("Program ID:", program.programId.toString());
@@ -17,7 +26,7 @@ async function main() {
   console.log("Creating governance token mint...");
   const mint = await createMint(
     provider.connection,
-    provider.wallet as any,
+    provider.wallet,
     provider.wallet.publicKey,
     null,
     9
@@ -41,7 +50,7 @@ async function main() {
 
   const feeRate = 500; // 5% in basis points
 
-  await (program as any).methods
+  await program.methods
     .initializeGovernancePool(new anchor.BN(feeRate))
     .accounts({
       governancePool: governancePoolPda,

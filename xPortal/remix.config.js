@@ -4,13 +4,7 @@ export default {
   serverModuleFormat: "esm",
   serverDependenciesToBundle: [
     "bcryptjs",
-    "mongodb",
-    "drizzle-orm",
-    "drizzle-orm/sqlite-core",
     "drizzle-orm/d1",
-    "@solana/web3.js",
-    "@solana/spl-token",
-    "@coral-xyz/anchor",
   ],
   browserNodeBuiltinsPolyfill: {
     modules: {
@@ -26,9 +20,5 @@ export default {
       net: false,
       tls: false,
     },
-  },
-  future: {
-    v3_fetcherPersist: true,
-    v3_relativeSplatPath: true,
   },
 }; 
