@@ -1,28 +1,16 @@
 import { useState, useEffect } from 'react';
-import { useLoaderData, useActionData, useFetcher, useRouteError, isRouteErrorResponse, useSubmit, Link, Form } from '@remix-run/react';
+import { useLoaderData, useActionData, useRouteError, isRouteErrorResponse, useSubmit, Link, Form } from '@remix-run/react';
 import { json, type ActionFunctionArgs, type LoaderFunctionArgs, redirect, type MetaFunction } from '@remix-run/cloudflare';
-import { getUser, requireUserId } from '~/utils/auth.server';
+import { getUser } from '~/utils/auth.server';
 import { createDb } from '~/utils/db.server';
-import { eq, and, desc, or, sql } from 'drizzle-orm';
-import { posts, users, profiles, media, comments, answers, codeBlocks, votes, bounties, virtualWallets, postTags, tags, reports, bookmarks, integrityRatings, bountyClaims } from '../../drizzle/schema';
+import { eq, and, sql } from 'drizzle-orm';
+import { posts, users, profiles, comments, answers, votes, bounties, postTags, reports, bookmarks, integrityRatings, bountyClaims } from '../../drizzle/schema';
 import { Nav } from '~/components/nav';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import { FiTrash2, FiArrowUp, FiArrowDown } from 'react-icons/fi';
 import { addReputationPoints, REPUTATION_POINTS } from '~/utils/reputation.server';
 import IntegrityRatingButton from '~/components/IntegrityRatingButton';
-import { Layout } from '~/components/Layout';
-import { AuthNotice } from '~/components/auth-notice';
-import { FaThumbsUp, FaThumbsDown, FaComment, FaReply, FaEdit, FaTrash, FaFlag, FaCheck, FaTimes, FaEye, FaClock, FaUser, FaTag, FaDollarSign, FaGift, FaLock, FaUnlock } from 'react-icons/fa';
-import CodeBlockEditor from '~/components/CodeBlockEditor';
-import { MediaUpload } from '~/components/MediaUpload';
-import TagSelector from '~/components/TagSelector';
-import bountyBucksInfo from '../../bounty-bucks-info.json';
-import { getVirtualWallet, createDepositRequest, confirmDeposit, createWithdrawalRequest } from '~/utils/virtual-wallet.server';
-import { BountyModal } from '~/components/BountyModal';
-import { RefundRequestModal } from '~/components/RefundRequestModal';
-import IntegrityRatingModal from '~/components/IntegrityRatingModal';
-import { z } from 'zod';
 
 // Extended CodeBlock type with description field
 type CodeBlockWithDescription = {
@@ -30,8 +18,8 @@ type CodeBlockWithDescription = {
   language: string;
   code: string;
   description?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 };
 
 type CommentWithAuthor = {
@@ -45,9 +33,9 @@ type CommentWithAuthor = {
   author: {
     id: string;
     username: string;
-    profilePicture: string | null;
+    profilePicture?: string | null;
     profile?: {
-      profilePicture: string | null;
+      profilePicture?: string | null;
     } | null;
   };
 };
@@ -64,9 +52,9 @@ type AnswerWithAuthor = {
   author: {
     id: string;
     username: string;
-    profilePicture: string | null;
+    profilePicture?: string | null;
     profile?: {
-      profilePicture: string | null;
+      profilePicture?: string | null;
     } | null;
   };
 };
@@ -75,8 +63,8 @@ type PostWithRelations = {
   id: string;
   title: string;
   content: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
   authorId: string;
   visibilityVotes: number;
   qualityUpvotes: number;
@@ -89,9 +77,9 @@ type PostWithRelations = {
     id: string;
     username: string;
     profile?: {
-      profilePicture: string | null;
+      profilePicture?: string | null;
     } | null;
-    profilePicture: string | null;
+    profilePicture?: string | null;
   };
   comments: CommentWithAuthor[];
   answers: AnswerWithAuthor[];
@@ -123,21 +111,6 @@ type AnswerResponse = {
   error?: string;
 };
 
-type VoteResponse = {
-  success: boolean;
-  qualityUpvotes: number;
-  qualityDownvotes: number;
-  userQualityVote: number;
-  error?: string;
-};
-
-type AcceptAnswerResponse = {
-  success: boolean;
-  answer?: AnswerWithAuthor;
-  error?: string;
-  message?: string;
-};
-
 type BountyClaimResponse = {
   success: boolean;
   message: string;
@@ -154,8 +127,98 @@ function getProfilePicture(profilePicture: string | null, username: string): str
     return `${DEFAULT_PROFILE_PICTURE}${encodeURIComponent(username)}`;
 }
 
+interface PostData {
+  post: {
+    id: string;
+    title: string;
+    content: string;
+    authorId: string;
+    createdAt: string;
+    updatedAt: string;
+    visibilityVotes: number;
+    qualityUpvotes: number;
+    qualityDownvotes: number;
+    hasBounty: boolean;
+    status: string;
+  };
+  author: {
+    id: string;
+    username: string;
+    profilePicture: string | null;
+  };
+  comments: Array<{
+    id: string;
+    content: string;
+    authorId: string;
+    postId: string;
+    answerId: string | null;
+    createdAt: string;
+    updatedAt: string;
+    upvotes: number;
+    downvotes: number;
+    author: {
+      id: string;
+      username: string;
+      profilePicture: string | null;
+    };
+  }>;
+  answers: Array<{
+    id: string;
+    content: string;
+    authorId: string;
+    postId: string;
+    createdAt: string;
+    updatedAt: string;
+    upvotes: number;
+    downvotes: number;
+    isAccepted: boolean;
+    author: {
+      id: string;
+      username: string;
+      profilePicture: string | null;
+    };
+  }>;
+  codeBlocks: Array<{
+    id: string;
+    language: string;
+    code: string;
+  }>;
+  media: Array<{
+    id: string;
+    type: string;
+    url: string;
+    thumbnailUrl?: string;
+    isScreenRecording: boolean;
+  }>;
+  bounty?: {
+    id: string;
+    amount: number;
+    status: string;
+    tokenDecimals: number;
+    refundLockPeriod: number;
+    refundPenalty: number;
+    communityFee: number;
+  };
+  userVoted: boolean;
+  userVoteValue: number;
+  totalComments: number;
+  totalAnswers: number;
+  commentVotes: Array<{
+    id: string;
+    userId: string;
+    commentId: string;
+    value: number;
+  }>;
+  answerVotes: Array<{
+    id: string;
+    userId: string;
+    answerId: string;
+    value: number;
+  }>;
+}
+
 export const meta: MetaFunction = ({ data }) => {
-  const postTitle = (data as any)?.post?.title || 'Post';
+  const postTitle = (data as PostData)?.post?.title || 'Post';
   return [
     { title: `${postTitle} - portal.ask` },
     { name: "description", content: postTitle },
@@ -180,64 +243,33 @@ export const loader = async ({ request, params, context }: LoaderFunctionArgs) =
       where: eq(posts.id, postId),
       with: {
         author: {
-          columns: {
-            id: true,
-            username: true,
-          },
           with: {
-            profile: {
-              columns: {
-                profilePicture: true,
-              },
-            },
-          },
+            profile: true
+          }
         },
-        media: true,
         comments: {
-          orderBy: [desc(comments.upvotes), desc(comments.createdAt)],
-          limit: perPage,
-          offset: (page - 1) * perPage,
           with: {
             author: {
-              columns: {
-                id: true,
-                username: true,
-              },
               with: {
-                profile: {
-                  columns: {
-                    profilePicture: true,
-                  },
-                },
-              },
-            },
-          },
+                profile: true
+              }
+            }
+          }
         },
         answers: {
-          orderBy: [desc(answers.isAccepted), desc(answers.upvotes), desc(answers.createdAt)],
           with: {
             author: {
-              columns: {
-                id: true,
-                username: true,
-              },
               with: {
-                profile: {
-                  columns: {
-                    profilePicture: true,
-                  },
-                },
-              },
-            },
-          },
+                profile: true
+              }
+            }
+          }
         },
         codeBlocks: true,
-        votes: user ? {
-          where: and(eq(votes.userId, user.id), eq(votes.isQualityVote, true)),
-        } : undefined,
-        bounty: true,
-      },
-    }) as unknown as {
+        media: true,
+        bounty: true
+      }
+    }) as {
       id: string;
       title: string;
       content: string;
@@ -247,12 +279,59 @@ export const loader = async ({ request, params, context }: LoaderFunctionArgs) =
       visibilityVotes: number;
       hasBounty: boolean;
       status: string;
-      author: { id: string; username: string; profile?: { profilePicture: string | null } | null };
-      comments: any[];
-      answers: any[];
-      codeBlocks: any[];
-      media: any[];
-      bounty?: any;
+      author: { 
+        id: string; 
+        username: string; 
+        profile?: { profilePicture: string | null } | null 
+      };
+      comments: Array<{
+        id: string;
+        content: string;
+        createdAt: Date;
+        updatedAt: Date;
+        upvotes: number;
+        downvotes: number;
+        author: {
+          id: string;
+          username: string;
+          profile?: { profilePicture: string | null } | null;
+        };
+      }>;
+      answers: Array<{
+        id: string;
+        content: string;
+        createdAt: Date;
+        updatedAt: Date;
+        upvotes: number;
+        downvotes: number;
+        isAccepted: boolean;
+        author: {
+          id: string;
+          username: string;
+          profile?: { profilePicture: string | null } | null;
+        };
+      }>;
+      codeBlocks: Array<{
+        id: string;
+        language: string;
+        code: string;
+        description?: string;
+        createdAt: Date;
+        updatedAt: Date;
+      }>;
+      media: Array<{
+        id: string;
+        type: string;
+        url: string;
+        thumbnailUrl?: string;
+        isScreenRecording: boolean;
+      }>;
+      bounty?: {
+        id: string;
+        amount: number;
+        status: string;
+        expiresAt?: Date;
+      } | null;
     } | null;
 
     if (!post) {
@@ -268,8 +347,8 @@ export const loader = async ({ request, params, context }: LoaderFunctionArgs) =
     const allVotes = await db.query.votes.findMany({
       where: and(eq(votes.postId, postId), eq(votes.voteType, 'POST'), eq(votes.isQualityVote, true)),
     });
-    const qualityUpvotes = allVotes.filter((v: any) => v.value === 1).length;
-    const qualityDownvotes = allVotes.filter((v: any) => v.value === -1).length;
+    const qualityUpvotes = allVotes.filter((v: { value: number }) => v.value === 1).length;
+    const qualityDownvotes = allVotes.filter((v: { value: number }) => v.value === -1).length;
     const userQualityVote = userVotes.find(v => v.isQualityVote)?.value || 0;
     const userVisibilityVote = userVotes.find(v => !v.isQualityVote)?.value || 0;
 
@@ -302,8 +381,8 @@ export const loader = async ({ request, params, context }: LoaderFunctionArgs) =
       id: post.id!,
       title: post.title!,
       content: post.content!,
-      createdAt: post.createdAt!,
-      updatedAt: post.updatedAt!,
+      createdAt: post.createdAt!.toISOString(),
+      updatedAt: post.updatedAt!.toISOString(),
       authorId: post.authorId!,
       visibilityVotes: post.visibilityVotes ?? 0,
       qualityUpvotes,
@@ -348,7 +427,11 @@ export const loader = async ({ request, params, context }: LoaderFunctionArgs) =
           } : null
         }
       })),
-      codeBlocks: (post.codeBlocks || []).map(cb => ({ ...cb })),
+      codeBlocks: (post.codeBlocks || []).map(cb => ({
+        ...cb,
+        createdAt: cb.createdAt?.toISOString?.() ?? '',
+        updatedAt: cb.updatedAt?.toISOString?.() ?? '',
+      })),
       media: (post.media || []).map(m => ({
         id: m.id!,
         type: m.type!,
@@ -364,9 +447,22 @@ export const loader = async ({ request, params, context }: LoaderFunctionArgs) =
       } : null
     };
 
+    // Fetch user and their profile for currentUser
+    let currentUserObj = null;
+    if (user) {
+      // Fetch profile for the user
+      const profile = await db.query.profiles.findFirst({ where: eq(profiles.userId, user.id) });
+      currentUserObj = {
+        ...user,
+        createdAt: user.createdAt?.toISOString?.() ?? '',
+        updatedAt: user.updatedAt?.toISOString?.() ?? '',
+        profilePicture: profile?.profilePicture ?? null,
+      };
+    }
+
     return json({ 
       post: transformedPost, 
-      currentUser: user,
+      currentUser: currentUserObj,
       pagination: {
         currentPage: page,
         totalPages: Math.ceil(totalComments / perPage),
@@ -380,7 +476,7 @@ export const loader = async ({ request, params, context }: LoaderFunctionArgs) =
 };
 
 export const action = async ({ request, params, context }: ActionFunctionArgs) => {
-  const db = createDb((context as any).env.DB);
+  const db = createDb((context as { env: { DB: D1Database } }).env.DB);
   const user = await getUser(request, db);
   if (!user) {
     return json({ error: 'Not authenticated' }, { status: 401 });
@@ -437,8 +533,8 @@ export const action = async ({ request, params, context }: ActionFunctionArgs) =
         const allVotes = await db.query.votes.findMany({
           where: and(eq(votes.postId, postId), eq(votes.voteType, 'POST'), eq(votes.isQualityVote, true)),
         });
-        const qualityUpvotes = allVotes.filter((v: any) => v.value === 1).length;
-        const qualityDownvotes = allVotes.filter((v: any) => v.value === -1).length;
+        const qualityUpvotes = allVotes.filter((v: { value: number }) => v.value === 1).length;
+        const qualityDownvotes = allVotes.filter((v: { value: number }) => v.value === -1).length;
         // Update post vote counts
         await db.update(posts).set({
           qualityUpvotes,
@@ -624,7 +720,7 @@ export const action = async ({ request, params, context }: ActionFunctionArgs) =
             }
           }
         }
-      }) as any;
+      }) as { id: string; postId: string; authorId: string; author: { id: string; username: string } } | undefined;
 
       if (!answer) {
         return json({ error: 'Answer not found' }, { status: 404 });
@@ -636,7 +732,7 @@ export const action = async ({ request, params, context }: ActionFunctionArgs) =
         with: {
           bounty: true
         }
-      }) as any;
+      }) as { id: string; authorId: string; bounty?: { id: string; amount: number; status: string } | null } | undefined;
 
       if (!post) {
         return json({ error: 'Post not found' }, { status: 404 });
@@ -741,9 +837,9 @@ export const action = async ({ request, params, context }: ActionFunctionArgs) =
               userVote: value
             });
           });
-        } catch (error: any) {
+        } catch (error: unknown) {
           retryCount++;
-          if (error.code === 'P2034' && retryCount < maxRetries) {
+          if ((error as { code?: string }).code === 'P2034' && retryCount < maxRetries) {
             // Deadlock detected, wait a bit and retry
             await new Promise(resolve => setTimeout(resolve, 100 * retryCount));
             continue;
@@ -806,9 +902,9 @@ export const action = async ({ request, params, context }: ActionFunctionArgs) =
               userVote: value
             });
           });
-        } catch (error: any) {
+        } catch (error: unknown) {
           retryCount++;
-          if (error.code === 'P2034' && retryCount < maxRetries) {
+          if ((error as { code?: string }).code === 'P2034' && retryCount < maxRetries) {
             // Deadlock detected, wait a bit and retry
             await new Promise(resolve => setTimeout(resolve, 100 * retryCount));
             continue;
@@ -837,7 +933,7 @@ export const action = async ({ request, params, context }: ActionFunctionArgs) =
             }
           }
         }
-      }) as any;
+      }) as { id: string; postId: string; authorId: string; author: { id: string; username: string } } | undefined;
 
       if (!answer) {
         return json({ error: 'Answer not found' }, { status: 404 });
@@ -849,7 +945,7 @@ export const action = async ({ request, params, context }: ActionFunctionArgs) =
         with: {
           bounty: true
         }
-      }) as any;
+      }) as { id: string; authorId: string; bounty?: { id: string; amount: number; status: string } | null } | undefined;
 
       if (!post) {
         return json({ error: 'Post not found' }, { status: 404 });
@@ -941,7 +1037,7 @@ export const action = async ({ request, params, context }: ActionFunctionArgs) =
             }
           }
         }
-      }) as any;
+      }) as { id: string; postId: string; authorId: string; author: { id: string; username: string } } | undefined;
 
       if (!answer) {
         return json({ error: 'Answer not found' }, { status: 404 });
@@ -1014,7 +1110,6 @@ export const action = async ({ request, params, context }: ActionFunctionArgs) =
       const title = formData.get('title') as string;
       const content = formData.get('content') as string;
       const tags = formData.getAll('tags') as string[];
-      const bountyAmount = formData.get('bountyAmount') as string;
       
       if (!user.id) {
         throw new Response("Unauthorized", { status: 401 });
@@ -1357,22 +1452,15 @@ export function ErrorBoundary() {
 }
 
 export default function PostDetail() {
-  const { post, currentUser, pagination } = useLoaderData<typeof loader>() as {
-    post: PostWithRelations;
-    currentUser: any;
-    pagination: {
-      currentPage: number;
-      totalPages: number;
-      totalComments: number;
-      totalAnswers: number;
-    };
-  };
+  const loaderData = useLoaderData<typeof loader>();
+  const post = loaderData.post;
+  const currentUser = loaderData.currentUser;
+  const pagination = loaderData.pagination;
   const [answers, setAnswers] = useState<AnswerWithAuthor[]>(post.answers);
   const [comments, setComments] = useState<CommentWithAuthor[]>(post.comments);
   const [votingStates, setVotingStates] = useState<Record<string, boolean>>({});
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const submit = useSubmit();
-  const fetcher = useFetcher();
   const actionData = useActionData<AnswerResponse | CommentResponse | BountyClaimResponse>();
 
   // Show success message when bounty is claimed
@@ -1613,13 +1701,6 @@ export default function PostDetail() {
     submit(formData, { method: 'post' });
   };
 
-  const handleAcceptAnswer = async (answerId: string) => {
-    const formData = new FormData();
-    formData.append('action', 'acceptAnswer');
-    formData.append('answerId', answerId);
-    submit(formData, { method: 'post' });
-  };
-
   const handleDelete = () => {
     const formData = new FormData();
     formData.append('action', 'deletePost');
@@ -1643,7 +1724,7 @@ export default function PostDetail() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-2">
                 <img
-                  src={getProfilePicture(post.author.profilePicture, post.author.username)}
+                  src={getProfilePicture((post.author.profilePicture ?? null) as string | null, post.author.username)}
                   alt={`${post.author.username}'s avatar`}
                   className="w-10 h-10 rounded-full"
                 />
@@ -1715,6 +1796,7 @@ export default function PostDetail() {
                             poster={mediaItem.thumbnailUrl}
                           >
                             <source src={mediaItem.url} type="video/mp4" />
+                            <track kind="captions" src="" label="English" />
                             Your browser does not support the video tag.
                           </video>
                         )}
@@ -1722,6 +1804,7 @@ export default function PostDetail() {
                           <div className="p-4">
                             <audio controls className="w-full">
                               <source src={mediaItem.url} type="audio/mpeg" />
+                              <track kind="captions" src="" label="English" />
                               Your browser does not support the audio tag.
                             </audio>
                           </div>
@@ -1913,7 +1996,7 @@ export default function PostDetail() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         <img
-                          src={getProfilePicture(answer.author.profile?.profilePicture ?? null, answer.author.username)}
+                          src={getProfilePicture((answer.author.profile?.profilePicture ?? null) as string | null, answer.author.username)}
                           alt={`${answer.author.username}'s avatar`}
                           className="w-8 h-8 rounded-full"
                         />
@@ -2030,7 +2113,7 @@ export default function PostDetail() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         <img
-                          src={getProfilePicture(comment.author.profile?.profilePicture ?? null, comment.author.username)}
+                          src={getProfilePicture((comment.author.profile?.profilePicture ?? null) as string | null, comment.author.username)}
                           alt={`${comment.author.username}'s avatar`}
                           className="w-6 h-6 rounded-full"
                         />

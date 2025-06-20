@@ -1,4 +1,4 @@
-import { json, type LoaderFunctionArgs } from "@remix-run/cloudflare";
+import { json } from "@remix-run/cloudflare";
 import { useLoaderData, Link } from "@remix-run/react";
 import { Layout } from "~/components/Layout";
 import { FiArrowLeft, FiDownload } from "react-icons/fi";

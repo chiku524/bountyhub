@@ -42,6 +42,7 @@
     "@cloudflare/workers-types": "^4.20250620.0",
     "@types/bcryptjs": "2.4.6",
     "@types/node": "^20.11.0",
+    "@types/puppeteer": "^5.4.7",
     "@types/react": "18.2.55",
     "@types/react-dom": "18.2.19",
     "@types/react-syntax-highlighter": "^15.5.11",

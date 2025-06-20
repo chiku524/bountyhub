@@ -3,14 +3,7 @@ import { eq, and } from 'drizzle-orm';
 import { bookmarks } from '../../drizzle/schema';
 import type { DrizzleD1Database } from 'drizzle-orm/d1';
 import { requireUserId } from "~/utils/auth.server";
-import { checkBookmarkStatus } from "~/utils/bookmark.server";
 import { createDb } from "~/utils/db.server";
-
-interface CloudflareContext {
-  env: {
-    DB: DrizzleD1Database<typeof import('../../drizzle/schema')>;
-  };
-}
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const url = new URL(request.url);

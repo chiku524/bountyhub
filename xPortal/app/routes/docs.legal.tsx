@@ -1,4 +1,4 @@
-import { json, type LoaderFunction } from '@remix-run/node';
+import { json } from '@remix-run/cloudflare';
 import { useLoaderData, Link } from '@remix-run/react';
 import { Layout } from '~/components/Layout';
 import { FiArrowLeft, FiDownload, FiShield, FiFileText } from 'react-icons/fi';
@@ -50,7 +50,7 @@ export default function LegalDocsPage() {
             <div className="prose prose-invert prose-violet max-w-none mb-6">
               <p>
                 Our privacy policy explains how portal.ask collects, uses, and protects your personal information. 
-                We are committed to transparency and protecting your privacy while providing our services.
+                We&apos;re committed to protecting your privacy and ensuring transparency in how we handle your data.
               </p>
               
               <h3>What We Collect</h3>
@@ -146,7 +146,7 @@ export default function LegalDocsPage() {
               <ul>
                 <li>You retain rights to your content</li>
                 <li>You grant us license to display your content</li>
-                <li>Respect others' intellectual property</li>
+                <li>Respect others&apos; intellectual property</li>
                 <li>Report copyright violations</li>
                 <li>DMCA compliance procedures</li>
               </ul>

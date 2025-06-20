@@ -1,6 +1,5 @@
 import { json, type ActionFunctionArgs } from "@remix-run/cloudflare";
 import { getUser } from "~/utils/auth.server";
-import { claimBounty } from "~/utils/bounty_program.server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { bounties } from "../../drizzle/schema";

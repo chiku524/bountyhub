@@ -1,21 +1,20 @@
 // app/routes/profile.tsx
-import { Form, useLoaderData, Link, Outlet, useLocation } from "@remix-run/react"
-import { LoaderFunction, json, redirect, MetaFunction, LoaderFunctionArgs } from '@remix-run/node'
-import { getUser, requireUserId } from '~/utils/auth.server'
+import { useLoaderData, Link, Outlet, useLocation } from "@remix-run/react"
+import { json, MetaFunction, LoaderFunctionArgs } from '@remix-run/node'
+import { requireUserId } from '~/utils/auth.server'
 import { Layout } from '../components/Layout'
 
 import { ProfilePictureUpload } from '~/components/ProfilePictureUpload'
 import { getReputationLevel } from '~/utils/reputationLevel'
 
 import { AuthNotice } from '~/components/auth-notice'
-import { FaUser, FaEdit, FaEye, FaEyeSlash, FaSave, FaTimes, FaCheck, FaGithub, FaTwitter, FaLinkedin, FaInstagram, FaFacebook, FaYoutube, FaTiktok, FaDiscord, FaReddit, FaMedium, FaStackOverflow, FaDev } from 'react-icons/fa'
+import { FaGithub, FaTwitter, FaLinkedin, FaInstagram, FaFacebook, FaYoutube, FaTiktok, FaDiscord, FaReddit, FaMedium, FaStackOverflow, FaDev } from 'react-icons/fa'
 import { FiThumbsUp, FiEdit2 } from 'react-icons/fi'
 import IntegrityDisplay from '~/components/IntegrityDisplay'
 import { getUserBookmarks } from '~/utils/bookmark.server'
 import { eq, desc } from 'drizzle-orm'
 import { users, profiles, posts, reputationHistory } from '../../drizzle/schema'
 import { createDb } from '~/utils/db.server'
-import { useState } from "react"
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   const username = data?.user?.username || 'Profile';
@@ -27,20 +26,6 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 
 const DEFAULT_PROFILE_PICTURE = 'https://api.dicebear.com/7.x/initials/svg?seed=';
 
-type Post = {
-    id: string;
-    title: string;
-    content: string;
-    createdAt: string | Date;
-};
-
-type ReputationHistory = {
-    id: string;
-    action: string;
-    points: number;
-    createdAt: string | Date;
-};
-
 type BookmarkData = {
     id: string;
     createdAt: Date;
@@ -48,7 +33,13 @@ type BookmarkData = {
         id: string;
         title: string;
         content: string;
-        media: any;
+        media: Array<{
+            id: string;
+            type: string;
+            url: string;
+            thumbnailUrl?: string;
+            isScreenRecording: boolean;
+        }>;
         author: {
             id: string;
             username: string;
@@ -58,7 +49,11 @@ type BookmarkData = {
         visibilityVotes: number;
         comments: number;
         hasBounty: boolean;
-        bounty: any;
+        bounty: {
+            id: string;
+            amount: number;
+            status: string;
+        } | null;
         tags: Array<{
             id: string;
             name: string;
@@ -123,7 +118,7 @@ interface UserData {
 
 export const loader = async ({ request, context }: LoaderFunctionArgs) => {
     const userId = await requireUserId(request);
-    const db = createDb((context as any).env.DB);
+    const db = createDb((context as { env: { DB: D1Database } }).env.DB);
 
     // Fetch user and profile
     const userRows = await db.select().from(users).where(eq(users.id, userId)).limit(1);
@@ -346,16 +341,16 @@ export default function Profile() {
                             <h2 className="text-lg font-semibold text-violet-300 mb-4">Profile Information</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
-                                    <label className="block text-sm font-medium text-violet-300">Bio</label>
-                                    <p className="mt-1 text-sm text-gray-300">{user.profile?.bio || 'No bio provided'}</p>
+                                    <label htmlFor="bio" className="block text-sm font-medium text-violet-300">Bio</label>
+                                    <p id="bio" className="mt-1 text-sm text-gray-300">{user.profile?.bio || 'No bio provided'}</p>
                                 </div>
                                 <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
-                                    <label className="block text-sm font-medium text-violet-300">Location</label>
-                                    <p className="mt-1 text-sm text-gray-300">{user.profile?.location || 'No location provided'}</p>
+                                    <label htmlFor="location" className="block text-sm font-medium text-violet-300">Location</label>
+                                    <p id="location" className="mt-1 text-sm text-gray-300">{user.profile?.location || 'No location provided'}</p>
                                 </div>
                                 <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
-                                    <label className="block text-sm font-medium text-violet-300">Website</label>
-                                    <p className="mt-1 text-sm text-gray-300">
+                                    <label htmlFor="website" className="block text-sm font-medium text-violet-300">Website</label>
+                                    <p id="website" className="mt-1 text-sm text-gray-300">
                                         {user.profile?.website ? (
                                             <a href={user.profile.website} target="_blank" rel="noopener noreferrer" 
                                                className="text-violet-400 hover:text-violet-300">
@@ -365,8 +360,8 @@ export default function Profile() {
                                     </p>
                                 </div>
                                 <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
-                                    <label className="block text-sm font-medium text-violet-300">Social Media</label>
-                                    <div className="mt-2">
+                                    <label htmlFor="socialMedia" className="block text-sm font-medium text-violet-300">Social Media</label>
+                                    <div id="socialMedia" className="mt-2">
                                         {user.profile ? (
                                             <SocialMediaIcons profile={user.profile} />
                                         ) : (
@@ -383,8 +378,8 @@ export default function Profile() {
                                 user={{
                                     id: user.id,
                                     username: user.username,
-                                    integrityScore: (user as any).integrityScore || 5.0,
-                                    totalRatings: (user as any).totalRatings || 0,
+                                    integrityScore: user.integrityScore || 5.0,
+                                    totalRatings: user.totalRatings || 0,
                                 }}
                                 currentUserId={user.id}
                                 canRate={false}

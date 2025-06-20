@@ -1,12 +1,7 @@
-import { json, type LoaderFunctionArgs } from "@remix-run/cloudflare";
-import { redirect } from "@remix-run/node";
-import { createDb } from "~/utils/db.server";
-import { getUser } from "~/utils/auth.server";
-import type { MetaFunction } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
-import { Layout } from "~/components/Layout";
+import { json } from '@remix-run/cloudflare';
+import { Layout } from '~/components/Layout';
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export const loader = async () => {
   // For now, we'll allow public access to privacy policy
   // You can change this to requireUserId if you want it to be private
   return json({});
@@ -51,7 +46,7 @@ export default function PrivacyPolicy() {
               <section>
                 <h2 className="text-xl font-semibold text-gray-900 mb-3">1. Introduction</h2>
                 <p className="text-gray-700 mb-3">
-                  Welcome to portal.ask ("we," "our," or "us"). We are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our decentralized platform for knowledge sharing and community building.
+                  Welcome to portal.ask (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;). We are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our decentralized platform for knowledge sharing and community building.
                 </p>
                 <p className="text-gray-700">
                   By using portal.ask, you consent to the data practices described in this policy.
@@ -191,7 +186,7 @@ export default function PrivacyPolicy() {
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold text-gray-900 mb-3">9. Children's Privacy</h2>
+                <h2 className="text-xl font-semibold text-gray-900 mb-3">9. Children&apos;s Privacy</h2>
                 <p className="text-gray-700">
                   Our platform is not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13. If you believe we have collected such information, please contact us immediately.
                 </p>

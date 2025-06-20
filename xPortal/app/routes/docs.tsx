@@ -154,9 +154,8 @@ export default function DocsPage() {
           <h1 className="text-4xl font-bold text-white mb-4">
             Documentation
           </h1>
-          <p className="text-gray-400 text-lg max-w-3xl">
-            Welcome to the portal.ask documentation. Find everything you need to understand, 
-            use, and develop with our platform.
+          <p className="text-gray-300 mb-4">
+            Welcome to portal.ask&apos;s documentation. Here you&apos;ll find comprehensive guides and information about our platform.
           </p>
         </div>
 
@@ -293,7 +292,7 @@ export default function DocsPage() {
           
           <div className="mt-6 text-center">
             <p className="text-gray-400 mb-4">
-              Can't find what you're looking for? Our team is here to help!
+              Can&apos;t find what you&apos;re looking for? Our team is here to help!
             </p>
             <div className="flex justify-center space-x-4">
               <a

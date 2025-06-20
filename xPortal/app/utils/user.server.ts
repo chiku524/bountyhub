@@ -1,13 +1,12 @@
 // app/utils/user.server.ts
 import bcrypt from 'bcryptjs'
-import type { RegisterForm, User, Post, PostForm, Profile } from './types.server'
+import type { RegisterForm, PostForm, Profile } from './types.server'
 import { getUser } from './auth.server'
 import { addReputationPoints, REPUTATION_POINTS } from './reputation.server'
-import { getProfilePicture } from './profile.server'
 import { SolanaAddressService } from './solana-address.server'
 import type { Db } from './db.server';
-import { users, posts, comments, votes, bounties, tags, postTags, profiles, virtualWallets, refundRequests, media, codeBlocks } from '../../drizzle/schema';
-import { eq, desc, asc } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
+import { users, profiles, posts, codeBlocks, media, virtualWallets } from '../../drizzle/schema';
 
 export async function createUser(db: Db, { email, password, username }: RegisterForm) {
     const hashedPassword = await bcrypt.hash(password, 10)
@@ -94,56 +93,48 @@ export const editUser = async (db: Db, inputData: { profile: Partial<Profile> },
 };
 
 export const getUserPosts = async (db: Db, username: string) => {
-  try {
-    const user = await db.query.users.findFirst({
-      where: eq(users.username, username),
-      with: {
-        posts: {
-          orderBy: [desc(posts.createdAt)]
-        }
+  const user = await db.query.users.findFirst({
+    where: eq(users.username, username),
+    with: {
+      posts: {
+        orderBy: [posts.createdAt]
       }
-    });
-    if (!user) return [];
-    return user.posts;
-  } catch (error) {
-    return [];
-  }
+    }
+  });
+  if (!user) return [];
+  return user.posts;
 }
 
 export const createPost = async (db: Db, post: PostForm) => {
-  try {
-    const postId = crypto.randomUUID();
-    const [newPost] = await db.insert(posts).values({
-      id: postId,
-      title: post.title,
-      content: post.content,
-      authorId: post.authorId,
-    }).returning().all();
-    for (const cb of post.codeBlocks) {
-      await db.insert(codeBlocks).values({
-        id: crypto.randomUUID(),
-        postId: newPost.id,
-        language: cb.language,
-        code: cb.code,
-        description: cb.description,
-      }).run();
-    }
-    for (const m of post.media) {
-      await db.insert(media).values({
-        id: crypto.randomUUID(),
-        postId: newPost.id,
-        type: m.type,
-        url: m.url,
-        thumbnailUrl: m.thumbnailUrl,
-        isScreenRecording: m.isScreenRecording,
-        cloudinaryId: m.url.split('/').pop()?.split('.')[0] || 'default',
-      }).run();
-    }
-    await addReputationPoints(db, post.authorId, REPUTATION_POINTS.POST_CREATED, 'POST_CREATED', newPost.id);
-    return newPost;
-  } catch (error) {
-    throw error;
+  const postId = crypto.randomUUID();
+  const [newPost] = await db.insert(posts).values({
+    id: postId,
+    title: post.title,
+    content: post.content,
+    authorId: post.authorId,
+  }).returning().all();
+  for (const cb of post.codeBlocks) {
+    await db.insert(codeBlocks).values({
+      id: crypto.randomUUID(),
+      postId: newPost.id,
+      language: cb.language,
+      code: cb.code,
+      description: cb.description,
+    }).run();
   }
+  for (const m of post.media) {
+    await db.insert(media).values({
+      id: crypto.randomUUID(),
+      postId: newPost.id,
+      type: m.type,
+      url: m.url,
+      thumbnailUrl: m.thumbnailUrl,
+      isScreenRecording: m.isScreenRecording,
+      cloudinaryId: m.url.split('/').pop()?.split('.')[0] || 'default',
+    }).run();
+  }
+  await addReputationPoints(db, post.authorId, REPUTATION_POINTS.POST_CREATED, 'POST_CREATED', newPost.id);
+  return newPost;
 };
 
 export async function deletePost(db: Db, postId: string) {
@@ -151,7 +142,6 @@ export async function deletePost(db: Db, postId: string) {
     return { success: true };
 }
 
-type UserLookupType = 'id' | 'email' | 'username';
 export async function getUserById(db: Db, userId: string) {
     return db.query.users.findFirst({ where: eq(users.id, userId) });
 }

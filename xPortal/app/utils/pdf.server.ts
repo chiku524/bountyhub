@@ -1,5 +1,5 @@
 // Conditional import for puppeteer - will be undefined in Workers environment
-let puppeteer: any = null;
+let puppeteer: typeof import('puppeteer') | null = null;
 try {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   puppeteer = require('puppeteer');
@@ -12,6 +12,9 @@ import { renderToString } from 'react-dom/server';
 import React from 'react';
 import { createDb } from './db.server';
 import { getUser } from './auth.server';
+import { type LoaderFunctionArgs } from '@remix-run/cloudflare';
+import { eq } from 'drizzle-orm';
+import { posts } from '../../drizzle/schema';
 
 export interface PDFOptions {
   format?: 'A4' | 'Letter' | 'Legal';
@@ -28,13 +31,12 @@ export interface PDFOptions {
 }
 
 export class PDFService {
-  private static browser: any = null;
+  private static browser: import('puppeteer').Browser | null = null;
 
-  private static async getBrowser(): Promise<any> {
+  private static async getBrowser(): Promise<import('puppeteer').Browser> {
     if (!puppeteer) {
       throw new Error('Puppeteer is not available in this environment');
     }
-    
     if (!this.browser) {
       this.browser = await puppeteer.launch({
         headless: true,
@@ -48,20 +50,12 @@ export class PDFService {
     htmlContent: string,
     options: PDFOptions = {}
   ): Promise<Buffer> {
-    if (!puppeteer) {
-      throw new Error('PDF generation is not available in this environment');
-    }
-
     const browser = await this.getBrowser();
     const page = await browser.newPage();
-
+    
     try {
-      // Set the HTML content
-      await page.setContent(htmlContent, {
-        waitUntil: 'networkidle0'
-      });
-
-      // Generate PDF
+      await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+      
       const pdfBuffer = await page.pdf({
         format: options.format || 'A4',
         margin: options.margin || {
@@ -70,13 +64,10 @@ export class PDFService {
           bottom: '1in',
           left: '1in'
         },
-        printBackground: options.printBackground ?? true,
-        displayHeaderFooter: options.displayHeaderFooter ?? false,
-        headerTemplate: options.headerTemplate,
-        footerTemplate: options.footerTemplate
+        printBackground: true
       });
-
-      return Buffer.from(pdfBuffer);
+      
+      return pdfBuffer;
     } finally {
       await page.close();
     }
@@ -89,9 +80,7 @@ export class PDFService {
     if (!puppeteer) {
       throw new Error('PDF generation is not available in this environment');
     }
-
     const htmlString = renderToString(component);
-    
     // Create a complete HTML document
     const fullHTML = `
       <!DOCTYPE html>
@@ -137,7 +126,6 @@ export class PDFService {
         </body>
       </html>
     `;
-
     return this.generatePDF(fullHTML, options);
   }
 
@@ -234,4 +222,44 @@ export async function createSimplePDF(
   `;
 
   return PDFService.generatePDF(htmlContent, options);
+}
+
+export async function loader({ request, context }: LoaderFunctionArgs) {
+  const db = createDb((context as { env: { DB: D1Database } }).env.DB);
+  const user = await getUser(request, db);
+  
+  if (!user) {
+    throw new Response('Unauthorized', { status: 401 });
+  }
+
+  // Get user's posts for PDF generation
+  const userPosts = await db.query.posts.findMany({
+    where: eq(posts.authorId, user.id),
+    with: {
+      author: true,
+      tags: true,
+      bounty: true,
+    },
+  });
+
+  // Generate PDF content
+  const pdfContent = generatePDFContent(userPosts);
+
+  return new Response(pdfContent, {
+    headers: {
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="user-posts-${user.username}.pdf"`,
+    },
+  });
+}
+
+function generatePDFContent(posts: unknown[]): string {
+  // This is a placeholder implementation
+  // In a real implementation, you would use a PDF library like jsPDF or puppeteer
+  const content = posts.map((post: unknown) => {
+    const p = post as { title: string; content: string; createdAt: string };
+    return `Title: ${p.title}\nContent: ${p.content}\nCreated: ${p.createdAt}\n\n`;
+  }).join('---\n');
+
+  return `PDF content would be generated here\n\n${content}`;
 } 

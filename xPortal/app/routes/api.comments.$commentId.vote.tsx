@@ -1,5 +1,4 @@
 import { json, type ActionFunctionArgs } from "@remix-run/cloudflare";
-import { getUser } from "~/utils/auth.server";
 import { eq, and } from "drizzle-orm";
 import { votes, comments } from "../../drizzle/schema";
 import { createDb } from "~/utils/db.server";

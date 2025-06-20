@@ -1,15 +1,11 @@
 // app/routes/profile.tsx
 import { json, type LoaderFunctionArgs, type ActionFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
-import { useLoaderData, useActionData, useNavigation, useFetcher } from "@remix-run/react";
+import { useLoaderData, useNavigation, useFetcher } from "@remix-run/react";
 import { getUser } from "~/utils/auth.server";
-import { editUser } from "~/utils/user.server";
 import { useEffect, useState } from "react";
 import { Layout } from "../components/Layout";
-import { validateUsername } from "~/utils/validators.client";
 import { AuthNotice } from "~/components/auth-notice";
-import type { Profile, User } from "~/utils/types.server";
 import { FiUser, FiLink, FiMail, FiLock, FiSave, FiCheck } from "react-icons/fi";
-import { FaUser, FaLock, FaBell, FaPalette, FaGlobe, FaTrash, FaSave, FaTimes, FaCheck, FaEdit, FaEye, FaEyeSlash } from "react-icons/fa";
 import { eq } from "drizzle-orm";
 import { users, profiles } from "../../drizzle/schema";
 import { createDb } from "~/utils/db.server";
@@ -44,10 +40,6 @@ type UserData = {
     devto: string | null;
   } | null;
 };
-
-interface LoaderData {
-  user: UserData;
-}
 
 interface ActionData {
     error?: string;
@@ -225,7 +217,6 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
 export default function Settings() {
     const { userData, isAuthenticated } = useLoaderData<{ userData: UserData; isAuthenticated?: boolean }>();
-    const actionData = useActionData<ActionData>();
     const navigation = useNavigation();
     const [activeTab, setActiveTab] = useState('profile');
     const [showSuccess, setShowSuccess] = useState(false);
@@ -295,10 +286,11 @@ export default function Settings() {
                                 <div className="space-y-6">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-sm font-medium text-violet-300 mb-2">
+                                            <label htmlFor="firstName" className="block text-sm font-medium text-violet-300 mb-2">
                                                 First Name
                                             </label>
                                             <input
+                                                id="firstName"
                                                 type="text"
                                                 name="firstName"
                                                 defaultValue={userData.profile?.firstName || ''}
@@ -307,10 +299,11 @@ export default function Settings() {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-violet-300 mb-2">
+                                            <label htmlFor="lastName" className="block text-sm font-medium text-violet-300 mb-2">
                                                 Last Name
                                             </label>
                                             <input
+                                                id="lastName"
                                                 type="text"
                                                 name="lastName"
                                                 defaultValue={userData.profile?.lastName || ''}
@@ -321,10 +314,11 @@ export default function Settings() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                        <label htmlFor="bio" className="block text-sm font-medium text-violet-300 mb-2">
                                             Bio
                                         </label>
                                         <textarea
+                                            id="bio"
                                             name="bio"
                                             defaultValue={userData.profile?.bio || ''}
                                             placeholder="Tell us about yourself..."
@@ -334,10 +328,11 @@ export default function Settings() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                        <label htmlFor="location" className="block text-sm font-medium text-violet-300 mb-2">
                                             Location
                                         </label>
                                         <input
+                                            id="location"
                                             type="text"
                                             name="location"
                                             defaultValue={userData.profile?.location || ''}
@@ -347,10 +342,11 @@ export default function Settings() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                        <label htmlFor="website" className="block text-sm font-medium text-violet-300 mb-2">
                                             Website
                                         </label>
                                         <input
+                                            id="website"
                                             type="url"
                                             name="website"
                                             defaultValue={userData.profile?.website || ''}
@@ -364,10 +360,11 @@ export default function Settings() {
                             {activeTab === 'social' && (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                        <label htmlFor="facebook" className="block text-sm font-medium text-violet-300 mb-2">
                                             Facebook
                                         </label>
                                         <input
+                                            id="facebook"
                                             type="text"
                                             name="facebook"
                                             defaultValue={userData.profile?.facebook || ''}
@@ -376,10 +373,11 @@ export default function Settings() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                        <label htmlFor="twitter" className="block text-sm font-medium text-violet-300 mb-2">
                                             Twitter
                                         </label>
                                         <input
+                                            id="twitter"
                                             type="text"
                                             name="twitter"
                                             defaultValue={userData.profile?.twitter || ''}
@@ -388,10 +386,11 @@ export default function Settings() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                        <label htmlFor="instagram" className="block text-sm font-medium text-violet-300 mb-2">
                                             Instagram
                                         </label>
                                         <input
+                                            id="instagram"
                                             type="text"
                                             name="instagram"
                                             defaultValue={userData.profile?.instagram || ''}
@@ -400,10 +399,11 @@ export default function Settings() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                        <label htmlFor="linkedin" className="block text-sm font-medium text-violet-300 mb-2">
                                             LinkedIn
                                         </label>
                                         <input
+                                            id="linkedin"
                                             type="text"
                                             name="linkedin"
                                             defaultValue={userData.profile?.linkedin || ''}
@@ -412,10 +412,11 @@ export default function Settings() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                        <label htmlFor="github" className="block text-sm font-medium text-violet-300 mb-2">
                                             GitHub
                                         </label>
                                         <input
+                                            id="github"
                                             type="text"
                                             name="github"
                                             defaultValue={userData.profile?.github || ''}
@@ -424,10 +425,11 @@ export default function Settings() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                        <label htmlFor="youtube" className="block text-sm font-medium text-violet-300 mb-2">
                                             YouTube
                                         </label>
                                         <input
+                                            id="youtube"
                                             type="text"
                                             name="youtube"
                                             defaultValue={userData.profile?.youtube || ''}
@@ -436,10 +438,11 @@ export default function Settings() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                        <label htmlFor="tiktok" className="block text-sm font-medium text-violet-300 mb-2">
                                             TikTok
                                         </label>
                                         <input
+                                            id="tiktok"
                                             type="text"
                                             name="tiktok"
                                             defaultValue={userData.profile?.tiktok || ''}
@@ -448,10 +451,11 @@ export default function Settings() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                        <label htmlFor="discord" className="block text-sm font-medium text-violet-300 mb-2">
                                             Discord
                                         </label>
                                         <input
+                                            id="discord"
                                             type="text"
                                             name="discord"
                                             defaultValue={userData.profile?.discord || ''}
@@ -460,10 +464,11 @@ export default function Settings() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                        <label htmlFor="reddit" className="block text-sm font-medium text-violet-300 mb-2">
                                             Reddit
                                         </label>
                                         <input
+                                            id="reddit"
                                             type="text"
                                             name="reddit"
                                             defaultValue={userData.profile?.reddit || ''}
@@ -472,10 +477,11 @@ export default function Settings() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                        <label htmlFor="medium" className="block text-sm font-medium text-violet-300 mb-2">
                                             Medium
                                         </label>
                                         <input
+                                            id="medium"
                                             type="text"
                                             name="medium"
                                             defaultValue={userData.profile?.medium || ''}
@@ -484,10 +490,11 @@ export default function Settings() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                        <label htmlFor="stackoverflow" className="block text-sm font-medium text-violet-300 mb-2">
                                             Stack Overflow
                                         </label>
                                         <input
+                                            id="stackoverflow"
                                             type="text"
                                             name="stackoverflow"
                                             defaultValue={userData.profile?.stackoverflow || ''}
@@ -496,10 +503,11 @@ export default function Settings() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                        <label htmlFor="devto" className="block text-sm font-medium text-violet-300 mb-2">
                                             Dev.to
                                         </label>
                                         <input
+                                            id="devto"
                                             type="text"
                                             name="devto"
                                             defaultValue={userData.profile?.devto || ''}
@@ -513,10 +521,11 @@ export default function Settings() {
                             {activeTab === 'account' && (
                                 <div className="space-y-6">
                                     <div>
-                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                        <label htmlFor="email" className="block text-sm font-medium text-violet-300 mb-2">
                                             Email
                                         </label>
                                         <input
+                                            id="email"
                                             type="email"
                                             value={userData.email}
                                             disabled
@@ -525,10 +534,11 @@ export default function Settings() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                        <label htmlFor="username" className="block text-sm font-medium text-violet-300 mb-2">
                                             Username
                                         </label>
                                         <input
+                                            id="username"
                                             type="text"
                                             value={userData.username}
                                             disabled
@@ -542,10 +552,11 @@ export default function Settings() {
                             {activeTab === 'security' && (
                                 <div className="space-y-6">
                                     <div>
-                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                        <label htmlFor="currentPassword" className="block text-sm font-medium text-violet-300 mb-2">
                                             Current Password
                                         </label>
                                         <input
+                                            id="currentPassword"
                                             type="password"
                                             name="currentPassword"
                                             placeholder="Enter your current password"
@@ -553,10 +564,11 @@ export default function Settings() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                        <label htmlFor="newPassword" className="block text-sm font-medium text-violet-300 mb-2">
                                             New Password
                                         </label>
                                         <input
+                                            id="newPassword"
                                             type="password"
                                             name="newPassword"
                                             placeholder="Enter your new password"
@@ -564,10 +576,11 @@ export default function Settings() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-violet-300 mb-2">
+                                        <label htmlFor="confirmPassword" className="block text-sm font-medium text-violet-300 mb-2">
                                             Confirm New Password
                                         </label>
                                         <input
+                                            id="confirmPassword"
                                             type="password"
                                             name="confirmPassword"
                                             placeholder="Confirm your new password"

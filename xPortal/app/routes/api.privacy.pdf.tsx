@@ -1,4 +1,4 @@
-import { json, type LoaderFunctionArgs } from "@remix-run/cloudflare";
+import { json } from "@remix-run/cloudflare";
 import { createSimplePDF } from "~/utils/pdf.server";
 
 export async function loader() {

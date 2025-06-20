@@ -3,7 +3,24 @@ import { Program } from "@coral-xyz/anchor";
 import { PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID, createMint } from "@solana/spl-token";
 import fs from "fs";
-import { GovernanceProgram } from "../app/types/governance_program";
+
+// Define a minimal IDL type for the governance program
+interface GovernanceIDL {
+  version: string;
+  name: string;
+  instructions: Array<{
+    name: string;
+    accounts: Array<{
+      name: string;
+      isMut: boolean;
+      isSigner: boolean;
+    }>;
+    args: Array<{
+      name: string;
+      type: string;
+    }>;
+  }>;
+}
 
 async function main() {
   const provider = anchor.AnchorProvider.env();
@@ -14,7 +31,7 @@ async function main() {
   
   // Create a minimal program instance for deployment
   const program = new Program(
-    {} as any, // Placeholder IDL
+    {} as GovernanceIDL, // Use proper IDL type
     programId,
     provider
   );
@@ -24,12 +41,14 @@ async function main() {
 
   // Create a test mint for governance tokens
   console.log("Creating governance token mint...");
+  const mintKeypair = anchor.web3.Keypair.generate();
   const mint = await createMint(
     provider.connection,
-    provider.wallet,
+    provider.wallet as anchor.Wallet,
     provider.wallet.publicKey,
-    null,
-    9
+    provider.wallet.publicKey, // freeze authority (same as mint authority)
+    9,
+    mintKeypair
   );
   console.log("Governance token mint:", mint.toString());
 

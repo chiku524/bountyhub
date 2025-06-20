@@ -1,12 +1,7 @@
-import { json, type LoaderFunctionArgs } from "@remix-run/cloudflare";
-import { redirect } from "@remix-run/node";
-import { createDb } from "~/utils/db.server";
-import { getUser } from "~/utils/auth.server";
-import type { MetaFunction } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
-import { Layout } from "~/components/Layout";
+import { json } from '@remix-run/cloudflare';
+import { Layout } from '~/components/Layout';
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export const loader = async () => {
   // For now, we'll allow public access to terms of service
   // You can change this to requireUserId if you want it to be private
   return json({});
@@ -51,10 +46,10 @@ export default function TermsOfService() {
               <section>
                 <h2 className="text-xl font-semibold text-gray-900 mb-3">1. Acceptance of Terms</h2>
                 <p className="text-gray-700 mb-3">
-                  By accessing and using portal.ask ("the Platform"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
+                  By accessing and using portal.ask (&quot;the Platform&quot;), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
                 </p>
                 <p className="text-gray-700">
-                  These Terms of Service ("Terms") govern your use of our decentralized platform for knowledge sharing, community building, and reputation-based interactions.
+                  These Terms of Service (&quot;Terms&quot;) govern your use of our decentralized platform for knowledge sharing, community building, and reputation-based interactions.
                 </p>
               </section>
 
@@ -105,7 +100,7 @@ export default function TermsOfService() {
                   <li>Harass, abuse, or harm other users</li>
                   <li>Post false, misleading, or fraudulent content</li>
                   <li>Attempt to gain unauthorized access to the Platform</li>
-                  <li>Interfere with the Platform's operation or security</li>
+                  <li>Interfere with the Platform&apos;s operation or security</li>
                   <li>Use automated systems to access the Platform</li>
                   <li>Engage in spam or unsolicited communications</li>
                 </ul>
@@ -138,7 +133,7 @@ export default function TermsOfService() {
 
                 <h3 className="text-lg font-medium text-gray-900 mb-2">5.2 Transaction Terms</h3>
                 <p className="text-gray-700 mb-3">
-                  By using the Platform's transaction features, you agree to:
+                  By using the Platform&apos;s transaction features, you agree to:
                 </p>
                 <ul className="list-disc list-inside text-gray-700 mb-4 space-y-1">
                   <li>Understand that transactions are irreversible</li>

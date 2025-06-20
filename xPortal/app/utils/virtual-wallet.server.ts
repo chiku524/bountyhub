@@ -1,9 +1,6 @@
-import bountyBucksInfo from '../../bounty-bucks-info.json';
-import { eq, and, desc, sql } from 'drizzle-orm';
-import { virtualWallets, walletTransactions, bounties } from '../../drizzle/schema';
+import { eq, desc, and, sql } from 'drizzle-orm';
+import { virtualWallets, walletTransactions } from '../../drizzle/schema';
 import type { Db } from './db.server';
-
-const TOKEN_SYMBOL = bountyBucksInfo.symbol;
 
 export interface VirtualWallet {
   id: string;
@@ -70,7 +67,7 @@ export async function updateWalletBalance(
   amount: number,
   transactionType: WalletTransaction['type'],
   description: string,
-  metadata?: any
+  metadata?: unknown
 ): Promise<boolean> {
   try {
     const wallet = await getVirtualWallet(db, userId);
@@ -290,7 +287,7 @@ export async function confirmDeposit(db: Db, transactionId: string, solanaSignat
   return await getTransactionById(db, transactionId);
 }
 
-export async function createWithdrawalRequest(db: Db, userId: string, amount: number, metadata?: any) {
+export async function createWithdrawalRequest(db: Db, userId: string, amount: number, metadata?: unknown) {
   const wallet = await getVirtualWallet(db, userId);
 
   if (!wallet || wallet.balance < amount) {

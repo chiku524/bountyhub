@@ -1,10 +1,10 @@
 import { json, type LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { requireUserId } from '~/utils/auth.server';
 import { createDb } from '~/utils/db.server';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
 import { posts, comments, answers, reputationHistory } from '../../drizzle/schema';
 import { useLoaderData, Link } from '@remix-run/react';
-import { FiMessageSquare, FiThumbsUp, FiThumbsDown, FiCheckCircle, FiEdit2 } from 'react-icons/fi';
+import { FiMessageSquare, FiThumbsUp, FiCheckCircle, FiEdit2 } from 'react-icons/fi';
 
 interface Activity {
   id: string;
@@ -24,7 +24,7 @@ interface LoaderData {
 export const loader = async ({ request, context }: LoaderFunctionArgs) => {
   try {
     const userId = await requireUserId(request);
-    const db = (context as any).env.DB;
+    const db = createDb((context as { env: { DB: D1Database } }).env.DB);
     
     // Fetch user activity data
     const [userPosts, userComments, userAnswers, userReputationHistory] = await Promise.all([
@@ -36,28 +36,28 @@ export const loader = async ({ request, context }: LoaderFunctionArgs) => {
 
     // Transform data for the frontend
     const activityItems = [
-      ...userPosts.map((post: unknown) => ({
-        id: (post as any).id,
+      ...userPosts.map((post: { id: string; title: string; createdAt: Date }) => ({
+        id: post.id,
         type: 'post' as const,
-        title: (post as any).title,
-        createdAt: (post as any).createdAt.toISOString(),
+        title: post.title,
+        createdAt: post.createdAt.toISOString(),
         action: 'POST_CREATED'
       })),
-      ...userComments.map((comment: unknown) => ({
-        id: (comment as any).id,
+      ...userComments.map((comment: { id: string; createdAt: Date; post?: { title: string } }) => ({
+        id: comment.id,
         type: 'comment' as const,
-        title: (comment as any).post?.title || 'Unknown Post',
-        createdAt: (comment as any).createdAt.toISOString(),
+        title: comment.post?.title || 'Unknown Post',
+        createdAt: comment.createdAt.toISOString(),
         action: 'COMMENT_CREATED'
       })),
-      ...userAnswers.map((answer: unknown) => ({
-        id: (answer as any).id,
+      ...userAnswers.map((answer: { id: string; createdAt: Date; post?: { title: string } }) => ({
+        id: answer.id,
         type: 'answer' as const,
-        title: (answer as any).post?.title || 'Unknown Post',
-        createdAt: (answer as any).createdAt.toISOString(),
+        title: answer.post?.title || 'Unknown Post',
+        createdAt: answer.createdAt.toISOString(),
         action: 'ANSWER_CREATED'
       })),
-      ...userReputationHistory.map((history: unknown) => ({
+      ...userReputationHistory.map((history: { id: string; action: string; description?: string; createdAt: Date; points: number }) => ({
         id: history.id,
         type: 'reputation' as const,
         title: history.action,
@@ -108,36 +108,6 @@ function getActivityDescription(action: string): string {
 
 export default function ProfileActivity() {
   const { activities } = useLoaderData<LoaderData>();
-
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'post':
-        return <FiEdit2 className="w-5 h-5" />;
-      case 'comment':
-        return <FiMessageSquare className="w-5 h-5" />;
-      case 'answer':
-        return <FiCheckCircle className="w-5 h-5" />;
-      case 'reputation':
-        return <FiThumbsUp className="w-5 h-5" />;
-      default:
-        return null;
-    }
-  };
-
-  const getActivityTitle = (activity: Activity) => {
-    switch (activity.type) {
-      case 'post':
-        return 'Created a post';
-      case 'comment':
-        return 'Commented on a post';
-      case 'answer':
-        return 'Answered a question';
-      case 'reputation':
-        return activity.action?.replace(/_/g, ' ').toLowerCase() || 'Reputation change';
-      default:
-        return '';
-    }
-  };
 
   return (
     <div className="bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)] mt-8">

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, Form } from "@remix-run/react"
-import gsap from 'gsap'
+import { gsap } from 'gsap'
 import { FiCreditCard, FiLogOut } from 'react-icons/fi'
 import { ClientOnly } from './ClientOnly'
 
@@ -108,14 +108,14 @@ export function Nav() {
         setMounted(true);
     }, []);
     
-    const bubbleConfigs: BubbleConfig[] = [
-        { size: 4, opacity: 0.6, duration: 3.5, className: 'bubble' },
-        { size: 3, opacity: 0.6, duration: 4, className: 'bubble-1' },
-        { size: 2, opacity: 0.6, duration: 4.5, className: 'bubble-2' }
-    ];
-
     useEffect(() => {
         if (!mounted) return;
+
+        const bubbleConfigs: BubbleConfig[] = [
+            { size: 4, opacity: 0.6, duration: 3.5, className: 'bubble' },
+            { size: 3, opacity: 0.6, duration: 4, className: 'bubble-1' },
+            { size: 2, opacity: 0.6, duration: 4.5, className: 'bubble-2' }
+        ];
 
         const nav = document.querySelector(".nav-container");
         if (!nav) return;

@@ -1,4 +1,4 @@
-import { json, type LoaderFunctionArgs } from "@remix-run/cloudflare";
+import { json } from "@remix-run/cloudflare";
 import { useLoaderData, Link } from "@remix-run/react";
 import { Layout } from "~/components/Layout";
 import { FiArrowLeft, FiExternalLink, FiClock, FiUsers, FiShield, FiAward, FiAlertTriangle } from "react-icons/fi";
@@ -84,7 +84,7 @@ export default function RefundSystemDocsPage() {
               <h4>Process</h4>
               <ol>
                 <li>Navigate to your bounty post</li>
-                <li>Click "Request Refund" button</li>
+                <li>Click &quot;Request Refund&quot; button</li>
                 <li>Provide a detailed reason (minimum 10 characters)</li>
                 <li>Submit the request</li>
               </ol>
@@ -245,7 +245,7 @@ export default function RefundSystemDocsPage() {
 
             <h3>Q: What happens if my refund request expires without enough votes?</h3>
             <p>
-              <strong>A:</strong> If the 48-hour voting period expires without reaching the minimum vote threshold, the request is marked as "EXPIRED" and no refund is processed. The bounty remains active.
+              <strong>A:</strong> If the 48-hour voting period expires without reaching the minimum vote threshold, the request is marked as &quot;EXPIRED&quot; and no refund is processed. The bounty remains active.
             </p>
 
             <h3>Q: How are governance rewards calculated?</h3>
@@ -263,7 +263,7 @@ export default function RefundSystemDocsPage() {
               <strong>A:</strong> No, you cannot vote on your own refund request. This prevents self-voting and ensures impartial community decisions.
             </p>
 
-            <h3>Q: What constitutes a "helpful answer" for penalty calculation?</h3>
+            <h3>Q: What constitutes a &quot;helpful answer&quot; for penalty calculation?</h3>
             <p>
               <strong>A:</strong> An answer is considered helpful if it has received 2 or more votes. These answers are protected by the penalty system.
             </p>

@@ -1,5 +1,5 @@
 import { json, type LoaderFunctionArgs } from "@remix-run/cloudflare";
-import { useLoaderData, useSearchParams, useSubmit } from "@remix-run/react";
+import { useLoaderData, useSearchParams, useSubmit, Link } from "@remix-run/react";
 import { createDb } from "~/utils/db.server";
 import { getUser } from "~/utils/auth.server";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -8,7 +8,6 @@ import { Layout } from "~/components/Layout";
 import { FaSearch, FaBookmark } from "react-icons/fa";
 import { FiTrendingUp } from "react-icons/fi";
 import { useState, useEffect } from "react";
-import { Link } from "@remix-run/react";
 
 const DEFAULT_PROFILE_PICTURE = 'https://api.dicebear.com/7.x/initials/svg?seed=';
 
@@ -81,7 +80,7 @@ export const meta = () => {
 export const loader = async ({ request, context }: LoaderFunctionArgs) => {
   try {
     const user = await getUser(request);
-    const db = (context as { env: { DB: D1Database } }).env.DB;
+    const db = createDb((context as { env: { DB: D1Database } }).env.DB);
     
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -268,7 +267,7 @@ export const action = async ({ request, context }: LoaderFunctionArgs) => {
       return json({ error: 'You must be logged in to perform this action' }, { status: 401 });
     }
 
-    const db = createDb((context as unknown as { env: { DB: D1Database } }).env.DB);
+    const db = createDb((context as { env: { DB: D1Database } }).env.DB);
     const formData = await request.formData();
     const action = formData.get('action');
     const postIdRaw = formData.get('postId');
@@ -366,7 +365,7 @@ export const action = async ({ request, context }: LoaderFunctionArgs) => {
 };
 
 export default function Community() {
-  const { user, posts: initialPosts, totalPosts, currentPage, totalPages, availableTags, selectedTags, searchQuery } = useLoaderData<LoaderData>();
+  const { user, posts: initialPosts, totalPosts, availableTags, selectedTags, searchQuery } = useLoaderData<LoaderData>();
   const [searchParams, setSearchParams] = useSearchParams();
   const [localPosts, setLocalPosts] = useState<LoaderData['posts']>(initialPosts);
   const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
@@ -550,7 +549,7 @@ export default function Community() {
           </div>
           {searchQuery && (
             <div className="mt-2 text-sm text-gray-400">
-              Searching for: "{searchQuery}" • {totalPosts} result{totalPosts !== 1 ? 's' : ''} found
+              Searching for: &quot;{searchQuery}&quot; • {totalPosts} result{totalPosts !== 1 ? 's' : ''} found
               {isSearching && <span className="ml-2 text-violet-400">(searching...)</span>}
             </div>
           )}
@@ -713,7 +712,9 @@ export default function Community() {
                             poster={post.media.thumbnailUrl}
                             controls
                             className="w-full h-48 object-cover rounded-lg"
-                          />
+                          >
+                            <track kind="captions" />
+                          </video>
                         )}
                       </div>
                     )}

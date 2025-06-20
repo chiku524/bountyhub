@@ -1,35 +1,22 @@
 // app/routes/profile.tsx
 import { useState } from 'react'
-import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/cloudflare";
-import { useLoaderData, useActionData } from "@remix-run/react";
+import { json, type ActionFunctionArgs, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
+import { useLoaderData, useActionData, useRouteError, useNavigation, Form } from "@remix-run/react";
 import { redirect } from "@remix-run/node";
 import { createDb } from "~/utils/db.server";
-import { getUser } from "~/utils/auth.server";
-import { createPost } from "~/utils/user.server";
-import { eq } from "drizzle-orm";
-import { posts, users } from "~/drizzle/schema";
+import { requireUserId } from "~/utils/auth.server";
+import { eq, asc } from "drizzle-orm";
+import { posts, users, tags, bounties } from "../../drizzle/schema";
 import { Layout } from "~/components/Layout";
-import { AuthNotice } from "~/components/auth-notice";
-import { FaSave, FaTimes, FaEye, FaEyeSlash, FaTag, FaDollarSign, FaGift } from "react-icons/fa";
-import { FiUpload, FiLink } from "react-icons/fi";
-import { useEffect, useRef } from 'react'
-import { Link, useNavigate, useSubmit, useRouteError, useNavigation, MetaFunction } from "@remix-run/react"
-import { requireUserId } from '~/utils/auth.server'
-import { validateTitle, validateContent } from '~/utils/validators.server'
+import { FaDollarSign, FaGift, FaClock as FaClockIcon } from "react-icons/fa";
+import { FiInfo } from "react-icons/fi";
 import type { CodeBlockForm } from '~/utils/types.server'
-import { addReputationPoints, REPUTATION_POINTS } from '~/utils/reputation.server'
-import CodeBlockEditor from '~/components/CodeBlockEditor'
-import { MediaUpload } from '~/components/MediaUpload'
-import { uploadToCloudinary } from '~/utils/cloudinary.server'
 import { getVirtualWallet, createVirtualWallet, createBounty } from "~/utils/virtual-wallet.server"
-import { tags } from "../../drizzle/schema"
-import { asc } from "drizzle-orm"
+import bountyBucksInfo from '../../bounty-bucks-info.json'
 import { z } from "zod"
 import TagSelector from '~/components/TagSelector'
-import bountyBucksInfo from '../../bounty-bucks-info.json'
-import { BountyForm } from '~/components/BountyForm'
-import { FiClock, FiInfo } from 'react-icons/fi'
-import { FaClock as FaClockIcon } from "react-icons/fa"
+import CodeBlockEditor from '~/components/CodeBlockEditor'
+import { MediaUpload } from '~/components/MediaUpload'
 
 const TOKEN_SYMBOL = bountyBucksInfo.symbol
 
@@ -57,7 +44,7 @@ export const meta: MetaFunction = () => {
 
 export const loader = async ({ request, context }: LoaderFunctionArgs) => {
   const userId = await requireUserId(request);
-  const db = createDb((context as any).env.DB);
+  const db = createDb((context as { env: { DB: D1Database } }).env.DB);
 
   // Fetch user
   const userRows = await db.select({ id: users.id, username: users.username }).from(users).where(eq(users.id, userId)).limit(1);
@@ -96,7 +83,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return json({ error: validation.error.errors[0].message }, { status: 400 });
   }
 
-  const db = createDb((context as any).env.DB);
+  const db = createDb((context as { env: { DB: D1Database } }).env.DB);
 
   try {
     // Create the post
@@ -150,7 +137,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 }
 
 export default function CreatePost() {
-  const { user, availableTags } = useLoaderData<LoaderData>();
+  const { availableTags } = useLoaderData<LoaderData>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
@@ -159,7 +146,6 @@ export default function CreatePost() {
   const [hasBounty, setHasBounty] = useState(false);
   const [bountyAmount, setBountyAmount] = useState('');
   const [bountyDuration, setBountyDuration] = useState(7);
-  const [clientError, setClientError] = useState<string | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const handleMediaUpload = (newMedia: { type: string; url: string; thumbnailUrl?: string; isScreenRecording: boolean }) => {
@@ -228,7 +214,7 @@ export default function CreatePost() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-violet-300 mb-2">
+            <label htmlFor="media" className="block text-sm font-medium text-violet-300 mb-2">
               Media
             </label>
             <MediaUpload
@@ -239,7 +225,7 @@ export default function CreatePost() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-violet-300 mb-2">
+            <label htmlFor="codeBlocks" className="block text-sm font-medium text-violet-300 mb-2">
               Code Blocks
             </label>
             <CodeBlockEditor
@@ -249,42 +235,35 @@ export default function CreatePost() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-violet-300 mb-3">
+            <h3 className="block text-sm font-medium text-violet-300 mb-3">
               <div className="flex items-center gap-2">
                 <FaGift className="w-4 h-4" />
                 Bounty Settings
               </div>
-            </label>
+            </h3>
             
             <div className="bg-gradient-to-br from-neutral-800/60 to-neutral-900/60 border border-violet-500/20 rounded-xl p-6 backdrop-blur-sm">
               {/* Bounty Toggle */}
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <div className="relative">
-                    <input
-                      type="checkbox"
-                      id="hasBounty"
-                      checked={hasBounty}
-                      onChange={(e) => setHasBounty(e.target.checked)}
-                      className="sr-only"
-                    />
-                    <label
-                      htmlFor="hasBounty"
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out cursor-pointer ${
-                        hasBounty ? 'bg-violet-500' : 'bg-neutral-600'
-                      }`}
-                    >
+                    <label htmlFor="hasBounty" className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out cursor-pointer ${hasBounty ? 'bg-violet-500' : 'bg-neutral-600'}`}>
+                      <input
+                        type="checkbox"
+                        id="hasBounty"
+                        checked={hasBounty}
+                        onChange={(e) => setHasBounty(e.target.checked)}
+                        className="sr-only"
+                      />
                       <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${
-                          hasBounty ? 'translate-x-6' : 'translate-x-1'
-                        }`}
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${hasBounty ? 'translate-x-6' : 'translate-x-1'}`}
                       />
                     </label>
                   </div>
                   <div>
-                    <label htmlFor="hasBounty" className="text-white font-medium cursor-pointer">
+                    <span className="text-white font-medium cursor-pointer">
                       Add Crypto Bounty
-                    </label>
+                    </span>
                     <p className="text-gray-400 text-sm">Reward the best answer with tokens</p>
                   </div>
                 </div>
@@ -304,10 +283,11 @@ export default function CreatePost() {
                   <div className="bg-neutral-700/30 rounded-lg p-4 border border-neutral-600/50">
                     <div className="flex items-center gap-2 mb-3">
                       <FaDollarSign className="w-4 h-4 text-yellow-400" />
-                      <label className="text-white font-medium">Bounty Amount</label>
                     </div>
+                    <label htmlFor="bountyAmount" className="text-white font-medium mb-1 block">Bounty Amount</label>
                     <div className="relative">
                       <input
+                        id="bountyAmount"
                         type="number"
                         value={bountyAmount}
                         onChange={(e) => setBountyAmount(e.target.value)}
@@ -331,10 +311,11 @@ export default function CreatePost() {
                   <div className="bg-neutral-700/30 rounded-lg p-4 border border-neutral-600/50">
                     <div className="flex items-center gap-2 mb-3">
                       <FaClockIcon className="w-4 h-4 text-blue-400" />
-                      <label className="text-white font-medium">Bounty Duration</label>
                     </div>
+                    <label htmlFor="bountyDuration" className="text-white font-medium mb-1 block">Bounty Duration</label>
                     <div className="grid grid-cols-2 gap-3">
                       <input
+                        id="bountyDuration"
                         type="number"
                         value={bountyDuration}
                         onChange={(e) => setBountyDuration(Number(e.target.value))}
@@ -403,9 +384,9 @@ export default function CreatePost() {
             </div>
           </div>
 
-          {(actionData?.error || clientError) && (
+          {(actionData?.error) && (
             <div className="bg-red-500/10 border border-red-500/30 text-red-500 px-4 py-2 rounded-lg">
-              {actionData?.error || clientError}
+              {actionData?.error}
             </div>
           )}
 

@@ -1,11 +1,9 @@
 // app/routes/profile.tsx
 import { Link, useSearchParams, useLoaderData } from "@remix-run/react"
-import { json } from '@remix-run/node'
 import { FiThumbsUp, FiMessageSquare } from 'react-icons/fi'
 import { json as cloudflareJson, LoaderFunctionArgs, ActionFunctionArgs } from '@remix-run/cloudflare'
-import { eq, inArray, sql, desc } from 'drizzle-orm'
+import { eq, sql, desc } from 'drizzle-orm'
 import { users, posts, profiles, comments } from '../../drizzle/schema'
-import type { DrizzleD1Database } from 'drizzle-orm/d1'
 import { getUser } from '~/utils/auth.server'
 import { createDb } from "~/utils/db.server"
 
@@ -24,33 +22,6 @@ type Post = {
         profilePicture: string | null;
     };
 };
-
-interface CloudflareContext {
-  env: {
-    DB: DrizzleD1Database<typeof import('../../drizzle/schema')>;
-  };
-}
-
-// Define the type for userPosts
-interface UserPostDb {
-  id: string;
-  title: string;
-  content: string;
-  createdAt: Date;
-  updatedAt: Date;
-  visibilityVotes: number;
-  qualityUpvotes: number;
-  qualityDownvotes: number;
-  hasBounty: boolean;
-  status: string;
-  author: {
-    id: string;
-    username: string;
-  };
-  profile: {
-    profilePicture: string | null;
-  } | null;
-}
 
 export async function loader({ params, context, request }: LoaderFunctionArgs) {
   const { username } = params;
@@ -141,7 +112,7 @@ export async function loader({ params, context, request }: LoaderFunctionArgs) {
 
     const totalPages = Math.ceil(totalPosts[0].count / limit);
 
-    return json({
+    return cloudflareJson({
       user,
       posts: postsData,
       currentPage: page,
@@ -296,7 +267,7 @@ export default function UserPosts() {
 
                     {/* Responsive grid for posts */}
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
-                        {mappedPosts.map((post) => (
+                        {mappedPosts.map((post: Post) => (
                             renderPost(post)
                         ))}
                     </div>

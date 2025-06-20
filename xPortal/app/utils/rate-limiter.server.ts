@@ -35,7 +35,7 @@ export class RateLimiterService {
     type: keyof typeof RateLimiterService.DEFAULT_CONFIGS = 'general'
   ): Promise<{ allowed: boolean; remaining: number; resetTime: number }> {
     const config = this.DEFAULT_CONFIGS[type];
-    const key = this.generateKey(request, type);
+    const key = this.generateKey(type);
     const now = Date.now();
 
     // Get current rate limit entry
@@ -78,17 +78,15 @@ export class RateLimiterService {
   /**
    * Generate a unique key for rate limiting
    */
-  private static generateKey(request: Request, type: string): string {
+  private static generateKey(type: string): string {
     // Try to get user ID from the request
-    const url = new URL(request.url);
-    const userId = url.searchParams.get('userId') || 'anonymous';
-    return `${type}:${userId}`;
+    return `${type}:anonymous`;
   }
 
   /**
    * Get client IP address
    */
-  private static getClientIP(request: Request): string {
+  private static getClientIP(): string {
     // In production, you'd get this from headers like X-Forwarded-For
     return 'unknown'; // Placeholder
   }

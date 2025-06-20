@@ -1,12 +1,11 @@
 import { Connection, PublicKey } from '@solana/web3.js';
-import { getAssociatedTokenAddress } from '@solana/spl-token';
+import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import bountyBucksInfo from '../../bounty-bucks-info.json';
 import { 
   Program, 
   AnchorProvider, 
   web3, 
-  BN, 
-  Idl 
+  BN
 } from '@coral-xyz/anchor';
 import { GovernanceProgram as GovernanceIDL } from '../types/governance_program';
 
@@ -16,18 +15,46 @@ const GOVERNANCE_PROGRAM_ID = new PublicKey('GovPool1111111111111111111111111111
 // Token mint
 const TOKEN_MINT = new PublicKey(bountyBucksInfo.mint);
 
+interface Wallet {
+  publicKey: PublicKey;
+  signTransaction: (transaction: unknown) => Promise<unknown>;
+  signAllTransactions: (transactions: unknown[]) => Promise<unknown[]>;
+}
+
+interface GovernancePool {
+  authority: PublicKey;
+  feeRate: number;
+  totalFeesCollected: number;
+  proposalCounter: number;
+}
+
+interface Proposal {
+  governancePool: PublicKey;
+  authority: PublicKey;
+  title: string;
+  description: string;
+  proposalType: string;
+  amount?: number;
+  recipient?: PublicKey;
+  status: 'Active' | 'Executed' | 'Rejected';
+  yesVotes: number;
+  noVotes: number;
+  createdAt: number;
+  executedAt?: number;
+}
+
 export class GovernanceClient {
   private connection: Connection;
-  private program: Program<any>;
+  private program: Program<typeof GovernanceIDL>;
   private provider: AnchorProvider;
 
-  constructor(connection: Connection, wallet: any) {
+  constructor(connection: Connection, wallet: Wallet) {
     this.connection = connection;
     this.provider = new AnchorProvider(connection, wallet, {
       commitment: 'confirmed',
       preflightCommitment: 'confirmed',
     });
-    this.program = new (Program as any)(GovernanceIDL as any, GOVERNANCE_PROGRAM_ID, this.provider);
+    this.program = new Program(GovernanceIDL, GOVERNANCE_PROGRAM_ID, this.provider);
   }
 
   /**
@@ -93,7 +120,7 @@ export class GovernanceClient {
     const governancePool = GovernanceClient.getGovernancePoolAddress();
     const governancePoolTokenAccount = await GovernanceClient.getGovernancePoolTokenAddress();
 
-    const tx = await (this.program as any).methods
+    const tx = await this.program.methods
       .initializeGovernancePool(new BN(feeRate))
       .accounts({
         governancePool,
@@ -120,7 +147,7 @@ export class GovernanceClient {
     const governancePool = GovernanceClient.getGovernancePoolAddress();
     const governancePoolTokenAccount = await GovernanceClient.getGovernancePoolTokenAddress();
 
-    const tx = await (this.program as any).methods
+    const tx = await this.program.methods
       .collectGovernanceFee(new BN(bountyAmount * Math.pow(10, 9))) // Convert to lamports
       .accounts({
         governancePool,
@@ -150,7 +177,7 @@ export class GovernanceClient {
     const proposalCounter = 1; // This should be fetched from on-chain state
     const proposal = GovernanceClient.getProposalAddress(governancePool, proposalCounter);
 
-    const tx = await (this.program as any).methods
+    const tx = await this.program.methods
       .createProposal(
         title,
         description,
@@ -177,7 +204,7 @@ export class GovernanceClient {
   async voteOnProposal(proposal: PublicKey, vote: boolean): Promise<string> {
     const voteRecord = GovernanceClient.getVoteRecordAddress(proposal, this.provider.wallet.publicKey);
 
-    const tx = await (this.program as any).methods
+    const tx = await this.program.methods
       .voteOnProposal(vote)
       .accounts({
         proposal,
@@ -201,7 +228,7 @@ export class GovernanceClient {
     const governancePool = GovernanceClient.getGovernancePoolAddress();
     const governancePoolTokenAccount = await GovernanceClient.getGovernancePoolTokenAddress();
 
-    const tx = await (this.program as any).methods
+    const tx = await (this.program as Program<typeof GovernanceIDL>).methods
       .executeProposal()
       .accounts({
         proposal,
@@ -232,7 +259,7 @@ export class GovernanceClient {
       })
     );
 
-    const tx = await (this.program as any).methods
+    const tx = await (this.program as Program<typeof GovernanceIDL>).methods
       .distributeVoterRewards(
         new BN(totalRewardAmount * Math.pow(10, 9)),
         voterAddresses
@@ -251,67 +278,34 @@ export class GovernanceClient {
   /**
    * Get governance pool data
    */
-  async getGovernancePool(): Promise<any> {
-    try {
-      const governancePool = GovernanceClient.getGovernancePoolAddress();
-      const account = await (this.program as any).account['governancePool'].fetch(governancePool);
-      return {
-        authority: account.authority.toString(),
-        governanceFeeRate: account.governanceFeeRate.toNumber(),
-        totalFeesCollected: account.totalFeesCollected.toNumber(),
-        totalRewardsDistributed: account.totalRewardsDistributed.toNumber(),
-        bump: account.bump,
-      };
-    } catch (error) {
-      console.error('Error fetching governance pool:', error);
-      return null;
-    }
+  async getGovernancePool(): Promise<GovernancePool> {
+    const governancePool = GovernanceClient.getGovernancePoolAddress();
+    const account = await this.program.account.governancePool.fetch(governancePool);
+    return account as GovernancePool;
   }
 
   /**
    * Get proposal data
    */
-  async getProposal(proposalAddress: PublicKey): Promise<any> {
-    try {
-      const account = await (this.program as any).account['proposal'].fetch(proposalAddress);
-      return {
-        authority: account.authority.toString(),
-        governancePool: account.governancePool.toString(),
-        title: account.title,
-        description: account.description,
-        proposalType: account.proposalType,
-        amount: account.amount?.toNumber(),
-        recipient: account.recipient?.toString(),
-        status: account.status,
-        yesVotes: account.yesVotes.toNumber(),
-        noVotes: account.noVotes.toNumber(),
-        totalVotes: account.totalVotes.toNumber(),
-        createdAt: account.createdAt.toNumber(),
-        expiresAt: account.expiresAt.toNumber(),
-        bump: account.bump,
-      };
-    } catch (error) {
-      console.error('Error fetching proposal:', error);
-      return null;
-    }
+  async getProposal(proposalAddress: PublicKey): Promise<Proposal> {
+    const account = await this.program.account.proposal.fetch(proposalAddress);
+    return account as Proposal;
   }
 
   /**
    * Get all active proposals
    */
-  async getActiveProposals(): Promise<any[]> {
-    try {
-      const governancePool = GovernanceClient.getGovernancePoolAddress();
-      
-      // This would need to be implemented with proper indexing
-      // For now, we'll return an empty array
-      // In a real implementation, you'd query for all proposals associated with the governance pool
-      
-      return [];
-    } catch (error) {
-      console.error('Error fetching active proposals:', error);
-      return [];
-    }
+  async getActiveProposals(): Promise<Proposal[]> {
+    const governancePool = GovernanceClient.getGovernancePoolAddress();
+    const proposals = await this.program.account.proposal.all([
+      {
+        memcmp: {
+          offset: 8, // Skip discriminator
+          bytes: governancePool.toBase58(),
+        },
+      },
+    ]);
+    return proposals.map(p => p.account as Proposal);
   }
 
   /**

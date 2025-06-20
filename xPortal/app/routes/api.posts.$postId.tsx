@@ -1,6 +1,6 @@
 import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { getUser } from "~/utils/auth.server";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { posts, comments, answers, votes, users, profiles } from "../../drizzle/schema";
 import { createDb } from "~/utils/db.server";
 import { addReputationPoints, REPUTATION_POINTS } from "~/utils/reputation.server";
