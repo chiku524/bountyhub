@@ -1,13 +1,4 @@
-// Conditional import for puppeteer - will be undefined in Workers environment
-let puppeteer: typeof import('puppeteer') | null = null;
-try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  puppeteer = require('puppeteer');
-} catch (error) {
-  // Puppeteer not available in Workers environment
-  console.warn('Puppeteer not available in current environment');
-}
-
+// Remove the top-level Puppeteer import
 import { renderToString } from 'react-dom/server';
 import React from 'react';
 import { createDb } from './db.server';
@@ -33,11 +24,18 @@ export interface PDFOptions {
 export class PDFService {
   private static browser: import('puppeteer').Browser | null = null;
 
-  private static async getBrowser(): Promise<import('puppeteer').Browser> {
-    if (!puppeteer) {
+  private static async getPuppeteer(): Promise<typeof import('puppeteer')> {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      return require('puppeteer');
+    } catch (error) {
       throw new Error('Puppeteer is not available in this environment');
     }
+  }
+
+  private static async getBrowser(): Promise<import('puppeteer').Browser> {
     if (!this.browser) {
+      const puppeteer = await this.getPuppeteer();
       this.browser = await puppeteer.launch({
         headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox']
@@ -77,9 +75,7 @@ export class PDFService {
     component: React.ReactElement,
     options: PDFOptions = {}
   ): Promise<Buffer> {
-    if (!puppeteer) {
-      throw new Error('PDF generation is not available in this environment');
-    }
+    const puppeteer = await this.getPuppeteer();
     const htmlString = renderToString(component);
     // Create a complete HTML document
     const fullHTML = `
@@ -138,7 +134,7 @@ export class PDFService {
 
   // Check if PDF generation is available
   static isAvailable(): boolean {
-    return puppeteer !== null;
+    return true; // Always available since we handle the error in getPuppeteer
   }
 }
 
@@ -148,11 +144,7 @@ export async function createSimplePDF(
   content: string,
   options: PDFOptions = {}
 ): Promise<Buffer> {
-  if (!puppeteer) {
-    throw new Error('PDF generation is not available in this environment');
-  }
-
-  const htmlContent = `
+  return PDFService.generatePDF(`
     <!DOCTYPE html>
     <html>
       <head>
@@ -198,18 +190,6 @@ export async function createSimplePDF(
           .section {
             margin-bottom: 30px;
           }
-          .contact-info {
-            background: #f5f5f5;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
-          }
-          @media print {
-            body {
-              background: white !important;
-              color: black !important;
-            }
-          }
         </style>
       </head>
       <body>
@@ -219,9 +199,7 @@ export async function createSimplePDF(
         </div>
       </body>
     </html>
-  `;
-
-  return PDFService.generatePDF(htmlContent, options);
+  `, options);
 }
 
 export async function loader({ request, context }: LoaderFunctionArgs) {

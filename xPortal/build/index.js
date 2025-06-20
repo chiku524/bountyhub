@@ -20,10 +20,10 @@ var __commonJS = (cb, mod) => function() {
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, { get: all[name], enumerable: !0 });
-}, __copyProps = (to, from, except2, desc12) => {
+}, __copyProps = (to, from, except2, desc11) => {
   if (from && typeof from == "object" || typeof from == "function")
     for (let key of __getOwnPropNames(from))
-      !__hasOwnProp.call(to, key) && key !== except2 && __defProp(to, key, { get: () => from[key], enumerable: !(desc12 = __getOwnPropDesc(from, key)) || desc12.enumerable });
+      !__hasOwnProp.call(to, key) && key !== except2 && __defProp(to, key, { get: () => from[key], enumerable: !(desc11 = __getOwnPropDesc(from, key)) || desc11.enumerable });
   return to;
 };
 var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
@@ -1595,7 +1595,7 @@ __export(schema_exports, {
   integrityViolations: () => integrityViolations,
   media: () => media,
   postTags: () => postTags,
-  posts: () => posts,
+  posts: () => posts2,
   profiles: () => profiles,
   refundRequestVotes: () => refundRequestVotes,
   refundRequests: () => refundRequests,
@@ -1612,7 +1612,7 @@ __export(schema_exports, {
 });
 import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
-var users, profiles, posts, media, comments, answers, votes, codeBlocks, reputationHistory, bounties, virtualWallets, walletTransactions, transactionLogs, userRatings, integrityViolations, integrityHistory, tags, postTags, bookmarks, refundRequests, refundRequestVotes, reports, bountyClaims, integrityRatings, schema, init_schema = __esm({
+var users, profiles, posts2, media, comments, answers, votes, codeBlocks, reputationHistory, bounties, virtualWallets, walletTransactions, transactionLogs, userRatings, integrityViolations, integrityHistory, tags, postTags, bookmarks, refundRequests, refundRequestVotes, reports, bountyClaims, integrityRatings, schema, init_schema = __esm({
   "drizzle/schema.ts"() {
     "use strict";
     users = sqliteTable("users", {
@@ -1650,7 +1650,7 @@ var users, profiles, posts, media, comments, answers, votes, codeBlocks, reputat
       devto: text("devto"),
       createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`),
       updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`)
-    }), posts = sqliteTable("posts", {
+    }), posts2 = sqliteTable("posts", {
       id: text("id").primaryKey(),
       title: text("title").notNull(),
       content: text("content").notNull(),
@@ -1670,14 +1670,14 @@ var users, profiles, posts, media, comments, answers, votes, codeBlocks, reputat
       thumbnailUrl: text("thumbnail_url"),
       isScreenRecording: integer("is_screen_recording", { mode: "boolean" }).notNull().default(!1),
       cloudinaryId: text("cloudinary_id").notNull(),
-      postId: text("post_id").notNull().references(() => posts.id, { onDelete: "cascade" }),
+      postId: text("post_id").notNull().references(() => posts2.id, { onDelete: "cascade" }),
       createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`),
       updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`)
     }), comments = sqliteTable("comments", {
       id: text("id").primaryKey(),
       content: text("content").notNull(),
       authorId: text("author_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-      postId: text("post_id").notNull().references(() => posts.id, { onDelete: "cascade" }),
+      postId: text("post_id").notNull().references(() => posts2.id, { onDelete: "cascade" }),
       answerId: text("answer_id").references(() => answers.id, { onDelete: "cascade" }),
       createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`),
       updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`),
@@ -1687,7 +1687,7 @@ var users, profiles, posts, media, comments, answers, votes, codeBlocks, reputat
       id: text("id").primaryKey(),
       content: text("content").notNull(),
       authorId: text("author_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-      postId: text("post_id").notNull().references(() => posts.id, { onDelete: "cascade" }),
+      postId: text("post_id").notNull().references(() => posts2.id, { onDelete: "cascade" }),
       createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`),
       updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`),
       upvotes: integer("upvotes").notNull().default(0),
@@ -1696,7 +1696,7 @@ var users, profiles, posts, media, comments, answers, votes, codeBlocks, reputat
     }), votes = sqliteTable("votes", {
       id: text("id").primaryKey(),
       userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-      postId: text("post_id").references(() => posts.id, { onDelete: "cascade" }),
+      postId: text("post_id").references(() => posts2.id, { onDelete: "cascade" }),
       commentId: text("comment_id").references(() => comments.id, { onDelete: "cascade" }),
       answerId: text("answer_id").references(() => answers.id, { onDelete: "cascade" }),
       value: integer("value").notNull(),
@@ -1709,7 +1709,7 @@ var users, profiles, posts, media, comments, answers, votes, codeBlocks, reputat
       language: text("language").notNull(),
       code: text("code").notNull(),
       description: text("description"),
-      postId: text("post_id").notNull().references(() => posts.id, { onDelete: "cascade" }),
+      postId: text("post_id").notNull().references(() => posts2.id, { onDelete: "cascade" }),
       createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`),
       updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`)
     }), reputationHistory = sqliteTable("reputation_history", {
@@ -1721,7 +1721,7 @@ var users, profiles, posts, media, comments, answers, votes, codeBlocks, reputat
       createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`)
     }), bounties = sqliteTable("bounties", {
       id: text("id").primaryKey(),
-      postId: text("post_id").notNull().unique().references(() => posts.id, { onDelete: "cascade" }),
+      postId: text("post_id").notNull().unique().references(() => posts2.id, { onDelete: "cascade" }),
       amount: real("amount").notNull(),
       status: text("status", { enum: ["ACTIVE", "CLAIMED", "REFUNDED", "EXPIRED"] }).notNull().default("ACTIVE"),
       winnerId: text("winner_id").references(() => users.id, { onDelete: "set null" }),
@@ -1816,12 +1816,12 @@ var users, profiles, posts, media, comments, answers, votes, codeBlocks, reputat
       updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`)
     }), postTags = sqliteTable("post_tags", {
       id: text("id").primaryKey(),
-      postId: text("post_id").notNull().references(() => posts.id, { onDelete: "cascade" }),
+      postId: text("post_id").notNull().references(() => posts2.id, { onDelete: "cascade" }),
       tagId: text("tag_id").notNull().references(() => tags.id, { onDelete: "cascade" })
     }), bookmarks = sqliteTable("bookmarks", {
       id: text("id").primaryKey(),
       userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-      postId: text("post_id").notNull().references(() => posts.id, { onDelete: "cascade" }),
+      postId: text("post_id").notNull().references(() => posts2.id, { onDelete: "cascade" }),
       createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`)
     }), refundRequests = sqliteTable("refund_requests", {
       id: text("id").primaryKey(),
@@ -1844,7 +1844,7 @@ var users, profiles, posts, media, comments, answers, votes, codeBlocks, reputat
     }), reports = sqliteTable("reports", {
       id: text("id").primaryKey(),
       reporterId: text("reporter_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-      postId: text("post_id").references(() => posts.id, { onDelete: "cascade" }),
+      postId: text("post_id").references(() => posts2.id, { onDelete: "cascade" }),
       commentId: text("comment_id").references(() => comments.id, { onDelete: "cascade" }),
       answerId: text("answer_id").references(() => answers.id, { onDelete: "cascade" }),
       reason: text("reason").notNull(),
@@ -1853,7 +1853,7 @@ var users, profiles, posts, media, comments, answers, votes, codeBlocks, reputat
       updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`)
     }), bountyClaims = sqliteTable("bounty_claims", {
       id: text("id").primaryKey(),
-      postId: text("post_id").notNull().references(() => posts.id, { onDelete: "cascade" }),
+      postId: text("post_id").notNull().references(() => posts2.id, { onDelete: "cascade" }),
       answerId: text("answer_id").notNull().references(() => answers.id, { onDelete: "cascade" }),
       claimantId: text("claimant_id").notNull().references(() => users.id, { onDelete: "cascade" }),
       amount: real("amount").notNull(),
@@ -1863,7 +1863,7 @@ var users, profiles, posts, media, comments, answers, votes, codeBlocks, reputat
     }), integrityRatings = sqliteTable("integrity_ratings", {
       id: text("id").primaryKey(),
       raterId: text("rater_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-      postId: text("post_id").notNull().references(() => posts.id, { onDelete: "cascade" }),
+      postId: text("post_id").notNull().references(() => posts2.id, { onDelete: "cascade" }),
       rating: integer("rating").notNull(),
       reason: text("reason").notNull(),
       createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`),
@@ -1871,7 +1871,7 @@ var users, profiles, posts, media, comments, answers, votes, codeBlocks, reputat
     }), schema = {
       users,
       profiles,
-      posts,
+      posts: posts2,
       media,
       comments,
       answers,
@@ -1897,53 +1897,10 @@ var users, profiles, posts, media, comments, answers, votes, codeBlocks, reputat
   }
 });
 
-// bounty-bucks-info.json
-var bounty_bucks_info_default, init_bounty_bucks_info = __esm({
-  "bounty-bucks-info.json"() {
-    bounty_bucks_info_default = {
-      name: "BountyBucks",
-      symbol: "BBUX",
-      mint: "8TxxzfEUbQcMTmsC5z1SS9TuLNzbL2iBVTLvb5JaKR6M",
-      description: "BountyBucks (BBUX) is the native token for Portal's revolutionary decentralized bounty platform. Built on Solana, BBUX powers a hybrid virtual/real token model with innovative staking pools and an integrity rating system. Earn BBUX by completing bounties, stake for rewards, and participate in platform governance. The future of decentralized bounty platforms starts here.",
-      image: "https://bountybucks.vercel.app/logo.svg",
-      external_url: "https://bountybucks.vercel.app/",
-      attributes: [
-        { trait_type: "Token Type", value: "Utility Token" },
-        { trait_type: "Blockchain", value: "Solana" },
-        { trait_type: "Total Supply", value: "1,000,000,000 BBUX" },
-        { trait_type: "Decimals", value: "9" },
-        { trait_type: "Use Case", value: "Bounty Platform Rewards" },
-        { trait_type: "Features", value: "Staking, Governance, Liquidity Pools" },
-        { trait_type: "Platform", value: "Portal Bounty Platform" }
-      ],
-      properties: {
-        files: [
-          { type: "image/svg+xml", uri: "https://bountybucks.vercel.app/logo.svg" }
-        ],
-        category: "image",
-        creators: [
-          { address: "e6EdfgpEdo48zUKFC18cADxTqgbt68JE8uDjAgdCzkp", share: 100 }
-        ]
-      },
-      extensions: {
-        website: "https://bountybucks.vercel.app/",
-        twitter: "https://twitter.com/BountyBucks524",
-        discord: "https://discord.gg/9uwHxMP9mz",
-        email: "bountybucks524@gmail.com",
-        github: "https://github.com/chiku524/bountybucks",
-        whitepaper: "https://bountybucks.vercel.app/whitepaper.pdf"
-      },
-      tags: [
-        "bounty",
-        "defi",
-        "solana",
-        "staking",
-        "governance",
-        "developer-tools",
-        "freelance",
-        "rewards"
-      ]
-    };
+// css-side-effects-plugin-ns:node_modules\@solana\wallet-adapter-react-ui\styles.css
+var require_ = __commonJS({
+  "css-side-effects-plugin-ns:node_modules\\@solana\\wallet-adapter-react-ui\\styles.css"(exports, module) {
+    module.exports = {};
   }
 });
 
@@ -1952,7 +1909,7 @@ var virtual_wallet_server_exports = {};
 __export(virtual_wallet_server_exports, {
   addCompensation: () => addCompensation,
   cancelTransaction: () => cancelTransaction,
-  claimBounty: () => claimBounty,
+  claimBounty: () => claimBounty2,
   confirmDeposit: () => confirmDeposit,
   confirmWithdrawal: () => confirmWithdrawal,
   createBounty: () => createBounty,
@@ -1968,7 +1925,7 @@ __export(virtual_wallet_server_exports, {
   refundBounty: () => refundBounty,
   updateWalletBalance: () => updateWalletBalance
 });
-import { eq as eq4, and as and3, desc as desc4, sql as sql5 } from "drizzle-orm";
+import { eq as eq4, desc as desc3, and as and2, sql as sql4 } from "drizzle-orm";
 async function getVirtualWallet(db, userId) {
   try {
     return await db.query.virtualWallets.findFirst({
@@ -2051,7 +2008,7 @@ async function getWalletTransactions(db, userId, limit = 50, offset = 0) {
   try {
     return await db.query.walletTransactions.findMany({
       where: eq4(walletTransactions.userId, userId),
-      orderBy: [desc4(walletTransactions.createdAt)],
+      orderBy: [desc3(walletTransactions.createdAt)],
       limit,
       offset
     });
@@ -2092,17 +2049,17 @@ async function getWalletDetails(db, userId) {
 async function getAllTransactions(db, userId, page = 1, limit = 50) {
   let wallet = await getVirtualWallet(db, userId), offset = (page - 1) * limit, [transactions, totalCountResult] = await Promise.all([
     getWalletTransactions(db, userId, limit, offset),
-    db.select({ count: sql5`count(*)` }).from(walletTransactions).where(eq4(walletTransactions.userId, userId)).get()
+    db.select({ count: sql4`count(*)` }).from(walletTransactions).where(eq4(walletTransactions.userId, userId)).get()
   ]), totalCount = totalCountResult?.count || 0;
   return { transactions, totalCount, wallet };
 }
 async function getPendingTransactions(db, userId) {
   return await db.query.walletTransactions.findMany({
-    where: and3(
+    where: and2(
       eq4(walletTransactions.userId, userId),
       eq4(walletTransactions.status, "PENDING")
     ),
-    orderBy: [desc4(walletTransactions.createdAt)]
+    orderBy: [desc3(walletTransactions.createdAt)]
   });
 }
 async function createDepositRequest(db, userId, amount) {
@@ -2187,7 +2144,7 @@ async function createBounty(db, userId, amount, bountyId) {
   }).returning().all();
   return transaction;
 }
-async function claimBounty(db, userId, amount, bountyId) {
+async function claimBounty2(db, userId, amount, bountyId) {
   let wallet = await getVirtualWallet(db, userId), [transaction] = await db.insert(walletTransactions).values({
     id: crypto.randomUUID(),
     userId,
@@ -2231,12 +2188,10 @@ async function addCompensation(db, userId, amount, reason) {
   }).returning().all();
   return transaction;
 }
-var TOKEN_SYMBOL, init_virtual_wallet_server = __esm({
+var init_virtual_wallet_server = __esm({
   "app/utils/virtual-wallet.server.ts"() {
     "use strict";
-    init_bounty_bucks_info();
     init_schema();
-    TOKEN_SYMBOL = bounty_bucks_info_default.symbol;
   }
 });
 
@@ -2252,7 +2207,7 @@ import { isbot } from "isbot";
 import { renderToPipeableStream } from "react-dom/server";
 import { jsx } from "react/jsx-runtime";
 var ABORT_DELAY = 5e3;
-function handleRequest(request, responseStatusCode, responseHeaders, remixContext, loadContext) {
+function handleRequest(request, responseStatusCode, responseHeaders, remixContext) {
   return isbot(request.headers.get("user-agent") || "") ? handleBotRequest(
     request,
     responseStatusCode,
@@ -2287,10 +2242,10 @@ function handleBotRequest(request, responseStatusCode, responseHeaders, remixCon
             })
           ), pipe(body);
         },
-        onShellError(error) {
-          reject(error);
+        onShellError() {
+          reject(new Error("Shell error occurred"));
         },
-        onError(error) {
+        onError() {
           responseStatusCode = 500;
         }
       }
@@ -2320,10 +2275,10 @@ function handleBrowserRequest(request, responseStatusCode, responseHeaders, remi
             })
           ), pipe(body);
         },
-        onShellError(error) {
-          reject(error);
+        onShellError() {
+          reject(new Error("Shell error occurred"));
         },
-        onError(error) {
+        onError() {
           responseStatusCode = 500;
         }
       }
@@ -2351,8 +2306,8 @@ import {
   isRouteErrorResponse,
   useLoaderData
 } from "@remix-run/react";
-import { useEffect as useEffect2 } from "react";
 import { json } from "@remix-run/node";
+import { useEffect } from "react";
 
 // app/utils/auth.server.ts
 var import_bcryptjs2 = __toESM(require_bcryptjs(), 1);
@@ -2363,8 +2318,7 @@ var import_bcryptjs = __toESM(require_bcryptjs(), 1);
 
 // app/utils/reputation.server.ts
 init_schema();
-import { eq, desc } from "drizzle-orm";
-import { sql as sql2 } from "drizzle-orm";
+import { eq, desc, sql as sql2 } from "drizzle-orm";
 var REPUTATION_POINTS = {
   POST_CREATED: 10,
   POST_UPVOTED: 2,
@@ -2396,9 +2350,56 @@ async function addReputationPoints(db, userId, points, action26, referenceId) {
 }
 
 // app/utils/solana-address.server.ts
-init_bounty_bucks_info();
 import { Keypair, PublicKey } from "@solana/web3.js";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
+
+// bounty-bucks-info.json
+var bounty_bucks_info_default = {
+  name: "BountyBucks",
+  symbol: "BBUX",
+  mint: "8TxxzfEUbQcMTmsC5z1SS9TuLNzbL2iBVTLvb5JaKR6M",
+  description: "BountyBucks (BBUX) is the native token for Portal's revolutionary decentralized bounty platform. Built on Solana, BBUX powers a hybrid virtual/real token model with innovative staking pools and an integrity rating system. Earn BBUX by completing bounties, stake for rewards, and participate in platform governance. The future of decentralized bounty platforms starts here.",
+  image: "https://bountybucks.vercel.app/logo.svg",
+  external_url: "https://bountybucks.vercel.app/",
+  attributes: [
+    { trait_type: "Token Type", value: "Utility Token" },
+    { trait_type: "Blockchain", value: "Solana" },
+    { trait_type: "Total Supply", value: "1,000,000,000 BBUX" },
+    { trait_type: "Decimals", value: "9" },
+    { trait_type: "Use Case", value: "Bounty Platform Rewards" },
+    { trait_type: "Features", value: "Staking, Governance, Liquidity Pools" },
+    { trait_type: "Platform", value: "Portal Bounty Platform" }
+  ],
+  properties: {
+    files: [
+      { type: "image/svg+xml", uri: "https://bountybucks.vercel.app/logo.svg" }
+    ],
+    category: "image",
+    creators: [
+      { address: "e6EdfgpEdo48zUKFC18cADxTqgbt68JE8uDjAgdCzkp", share: 100 }
+    ]
+  },
+  extensions: {
+    website: "https://bountybucks.vercel.app/",
+    twitter: "https://twitter.com/BountyBucks524",
+    discord: "https://discord.gg/9uwHxMP9mz",
+    email: "bountybucks524@gmail.com",
+    github: "https://github.com/chiku524/bountybucks",
+    whitepaper: "https://bountybucks.vercel.app/whitepaper.pdf"
+  },
+  tags: [
+    "bounty",
+    "defi",
+    "solana",
+    "staking",
+    "governance",
+    "developer-tools",
+    "freelance",
+    "rewards"
+  ]
+};
+
+// app/utils/solana-address.server.ts
 var TOKEN_MINT = bounty_bucks_info_default.mint, SolanaAddressService = class {
   /**
    * Generate a new Solana keypair for a user
@@ -2444,7 +2445,7 @@ var TOKEN_MINT = bounty_bucks_info_default.mint, SolanaAddressService = class {
 
 // app/utils/user.server.ts
 init_schema();
-import { eq as eq2, desc as desc2 } from "drizzle-orm";
+import { eq as eq2 } from "drizzle-orm";
 async function createUser(db, { email, password, username }) {
   let hashedPassword = await import_bcryptjs.default.hash(password, 10), { solanaAddress, tokenAccountAddress } = await SolanaAddressService.generateUserAddresses(), userId = crypto.randomUUID(), [user] = await db.insert(users).values({
     id: userId,
@@ -2559,51 +2560,25 @@ async function logout(request) {
 }
 
 // app/components/WalletProvider.tsx
-import { useEffect, useState } from "react";
-import { Fragment, jsx as jsx2 } from "react/jsx-runtime";
-function ClientWalletProvider({ children }) {
-  let [walletComponents, setWalletComponents] = useState(null), [isLoading, setIsLoading] = useState(!0);
-  if (useEffect(() => {
-    Promise.all([
-      import("@solana/wallet-adapter-base"),
-      import("@solana/wallet-adapter-react"),
-      import("@solana/wallet-adapter-react-ui"),
-      import("@solana/wallet-adapter-phantom"),
-      import("@solana/wallet-adapter-solflare"),
-      import("@solana/web3.js")
-    ]).then(([
-      { WalletAdapterNetwork },
-      { ConnectionProvider: ConnectionProvider2, WalletProvider: SolanaWalletProvider2 },
-      { WalletModalProvider: WalletModalProvider2 },
-      { PhantomWalletAdapter },
-      { SolflareWalletAdapter },
-      { clusterApiUrl }
-    ]) => {
-      let wallets2 = [
-        new PhantomWalletAdapter(),
-        new SolflareWalletAdapter()
-      ];
-      setWalletComponents({
-        ConnectionProvider: ConnectionProvider2,
-        SolanaWalletProvider: SolanaWalletProvider2,
-        WalletModalProvider: WalletModalProvider2,
-        wallets: wallets2,
-        endpoint: clusterApiUrl(WalletAdapterNetwork.Devnet)
-      }), setIsLoading(!1);
-    }).catch((error) => {
-      console.error("Failed to load wallet components:", error), setIsLoading(!1);
-    });
-  }, []), isLoading || !walletComponents)
-    return /* @__PURE__ */ jsx2(Fragment, { children });
-  let { ConnectionProvider, SolanaWalletProvider, WalletModalProvider, wallets, endpoint } = walletComponents;
+import { useMemo } from "react";
+import { ConnectionProvider, WalletProvider as SolanaWalletProvider } from "@solana/wallet-adapter-react";
+import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
+import { PhantomWalletAdapter } from "@solana/wallet-adapter-phantom";
+import { SolflareWalletAdapter } from "@solana/wallet-adapter-solflare";
+import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
+import { clusterApiUrl } from "@solana/web3.js";
+import { jsx as jsx2 } from "react/jsx-runtime";
+require_();
+var WalletProvider = ({ children }) => {
+  let network = WalletAdapterNetwork.Devnet, endpoint = useMemo(() => clusterApiUrl(network), [network]), wallets = useMemo(
+    () => [
+      new PhantomWalletAdapter(),
+      new SolflareWalletAdapter()
+    ],
+    []
+  );
   return /* @__PURE__ */ jsx2(ConnectionProvider, { endpoint, children: /* @__PURE__ */ jsx2(SolanaWalletProvider, { wallets, autoConnect: !0, children: /* @__PURE__ */ jsx2(WalletModalProvider, { children }) }) });
-}
-function WalletProvider({ children }) {
-  let [mounted, setMounted] = useState(!1);
-  return useEffect(() => {
-    setMounted(!0);
-  }, []), typeof window > "u" ? /* @__PURE__ */ jsx2(Fragment, { children }) : mounted ? /* @__PURE__ */ jsx2(ClientWalletProvider, { children }) : /* @__PURE__ */ jsx2(Fragment, { children });
-}
+};
 
 // node_modules/drizzle-orm/entity.js
 var entityKind = Symbol.for("drizzle:entityKind"), hasOwnEntityKind = Symbol.for("drizzle:hasOwnEntityKind");
@@ -3191,10 +3166,10 @@ _a21 = entityKind, __publicField(PgEnumColumn, _a21, "PgEnumColumn");
 
 // node_modules/drizzle-orm/subquery.js
 var _a22, Subquery = class {
-  constructor(sql11, fields, alias, isWith = !1, usedTables = []) {
+  constructor(sql10, fields, alias, isWith = !1, usedTables = []) {
     this._ = {
       brand: "Subquery",
-      sql: sql11,
+      sql: sql10,
       selectedFields: fields,
       alias,
       isWith,
@@ -3440,7 +3415,7 @@ var noopDecoder = {
   }
 };
 _a28 = entityKind, __publicField(Param, _a28, "Param");
-function sql4(strings, ...params) {
+function sql3(strings, ...params) {
   let queryChunks = [];
   (params.length > 0 || strings.length > 0 && strings[0] !== "") && queryChunks.push(new StringChunk(strings[0]));
   for (let [paramIndex, param2] of params.entries())
@@ -3479,7 +3454,7 @@ function sql4(strings, ...params) {
     return new Param(value, encoder);
   }
   sql22.param = param2;
-})(sql4 || (sql4 = {}));
+})(sql3 || (sql3 = {}));
 ((SQL2) => {
   class Aliased {
     constructor(sql22, fieldAlias) {
@@ -3666,15 +3641,15 @@ _a33 = entityKind, __publicField(PrimaryKey, _a33, "PgPrimaryKey");
 function bindIfParam(value, column) {
   return isDriverValueEncoder(column) && !isSQLWrapper(value) && !is(value, Param) && !is(value, Placeholder) && !is(value, Column) && !is(value, Table) && !is(value, View) ? new Param(value, column) : value;
 }
-var eq3 = (left, right) => sql4`${left} = ${bindIfParam(right, left)}`, ne = (left, right) => sql4`${left} <> ${bindIfParam(right, left)}`;
-function and2(...unfilteredConditions) {
+var eq3 = (left, right) => sql3`${left} = ${bindIfParam(right, left)}`, ne = (left, right) => sql3`${left} <> ${bindIfParam(right, left)}`;
+function and(...unfilteredConditions) {
   let conditions = unfilteredConditions.filter(
     (c) => c !== void 0
   );
   if (conditions.length !== 0)
     return conditions.length === 1 ? new SQL(conditions) : new SQL([
       new StringChunk("("),
-      sql4.join(conditions, new StringChunk(" and ")),
+      sql3.join(conditions, new StringChunk(" and ")),
       new StringChunk(")")
     ]);
 }
@@ -3685,63 +3660,63 @@ function or(...unfilteredConditions) {
   if (conditions.length !== 0)
     return conditions.length === 1 ? new SQL(conditions) : new SQL([
       new StringChunk("("),
-      sql4.join(conditions, new StringChunk(" or ")),
+      sql3.join(conditions, new StringChunk(" or ")),
       new StringChunk(")")
     ]);
 }
 function not(condition) {
-  return sql4`not ${condition}`;
+  return sql3`not ${condition}`;
 }
-var gt = (left, right) => sql4`${left} > ${bindIfParam(right, left)}`, gte = (left, right) => sql4`${left} >= ${bindIfParam(right, left)}`, lt = (left, right) => sql4`${left} < ${bindIfParam(right, left)}`, lte = (left, right) => sql4`${left} <= ${bindIfParam(right, left)}`;
+var gt = (left, right) => sql3`${left} > ${bindIfParam(right, left)}`, gte = (left, right) => sql3`${left} >= ${bindIfParam(right, left)}`, lt = (left, right) => sql3`${left} < ${bindIfParam(right, left)}`, lte = (left, right) => sql3`${left} <= ${bindIfParam(right, left)}`;
 function inArray(column, values) {
-  return Array.isArray(values) ? values.length === 0 ? sql4`false` : sql4`${column} in ${values.map((v) => bindIfParam(v, column))}` : sql4`${column} in ${bindIfParam(values, column)}`;
+  return Array.isArray(values) ? values.length === 0 ? sql3`false` : sql3`${column} in ${values.map((v) => bindIfParam(v, column))}` : sql3`${column} in ${bindIfParam(values, column)}`;
 }
 function notInArray(column, values) {
-  return Array.isArray(values) ? values.length === 0 ? sql4`true` : sql4`${column} not in ${values.map((v) => bindIfParam(v, column))}` : sql4`${column} not in ${bindIfParam(values, column)}`;
+  return Array.isArray(values) ? values.length === 0 ? sql3`true` : sql3`${column} not in ${values.map((v) => bindIfParam(v, column))}` : sql3`${column} not in ${bindIfParam(values, column)}`;
 }
 function isNull(value) {
-  return sql4`${value} is null`;
+  return sql3`${value} is null`;
 }
 function isNotNull(value) {
-  return sql4`${value} is not null`;
+  return sql3`${value} is not null`;
 }
 function exists(subquery) {
-  return sql4`exists ${subquery}`;
+  return sql3`exists ${subquery}`;
 }
 function notExists(subquery) {
-  return sql4`not exists ${subquery}`;
+  return sql3`not exists ${subquery}`;
 }
 function between(column, min, max) {
-  return sql4`${column} between ${bindIfParam(min, column)} and ${bindIfParam(
+  return sql3`${column} between ${bindIfParam(min, column)} and ${bindIfParam(
     max,
     column
   )}`;
 }
 function notBetween(column, min, max) {
-  return sql4`${column} not between ${bindIfParam(
+  return sql3`${column} not between ${bindIfParam(
     min,
     column
   )} and ${bindIfParam(max, column)}`;
 }
 function like(column, value) {
-  return sql4`${column} like ${value}`;
+  return sql3`${column} like ${value}`;
 }
 function notLike(column, value) {
-  return sql4`${column} not like ${value}`;
+  return sql3`${column} not like ${value}`;
 }
 function ilike(column, value) {
-  return sql4`${column} ilike ${value}`;
+  return sql3`${column} ilike ${value}`;
 }
 function notIlike(column, value) {
-  return sql4`${column} not ilike ${value}`;
+  return sql3`${column} not ilike ${value}`;
 }
 
 // node_modules/drizzle-orm/sql/expressions/select.js
 function asc(column) {
-  return sql4`${column} asc`;
+  return sql3`${column} asc`;
 }
-function desc3(column) {
-  return sql4`${column} desc`;
+function desc2(column) {
+  return sql3`${column} desc`;
 }
 
 // node_modules/drizzle-orm/relations.js
@@ -3790,7 +3765,7 @@ var _a37, _Many = class extends Relation {
 _a37 = entityKind, __publicField(Many, _a37, "Many");
 function getOperators() {
   return {
-    and: and2,
+    and,
     between,
     eq: eq3,
     exists,
@@ -3811,14 +3786,14 @@ function getOperators() {
     notIlike,
     notInArray,
     or,
-    sql: sql4
+    sql: sql3
   };
 }
 function getOrderByOperators() {
   return {
-    sql: sql4,
+    sql: sql3,
     asc,
-    desc: desc3
+    desc: desc2
   };
 }
 function extractTablesRelationalConfig(schema3, configHelpers) {
@@ -4015,7 +3990,7 @@ function mapColumnsInAliasedSQLToAlias(query, alias) {
   return new SQL.Aliased(mapColumnsInSQLToAlias(query.sql, alias), query.fieldAlias);
 }
 function mapColumnsInSQLToAlias(query, alias) {
-  return sql4.join(query.queryChunks.map((c) => is(c, Column) ? aliasedTableColumn(c, alias) : is(c, SQL) ? mapColumnsInSQLToAlias(c, alias) : is(c, SQL.Aliased) ? mapColumnsInAliasedSQLToAlias(c, alias) : c));
+  return sql3.join(query.queryChunks.map((c) => is(c, Column) ? aliasedTableColumn(c, alias) : is(c, SQL) ? mapColumnsInSQLToAlias(c, alias) : is(c, SQL.Aliased) ? mapColumnsInAliasedSQLToAlias(c, alias) : c));
 }
 
 // node_modules/drizzle-orm/selection-proxy.js
@@ -4407,27 +4382,27 @@ var _a56, SQLiteDialect = class {
   buildWithCTE(queries) {
     if (!queries?.length)
       return;
-    let withSqlChunks = [sql4`with `];
+    let withSqlChunks = [sql3`with `];
     for (let [i, w] of queries.entries())
-      withSqlChunks.push(sql4`${sql4.identifier(w._.alias)} as (${w._.sql})`), i < queries.length - 1 && withSqlChunks.push(sql4`, `);
-    return withSqlChunks.push(sql4` `), sql4.join(withSqlChunks);
+      withSqlChunks.push(sql3`${sql3.identifier(w._.alias)} as (${w._.sql})`), i < queries.length - 1 && withSqlChunks.push(sql3`, `);
+    return withSqlChunks.push(sql3` `), sql3.join(withSqlChunks);
   }
   buildDeleteQuery({ table, where, returning, withList, limit, orderBy }) {
-    let withSql = this.buildWithCTE(withList), returningSql = returning ? sql4` returning ${this.buildSelection(returning, { isSingleTable: !0 })}` : void 0, whereSql = where ? sql4` where ${where}` : void 0, orderBySql = this.buildOrderBy(orderBy), limitSql = this.buildLimit(limit);
-    return sql4`${withSql}delete from ${table}${whereSql}${returningSql}${orderBySql}${limitSql}`;
+    let withSql = this.buildWithCTE(withList), returningSql = returning ? sql3` returning ${this.buildSelection(returning, { isSingleTable: !0 })}` : void 0, whereSql = where ? sql3` where ${where}` : void 0, orderBySql = this.buildOrderBy(orderBy), limitSql = this.buildLimit(limit);
+    return sql3`${withSql}delete from ${table}${whereSql}${returningSql}${orderBySql}${limitSql}`;
   }
   buildUpdateSet(table, set) {
     let tableColumns = table[Table.Symbol.Columns], columnNames = Object.keys(tableColumns).filter(
       (colName) => set[colName] !== void 0 || tableColumns[colName]?.onUpdateFn !== void 0
     ), setSize = columnNames.length;
-    return sql4.join(columnNames.flatMap((colName, i) => {
-      let col = tableColumns[colName], value = set[colName] ?? sql4.param(col.onUpdateFn(), col), res = sql4`${sql4.identifier(this.casing.getColumnCasing(col))} = ${value}`;
-      return i < setSize - 1 ? [res, sql4.raw(", ")] : [res];
+    return sql3.join(columnNames.flatMap((colName, i) => {
+      let col = tableColumns[colName], value = set[colName] ?? sql3.param(col.onUpdateFn(), col), res = sql3`${sql3.identifier(this.casing.getColumnCasing(col))} = ${value}`;
+      return i < setSize - 1 ? [res, sql3.raw(", ")] : [res];
     }));
   }
   buildUpdateQuery({ table, set, where, returning, withList, joins, from, limit, orderBy }) {
-    let withSql = this.buildWithCTE(withList), setSql = this.buildUpdateSet(table, set), fromSql = from && sql4.join([sql4.raw(" from "), this.buildFromTable(from)]), joinsSql = this.buildJoins(joins), returningSql = returning ? sql4` returning ${this.buildSelection(returning, { isSingleTable: !0 })}` : void 0, whereSql = where ? sql4` where ${where}` : void 0, orderBySql = this.buildOrderBy(orderBy), limitSql = this.buildLimit(limit);
-    return sql4`${withSql}update ${table} set ${setSql}${fromSql}${joinsSql}${whereSql}${returningSql}${orderBySql}${limitSql}`;
+    let withSql = this.buildWithCTE(withList), setSql = this.buildUpdateSet(table, set), fromSql = from && sql3.join([sql3.raw(" from "), this.buildFromTable(from)]), joinsSql = this.buildJoins(joins), returningSql = returning ? sql3` returning ${this.buildSelection(returning, { isSingleTable: !0 })}` : void 0, whereSql = where ? sql3` where ${where}` : void 0, orderBySql = this.buildOrderBy(orderBy), limitSql = this.buildLimit(limit);
+    return sql3`${withSql}update ${table} set ${setSql}${fromSql}${joinsSql}${whereSql}${returningSql}${orderBySql}${limitSql}`;
   }
   /**
    * Builds selection SQL with provided fields/expressions
@@ -4444,23 +4419,23 @@ var _a56, SQLiteDialect = class {
     let columnsLen = fields.length, chunks = fields.flatMap(({ field }, i) => {
       let chunk = [];
       if (is(field, SQL.Aliased) && field.isSelectionField)
-        chunk.push(sql4.identifier(field.fieldAlias));
+        chunk.push(sql3.identifier(field.fieldAlias));
       else if (is(field, SQL.Aliased) || is(field, SQL)) {
         let query = is(field, SQL.Aliased) ? field.sql : field;
         isSingleTable ? chunk.push(
           new SQL(
-            query.queryChunks.map((c) => is(c, Column) ? sql4.identifier(this.casing.getColumnCasing(c)) : c)
+            query.queryChunks.map((c) => is(c, Column) ? sql3.identifier(this.casing.getColumnCasing(c)) : c)
           )
-        ) : chunk.push(query), is(field, SQL.Aliased) && chunk.push(sql4` as ${sql4.identifier(field.fieldAlias)}`);
+        ) : chunk.push(query), is(field, SQL.Aliased) && chunk.push(sql3` as ${sql3.identifier(field.fieldAlias)}`);
       } else if (is(field, Column)) {
         let tableName = field.table[Table.Symbol.Name];
-        field.columnType === "SQLiteNumericBigInt" ? isSingleTable ? chunk.push(sql4`cast(${sql4.identifier(this.casing.getColumnCasing(field))} as text)`) : chunk.push(
-          sql4`cast(${sql4.identifier(tableName)}.${sql4.identifier(this.casing.getColumnCasing(field))} as text)`
-        ) : isSingleTable ? chunk.push(sql4.identifier(this.casing.getColumnCasing(field))) : chunk.push(sql4`${sql4.identifier(tableName)}.${sql4.identifier(this.casing.getColumnCasing(field))}`);
+        field.columnType === "SQLiteNumericBigInt" ? isSingleTable ? chunk.push(sql3`cast(${sql3.identifier(this.casing.getColumnCasing(field))} as text)`) : chunk.push(
+          sql3`cast(${sql3.identifier(tableName)}.${sql3.identifier(this.casing.getColumnCasing(field))} as text)`
+        ) : isSingleTable ? chunk.push(sql3.identifier(this.casing.getColumnCasing(field))) : chunk.push(sql3`${sql3.identifier(tableName)}.${sql3.identifier(this.casing.getColumnCasing(field))}`);
       }
-      return i < columnsLen - 1 && chunk.push(sql4`, `), chunk;
+      return i < columnsLen - 1 && chunk.push(sql3`, `), chunk;
     });
-    return sql4.join(chunks);
+    return sql3.join(chunks);
   }
   buildJoins(joins) {
     if (!joins || joins.length === 0)
@@ -4468,33 +4443,33 @@ var _a56, SQLiteDialect = class {
     let joinsArray = [];
     if (joins)
       for (let [index, joinMeta] of joins.entries()) {
-        index === 0 && joinsArray.push(sql4` `);
-        let table = joinMeta.table, onSql = joinMeta.on ? sql4` on ${joinMeta.on}` : void 0;
+        index === 0 && joinsArray.push(sql3` `);
+        let table = joinMeta.table, onSql = joinMeta.on ? sql3` on ${joinMeta.on}` : void 0;
         if (is(table, SQLiteTable)) {
           let tableName = table[SQLiteTable.Symbol.Name], tableSchema = table[SQLiteTable.Symbol.Schema], origTableName = table[SQLiteTable.Symbol.OriginalName], alias = tableName === origTableName ? void 0 : joinMeta.alias;
           joinsArray.push(
-            sql4`${sql4.raw(joinMeta.joinType)} join ${tableSchema ? sql4`${sql4.identifier(tableSchema)}.` : void 0}${sql4.identifier(origTableName)}${alias && sql4` ${sql4.identifier(alias)}`}${onSql}`
+            sql3`${sql3.raw(joinMeta.joinType)} join ${tableSchema ? sql3`${sql3.identifier(tableSchema)}.` : void 0}${sql3.identifier(origTableName)}${alias && sql3` ${sql3.identifier(alias)}`}${onSql}`
           );
         } else
           joinsArray.push(
-            sql4`${sql4.raw(joinMeta.joinType)} join ${table}${onSql}`
+            sql3`${sql3.raw(joinMeta.joinType)} join ${table}${onSql}`
           );
-        index < joins.length - 1 && joinsArray.push(sql4` `);
+        index < joins.length - 1 && joinsArray.push(sql3` `);
       }
-    return sql4.join(joinsArray);
+    return sql3.join(joinsArray);
   }
   buildLimit(limit) {
-    return typeof limit == "object" || typeof limit == "number" && limit >= 0 ? sql4` limit ${limit}` : void 0;
+    return typeof limit == "object" || typeof limit == "number" && limit >= 0 ? sql3` limit ${limit}` : void 0;
   }
   buildOrderBy(orderBy) {
     let orderByList = [];
     if (orderBy)
       for (let [index, orderByValue] of orderBy.entries())
-        orderByList.push(orderByValue), index < orderBy.length - 1 && orderByList.push(sql4`, `);
-    return orderByList.length > 0 ? sql4` order by ${sql4.join(orderByList)}` : void 0;
+        orderByList.push(orderByValue), index < orderBy.length - 1 && orderByList.push(sql3`, `);
+    return orderByList.length > 0 ? sql3` order by ${sql3.join(orderByList)}` : void 0;
   }
   buildFromTable(table) {
-    return is(table, Table) && table[Table.Symbol.IsAlias] ? sql4`${sql4`${sql4.identifier(table[Table.Symbol.Schema] ?? "")}.`.if(table[Table.Symbol.Schema])}${sql4.identifier(table[Table.Symbol.OriginalName])} ${sql4.identifier(table[Table.Symbol.Name])}` : table;
+    return is(table, Table) && table[Table.Symbol.IsAlias] ? sql3`${sql3`${sql3.identifier(table[Table.Symbol.Schema] ?? "")}.`.if(table[Table.Symbol.Schema])}${sql3.identifier(table[Table.Symbol.OriginalName])} ${sql3.identifier(table[Table.Symbol.Name])}` : table;
   }
   buildSelectQuery({
     withList,
@@ -4521,11 +4496,11 @@ var _a56, SQLiteDialect = class {
           `Your "${f.path.join("->")}" field references a column "${tableName}"."${f.field.name}", but the table "${tableName}" is not part of the query! Did you forget to join it?`
         );
       }
-    let isSingleTable = !joins || joins.length === 0, withSql = this.buildWithCTE(withList), distinctSql = distinct ? sql4` distinct` : void 0, selection = this.buildSelection(fieldsList, { isSingleTable }), tableSql = this.buildFromTable(table), joinsSql = this.buildJoins(joins), whereSql = where ? sql4` where ${where}` : void 0, havingSql = having ? sql4` having ${having}` : void 0, groupByList = [];
+    let isSingleTable = !joins || joins.length === 0, withSql = this.buildWithCTE(withList), distinctSql = distinct ? sql3` distinct` : void 0, selection = this.buildSelection(fieldsList, { isSingleTable }), tableSql = this.buildFromTable(table), joinsSql = this.buildJoins(joins), whereSql = where ? sql3` where ${where}` : void 0, havingSql = having ? sql3` having ${having}` : void 0, groupByList = [];
     if (groupBy)
       for (let [index, groupByValue] of groupBy.entries())
-        groupByList.push(groupByValue), index < groupBy.length - 1 && groupByList.push(sql4`, `);
-    let groupBySql = groupByList.length > 0 ? sql4` group by ${sql4.join(groupByList)}` : void 0, orderBySql = this.buildOrderBy(orderBy), limitSql = this.buildLimit(limit), offsetSql = offset ? sql4` offset ${offset}` : void 0, finalQuery = sql4`${withSql}select${distinctSql} ${selection} from ${tableSql}${joinsSql}${whereSql}${groupBySql}${havingSql}${orderBySql}${limitSql}${offsetSql}`;
+        groupByList.push(groupByValue), index < groupBy.length - 1 && groupByList.push(sql3`, `);
+    let groupBySql = groupByList.length > 0 ? sql3` group by ${sql3.join(groupByList)}` : void 0, orderBySql = this.buildOrderBy(orderBy), limitSql = this.buildLimit(limit), offsetSql = offset ? sql3` offset ${offset}` : void 0, finalQuery = sql3`${withSql}select${distinctSql} ${selection} from ${tableSql}${joinsSql}${whereSql}${groupBySql}${havingSql}${orderBySql}${limitSql}${offsetSql}`;
     return setOperators.length > 0 ? this.buildSetOperations(finalQuery, setOperators) : finalQuery;
   }
   buildSetOperations(leftSelect, setOperators) {
@@ -4541,35 +4516,35 @@ var _a56, SQLiteDialect = class {
     leftSelect,
     setOperator: { type, isAll, rightSelect, limit, orderBy, offset }
   }) {
-    let leftChunk = sql4`${leftSelect.getSQL()} `, rightChunk = sql4`${rightSelect.getSQL()}`, orderBySql;
+    let leftChunk = sql3`${leftSelect.getSQL()} `, rightChunk = sql3`${rightSelect.getSQL()}`, orderBySql;
     if (orderBy && orderBy.length > 0) {
       let orderByValues = [];
       for (let singleOrderBy of orderBy)
         if (is(singleOrderBy, SQLiteColumn))
-          orderByValues.push(sql4.identifier(singleOrderBy.name));
+          orderByValues.push(sql3.identifier(singleOrderBy.name));
         else if (is(singleOrderBy, SQL)) {
           for (let i = 0; i < singleOrderBy.queryChunks.length; i++) {
             let chunk = singleOrderBy.queryChunks[i];
-            is(chunk, SQLiteColumn) && (singleOrderBy.queryChunks[i] = sql4.identifier(this.casing.getColumnCasing(chunk)));
+            is(chunk, SQLiteColumn) && (singleOrderBy.queryChunks[i] = sql3.identifier(this.casing.getColumnCasing(chunk)));
           }
-          orderByValues.push(sql4`${singleOrderBy}`);
+          orderByValues.push(sql3`${singleOrderBy}`);
         } else
-          orderByValues.push(sql4`${singleOrderBy}`);
-      orderBySql = sql4` order by ${sql4.join(orderByValues, sql4`, `)}`;
+          orderByValues.push(sql3`${singleOrderBy}`);
+      orderBySql = sql3` order by ${sql3.join(orderByValues, sql3`, `)}`;
     }
-    let limitSql = typeof limit == "object" || typeof limit == "number" && limit >= 0 ? sql4` limit ${limit}` : void 0, operatorChunk = sql4.raw(`${type} ${isAll ? "all " : ""}`), offsetSql = offset ? sql4` offset ${offset}` : void 0;
-    return sql4`${leftChunk}${operatorChunk}${rightChunk}${orderBySql}${limitSql}${offsetSql}`;
+    let limitSql = typeof limit == "object" || typeof limit == "number" && limit >= 0 ? sql3` limit ${limit}` : void 0, operatorChunk = sql3.raw(`${type} ${isAll ? "all " : ""}`), offsetSql = offset ? sql3` offset ${offset}` : void 0;
+    return sql3`${leftChunk}${operatorChunk}${rightChunk}${orderBySql}${limitSql}${offsetSql}`;
   }
   buildInsertQuery({ table, values: valuesOrSelect, onConflict, returning, withList, select }) {
     let valuesSqlList = [], columns = table[Table.Symbol.Columns], colEntries = Object.entries(columns).filter(
       ([_, col]) => !col.shouldDisableInsert()
-    ), insertOrder = colEntries.map(([, column]) => sql4.identifier(this.casing.getColumnCasing(column)));
+    ), insertOrder = colEntries.map(([, column]) => sql3.identifier(this.casing.getColumnCasing(column)));
     if (select) {
       let select2 = valuesOrSelect;
       is(select2, SQL) ? valuesSqlList.push(select2) : valuesSqlList.push(select2.getSQL());
     } else {
       let values = valuesOrSelect;
-      valuesSqlList.push(sql4.raw("values "));
+      valuesSqlList.push(sql3.raw("values "));
       for (let [valueIndex, value] of values.entries()) {
         let valueList = [];
         for (let [fieldName, col] of colEntries) {
@@ -4577,24 +4552,24 @@ var _a56, SQLiteDialect = class {
           if (colValue === void 0 || is(colValue, Param) && colValue.value === void 0) {
             let defaultValue;
             if (col.default !== null && col.default !== void 0)
-              defaultValue = is(col.default, SQL) ? col.default : sql4.param(col.default, col);
+              defaultValue = is(col.default, SQL) ? col.default : sql3.param(col.default, col);
             else if (col.defaultFn !== void 0) {
               let defaultFnResult = col.defaultFn();
-              defaultValue = is(defaultFnResult, SQL) ? defaultFnResult : sql4.param(defaultFnResult, col);
+              defaultValue = is(defaultFnResult, SQL) ? defaultFnResult : sql3.param(defaultFnResult, col);
             } else if (!col.default && col.onUpdateFn !== void 0) {
               let onUpdateFnResult = col.onUpdateFn();
-              defaultValue = is(onUpdateFnResult, SQL) ? onUpdateFnResult : sql4.param(onUpdateFnResult, col);
+              defaultValue = is(onUpdateFnResult, SQL) ? onUpdateFnResult : sql3.param(onUpdateFnResult, col);
             } else
-              defaultValue = sql4`null`;
+              defaultValue = sql3`null`;
             valueList.push(defaultValue);
           } else
             valueList.push(colValue);
         }
-        valuesSqlList.push(valueList), valueIndex < values.length - 1 && valuesSqlList.push(sql4`, `);
+        valuesSqlList.push(valueList), valueIndex < values.length - 1 && valuesSqlList.push(sql3`, `);
       }
     }
-    let withSql = this.buildWithCTE(withList), valuesSql = sql4.join(valuesSqlList), returningSql = returning ? sql4` returning ${this.buildSelection(returning, { isSingleTable: !0 })}` : void 0, onConflictSql = onConflict?.length ? sql4.join(onConflict) : void 0;
-    return sql4`${withSql}insert into ${table} ${insertOrder} ${valuesSql}${onConflictSql}${returningSql}`;
+    let withSql = this.buildWithCTE(withList), valuesSql = sql3.join(valuesSqlList), returningSql = returning ? sql3` returning ${this.buildSelection(returning, { isSingleTable: !0 })}` : void 0, onConflictSql = onConflict?.length ? sql3.join(onConflict) : void 0;
+    return sql3`${withSql}insert into ${table} ${insertOrder} ${valuesSql}${onConflictSql}${returningSql}`;
   }
   sqlToQuery(sql22, invokeSource) {
     return sql22.toQuery({
@@ -4650,7 +4625,7 @@ var _a56, SQLiteDialect = class {
       config.with && (selectedRelations = Object.entries(config.with).filter((entry2) => !!entry2[1]).map(([tsKey, queryConfig]) => ({ tsKey, queryConfig, relation: tableConfig.relations[tsKey] })));
       let extras;
       if (config.extras) {
-        extras = typeof config.extras == "function" ? config.extras(aliasedColumns, { sql: sql4 }) : config.extras;
+        extras = typeof config.extras == "function" ? config.extras(aliasedColumns, { sql: sql3 }) : config.extras;
         for (let [tsKey, value] of Object.entries(extras))
           fieldsSelection.push({
             tsKey,
@@ -4673,7 +4648,7 @@ var _a56, SQLiteDialect = class {
         queryConfig: selectedRelationConfigValue,
         relation
       } of selectedRelations) {
-        let normalizedRelation = normalizeRelation(schema3, tableNamesMap, relation), relationTableName = getTableUniqueName(relation.referencedTable), relationTableTsName = tableNamesMap[relationTableName], relationTableAlias = `${tableAlias}_${selectedRelationTsKey}`, joinOn2 = and2(
+        let normalizedRelation = normalizeRelation(schema3, tableNamesMap, relation), relationTableName = getTableUniqueName(relation.referencedTable), relationTableTsName = tableNamesMap[relationTableName], relationTableAlias = `${tableAlias}_${selectedRelationTsKey}`, joinOn2 = and(
           ...normalizedRelation.fields.map(
             (field2, i) => eq3(
               aliasedTableColumn(normalizedRelation.references[i], relationTableAlias),
@@ -4690,7 +4665,7 @@ var _a56, SQLiteDialect = class {
           tableAlias: relationTableAlias,
           joinOn: joinOn2,
           nestedQueryRelation: relation
-        }), field = sql4`(${builtRelation.sql})`.as(selectedRelationTsKey);
+        }), field = sql3`(${builtRelation.sql})`.as(selectedRelationTsKey);
         selection.push({
           dbKey: selectedRelationTsKey,
           tsKey: selectedRelationTsKey,
@@ -4706,14 +4681,14 @@ var _a56, SQLiteDialect = class {
         message: `No fields selected for table "${tableConfig.tsName}" ("${tableAlias}"). You need to have at least one item in "columns", "with" or "extras". If you need to select all columns, omit the "columns" key or set it to undefined.`
       });
     let result;
-    if (where = and2(joinOn, where), nestedQueryRelation) {
-      let field = sql4`json_array(${sql4.join(
+    if (where = and(joinOn, where), nestedQueryRelation) {
+      let field = sql3`json_array(${sql3.join(
         selection.map(
-          ({ field: field2 }) => is(field2, SQLiteColumn) ? sql4.identifier(this.casing.getColumnCasing(field2)) : is(field2, SQL.Aliased) ? field2.sql : field2
+          ({ field: field2 }) => is(field2, SQLiteColumn) ? sql3.identifier(this.casing.getColumnCasing(field2)) : is(field2, SQL.Aliased) ? field2.sql : field2
         ),
-        sql4`, `
+        sql3`, `
       )})`;
-      is(nestedQueryRelation, Many) && (field = sql4`coalesce(json_group_array(${field}), json_array())`);
+      is(nestedQueryRelation, Many) && (field = sql3`coalesce(json_group_array(${field}), json_array())`);
       let nestedSelection = [{
         dbKey: "data",
         tsKey: "data",
@@ -4728,7 +4703,7 @@ var _a56, SQLiteDialect = class {
         fieldsFlat: [
           {
             path: [],
-            field: sql4.raw("*")
+            field: sql3.raw("*")
           }
         ],
         where,
@@ -4775,8 +4750,8 @@ var _a56, SQLiteDialect = class {
 _a56 = entityKind, __publicField(SQLiteDialect, _a56, "SQLiteDialect");
 var _a57, SQLiteSyncDialect = class extends SQLiteDialect {
   migrate(migrations, session, config) {
-    let migrationsTable = config === void 0 || typeof config == "string" ? "__drizzle_migrations" : config.migrationsTable ?? "__drizzle_migrations", migrationTableCreate = sql4`
-			CREATE TABLE IF NOT EXISTS ${sql4.identifier(migrationsTable)} (
+    let migrationsTable = config === void 0 || typeof config == "string" ? "__drizzle_migrations" : config.migrationsTable ?? "__drizzle_migrations", migrationTableCreate = sql3`
+			CREATE TABLE IF NOT EXISTS ${sql3.identifier(migrationsTable)} (
 				id SERIAL PRIMARY KEY,
 				hash text NOT NULL,
 				created_at numeric
@@ -4784,29 +4759,29 @@ var _a57, SQLiteSyncDialect = class extends SQLiteDialect {
 		`;
     session.run(migrationTableCreate);
     let lastDbMigration = session.values(
-      sql4`SELECT id, hash, created_at FROM ${sql4.identifier(migrationsTable)} ORDER BY created_at DESC LIMIT 1`
+      sql3`SELECT id, hash, created_at FROM ${sql3.identifier(migrationsTable)} ORDER BY created_at DESC LIMIT 1`
     )[0] ?? void 0;
-    session.run(sql4`BEGIN`);
+    session.run(sql3`BEGIN`);
     try {
       for (let migration of migrations)
         if (!lastDbMigration || Number(lastDbMigration[2]) < migration.folderMillis) {
           for (let stmt of migration.sql)
-            session.run(sql4.raw(stmt));
+            session.run(sql3.raw(stmt));
           session.run(
-            sql4`INSERT INTO ${sql4.identifier(migrationsTable)} ("hash", "created_at") VALUES(${migration.hash}, ${migration.folderMillis})`
+            sql3`INSERT INTO ${sql3.identifier(migrationsTable)} ("hash", "created_at") VALUES(${migration.hash}, ${migration.folderMillis})`
           );
         }
-      session.run(sql4`COMMIT`);
+      session.run(sql3`COMMIT`);
     } catch (e) {
-      throw session.run(sql4`ROLLBACK`), e;
+      throw session.run(sql3`ROLLBACK`), e;
     }
   }
 };
 _a57 = entityKind, __publicField(SQLiteSyncDialect, _a57, "SQLiteSyncDialect");
 var _a58, SQLiteAsyncDialect = class extends SQLiteDialect {
   async migrate(migrations, session, config) {
-    let migrationsTable = config === void 0 || typeof config == "string" ? "__drizzle_migrations" : config.migrationsTable ?? "__drizzle_migrations", migrationTableCreate = sql4`
-			CREATE TABLE IF NOT EXISTS ${sql4.identifier(migrationsTable)} (
+    let migrationsTable = config === void 0 || typeof config == "string" ? "__drizzle_migrations" : config.migrationsTable ?? "__drizzle_migrations", migrationTableCreate = sql3`
+			CREATE TABLE IF NOT EXISTS ${sql3.identifier(migrationsTable)} (
 				id SERIAL PRIMARY KEY,
 				hash text NOT NULL,
 				created_at numeric
@@ -4814,15 +4789,15 @@ var _a58, SQLiteAsyncDialect = class extends SQLiteDialect {
 		`;
     await session.run(migrationTableCreate);
     let lastDbMigration = (await session.values(
-      sql4`SELECT id, hash, created_at FROM ${sql4.identifier(migrationsTable)} ORDER BY created_at DESC LIMIT 1`
+      sql3`SELECT id, hash, created_at FROM ${sql3.identifier(migrationsTable)} ORDER BY created_at DESC LIMIT 1`
     ))[0] ?? void 0;
     await session.transaction(async (tx) => {
       for (let migration of migrations)
         if (!lastDbMigration || Number(lastDbMigration[2]) < migration.folderMillis) {
           for (let stmt of migration.sql)
-            await tx.run(sql4.raw(stmt));
+            await tx.run(sql3.raw(stmt));
           await tx.run(
-            sql4`INSERT INTO ${sql4.identifier(migrationsTable)} ("hash", "created_at") VALUES(${migration.hash}, ${migration.folderMillis})`
+            sql3`INSERT INTO ${sql3.identifier(migrationsTable)} ("hash", "created_at") VALUES(${migration.hash}, ${migration.folderMillis})`
           );
         }
     });
@@ -5535,10 +5510,10 @@ var _a65, SQLiteInsertBase = class extends QueryPromise {
    */
   onConflictDoNothing(config = {}) {
     if (this.config.onConflict || (this.config.onConflict = []), config.target === void 0)
-      this.config.onConflict.push(sql4` on conflict do nothing`);
+      this.config.onConflict.push(sql3` on conflict do nothing`);
     else {
-      let targetSql = Array.isArray(config.target) ? sql4`${config.target}` : sql4`${[config.target]}`, whereSql = config.where ? sql4` where ${config.where}` : sql4``;
-      this.config.onConflict.push(sql4` on conflict ${targetSql} do nothing${whereSql}`);
+      let targetSql = Array.isArray(config.target) ? sql3`${config.target}` : sql3`${[config.target]}`, whereSql = config.where ? sql3` where ${config.where}` : sql3``;
+      this.config.onConflict.push(sql3` on conflict ${targetSql} do nothing${whereSql}`);
     }
     return this;
   }
@@ -5577,9 +5552,9 @@ var _a65, SQLiteInsertBase = class extends QueryPromise {
         'You cannot use both "where" and "targetWhere"/"setWhere" at the same time - "where" is deprecated, use "targetWhere" or "setWhere" instead.'
       );
     this.config.onConflict || (this.config.onConflict = []);
-    let whereSql = config.where ? sql4` where ${config.where}` : void 0, targetWhereSql = config.targetWhere ? sql4` where ${config.targetWhere}` : void 0, setWhereSql = config.setWhere ? sql4` where ${config.setWhere}` : void 0, targetSql = Array.isArray(config.target) ? sql4`${config.target}` : sql4`${[config.target]}`, setSql = this.dialect.buildUpdateSet(this.config.table, mapUpdateSet(this.config.table, config.set));
+    let whereSql = config.where ? sql3` where ${config.where}` : void 0, targetWhereSql = config.targetWhere ? sql3` where ${config.targetWhere}` : void 0, setWhereSql = config.setWhere ? sql3` where ${config.setWhere}` : void 0, targetSql = Array.isArray(config.target) ? sql3`${config.target}` : sql3`${[config.target]}`, setSql = this.dialect.buildUpdateSet(this.config.table, mapUpdateSet(this.config.table, config.set));
     return this.config.onConflict.push(
-      sql4` on conflict ${targetSql}${targetWhereSql} do update set ${setSql}${whereSql}${setWhereSql}`
+      sql3` on conflict ${targetSql}${targetWhereSql} do update set ${setSql}${whereSql}${setWhereSql}`
     ), this;
   }
   /** @internal */
@@ -5777,10 +5752,10 @@ var _a68, _SQLiteCountBuilder = class extends SQL {
   [(_a68 = entityKind, Symbol.toStringTag)] = "SQLiteCountBuilderAsync";
   session;
   static buildEmbeddedCount(source, filters) {
-    return sql4`(select count(*) from ${source}${sql4.raw(" where ").if(filters)}${filters})`;
+    return sql3`(select count(*) from ${source}${sql3.raw(" where ").if(filters)}${filters})`;
   }
   static buildCount(source, filters) {
-    return sql4`select count(*) from ${source}${sql4.raw(" where ").if(filters)}${filters}`;
+    return sql3`select count(*) from ${source}${sql3.raw(" where ").if(filters)}${filters}`;
   }
   then(onfulfilled, onrejected) {
     return Promise.resolve(this.session.count(this.sql)).then(
@@ -6168,7 +6143,7 @@ var _a73, BaseSQLiteDatabase = class {
     return new SQLiteDeleteBase(from, this.session, this.dialect);
   }
   run(query) {
-    let sequel = typeof query == "string" ? sql4.raw(query) : query.getSQL();
+    let sequel = typeof query == "string" ? sql3.raw(query) : query.getSQL();
     return this.resultKind === "async" ? new SQLiteRaw(
       async () => this.session.run(sequel),
       () => sequel,
@@ -6178,7 +6153,7 @@ var _a73, BaseSQLiteDatabase = class {
     ) : this.session.run(sequel);
   }
   all(query) {
-    let sequel = typeof query == "string" ? sql4.raw(query) : query.getSQL();
+    let sequel = typeof query == "string" ? sql3.raw(query) : query.getSQL();
     return this.resultKind === "async" ? new SQLiteRaw(
       async () => this.session.all(sequel),
       () => sequel,
@@ -6188,7 +6163,7 @@ var _a73, BaseSQLiteDatabase = class {
     ) : this.session.all(sequel);
   }
   get(query) {
-    let sequel = typeof query == "string" ? sql4.raw(query) : query.getSQL();
+    let sequel = typeof query == "string" ? sql3.raw(query) : query.getSQL();
     return this.resultKind === "async" ? new SQLiteRaw(
       async () => this.session.get(sequel),
       () => sequel,
@@ -6198,7 +6173,7 @@ var _a73, BaseSQLiteDatabase = class {
     ) : this.session.get(sequel);
   }
   values(query) {
-    let sequel = typeof query == "string" ? sql4.raw(query) : query.getSQL();
+    let sequel = typeof query == "string" ? sql3.raw(query) : query.getSQL();
     return this.resultKind === "async" ? new SQLiteRaw(
       async () => this.session.values(sequel),
       () => sequel,
@@ -6229,8 +6204,8 @@ var _a75, NoopCache = class extends Cache {
   }
 };
 _a75 = entityKind, __publicField(NoopCache, _a75, "NoopCache");
-async function hashQuery(sql11, params) {
-  let dataToHash = `${sql11}-${JSON.stringify(params)}`, data = new TextEncoder().encode(dataToHash), hashBuffer = await crypto.subtle.digest("SHA-256", data);
+async function hashQuery(sql10, params) {
+  let dataToHash = `${sql10}-${JSON.stringify(params)}`, data = new TextEncoder().encode(dataToHash), hashBuffer = await crypto.subtle.digest("SHA-256", data);
   return [...new Uint8Array(hashBuffer)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
@@ -6393,8 +6368,8 @@ var _a78, SQLiteSession = class {
   values(query) {
     return this.prepareOneTimeQuery(this.dialect.sqlToQuery(query), void 0, "run", !1).values();
   }
-  async count(sql11) {
-    return (await this.values(sql11))[0][0];
+  async count(sql10) {
+    return (await this.values(sql10))[0][0];
   }
   /** @internal */
   extractRawValuesValueFromBatchResult(_result) {
@@ -6460,12 +6435,12 @@ var _a80, SQLiteD1Session = class extends SQLiteSession {
   }
   async transaction(transaction, config) {
     let tx = new D1Transaction("async", this.dialect, this, this.schema);
-    await this.run(sql4.raw(`begin${config?.behavior ? " " + config.behavior : ""}`));
+    await this.run(sql3.raw(`begin${config?.behavior ? " " + config.behavior : ""}`));
     try {
       let result = await transaction(tx);
-      return await this.run(sql4`commit`), result;
+      return await this.run(sql3`commit`), result;
     } catch (err) {
-      throw await this.run(sql4`rollback`), err;
+      throw await this.run(sql3`rollback`), err;
     }
   }
 };
@@ -6473,12 +6448,12 @@ _a80 = entityKind, __publicField(SQLiteD1Session, _a80, "SQLiteD1Session");
 var _a81, _D1Transaction = class extends SQLiteTransaction {
   async transaction(transaction) {
     let savepointName = `sp${this.nestedIndex}`, tx = new _D1Transaction("async", this.dialect, this.session, this.schema, this.nestedIndex + 1);
-    await this.session.run(sql4.raw(`savepoint ${savepointName}`));
+    await this.session.run(sql3.raw(`savepoint ${savepointName}`));
     try {
       let result = await transaction(tx);
-      return await this.session.run(sql4.raw(`release savepoint ${savepointName}`)), result;
+      return await this.session.run(sql3.raw(`release savepoint ${savepointName}`)), result;
     } catch (err) {
-      throw await this.session.run(sql4.raw(`rollback to savepoint ${savepointName}`)), err;
+      throw await this.session.run(sql3.raw(`rollback to savepoint ${savepointName}`)), err;
     }
   }
 }, D1Transaction = _D1Transaction;
@@ -6602,8 +6577,8 @@ var links = () => [
   { rel: "shortcut icon", href: "/favicon.svg" }
 ];
 function ErrorBoundary() {
-  let error = useRouteError(), errorTitle = "Something went wrong", errorMessage = "An unexpected error occurred. Please try again later.", errorStatus = 500, is404 = !1;
-  return isRouteErrorResponse(error) ? (errorStatus = error.status, is404 = error.status === 404, is404 ? (errorTitle = "Page Not Found", errorMessage = "The page you're looking for doesn't exist or has been moved.") : error.status === 401 ? (errorTitle = "Unauthorized", errorMessage = "You need to be logged in to access this page.") : error.status === 403 ? (errorTitle = "Access Denied", errorMessage = "You don't have permission to access this page.") : error.status === 500 ? (errorTitle = "Server Error", errorMessage = "Something went wrong on our end. Please try again later.") : (errorTitle = `Error ${error.status}`, errorMessage = error.data?.message || error.statusText || "An error occurred.")) : error instanceof Error && (errorTitle = "Application Error", errorMessage = error.message || "An unexpected error occurred."), /* @__PURE__ */ jsxs("html", { lang: "en", className: "h-full bg-neutral-900", children: [
+  let error = useRouteError(), errorTitle = "Something went wrong", errorMessage = "An unexpected error occurred. Please try again later.", is404 = !1;
+  return isRouteErrorResponse(error) ? (is404 = error.status === 404, is404 ? (errorTitle = "Page Not Found", errorMessage = "The page you're looking for doesn't exist or has been moved.") : error.status === 401 ? (errorTitle = "Unauthorized", errorMessage = "You need to be logged in to access this page.") : error.status === 403 ? (errorTitle = "Access Denied", errorMessage = "You don't have permission to access this page.") : error.status === 500 ? (errorTitle = "Server Error", errorMessage = "Something went wrong on our end. Please try again later.") : (errorTitle = `Error ${error.status}`, errorMessage = error.data?.message || error.statusText || "An error occurred.")) : error instanceof Error && (errorTitle = "Application Error", errorMessage = error.message || "An unexpected error occurred."), /* @__PURE__ */ jsxs("html", { lang: "en", className: "h-full bg-neutral-900", children: [
     /* @__PURE__ */ jsxs("head", { children: [
       /* @__PURE__ */ jsx3("meta", { charSet: "utf-8" }),
       /* @__PURE__ */ jsx3("meta", { name: "viewport", content: "width=device-width, initial-scale=1" }),
@@ -6665,15 +6640,16 @@ function ErrorBoundary() {
   ] });
 }
 var loader = async ({ request, context }) => {
-  if (!context || !context.env || !context.env.DB)
+  let ctx = context;
+  if (!ctx.env || !ctx.env.DB)
     throw new Error("D1 Database binding is missing from context.env.DB");
-  let db = createDb(context.env.DB);
-  return context.env.SESSION_SECRET && (global.SESSION_SECRET = context.env.SESSION_SECRET), json({
+  let db = createDb(ctx.env.DB);
+  return ctx.env.SESSION_SECRET && (global.SESSION_SECRET = ctx.env.SESSION_SECRET), json({
     user: await getUser(request, db)
   });
 };
 function WalletModalHandler() {
-  return useEffect2(() => {
+  return useEffect(() => {
     let handleClickOutside = (event) => {
       let modal = document.querySelector(".wallet-adapter-modal"), modalWrapper = document.querySelector(".wallet-adapter-modal-wrapper");
       if (modal && modalWrapper && !modalWrapper.contains(event.target)) {
@@ -6696,7 +6672,7 @@ function WalletModalHandler() {
 }
 function App() {
   let { user } = useLoaderData(), location = useLocation(), isClient = typeof window < "u";
-  return useEffect2(() => {
+  return useEffect(() => {
     if (isClient) {
       let originalOnError = window.onerror;
       window.onerror = (event) => event.toString().includes("access to storage is not allowed") ? !0 : originalOnError ? originalOnError(event) : !1;
@@ -6747,7 +6723,7 @@ __export(api_comments_commentId_vote_exports, {
 });
 init_schema();
 import { json as json3 } from "@remix-run/cloudflare";
-import { eq as eq5, and as and4 } from "drizzle-orm";
+import { eq as eq5, and as and3 } from "drizzle-orm";
 async function action2({ request, params, context }) {
   let { commentId } = params;
   if (!commentId)
@@ -6756,8 +6732,8 @@ async function action2({ request, params, context }) {
   if (!userId || isNaN(value) || !voteType)
     return json3({ error: "Missing required fields" }, { status: 400 });
   try {
-    let db = context.env.DB, existingVote = await db.select().from(votes).where(
-      and4(
+    let db = createDb(context.env.DB), existingVote = await db.select().from(votes).where(
+      and3(
         eq5(votes.commentId, commentId),
         eq5(votes.userId, userId),
         eq5(votes.voteType, voteType)
@@ -6780,7 +6756,7 @@ async function action2({ request, params, context }) {
       upvotes: votes.value,
       downvotes: votes.value
     }).from(votes).where(
-      and4(
+      and3(
         eq5(votes.commentId, commentId),
         eq5(votes.voteType, voteType)
       )
@@ -6806,7 +6782,7 @@ __export(api_answers_answerId_vote_exports, {
 });
 init_schema();
 import { json as json4 } from "@remix-run/cloudflare";
-import { eq as eq6, and as and5 } from "drizzle-orm";
+import { eq as eq6, and as and4 } from "drizzle-orm";
 async function action3({ request, params, context }) {
   let { answerId } = params;
   if (!answerId)
@@ -6815,8 +6791,8 @@ async function action3({ request, params, context }) {
   if (!userId || isNaN(value) || !voteType)
     return json4({ error: "Missing required fields" }, { status: 400 });
   try {
-    let db = context.env.DB, existingVote = await db.select().from(votes).where(
-      and5(
+    let db = createDb(context.env.DB), existingVote = await db.select().from(votes).where(
+      and4(
         eq6(votes.answerId, answerId),
         eq6(votes.userId, userId),
         eq6(votes.voteType, voteType)
@@ -6839,7 +6815,7 @@ async function action3({ request, params, context }) {
       upvotes: votes.value,
       downvotes: votes.value
     }).from(votes).where(
-      and5(
+      and4(
         eq6(votes.answerId, answerId),
         eq6(votes.voteType, voteType)
       )
@@ -6872,7 +6848,7 @@ var confirmDepositSchema = z.object({
 });
 async function action4({ request, context }) {
   try {
-    let userId = await requireUserId(request), formData = await request.formData(), validation = confirmDepositSchema.safeParse({
+    let formData = await request.formData(), validation = confirmDepositSchema.safeParse({
       transactionId: formData.get("transactionId"),
       solanaSignature: formData.get("solanaSignature")
     });
@@ -6896,7 +6872,7 @@ __export(api_posts_postId_vote_exports, {
 });
 init_schema();
 import { json as json6 } from "@remix-run/cloudflare";
-import { eq as eq7, and as and6 } from "drizzle-orm";
+import { eq as eq7, and as and5 } from "drizzle-orm";
 async function action5({ request, params, context }) {
   let { postId } = params;
   if (!postId)
@@ -6905,8 +6881,8 @@ async function action5({ request, params, context }) {
   if (!userId || isNaN(value) || !voteType)
     return json6({ error: "Missing required fields" }, { status: 400 });
   try {
-    let db = context.env.DB, existingVote = await db.select().from(votes).where(
-      and6(
+    let db = createDb(context.env.DB), existingVote = await db.select().from(votes).where(
+      and5(
         eq7(votes.postId, postId),
         eq7(votes.userId, userId),
         eq7(votes.voteType, voteType)
@@ -6929,7 +6905,7 @@ async function action5({ request, params, context }) {
       qualityUpvotes: votes.value,
       qualityDownvotes: votes.value
     }).from(votes).where(
-      and6(
+      and5(
         eq7(votes.postId, postId),
         eq7(votes.voteType, voteType)
       )
@@ -6937,7 +6913,7 @@ async function action5({ request, params, context }) {
       totalVotes += vote.totalVotes, vote.qualityUpvotes > 0 && (qualityUpvotes += vote.qualityUpvotes), vote.qualityDownvotes < 0 && (qualityDownvotes += Math.abs(vote.qualityDownvotes));
     });
     let updateData = {};
-    return voteType === "visibility" ? updateData.visibilityVotes = totalVotes : voteType === "quality" && (updateData.qualityUpvotes = qualityUpvotes, updateData.qualityDownvotes = qualityDownvotes), await db.update(posts).set(updateData).where(eq7(posts.id, postId)), json6({
+    return voteType === "visibility" ? updateData.visibilityVotes = totalVotes : voteType === "quality" && (updateData.qualityUpvotes = qualityUpvotes, updateData.qualityDownvotes = qualityDownvotes), await db.update(posts2).set(updateData).where(eq7(posts2.id, postId)), json6({
       success: !0,
       totalVotes,
       qualityUpvotes,
@@ -6956,17 +6932,17 @@ __export(api_bookmarks_status_exports, {
 });
 init_schema();
 import { json as json7 } from "@remix-run/cloudflare";
-import { eq as eq8, and as and7 } from "drizzle-orm";
+import { eq as eq8, and as and6 } from "drizzle-orm";
 async function loader2({ request, context }) {
   let url = new URL(request.url), postId = url.searchParams.get("postId"), userId = url.searchParams.get("userId");
   if (!postId || !userId)
     return json7({ error: "Missing postId or userId" }, { status: 400 });
   try {
-    let db = context.env.DB;
+    let db = createDb(context.env.DB);
     if (!db)
       return console.error("Database is undefined in bookmarks-status loader"), json7({ error: "Database connection not available" }, { status: 500 });
     let isBookmarked = (await db.select().from(bookmarks).where(
-      and7(
+      and6(
         eq8(bookmarks.postId, postId),
         eq8(bookmarks.userId, userId)
       )
@@ -6977,18 +6953,18 @@ async function loader2({ request, context }) {
   }
 }
 async function action6({ request, context }) {
-  let formData = await request.formData(), postId = formData.get("postId"), userId = formData.get("userId"), action26 = formData.get("action");
-  if (!postId || !userId || !action26)
-    return json7({ error: "Missing required fields" }, { status: 400 });
   try {
-    let db = context.env.DB;
-    return db ? action26 === "toggle" ? (await db.select().from(bookmarks).where(
-      and7(
+    let userId = await requireUserId(request), { postId } = await request.json();
+    if (!postId)
+      return json7({ error: "Missing postId" }, { status: 400 });
+    let db = createDb(context.env.DB);
+    return db ? action6 === "toggle" ? (await db.select().from(bookmarks).where(
+      and6(
         eq8(bookmarks.postId, postId),
         eq8(bookmarks.userId, userId)
       )
     ).limit(1)).length > 0 ? (await db.delete(bookmarks).where(
-      and7(
+      and6(
         eq8(bookmarks.postId, postId),
         eq8(bookmarks.userId, userId)
       )
@@ -7012,15 +6988,15 @@ import { json as json8 } from "@remix-run/cloudflare";
 
 // app/utils/bookmark.server.ts
 init_schema();
-import { eq as eq9, and as and8 } from "drizzle-orm";
+import { eq as eq9, and as and7 } from "drizzle-orm";
 async function toggleBookmark(db, postId, userId) {
   return (await db.select().from(bookmarks).where(
-    and8(
+    and7(
       eq9(bookmarks.postId, postId),
       eq9(bookmarks.userId, userId)
     )
   ).limit(1)).length > 0 ? (await db.delete(bookmarks).where(
-    and8(
+    and7(
       eq9(bookmarks.postId, postId),
       eq9(bookmarks.userId, userId)
     )
@@ -7040,11 +7016,11 @@ async function getUserBookmarks(db, userId) {
       postId: bookmarks.postId,
       createdAt: bookmarks.createdAt,
       post: {
-        id: posts.id,
-        title: posts.title,
-        content: posts.content,
-        createdAt: posts.createdAt,
-        authorId: posts.authorId
+        id: posts2.id,
+        title: posts2.title,
+        content: posts2.content,
+        createdAt: posts2.createdAt,
+        authorId: posts2.authorId
       },
       user: {
         id: users.id,
@@ -7053,20 +7029,20 @@ async function getUserBookmarks(db, userId) {
       profile: {
         profilePicture: profiles.profilePicture
       }
-    }).from(bookmarks).innerJoin(posts, eq9(bookmarks.postId, posts.id)).innerJoin(users, eq9(posts.authorId, users.id)).leftJoin(profiles, eq9(users.id, profiles.userId)).where(eq9(bookmarks.userId, userId)).orderBy(bookmarks.createdAt);
+    }).from(bookmarks).innerJoin(posts2, eq9(bookmarks.postId, posts2.id)).innerJoin(users, eq9(posts2.authorId, users.id)).leftJoin(profiles, eq9(users.id, profiles.userId)).where(eq9(bookmarks.userId, userId)).orderBy(bookmarks.createdAt);
   } catch (error) {
     return console.error("Error fetching user bookmarks:", error), [];
   }
 }
 
 // app/routes/api.bookmarks-toggle.tsx
-var action7 = async ({ request, context }) => {
+async function action7({ request, context }) {
   let userId = await requireUserId(request), { postId } = await request.json();
   if (!postId)
     return json8({ error: "Missing postId" }, { status: 400 });
-  let db = context.env.DB, result = await toggleBookmark(db, postId, userId);
+  let db = createDb(context.env.DB), result = await toggleBookmark(db, postId, userId);
   return json8(result);
-};
+}
 
 // app/routes/api.integrity.report.tsx
 var api_integrity_report_exports = {};
@@ -7078,10 +7054,10 @@ import { z as z2 } from "zod";
 
 // app/utils/integrity.server.ts
 init_schema();
-import { eq as eq10, and as and9, desc as desc5, isNull as isNull2 } from "drizzle-orm";
+import { eq as eq10, and as and8, desc as desc4, isNull as isNull2 } from "drizzle-orm";
 async function rateUser(db, user, ratingData) {
   try {
-    if ((await db.select().from(userRatings).where(and9(
+    if ((await db.select().from(userRatings).where(and8(
       eq10(userRatings.raterId, user.id),
       eq10(userRatings.ratedUserId, ratingData.ratedUserId),
       ratingData.referenceId ? eq10(userRatings.referenceId, ratingData.referenceId) : isNull2(userRatings.referenceId)
@@ -7113,7 +7089,7 @@ async function reportViolation(db, user, violationData) {
   if (user.id === violationData.targetUserId)
     throw new Error("Cannot report yourself");
   try {
-    if ((await db.select().from(integrityViolations).where(and9(
+    if ((await db.select().from(integrityViolations).where(and8(
       eq10(integrityViolations.reporterId, user.id),
       eq10(integrityViolations.targetUserId, violationData.targetUserId),
       eq10(integrityViolations.violationType, violationData.violationType),
@@ -7383,7 +7359,7 @@ import { json as json14 } from "@remix-run/cloudflare";
 // app/utils/refund-system.server.ts
 init_virtual_wallet_server();
 init_schema();
-import { eq as eq13, and as and10, desc as desc6, sql as sql6 } from "drizzle-orm";
+import { eq as eq13, and as and9, desc as desc5, sql as sql5 } from "drizzle-orm";
 async function createRefundRequest(db, bountyId, requesterId, reason) {
   try {
     let bounty = await db.query.bounties.findFirst({
@@ -7394,7 +7370,7 @@ async function createRefundRequest(db, bountyId, requesterId, reason) {
     if (bounty.status !== "ACTIVE")
       throw new Error("Bounty is not active");
     if (await db.query.refundRequests.findFirst({
-      where: and10(
+      where: and9(
         eq13(refundRequests.bountyId, bountyId),
         eq13(refundRequests.requesterId, requesterId),
         eq13(refundRequests.status, "PENDING")
@@ -7428,7 +7404,7 @@ async function voteOnRefundRequest(db, refundRequestId, voterId, vote, reason) {
     if (refundRequest.requesterId === voterId)
       throw new Error("Cannot vote on your own refund request");
     if (await db.query.refundRequestVotes.findFirst({
-      where: and10(
+      where: and9(
         eq13(refundRequestVotes.refundRequestId, refundRequestId),
         eq13(refundRequestVotes.voterId, voterId)
       )
@@ -7441,9 +7417,9 @@ async function voteOnRefundRequest(db, refundRequestId, voterId, vote, reason) {
       vote,
       reason: reason || void 0,
       rewardAmount
-    }).returning().all(), voteCount = (await db.select({ count: sql6`count(*)` }).from(refundRequestVotes).where(eq13(refundRequestVotes.refundRequestId, refundRequestId)).get())?.count || 0;
+    }).returning().all(), voteCount = (await db.select({ count: sql5`count(*)` }).from(refundRequestVotes).where(eq13(refundRequestVotes.refundRequestId, refundRequestId)).get())?.count || 0;
     await db.update(refundRequests).set({ communityVotes: voteCount }).where(eq13(refundRequests.id, refundRequestId)).run(), await addCompensation(db, voterId, rewardAmount, "Voting on refund request");
-    let approvalCount = (await db.select({ count: sql6`count(*)` }).from(refundRequestVotes).where(and10(
+    let approvalCount = (await db.select({ count: sql5`count(*)` }).from(refundRequestVotes).where(and9(
       eq13(refundRequestVotes.refundRequestId, refundRequestId),
       eq13(refundRequestVotes.vote, !0)
     )).get())?.count || 0, rejectionCount = voteCount - approvalCount;
@@ -7467,7 +7443,7 @@ async function approveRefundRequest(db, refundRequestId) {
     let refundAmount = bounty.amount * (1 - bounty.refundPenalty);
     await refundBounty(db, refundRequest.requesterId, refundAmount, bounty.id), await db.update(refundRequests).set({ status: "APPROVED" }).where(eq13(refundRequests.id, refundRequestId)).run();
     let correctVotes = await db.query.refundRequestVotes.findMany({
-      where: and10(
+      where: and9(
         eq13(refundRequestVotes.refundRequestId, refundRequestId),
         eq13(refundRequestVotes.vote, !0)
       )
@@ -7488,7 +7464,7 @@ async function rejectRefundRequest(db, refundRequestId) {
   try {
     await db.update(refundRequests).set({ status: "REJECTED" }).where(eq13(refundRequests.id, refundRequestId)).run();
     let correctVotes = await db.query.refundRequestVotes.findMany({
-      where: and10(
+      where: and9(
         eq13(refundRequestVotes.refundRequestId, refundRequestId),
         eq13(refundRequestVotes.vote, !1)
       )
@@ -7533,17 +7509,7 @@ __export(api_wallet_deposit_exports, {
   action: () => action13
 });
 init_virtual_wallet_server();
-init_bounty_bucks_info();
-init_virtual_wallet_server();
 import { json as json15 } from "@remix-run/cloudflare";
-import { z as z6 } from "zod";
-var TOKEN_SYMBOL2 = bounty_bucks_info_default.symbol, depositSchema = z6.object({
-  amount: z6.number().positive().max(1e4),
-  transactionId: z6.string().optional()
-}), confirmDepositSchema2 = z6.object({
-  transactionId: z6.string(),
-  solanaSignature: z6.string()
-});
 async function action13({ request, context }) {
   let db = createDb(context.env.DB), user = await getUser(request, db);
   if (!user)
@@ -7572,54 +7538,37 @@ async function action13({ request, context }) {
 
 // app/routes/default-avatar.png.tsx
 var default_avatar_png_exports = {};
-__export(default_avatar_png_exports, {
-  loader: () => loader4
-});
-var loader4 = async () => {
-  let svg = `
-    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="40" height="40" rx="20" fill="#4B5563"/>
-      <path d="M20 20C22.21 20 24 18.21 24 16C24 13.79 22.21 12 20 12C17.79 12 16 13.79 16 16C16 18.21 17.79 20 20 20ZM20 22C17.33 22 12 23.34 12 26V28H28V26C28 23.34 22.67 22 20 22Z" fill="#9CA3AF"/>
-    </svg>
-  `;
-  return new Response(svg, {
-    headers: {
-      "Content-Type": "image/svg+xml",
-      "Cache-Control": "public, max-age=31536000"
-    }
-  });
-};
 
 // app/routes/docs.refund-system.tsx
 var docs_refund_system_exports = {};
 __export(docs_refund_system_exports, {
   default: () => RefundSystemDocsPage,
-  loader: () => loader5
+  loader: () => loader4
 });
-import { json as json16 } from "@remix-run/node";
+import { json as json16 } from "@remix-run/cloudflare";
 import { useLoaderData as useLoaderData2, Link as Link3 } from "@remix-run/react";
 
 // app/components/nav.tsx
-import { useEffect as useEffect4, useState as useState3 } from "react";
+import { useEffect as useEffect3, useState as useState2 } from "react";
 import { Link, Form } from "@remix-run/react";
-import gsap from "gsap";
+import { gsap } from "gsap";
 import { FiCreditCard, FiLogOut } from "react-icons/fi";
 
 // app/components/ClientOnly.tsx
-import { useEffect as useEffect3, useState as useState2 } from "react";
-import { Fragment as Fragment2, jsx as jsx4 } from "react/jsx-runtime";
+import { useEffect as useEffect2, useState } from "react";
+import { Fragment, jsx as jsx4 } from "react/jsx-runtime";
 function ClientOnly({ children }) {
-  let [mounted, setMounted] = useState2(!1);
-  return useEffect3(() => {
+  let [mounted, setMounted] = useState(!1);
+  return useEffect2(() => {
     setMounted(!0);
-  }, []), mounted ? /* @__PURE__ */ jsx4(Fragment2, { children }) : null;
+  }, []), mounted ? /* @__PURE__ */ jsx4(Fragment, { children }) : null;
 }
 
 // app/components/nav.tsx
 import { jsx as jsx5, jsxs as jsxs2 } from "react/jsx-runtime";
 function WalletButton() {
-  let [mounted, setMounted] = useState3(!1), [walletHooks, setWalletHooks] = useState3(null);
-  return useEffect4(() => {
+  let [mounted, setMounted] = useState2(!1), [walletHooks, setWalletHooks] = useState2(null);
+  return useEffect3(() => {
     setMounted(!0), typeof window < "u" && Promise.all([
       import("@solana/wallet-adapter-react"),
       import("@solana/wallet-adapter-react-ui")
@@ -7676,22 +7625,20 @@ function WalletButtonWithHooks({ walletHooks }) {
   );
 }
 function Nav() {
-  let [mounted, setMounted] = useState3(!1);
-  useEffect4(() => {
+  let [mounted, setMounted] = useState2(!1);
+  return useEffect3(() => {
     setMounted(!0);
-  }, []);
-  let bubbleConfigs = [
-    { size: 4, opacity: 0.6, duration: 3.5, className: "bubble" },
-    { size: 3, opacity: 0.6, duration: 4, className: "bubble-1" },
-    { size: 2, opacity: 0.6, duration: 4.5, className: "bubble-2" }
-  ];
-  return useEffect4(() => {
+  }, []), useEffect3(() => {
     if (!mounted)
       return;
-    let nav = document.querySelector(".nav-container");
+    let bubbleConfigs = [
+      { size: 4, opacity: 0.6, duration: 3.5, className: "bubble" },
+      { size: 3, opacity: 0.6, duration: 4, className: "bubble-1" },
+      { size: 2, opacity: 0.6, duration: 4.5, className: "bubble-2" }
+    ], nav = document.querySelector(".nav-container");
     if (!nav)
       return;
-    let navWidth = nav.clientWidth, navHeight = nav.clientHeight, container = document.querySelector(".bubble-container");
+    let navHeight = nav.clientHeight, container = document.querySelector(".bubble-container");
     if (!container)
       return;
     container.innerHTML = "";
@@ -7912,7 +7859,7 @@ function Layout({ children, showNav = !0 }) {
 // app/routes/docs.refund-system.tsx
 import { FiArrowLeft, FiExternalLink, FiClock, FiUsers, FiShield, FiAward, FiAlertTriangle } from "react-icons/fi";
 import { jsx as jsx8, jsxs as jsxs5 } from "react/jsx-runtime";
-var loader5 = async () => json16({
+var loader4 = async () => json16({
   title: "Refund System Documentation",
   description: "Understanding the refund system and dispute resolution"
 });
@@ -8294,17 +8241,16 @@ function RefundSystemDocsPage() {
 var api_posts_postId_exports = {};
 __export(api_posts_postId_exports, {
   action: () => action14,
-  loader: () => loader6
+  loader: () => loader5
 });
-init_schema();
 import { json as json17 } from "@remix-run/cloudflare";
-import { eq as eq14, and as and11 } from "drizzle-orm";
-async function loader6({ params, context }) {
-  let { postId } = params;
-  if (!postId)
-    return json17({ error: "Post ID is required" }, { status: 400 });
+init_schema();
+import { eq as eq14, and as and10 } from "drizzle-orm";
+async function loader5({ params, context }) {
+  if (!params.postId)
+    throw new Response("Post ID is required", { status: 400 });
   try {
-    let post = await context.env.DB.select().from(posts).where(eq14(posts.id, postId)).limit(1);
+    let post = await createDb(context.env.DB).select().from(posts2).where(eq14(posts2.id, params.postId)).limit(1);
     return post.length ? json17({ post: post[0] }) : json17({ error: "Post not found" }, { status: 404 });
   } catch (error) {
     return console.error("Error fetching post:", error), json17({ error: "Failed to fetch post" }, { status: 500 });
@@ -8314,10 +8260,12 @@ async function action14({ request, params, context }) {
   let { postId } = params;
   if (!postId)
     return json17({ error: "Post ID is required" }, { status: 400 });
-  let formData = await request.formData(), action26 = formData.get("action");
   try {
-    let db = context.env.DB;
-    switch (action26) {
+    let db = createDb(context.env.DB), user = await getUser(request, db);
+    if (!user)
+      return json17({ error: "User not authenticated" }, { status: 401 });
+    let formData = await request.formData();
+    switch (formData.get("action")) {
       case "addComment": {
         let content = formData.get("content"), userId = formData.get("userId"), answerId = formData.get("answerId");
         if (!content || !userId)
@@ -8352,7 +8300,7 @@ async function action14({ request, params, context }) {
         if (!userId || isNaN(value) || !voteType)
           return json17({ error: "Missing required fields" }, { status: 400 });
         let existingVote = await db.select().from(votes).where(
-          and11(
+          and10(
             eq14(votes.postId, postId),
             eq14(votes.userId, userId),
             eq14(votes.voteType, voteType)
@@ -8374,7 +8322,7 @@ async function action14({ request, params, context }) {
         let voteCounts = await db.select({
           totalVotes: votes.value
         }).from(votes).where(
-          and11(
+          and10(
             eq14(votes.postId, postId),
             eq14(votes.voteType, voteType)
           )
@@ -8385,18 +8333,18 @@ async function action14({ request, params, context }) {
           let upvotes = voteCounts.filter((v) => v.totalVotes > 0).reduce((sum, v) => sum + v.totalVotes, 0), downvotes = voteCounts.filter((v) => v.totalVotes < 0).reduce((sum, v) => sum + Math.abs(v.totalVotes), 0);
           updateData.qualityUpvotes = upvotes, updateData.qualityDownvotes = downvotes;
         }
-        return await db.update(posts).set(updateData).where(eq14(posts.id, postId)), json17({ success: !0, totalVotes });
+        return await db.update(posts2).set(updateData).where(eq14(posts2.id, postId)), json17({ success: !0, totalVotes });
       }
       case "updatePost": {
         let title = formData.get("title"), content = formData.get("content"), userId = formData.get("userId");
         if (!title || !content || !userId)
           return json17({ error: "Missing required fields" }, { status: 400 });
-        let post = await db.select().from(posts).where(eq14(posts.id, postId)).limit(1);
-        return !post.length || post[0].authorId !== userId ? json17({ error: "Unauthorized" }, { status: 401 }) : (await db.update(posts).set({
+        let post = await db.select().from(posts2).where(eq14(posts2.id, postId)).limit(1);
+        return !post.length || post[0].authorId !== userId ? json17({ error: "Unauthorized" }, { status: 401 }) : (await db.update(posts2).set({
           title,
           content,
           updatedAt: /* @__PURE__ */ new Date()
-        }).where(eq14(posts.id, postId)), json17({ success: !0 }));
+        }).where(eq14(posts2.id, postId)), json17({ success: !0 }));
       }
       case "updateComment": {
         let content = formData.get("content"), commentId = formData.get("commentId"), userId = formData.get("userId");
@@ -8418,11 +8366,96 @@ async function action14({ request, params, context }) {
           updatedAt: /* @__PURE__ */ new Date()
         }).where(eq14(answers.id, answerId)), json17({ success: !0 }));
       }
+      case "comment": {
+        let content = formData.get("content");
+        if (!content)
+          return json17({ error: "Comment content is required" }, { status: 400 });
+        if (!params.postId)
+          return json17({ error: "Post ID is required" }, { status: 400 });
+        let commentId = crypto.randomUUID();
+        await db.insert(comments).values({
+          id: commentId,
+          content,
+          authorId: user.id,
+          postId: params.postId,
+          upvotes: 0,
+          downvotes: 0,
+          answerId: null
+        });
+        let author = await db.select().from(users).where(eq14(users.id, user.id)).limit(1), profile = await db.select().from(profiles).where(eq14(profiles.userId, user.id)).limit(1);
+        return await addReputationPoints(
+          db,
+          user.id,
+          REPUTATION_POINTS.COMMENT_CREATED,
+          "COMMENT_CREATED",
+          commentId
+        ), json17({
+          success: !0,
+          comment: {
+            id: commentId,
+            content,
+            author: {
+              id: author[0]?.id,
+              username: author[0]?.username,
+              profilePicture: profile[0]?.profilePicture || null,
+              profile: profile[0] ? { profilePicture: profile[0].profilePicture } : null
+            },
+            upvotes: 0,
+            downvotes: 0,
+            createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+            updatedAt: (/* @__PURE__ */ new Date()).toISOString(),
+            userVote: 0
+          }
+        });
+      }
+      case "answer": {
+        let content = formData.get("content");
+        if (!content)
+          return json17({ error: "Answer content is required" }, { status: 400 });
+        if (!params.postId)
+          return json17({ error: "Post ID is required" }, { status: 400 });
+        let answerId = crypto.randomUUID();
+        await db.insert(answers).values({
+          id: answerId,
+          content,
+          postId: params.postId,
+          authorId: user.id,
+          isAccepted: !1,
+          upvotes: 0,
+          downvotes: 0
+        });
+        let author = await db.select().from(users).where(eq14(users.id, user.id)).limit(1), profile = await db.select().from(profiles).where(eq14(profiles.userId, user.id)).limit(1);
+        return await addReputationPoints(
+          db,
+          user.id,
+          REPUTATION_POINTS.ANSWER_CREATED,
+          "ANSWER_CREATED",
+          answerId
+        ), json17({
+          success: !0,
+          answer: {
+            id: answerId,
+            content,
+            author: {
+              id: author[0]?.id,
+              username: author[0]?.username,
+              profilePicture: profile[0]?.profilePicture || null,
+              profile: profile[0] ? { profilePicture: profile[0].profilePicture } : null
+            },
+            upvotes: 0,
+            downvotes: 0,
+            isAccepted: !1,
+            createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+            updatedAt: (/* @__PURE__ */ new Date()).toISOString(),
+            userVote: 0
+          }
+        });
+      }
       default:
         return json17({ error: "Invalid action" }, { status: 400 });
     }
   } catch (error) {
-    return console.error("Error processing post action:", error), json17({ error: "Failed to process action" }, { status: 500 });
+    return console.error("Error processing action:", error), json17({ error: "Failed to process action" }, { status: 500 });
   }
 }
 
@@ -8432,21 +8465,20 @@ __export(api_bounty_claim_exports, {
   action: () => action15
 });
 import { json as json18 } from "@remix-run/cloudflare";
-init_virtual_wallet_server();
 init_schema();
 import { eq as eq15 } from "drizzle-orm";
-import { z as z7 } from "zod";
-var claimBountySchema = z7.object({
-  bountyId: z7.string().min(1, "Bounty ID is required")
+import { z as z6 } from "zod";
+var claimBountySchema = z6.object({
+  bountyId: z6.string().min(1, "Bounty ID is required")
 });
-async function action15({ request, context }) {
+async function action15({ request }) {
   try {
-    let userId = await requireUserId(request), formData = await request.formData(), validation = claimBountySchema.safeParse({
+    let userId = await getUser(request), formData = await request.formData(), validation = claimBountySchema.safeParse({
       bountyId: formData.get("bountyId")
     });
     if (!validation.success)
       return json18({ error: validation.error.errors[0].message }, { status: 400 });
-    let { bountyId } = validation.data, db = createDb(context.env.DB), bounty = await db.query.bounties.findFirst({
+    let { bountyId } = validation.data, db = createDb(), bounty = await db.query.bounties.findFirst({
       where: eq15(bounties.id, bountyId)
     });
     if (!bounty)
@@ -8476,66 +8508,63 @@ __export(api_posts_delete_exports, {
 import { json as json19 } from "@remix-run/cloudflare";
 init_schema();
 import { eq as eq16 } from "drizzle-orm";
-var action16 = async ({ request, context }) => {
-  if (request.method !== "POST")
+async function action16({ request, context }) {
+  if (request.method !== "DELETE")
     return json19({ error: "Method not allowed" }, { status: 405 });
   try {
-    let userId = await requireUserId(request), { postId } = await request.json();
+    let db = createDb(context.env.DB), user = await getUser(request, db);
+    if (!user)
+      return json19({ error: "User not authenticated" }, { status: 401 });
+    let { postId } = await request.json();
     if (!postId)
       return json19({ error: "Post ID is required" }, { status: 400 });
-    let db = context.env.DB, post = await db.select().from(posts).where(eq16(posts.id, postId)).limit(1);
-    return !post.length || post[0].authorId !== userId ? json19({ error: "Unauthorized" }, { status: 401 }) : (await db.delete(posts).where(eq16(posts.id, postId)), json19({ success: !0 }));
+    let post = await db.select().from(posts2).where(eq16(posts2.id, postId)).limit(1);
+    return !post.length || post[0].authorId !== user.id ? json19({ error: "Unauthorized" }, { status: 401 }) : (await db.delete(posts2).where(eq16(posts2.id, postId)), json19({ success: !0 }));
   } catch (error) {
     return console.error("Delete post error:", error), json19({ error: "Failed to delete post" }, { status: 500 });
   }
-};
+}
 
 // app/routes/profile.activity.tsx
 var profile_activity_exports = {};
 __export(profile_activity_exports, {
   default: () => ProfileActivity,
-  loader: () => loader7
+  loader: () => loader6
 });
-import { json as json20 } from "@remix-run/node";
+import { json as json20 } from "@remix-run/cloudflare";
 init_schema();
-import { eq as eq17, desc as desc7 } from "drizzle-orm";
+import { eq as eq17, desc as desc6 } from "drizzle-orm";
 import { useLoaderData as useLoaderData3, Link as Link4 } from "@remix-run/react";
 import { FiMessageSquare, FiThumbsUp, FiCheckCircle, FiEdit2 } from "react-icons/fi";
 import { jsx as jsx9, jsxs as jsxs6 } from "react/jsx-runtime";
-var loader7 = async ({ request, context }) => {
+var loader6 = async ({ request, context }) => {
   try {
-    let userId = await requireUserId(request), db = context.env.DB, [userPosts, userComments, userAnswers, userReputationHistory] = await Promise.all([
-      db.select().from(posts).where(eq17(posts.authorId, userId)).orderBy(desc7(posts.createdAt)).limit(100),
-      db.select().from(comments).where(eq17(comments.authorId, userId)).orderBy(desc7(comments.createdAt)).limit(100),
-      db.select().from(answers).where(eq17(answers.authorId, userId)).orderBy(desc7(answers.createdAt)).limit(100),
-      db.select().from(reputationHistory).where(eq17(reputationHistory.userId, userId)).orderBy(desc7(reputationHistory.createdAt)).limit(100)
+    let userId = await requireUserId(request), db = createDb(context.env.DB), [userPosts, userComments, userAnswers, userReputationHistory] = await Promise.all([
+      db.select().from(posts2).where(eq17(posts2.authorId, userId)).orderBy(desc6(posts2.createdAt)).limit(100),
+      db.select().from(comments).where(eq17(comments.authorId, userId)).orderBy(desc6(comments.createdAt)).limit(100),
+      db.select().from(answers).where(eq17(answers.authorId, userId)).orderBy(desc6(answers.createdAt)).limit(100),
+      db.select().from(reputationHistory).where(eq17(reputationHistory.userId, userId)).orderBy(desc6(reputationHistory.createdAt)).limit(100)
     ]), activityItems = [
       ...userPosts.map((post) => ({
         id: post.id,
         type: "post",
         title: post.title,
-        content: post.content,
-        createdAt: post.createdAt,
-        points: 0,
-        action: "Created post"
+        createdAt: post.createdAt.toISOString(),
+        action: "POST_CREATED"
       })),
       ...userComments.map((comment) => ({
         id: comment.id,
         type: "comment",
-        title: "Comment",
-        content: comment.content,
-        createdAt: comment.createdAt,
-        points: 0,
-        action: "Added comment"
+        title: comment.post?.title || "Unknown Post",
+        createdAt: comment.createdAt.toISOString(),
+        action: "COMMENT_CREATED"
       })),
       ...userAnswers.map((answer) => ({
         id: answer.id,
         type: "answer",
-        title: "Answer",
-        content: answer.content,
-        createdAt: answer.createdAt,
-        points: 0,
-        action: "Provided answer"
+        title: answer.post?.title || "Unknown Post",
+        createdAt: answer.createdAt.toISOString(),
+        action: "ANSWER_CREATED"
       })),
       ...userReputationHistory.map((history) => ({
         id: history.id,
@@ -8578,33 +8607,7 @@ function getActivityDescription(action26) {
   }[action26] || action26;
 }
 function ProfileActivity() {
-  let { activities } = useLoaderData3(), getActivityIcon = (type) => {
-    switch (type) {
-      case "post":
-        return /* @__PURE__ */ jsx9(FiEdit2, { className: "w-5 h-5" });
-      case "comment":
-        return /* @__PURE__ */ jsx9(FiMessageSquare, { className: "w-5 h-5" });
-      case "answer":
-        return /* @__PURE__ */ jsx9(FiCheckCircle, { className: "w-5 h-5" });
-      case "reputation":
-        return /* @__PURE__ */ jsx9(FiThumbsUp, { className: "w-5 h-5" });
-      default:
-        return null;
-    }
-  }, getActivityTitle = (activity) => {
-    switch (activity.type) {
-      case "post":
-        return "Created a post";
-      case "comment":
-        return "Commented on a post";
-      case "answer":
-        return "Answered a question";
-      case "reputation":
-        return activity.action?.replace(/_/g, " ").toLowerCase() || "Reputation change";
-      default:
-        return "";
-    }
-  };
+  let { activities } = useLoaderData3();
   return /* @__PURE__ */ jsxs6("div", { className: "bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)] mt-8", children: [
     /* @__PURE__ */ jsxs6("div", { className: "flex justify-between items-center mb-6", children: [
       /* @__PURE__ */ jsx9("h2", { className: "text-2xl font-bold text-white", children: "Activity History" }),
@@ -8645,91 +8648,98 @@ var username_posts_exports = {};
 __export(username_posts_exports, {
   action: () => action17,
   default: () => UserPosts,
-  loader: () => loader8
+  loader: () => loader7
 });
-import { useState as useState4 } from "react";
-import { useLoaderData as useLoaderData4, Link as Link5, useActionData, useNavigate, useSubmit, useSearchParams } from "@remix-run/react";
-import { json as json21 } from "@remix-run/node";
 init_schema();
+import { Link as Link5, useSearchParams, useLoaderData as useLoaderData4 } from "@remix-run/react";
 import { FiThumbsUp as FiThumbsUp2, FiMessageSquare as FiMessageSquare2 } from "react-icons/fi";
 import { json as cloudflareJson } from "@remix-run/cloudflare";
-import { eq as eq18, inArray as inArray2, sql as sql7 } from "drizzle-orm";
+import { eq as eq18, sql as sql6, desc as desc7 } from "drizzle-orm";
 import { jsx as jsx10, jsxs as jsxs7 } from "react/jsx-runtime";
-async function loader8({ params, context, request }) {
-  let { username } = params;
+async function loader7({ params, context, request }) {
+  let { username } = params, searchParams = new URL(request.url).searchParams;
   if (!username)
     throw new Response("Username is required", { status: 400 });
   try {
-    let db = context.env.DB, currentUser = await getUser(request), user = await db.select({
+    let db = createDb(context.env.DB), currentUser = await getUser(request, db), userData = await db.select({
       id: users.id,
       username: users.username,
       email: users.email,
+      solanaAddress: users.solanaAddress,
       createdAt: users.createdAt,
       reputationPoints: users.reputationPoints,
       integrityScore: users.integrityScore,
-      totalRatings: users.totalRatings
-    }).from(users).where(eq18(users.username, username)).limit(1);
-    if (!user.length)
-      throw new Response("User not found", { status: 404 });
-    let userPosts = await db.select({
-      id: posts.id,
-      title: posts.title,
-      content: posts.content,
-      createdAt: posts.createdAt,
-      updatedAt: posts.updatedAt,
-      visibilityVotes: posts.visibilityVotes,
-      qualityUpvotes: posts.qualityUpvotes,
-      qualityDownvotes: posts.qualityDownvotes,
-      hasBounty: posts.hasBounty,
-      status: posts.status,
-      author: {
-        id: users.id,
-        username: users.username
-      },
+      totalRatings: users.totalRatings,
       profile: {
-        profilePicture: profiles.profilePicture
+        firstName: profiles.firstName,
+        lastName: profiles.lastName,
+        profilePicture: profiles.profilePicture,
+        bio: profiles.bio,
+        location: profiles.location,
+        website: profiles.website,
+        facebook: profiles.facebook,
+        twitter: profiles.twitter,
+        instagram: profiles.instagram,
+        linkedin: profiles.linkedin,
+        github: profiles.github,
+        youtube: profiles.youtube,
+        tiktok: profiles.tiktok,
+        discord: profiles.discord,
+        reddit: profiles.reddit,
+        medium: profiles.medium,
+        stackoverflow: profiles.stackoverflow,
+        devto: profiles.devto
       }
-    }).from(posts).innerJoin(users, eq18(posts.authorId, users.id)).leftJoin(profiles, eq18(users.id, profiles.userId)).where(eq18(posts.authorId, user[0].id)).orderBy(posts.createdAt), postIds = userPosts.map((post) => post.id), commentCounts = postIds.length > 0 ? await db.select({
-      postId: comments.postId,
-      count: sql7`count(${comments.id})`
-    }).from(comments).where(inArray2(comments.postId, postIds)).groupBy(comments.postId) : [], transformedPosts = userPosts.map((post) => ({
-      id: post.id,
-      title: post.title,
-      content: post.content,
-      createdAt: post.createdAt.toISOString(),
-      visibilityVotes: post.visibilityVotes,
-      upvotes: post.qualityUpvotes,
-      comments: commentCounts.find((c) => c.postId === post.id)?.count || 0,
-      hasBounty: post.hasBounty,
-      author: {
-        id: post.author.id,
-        username: post.author.username,
-        profilePicture: post.profile?.profilePicture || null
-      }
-    }));
-    return json21({
-      user: user[0],
-      posts: transformedPosts,
-      currentUser
+    }).from(users).leftJoin(profiles, eq18(users.id, profiles.userId)).where(eq18(users.username, username)).limit(1);
+    if (!userData.length)
+      throw new Response("User not found", { status: 404 });
+    let user = userData[0], page = parseInt(searchParams.get("page") || "1"), limit = 10, offset = (page - 1) * limit, postsData = await db.select({
+      id: posts2.id,
+      title: posts2.title,
+      content: posts2.content,
+      createdAt: posts2.createdAt,
+      visibilityVotes: posts2.visibilityVotes,
+      qualityUpvotes: posts2.qualityUpvotes,
+      qualityDownvotes: posts2.qualityDownvotes,
+      comments: sql6`(
+          SELECT COUNT(*) FROM ${comments} 
+          WHERE ${comments.postId} = ${posts2.id}
+        )`.as("comments")
+    }).from(posts2).where(eq18(posts2.authorId, user.id)).orderBy(desc7(posts2.createdAt)).limit(limit).offset(offset), totalPosts = await db.select({ count: sql6`count(*)` }).from(posts2).where(eq18(posts2.authorId, user.id)), totalPages = Math.ceil(totalPosts[0].count / limit);
+    return cloudflareJson({
+      user,
+      posts: postsData,
+      currentPage: page,
+      totalPages,
+      currentUser: currentUser ? {
+        id: currentUser.id,
+        username: currentUser.username,
+        email: currentUser.email,
+        solanaAddress: currentUser.solanaAddress,
+        createdAt: currentUser.createdAt,
+        reputationPoints: currentUser.reputationPoints,
+        integrityScore: currentUser.integrityScore,
+        totalRatings: currentUser.totalRatings
+      } : null
     });
   } catch (error) {
-    throw console.error("Error fetching user posts:", error), new Response("Failed to fetch user posts", { status: 500 });
+    throw console.error("Error loading user posts:", error), new Response("Failed to load user posts", { status: 500 });
   }
 }
-async function action17({ request, params, context }) {
+async function action17({ request, context }) {
   let user = await getUser(request);
   if (!user)
     throw new Response("Unauthorized", { status: 401 });
   let formData = await request.formData(), action26 = formData.get("action");
   try {
-    let db = context.env.DB;
+    let db = createDb(context.env.DB);
     switch (action26) {
       case "deletePost": {
         let postId = formData.get("postId");
         if (!postId)
           return cloudflareJson({ error: "Post ID is required" }, { status: 400 });
-        let post = await db.select().from(posts).where(eq18(posts.id, postId)).limit(1);
-        return !post.length || post[0].authorId !== user.id ? cloudflareJson({ error: "Unauthorized" }, { status: 401 }) : (await db.delete(posts).where(eq18(posts.id, postId)), cloudflareJson({ success: !0 }));
+        let post = await db.select().from(posts2).where(eq18(posts2.id, postId)).limit(1);
+        return !post.length || post[0].authorId !== user.id ? cloudflareJson({ error: "Unauthorized" }, { status: 401 }) : (await db.delete(posts2).where(eq18(posts2.id, postId)), cloudflareJson({ success: !0 }));
       }
       default:
         return cloudflareJson({ error: "Invalid action" }, { status: 400 });
@@ -8739,17 +8749,18 @@ async function action17({ request, params, context }) {
   }
 }
 function UserPosts() {
-  let { user, posts: posts2, currentUser } = useLoaderData4(), [videoErrors, setVideoErrors] = useState4({}), submit = useSubmit(), navigate = useNavigate(), actionData = useActionData(), [searchParams, setSearchParams] = useSearchParams(), POSTS_PER_PAGE = 6, page = parseInt(searchParams.get("page") || "1", 10), totalPosts = posts2.length, totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE), paginatedPosts = posts2.slice((page - 1) * POSTS_PER_PAGE, page * POSTS_PER_PAGE), handleVideoError = (postId, error) => {
-    setVideoErrors((prev) => ({ ...prev, [postId]: error }));
-  }, handleVote = (postId) => {
-    let formData = new FormData();
-    formData.append("action", "vote"), formData.append("postId", postId), submit(formData, { method: "post" });
-  }, handleDelete = (postId) => {
-    if (window.confirm("Are you sure you want to delete this post?")) {
-      let formData = new FormData();
-      formData.append("action", "deletePost"), formData.append("postId", postId), submit(formData, { method: "post" });
+  let { user, posts: posts3 } = useLoaderData4(), [searchParams, setSearchParams] = useSearchParams(), POSTS_PER_PAGE = 6, page = parseInt(searchParams.get("page") || "1", 10), totalPosts = posts3.length, totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE), mappedPosts = posts3.slice((page - 1) * POSTS_PER_PAGE, page * POSTS_PER_PAGE).map((post) => ({
+    ...post,
+    hasBounty: !1,
+    // or get from post if available
+    upvotes: post.qualityUpvotes ?? 0,
+    // or another upvote field
+    author: {
+      id: user.id,
+      username: user.username,
+      profilePicture: user.profile?.profilePicture || null
     }
-  }, isPostOwner = (post) => currentUser?.id === post.author.id, renderPost = (post) => /* @__PURE__ */ jsxs7("div", { className: "bg-neutral-800 rounded-lg p-6 mb-6", children: [
+  })), renderPost = (post) => /* @__PURE__ */ jsxs7("div", { className: "bg-neutral-800 rounded-lg p-6 mb-6", children: [
     /* @__PURE__ */ jsx10("div", { className: "flex items-center justify-between mb-4", children: /* @__PURE__ */ jsxs7("div", { className: "flex items-center space-x-3", children: [
       /* @__PURE__ */ jsx10(
         "img",
@@ -8779,99 +8790,93 @@ function UserPosts() {
       ] })
     ] }) })
   ] }, post.id);
-  return /* @__PURE__ */ jsxs7("div", { className: "h-screen w-full bg-neutral-900/95 flex flex-row", children: [
-    /* @__PURE__ */ jsx10(Nav, {}),
-    /* @__PURE__ */ jsx10("div", { className: "flex-1 overflow-y-auto", children: /* @__PURE__ */ jsxs7("div", { className: "w-auto max-w-8xl mx-auto mt-4 px-4 ml-24 pb-16", children: [
-      /* @__PURE__ */ jsxs7("div", { className: "mb-6 flex justify-between items-center mt-16", children: [
-        /* @__PURE__ */ jsxs7("div", { children: [
-          /* @__PURE__ */ jsxs7("h1", { className: "text-2xl font-bold text-white mb-2", children: [
-            "Posts by ",
-            user.username
-          ] }),
-          /* @__PURE__ */ jsxs7("p", { className: "text-gray-400 text-sm", children: [
-            posts2.length,
-            " ",
-            posts2.length === 1 ? "post" : "posts"
-          ] })
+  return /* @__PURE__ */ jsx10("div", { className: "h-screen w-full bg-neutral-900/95 flex flex-row", children: /* @__PURE__ */ jsx10("div", { className: "flex-1 overflow-y-auto", children: /* @__PURE__ */ jsxs7("div", { className: "w-auto max-w-8xl mx-auto mt-4 px-4 ml-24 pb-16", children: [
+    /* @__PURE__ */ jsxs7("div", { className: "mb-6 flex justify-between items-center mt-16", children: [
+      /* @__PURE__ */ jsxs7("div", { children: [
+        /* @__PURE__ */ jsxs7("h1", { className: "text-2xl font-bold text-white mb-2", children: [
+          "Posts by ",
+          user.username
         ] }),
-        /* @__PURE__ */ jsx10(
-          Link5,
-          {
-            to: "/posts/create",
-            className: "bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2",
-            children: /* @__PURE__ */ jsx10("span", { children: "Create Post" })
-          }
-        )
+        /* @__PURE__ */ jsxs7("p", { className: "text-gray-400 text-sm", children: [
+          posts3.length,
+          " ",
+          posts3.length === 1 ? "post" : "posts"
+        ] })
       ] }),
-      /* @__PURE__ */ jsx10("div", { className: "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4", children: paginatedPosts.map(
-        (post) => renderPost(post)
-      ) }),
-      totalPages > 1 && /* @__PURE__ */ jsxs7("div", { className: "flex justify-center mt-8 space-x-2", children: [
-        /* @__PURE__ */ jsx10(
-          "button",
-          {
-            onClick: () => setSearchParams({ page: String(page - 1) }),
-            disabled: page === 1,
-            className: "px-3 py-1 rounded bg-gray-700 text-white disabled:opacity-50",
-            children: "Previous"
-          }
-        ),
-        Array.from({ length: totalPages }, (_, i) => /* @__PURE__ */ jsx10(
-          "button",
-          {
-            onClick: () => setSearchParams({ page: String(i + 1) }),
-            className: `px-3 py-1 rounded ${page === i + 1 ? "bg-violet-500 text-white" : "bg-gray-700 text-white"}`,
-            children: i + 1
-          },
-          i + 1
-        )),
-        /* @__PURE__ */ jsx10(
-          "button",
-          {
-            onClick: () => setSearchParams({ page: String(page + 1) }),
-            disabled: page === totalPages,
-            className: "px-3 py-1 rounded bg-gray-700 text-white disabled:opacity-50",
-            children: "Next"
-          }
-        )
-      ] })
-    ] }) })
-  ] });
+      /* @__PURE__ */ jsx10(
+        Link5,
+        {
+          to: "/posts/create",
+          className: "bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2",
+          children: /* @__PURE__ */ jsx10("span", { children: "Create Post" })
+        }
+      )
+    ] }),
+    /* @__PURE__ */ jsx10("div", { className: "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4", children: mappedPosts.map((post) => renderPost(post)) }),
+    totalPages > 1 && /* @__PURE__ */ jsxs7("div", { className: "flex justify-center mt-8 space-x-2", children: [
+      /* @__PURE__ */ jsx10(
+        "button",
+        {
+          onClick: () => setSearchParams({ page: String(page - 1) }),
+          disabled: page === 1,
+          className: "px-3 py-1 rounded bg-gray-700 text-white disabled:opacity-50",
+          children: "Previous"
+        }
+      ),
+      Array.from({ length: totalPages }, (_, i) => /* @__PURE__ */ jsx10(
+        "button",
+        {
+          onClick: () => setSearchParams({ page: String(i + 1) }),
+          className: `px-3 py-1 rounded ${page === i + 1 ? "bg-violet-500 text-white" : "bg-gray-700 text-white"}`,
+          children: i + 1
+        },
+        i + 1
+      )),
+      /* @__PURE__ */ jsx10(
+        "button",
+        {
+          onClick: () => setSearchParams({ page: String(page + 1) }),
+          disabled: page === totalPages,
+          className: "px-3 py-1 rounded bg-gray-700 text-white disabled:opacity-50",
+          children: "Next"
+        }
+      )
+    ] })
+  ] }) }) });
 }
 
 // app/routes/api.privacy.pdf.tsx
 var api_privacy_pdf_exports = {};
 __export(api_privacy_pdf_exports, {
-  loader: () => loader9
+  loader: () => loader8
 });
-import { json as json22 } from "@remix-run/cloudflare";
+import { json as json21 } from "@remix-run/cloudflare";
 
 // app/utils/pdf.server.ts
 import { renderToString } from "react-dom/server";
-var puppeteer = null;
-try {
-  puppeteer = __require("puppeteer");
-} catch {
-  console.warn("Puppeteer not available in current environment");
-}
+import { eq as eq19 } from "drizzle-orm";
 var PDFService = class {
-  static async getBrowser() {
-    if (!puppeteer)
+  static async getPuppeteer() {
+    try {
+      return __require("puppeteer");
+    } catch {
       throw new Error("Puppeteer is not available in this environment");
-    return this.browser || (this.browser = await puppeteer.launch({
-      headless: !0,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"]
-    })), this.browser;
+    }
+  }
+  static async getBrowser() {
+    if (!this.browser) {
+      let puppeteer = await this.getPuppeteer();
+      this.browser = await puppeteer.launch({
+        headless: !0,
+        args: ["--no-sandbox", "--disable-setuid-sandbox"]
+      });
+    }
+    return this.browser;
   }
   static async generatePDF(htmlContent, options = {}) {
-    if (!puppeteer)
-      throw new Error("PDF generation is not available in this environment");
     let page = await (await this.getBrowser()).newPage();
     try {
-      await page.setContent(htmlContent, {
-        waitUntil: "networkidle0"
-      });
-      let pdfBuffer = await page.pdf({
+      return await page.setContent(htmlContent, { waitUntil: "networkidle0" }), await page.pdf({
         format: options.format || "A4",
         margin: options.margin || {
           top: "1in",
@@ -8879,20 +8884,14 @@ var PDFService = class {
           bottom: "1in",
           left: "1in"
         },
-        printBackground: options.printBackground ?? !0,
-        displayHeaderFooter: options.displayHeaderFooter ?? !1,
-        headerTemplate: options.headerTemplate,
-        footerTemplate: options.footerTemplate
+        printBackground: !0
       });
-      return Buffer.from(pdfBuffer);
     } finally {
       await page.close();
     }
   }
   static async generatePDFFromReactComponent(component, options = {}) {
-    if (!puppeteer)
-      throw new Error("PDF generation is not available in this environment");
-    let fullHTML = `
+    let puppeteer = await this.getPuppeteer(), fullHTML = `
       <!DOCTYPE html>
       <html>
         <head>
@@ -8943,14 +8942,12 @@ var PDFService = class {
   }
   // Check if PDF generation is available
   static isAvailable() {
-    return puppeteer !== null;
+    return !0;
   }
 };
 __publicField(PDFService, "browser", null);
 async function createSimplePDF(title, content, options = {}) {
-  if (!puppeteer)
-    throw new Error("PDF generation is not available in this environment");
-  let htmlContent = `
+  return PDFService.generatePDF(`
     <!DOCTYPE html>
     <html>
       <head>
@@ -8996,18 +8993,6 @@ async function createSimplePDF(title, content, options = {}) {
           .section {
             margin-bottom: 30px;
           }
-          .contact-info {
-            background: #f5f5f5;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
-          }
-          @media print {
-            body {
-              background: white !important;
-              color: black !important;
-            }
-          }
         </style>
       </head>
       <body>
@@ -9017,162 +9002,18 @@ async function createSimplePDF(title, content, options = {}) {
         </div>
       </body>
     </html>
-  `;
-  return PDFService.generatePDF(htmlContent, options);
+  `, options);
 }
 
 // app/routes/api.privacy.pdf.tsx
-var loader9 = async ({ request }) => {
+async function loader8() {
   try {
     let pdfBuffer = await createSimplePDF(
       "Privacy Policy - portal.ask",
       `
       <div class="section">
         <h2>1. Introduction</h2>
-        <p>Welcome to portal.ask ("we," "our," or "us"). We are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our decentralized platform for knowledge sharing and community building.</p>
-        <p>By using portal.ask, you consent to the data practices described in this policy.</p>
-      </div>
-
-      <div class="section">
-        <h2>2. Information We Collect</h2>
-        
-        <h3>2.1 Personal Information</h3>
-        <p>We may collect the following personal information:</p>
-        <ul>
-          <li>Email address</li>
-          <li>Username</li>
-          <li>Profile information (bio, location, website)</li>
-          <li>Social media links</li>
-          <li>Profile picture</li>
-          <li>Solana wallet addresses</li>
-        </ul>
-
-        <h3>2.2 Usage Information</h3>
-        <p>We automatically collect certain information about your use of our platform:</p>
-        <ul>
-          <li>Posts, comments, and interactions</li>
-          <li>Voting and reputation data</li>
-          <li>Transaction history</li>
-          <li>IP address and device information</li>
-          <li>Browser type and version</li>
-          <li>Pages visited and time spent</li>
-        </ul>
-
-        <h3>2.3 Blockchain Data</h3>
-        <p>As a decentralized platform, some information may be stored on the Solana blockchain, which is publicly accessible and immutable.</p>
-      </div>
-
-      <div class="section">
-        <h2>3. How We Use Your Information</h2>
-        <p>We use the collected information for the following purposes:</p>
-        <ul>
-          <li>Provide and maintain our platform services</li>
-          <li>Process transactions and manage virtual wallets</li>
-          <li>Calculate and display reputation scores</li>
-          <li>Facilitate community interactions</li>
-          <li>Send important notifications and updates</li>
-          <li>Improve our platform and user experience</li>
-          <li>Comply with legal obligations</li>
-          <li>Prevent fraud and abuse</li>
-        </ul>
-      </div>
-
-      <div class="section">
-        <h2>4. Information Sharing and Disclosure</h2>
-        <p>We do not sell, trade, or rent your personal information to third parties. However, we may share your information in the following circumstances:</p>
-        <ul>
-          <li><strong>Public Content:</strong> Posts, comments, and public profile information are visible to all users</li>
-          <li><strong>Blockchain Transactions:</strong> Transaction data is publicly visible on the Solana blockchain</li>
-          <li><strong>Legal Requirements:</strong> When required by law or to protect our rights</li>
-          <li><strong>Service Providers:</strong> With trusted third-party service providers who assist in platform operations</li>
-          <li><strong>Consent:</strong> When you explicitly consent to sharing</li>
-        </ul>
-      </div>
-
-      <div class="section">
-        <h2>5. Data Security</h2>
-        <p>We implement appropriate security measures to protect your personal information:</p>
-        <ul>
-          <li>Encryption of sensitive data</li>
-          <li>Secure authentication systems</li>
-          <li>Regular security audits</li>
-          <li>Access controls and monitoring</li>
-          <li>Secure hosting infrastructure</li>
-        </ul>
-        <p>However, no method of transmission over the internet is 100% secure, and we cannot guarantee absolute security.</p>
-      </div>
-
-      <div class="section">
-        <h2>6. Your Rights and Choices</h2>
-        <p>You have the following rights regarding your personal information:</p>
-        <ul>
-          <li><strong>Access:</strong> Request access to your personal information</li>
-          <li><strong>Correction:</strong> Update or correct your information</li>
-          <li><strong>Deletion:</strong> Request deletion of your account and data</li>
-          <li><strong>Portability:</strong> Export your data in a machine-readable format</li>
-          <li><strong>Opt-out:</strong> Unsubscribe from non-essential communications</li>
-        </ul>
-        <p>Note: Some data stored on the blockchain may be immutable and cannot be deleted.</p>
-      </div>
-
-      <div class="section">
-        <h2>7. Cookies and Tracking</h2>
-        <p>We use cookies and similar technologies to:</p>
-        <ul>
-          <li>Maintain your session and preferences</li>
-          <li>Analyze platform usage and performance</li>
-          <li>Provide personalized content</li>
-          <li>Improve user experience</li>
-        </ul>
-        <p>You can control cookie settings through your browser preferences.</p>
-      </div>
-
-      <div class="section">
-        <h2>8. Third-Party Services</h2>
-        <p>Our platform may integrate with third-party services:</p>
-        <ul>
-          <li>Solana blockchain network</li>
-          <li>Cloudinary for media storage</li>
-          <li>Authentication providers</li>
-          <li>Analytics services</li>
-        </ul>
-        <p>These services have their own privacy policies, and we encourage you to review them.</p>
-      </div>
-
-      <div class="section">
-        <h2>9. Children's Privacy</h2>
-        <p>Our platform is not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13. If you believe we have collected such information, please contact us immediately.</p>
-      </div>
-
-      <div class="section">
-        <h2>10. International Data Transfers</h2>
-        <p>Your information may be transferred to and processed in countries other than your own. We ensure appropriate safeguards are in place to protect your data in accordance with this Privacy Policy.</p>
-      </div>
-
-      <div class="section">
-        <h2>11. Changes to This Policy</h2>
-        <p>We may update this Privacy Policy from time to time. We will notify you of any material changes by:</p>
-        <ul>
-          <li>Posting the updated policy on our platform</li>
-          <li>Sending email notifications to registered users</li>
-          <li>Displaying prominent notices on our website</li>
-        </ul>
-        <p>Your continued use of the platform after changes become effective constitutes acceptance of the updated policy.</p>
-      </div>
-
-      <div class="section">
-        <h2>12. Contact Us</h2>
-        <p>If you have any questions about this Privacy Policy or our data practices, please contact us:</p>
-        <div class="contact-info">
-          <p><strong>Email:</strong> bountybucks524@gmail.com</p>
-          <p><strong>Platform:</strong> portal.ask</p>
-          <p>We will respond to your inquiry within a reasonable timeframe.</p>
-        </div>
-      </div>
-
-      <div class="section">
-        <h2>13. Governing Law</h2>
-        <p>This Privacy Policy is governed by and construed in accordance with the laws of the jurisdiction in which portal.ask operates. Any disputes arising from this policy will be resolved in the appropriate courts of that jurisdiction.</p>
+        <p>Welcome to portal.ask ("we," "our," or "us"). We are committed to protecting your privacy and ensuring the security of your personal information.</p>
       </div>
     `,
       {
@@ -9186,49 +9027,47 @@ var loader9 = async ({ request }) => {
       }
     );
     return new Response(pdfBuffer, {
-      status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": 'attachment; filename="portal-ask-privacy-policy.pdf"',
-        "Content-Length": pdfBuffer.length.toString()
+        "Content-Disposition": "inline; filename=privacy-policy.pdf"
       }
     });
   } catch (error) {
-    return console.error("Error generating privacy policy PDF:", error), json22({ error: "Failed to generate PDF" }, { status: 500 });
+    return console.error("Error generating privacy PDF:", error), json21({ error: "Failed to generate PDF" }, { status: 500 });
   }
-};
+}
 
 // app/routes/api.refund.vote.tsx
 var api_refund_vote_exports = {};
 __export(api_refund_vote_exports, {
   action: () => action18
 });
-import { json as json23 } from "@remix-run/cloudflare";
-import { z as z8 } from "zod";
-var refundVoteSchema = z8.object({
-  refundRequestId: z8.string(),
-  vote: z8.boolean(),
-  reason: z8.string().min(20, "Must provide at least 20 characters of reasoning")
+import { json as json22 } from "@remix-run/cloudflare";
+import { z as z7 } from "zod";
+var refundVoteSchema = z7.object({
+  refundRequestId: z7.string(),
+  vote: z7.boolean(),
+  reason: z7.string().min(20, "Must provide at least 20 characters of reasoning")
 });
 async function action18({ request, context }) {
   let userId = await requireUserId(request);
   if (request.method !== "POST")
-    return json23({ error: "Method not allowed" }, { status: 405 });
+    return json22({ error: "Method not allowed" }, { status: 405 });
   try {
-    let formData = await request.formData(), refundRequestId = formData.get("refundRequestId"), vote = formData.get("vote") === "true", reason = formData.get("reason") || void 0, validatedData = refundVoteSchema.parse({ refundRequestId, vote, reason }), db = context.env.DB, voteRecord = await voteOnRefundRequest(
+    let formData = await request.formData(), refundRequestId = formData.get("refundRequestId"), vote = formData.get("vote") === "true", reason = formData.get("reason") || void 0, validatedData = refundVoteSchema.parse({ refundRequestId, vote, reason }), db = createDb(context.env.DB), voteRecord = await voteOnRefundRequest(
       db,
       validatedData.refundRequestId,
       userId,
       validatedData.vote,
       validatedData.reason
     );
-    return json23({
+    return json22({
       success: !0,
       vote: voteRecord,
       message: `Vote ${validatedData.vote ? "approved" : "rejected"} successfully. You'll receive ${voteRecord.rewardAmount.toFixed(4)} tokens when the final decision is reached.`
     });
   } catch (error) {
-    return console.error("Refund vote error:", error), error instanceof z8.ZodError ? json23({ error: "Invalid input data", details: error.errors }, { status: 400 }) : error instanceof Error ? json23({ error: error.message }, { status: 400 }) : json23({ error: "Failed to vote on refund request" }, { status: 500 });
+    return console.error("Refund vote error:", error), error instanceof z7.ZodError ? json22({ error: "Invalid input data", details: error.errors }, { status: 400 }) : error instanceof Error ? json22({ error: error.message }, { status: 400 }) : json22({ error: "Failed to vote on refund request" }, { status: 500 });
   }
 }
 
@@ -9236,17 +9075,16 @@ async function action18({ request, context }) {
 var refund_requests_exports = {};
 __export(refund_requests_exports, {
   default: () => RefundRequestsPage,
-  loader: () => loader10
+  loader: () => loader9
 });
-import { json as json24 } from "@remix-run/node";
-import { useLoaderData as useLoaderData5 } from "@remix-run/react";
+import { json as json23 } from "@remix-run/cloudflare";
 
 // app/components/RefundRequestsList.tsx
-import { useState as useState5 } from "react";
-import { Form as Form3, useActionData as useActionData2, useNavigation } from "@remix-run/react";
+import { useState as useState3 } from "react";
+import { Form as Form2, useActionData, useNavigation } from "@remix-run/react";
 import { jsx as jsx11, jsxs as jsxs8 } from "react/jsx-runtime";
 function RefundRequestsList({ refundRequests: refundRequests2 }) {
-  let actionData = useActionData2(), navigation = useNavigation(), [selectedRequest, setSelectedRequest] = useState5(null), [voteReason, setVoteReason] = useState5(""), isSubmitting = navigation.state === "submitting", handleVote = (requestId) => {
+  let actionData = useActionData(), navigation = useNavigation(), [selectedRequest, setSelectedRequest] = useState3(null), [voteReason, setVoteReason] = useState3(""), isSubmitting = navigation.state === "submitting", handleVote = (requestId) => {
     setSelectedRequest(requestId), setVoteReason("");
   }, formatTimeRemaining = (expiresAt) => {
     let now = /* @__PURE__ */ new Date(), diff = new Date(expiresAt).getTime() - now.getTime();
@@ -9342,7 +9180,7 @@ function RefundRequestsList({ refundRequests: refundRequests2 }) {
             /* @__PURE__ */ jsx11("li", { children: "\u2022 Max 10 votes per 24 hours" })
           ] })
         ] }),
-        /* @__PURE__ */ jsxs8(Form3, { method: "post", action: "/api/refund/vote", children: [
+        /* @__PURE__ */ jsxs8(Form2, { method: "post", action: "/api/refund/vote", children: [
           /* @__PURE__ */ jsx11("input", { type: "hidden", name: "refundRequestId", value: request.id }),
           /* @__PURE__ */ jsxs8("div", { className: "mb-3", children: [
             /* @__PURE__ */ jsx11("label", { htmlFor: "voteReason", className: "block text-sm text-gray-300 mb-1", children: "Reasoning for Vote *" }),
@@ -9405,97 +9243,19 @@ function RefundRequestsList({ refundRequests: refundRequests2 }) {
 }
 
 // app/routes/refund-requests.tsx
-init_schema();
-import { eq as eq19 } from "drizzle-orm";
 import { jsx as jsx12, jsxs as jsxs9 } from "react/jsx-runtime";
-async function loader10({ request, context }) {
-  let userId = await requireUserId(request);
-  try {
-    let db = context.env.DB, requests = await db.select({
-      id: refundRequests.id,
-      reason: refundRequests.reason,
-      status: refundRequests.status,
-      createdAt: refundRequests.createdAt,
-      expiresAt: refundRequests.expiresAt,
-      communityVotes: refundRequests.communityVotes,
-      requiredVotes: refundRequests.requiredVotes,
-      bountyId: refundRequests.bountyId,
-      requesterId: refundRequests.requesterId
-    }).from(refundRequests).where(eq19(refundRequests.status, "PENDING")).orderBy(refundRequests.createdAt), validRequests = (await Promise.all(
-      requests.map(async (request2) => {
-        let bounty = await db.select({
-          amount: bounties.amount,
-          postId: bounties.postId
-        }).from(bounties).where(eq19(bounties.id, request2.bountyId)).get();
-        if (!bounty)
-          return null;
-        let post = await db.select({
-          title: posts.title,
-          authorId: posts.authorId
-        }).from(posts).where(eq19(posts.id, bounty.postId)).get();
-        if (!post)
-          return null;
-        let answersCount = await db.select({ count: answers.id }).from(answers).where(eq19(answers.postId, bounty.postId)).all(), requester = await db.select({
-          username: users.username
-        }).from(users).where(eq19(users.id, request2.requesterId)).get(), votes3 = await db.select({
-          id: refundRequestVotes.id,
-          vote: refundRequestVotes.vote,
-          voterId: refundRequestVotes.voterId,
-          reason: refundRequestVotes.reason,
-          createdAt: refundRequestVotes.createdAt,
-          rewardAmount: refundRequestVotes.rewardAmount
-        }).from(refundRequestVotes).where(eq19(refundRequestVotes.refundRequestId, request2.id)).all();
-        return {
-          id: request2.id,
-          reason: request2.reason,
-          status: request2.status,
-          createdAt: request2.createdAt.toISOString(),
-          expiresAt: request2.expiresAt.toISOString(),
-          communityVotes: request2.communityVotes,
-          requiredVotes: request2.requiredVotes,
-          bounty: {
-            amount: bounty.amount,
-            post: {
-              title: post.title,
-              answers: Array(answersCount.length).fill({ id: "placeholder" }),
-              author: { username: "Unknown" }
-              // We'd need to join with users to get this
-            }
-          },
-          requester: { username: requester?.username || "Unknown" },
-          votes: votes3.map((vote) => ({
-            ...vote,
-            createdAt: vote.createdAt.toISOString()
-          }))
-        };
-      })
-    )).filter(Boolean);
-    return json24({
-      refundRequests: validRequests,
-      count: validRequests.length
-    });
-  } catch (error) {
-    return console.error("Load refund requests error:", error), json24({
-      refundRequests: [],
-      count: 0,
-      error: error instanceof Error ? error.message : "Failed to load refund requests"
-    });
-  }
-}
+var loader9 = async ({ request }) => {
+  let user = await getUser(request);
+  if (!user)
+    throw new Response("Unauthorized", { status: 401 });
+  return json23({ user });
+};
 function RefundRequestsPage() {
-  let data = useLoaderData5(), { refundRequests: refundRequests2, count } = data, error = "error" in data ? data.error : void 0;
   return /* @__PURE__ */ jsx12(Layout, { children: /* @__PURE__ */ jsxs9("div", { className: "w-auto max-w-8xl mx-auto mt-4 px-4 pb-16", children: [
-    /* @__PURE__ */ jsxs9("div", { className: "mb-6 flex justify-between items-center mt-16", children: [
-      /* @__PURE__ */ jsxs9("div", { children: [
-        /* @__PURE__ */ jsx12("h1", { className: "text-2xl font-bold text-white", children: "Refund Requests" }),
-        /* @__PURE__ */ jsx12("p", { className: "text-gray-400 text-sm mt-1", children: "Help the community by voting on refund requests. Earn tokens for participating in governance (5% fee)!" })
-      ] }),
-      /* @__PURE__ */ jsxs9("div", { className: "text-right", children: [
-        /* @__PURE__ */ jsx12("div", { className: "text-2xl font-bold text-indigo-400", children: count }),
-        /* @__PURE__ */ jsx12("div", { className: "text-gray-400 text-sm", children: "Active Requests" })
-      ] })
-    ] }),
-    error && /* @__PURE__ */ jsx12("div", { className: "bg-red-900/20 border border-red-500 rounded-lg p-4 mb-6", children: /* @__PURE__ */ jsx12("p", { className: "text-red-400", children: error }) }),
+    /* @__PURE__ */ jsx12("div", { className: "mb-6 flex justify-between items-center mt-16", children: /* @__PURE__ */ jsxs9("div", { children: [
+      /* @__PURE__ */ jsx12("h1", { className: "text-2xl font-bold text-white", children: "Refund Requests" }),
+      /* @__PURE__ */ jsx12("p", { className: "text-gray-400 text-sm mt-1", children: "Help the community by voting on refund requests. Earn tokens for participating in governance (5% fee)!" })
+    ] }) }),
     /* @__PURE__ */ jsxs9("div", { className: "bg-neutral-900/50 rounded-lg p-6 mb-6", children: [
       /* @__PURE__ */ jsx12("h2", { className: "text-lg font-semibold text-white mb-3", children: "How it works" }),
       /* @__PURE__ */ jsxs9("div", { className: "grid md:grid-cols-3 gap-4 text-sm", children: [
@@ -9513,227 +9273,24 @@ function RefundRequestsPage() {
         ] })
       ] })
     ] }),
-    /* @__PURE__ */ jsx12(RefundRequestsList, { refundRequests: refundRequests2 })
+    /* @__PURE__ */ jsx12(RefundRequestsList, { refundRequests: [] })
   ] }) });
 }
 
 // app/routes/api.terms.pdf.tsx
 var api_terms_pdf_exports = {};
 __export(api_terms_pdf_exports, {
-  loader: () => loader11
+  loader: () => loader10
 });
-import { json as json25 } from "@remix-run/cloudflare";
-var loader11 = async ({ request }) => {
+import { json as json24 } from "@remix-run/cloudflare";
+async function loader10() {
   try {
     let pdfBuffer = await createSimplePDF(
       "Terms of Service - portal.ask",
       `
       <div class="section">
-        <h2>1. Acceptance of Terms</h2>
-        <p>By accessing and using portal.ask ("the Platform"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.</p>
-        <p>These Terms of Service ("Terms") govern your use of our decentralized platform for knowledge sharing, community building, and reputation-based interactions.</p>
-      </div>
-
-      <div class="section">
-        <h2>2. Description of Service</h2>
-        <p>portal.ask is a decentralized platform that provides:</p>
-        <ul>
-          <li>Knowledge sharing and Q&A functionality</li>
-          <li>Community building and interaction tools</li>
-          <li>Reputation and integrity scoring systems</li>
-          <li>Virtual wallet and token management</li>
-          <li>Bounty and reward mechanisms</li>
-          <li>Blockchain-based transaction processing</li>
-        </ul>
-      </div>
-
-      <div class="section">
-        <h2>3. User Accounts and Registration</h2>
-        
-        <h3>3.1 Account Creation</h3>
-        <p>To access certain features of the Platform, you must create an account. You agree to:</p>
-        <ul>
-          <li>Provide accurate, current, and complete information</li>
-          <li>Maintain and update your account information</li>
-          <li>Keep your account credentials secure</li>
-          <li>Accept responsibility for all activities under your account</li>
-          <li>Notify us immediately of any unauthorized use</li>
-        </ul>
-
-        <h3>3.2 Account Eligibility</h3>
-        <p>You must be at least 13 years old to create an account. By creating an account, you represent and warrant that you meet this age requirement.</p>
-      </div>
-
-      <div class="section">
-        <h2>4. User Conduct and Responsibilities</h2>
-        
-        <h3>4.1 Acceptable Use</h3>
-        <p>You agree to use the Platform only for lawful purposes and in accordance with these Terms. You agree not to:</p>
-        <ul>
-          <li>Violate any applicable laws or regulations</li>
-          <li>Infringe on intellectual property rights</li>
-          <li>Harass, abuse, or harm other users</li>
-          <li>Post false, misleading, or fraudulent content</li>
-          <li>Attempt to gain unauthorized access to the Platform</li>
-          <li>Interfere with the Platform's operation or security</li>
-          <li>Use automated systems to access the Platform</li>
-          <li>Engage in spam or unsolicited communications</li>
-        </ul>
-
-        <h3>4.2 Content Standards</h3>
-        <p>All content you post must:</p>
-        <ul>
-          <li>Be accurate and truthful</li>
-          <li>Respect intellectual property rights</li>
-          <li>Not contain harmful, offensive, or inappropriate material</li>
-          <li>Comply with community guidelines</li>
-          <li>Not violate any third-party rights</li>
-        </ul>
-      </div>
-
-      <div class="section">
-        <h2>5. Virtual Currency and Transactions</h2>
-        
-        <h3>5.1 PORTAL Tokens</h3>
-        <p>The Platform uses PORTAL tokens as virtual currency for:</p>
-        <ul>
-          <li>Creating bounties and rewards</li>
-          <li>Community transactions</li>
-          <li>Platform governance</li>
-          <li>Reputation and integrity systems</li>
-        </ul>
-
-        <h3>5.2 Transaction Terms</h3>
-        <p>By using the Platform's transaction features, you agree to:</p>
-        <ul>
-          <li>Understand that transactions are irreversible</li>
-          <li>Accept responsibility for all transactions initiated from your account</li>
-          <li>Comply with applicable financial regulations</li>
-          <li>Not engage in fraudulent or manipulative trading</li>
-          <li>Pay any applicable fees or charges</li>
-        </ul>
-
-        <h3>5.3 No Financial Advice</h3>
-        <p>The Platform does not provide financial, investment, or legal advice. All transactions are at your own risk.</p>
-      </div>
-
-      <div class="section">
-        <h2>6. Intellectual Property Rights</h2>
-        
-        <h3>6.1 Platform Rights</h3>
-        <p>The Platform and its original content, features, and functionality are owned by portal.ask and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws.</p>
-
-        <h3>6.2 User Content</h3>
-        <p>You retain ownership of content you post, but grant us a license to:</p>
-        <ul>
-          <li>Display and distribute your content on the Platform</li>
-          <li>Use your content for Platform improvement</li>
-          <li>Store and backup your content</li>
-          <li>Share your content as required by law</li>
-        </ul>
-
-        <h3>6.3 License Terms</h3>
-        <p>This license is worldwide, non-exclusive, royalty-free, and transferable. It terminates when you delete your content or account, except where your content has been shared with others.</p>
-      </div>
-
-      <div class="section">
-        <h2>7. Privacy and Data Protection</h2>
-        <p>Your privacy is important to us. Our collection and use of personal information is governed by our Privacy Policy, which is incorporated into these Terms by reference.</p>
-        <p>By using the Platform, you consent to the collection and use of your information as described in our Privacy Policy.</p>
-      </div>
-
-      <div class="section">
-        <h2>8. Disclaimers and Limitations</h2>
-        
-        <h3>8.1 Service Availability</h3>
-        <p>We strive to maintain Platform availability but do not guarantee uninterrupted access. The Platform may be temporarily unavailable due to maintenance, updates, or technical issues.</p>
-
-        <h3>8.2 Content Accuracy</h3>
-        <p>We do not guarantee the accuracy, completeness, or usefulness of any content on the Platform. Users are responsible for verifying information and making their own decisions.</p>
-
-        <h3>8.3 Limitation of Liability</h3>
-        <p>To the maximum extent permitted by law, portal.ask shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to:</p>
-        <ul>
-          <li>Loss of profits, data, or use</li>
-          <li>Business interruption</li>
-          <li>Personal injury or property damage</li>
-          <li>Emotional distress</li>
-          <li>Any other damages arising from your use of the Platform</li>
-        </ul>
-      </div>
-
-      <div class="section">
-        <h2>9. Indemnification</h2>
-        <p>You agree to defend, indemnify, and hold harmless portal.ask and its affiliates from and against any claims, damages, obligations, losses, liabilities, costs, or debt arising from:</p>
-        <ul>
-          <li>Your use of the Platform</li>
-          <li>Your violation of these Terms</li>
-          <li>Your violation of any third-party rights</li>
-          <li>Your content posted on the Platform</li>
-        </ul>
-      </div>
-
-      <div class="section">
-        <h2>10. Termination</h2>
-        
-        <h3>10.1 Termination by You</h3>
-        <p>You may terminate your account at any time by contacting us or using the account deletion feature. Upon termination:</p>
-        <ul>
-          <li>Your account will be deactivated</li>
-          <li>Your public content may remain visible</li>
-          <li>Blockchain transactions cannot be reversed</li>
-          <li>Some data may be retained for legal compliance</li>
-        </ul>
-
-        <h3>10.2 Termination by Us</h3>
-        <p>We may terminate or suspend your account immediately, without prior notice, for conduct that we believe violates these Terms or is harmful to other users or the Platform.</p>
-      </div>
-
-      <div class="section">
-        <h2>11. Governing Law and Disputes</h2>
-        
-        <h3>11.1 Governing Law</h3>
-        <p>These Terms shall be governed by and construed in accordance with the laws of the jurisdiction in which portal.ask operates, without regard to its conflict of law provisions.</p>
-
-        <h3>11.2 Dispute Resolution</h3>
-        <p>Any disputes arising from these Terms or your use of the Platform shall be resolved through:</p>
-        <ul>
-          <li>Good faith negotiations between parties</li>
-          <li>Mediation if negotiations fail</li>
-          <li>Binding arbitration as a last resort</li>
-          <li>Court proceedings only if arbitration is not available</li>
-        </ul>
-      </div>
-
-      <div class="section">
-        <h2>12. Changes to Terms</h2>
-        <p>We reserve the right to modify these Terms at any time. We will notify users of material changes by:</p>
-        <ul>
-          <li>Posting updated Terms on the Platform</li>
-          <li>Sending email notifications to registered users</li>
-          <li>Displaying prominent notices on our website</li>
-        </ul>
-        <p>Your continued use of the Platform after changes become effective constitutes acceptance of the updated Terms.</p>
-      </div>
-
-      <div class="section">
-        <h2>13. Severability</h2>
-        <p>If any provision of these Terms is found to be unenforceable or invalid, that provision will be limited or eliminated to the minimum extent necessary so that the Terms will otherwise remain in full force and effect.</p>
-      </div>
-
-      <div class="section">
-        <h2>14. Entire Agreement</h2>
-        <p>These Terms, together with our Privacy Policy, constitute the entire agreement between you and portal.ask regarding your use of the Platform and supersede all prior agreements and understandings.</p>
-      </div>
-
-      <div class="section">
-        <h2>15. Contact Information</h2>
-        <p>If you have any questions about these Terms of Service, please contact us:</p>
-        <div class="contact-info">
-          <p><strong>Email:</strong> bountybucks524@gmail.com</p>
-          <p><strong>Platform:</strong> portal.ask</p>
-          <p>We will respond to your inquiry within a reasonable timeframe.</p>
-        </div>
+        <h2>1. Terms of Service</h2>
+        <p>Welcome to portal.ask. These Terms of Service govern your use of our platform.</p>
       </div>
     `,
       {
@@ -9747,34 +9304,32 @@ var loader11 = async ({ request }) => {
       }
     );
     return new Response(pdfBuffer, {
-      status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": 'attachment; filename="portal-ask-terms-of-service.pdf"',
-        "Content-Length": pdfBuffer.length.toString()
+        "Content-Disposition": "inline; filename=terms-of-service.pdf"
       }
     });
   } catch (error) {
-    return console.error("Error generating terms of service PDF:", error), json25({ error: "Failed to generate PDF" }, { status: 500 });
+    return console.error("Error generating terms PDF:", error), json24({ error: "Failed to generate PDF" }, { status: 500 });
   }
-};
+}
 
 // app/routes/docs.platform.tsx
 var docs_platform_exports = {};
 __export(docs_platform_exports, {
   default: () => PlatformDocsPage,
-  loader: () => loader12
+  loader: () => loader11
 });
-import { json as json26 } from "@remix-run/node";
-import { useLoaderData as useLoaderData6, Link as Link6 } from "@remix-run/react";
-import { FiArrowLeft as FiArrowLeft2, FiDownload as FiDownload2 } from "react-icons/fi";
+import { json as json25 } from "@remix-run/cloudflare";
+import { useLoaderData as useLoaderData5, Link as Link6 } from "@remix-run/react";
+import { FiArrowLeft as FiArrowLeft2, FiDownload } from "react-icons/fi";
 import { jsx as jsx13, jsxs as jsxs10 } from "react/jsx-runtime";
-var loader12 = async () => json26({
+var loader11 = async () => json25({
   title: "Platform Documentation",
-  description: "Complete overview of portal.ask platform features, architecture, and functionality"
+  description: "Learn about portal.ask platform features and capabilities"
 });
 function PlatformDocsPage() {
-  let data = useLoaderData6(), { title, description } = data;
+  let data = useLoaderData5(), { title, description } = data;
   return /* @__PURE__ */ jsx13(Layout, { children: /* @__PURE__ */ jsxs10("div", { className: "w-auto max-w-6xl mx-auto mt-4 px-4 ml-24 pb-16", children: [
     /* @__PURE__ */ jsxs10("div", { className: "mb-8 mt-16", children: [
       /* @__PURE__ */ jsxs10(
@@ -9851,12 +9406,7 @@ function PlatformDocsPage() {
       /* @__PURE__ */ jsx13("h2", { children: "Features" }),
       /* @__PURE__ */ jsx13("h3", { children: "1. User Authentication & Profiles" }),
       /* @__PURE__ */ jsx13("h4", { children: "Registration & Login" }),
-      /* @__PURE__ */ jsxs10("ul", { children: [
-        /* @__PURE__ */ jsx13("li", { children: "Email-based authentication" }),
-        /* @__PURE__ */ jsx13("li", { children: "Username uniqueness validation" }),
-        /* @__PURE__ */ jsx13("li", { children: "Password security with bcrypt" }),
-        /* @__PURE__ */ jsx13("li", { children: "Session management with JWT" })
-      ] }),
+      /* @__PURE__ */ jsx13("p", { children: "Users can register and login using email/password authentication." }),
       /* @__PURE__ */ jsx13("h4", { children: "Profile Management" }),
       /* @__PURE__ */ jsxs10("ul", { children: [
         /* @__PURE__ */ jsx13("li", { children: "Customizable profile pictures" }),
@@ -9866,6 +9416,7 @@ function PlatformDocsPage() {
         /* @__PURE__ */ jsx13("li", { children: "Activity history" })
       ] }),
       /* @__PURE__ */ jsx13("h3", { children: "2. Content Creation & Management" }),
+      /* @__PURE__ */ jsx13("p", { children: "Users can create posts, comments, and answers with rich text formatting." }),
       /* @__PURE__ */ jsx13("h4", { children: "Posts (Questions)" }),
       /* @__PURE__ */ jsxs10("ul", { children: [
         /* @__PURE__ */ jsx13("li", { children: "Rich text editor with markdown support" }),
@@ -10092,6 +9643,7 @@ function PlatformDocsPage() {
         /* @__PURE__ */ jsx13("li", { children: "Format validation" })
       ] }),
       /* @__PURE__ */ jsx13("h3", { children: "9. Search & Discovery" }),
+      /* @__PURE__ */ jsx13("p", { children: "Advanced search functionality with filters and sorting options." }),
       /* @__PURE__ */ jsx13("h4", { children: "Content Discovery" }),
       /* @__PURE__ */ jsxs10("ul", { children: [
         /* @__PURE__ */ jsx13("li", { children: "Community feed" }),
@@ -10223,7 +9775,7 @@ function PlatformDocsPage() {
             href: "/api/docs/platform.pdf",
             className: "inline-flex items-center px-4 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-colors",
             children: [
-              /* @__PURE__ */ jsx13(FiDownload2, { className: "w-4 h-4 mr-2" }),
+              /* @__PURE__ */ jsx13(FiDownload, { className: "w-4 h-4 mr-2" }),
               "Download PDF"
             ]
           }
@@ -10239,24 +9791,24 @@ __export(posts_postId_exports, {
   ErrorBoundary: () => ErrorBoundary2,
   action: () => action19,
   default: () => PostDetail,
-  loader: () => loader13,
+  loader: () => loader12,
   meta: () => meta
 });
-import { useEffect as useEffect6, useState as useState8 } from "react";
-import { useLoaderData as useLoaderData7, useSubmit as useSubmit2, useFetcher as useFetcher2, Form as Form4, useRouteError as useRouteError2, isRouteErrorResponse as isRouteErrorResponse2, Link as Link7, useActionData as useActionData3 } from "@remix-run/react";
-import { json as json27, redirect as redirect2 } from "@remix-run/node";
+import { useState as useState6, useEffect as useEffect5 } from "react";
+import { useLoaderData as useLoaderData6, useActionData as useActionData2, useRouteError as useRouteError2, isRouteErrorResponse as isRouteErrorResponse2, useSubmit, Link as Link7, Form as Form3 } from "@remix-run/react";
+import { json as json26, redirect as redirect2 } from "@remix-run/cloudflare";
 init_schema();
-import { eq as eq20, and as and15, desc as desc8, sql as sql8 } from "drizzle-orm";
+import { eq as eq20, and as and11, sql as sql7 } from "drizzle-orm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { FiTrash2 as FiTrash22, FiArrowUp, FiArrowDown } from "react-icons/fi";
+import { FiTrash2, FiArrowUp, FiArrowDown } from "react-icons/fi";
 
 // app/components/IntegrityRatingButton.tsx
-import { useState as useState7 } from "react";
+import { useState as useState5 } from "react";
 import { FiShield as FiShield2, FiStar as FiStar2 } from "react-icons/fi";
 
 // app/components/IntegrityRatingModal.tsx
-import { useState as useState6, useEffect as useEffect5 } from "react";
+import { useState as useState4, useEffect as useEffect4 } from "react";
 import { useFetcher } from "@remix-run/react";
 import { FiStar, FiX, FiAlertCircle } from "react-icons/fi";
 import { jsx as jsx14, jsxs as jsxs11 } from "react/jsx-runtime";
@@ -10300,8 +9852,8 @@ function IntegrityRatingModal({
   referenceId,
   referenceType
 }) {
-  let [rating, setRating] = useState6(5), [selectedContext, setSelectedContext] = useState6(context), [reason, setReason] = useState6(""), [hoveredRating, setHoveredRating] = useState6(0), fetcher = useFetcher(), isSubmitting = fetcher.state === "submitting";
-  useEffect5(() => {
+  let [rating, setRating] = useState4(5), [selectedContext, setSelectedContext] = useState4(context), [reason, setReason] = useState4(""), [hoveredRating, setHoveredRating] = useState4(0), fetcher = useFetcher(), isSubmitting = fetcher.state === "submitting";
+  useEffect4(() => {
     fetcher.data?.success && (onClose(), setRating(5), setReason(""), setSelectedContext(context));
   }, [fetcher.data, onClose, context]);
   let handleSubmit = (e) => {
@@ -10330,7 +9882,7 @@ function IntegrityRatingModal({
     ] }) }),
     /* @__PURE__ */ jsxs11(fetcher.Form, { onSubmit: handleSubmit, className: "space-y-4", children: [
       /* @__PURE__ */ jsxs11("div", { children: [
-        /* @__PURE__ */ jsx14("label", { className: "block text-sm font-medium text-violet-300 mb-2", children: "Integrity Rating (1-10)" }),
+        /* @__PURE__ */ jsx14("label", { className: "block text-sm font-medium text-violet-300 mb-2", htmlFor: "rating", children: "Integrity Rating (1-10)" }),
         /* @__PURE__ */ jsx14("div", { className: "flex items-center space-x-1", children: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => /* @__PURE__ */ jsx14(
           "button",
           {
@@ -10350,7 +9902,7 @@ function IntegrityRatingModal({
         ] })
       ] }),
       /* @__PURE__ */ jsxs11("div", { children: [
-        /* @__PURE__ */ jsx14("label", { className: "block text-sm font-medium text-violet-300 mb-2", children: "Rating Context" }),
+        /* @__PURE__ */ jsx14("label", { className: "block text-sm font-medium text-violet-300 mb-2", htmlFor: "context", children: "Rating Context" }),
         /* @__PURE__ */ jsx14(
           "select",
           {
@@ -10363,7 +9915,7 @@ function IntegrityRatingModal({
         /* @__PURE__ */ jsx14("p", { className: "text-xs text-gray-400 mt-1", children: RATING_CONTEXTS.find((c) => c.value === selectedContext)?.description })
       ] }),
       /* @__PURE__ */ jsxs11("div", { children: [
-        /* @__PURE__ */ jsx14("label", { className: "block text-sm font-medium text-violet-300 mb-2", children: "Reason for Rating" }),
+        /* @__PURE__ */ jsx14("label", { className: "block text-sm font-medium text-violet-300 mb-2", htmlFor: "reason", children: "Reason for Rating" }),
         /* @__PURE__ */ jsx14(
           "textarea",
           {
@@ -10381,7 +9933,7 @@ function IntegrityRatingModal({
           "/500 characters"
         ] })
       ] }),
-      fetcher.data?.error && /* @__PURE__ */ jsxs11("div", { className: "flex items-center space-x-2 p-3 bg-red-500/20 border border-red-500/30 rounded-lg", children: [
+      typeof fetcher.data == "object" && fetcher.data && "error" in fetcher.data && /* @__PURE__ */ jsxs11("div", { className: "flex items-center space-x-2 p-3 bg-red-500/20 border border-red-500/30 rounded-lg", children: [
         /* @__PURE__ */ jsx14(FiAlertCircle, { className: "w-5 h-5 text-red-400 flex-shrink-0" }),
         /* @__PURE__ */ jsx14("p", { className: "text-red-400 text-sm", children: fetcher.data.error })
       ] }),
@@ -10413,7 +9965,7 @@ function getRatingDescription(rating) {
 }
 
 // app/components/IntegrityRatingButton.tsx
-import { Fragment as Fragment3, jsx as jsx15, jsxs as jsxs12 } from "react/jsx-runtime";
+import { Fragment as Fragment2, jsx as jsx15, jsxs as jsxs12 } from "react/jsx-runtime";
 function IntegrityRatingButton({
   targetUser,
   context,
@@ -10422,7 +9974,7 @@ function IntegrityRatingButton({
   className = "",
   variant = "button"
 }) {
-  let [showModal, setShowModal] = useState7(!1), getContextDescription = (context2) => ({
+  let [showModal, setShowModal] = useState5(!1), getContextDescription = (context2) => ({
     BOUNTY_REJECTION: "Rate bounty rejection",
     ANSWER_QUALITY: "Rate answer quality",
     COMMUNICATION: "Rate communication",
@@ -10430,7 +9982,7 @@ function IntegrityRatingButton({
     HARASSMENT: "Rate harassment",
     GENERAL: "Rate general behavior"
   })[context2] || "Rate user";
-  return /* @__PURE__ */ jsxs12(Fragment3, { children: [
+  return /* @__PURE__ */ jsxs12(Fragment2, { children: [
     (() => {
       switch (variant) {
         case "icon":
@@ -10496,91 +10048,60 @@ var meta = ({ data }) => {
     { title: `${postTitle} - portal.ask` },
     { name: "description", content: postTitle }
   ];
-}, loader13 = async ({ request, params, context }) => {
+}, loader12 = async ({ request, params, context }) => {
   try {
     let db = createDb(context.env.DB), user = await getUser(request, db), { postId } = params, url = new URL(request.url), page = parseInt(url.searchParams.get("page") || "1"), perPage = 10;
     if (!postId)
       throw new Response("Post ID is required", { status: 400 });
     let post = await db.query.posts.findFirst({
-      where: eq20(posts.id, postId),
+      where: eq20(posts2.id, postId),
       with: {
         author: {
-          columns: {
-            id: !0,
-            username: !0
-          },
           with: {
-            profile: {
-              columns: {
-                profilePicture: !0
-              }
-            }
+            profile: !0
           }
         },
-        media: !0,
         comments: {
-          orderBy: [desc8(comments.upvotes), desc8(comments.createdAt)],
-          limit: perPage,
-          offset: (page - 1) * perPage,
           with: {
             author: {
-              columns: {
-                id: !0,
-                username: !0
-              },
               with: {
-                profile: {
-                  columns: {
-                    profilePicture: !0
-                  }
-                }
+                profile: !0
               }
             }
           }
         },
         answers: {
-          orderBy: [desc8(answers.isAccepted), desc8(answers.upvotes), desc8(answers.createdAt)],
           with: {
             author: {
-              columns: {
-                id: !0,
-                username: !0
-              },
               with: {
-                profile: {
-                  columns: {
-                    profilePicture: !0
-                  }
-                }
+                profile: !0
               }
             }
           }
         },
         codeBlocks: !0,
-        votes: user ? {
-          where: and15(eq20(votes.userId, user.id), eq20(votes.isQualityVote, !0))
-        } : void 0,
+        media: !0,
         bounty: !0
       }
     });
     if (!post)
       throw new Response("Post not found", { status: 404 });
     let userVotes = user ? await db.query.votes.findMany({
-      where: and15(eq20(votes.userId, user.id), eq20(votes.postId, postId))
+      where: and11(eq20(votes.userId, user.id), eq20(votes.postId, postId))
     }) : [], allVotes = await db.query.votes.findMany({
-      where: and15(eq20(votes.postId, postId), eq20(votes.voteType, "POST"), eq20(votes.isQualityVote, !0))
+      where: and11(eq20(votes.postId, postId), eq20(votes.voteType, "POST"), eq20(votes.isQualityVote, !0))
     }), qualityUpvotes = allVotes.filter((v) => v.value === 1).length, qualityDownvotes = allVotes.filter((v) => v.value === -1).length, userQualityVote = userVotes.find((v) => v.isQualityVote)?.value || 0, userVisibilityVote = userVotes.find((v) => !v.isQualityVote)?.value || 0, totalComments = (await db.query.comments.findMany({ where: eq20(comments.postId, postId) })).length, totalAnswers = (await db.query.answers.findMany({ where: eq20(answers.postId, postId) })).length, commentIds = post?.comments?.map((c) => c.id) || [], answerIds = post?.answers?.map((a) => a.id) || [], commentVotes = [], answerVotes = [];
     user && (commentIds.length > 0 && (commentVotes = (await db.query.votes.findMany({
-      where: and15(eq20(votes.userId, user.id), eq20(votes.voteType, "COMMENT"), eq20(votes.isQualityVote, !0))
+      where: and11(eq20(votes.userId, user.id), eq20(votes.voteType, "COMMENT"), eq20(votes.isQualityVote, !0))
     })).filter((v) => commentIds.includes(v.commentId)).map((v) => ({ commentId: v.commentId, value: v.value }))), answerIds.length > 0 && (answerVotes = (await db.query.votes.findMany({
-      where: and15(eq20(votes.userId, user.id), eq20(votes.voteType, "ANSWER"), eq20(votes.isQualityVote, !0))
+      where: and11(eq20(votes.userId, user.id), eq20(votes.voteType, "ANSWER"), eq20(votes.isQualityVote, !0))
     })).filter((v) => answerIds.includes(v.answerId)).map((v) => ({ answerId: v.answerId, value: v.value }))));
     let transformedPost = {
       id: post.id,
       title: post.title,
       content: post.content,
-      createdAt: post.createdAt,
-      updatedAt: post.updatedAt,
+      createdAt: post.createdAt.toISOString(),
+      updatedAt: post.updatedAt.toISOString(),
       authorId: post.authorId,
       visibilityVotes: post.visibilityVotes ?? 0,
       qualityUpvotes,
@@ -10625,7 +10146,11 @@ var meta = ({ data }) => {
           } : null
         }
       })),
-      codeBlocks: (post.codeBlocks || []).map((cb) => ({ ...cb })),
+      codeBlocks: (post.codeBlocks || []).map((cb) => ({
+        ...cb,
+        createdAt: cb.createdAt?.toISOString?.() ?? "",
+        updatedAt: cb.updatedAt?.toISOString?.() ?? ""
+      })),
       media: (post.media || []).map((m) => ({
         id: m.id,
         type: m.type,
@@ -10640,10 +10165,19 @@ var meta = ({ data }) => {
         expiresAt: post.bounty.expiresAt?.toISOString?.() || "",
         status: post.bounty.status
       } : null
-    };
-    return json27({
+    }, currentUserObj = null;
+    if (user) {
+      let profile = await db.query.profiles.findFirst({ where: eq20(profiles.userId, user.id) });
+      currentUserObj = {
+        ...user,
+        createdAt: user.createdAt?.toISOString?.() ?? "",
+        updatedAt: user.updatedAt?.toISOString?.() ?? "",
+        profilePicture: profile?.profilePicture ?? null
+      };
+    }
+    return json26({
       post: transformedPost,
-      currentUser: user,
+      currentUser: currentUserObj,
       pagination: {
         currentPage: page,
         totalPages: Math.ceil(totalComments / perPage),
@@ -10657,22 +10191,22 @@ var meta = ({ data }) => {
 }, action19 = async ({ request, params, context }) => {
   let db = createDb(context.env.DB), user = await getUser(request, db);
   if (!user)
-    return json27({ error: "Not authenticated" }, { status: 401 });
+    return json26({ error: "Not authenticated" }, { status: 401 });
   let postId = params.postId;
   if (!postId)
-    return json27({ error: "Post ID is required" }, { status: 400 });
+    return json26({ error: "Post ID is required" }, { status: 400 });
   let formData = await request.formData();
   switch (formData.get("action")) {
     case "deletePost": {
       let post = await db.query.posts.findFirst({
-        where: eq20(posts.id, postId)
+        where: eq20(posts2.id, postId)
       });
-      return post ? post.authorId !== user.id ? json27({ error: "You can only delete your own posts" }, { status: 403 }) : (await db.delete(posts).where(eq20(posts.id, postId)), redirect2("/community")) : json27({ error: "Post not found" }, { status: 404 });
+      return post ? post.authorId !== user.id ? json26({ error: "You can only delete your own posts" }, { status: 403 }) : (await db.delete(posts2).where(eq20(posts2.id, postId)), redirect2("/community")) : json26({ error: "Post not found" }, { status: 404 });
     }
     case "qualityVote": {
       let value = parseInt(formData.get("value"));
       return [-1, 0, 1].includes(value) ? await db.transaction(async () => {
-        await db.delete(votes).where(and15(eq20(votes.userId, user.id), eq20(votes.postId, postId), eq20(votes.voteType, "POST"), eq20(votes.isQualityVote, !0))), value !== 0 && await db.insert(votes).values({
+        await db.delete(votes).where(and11(eq20(votes.userId, user.id), eq20(votes.postId, postId), eq20(votes.voteType, "POST"), eq20(votes.isQualityVote, !0))), value !== 0 && await db.insert(votes).values({
           id: crypto.randomUUID(),
           userId: user.id,
           postId,
@@ -10683,22 +10217,22 @@ var meta = ({ data }) => {
           answerId: null
         });
         let allVotes = await db.query.votes.findMany({
-          where: and15(eq20(votes.postId, postId), eq20(votes.voteType, "POST"), eq20(votes.isQualityVote, !0))
+          where: and11(eq20(votes.postId, postId), eq20(votes.voteType, "POST"), eq20(votes.isQualityVote, !0))
         }), qualityUpvotes = allVotes.filter((v) => v.value === 1).length, qualityDownvotes = allVotes.filter((v) => v.value === -1).length;
-        return await db.update(posts).set({
+        return await db.update(posts2).set({
           qualityUpvotes,
           qualityDownvotes
-        }).where(eq20(posts.id, postId)), json27({
+        }).where(eq20(posts2.id, postId)), json26({
           success: !0,
           qualityUpvotes,
           qualityDownvotes,
           userQualityVote: value
         });
-      }) : json27({ error: "Invalid vote value" }, { status: 400 });
+      }) : json26({ error: "Invalid vote value" }, { status: 400 });
     }
     case "visibilityVote": {
       let isVoting = formData.get("isVoting") === "true", result = await db.transaction(async () => {
-        let existingVote = await db.select().from(votes).where(and15(eq20(votes.userId, user.id), eq20(votes.postId, postId), eq20(votes.voteType, "POST"), eq20(votes.isQualityVote, !1))).limit(1);
+        let existingVote = await db.select().from(votes).where(and11(eq20(votes.userId, user.id), eq20(votes.postId, postId), eq20(votes.voteType, "POST"), eq20(votes.isQualityVote, !1))).limit(1);
         isVoting ? existingVote.length || await db.insert(votes).values({
           id: crypto.randomUUID(),
           userId: user.id,
@@ -10710,15 +10244,15 @@ var meta = ({ data }) => {
           commentId: null,
           answerId: null
         }) : existingVote.length && await db.delete(votes).where(eq20(votes.id, existingVote[0].id));
-        let visibilityVotesResult = await db.select({ count: sql8`count(*)` }).from(votes).where(and15(eq20(votes.postId, postId), eq20(votes.voteType, "POST"), eq20(votes.isQualityVote, !1), eq20(votes.value, 1)));
+        let visibilityVotesResult = await db.select({ count: sql7`count(*)` }).from(votes).where(and11(eq20(votes.postId, postId), eq20(votes.voteType, "POST"), eq20(votes.isQualityVote, !1), eq20(votes.value, 1)));
         return {
-          post: (await db.update(posts).set({
+          post: (await db.update(posts2).set({
             visibilityVotes: visibilityVotesResult[0]?.count || 0
-          }).where(eq20(posts.id, postId)).returning())[0],
+          }).where(eq20(posts2.id, postId)).returning())[0],
           userVisibilityVote: isVoting
         };
       });
-      return json27({
+      return json26({
         success: !0,
         visibilityVotes: result.post.visibilityVotes,
         userVisibilityVote: result.userVisibilityVote
@@ -10727,9 +10261,9 @@ var meta = ({ data }) => {
     case "comment": {
       let content = formData.get("content");
       if (!content)
-        return json27({ error: "Comment content is required" }, { status: 400 });
+        return json26({ error: "Comment content is required" }, { status: 400 });
       if (!params.postId)
-        return json27({ error: "Post ID is required" }, { status: 400 });
+        return json26({ error: "Post ID is required" }, { status: 400 });
       let commentId = crypto.randomUUID();
       await db.insert(comments).values({
         id: commentId,
@@ -10747,7 +10281,7 @@ var meta = ({ data }) => {
         REPUTATION_POINTS.COMMENT_CREATED,
         "COMMENT_CREATED",
         commentId
-      ), json27({
+      ), json26({
         success: !0,
         comment: {
           id: commentId,
@@ -10769,9 +10303,9 @@ var meta = ({ data }) => {
     case "answer": {
       let content = formData.get("content");
       if (!content)
-        return json27({ error: "Answer content is required" }, { status: 400 });
+        return json26({ error: "Answer content is required" }, { status: 400 });
       if (!params.postId)
-        return json27({ error: "Post ID is required" }, { status: 400 });
+        return json26({ error: "Post ID is required" }, { status: 400 });
       let answerId = crypto.randomUUID();
       await db.insert(answers).values({
         id: answerId,
@@ -10789,7 +10323,7 @@ var meta = ({ data }) => {
         REPUTATION_POINTS.ANSWER_CREATED,
         "ANSWER_CREATED",
         answerId
-      ), json27({
+      ), json26({
         success: !0,
         answer: {
           id: answerId,
@@ -10812,7 +10346,7 @@ var meta = ({ data }) => {
     case "acceptAnswer": {
       let answerId = formData.get("answerId");
       if (!answerId)
-        return json27({ error: "Answer ID is required" }, { status: 400 });
+        return json26({ error: "Answer ID is required" }, { status: 400 });
       let answer = await db.query.answers.findFirst({
         where: eq20(answers.id, answerId),
         with: {
@@ -10825,25 +10359,25 @@ var meta = ({ data }) => {
         }
       });
       if (!answer)
-        return json27({ error: "Answer not found" }, { status: 404 });
+        return json26({ error: "Answer not found" }, { status: 404 });
       let post = await db.query.posts.findFirst({
-        where: eq20(posts.id, answer.postId),
+        where: eq20(posts2.id, answer.postId),
         with: {
           bounty: !0
         }
       });
-      return post ? post.authorId !== user.id ? json27({ error: "Only the post author can accept answers" }, { status: 403 }) : post.bounty ? post.bounty.status !== "ACTIVE" ? json27({ error: "Bounty is not active" }, { status: 400 }) : await db.transaction(async () => {
-        await db.update(answers).set({ isAccepted: !0 }).where(eq20(answers.id, answerId)), await db.update(posts).set({ status: "COMPLETED" }).where(eq20(posts.id, answer.postId)), await db.update(bounties).set({
+      return post ? post.authorId !== user.id ? json26({ error: "Only the post author can accept answers" }, { status: 403 }) : post.bounty ? post.bounty.status !== "ACTIVE" ? json26({ error: "Bounty is not active" }, { status: 400 }) : await db.transaction(async () => {
+        await db.update(answers).set({ isAccepted: !0 }).where(eq20(answers.id, answerId)), await db.update(posts2).set({ status: "COMPLETED" }).where(eq20(posts2.id, answer.postId)), await db.update(bounties).set({
           status: "CLAIMED",
           winnerId: answer.authorId
         }).where(eq20(bounties.postId, answer.postId));
-        let { claimBounty: claimBounty2 } = await Promise.resolve().then(() => (init_virtual_wallet_server(), virtual_wallet_server_exports)), bountyAmount = post.bounty.amount;
-        return await claimBounty2(
+        let { claimBounty: claimBounty3 } = await Promise.resolve().then(() => (init_virtual_wallet_server(), virtual_wallet_server_exports)), bountyAmount = post.bounty.amount;
+        return await claimBounty3(
           db,
           answer.authorId,
           bountyAmount,
           post.bounty.id
-        ), json27({
+        ), json26({
           success: !0,
           message: `Bounty of ${bountyAmount} BBUX transferred to ${answer.author.username}`,
           answer: {
@@ -10851,17 +10385,17 @@ var meta = ({ data }) => {
             isAccepted: !0
           }
         });
-      }) : json27({ error: "No bounty found for this post" }, { status: 404 }) : json27({ error: "Post not found" }, { status: 404 });
+      }) : json26({ error: "No bounty found for this post" }, { status: 404 }) : json26({ error: "Post not found" }, { status: 404 });
     }
     case "commentVote": {
       let commentId = formData.get("commentId"), value = parseInt(formData.get("value"));
       if (!commentId || ![-1, 0, 1].includes(value))
-        return json27({ error: "Invalid parameters" }, { status: 400 });
+        return json26({ error: "Invalid parameters" }, { status: 400 });
       let maxRetries = 3, retryCount = 0;
       for (; retryCount < maxRetries; )
         try {
           return await db.transaction(async () => {
-            await db.delete(votes).where(and15(eq20(votes.userId, user.id), eq20(votes.commentId, commentId), eq20(votes.voteType, "COMMENT"), eq20(votes.isQualityVote, !0))), value !== 0 && await db.insert(votes).values({
+            await db.delete(votes).where(and11(eq20(votes.userId, user.id), eq20(votes.commentId, commentId), eq20(votes.voteType, "COMMENT"), eq20(votes.isQualityVote, !0))), value !== 0 && await db.insert(votes).values({
               id: crypto.randomUUID(),
               userId: user.id,
               commentId,
@@ -10872,13 +10406,13 @@ var meta = ({ data }) => {
               answerId: null
             });
             let [upvotesResult, downvotesResult] = await Promise.all([
-              db.select({ count: sql8`count(*)` }).from(votes).where(and15(eq20(votes.commentId, commentId), eq20(votes.voteType, "COMMENT"), eq20(votes.isQualityVote, !0), eq20(votes.value, 1))),
-              db.select({ count: sql8`count(*)` }).from(votes).where(and15(eq20(votes.commentId, commentId), eq20(votes.voteType, "COMMENT"), eq20(votes.isQualityVote, !0), eq20(votes.value, -1)))
+              db.select({ count: sql7`count(*)` }).from(votes).where(and11(eq20(votes.commentId, commentId), eq20(votes.voteType, "COMMENT"), eq20(votes.isQualityVote, !0), eq20(votes.value, 1))),
+              db.select({ count: sql7`count(*)` }).from(votes).where(and11(eq20(votes.commentId, commentId), eq20(votes.voteType, "COMMENT"), eq20(votes.isQualityVote, !0), eq20(votes.value, -1)))
             ]);
             return await db.update(comments).set({
               upvotes: upvotesResult[0]?.count || 0,
               downvotes: downvotesResult[0]?.count || 0
-            }).where(eq20(comments.id, commentId)), json27({
+            }).where(eq20(comments.id, commentId)), json26({
               success: !0,
               upvotes: upvotesResult[0]?.count || 0,
               downvotes: downvotesResult[0]?.count || 0,
@@ -10892,17 +10426,17 @@ var meta = ({ data }) => {
           }
           throw error;
         }
-      return json27({ error: "Vote operation failed after retries" }, { status: 500 });
+      return json26({ error: "Vote operation failed after retries" }, { status: 500 });
     }
     case "answerVote": {
       let answerId = formData.get("answerId"), value = parseInt(formData.get("value"));
       if (!answerId || ![-1, 0, 1].includes(value))
-        return json27({ error: "Invalid parameters" }, { status: 400 });
+        return json26({ error: "Invalid parameters" }, { status: 400 });
       let maxRetries = 3, retryCount = 0;
       for (; retryCount < maxRetries; )
         try {
           return await db.transaction(async () => {
-            await db.delete(votes).where(and15(eq20(votes.userId, user.id), eq20(votes.answerId, answerId), eq20(votes.voteType, "ANSWER"), eq20(votes.isQualityVote, !0))), value !== 0 && await db.insert(votes).values({
+            await db.delete(votes).where(and11(eq20(votes.userId, user.id), eq20(votes.answerId, answerId), eq20(votes.voteType, "ANSWER"), eq20(votes.isQualityVote, !0))), value !== 0 && await db.insert(votes).values({
               id: crypto.randomUUID(),
               userId: user.id,
               answerId,
@@ -10913,13 +10447,13 @@ var meta = ({ data }) => {
               commentId: null
             });
             let [upvotesResult, downvotesResult] = await Promise.all([
-              db.select({ count: sql8`count(*)` }).from(votes).where(and15(eq20(votes.answerId, answerId), eq20(votes.voteType, "ANSWER"), eq20(votes.isQualityVote, !0), eq20(votes.value, 1))),
-              db.select({ count: sql8`count(*)` }).from(votes).where(and15(eq20(votes.answerId, answerId), eq20(votes.voteType, "ANSWER"), eq20(votes.isQualityVote, !0), eq20(votes.value, -1)))
+              db.select({ count: sql7`count(*)` }).from(votes).where(and11(eq20(votes.answerId, answerId), eq20(votes.voteType, "ANSWER"), eq20(votes.isQualityVote, !0), eq20(votes.value, 1))),
+              db.select({ count: sql7`count(*)` }).from(votes).where(and11(eq20(votes.answerId, answerId), eq20(votes.voteType, "ANSWER"), eq20(votes.isQualityVote, !0), eq20(votes.value, -1)))
             ]);
             return await db.update(answers).set({
               upvotes: upvotesResult[0]?.count || 0,
               downvotes: downvotesResult[0]?.count || 0
-            }).where(eq20(answers.id, answerId)), json27({
+            }).where(eq20(answers.id, answerId)), json26({
               success: !0,
               upvotes: upvotesResult[0]?.count || 0,
               downvotes: downvotesResult[0]?.count || 0,
@@ -10933,12 +10467,12 @@ var meta = ({ data }) => {
           }
           throw error;
         }
-      return json27({ error: "Vote operation failed after retries" }, { status: 500 });
+      return json26({ error: "Vote operation failed after retries" }, { status: 500 });
     }
     case "claim_bounty": {
       let answerId = formData.get("answerId");
       if (!answerId)
-        return json27({ error: "Answer ID is required" }, { status: 400 });
+        return json26({ error: "Answer ID is required" }, { status: 400 });
       let answer = await db.query.answers.findFirst({
         where: eq20(answers.id, answerId),
         with: {
@@ -10951,25 +10485,25 @@ var meta = ({ data }) => {
         }
       });
       if (!answer)
-        return json27({ error: "Answer not found" }, { status: 404 });
+        return json26({ error: "Answer not found" }, { status: 404 });
       let post = await db.query.posts.findFirst({
-        where: eq20(posts.id, answer.postId),
+        where: eq20(posts2.id, answer.postId),
         with: {
           bounty: !0
         }
       });
-      return post ? post.authorId !== user.id ? json27({ error: "Only the post author can claim the bounty" }, { status: 403 }) : post.bounty ? post.bounty.status !== "ACTIVE" ? json27({ error: "Bounty is not active" }, { status: 400 }) : await db.transaction(async () => {
-        await db.update(answers).set({ isAccepted: !0 }).where(eq20(answers.id, answerId)), await db.update(posts).set({ status: "COMPLETED" }).where(eq20(posts.id, answer.postId)), await db.update(bounties).set({
+      return post ? post.authorId !== user.id ? json26({ error: "Only the post author can claim the bounty" }, { status: 403 }) : post.bounty ? post.bounty.status !== "ACTIVE" ? json26({ error: "Bounty is not active" }, { status: 400 }) : await db.transaction(async () => {
+        await db.update(answers).set({ isAccepted: !0 }).where(eq20(answers.id, answerId)), await db.update(posts2).set({ status: "COMPLETED" }).where(eq20(posts2.id, answer.postId)), await db.update(bounties).set({
           status: "CLAIMED",
           winnerId: answer.authorId
         }).where(eq20(bounties.postId, answer.postId));
-        let { claimBounty: claimBounty2 } = await Promise.resolve().then(() => (init_virtual_wallet_server(), virtual_wallet_server_exports)), bountyAmount = post.bounty.amount;
-        return await claimBounty2(
+        let { claimBounty: claimBounty3 } = await Promise.resolve().then(() => (init_virtual_wallet_server(), virtual_wallet_server_exports)), bountyAmount = post.bounty.amount;
+        return await claimBounty3(
           db,
           answer.authorId,
           bountyAmount,
           post.bounty.id
-        ), json27({
+        ), json26({
           success: !0,
           message: `Bounty of ${bountyAmount} BBUX transferred to ${answer.author.username}`,
           answer: {
@@ -10977,21 +10511,21 @@ var meta = ({ data }) => {
             isAccepted: !0
           }
         });
-      }) : json27({ error: "No bounty found for this post" }, { status: 404 }) : json27({ error: "Post not found" }, { status: 404 });
+      }) : json26({ error: "No bounty found for this post" }, { status: 404 }) : json26({ error: "Post not found" }, { status: 404 });
     }
     case "refund_bounty": {
       let post = await db.query.posts.findFirst({
-        where: eq20(posts.id, postId),
+        where: eq20(posts2.id, postId),
         with: { bounty: !0 }
       });
-      return post?.bounty ? post.authorId !== user.id ? json27({ error: "Only the post author can refund the bounty" }, { status: 403 }) : (await db.update(bounties).set({
+      return post?.bounty ? post.authorId !== user.id ? json26({ error: "Only the post author can refund the bounty" }, { status: 403 }) : (await db.update(bounties).set({
         status: "REFUNDED"
-      }).where(eq20(bounties.postId, postId)), json27({ success: !0 })) : json27({ error: "No bounty found" }, { status: 404 });
+      }).where(eq20(bounties.postId, postId)), json26({ success: !0 })) : json26({ error: "No bounty found" }, { status: 404 });
     }
     case "accept_answer": {
       let answerId = formData.get("answerId");
       if (!answerId)
-        return json27({ error: "Answer ID is required" }, { status: 400 });
+        return json26({ error: "Answer ID is required" }, { status: 400 });
       let answer = await db.query.answers.findFirst({
         where: eq20(answers.id, answerId),
         with: {
@@ -11004,18 +10538,18 @@ var meta = ({ data }) => {
         }
       });
       if (!answer)
-        return json27({ error: "Answer not found" }, { status: 404 });
+        return json26({ error: "Answer not found" }, { status: 404 });
       let post = await db.query.posts.findFirst({
-        where: eq20(posts.id, answer.postId)
+        where: eq20(posts2.id, answer.postId)
       });
-      return post ? post.authorId !== user.id ? json27({ error: "Only the post author can accept answers" }, { status: 403 }) : await db.transaction(async () => (await db.update(answers).set({ isAccepted: !0 }).where(eq20(answers.id, answerId)), await db.update(posts).set({ status: "COMPLETED" }).where(eq20(posts.id, answer.postId)), json27({
+      return post ? post.authorId !== user.id ? json26({ error: "Only the post author can accept answers" }, { status: 403 }) : await db.transaction(async () => (await db.update(answers).set({ isAccepted: !0 }).where(eq20(answers.id, answerId)), await db.update(posts2).set({ status: "COMPLETED" }).where(eq20(posts2.id, answer.postId)), json26({
         success: !0,
         message: `Answer accepted by ${answer.author.username}`,
         answer: {
           ...answer,
           isAccepted: !0
         }
-      }))) : json27({ error: "Post not found" }, { status: 404 });
+      }))) : json26({ error: "Post not found" }, { status: 404 });
     }
     case "deleteComment": {
       let commentId = formData.get("commentId"), comment = await db.select().from(comments).where(eq20(comments.id, commentId)).limit(1);
@@ -11030,19 +10564,19 @@ var meta = ({ data }) => {
       return await db.delete(answers).where(eq20(answers.id, answerId)), { success: !0 };
     }
     case "updatePost": {
-      let title = formData.get("title"), content = formData.get("content"), tags3 = formData.getAll("tags"), bountyAmount = formData.get("bountyAmount");
+      let title = formData.get("title"), content = formData.get("content"), tags2 = formData.getAll("tags");
       if (!user.id)
         throw new Response("Unauthorized", { status: 401 });
-      let post = await db.select().from(posts).where(eq20(posts.id, postId)).limit(1);
+      let post = await db.select().from(posts2).where(eq20(posts2.id, postId)).limit(1);
       if (!post.length || post[0].authorId !== user.id)
         throw new Response("Unauthorized", { status: 401 });
       return await db.transaction(async () => {
-        if (await db.update(posts).set({
+        if (await db.update(posts2).set({
           title,
           content,
           updatedAt: /* @__PURE__ */ new Date()
-        }).where(eq20(posts.id, postId)), await db.delete(postTags).where(eq20(postTags.postId, postId)), tags3 && tags3.length > 0) {
-          let tagValues = tags3.map((tag) => ({
+        }).where(eq20(posts2.id, postId)), await db.delete(postTags).where(eq20(postTags.postId, postId)), tags2 && tags2.length > 0) {
+          let tagValues = tags2.map((tag) => ({
             id: crypto.randomUUID(),
             postId,
             tagId: tag
@@ -11056,7 +10590,7 @@ var meta = ({ data }) => {
       if (!user.id)
         throw new Response("Unauthorized", { status: 401 });
       if ((await db.select().from(reports).where(
-        and15(
+        and11(
           eq20(reports.postId, postId),
           eq20(reports.reporterId, user.id)
         )
@@ -11076,7 +10610,7 @@ var meta = ({ data }) => {
       if (!user.id)
         throw new Response("Unauthorized", { status: 401 });
       if ((await db.select().from(reports).where(
-        and15(
+        and11(
           eq20(reports.commentId, commentId),
           eq20(reports.reporterId, user.id)
         )
@@ -11096,7 +10630,7 @@ var meta = ({ data }) => {
       if (!user.id)
         throw new Response("Unauthorized", { status: 401 });
       if ((await db.select().from(reports).where(
-        and15(
+        and11(
           eq20(reports.answerId, answerId),
           eq20(reports.reporterId, user.id)
         )
@@ -11115,12 +10649,12 @@ var meta = ({ data }) => {
       if (!user.id)
         throw new Response("Unauthorized", { status: 401 });
       return (await db.select().from(bookmarks).where(
-        and15(
+        and11(
           eq20(bookmarks.postId, postId),
           eq20(bookmarks.userId, user.id)
         )
       ).limit(1)).length > 0 ? (await db.delete(bookmarks).where(
-        and15(
+        and11(
           eq20(bookmarks.postId, postId),
           eq20(bookmarks.userId, user.id)
         )
@@ -11136,7 +10670,7 @@ var meta = ({ data }) => {
       if (!user.id)
         throw new Response("Unauthorized", { status: 401 });
       return (await db.select().from(integrityRatings).where(
-        and15(
+        and11(
           eq20(integrityRatings.postId, postId),
           eq20(integrityRatings.raterId, user.id)
         )
@@ -11145,7 +10679,7 @@ var meta = ({ data }) => {
         reason,
         updatedAt: /* @__PURE__ */ new Date()
       }).where(
-        and15(
+        and11(
           eq20(integrityRatings.postId, postId),
           eq20(integrityRatings.raterId, user.id)
         )
@@ -11163,7 +10697,7 @@ var meta = ({ data }) => {
       let answerId = formData.get("answerId");
       if (!user.id)
         throw new Response("Unauthorized", { status: 401 });
-      let post = await db.select().from(posts).where(eq20(posts.id, postId)).limit(1);
+      let post = await db.select().from(posts2).where(eq20(posts2.id, postId)).limit(1);
       if (!post.length)
         throw new Response("Post not found", { status: 404 });
       if (post[0].authorId === user.id)
@@ -11185,9 +10719,9 @@ var meta = ({ data }) => {
           // This should be fetched from bounty table
           status: "PENDING",
           createdAt: /* @__PURE__ */ new Date()
-        }), await db.update(posts).set({
+        }), await db.update(posts2).set({
           updatedAt: /* @__PURE__ */ new Date()
-        }).where(eq20(posts.id, postId));
+        }).where(eq20(posts2.id, postId));
       }), { success: !0 };
     }
     default:
@@ -11205,12 +10739,12 @@ function ErrorBoundary2() {
   ] });
 }
 function PostDetail() {
-  let { post, currentUser, pagination } = useLoaderData7(), [answers2, setAnswers] = useState8(post.answers), [comments2, setComments] = useState8(post.comments), [votingStates, setVotingStates] = useState8({}), [successMessage, setSuccessMessage] = useState8(null), submit = useSubmit2(), fetcher = useFetcher2(), actionData = useActionData3();
-  useEffect6(() => {
+  let loaderData = useLoaderData6(), post = loaderData.post, currentUser = loaderData.currentUser, pagination = loaderData.pagination, [answers2, setAnswers] = useState6(post.answers), [comments2, setComments] = useState6(post.comments), [votingStates, setVotingStates] = useState6({}), [successMessage, setSuccessMessage] = useState6(null), submit = useSubmit(), actionData = useActionData2();
+  useEffect5(() => {
     actionData?.success && "message" in actionData && actionData.message && (setSuccessMessage(actionData.message), setTimeout(() => setSuccessMessage(null), 5e3));
   }, [actionData]);
   let sortAnswers = (answers3) => [...answers3].sort((a, b) => a.isAccepted && !b.isAccepted ? -1 : !a.isAccepted && b.isAccepted ? 1 : a.upvotes !== b.upvotes ? b.upvotes - a.upvotes : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()), sortComments = (comments3) => [...comments3].sort((a, b) => a.upvotes !== b.upvotes ? b.upvotes - a.upvotes : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  useEffect6(() => {
+  useEffect5(() => {
     actionData?.success && ("answer" in actionData && actionData.answer ? setAnswers((prev) => {
       let filtered = prev.filter((a) => !a.id.startsWith("temp-")), newAnswers = [actionData.answer, ...filtered];
       return sortAnswers(newAnswers);
@@ -11319,9 +10853,6 @@ function PostDetail() {
     });
     let formData = new FormData();
     formData.append("action", "answer"), formData.append("content", content), submit(formData, { method: "post" });
-  }, handleAcceptAnswer = async (answerId) => {
-    let formData = new FormData();
-    formData.append("action", "acceptAnswer"), formData.append("answerId", answerId), submit(formData, { method: "post" });
   }, handleDelete = () => {
     let formData = new FormData();
     formData.append("action", "deletePost"), submit(formData, { method: "post" });
@@ -11337,7 +10868,7 @@ function PostDetail() {
           /* @__PURE__ */ jsx16(
             "img",
             {
-              src: getProfilePicture(post.author.profilePicture, post.author.username),
+              src: getProfilePicture(post.author.profilePicture ?? null, post.author.username),
               alt: `${post.author.username}'s avatar`,
               className: "w-10 h-10 rounded-full"
             }
@@ -11375,7 +10906,7 @@ function PostDetail() {
           {
             onClick: handleDelete,
             className: "p-2 text-red-400 hover:text-red-300 transition-colors",
-            children: /* @__PURE__ */ jsx16(FiTrash22, { className: "h-5 w-5" })
+            children: /* @__PURE__ */ jsx16(FiTrash2, { className: "h-5 w-5" })
           }
         )
       ] }),
@@ -11400,12 +10931,14 @@ function PostDetail() {
                 poster: mediaItem.thumbnailUrl,
                 children: [
                   /* @__PURE__ */ jsx16("source", { src: mediaItem.url, type: "video/mp4" }),
+                  /* @__PURE__ */ jsx16("track", { kind: "captions", src: "", label: "English" }),
                   "Your browser does not support the video tag."
                 ]
               }
             ),
             mediaItem.type === "AUDIO" && /* @__PURE__ */ jsx16("div", { className: "p-4", children: /* @__PURE__ */ jsxs13("audio", { controls: !0, className: "w-full", children: [
               /* @__PURE__ */ jsx16("source", { src: mediaItem.url, type: "audio/mpeg" }),
+              /* @__PURE__ */ jsx16("track", { kind: "captions", src: "", label: "English" }),
               "Your browser does not support the audio tag."
             ] }) }),
             (mediaItem.isScreenRecording || mediaItem.type === "VIDEO") && /* @__PURE__ */ jsx16("div", { className: "px-3 py-2 bg-neutral-700/50 border-t border-neutral-600/50", children: /* @__PURE__ */ jsxs13("div", { className: "flex items-center justify-between text-sm", children: [
@@ -11488,7 +11021,7 @@ function PostDetail() {
             /* @__PURE__ */ jsx16("span", { className: "text-cyan-300 font-medium", children: post.bounty.status })
           ] })
         ] }),
-        post.bounty.status === "ACTIVE" && post.authorId === currentUser?.id && /* @__PURE__ */ jsx16("div", { className: "mt-4 flex justify-end", children: /* @__PURE__ */ jsxs13(Form4, { method: "post", children: [
+        post.bounty.status === "ACTIVE" && post.authorId === currentUser?.id && /* @__PURE__ */ jsx16("div", { className: "mt-4 flex justify-end", children: /* @__PURE__ */ jsxs13(Form3, { method: "post", children: [
           /* @__PURE__ */ jsx16("input", { type: "hidden", name: "action", value: "refund_bounty" }),
           /* @__PURE__ */ jsx16(
             "button",
@@ -11582,7 +11115,7 @@ function PostDetail() {
                   className: "ml-1"
                 }
               ),
-              currentUser?.id === post.author.id && !answers2.some((a) => a.isAccepted) && /* @__PURE__ */ jsxs13(Form4, { method: "post", children: [
+              currentUser?.id === post.author.id && !answers2.some((a) => a.isAccepted) && /* @__PURE__ */ jsxs13(Form3, { method: "post", children: [
                 /* @__PURE__ */ jsx16("input", { type: "hidden", name: "action", value: post.bounty && post.bounty.status === "ACTIVE" ? "claim_bounty" : "accept_answer" }),
                 /* @__PURE__ */ jsx16("input", { type: "hidden", name: "answerId", value: answer.id }),
                 /* @__PURE__ */ jsx16(
@@ -11590,7 +11123,7 @@ function PostDetail() {
                   {
                     type: "submit",
                     className: `px-4 py-2 text-white rounded-lg transition-all duration-200 shadow-lg ${post.bounty && post.bounty.status === "ACTIVE" ? "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 shadow-cyan-500/25" : "bg-green-500 hover:bg-green-600 shadow-green-500/25"}`,
-                    children: post.bounty && post.bounty.status === "ACTIVE" ? "Accept Answer & Claim Bounty" : "Accept Answer"
+                    children: post.bounty && post.bounty.status === "ACTIVE" ? "Accept Answer &amp; Claim Bounty" : "Accept Answer"
                   }
                 )
               ] })
@@ -11683,17 +11216,181 @@ __export(posts_create_exports, {
   ErrorBoundary: () => ErrorBoundary3,
   action: () => action20,
   default: () => CreatePost,
-  loader: () => loader14,
+  loader: () => loader13,
   meta: () => meta2
 });
-import { useState as useState12 } from "react";
-import { Form as Form5, useLoaderData as useLoaderData8, useActionData as useActionData4, redirect as redirect3, useRouteError as useRouteError3, useNavigation as useNavigation2 } from "@remix-run/react";
-import { json as json28 } from "@remix-run/node";
+import { useState as useState10 } from "react";
+import { json as json27 } from "@remix-run/cloudflare";
+import { useLoaderData as useLoaderData7, useActionData as useActionData3, useRouteError as useRouteError3, useNavigation as useNavigation2, Form as Form4 } from "@remix-run/react";
+import { redirect as redirect3 } from "@remix-run/node";
+init_schema();
+import { eq as eq21, asc as asc2 } from "drizzle-orm";
+init_virtual_wallet_server();
+import { FaDollarSign, FaGift, FaClock as FaClockIcon } from "react-icons/fa";
+import { FiInfo } from "react-icons/fi";
+import { z as z8 } from "zod";
+
+// app/components/TagSelector.tsx
+import { useState as useState7, useEffect as useEffect6, useRef } from "react";
+import { FiX as FiX2, FiTag } from "react-icons/fi";
+import { jsx as jsx17, jsxs as jsxs14 } from "react/jsx-runtime";
+function TagSelector({
+  selectedTags,
+  onTagsChange,
+  availableTags,
+  error,
+  required = !0
+}) {
+  let [isOpen, setIsOpen] = useState7(!1), [searchTerm, setSearchTerm] = useState7(""), dropdownRef = useRef(null), filteredTags = availableTags.filter(
+    (tag) => tag.name.toLowerCase().includes(searchTerm.toLowerCase()) || tag.description?.toLowerCase().includes(searchTerm.toLowerCase()) || tag.description === null
+  ), selectedTagObjects = availableTags.filter(
+    (tag) => selectedTags.includes(tag.id)
+  );
+  useEffect6(() => {
+    let handleClickOutside = (event) => {
+      dropdownRef.current && !dropdownRef.current.contains(event.target) && (setIsOpen(!1), setSearchTerm(""));
+    };
+    return isOpen && document.addEventListener("mousedown", handleClickOutside), () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
+  let handleTagToggle = (tagId) => {
+    let newSelectedTags = selectedTags.includes(tagId) ? selectedTags.filter((id) => id !== tagId) : [...selectedTags, tagId];
+    onTagsChange(newSelectedTags);
+  }, removeTag = (tagId) => {
+    let newSelectedTags = selectedTags.filter((id) => id !== tagId);
+    onTagsChange(newSelectedTags);
+  }, handleKeyDown = (e) => {
+    e.key === "Escape" && (setIsOpen(!1), setSearchTerm(""));
+  };
+  return /* @__PURE__ */ jsxs14("div", { className: "space-y-3", children: [
+    /* @__PURE__ */ jsxs14("div", { className: "flex items-center justify-between", children: [
+      /* @__PURE__ */ jsxs14("label", { className: "block text-sm font-medium text-white", children: [
+        "Tags ",
+        required && /* @__PURE__ */ jsx17("span", { className: "text-red-400", children: "*" })
+      ] }),
+      /* @__PURE__ */ jsxs14("span", { className: "text-xs text-gray-400", children: [
+        selectedTags.length,
+        " selected"
+      ] })
+    ] }),
+    selectedTagObjects.length > 0 && /* @__PURE__ */ jsx17("div", { className: "flex flex-wrap gap-2 mb-3", children: selectedTagObjects.map((tag) => /* @__PURE__ */ jsxs14(
+      "div",
+      {
+        className: "inline-flex items-center px-3 py-1 rounded-full text-sm font-medium",
+        style: {
+          backgroundColor: `${tag.color}20`,
+          color: tag.color,
+          border: `1px solid ${tag.color}40`
+        },
+        children: [
+          /* @__PURE__ */ jsx17(FiTag, { className: "w-3 h-3 mr-1" }),
+          tag.name,
+          /* @__PURE__ */ jsx17(
+            "button",
+            {
+              type: "button",
+              onClick: () => removeTag(tag.id),
+              className: "ml-2 hover:bg-black/20 rounded-full p-0.5 transition-colors",
+              children: /* @__PURE__ */ jsx17(FiX2, { className: "w-3 h-3" })
+            }
+          )
+        ]
+      },
+      tag.id
+    )) }),
+    /* @__PURE__ */ jsxs14("div", { className: "relative", children: [
+      /* @__PURE__ */ jsx17(
+        "button",
+        {
+          type: "button",
+          onClick: () => setIsOpen(!isOpen),
+          className: `w-full px-4 py-3 text-left bg-neutral-800/60 border rounded-lg transition-colors ${error ? "border-red-500/50 focus:border-red-500" : "border-violet-500/30 focus:border-violet-500"} ${isOpen ? "border-violet-500" : "hover:border-violet-500/50"}`,
+          children: /* @__PURE__ */ jsxs14("div", { className: "flex items-center justify-between", children: [
+            /* @__PURE__ */ jsx17("span", { className: selectedTags.length === 0 ? "text-gray-400" : "text-white", children: selectedTags.length === 0 ? "Select at least one tag..." : `${selectedTags.length} tag${selectedTags.length === 1 ? "" : "s"} selected` }),
+            /* @__PURE__ */ jsxs14("div", { className: "flex items-center space-x-2", children: [
+              selectedTags.length > 0 && /* @__PURE__ */ jsxs14("span", { className: "text-xs text-gray-400", children: [
+                selectedTags.length,
+                "/10"
+              ] }),
+              /* @__PURE__ */ jsx17(
+                "svg",
+                {
+                  className: `w-4 h-4 text-gray-400 transition-transform ${isOpen ? "rotate-180" : ""}`,
+                  fill: "none",
+                  stroke: "currentColor",
+                  viewBox: "0 0 24 24",
+                  children: /* @__PURE__ */ jsx17("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M19 9l-7 7-7-7" })
+                }
+              )
+            ] })
+          ] })
+        }
+      ),
+      isOpen && /* @__PURE__ */ jsxs14("div", { className: "absolute z-50 w-full mt-1 bg-neutral-800 border border-violet-500/30 rounded-lg shadow-xl max-h-64 overflow-hidden", ref: dropdownRef, children: [
+        /* @__PURE__ */ jsx17("div", { className: "p-3 border-b border-violet-500/20", children: /* @__PURE__ */ jsx17(
+          "input",
+          {
+            type: "text",
+            placeholder: "Search tags...",
+            value: searchTerm,
+            onChange: (e) => setSearchTerm(e.target.value),
+            onKeyDown: handleKeyDown,
+            className: "w-full px-3 py-2 bg-neutral-700/50 border border-violet-500/20 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-violet-500"
+          }
+        ) }),
+        /* @__PURE__ */ jsx17("div", { className: "max-h-48 overflow-y-auto", children: filteredTags.length === 0 ? /* @__PURE__ */ jsxs14("div", { className: "p-4 text-center text-gray-400", children: [
+          'No tags found matching "',
+          searchTerm,
+          '"'
+        ] }) : /* @__PURE__ */ jsx17("div", { className: "p-2", children: filteredTags.map((tag) => {
+          let isSelected = selectedTags.includes(tag.id);
+          return /* @__PURE__ */ jsxs14(
+            "button",
+            {
+              type: "button",
+              onClick: () => handleTagToggle(tag.id),
+              className: `w-full flex items-center justify-between p-3 rounded-lg transition-colors ${isSelected ? "bg-violet-500/20 border border-violet-500/40" : "hover:bg-neutral-700/50 border border-transparent"}`,
+              children: [
+                /* @__PURE__ */ jsxs14("div", { className: "flex items-center space-x-3", children: [
+                  /* @__PURE__ */ jsx17(
+                    "div",
+                    {
+                      className: "w-3 h-3 rounded-full",
+                      style: { backgroundColor: tag.color }
+                    }
+                  ),
+                  /* @__PURE__ */ jsxs14("div", { className: "text-left", children: [
+                    /* @__PURE__ */ jsx17("div", { className: "font-medium text-white", children: tag.name }),
+                    /* @__PURE__ */ jsx17("div", { className: "text-sm text-gray-400", children: tag.description || "No description" })
+                  ] })
+                ] }),
+                isSelected && /* @__PURE__ */ jsx17("div", { className: "w-5 h-5 bg-violet-500 rounded-full flex items-center justify-center", children: /* @__PURE__ */ jsx17("svg", { className: "w-3 h-3 text-white", fill: "currentColor", viewBox: "0 0 20 20", children: /* @__PURE__ */ jsx17("path", { fillRule: "evenodd", d: "M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z", clipRule: "evenodd" }) }) })
+              ]
+            },
+            tag.id
+          );
+        }) }) }),
+        /* @__PURE__ */ jsx17("div", { className: "p-3 border-t border-violet-500/20 bg-neutral-700/30", children: /* @__PURE__ */ jsxs14("div", { className: "flex items-center justify-between text-sm", children: [
+          /* @__PURE__ */ jsxs14("span", { className: "text-gray-400", children: [
+            selectedTags.length,
+            " of ",
+            availableTags.length,
+            " tags selected"
+          ] }),
+          required && selectedTags.length === 0 && /* @__PURE__ */ jsx17("span", { className: "text-red-400", children: "At least one tag required" })
+        ] }) })
+      ] })
+    ] }),
+    error && /* @__PURE__ */ jsx17("p", { className: "text-sm text-red-400", children: error }),
+    /* @__PURE__ */ jsx17("p", { className: "text-xs text-gray-400", children: "Tags help categorize your post and make it easier for others to find. Select tags that best describe your content." })
+  ] });
+}
 
 // app/components/CodeBlockEditor.tsx
-import { useState as useState9 } from "react";
-import { FiCopy, FiCheck, FiPlus, FiTrash2 as FiTrash23 } from "react-icons/fi";
-import { jsx as jsx17, jsxs as jsxs14 } from "react/jsx-runtime";
+import { useState as useState8 } from "react";
+import { FiCopy, FiCheck, FiPlus, FiTrash2 as FiTrash22 } from "react-icons/fi";
+import { jsx as jsx18, jsxs as jsxs15 } from "react/jsx-runtime";
 var SUPPORTED_LANGUAGES = [
   "javascript",
   "typescript",
@@ -11715,55 +11412,55 @@ var SUPPORTED_LANGUAGES = [
   "markdown",
   "plaintext"
 ];
-function CodeBlockEditor({ codeBlocks: codeBlocks3, onCodeBlocksChange }) {
-  let [currentBlock, setCurrentBlock] = useState9({
+function CodeBlockEditor({ codeBlocks: codeBlocks2, onCodeBlocksChange }) {
+  let [currentBlock, setCurrentBlock] = useState8({
     language: "",
     code: "",
     description: ""
-  }), [copiedIndex, setCopiedIndex] = useState9(null), handleAddCodeBlock = () => {
-    currentBlock.language && currentBlock.code && (onCodeBlocksChange([...codeBlocks3, currentBlock]), setCurrentBlock({ language: "", code: "", description: "" }));
+  }), [copiedIndex, setCopiedIndex] = useState8(null), handleAddCodeBlock = () => {
+    currentBlock.language && currentBlock.code && (onCodeBlocksChange([...codeBlocks2, currentBlock]), setCurrentBlock({ language: "", code: "", description: "" }));
   }, handleRemoveCodeBlock = (index) => {
-    onCodeBlocksChange(codeBlocks3.filter((_, i) => i !== index));
+    onCodeBlocksChange(codeBlocks2.filter((_, i) => i !== index));
   }, handleCopyCode = async (code, index) => {
     try {
       await navigator.clipboard.writeText(code), setCopiedIndex(index), setTimeout(() => setCopiedIndex(null), 2e3);
     } catch {
     }
   };
-  return /* @__PURE__ */ jsxs14("div", { className: "space-y-6", children: [
-    codeBlocks3.map((block, index) => /* @__PURE__ */ jsxs14("div", { className: "bg-neutral-800/80 rounded-lg p-4 border border-violet-500/30", children: [
-      /* @__PURE__ */ jsxs14("div", { className: "flex justify-between items-center mb-2", children: [
-        /* @__PURE__ */ jsxs14("div", { className: "flex items-center gap-2", children: [
-          /* @__PURE__ */ jsx17("span", { className: "px-2 py-1 bg-violet-500/20 text-violet-300 rounded text-sm", children: block.language }),
-          /* @__PURE__ */ jsx17(
+  return /* @__PURE__ */ jsxs15("div", { className: "space-y-6", children: [
+    codeBlocks2.map((block, index) => /* @__PURE__ */ jsxs15("div", { className: "bg-neutral-800/80 rounded-lg p-4 border border-violet-500/30", children: [
+      /* @__PURE__ */ jsxs15("div", { className: "flex justify-between items-center mb-2", children: [
+        /* @__PURE__ */ jsxs15("div", { className: "flex items-center gap-2", children: [
+          /* @__PURE__ */ jsx18("span", { className: "px-2 py-1 bg-violet-500/20 text-violet-300 rounded text-sm", children: block.language }),
+          /* @__PURE__ */ jsx18(
             "button",
             {
               type: "button",
               onClick: () => handleCopyCode(block.code, index),
               className: "p-1 text-gray-400 hover:text-violet-400 transition-colors",
               title: "Copy code",
-              children: copiedIndex === index ? /* @__PURE__ */ jsx17(FiCheck, { className: "w-4 h-4" }) : /* @__PURE__ */ jsx17(FiCopy, { className: "w-4 h-4" })
+              children: copiedIndex === index ? /* @__PURE__ */ jsx18(FiCheck, { className: "w-4 h-4" }) : /* @__PURE__ */ jsx18(FiCopy, { className: "w-4 h-4" })
             }
           )
         ] }),
-        /* @__PURE__ */ jsx17(
+        /* @__PURE__ */ jsx18(
           "button",
           {
             type: "button",
             onClick: () => handleRemoveCodeBlock(index),
             className: "p-1 text-gray-400 hover:text-red-400 transition-colors",
             title: "Remove code block",
-            children: /* @__PURE__ */ jsx17(FiTrash23, { className: "w-4 h-4" })
+            children: /* @__PURE__ */ jsx18(FiTrash22, { className: "w-4 h-4" })
           }
         )
       ] }),
-      /* @__PURE__ */ jsx17("pre", { className: "bg-neutral-900/80 p-4 rounded-lg overflow-x-auto", children: /* @__PURE__ */ jsx17("code", { className: "text-sm text-gray-300", children: block.code }) }),
-      block.description && /* @__PURE__ */ jsx17("p", { className: "mt-2 text-sm text-gray-400", children: block.description })
+      /* @__PURE__ */ jsx18("pre", { className: "bg-neutral-900/80 p-4 rounded-lg overflow-x-auto", children: /* @__PURE__ */ jsx18("code", { className: "text-sm text-gray-300", children: block.code }) }),
+      block.description && /* @__PURE__ */ jsx18("p", { className: "mt-2 text-sm text-gray-400", children: block.description })
     ] }, index)),
-    /* @__PURE__ */ jsx17("div", { className: "bg-neutral-800/80 rounded-lg p-4 border border-violet-500/30", children: /* @__PURE__ */ jsxs14("div", { className: "space-y-4", children: [
-      /* @__PURE__ */ jsxs14("div", { children: [
-        /* @__PURE__ */ jsx17("label", { htmlFor: "language", className: "block text-sm font-medium text-violet-300 mb-2", children: "Language" }),
-        /* @__PURE__ */ jsxs14(
+    /* @__PURE__ */ jsx18("div", { className: "bg-neutral-800/80 rounded-lg p-4 border border-violet-500/30", children: /* @__PURE__ */ jsxs15("div", { className: "space-y-4", children: [
+      /* @__PURE__ */ jsxs15("div", { children: [
+        /* @__PURE__ */ jsx18("label", { htmlFor: "language", className: "block text-sm font-medium text-violet-300 mb-2", children: "Language" }),
+        /* @__PURE__ */ jsxs15(
           "select",
           {
             id: "language",
@@ -11771,15 +11468,15 @@ function CodeBlockEditor({ codeBlocks: codeBlocks3, onCodeBlocksChange }) {
             onChange: (e) => setCurrentBlock({ ...currentBlock, language: e.target.value }),
             className: "w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500",
             children: [
-              /* @__PURE__ */ jsx17("option", { value: "", children: "Select a language" }),
-              SUPPORTED_LANGUAGES.map((lang) => /* @__PURE__ */ jsx17("option", { value: lang, children: lang.charAt(0).toUpperCase() + lang.slice(1) }, lang))
+              /* @__PURE__ */ jsx18("option", { value: "", children: "Select a language" }),
+              SUPPORTED_LANGUAGES.map((lang) => /* @__PURE__ */ jsx18("option", { value: lang, children: lang.charAt(0).toUpperCase() + lang.slice(1) }, lang))
             ]
           }
         )
       ] }),
-      /* @__PURE__ */ jsxs14("div", { children: [
-        /* @__PURE__ */ jsx17("label", { htmlFor: "code", className: "block text-sm font-medium text-violet-300 mb-2", children: "Code" }),
-        /* @__PURE__ */ jsx17(
+      /* @__PURE__ */ jsxs15("div", { children: [
+        /* @__PURE__ */ jsx18("label", { htmlFor: "code", className: "block text-sm font-medium text-violet-300 mb-2", children: "Code" }),
+        /* @__PURE__ */ jsx18(
           "textarea",
           {
             id: "code",
@@ -11791,9 +11488,9 @@ function CodeBlockEditor({ codeBlocks: codeBlocks3, onCodeBlocksChange }) {
           }
         )
       ] }),
-      /* @__PURE__ */ jsxs14("div", { children: [
-        /* @__PURE__ */ jsx17("label", { htmlFor: "description", className: "block text-sm font-medium text-violet-300 mb-2", children: "Description (optional)" }),
-        /* @__PURE__ */ jsx17(
+      /* @__PURE__ */ jsxs15("div", { children: [
+        /* @__PURE__ */ jsx18("label", { htmlFor: "description", className: "block text-sm font-medium text-violet-300 mb-2", children: "Description (optional)" }),
+        /* @__PURE__ */ jsx18(
           "input",
           {
             type: "text",
@@ -11805,7 +11502,7 @@ function CodeBlockEditor({ codeBlocks: codeBlocks3, onCodeBlocksChange }) {
           }
         )
       ] }),
-      /* @__PURE__ */ jsxs14(
+      /* @__PURE__ */ jsxs15(
         "button",
         {
           type: "button",
@@ -11813,7 +11510,7 @@ function CodeBlockEditor({ codeBlocks: codeBlocks3, onCodeBlocksChange }) {
           disabled: !currentBlock.language || !currentBlock.code,
           className: "inline-flex items-center gap-2 px-4 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
           children: [
-            /* @__PURE__ */ jsx17(FiPlus, { className: "w-4 h-4" }),
+            /* @__PURE__ */ jsx18(FiPlus, { className: "w-4 h-4" }),
             "Add Code Block"
           ]
         }
@@ -11823,9 +11520,9 @@ function CodeBlockEditor({ codeBlocks: codeBlocks3, onCodeBlocksChange }) {
 }
 
 // app/components/MediaUpload.tsx
-import { useState as useState10, useRef, useCallback as useCallback2, useEffect as useEffect7 } from "react";
-import { FiUpload, FiVideo, FiX as FiX2 } from "react-icons/fi";
-import { jsx as jsx18, jsxs as jsxs15 } from "react/jsx-runtime";
+import { useState as useState9, useRef as useRef2, useCallback, useEffect as useEffect7 } from "react";
+import { FiUpload, FiVideo, FiX as FiX3 } from "react-icons/fi";
+import { jsx as jsx19, jsxs as jsxs16 } from "react/jsx-runtime";
 async function uploadToCloudinary2(file, resourceType, uploadPreset, cloudName, folder) {
   let formData = new FormData();
   formData.append("file", file), formData.append("upload_preset", uploadPreset), formData.append("folder", folder);
@@ -11838,13 +11535,13 @@ async function uploadToCloudinary2(file, resourceType, uploadPreset, cloudName, 
   return response.json();
 }
 function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }) {
-  let [isRecording, setIsRecording] = useState10(!1), [isUploading, setIsUploading] = useState10(!1), mediaRecorderRef = useRef(null), recordedChunksRef = useRef([]), fileInputRef = useRef(null), streamRef = useRef(null), cleanupRecording = useCallback2(() => {
+  let [isRecording, setIsRecording] = useState9(!1), [isUploading, setIsUploading] = useState9(!1), mediaRecorderRef = useRef2(null), recordedChunksRef = useRef2([]), fileInputRef = useRef2(null), streamRef = useRef2(null), cleanupRecording = useCallback(() => {
     mediaRecorderRef.current && (mediaRecorderRef.current.state !== "inactive" && mediaRecorderRef.current.stop(), mediaRecorderRef.current = null), streamRef.current && (streamRef.current.getTracks().forEach((track) => track.stop()), streamRef.current = null), recordedChunksRef.current = [], setIsRecording(!1);
   }, []);
   useEffect7(() => () => {
     cleanupRecording();
   }, [cleanupRecording]);
-  let startScreenRecording = useCallback2(async () => {
+  let startScreenRecording = useCallback(async () => {
     try {
       if (cleanupRecording(), !navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia)
         throw new Error("Screen recording is not supported in this browser");
@@ -11858,13 +11555,13 @@ function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }) {
           cleanupRecording();
           return;
         }
-        let blob2 = new Blob(recordedChunksRef.current, { type: "video/webm" });
+        let blob = new Blob(recordedChunksRef.current, { type: "video/webm" });
         setIsUploading(!0);
         try {
           let uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || "portal", cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || "dqobhvk07";
           if (!uploadPreset || !cloudName)
             throw new Error("Cloudinary config missing");
-          let url = (await uploadToCloudinary2(blob2, "video", uploadPreset, cloudName, "portal/posts")).secure_url;
+          let url = (await uploadToCloudinary2(blob, "video", uploadPreset, cloudName, "portal/posts")).secure_url;
           try {
             let video = document.createElement("video");
             video.src = url, video.crossOrigin = "anonymous", video.onloadeddata = () => {
@@ -11920,13 +11617,13 @@ function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }) {
     } catch (error) {
       alert(error instanceof Error ? error.message : "Failed to start screen recording"), cleanupRecording();
     }
-  }, [onMediaUpload, cleanupRecording]), stopScreenRecording = useCallback2(() => {
+  }, [onMediaUpload, cleanupRecording]), stopScreenRecording = useCallback(() => {
     mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive" && mediaRecorderRef.current.stop();
   }, []);
-  return /* @__PURE__ */ jsxs15("div", { className: "space-y-4", children: [
-    /* @__PURE__ */ jsx18("div", { className: "text-sm text-gray-400 mb-2", children: /* @__PURE__ */ jsx18("p", { children: "\u{1F4C1} File size limits: Images (50MB), Videos (100MB) - Powered by Cloudinary" }) }),
-    /* @__PURE__ */ jsxs15("div", { className: "flex gap-4", children: [
-      /* @__PURE__ */ jsxs15(
+  return /* @__PURE__ */ jsxs16("div", { className: "space-y-4", children: [
+    /* @__PURE__ */ jsx19("div", { className: "text-sm text-gray-400 mb-2", children: /* @__PURE__ */ jsx19("p", { children: "\u{1F4C1} File size limits: Images (50MB), Videos (100MB) - Powered by Cloudinary" }) }),
+    /* @__PURE__ */ jsxs16("div", { className: "flex gap-4", children: [
+      /* @__PURE__ */ jsxs16(
         "button",
         {
           type: "button",
@@ -11934,12 +11631,12 @@ function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }) {
           disabled: isUploading,
           className: `flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${isRecording ? "bg-red-500 hover:bg-red-600" : "bg-violet-500 hover:bg-violet-600"} text-white disabled:opacity-50 disabled:cursor-not-allowed`,
           children: [
-            /* @__PURE__ */ jsx18(FiVideo, { className: "w-5 h-5" }),
+            /* @__PURE__ */ jsx19(FiVideo, { className: "w-5 h-5" }),
             isRecording ? "Stop Recording" : "Record Screen"
           ]
         }
       ),
-      /* @__PURE__ */ jsxs15(
+      /* @__PURE__ */ jsxs16(
         "button",
         {
           type: "button",
@@ -11947,12 +11644,12 @@ function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }) {
           disabled: isRecording || isUploading,
           className: "flex items-center gap-2 px-4 py-2 bg-violet-500 hover:bg-violet-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
           children: [
-            /* @__PURE__ */ jsx18(FiUpload, { className: "w-5 h-5" }),
+            /* @__PURE__ */ jsx19(FiUpload, { className: "w-5 h-5" }),
             "Upload Media"
           ]
         }
       ),
-      /* @__PURE__ */ jsx18(
+      /* @__PURE__ */ jsx19(
         "input",
         {
           ref: fileInputRef,
@@ -12038,212 +11735,48 @@ function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }) {
         }
       )
     ] }),
-    uploadedMedia.length > 0 && /* @__PURE__ */ jsx18("div", { className: "grid grid-cols-2 gap-4", children: uploadedMedia.map((media3, index) => /* @__PURE__ */ jsxs15("div", { className: "relative group", children: [
-      media3.type === "VIDEO" ? /* @__PURE__ */ jsx18(
+    uploadedMedia.length > 0 && /* @__PURE__ */ jsx19("div", { className: "grid grid-cols-2 gap-4", children: uploadedMedia.map((media2, index) => /* @__PURE__ */ jsxs16("div", { className: "relative group", children: [
+      media2.type === "VIDEO" ? /* @__PURE__ */ jsx19(
         "video",
         {
-          src: media3.url,
-          poster: media3.thumbnailUrl,
+          src: media2.url,
+          poster: media2.thumbnailUrl,
           className: "w-full h-48 object-cover rounded-lg",
-          controls: !0
+          controls: !0,
+          children: /* @__PURE__ */ jsx19("track", { kind: "captions" })
         }
-      ) : /* @__PURE__ */ jsx18(
+      ) : /* @__PURE__ */ jsx19(
         "img",
         {
-          src: media3.url,
+          src: media2.url,
           alt: "Uploaded media",
           className: "w-full h-48 object-cover rounded-lg"
         }
       ),
-      /* @__PURE__ */ jsx18(
+      /* @__PURE__ */ jsx19(
         "button",
         {
           type: "button",
           onClick: () => onMediaRemove(index),
           className: "absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity",
-          children: /* @__PURE__ */ jsx18(FiX2, { className: "w-4 h-4" })
+          children: /* @__PURE__ */ jsx19(FiX3, { className: "w-4 h-4" })
         }
       ),
-      media3.isScreenRecording && /* @__PURE__ */ jsx18("span", { className: "absolute bottom-2 left-2 px-2 py-1 bg-black/50 text-white text-sm rounded", children: "Screen Recording" })
+      media2.isScreenRecording && /* @__PURE__ */ jsx19("span", { className: "absolute bottom-2 left-2 px-2 py-1 bg-black/50 text-white text-sm rounded", children: "Screen Recording" })
     ] }, index)) }),
-    (isRecording || isUploading) && /* @__PURE__ */ jsxs15("div", { className: "flex items-center gap-2 text-violet-400", children: [
-      /* @__PURE__ */ jsx18("div", { className: "animate-spin rounded-full h-4 w-4 border-b-2 border-violet-400" }),
-      /* @__PURE__ */ jsx18("span", { children: isRecording ? "Recording..." : "Uploading..." })
+    (isRecording || isUploading) && /* @__PURE__ */ jsxs16("div", { className: "flex items-center gap-2 text-violet-400", children: [
+      /* @__PURE__ */ jsx19("div", { className: "animate-spin rounded-full h-4 w-4 border-b-2 border-violet-400" }),
+      /* @__PURE__ */ jsx19("span", { children: isRecording ? "Recording..." : "Uploading..." })
     ] })
   ] });
 }
 
 // app/routes/posts.create.tsx
-init_virtual_wallet_server();
-init_schema();
-import { eq as eq21, asc as asc2 } from "drizzle-orm";
-import { z as z9 } from "zod";
-
-// app/components/TagSelector.tsx
-import { useState as useState11, useEffect as useEffect8, useRef as useRef2 } from "react";
-import { FiX as FiX3, FiTag } from "react-icons/fi";
-import { jsx as jsx19, jsxs as jsxs16 } from "react/jsx-runtime";
-function TagSelector({
-  selectedTags,
-  onTagsChange,
-  availableTags,
-  error,
-  required = !0
-}) {
-  let [isOpen, setIsOpen] = useState11(!1), [searchTerm, setSearchTerm] = useState11(""), dropdownRef = useRef2(null), filteredTags = availableTags.filter(
-    (tag) => tag.name.toLowerCase().includes(searchTerm.toLowerCase()) || tag.description?.toLowerCase().includes(searchTerm.toLowerCase()) || tag.description === null
-  ), selectedTagObjects = availableTags.filter(
-    (tag) => selectedTags.includes(tag.id)
-  );
-  useEffect8(() => {
-    let handleClickOutside = (event) => {
-      dropdownRef.current && !dropdownRef.current.contains(event.target) && (setIsOpen(!1), setSearchTerm(""));
-    };
-    return isOpen && document.addEventListener("mousedown", handleClickOutside), () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isOpen]);
-  let handleTagToggle = (tagId) => {
-    let newSelectedTags = selectedTags.includes(tagId) ? selectedTags.filter((id) => id !== tagId) : [...selectedTags, tagId];
-    onTagsChange(newSelectedTags);
-  }, removeTag = (tagId) => {
-    let newSelectedTags = selectedTags.filter((id) => id !== tagId);
-    onTagsChange(newSelectedTags);
-  }, handleKeyDown = (e) => {
-    e.key === "Escape" && (setIsOpen(!1), setSearchTerm(""));
-  };
-  return /* @__PURE__ */ jsxs16("div", { className: "space-y-3", children: [
-    /* @__PURE__ */ jsxs16("div", { className: "flex items-center justify-between", children: [
-      /* @__PURE__ */ jsxs16("label", { className: "block text-sm font-medium text-white", children: [
-        "Tags ",
-        required && /* @__PURE__ */ jsx19("span", { className: "text-red-400", children: "*" })
-      ] }),
-      /* @__PURE__ */ jsxs16("span", { className: "text-xs text-gray-400", children: [
-        selectedTags.length,
-        " selected"
-      ] })
-    ] }),
-    selectedTagObjects.length > 0 && /* @__PURE__ */ jsx19("div", { className: "flex flex-wrap gap-2 mb-3", children: selectedTagObjects.map((tag) => /* @__PURE__ */ jsxs16(
-      "div",
-      {
-        className: "inline-flex items-center px-3 py-1 rounded-full text-sm font-medium",
-        style: {
-          backgroundColor: `${tag.color}20`,
-          color: tag.color,
-          border: `1px solid ${tag.color}40`
-        },
-        children: [
-          /* @__PURE__ */ jsx19(FiTag, { className: "w-3 h-3 mr-1" }),
-          tag.name,
-          /* @__PURE__ */ jsx19(
-            "button",
-            {
-              type: "button",
-              onClick: () => removeTag(tag.id),
-              className: "ml-2 hover:bg-black/20 rounded-full p-0.5 transition-colors",
-              children: /* @__PURE__ */ jsx19(FiX3, { className: "w-3 h-3" })
-            }
-          )
-        ]
-      },
-      tag.id
-    )) }),
-    /* @__PURE__ */ jsxs16("div", { className: "relative", children: [
-      /* @__PURE__ */ jsx19(
-        "button",
-        {
-          type: "button",
-          onClick: () => setIsOpen(!isOpen),
-          className: `w-full px-4 py-3 text-left bg-neutral-800/60 border rounded-lg transition-colors ${error ? "border-red-500/50 focus:border-red-500" : "border-violet-500/30 focus:border-violet-500"} ${isOpen ? "border-violet-500" : "hover:border-violet-500/50"}`,
-          children: /* @__PURE__ */ jsxs16("div", { className: "flex items-center justify-between", children: [
-            /* @__PURE__ */ jsx19("span", { className: selectedTags.length === 0 ? "text-gray-400" : "text-white", children: selectedTags.length === 0 ? "Select at least one tag..." : `${selectedTags.length} tag${selectedTags.length === 1 ? "" : "s"} selected` }),
-            /* @__PURE__ */ jsxs16("div", { className: "flex items-center space-x-2", children: [
-              selectedTags.length > 0 && /* @__PURE__ */ jsxs16("span", { className: "text-xs text-gray-400", children: [
-                selectedTags.length,
-                "/10"
-              ] }),
-              /* @__PURE__ */ jsx19(
-                "svg",
-                {
-                  className: `w-4 h-4 text-gray-400 transition-transform ${isOpen ? "rotate-180" : ""}`,
-                  fill: "none",
-                  stroke: "currentColor",
-                  viewBox: "0 0 24 24",
-                  children: /* @__PURE__ */ jsx19("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M19 9l-7 7-7-7" })
-                }
-              )
-            ] })
-          ] })
-        }
-      ),
-      isOpen && /* @__PURE__ */ jsxs16("div", { className: "absolute z-50 w-full mt-1 bg-neutral-800 border border-violet-500/30 rounded-lg shadow-xl max-h-64 overflow-hidden", ref: dropdownRef, children: [
-        /* @__PURE__ */ jsx19("div", { className: "p-3 border-b border-violet-500/20", children: /* @__PURE__ */ jsx19(
-          "input",
-          {
-            type: "text",
-            placeholder: "Search tags...",
-            value: searchTerm,
-            onChange: (e) => setSearchTerm(e.target.value),
-            onKeyDown: handleKeyDown,
-            className: "w-full px-3 py-2 bg-neutral-700/50 border border-violet-500/20 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-violet-500"
-          }
-        ) }),
-        /* @__PURE__ */ jsx19("div", { className: "max-h-48 overflow-y-auto", children: filteredTags.length === 0 ? /* @__PURE__ */ jsxs16("div", { className: "p-4 text-center text-gray-400", children: [
-          'No tags found matching "',
-          searchTerm,
-          '"'
-        ] }) : /* @__PURE__ */ jsx19("div", { className: "p-2", children: filteredTags.map((tag) => {
-          let isSelected = selectedTags.includes(tag.id);
-          return /* @__PURE__ */ jsxs16(
-            "button",
-            {
-              type: "button",
-              onClick: () => handleTagToggle(tag.id),
-              className: `w-full flex items-center justify-between p-3 rounded-lg transition-colors ${isSelected ? "bg-violet-500/20 border border-violet-500/40" : "hover:bg-neutral-700/50 border border-transparent"}`,
-              children: [
-                /* @__PURE__ */ jsxs16("div", { className: "flex items-center space-x-3", children: [
-                  /* @__PURE__ */ jsx19(
-                    "div",
-                    {
-                      className: "w-3 h-3 rounded-full",
-                      style: { backgroundColor: tag.color }
-                    }
-                  ),
-                  /* @__PURE__ */ jsxs16("div", { className: "text-left", children: [
-                    /* @__PURE__ */ jsx19("div", { className: "font-medium text-white", children: tag.name }),
-                    /* @__PURE__ */ jsx19("div", { className: "text-sm text-gray-400", children: tag.description || "No description" })
-                  ] })
-                ] }),
-                isSelected && /* @__PURE__ */ jsx19("div", { className: "w-5 h-5 bg-violet-500 rounded-full flex items-center justify-center", children: /* @__PURE__ */ jsx19("svg", { className: "w-3 h-3 text-white", fill: "currentColor", viewBox: "0 0 20 20", children: /* @__PURE__ */ jsx19("path", { fillRule: "evenodd", d: "M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z", clipRule: "evenodd" }) }) })
-              ]
-            },
-            tag.id
-          );
-        }) }) }),
-        /* @__PURE__ */ jsx19("div", { className: "p-3 border-t border-violet-500/20 bg-neutral-700/30", children: /* @__PURE__ */ jsxs16("div", { className: "flex items-center justify-between text-sm", children: [
-          /* @__PURE__ */ jsxs16("span", { className: "text-gray-400", children: [
-            selectedTags.length,
-            " of ",
-            availableTags.length,
-            " tags selected"
-          ] }),
-          required && selectedTags.length === 0 && /* @__PURE__ */ jsx19("span", { className: "text-red-400", children: "At least one tag required" })
-        ] }) })
-      ] })
-    ] }),
-    error && /* @__PURE__ */ jsx19("p", { className: "text-sm text-red-400", children: error }),
-    /* @__PURE__ */ jsx19("p", { className: "text-xs text-gray-400", children: "Tags help categorize your post and make it easier for others to find. Select tags that best describe your content." })
-  ] });
-}
-
-// app/routes/posts.create.tsx
-init_bounty_bucks_info();
-import { FiGift, FiDollarSign, FiClock as FiClock2, FiInfo } from "react-icons/fi";
-import { Fragment as Fragment4, jsx as jsx20, jsxs as jsxs17 } from "react/jsx-runtime";
-var TOKEN_SYMBOL3 = bounty_bucks_info_default.symbol, meta2 = () => [
+import { Fragment as Fragment3, jsx as jsx20, jsxs as jsxs17 } from "react/jsx-runtime";
+var TOKEN_SYMBOL = bounty_bucks_info_default.symbol, meta2 = () => [
   { title: "Create Post - portal.ask" },
   { name: "description", content: "Create a new question or discussion post on portal.ask" }
-], loader14 = async ({ request, context }) => {
+], loader13 = async ({ request, context }) => {
   let userId = await requireUserId(request), db = createDb(context.env.DB), user = (await db.select({ id: users.id, username: users.username }).from(users).where(eq21(users.id, userId)).limit(1))[0];
   if (!user)
     throw new Error("User not found");
@@ -12253,19 +11786,19 @@ var TOKEN_SYMBOL3 = bounty_bucks_info_default.symbol, meta2 = () => [
     description: tags.description,
     color: tags.color
   }).from(tags).orderBy(asc2(tags.name));
-  return json28({ user, availableTags });
+  return json27({ user, availableTags });
 };
 async function action20({ request, context }) {
-  let userId = await requireUserId(request), formData = await request.formData(), title = formData.get("title"), content = formData.get("content"), bountyAmount = formData.get("bountyAmount"), validation = z9.object({
-    title: z9.string().min(1, "Title is required").max(200, "Title must be less than 200 characters"),
-    content: z9.string().min(10, "Content must be at least 10 characters"),
-    bountyAmount: z9.string().optional()
+  let userId = await requireUserId(request), formData = await request.formData(), title = formData.get("title"), content = formData.get("content"), bountyAmount = formData.get("bountyAmount"), validation = z8.object({
+    title: z8.string().min(1, "Title is required").max(200, "Title must be less than 200 characters"),
+    content: z8.string().min(10, "Content must be at least 10 characters"),
+    bountyAmount: z8.string().optional()
   }).safeParse({ title, content, bountyAmount });
   if (!validation.success)
-    return json28({ error: validation.error.errors[0].message }, { status: 400 });
+    return json27({ error: validation.error.errors[0].message }, { status: 400 });
   let db = createDb(context.env.DB);
   try {
-    let [post] = await db.insert(posts).values({
+    let [post] = await db.insert(posts2).values({
       id: crypto.randomUUID(),
       title: validation.data.title,
       content: validation.data.content,
@@ -12274,9 +11807,9 @@ async function action20({ request, context }) {
     if (validation.data.bountyAmount && parseFloat(validation.data.bountyAmount) > 0) {
       let amount = parseFloat(validation.data.bountyAmount), wallet = await getVirtualWallet(db, userId);
       if (wallet || (wallet = await createVirtualWallet(db, userId)), !wallet)
-        return json28({ error: "Failed to create wallet" }, { status: 500 });
+        return json27({ error: "Failed to create wallet" }, { status: 500 });
       if (wallet.balance < amount)
-        return json28({ error: "Insufficient balance to create bounty" }, { status: 400 });
+        return json27({ error: "Insufficient balance to create bounty" }, { status: 400 });
       let [bounty] = await db.insert(bounties).values({
         id: crypto.randomUUID(),
         postId: post.id,
@@ -12291,22 +11824,22 @@ async function action20({ request, context }) {
     }
     return redirect3(`/posts/${post.id}`);
   } catch (error) {
-    return console.error("Error creating post:", error), json28({ error: "Failed to create post" }, { status: 500 });
+    return console.error("Error creating post:", error), json27({ error: "Failed to create post" }, { status: 500 });
   }
 }
 function CreatePost() {
-  let { user, availableTags } = useLoaderData8(), actionData = useActionData4(), isSubmitting = useNavigation2().state === "submitting", [codeBlocks3, setCodeBlocks] = useState12([]), [media3, setMedia] = useState12([]), [hasBounty, setHasBounty] = useState12(!1), [bountyAmount, setBountyAmount] = useState12(""), [bountyDuration, setBountyDuration] = useState12(7), [clientError, setClientError] = useState12(null), [selectedTags, setSelectedTags] = useState12([]), handleMediaUpload = (newMedia) => {
+  let { availableTags } = useLoaderData7(), actionData = useActionData3(), isSubmitting = useNavigation2().state === "submitting", [codeBlocks2, setCodeBlocks] = useState10([]), [media2, setMedia] = useState10([]), [hasBounty, setHasBounty] = useState10(!1), [bountyAmount, setBountyAmount] = useState10(""), [bountyDuration, setBountyDuration] = useState10(7), [selectedTags, setSelectedTags] = useState10([]), handleMediaUpload = (newMedia) => {
     setMedia((prev) => [...prev, newMedia]);
   }, handleMediaRemove = (index) => {
     setMedia((prev) => prev.filter((_, i) => i !== index));
   };
   return /* @__PURE__ */ jsx20(Layout, { children: /* @__PURE__ */ jsxs17("div", { className: "max-w-4xl mx-auto p-6", children: [
     /* @__PURE__ */ jsx20("div", { className: "mb-6 flex justify-between items-center mt-16", children: /* @__PURE__ */ jsx20("h1", { className: "text-2xl font-bold text-white", children: "Create New Post" }) }),
-    /* @__PURE__ */ jsxs17(Form5, { method: "post", className: "space-y-6 max-w-4xl mx-auto", children: [
-      /* @__PURE__ */ jsx20("input", { type: "hidden", name: "codeBlocks", value: JSON.stringify(codeBlocks3) }),
-      /* @__PURE__ */ jsx20("input", { type: "hidden", name: "media", value: JSON.stringify(media3) }),
+    /* @__PURE__ */ jsxs17(Form4, { method: "post", className: "space-y-6 max-w-4xl mx-auto", children: [
+      /* @__PURE__ */ jsx20("input", { type: "hidden", name: "codeBlocks", value: JSON.stringify(codeBlocks2) }),
+      /* @__PURE__ */ jsx20("input", { type: "hidden", name: "media", value: JSON.stringify(media2) }),
       /* @__PURE__ */ jsx20("input", { type: "hidden", name: "hasBounty", value: hasBounty ? "on" : "off" }),
-      hasBounty && /* @__PURE__ */ jsxs17(Fragment4, { children: [
+      hasBounty && /* @__PURE__ */ jsxs17(Fragment3, { children: [
         /* @__PURE__ */ jsx20("input", { type: "hidden", name: "bountyAmount", value: bountyAmount }),
         /* @__PURE__ */ jsx20("input", { type: "hidden", name: "bountyDuration", value: bountyDuration.toString() })
       ] }),
@@ -12350,35 +11883,35 @@ function CreatePost() {
         )
       ] }),
       /* @__PURE__ */ jsxs17("div", { children: [
-        /* @__PURE__ */ jsx20("label", { className: "block text-sm font-medium text-violet-300 mb-2", children: "Media" }),
+        /* @__PURE__ */ jsx20("label", { htmlFor: "media", className: "block text-sm font-medium text-violet-300 mb-2", children: "Media" }),
         /* @__PURE__ */ jsx20(
           MediaUpload,
           {
             onMediaUpload: handleMediaUpload,
             onMediaRemove: handleMediaRemove,
-            uploadedMedia: media3
+            uploadedMedia: media2
           }
         )
       ] }),
       /* @__PURE__ */ jsxs17("div", { children: [
-        /* @__PURE__ */ jsx20("label", { className: "block text-sm font-medium text-violet-300 mb-2", children: "Code Blocks" }),
+        /* @__PURE__ */ jsx20("label", { htmlFor: "codeBlocks", className: "block text-sm font-medium text-violet-300 mb-2", children: "Code Blocks" }),
         /* @__PURE__ */ jsx20(
           CodeBlockEditor,
           {
-            codeBlocks: codeBlocks3,
+            codeBlocks: codeBlocks2,
             onCodeBlocksChange: setCodeBlocks
           }
         )
       ] }),
       /* @__PURE__ */ jsxs17("div", { children: [
-        /* @__PURE__ */ jsx20("label", { className: "block text-sm font-medium text-violet-300 mb-3", children: /* @__PURE__ */ jsxs17("div", { className: "flex items-center gap-2", children: [
-          /* @__PURE__ */ jsx20(FiGift, { className: "w-4 h-4" }),
+        /* @__PURE__ */ jsx20("h3", { className: "block text-sm font-medium text-violet-300 mb-3", children: /* @__PURE__ */ jsxs17("div", { className: "flex items-center gap-2", children: [
+          /* @__PURE__ */ jsx20(FaGift, { className: "w-4 h-4" }),
           "Bounty Settings"
         ] }) }),
         /* @__PURE__ */ jsxs17("div", { className: "bg-gradient-to-br from-neutral-800/60 to-neutral-900/60 border border-violet-500/20 rounded-xl p-6 backdrop-blur-sm", children: [
           /* @__PURE__ */ jsxs17("div", { className: "flex items-center justify-between mb-6", children: [
             /* @__PURE__ */ jsxs17("div", { className: "flex items-center gap-3", children: [
-              /* @__PURE__ */ jsxs17("div", { className: "relative", children: [
+              /* @__PURE__ */ jsx20("div", { className: "relative", children: /* @__PURE__ */ jsxs17("label", { htmlFor: "hasBounty", className: `relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out cursor-pointer ${hasBounty ? "bg-violet-500" : "bg-neutral-600"}`, children: [
                 /* @__PURE__ */ jsx20(
                   "input",
                   {
@@ -12390,39 +11923,31 @@ function CreatePost() {
                   }
                 ),
                 /* @__PURE__ */ jsx20(
-                  "label",
+                  "span",
                   {
-                    htmlFor: "hasBounty",
-                    className: `relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out cursor-pointer ${hasBounty ? "bg-violet-500" : "bg-neutral-600"}`,
-                    children: /* @__PURE__ */ jsx20(
-                      "span",
-                      {
-                        className: `inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${hasBounty ? "translate-x-6" : "translate-x-1"}`
-                      }
-                    )
+                    className: `inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${hasBounty ? "translate-x-6" : "translate-x-1"}`
                   }
                 )
-              ] }),
+              ] }) }),
               /* @__PURE__ */ jsxs17("div", { children: [
-                /* @__PURE__ */ jsx20("label", { htmlFor: "hasBounty", className: "text-white font-medium cursor-pointer", children: "Add Crypto Bounty" }),
+                /* @__PURE__ */ jsx20("span", { className: "text-white font-medium cursor-pointer", children: "Add Crypto Bounty" }),
                 /* @__PURE__ */ jsx20("p", { className: "text-gray-400 text-sm", children: "Reward the best answer with tokens" })
               ] })
             ] }),
             hasBounty && /* @__PURE__ */ jsxs17("div", { className: "flex items-center gap-2 px-3 py-1 bg-violet-500/20 border border-violet-500/30 rounded-full", children: [
-              /* @__PURE__ */ jsx20(FiGift, { className: "w-4 h-4 text-violet-300" }),
+              /* @__PURE__ */ jsx20(FaGift, { className: "w-4 h-4 text-violet-300" }),
               /* @__PURE__ */ jsx20("span", { className: "text-violet-300 text-sm font-medium", children: "Active" })
             ] })
           ] }),
           hasBounty && /* @__PURE__ */ jsxs17("div", { className: "space-y-6 animate-in slide-in-from-top-2 duration-300", children: [
             /* @__PURE__ */ jsxs17("div", { className: "bg-neutral-700/30 rounded-lg p-4 border border-neutral-600/50", children: [
-              /* @__PURE__ */ jsxs17("div", { className: "flex items-center gap-2 mb-3", children: [
-                /* @__PURE__ */ jsx20(FiDollarSign, { className: "w-4 h-4 text-yellow-400" }),
-                /* @__PURE__ */ jsx20("label", { className: "text-white font-medium", children: "Bounty Amount" })
-              ] }),
+              /* @__PURE__ */ jsx20("div", { className: "flex items-center gap-2 mb-3", children: /* @__PURE__ */ jsx20(FaDollarSign, { className: "w-4 h-4 text-yellow-400" }) }),
+              /* @__PURE__ */ jsx20("label", { htmlFor: "bountyAmount", className: "text-white font-medium mb-1 block", children: "Bounty Amount" }),
               /* @__PURE__ */ jsxs17("div", { className: "relative", children: [
                 /* @__PURE__ */ jsx20(
                   "input",
                   {
+                    id: "bountyAmount",
                     type: "number",
                     value: bountyAmount,
                     onChange: (e) => setBountyAmount(e.target.value),
@@ -12433,7 +11958,7 @@ function CreatePost() {
                     className: "w-full px-4 py-3 bg-neutral-800/50 border border-neutral-600/50 rounded-lg text-white placeholder-gray-400 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all duration-200"
                   }
                 ),
-                /* @__PURE__ */ jsx20("div", { className: "absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm", children: TOKEN_SYMBOL3 })
+                /* @__PURE__ */ jsx20("div", { className: "absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm", children: TOKEN_SYMBOL })
               ] }),
               /* @__PURE__ */ jsxs17("div", { className: "flex items-center gap-2 mt-2 text-xs text-gray-400", children: [
                 /* @__PURE__ */ jsx20(FiInfo, { className: "w-3 h-3" }),
@@ -12441,14 +11966,13 @@ function CreatePost() {
               ] })
             ] }),
             /* @__PURE__ */ jsxs17("div", { className: "bg-neutral-700/30 rounded-lg p-4 border border-neutral-600/50", children: [
-              /* @__PURE__ */ jsxs17("div", { className: "flex items-center gap-2 mb-3", children: [
-                /* @__PURE__ */ jsx20(FiClock2, { className: "w-4 h-4 text-blue-400" }),
-                /* @__PURE__ */ jsx20("label", { className: "text-white font-medium", children: "Bounty Duration" })
-              ] }),
+              /* @__PURE__ */ jsx20("div", { className: "flex items-center gap-2 mb-3", children: /* @__PURE__ */ jsx20(FaClockIcon, { className: "w-4 h-4 text-blue-400" }) }),
+              /* @__PURE__ */ jsx20("label", { htmlFor: "bountyDuration", className: "text-white font-medium mb-1 block", children: "Bounty Duration" }),
               /* @__PURE__ */ jsxs17("div", { className: "grid grid-cols-2 gap-3", children: [
                 /* @__PURE__ */ jsx20(
                   "input",
                   {
+                    id: "bountyDuration",
                     type: "number",
                     value: bountyDuration,
                     onChange: (e) => setBountyDuration(Number(e.target.value)),
@@ -12474,7 +11998,7 @@ function CreatePost() {
               /* @__PURE__ */ jsxs17("div", { className: "space-y-2 text-sm", children: [
                 /* @__PURE__ */ jsxs17("div", { className: "flex justify-between", children: [
                   /* @__PURE__ */ jsx20("span", { className: "text-gray-400", children: "Amount:" }),
-                  /* @__PURE__ */ jsx20("span", { className: "text-white font-medium", children: bountyAmount ? `${parseFloat(bountyAmount).toFixed(2)} ${TOKEN_SYMBOL3}` : "0.00 SOL" })
+                  /* @__PURE__ */ jsx20("span", { className: "text-white font-medium", children: bountyAmount ? `${parseFloat(bountyAmount).toFixed(2)} ${TOKEN_SYMBOL}` : "0.00 SOL" })
                 ] }),
                 /* @__PURE__ */ jsxs17("div", { className: "flex justify-between", children: [
                   /* @__PURE__ */ jsx20("span", { className: "text-gray-400", children: "Duration:" }),
@@ -12485,11 +12009,11 @@ function CreatePost() {
                 ] }),
                 /* @__PURE__ */ jsxs17("div", { className: "flex justify-between", children: [
                   /* @__PURE__ */ jsx20("span", { className: "text-gray-400", children: "Governance Fee:" }),
-                  /* @__PURE__ */ jsx20("span", { className: "text-yellow-400 font-medium", children: bountyAmount ? `${(parseFloat(bountyAmount) * 0.05).toFixed(3)} ${TOKEN_SYMBOL3}` : "0.000 SOL" })
+                  /* @__PURE__ */ jsx20("span", { className: "text-yellow-400 font-medium", children: bountyAmount ? `${(parseFloat(bountyAmount) * 0.05).toFixed(3)} ${TOKEN_SYMBOL}` : "0.000 SOL" })
                 ] }),
                 /* @__PURE__ */ jsx20("div", { className: "border-t border-violet-500/20 pt-2 mt-2", children: /* @__PURE__ */ jsxs17("div", { className: "flex justify-between", children: [
                   /* @__PURE__ */ jsx20("span", { className: "text-gray-400", children: "Total Cost:" }),
-                  /* @__PURE__ */ jsx20("span", { className: "text-violet-300 font-semibold", children: bountyAmount ? `${(parseFloat(bountyAmount) * 1.05).toFixed(3)} ${TOKEN_SYMBOL3}` : "0.000 SOL" })
+                  /* @__PURE__ */ jsx20("span", { className: "text-violet-300 font-semibold", children: bountyAmount ? `${(parseFloat(bountyAmount) * 1.05).toFixed(3)} ${TOKEN_SYMBOL}` : "0.000 SOL" })
                 ] }) })
               ] })
             ] })
@@ -12503,7 +12027,7 @@ function CreatePost() {
           ] }) })
         ] })
       ] }),
-      (actionData?.error || clientError) && /* @__PURE__ */ jsx20("div", { className: "bg-red-500/10 border border-red-500/30 text-red-500 px-4 py-2 rounded-lg", children: actionData?.error || clientError }),
+      actionData?.error && /* @__PURE__ */ jsx20("div", { className: "bg-red-500/10 border border-red-500/30 text-red-500 px-4 py-2 rounded-lg", children: actionData?.error }),
       /* @__PURE__ */ jsx20("div", { className: "flex justify-end", children: /* @__PURE__ */ jsx20(
         "button",
         {
@@ -12546,24 +12070,24 @@ function ErrorBoundary3() {
 var transactions_exports = {};
 __export(transactions_exports, {
   default: () => TransactionsPage,
-  loader: () => loader15,
+  loader: () => loader14,
   meta: () => meta3
 });
-import { json as json29 } from "@remix-run/node";
-import { useLoaderData as useLoaderData9, Link as Link9 } from "@remix-run/react";
+import { json as json28 } from "@remix-run/cloudflare";
+import { useLoaderData as useLoaderData8, Link as Link8 } from "@remix-run/react";
 import { jsx as jsx21, jsxs as jsxs18 } from "react/jsx-runtime";
-var TOKEN_SYMBOL4 = "BBUX", meta3 = () => [
+var TOKEN_SYMBOL2 = "BBUX", meta3 = () => [
   { title: "Transactions - portal.ask" },
   { name: "description", content: "View your portal.ask transaction history" }
 ];
-async function loader15({ request, context }) {
+async function loader14({ request, context }) {
   let db = createDb(context.env.DB), user = await getUser(request, db);
   if (!user)
     throw new Response("Unauthorized", { status: 401 });
-  return json29({ user, transactions: [] });
+  return json28({ user, transactions: [] });
 }
 function TransactionsPage() {
-  let { transactions } = useLoaderData9(), formatAmount = (amount) => `${amount} ${TOKEN_SYMBOL4}`, getStatusColor = (status) => {
+  let { transactions } = useLoaderData8(), formatAmount = (amount) => `${amount} ${TOKEN_SYMBOL2}`, getStatusColor = (status) => {
     switch (status) {
       case "PENDING":
         return "text-yellow-400";
@@ -12593,7 +12117,7 @@ function TransactionsPage() {
   return /* @__PURE__ */ jsx21(Layout, { children: /* @__PURE__ */ jsxs18("div", { className: "max-w-4xl mx-auto px-4 py-8", children: [
     /* @__PURE__ */ jsxs18("div", { className: "mb-8", children: [
       /* @__PURE__ */ jsx21(
-        Link9,
+        Link8,
         {
           to: "/wallet",
           className: "text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors mb-4 inline-block",
@@ -12601,11 +12125,7 @@ function TransactionsPage() {
         }
       ),
       /* @__PURE__ */ jsx21("h1", { className: "text-3xl font-bold text-white mb-2", children: "Transaction History" }),
-      /* @__PURE__ */ jsxs18("p", { className: "text-gray-300", children: [
-        "View all your ",
-        TOKEN_SYMBOL4,
-        " transactions"
-      ] })
+      /* @__PURE__ */ jsx21("p", { className: "text-gray-300 mb-4", children: "View your transaction history and manage your account's financial activities." })
     ] }),
     transactions.length === 0 ? /* @__PURE__ */ jsx21("div", { className: "text-center py-12", children: /* @__PURE__ */ jsxs18("div", { className: "text-gray-400 mb-4", children: [
       /* @__PURE__ */ jsx21("svg", { className: "w-16 h-16 mx-auto mb-4", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24", children: /* @__PURE__ */ jsx21("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" }) }),
@@ -12646,22 +12166,22 @@ function TransactionsPage() {
 var docs_legal_exports = {};
 __export(docs_legal_exports, {
   default: () => LegalDocsPage,
-  loader: () => loader16
+  loader: () => loader15
 });
-import { json as json30 } from "@remix-run/node";
-import { useLoaderData as useLoaderData10, Link as Link10 } from "@remix-run/react";
-import { FiArrowLeft as FiArrowLeft3, FiDownload as FiDownload3, FiShield as FiShield3, FiFileText } from "react-icons/fi";
+import { json as json29 } from "@remix-run/cloudflare";
+import { useLoaderData as useLoaderData9, Link as Link9 } from "@remix-run/react";
+import { FiArrowLeft as FiArrowLeft3, FiDownload as FiDownload2, FiShield as FiShield3, FiFileText } from "react-icons/fi";
 import { jsx as jsx22, jsxs as jsxs19 } from "react/jsx-runtime";
-var loader16 = async () => json30({
+var loader15 = async () => json29({
   title: "Legal Documents",
   description: "Privacy policy and terms of service with PDF download options"
 });
 function LegalDocsPage() {
-  let data = useLoaderData10(), { title, description } = data;
+  let data = useLoaderData9(), { title, description } = data;
   return /* @__PURE__ */ jsx22(Layout, { children: /* @__PURE__ */ jsxs19("div", { className: "w-auto max-w-6xl mx-auto mt-4 px-4 ml-24 pb-16", children: [
     /* @__PURE__ */ jsxs19("div", { className: "mb-8 mt-16", children: [
       /* @__PURE__ */ jsxs19(
-        Link10,
+        Link9,
         {
           to: "/docs",
           className: "inline-flex items-center text-violet-400 hover:text-violet-300 transition-colors mb-4",
@@ -12684,7 +12204,7 @@ function LegalDocsPage() {
           ] })
         ] }),
         /* @__PURE__ */ jsxs19("div", { className: "prose prose-invert prose-violet max-w-none mb-6", children: [
-          /* @__PURE__ */ jsx22("p", { children: "Our privacy policy explains how portal.ask collects, uses, and protects your personal information. We are committed to transparency and protecting your privacy while providing our services." }),
+          /* @__PURE__ */ jsx22("p", { children: "Our privacy policy explains how portal.ask collects, uses, and protects your personal information. We're committed to protecting your privacy and ensuring transparency in how we handle your data." }),
           /* @__PURE__ */ jsx22("h3", { children: "What We Collect" }),
           /* @__PURE__ */ jsxs19("ul", { children: [
             /* @__PURE__ */ jsx22("li", { children: "Account information (email, username, profile data)" }),
@@ -12712,7 +12232,7 @@ function LegalDocsPage() {
         ] }),
         /* @__PURE__ */ jsxs19("div", { className: "flex flex-col sm:flex-row gap-4", children: [
           /* @__PURE__ */ jsxs19(
-            Link10,
+            Link9,
             {
               to: "/privacy",
               className: "inline-flex items-center justify-center px-6 py-3 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-colors",
@@ -12728,7 +12248,7 @@ function LegalDocsPage() {
               href: "/api/privacy.pdf",
               className: "inline-flex items-center justify-center px-6 py-3 bg-neutral-700 text-white rounded-lg hover:bg-neutral-600 transition-colors",
               children: [
-                /* @__PURE__ */ jsx22(FiDownload3, { className: "w-4 h-4 mr-2" }),
+                /* @__PURE__ */ jsx22(FiDownload2, { className: "w-4 h-4 mr-2" }),
                 "Download PDF"
               ]
             }
@@ -12780,7 +12300,7 @@ function LegalDocsPage() {
         ] }),
         /* @__PURE__ */ jsxs19("div", { className: "flex flex-col sm:flex-row gap-4", children: [
           /* @__PURE__ */ jsxs19(
-            Link10,
+            Link9,
             {
               to: "/terms",
               className: "inline-flex items-center justify-center px-6 py-3 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-colors",
@@ -12796,7 +12316,7 @@ function LegalDocsPage() {
               href: "/api/terms.pdf",
               className: "inline-flex items-center justify-center px-6 py-3 bg-neutral-700 text-white rounded-lg hover:bg-neutral-600 transition-colors",
               children: [
-                /* @__PURE__ */ jsx22(FiDownload3, { className: "w-4 h-4 mr-2" }),
+                /* @__PURE__ */ jsx22(FiDownload2, { className: "w-4 h-4 mr-2" }),
                 "Download PDF"
               ]
             }
@@ -12894,10 +12414,11 @@ function LegalDocsPage() {
 var username_exports = {};
 __export(username_exports, {
   default: () => UserProfile,
-  loader: () => loader17
+  loader: () => loader16,
+  meta: () => meta4
 });
-import { json as json31 } from "@remix-run/cloudflare";
-import { useLoaderData as useLoaderData11, Link as Link11 } from "@remix-run/react";
+import { json as json30 } from "@remix-run/cloudflare";
+import { useLoaderData as useLoaderData10, Link as Link10 } from "@remix-run/react";
 
 // app/utils/reputationLevel.ts
 function getReputationLevel(points) {
@@ -12919,12 +12440,12 @@ import {
   FaStackOverflow,
   FaDev
 } from "react-icons/fa";
-import { FiThumbsUp as FiThumbsUp3, FiEdit2 as FiEdit23 } from "react-icons/fi";
+import { FiThumbsUp as FiThumbsUp3, FiEdit2 as FiEdit22 } from "react-icons/fi";
 
 // app/components/IntegrityDisplay.tsx
-import { useState as useState13 } from "react";
+import { useState as useState11 } from "react";
 import { FiStar as FiStar3, FiShield as FiShield4 } from "react-icons/fi";
-import { Fragment as Fragment5, jsx as jsx23, jsxs as jsxs20 } from "react/jsx-runtime";
+import { Fragment as Fragment4, jsx as jsx23, jsxs as jsxs20 } from "react/jsx-runtime";
 function IntegrityDisplay({
   user,
   currentUserId,
@@ -12933,8 +12454,8 @@ function IntegrityDisplay({
   referenceId,
   referenceType
 }) {
-  let [showRatingModal, setShowRatingModal] = useState13(!1), integrityLevel = getIntegrityLevel(user.integrityScore), integrityColor = getIntegrityColor(user.integrityScore);
-  return /* @__PURE__ */ jsxs20(Fragment5, { children: [
+  let [showRatingModal, setShowRatingModal] = useState11(!1), integrityLevel = getIntegrityLevel(user.integrityScore), integrityColor = getIntegrityColor(user.integrityScore);
+  return /* @__PURE__ */ jsxs20(Fragment4, { children: [
     /* @__PURE__ */ jsxs20("div", { className: "bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30", children: [
       /* @__PURE__ */ jsxs20("div", { className: "flex items-center justify-between mb-3", children: [
         /* @__PURE__ */ jsxs20("div", { className: "flex items-center space-x-2", children: [
@@ -13007,7 +12528,7 @@ function getIntegrityBadgeStyle(score) {
 
 // app/routes/$username.tsx
 init_schema();
-import { eq as eq22, desc as desc9, inArray as inArray3, sql as sql9 } from "drizzle-orm";
+import { eq as eq22, desc as desc8, inArray as inArray2, sql as sql8 } from "drizzle-orm";
 import { jsx as jsx24, jsxs as jsxs21 } from "react/jsx-runtime";
 var DEFAULT_PROFILE_PICTURE2 = "https://api.dicebear.com/7.x/initials/svg?seed=";
 function getProfilePicture2(profilePicture, username) {
@@ -13042,6 +12563,8 @@ function getActivityDescription2(action26) {
   }[action26] || action26;
 }
 var SocialMediaIcons = ({ profile }) => {
+  if (!profile)
+    return null;
   let socialLinks = [
     { icon: FaGithub, url: profile.github, label: "GitHub", color: "hover:text-[#333]" },
     { icon: FaTwitter, url: profile.twitter, label: "Twitter", color: "hover:text-[#1DA1F2]" },
@@ -13069,12 +12592,12 @@ var SocialMediaIcons = ({ profile }) => {
     label
   )) });
 };
-async function loader17({ params, context, request }) {
+async function loader16({ params, context, request }) {
   let { username } = params;
   if (!username)
     throw new Response("Username is required", { status: 400 });
   try {
-    let db = context.env.DB, currentUser = await getUser(request), user = await db.select({
+    let db = createDb(context.env.DB), currentUser = await getUser(request), user = await db.select({
       id: users.id,
       username: users.username,
       email: users.email,
@@ -13090,26 +12613,37 @@ async function loader17({ params, context, request }) {
         bio: profiles.bio,
         location: profiles.location,
         website: profiles.website,
-        github: profiles.github
+        github: profiles.github,
+        twitter: profiles.twitter,
+        linkedin: profiles.linkedin,
+        instagram: profiles.instagram,
+        facebook: profiles.facebook,
+        youtube: profiles.youtube,
+        tiktok: profiles.tiktok,
+        discord: profiles.discord,
+        reddit: profiles.reddit,
+        medium: profiles.medium,
+        stackoverflow: profiles.stackoverflow,
+        devto: profiles.devto
       }
     }).from(users).leftJoin(profiles, eq22(users.id, profiles.userId)).where(eq22(users.username, username)).limit(1);
     if (!user.length)
       throw new Response("User not found", { status: 404 });
     let userPosts = await db.select({
-      id: posts.id,
-      title: posts.title,
-      content: posts.content,
-      createdAt: posts.createdAt,
-      visibilityVotes: posts.visibilityVotes
-    }).from(posts).where(eq22(posts.authorId, user[0].id)).orderBy(desc9(posts.createdAt)).limit(5), postIds = userPosts.map((post) => post.id), commentCounts = postIds.length > 0 ? await db.select({
+      id: posts2.id,
+      title: posts2.title,
+      content: posts2.content,
+      createdAt: posts2.createdAt,
+      visibilityVotes: posts2.visibilityVotes
+    }).from(posts2).where(eq22(posts2.authorId, user[0].id)).orderBy(desc8(posts2.createdAt)).limit(5), postIds = userPosts.map((post) => post.id), commentCounts = postIds.length > 0 ? await db.select({
       postId: comments.postId,
-      count: sql9`count(${comments.id})`
-    }).from(comments).where(inArray3(comments.postId, postIds)).groupBy(comments.postId) : [], userReputationHistory = await db.select({
+      count: sql8`count(${comments.id})`
+    }).from(comments).where(inArray2(comments.postId, postIds)).groupBy(comments.postId) : [], userReputationHistory = await db.select({
       id: reputationHistory.id,
       points: reputationHistory.points,
       action: reputationHistory.action,
       createdAt: reputationHistory.createdAt
-    }).from(reputationHistory).where(eq22(reputationHistory.userId, user[0].id)).orderBy(desc9(reputationHistory.createdAt)).limit(10), transformedPosts = userPosts.map((post) => ({
+    }).from(reputationHistory).where(eq22(reputationHistory.userId, user[0].id)).orderBy(desc8(reputationHistory.createdAt)).limit(10), transformedPosts = userPosts.map((post) => ({
       id: post.id,
       title: post.title,
       content: post.content,
@@ -13122,7 +12656,7 @@ async function loader17({ params, context, request }) {
       action: history.action,
       createdAt: history.createdAt.toISOString()
     }));
-    return json31({
+    return json30({
       user: {
         ...user[0],
         posts: transformedPosts,
@@ -13134,8 +12668,15 @@ async function loader17({ params, context, request }) {
     throw console.error("Error fetching user:", error), new Response("Failed to fetch user", { status: 500 });
   }
 }
+var meta4 = ({ data }) => data ? [
+  { title: `User Profile - ${data.user.username}` },
+  { name: "description", content: `View the profile of ${data.user.username}` }
+] : [
+  { title: "User Profile" },
+  { name: "description", content: "User profile page" }
+];
 function UserProfile() {
-  let { user, currentUser } = useLoaderData11(), reputationLevel = getReputationLevel(user.reputationPoints), profilePicture = getProfilePicture2(user.profile?.profilePicture || null, user.username);
+  let { user, currentUser } = useLoaderData10(), reputationLevel = getReputationLevel(user.reputationPoints), profilePicture = getProfilePicture2(user.profile?.profilePicture || null, user.username);
   return /* @__PURE__ */ jsxs21("div", { className: "h-screen w-full bg-neutral-900/95 flex flex-row", children: [
     /* @__PURE__ */ jsx24(Nav, {}),
     /* @__PURE__ */ jsx24("div", { className: "flex-1 overflow-y-auto", children: /* @__PURE__ */ jsxs21("div", { className: "w-auto max-w-8xl mx-auto mt-4 px-4 ml-24 pb-16", children: [
@@ -13172,15 +12713,15 @@ function UserProfile() {
           /* @__PURE__ */ jsx24("h2", { className: "text-lg font-semibold text-violet-300 mb-4", children: "Profile Information" }),
           /* @__PURE__ */ jsxs21("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-6", children: [
             /* @__PURE__ */ jsxs21("div", { className: "bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30", children: [
-              /* @__PURE__ */ jsx24("label", { className: "block text-sm font-medium text-violet-300", children: "Bio" }),
+              /* @__PURE__ */ jsx24("span", { className: "block text-sm font-medium text-violet-300", children: "Bio" }),
               /* @__PURE__ */ jsx24("p", { className: "mt-1 text-sm text-gray-300", children: user.profile?.bio || "No bio provided" })
             ] }),
             /* @__PURE__ */ jsxs21("div", { className: "bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30", children: [
-              /* @__PURE__ */ jsx24("label", { className: "block text-sm font-medium text-violet-300", children: "Location" }),
+              /* @__PURE__ */ jsx24("span", { className: "block text-sm font-medium text-violet-300", children: "Location" }),
               /* @__PURE__ */ jsx24("p", { className: "mt-1 text-sm text-gray-300", children: user.profile?.location || "No location provided" })
             ] }),
             /* @__PURE__ */ jsxs21("div", { className: "bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30", children: [
-              /* @__PURE__ */ jsx24("label", { className: "block text-sm font-medium text-violet-300", children: "Website" }),
+              /* @__PURE__ */ jsx24("span", { className: "block text-sm font-medium text-violet-300", children: "Website" }),
               /* @__PURE__ */ jsx24("p", { className: "mt-1 text-sm text-gray-300", children: user.profile?.website ? /* @__PURE__ */ jsx24(
                 "a",
                 {
@@ -13193,7 +12734,7 @@ function UserProfile() {
               ) : "No website provided" })
             ] }),
             /* @__PURE__ */ jsxs21("div", { className: "bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30", children: [
-              /* @__PURE__ */ jsx24("label", { className: "block text-sm font-medium text-violet-300", children: "Social Media" }),
+              /* @__PURE__ */ jsx24("span", { className: "block text-sm font-medium text-violet-300", children: "Social Media" }),
               /* @__PURE__ */ jsx24("div", { className: "mt-2", children: user.profile ? /* @__PURE__ */ jsx24(SocialMediaIcons, { profile: user.profile }) : /* @__PURE__ */ jsx24("p", { className: "text-sm text-gray-300", children: "No social media links provided" }) })
             ] })
           ] })
@@ -13230,9 +12771,9 @@ function UserProfile() {
           ] }),
           /* @__PURE__ */ jsxs21("div", { children: [
             /* @__PURE__ */ jsx24("h2", { className: "text-lg font-semibold text-violet-300 mb-4", children: "Recent Posts" }),
-            /* @__PURE__ */ jsx24("div", { className: "space-y-2", children: user.posts.length > 0 ? user.posts.map((post) => /* @__PURE__ */ jsx24("div", { className: "p-3 bg-neutral-700/50 rounded-lg border border-violet-500/30", children: /* @__PURE__ */ jsxs21(Link11, { to: `/posts/${post.id}`, className: "block hover:bg-neutral-600/50 rounded-lg p-1.5 -m-1.5 transition-colors", children: [
+            /* @__PURE__ */ jsx24("div", { className: "space-y-2", children: user.posts.length > 0 ? user.posts.map((post) => /* @__PURE__ */ jsx24("div", { className: "p-3 bg-neutral-700/50 rounded-lg border border-violet-500/30", children: /* @__PURE__ */ jsxs21(Link10, { to: `/posts/${post.id}`, className: "block hover:bg-neutral-600/50 rounded-lg p-1.5 -m-1.5 transition-colors", children: [
               /* @__PURE__ */ jsxs21("div", { className: "flex items-center gap-2 mb-1", children: [
-                /* @__PURE__ */ jsx24("div", { className: "p-1.5 bg-violet-500/20 rounded-lg", children: /* @__PURE__ */ jsx24(FiEdit23, { className: "w-3.5 h-3.5 text-violet-300" }) }),
+                /* @__PURE__ */ jsx24("div", { className: "p-1.5 bg-violet-500/20 rounded-lg", children: /* @__PURE__ */ jsx24(FiEdit22, { className: "w-3.5 h-3.5 text-violet-300" }) }),
                 /* @__PURE__ */ jsx24("h3", { className: "text-sm font-medium text-violet-300", children: post.title })
               ] }),
               /* @__PURE__ */ jsx24("p", { className: "text-xs text-gray-300 line-clamp-2", children: truncateContent(post.content) }),
@@ -13262,49 +12803,49 @@ var community_exports = {};
 __export(community_exports, {
   action: () => action21,
   default: () => Community,
-  loader: () => loader18,
-  meta: () => meta4
+  loader: () => loader17,
+  meta: () => meta5
 });
-import { useEffect as useEffect10, useState as useState14 } from "react";
-import { useLoaderData as useLoaderData12, Link as Link12, useSubmit as useSubmit4, useNavigate as useNavigate4, useSearchParams as useSearchParams3 } from "@remix-run/react";
-import { json as json32 } from "@remix-run/node";
+import { json as json31 } from "@remix-run/cloudflare";
+import { useLoaderData as useLoaderData11, useSearchParams as useSearchParams2, useSubmit as useSubmit2, Link as Link11 } from "@remix-run/react";
 init_schema();
-import { eq as eq23, and as and16, desc as desc10, sql as sql10, or as or3 } from "drizzle-orm";
-import { FiTrendingUp } from "react-icons/fi";
+import { eq as eq23, desc as desc9, and as and12, or as or2, sql as sql9 } from "drizzle-orm";
 import { FaSearch, FaBookmark } from "react-icons/fa";
+import { FiTrendingUp } from "react-icons/fi";
+import { useState as useState12, useEffect as useEffect8 } from "react";
 import { jsx as jsx25, jsxs as jsxs22 } from "react/jsx-runtime";
 var DEFAULT_PROFILE_PICTURE3 = "https://api.dicebear.com/7.x/initials/svg?seed=";
 function getProfilePicture3(profilePicture, username) {
   return profilePicture || `${DEFAULT_PROFILE_PICTURE3}${encodeURIComponent(username)}`;
 }
-var meta4 = () => [
+var meta5 = () => [
   { title: "Community - portal.ask" },
   { name: "description", content: "Explore the portal.ask community and discover questions, answers, and discussions" }
-], loader18 = async ({ request, context }) => {
+], loader17 = async ({ request, context }) => {
   try {
-    let user = await getUser(request), db = context.env.DB, url = new URL(request.url), page = parseInt(url.searchParams.get("page") || "1"), selectedTags = url.searchParams.get("tags")?.split(",").filter(Boolean) || [], searchQuery = url.searchParams.get("search") || "", perPage = 20, skip = (page - 1) * perPage, whereConditions = [];
-    selectedTags.length > 0 && whereConditions.push(sql10`EXISTS (
+    let user = await getUser(request), db = createDb(context.env.DB), url = new URL(request.url), page = parseInt(url.searchParams.get("page") || "1"), selectedTags = url.searchParams.get("tags")?.split(",").filter(Boolean) || [], searchQuery = url.searchParams.get("search") || "", perPage = 20, skip = (page - 1) * perPage, whereConditions = [];
+    selectedTags.length > 0 && whereConditions.push(sql9`EXISTS (
         SELECT 1 FROM post_tags pt 
         JOIN tags t ON pt.tag_id = t.id 
         WHERE pt.post_id = posts.id AND t.name IN (${selectedTags.join(",")})
       )`), searchQuery && whereConditions.push(
-      or3(
-        sql10`posts.title LIKE ${`%${searchQuery}%`}`,
-        sql10`posts.content LIKE ${`%${searchQuery}%`}`
+      or2(
+        sql9`posts.title LIKE ${`%${searchQuery}%`}`,
+        sql9`posts.content LIKE ${`%${searchQuery}%`}`
       )
     );
     let baseQuery = db.select({
-      id: posts.id,
-      title: posts.title,
-      content: posts.content,
-      createdAt: posts.createdAt,
-      authorId: posts.authorId,
-      visibilityVotes: posts.visibilityVotes,
-      qualityUpvotes: posts.qualityUpvotes,
-      qualityDownvotes: posts.qualityDownvotes,
-      hasBounty: posts.hasBounty,
-      status: posts.status
-    }).from(posts).orderBy(desc10(posts.createdAt)).limit(perPage).offset(skip), postsData = await (whereConditions.length > 0 ? baseQuery.where(and16(...whereConditions)) : baseQuery), postsWithData = await Promise.all(
+      id: posts2.id,
+      title: posts2.title,
+      content: posts2.content,
+      createdAt: posts2.createdAt,
+      authorId: posts2.authorId,
+      visibilityVotes: posts2.visibilityVotes,
+      qualityUpvotes: posts2.qualityUpvotes,
+      qualityDownvotes: posts2.qualityDownvotes,
+      hasBounty: posts2.hasBounty,
+      status: posts2.status
+    }).from(posts2).orderBy(desc9(posts2.createdAt)).limit(perPage).offset(skip), postsData = await (whereConditions.length > 0 ? baseQuery.where(and12(...whereConditions)) : baseQuery), postsWithData = await Promise.all(
       postsData.map(async (post) => {
         let author = (await db.select({
           id: users.id,
@@ -13319,7 +12860,7 @@ var meta4 = () => [
             name: tags.name,
             color: tags.color
           }).from(tags).where(eq23(tags.id, pt.tagId)).limit(1))[0] || null)
-        ), commentsCount = (await db.select({ count: sql10`count(*)` }).from(comments).where(eq23(comments.postId, post.id)))[0]?.count || 0, bounty = null;
+        ), commentsCount = (await db.select({ count: sql9`count(*)` }).from(comments).where(eq23(comments.postId, post.id)))[0]?.count || 0, bounty = null;
         return post.hasBounty && (bounty = (await db.select({
           id: bounties.id,
           amount: bounties.amount,
@@ -13337,8 +12878,8 @@ var meta4 = () => [
           bounty
         };
       })
-    ), totalCount = (await db.select({ count: sql10`count(*)` }).from(posts))[0]?.count || 0;
-    return json32({
+    ), totalCount = (await db.select({ count: sql9`count(*)` }).from(posts2))[0]?.count || 0;
+    return json31({
       posts: postsWithData,
       totalPosts: totalCount,
       currentPage: page,
@@ -13350,7 +12891,7 @@ var meta4 = () => [
       user
     });
   } catch (error) {
-    return console.error("Error loading community posts:", error), json32({
+    return console.error("Error loading community posts:", error), json31({
       posts: [],
       totalPosts: 0,
       currentPage: 1,
@@ -13365,14 +12906,14 @@ var meta4 = () => [
   try {
     let user = await getUser(request);
     if (!user)
-      return json32({ error: "You must be logged in to perform this action" }, { status: 401 });
+      return json31({ error: "You must be logged in to perform this action" }, { status: 401 });
     let db = createDb(context.env.DB), formData = await request.formData(), action26 = formData.get("action"), postIdRaw = formData.get("postId"), postId = typeof postIdRaw == "string" ? postIdRaw : void 0, isVoting = formData.get("isVoting") === "true";
     if (!postId)
-      return json32({ error: "Post ID is required" }, { status: 400 });
+      return json31({ error: "Post ID is required" }, { status: 400 });
     if (action26 === "vote")
       try {
         let result = await db.transaction(async (tx) => {
-          await tx.delete(votes).where(and16(
+          await tx.delete(votes).where(and12(
             eq23(votes.userId, user.id),
             eq23(votes.postId, postId),
             eq23(votes.voteType, "POST"),
@@ -13387,50 +12928,50 @@ var meta4 = () => [
             commentId: null,
             answerId: null
           });
-          let visibilityVotes = (await tx.select({ count: sql10`count(*)` }).from(votes).where(and16(
+          let visibilityVotes = (await tx.select({ count: sql9`count(*)` }).from(votes).where(and12(
             eq23(votes.postId, postId),
             eq23(votes.voteType, "POST"),
             eq23(votes.isQualityVote, !1),
             eq23(votes.value, 1)
           )))[0]?.count || 0;
           return {
-            post: (await tx.update(posts).set({
+            post: (await tx.update(posts2).set({
               visibilityVotes
-            }).where(eq23(posts.id, postId)).returning())[0],
+            }).where(eq23(posts2.id, postId)).returning())[0],
             userVoted: isVoting
           };
         });
-        return json32({
+        return json31({
           success: !0,
           votes: result.post.visibilityVotes,
           voted: result.userVoted,
           postId
         });
       } catch (error) {
-        return json32({
+        return json31({
           error: "Failed to process vote",
           details: error instanceof Error ? error.message : "Unknown error"
         }, 500);
       }
     else if (action26 === "delete") {
-      let post = (await db.select().from(posts).where(eq23(posts.id, postId)).limit(1))[0];
-      return post ? post.authorId !== user.id ? json32({ error: "You can only delete your own posts" }, { status: 403 }) : (await db.delete(posts).where(eq23(posts.id, postId)), json32({ success: !0 })) : json32({ error: "Post not found" }, { status: 404 });
+      let post = (await db.select().from(posts2).where(eq23(posts2.id, postId)).limit(1))[0];
+      return post ? post.authorId !== user.id ? json31({ error: "You can only delete your own posts" }, { status: 403 }) : (await db.delete(posts2).where(eq23(posts2.id, postId)), json31({ success: !0 })) : json31({ error: "Post not found" }, { status: 404 });
     }
-    return json32({ error: "Invalid action" }, { status: 400 });
+    return json31({ error: "Invalid action" }, { status: 400 });
   } catch (error) {
-    return console.error("Action error:", error), json32({
+    return console.error("Action error:", error), json31({
       error: "Failed to process action",
       details: error instanceof Error ? error.message : "Unknown error"
     }, { status: 500 });
   }
 };
 function Community() {
-  let { user, posts: initialPosts, totalPosts, currentPage, totalPages, availableTags, selectedTags, searchQuery } = useLoaderData12(), [searchParams, setSearchParams] = useSearchParams3(), [localPosts, setLocalPosts] = useState14(initialPosts), [videoErrors, setVideoErrors] = useState14({}), [localSearchQuery, setLocalSearchQuery] = useState14(searchQuery), [isSearching, setIsSearching] = useState14(!1), submit = useSubmit4(), navigate = useNavigate4(), [isSubmitting, setIsSubmitting] = useState14(!1), [error, setError] = useState14(null), [bookmarkedPosts, setBookmarkedPosts] = useState14({});
-  useEffect10(() => {
+  let { user, posts: initialPosts, totalPosts, availableTags, selectedTags, searchQuery } = useLoaderData11(), [searchParams, setSearchParams] = useSearchParams2(), [localPosts, setLocalPosts] = useState12(initialPosts), [localSearchQuery, setLocalSearchQuery] = useState12(searchQuery), [isSearching, setIsSearching] = useState12(!1), submit = useSubmit2(), [bookmarkedPosts, setBookmarkedPosts] = useState12({});
+  useEffect8(() => {
     console.log("Setting localPosts from initialPosts:", initialPosts.length), setLocalPosts(initialPosts);
-  }, [initialPosts]), useEffect10(() => {
+  }, [initialPosts]), useEffect8(() => {
     setLocalSearchQuery(searchQuery), setIsSearching(!1);
-  }, [searchQuery]), useEffect10(() => {
+  }, [searchQuery]), useEffect8(() => {
     let timeoutId = setTimeout(() => {
       if (localSearchQuery !== searchQuery) {
         setIsSearching(!0);
@@ -13439,8 +12980,7 @@ function Community() {
       }
     }, 300);
     return () => clearTimeout(timeoutId);
-  }, [localSearchQuery, searchQuery, searchParams, setSearchParams]), useEffect10(() => {
-  }, [bookmarkedPosts]), useEffect10(() => {
+  }, [localSearchQuery, searchQuery, searchParams, setSearchParams]), useEffect8(() => {
     if (!user || localPosts.length === 0)
       return;
     (async () => {
@@ -13464,29 +13004,19 @@ function Community() {
         }
         let data = await res.json();
         setBookmarkedPosts(data.status);
-      } catch (error2) {
-        console.error("Error fetching bookmark status:", error2);
+      } catch (error) {
+        console.error("Error fetching bookmark status:", error);
       }
     })();
   }, [user, localPosts]);
-  let handleVideoError = (postId, error2) => {
-    setVideoErrors((prev) => ({ ...prev, [postId]: error2 }));
-  }, handleVote = async (postId, voteValue) => {
-    if (!user) {
-      setError("Please log in to vote");
-      return;
-    }
-    try {
-      if (isSubmitting)
-        return;
-      setIsSubmitting(!0), setError(null);
-      let formData = new FormData();
-      formData.append("action", "vote"), formData.append("postId", postId), formData.append("isVoting", (voteValue === 1).toString()), submit(formData, { method: "post" });
-    } catch (error2) {
-      setError(error2 instanceof Error ? error2.message : "Failed to process vote");
-    } finally {
-      setIsSubmitting(!1);
-    }
+  let handleVote = async (postId, voteValue) => {
+    if (user)
+      try {
+        let formData = new FormData();
+        formData.append("action", "vote"), formData.append("postId", postId), formData.append("isVoting", (voteValue === 1).toString()), submit(formData, { method: "post" });
+      } catch (error) {
+        console.error("Failed to process vote:", error);
+      }
   }, handleBookmark = async (postId) => {
     if (user) {
       setBookmarkedPosts((prev) => ({ ...prev, [postId]: !prev[postId] }));
@@ -13497,8 +13027,8 @@ function Community() {
           body: JSON.stringify({ postId })
         });
         response.ok || (console.error("Failed to toggle bookmark:", response.status), setBookmarkedPosts((prev) => ({ ...prev, [postId]: !prev[postId] })));
-      } catch (error2) {
-        console.error("Error toggling bookmark:", error2), setBookmarkedPosts((prev) => ({ ...prev, [postId]: !prev[postId] }));
+      } catch (error) {
+        console.error("Error toggling bookmark:", error), setBookmarkedPosts((prev) => ({ ...prev, [postId]: !prev[postId] }));
       }
     }
   };
@@ -13506,7 +13036,7 @@ function Community() {
     /* @__PURE__ */ jsxs22("div", { className: "mb-6 flex justify-between items-center mt-16", children: [
       /* @__PURE__ */ jsx25("h1", { className: "text-2xl font-bold text-white", children: "Community Posts" }),
       /* @__PURE__ */ jsx25(
-        Link12,
+        Link11,
         {
           to: "/posts/create",
           className: "bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2",
@@ -13608,7 +13138,7 @@ function Community() {
                 }
               ),
               /* @__PURE__ */ jsx25(
-                Link12,
+                Link11,
                 {
                   to: `/${post.author.username}`,
                   className: "font-semibold text-violet-400 hover:text-violet-300 transition-colors",
@@ -13629,7 +13159,7 @@ function Community() {
             )
           ] }),
           /* @__PURE__ */ jsx25("div", { className: "group", children: /* @__PURE__ */ jsxs22(
-            Link12,
+            Link11,
             {
               to: `/posts/${post.id}`,
               className: "block",
@@ -13665,86 +13195,25 @@ function Community() {
                       poster: post.media.thumbnailUrl,
                       controls: !0,
                       className: "w-full h-48 object-cover rounded-lg",
-                      onError: (e) => handleVideoError(post.id, e.currentTarget.error?.message || "Video error")
+                      children: /* @__PURE__ */ jsx25("track", { kind: "captions" })
                     }
                   )
                 ] })
               ]
             }
           ) }),
-          /* @__PURE__ */ jsxs22("div", { className: "flex items-center justify-between mt-4", children: [
-            /* @__PURE__ */ jsxs22("div", { className: "flex items-center space-x-4", children: [
-              /* @__PURE__ */ jsxs22(
-                "button",
-                {
-                  onClick: () => handleVote(post.id, post.userVoted ? 0 : 1),
-                  className: `flex items-center space-x-1 transition-colors ${post.userVoted ? "text-violet-400" : "text-gray-400 hover:text-violet-400"}`,
-                  children: [
-                    /* @__PURE__ */ jsx25(FiTrendingUp, { className: `w-5 h-5 ${post.userVoted ? "fill-current" : "fill-none"}` }),
-                    /* @__PURE__ */ jsx25("span", { children: post.visibilityVotes })
-                  ]
-                }
-              ),
-              /* @__PURE__ */ jsxs22("span", { className: "text-gray-400", children: [
-                post.comments,
-                " ",
-                post.comments === 1 ? "comment" : "comments"
-              ] })
-            ] }),
-            user && user.id !== post.author.id && /* @__PURE__ */ jsx25(
-              IntegrityRatingButton,
-              {
-                targetUser: post.author,
-                context: post.hasBounty ? "BOUNTY_REJECTION" : "GENERAL",
-                referenceId: post.id,
-                referenceType: "POST",
-                variant: "icon",
-                className: "ml-2"
-              }
-            )
-          ] })
+          /* @__PURE__ */ jsx25("div", { className: "flex items-center justify-between mt-4", children: /* @__PURE__ */ jsx25("div", { className: "flex items-center space-x-4", children: /* @__PURE__ */ jsx25(
+            "button",
+            {
+              onClick: () => handleVote(post.id, post.userVoted ? 0 : 1),
+              className: `flex items-center space-x-1 transition-colors ${post.userVoted ? "text-violet-400" : "text-gray-400 hover:text-violet-400"}`,
+              children: /* @__PURE__ */ jsx25(FiTrendingUp, { className: `w-5 h-5 ${post.userVoted ? "fill-current" : "fill-none"}` })
+            }
+          ) }) })
         ]
       },
       post.id
-    )) : /* @__PURE__ */ jsx25("div", { className: "col-span-full text-center py-12", children: /* @__PURE__ */ jsx25("p", { className: "text-gray-500", children: "No posts found" }) }) }),
-    totalPages > 1 && /* @__PURE__ */ jsxs22("div", { className: "flex justify-center mt-8 space-x-2", children: [
-      /* @__PURE__ */ jsx25(
-        "button",
-        {
-          onClick: () => {
-            let newParams = new URLSearchParams(searchParams);
-            newParams.set("page", String(currentPage - 1)), setSearchParams(newParams);
-          },
-          disabled: currentPage === 1,
-          className: "px-3 py-1 rounded bg-gray-700 text-white disabled:opacity-50",
-          children: "Previous"
-        }
-      ),
-      Array.from({ length: totalPages }, (_, i) => /* @__PURE__ */ jsx25(
-        "button",
-        {
-          onClick: () => {
-            let newParams = new URLSearchParams(searchParams);
-            newParams.set("page", String(i + 1)), setSearchParams(newParams);
-          },
-          className: `px-3 py-1 rounded ${currentPage === i + 1 ? "bg-violet-500 text-white" : "bg-gray-700 text-white"}`,
-          children: i + 1
-        },
-        i + 1
-      )),
-      /* @__PURE__ */ jsx25(
-        "button",
-        {
-          onClick: () => {
-            let newParams = new URLSearchParams(searchParams);
-            newParams.set("page", String(currentPage + 1)), setSearchParams(newParams);
-          },
-          disabled: currentPage === totalPages,
-          className: "px-3 py-1 rounded bg-gray-700 text-white disabled:opacity-50",
-          children: "Next"
-        }
-      )
-    ] })
+    )) : /* @__PURE__ */ jsx25("div", { className: "col-span-full text-center text-gray-400", children: "No posts found." }) })
   ] }) });
 }
 
@@ -13753,40 +13222,32 @@ var settings_exports = {};
 __export(settings_exports, {
   action: () => action22,
   default: () => Settings,
-  loader: () => loader19,
-  meta: () => meta5
+  loader: () => loader18,
+  meta: () => meta6
 });
-import { useLoaderData as useLoaderData13, useActionData as useActionData5, useNavigation as useNavigation3, useFetcher as useFetcher3 } from "@remix-run/react";
-import { json as json33 } from "@remix-run/node";
-import { useEffect as useEffect11, useState as useState15 } from "react";
+import { json as json32 } from "@remix-run/cloudflare";
+import { useLoaderData as useLoaderData12, useNavigation as useNavigation3, useFetcher as useFetcher2 } from "@remix-run/react";
+import { useEffect as useEffect9, useState as useState13 } from "react";
 
 // app/components/auth-notice.tsx
-import { Link as Link13 } from "@remix-run/react";
+import { Link as Link12 } from "@remix-run/react";
 import { jsx as jsx26, jsxs as jsxs23 } from "react/jsx-runtime";
-function AuthNotice() {
+function AuthNotice({ message = "You need to be logged in to access this feature." }) {
   return /* @__PURE__ */ jsxs23("div", { className: "h-screen w-full bg-neutral-900 flex flex-row", children: [
     /* @__PURE__ */ jsx26(Nav, {}),
     /* @__PURE__ */ jsx26("div", { className: "flex-1 flex items-center justify-center", children: /* @__PURE__ */ jsxs23("div", { className: "bg-slate-800 p-8 rounded-lg shadow-lg max-w-md w-full mx-4", children: [
       /* @__PURE__ */ jsx26("h2", { className: "text-2xl font-bold text-white mb-4 text-center", children: "Sign In Required" }),
-      /* @__PURE__ */ jsx26("p", { className: "text-gray-300 mb-6 text-center", children: "You must be signed in to access this page. If you don't have an account, you can create one for free." }),
-      /* @__PURE__ */ jsxs23("div", { className: "flex flex-col gap-4", children: [
-        /* @__PURE__ */ jsx26(
-          Link13,
-          {
-            to: "/login",
-            className: "w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded text-center transition-colors",
-            children: "Sign In"
-          }
-        ),
-        /* @__PURE__ */ jsx26(
-          Link13,
-          {
-            to: "/signup",
-            className: "w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded text-center transition-colors",
-            children: "Create Account"
-          }
-        )
-      ] })
+      /* @__PURE__ */ jsx26("div", { className: "bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6", children: /* @__PURE__ */ jsxs23("div", { className: "flex", children: [
+        /* @__PURE__ */ jsx26("div", { className: "flex-shrink-0", children: /* @__PURE__ */ jsx26("svg", { className: "h-5 w-5 text-blue-400", viewBox: "0 0 20 20", fill: "currentColor", children: /* @__PURE__ */ jsx26("path", { fillRule: "evenodd", d: "M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z", clipRule: "evenodd" }) }) }),
+        /* @__PURE__ */ jsx26("div", { className: "ml-3", children: /* @__PURE__ */ jsxs23("p", { className: "text-sm text-blue-700", children: [
+          message,
+          " Please ",
+          /* @__PURE__ */ jsx26(Link12, { to: "/login", className: "font-medium underline hover:text-blue-600", children: "log in" }),
+          " or ",
+          /* @__PURE__ */ jsx26(Link12, { to: "/signup", className: "font-medium underline hover:text-blue-600", children: "sign up" }),
+          " to continue."
+        ] }) })
+      ] }) })
     ] }) })
   ] });
 }
@@ -13796,16 +13257,16 @@ init_schema();
 import { FiUser, FiLink, FiMail, FiLock, FiSave, FiCheck as FiCheck2 } from "react-icons/fi";
 import { eq as eq24 } from "drizzle-orm";
 import { jsx as jsx27, jsxs as jsxs24 } from "react/jsx-runtime";
-var meta5 = () => [
+var meta6 = () => [
   { title: "Settings - portal.ask" },
   { name: "description", content: "Manage your portal.ask account settings" }
 ];
-async function loader19({ request, context }) {
+async function loader18({ request, context }) {
   let user = await getUser(request);
   if (!user)
     throw new Response("Unauthorized", { status: 401 });
   try {
-    let userData = await context.env.DB.select({
+    let userData = await createDb(context.env.DB).select({
       id: users.id,
       username: users.username,
       email: users.email,
@@ -13837,7 +13298,7 @@ async function loader19({ request, context }) {
     }).from(users).leftJoin(profiles, eq24(users.id, profiles.userId)).where(eq24(users.id, user.id)).limit(1);
     if (!userData.length)
       throw new Response("User not found", { status: 404 });
-    return json33({ user: userData[0] });
+    return json32({ user: userData[0] });
   } catch (error) {
     throw console.error("Error fetching user data:", error), new Response("Failed to fetch user data", { status: 500 });
   }
@@ -13848,7 +13309,7 @@ async function action22({ request, context }) {
     throw new Response("Unauthorized", { status: 401 });
   let formData = await request.formData(), action26 = formData.get("action");
   try {
-    let db = context.env.DB;
+    let db = createDb(context.env.DB);
     switch (action26) {
       case "updateProfile": {
         let firstName = formData.get("firstName"), lastName = formData.get("lastName"), bio = formData.get("bio"), location = formData.get("location"), website = formData.get("website"), facebook = formData.get("facebook"), twitter = formData.get("twitter"), instagram = formData.get("instagram"), linkedin = formData.get("linkedin"), github = formData.get("github"), youtube = formData.get("youtube"), tiktok = formData.get("tiktok"), discord = formData.get("discord"), reddit = formData.get("reddit"), medium = formData.get("medium"), stackoverflow = formData.get("stackoverflow"), devto = formData.get("devto");
@@ -13893,18 +13354,18 @@ async function action22({ request, context }) {
           devto,
           createdAt: /* @__PURE__ */ new Date(),
           updatedAt: /* @__PURE__ */ new Date()
-        }), json33({ success: !0, message: "Profile updated successfully" });
+        }), json32({ success: !0, message: "Profile updated successfully" });
       }
       default:
-        return json33({ error: "Invalid action" }, { status: 400 });
+        return json32({ error: "Invalid action" }, { status: 400 });
     }
   } catch (error) {
-    return console.error("Error updating profile:", error), json33({ error: "Failed to update profile" }, { status: 500 });
+    return console.error("Error updating profile:", error), json32({ error: "Failed to update profile" }, { status: 500 });
   }
 }
 function Settings() {
-  let { userData, isAuthenticated } = useLoaderData13(), actionData = useActionData5(), navigation = useNavigation3(), [activeTab, setActiveTab] = useState15("profile"), [showSuccess, setShowSuccess] = useState15(!1), isSubmitting = navigation.state === "submitting", fetcher = useFetcher3();
-  return useEffect11(() => {
+  let { userData, isAuthenticated } = useLoaderData12(), navigation = useNavigation3(), [activeTab, setActiveTab] = useState13("profile"), [showSuccess, setShowSuccess] = useState13(!1), isSubmitting = navigation.state === "submitting", fetcher = useFetcher2();
+  return useEffect9(() => {
     if (fetcher.data?.success) {
       setShowSuccess(!0);
       let timer = setTimeout(() => setShowSuccess(!1), 3e3);
@@ -13939,10 +13400,11 @@ function Settings() {
         activeTab === "profile" && /* @__PURE__ */ jsxs24("div", { className: "space-y-6", children: [
           /* @__PURE__ */ jsxs24("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-6", children: [
             /* @__PURE__ */ jsxs24("div", { children: [
-              /* @__PURE__ */ jsx27("label", { className: "block text-sm font-medium text-violet-300 mb-2", children: "First Name" }),
+              /* @__PURE__ */ jsx27("label", { htmlFor: "firstName", className: "block text-sm font-medium text-violet-300 mb-2", children: "First Name" }),
               /* @__PURE__ */ jsx27(
                 "input",
                 {
+                  id: "firstName",
                   type: "text",
                   name: "firstName",
                   defaultValue: userData.profile?.firstName || "",
@@ -13952,10 +13414,11 @@ function Settings() {
               )
             ] }),
             /* @__PURE__ */ jsxs24("div", { children: [
-              /* @__PURE__ */ jsx27("label", { className: "block text-sm font-medium text-violet-300 mb-2", children: "Last Name" }),
+              /* @__PURE__ */ jsx27("label", { htmlFor: "lastName", className: "block text-sm font-medium text-violet-300 mb-2", children: "Last Name" }),
               /* @__PURE__ */ jsx27(
                 "input",
                 {
+                  id: "lastName",
                   type: "text",
                   name: "lastName",
                   defaultValue: userData.profile?.lastName || "",
@@ -13966,10 +13429,11 @@ function Settings() {
             ] })
           ] }),
           /* @__PURE__ */ jsxs24("div", { children: [
-            /* @__PURE__ */ jsx27("label", { className: "block text-sm font-medium text-violet-300 mb-2", children: "Bio" }),
+            /* @__PURE__ */ jsx27("label", { htmlFor: "bio", className: "block text-sm font-medium text-violet-300 mb-2", children: "Bio" }),
             /* @__PURE__ */ jsx27(
               "textarea",
               {
+                id: "bio",
                 name: "bio",
                 defaultValue: userData.profile?.bio || "",
                 placeholder: "Tell us about yourself...",
@@ -13979,10 +13443,11 @@ function Settings() {
             )
           ] }),
           /* @__PURE__ */ jsxs24("div", { children: [
-            /* @__PURE__ */ jsx27("label", { className: "block text-sm font-medium text-violet-300 mb-2", children: "Location" }),
+            /* @__PURE__ */ jsx27("label", { htmlFor: "location", className: "block text-sm font-medium text-violet-300 mb-2", children: "Location" }),
             /* @__PURE__ */ jsx27(
               "input",
               {
+                id: "location",
                 type: "text",
                 name: "location",
                 defaultValue: userData.profile?.location || "",
@@ -13992,10 +13457,11 @@ function Settings() {
             )
           ] }),
           /* @__PURE__ */ jsxs24("div", { children: [
-            /* @__PURE__ */ jsx27("label", { className: "block text-sm font-medium text-violet-300 mb-2", children: "Website" }),
+            /* @__PURE__ */ jsx27("label", { htmlFor: "website", className: "block text-sm font-medium text-violet-300 mb-2", children: "Website" }),
             /* @__PURE__ */ jsx27(
               "input",
               {
+                id: "website",
                 type: "url",
                 name: "website",
                 defaultValue: userData.profile?.website || "",
@@ -14007,10 +13473,11 @@ function Settings() {
         ] }),
         activeTab === "social" && /* @__PURE__ */ jsxs24("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-6", children: [
           /* @__PURE__ */ jsxs24("div", { children: [
-            /* @__PURE__ */ jsx27("label", { className: "block text-sm font-medium text-violet-300 mb-2", children: "Facebook" }),
+            /* @__PURE__ */ jsx27("label", { htmlFor: "facebook", className: "block text-sm font-medium text-violet-300 mb-2", children: "Facebook" }),
             /* @__PURE__ */ jsx27(
               "input",
               {
+                id: "facebook",
                 type: "text",
                 name: "facebook",
                 defaultValue: userData.profile?.facebook || "",
@@ -14020,10 +13487,11 @@ function Settings() {
             )
           ] }),
           /* @__PURE__ */ jsxs24("div", { children: [
-            /* @__PURE__ */ jsx27("label", { className: "block text-sm font-medium text-violet-300 mb-2", children: "Twitter" }),
+            /* @__PURE__ */ jsx27("label", { htmlFor: "twitter", className: "block text-sm font-medium text-violet-300 mb-2", children: "Twitter" }),
             /* @__PURE__ */ jsx27(
               "input",
               {
+                id: "twitter",
                 type: "text",
                 name: "twitter",
                 defaultValue: userData.profile?.twitter || "",
@@ -14033,10 +13501,11 @@ function Settings() {
             )
           ] }),
           /* @__PURE__ */ jsxs24("div", { children: [
-            /* @__PURE__ */ jsx27("label", { className: "block text-sm font-medium text-violet-300 mb-2", children: "Instagram" }),
+            /* @__PURE__ */ jsx27("label", { htmlFor: "instagram", className: "block text-sm font-medium text-violet-300 mb-2", children: "Instagram" }),
             /* @__PURE__ */ jsx27(
               "input",
               {
+                id: "instagram",
                 type: "text",
                 name: "instagram",
                 defaultValue: userData.profile?.instagram || "",
@@ -14046,10 +13515,11 @@ function Settings() {
             )
           ] }),
           /* @__PURE__ */ jsxs24("div", { children: [
-            /* @__PURE__ */ jsx27("label", { className: "block text-sm font-medium text-violet-300 mb-2", children: "LinkedIn" }),
+            /* @__PURE__ */ jsx27("label", { htmlFor: "linkedin", className: "block text-sm font-medium text-violet-300 mb-2", children: "LinkedIn" }),
             /* @__PURE__ */ jsx27(
               "input",
               {
+                id: "linkedin",
                 type: "text",
                 name: "linkedin",
                 defaultValue: userData.profile?.linkedin || "",
@@ -14059,10 +13529,11 @@ function Settings() {
             )
           ] }),
           /* @__PURE__ */ jsxs24("div", { children: [
-            /* @__PURE__ */ jsx27("label", { className: "block text-sm font-medium text-violet-300 mb-2", children: "GitHub" }),
+            /* @__PURE__ */ jsx27("label", { htmlFor: "github", className: "block text-sm font-medium text-violet-300 mb-2", children: "GitHub" }),
             /* @__PURE__ */ jsx27(
               "input",
               {
+                id: "github",
                 type: "text",
                 name: "github",
                 defaultValue: userData.profile?.github || "",
@@ -14072,10 +13543,11 @@ function Settings() {
             )
           ] }),
           /* @__PURE__ */ jsxs24("div", { children: [
-            /* @__PURE__ */ jsx27("label", { className: "block text-sm font-medium text-violet-300 mb-2", children: "YouTube" }),
+            /* @__PURE__ */ jsx27("label", { htmlFor: "youtube", className: "block text-sm font-medium text-violet-300 mb-2", children: "YouTube" }),
             /* @__PURE__ */ jsx27(
               "input",
               {
+                id: "youtube",
                 type: "text",
                 name: "youtube",
                 defaultValue: userData.profile?.youtube || "",
@@ -14085,10 +13557,11 @@ function Settings() {
             )
           ] }),
           /* @__PURE__ */ jsxs24("div", { children: [
-            /* @__PURE__ */ jsx27("label", { className: "block text-sm font-medium text-violet-300 mb-2", children: "TikTok" }),
+            /* @__PURE__ */ jsx27("label", { htmlFor: "tiktok", className: "block text-sm font-medium text-violet-300 mb-2", children: "TikTok" }),
             /* @__PURE__ */ jsx27(
               "input",
               {
+                id: "tiktok",
                 type: "text",
                 name: "tiktok",
                 defaultValue: userData.profile?.tiktok || "",
@@ -14098,10 +13571,11 @@ function Settings() {
             )
           ] }),
           /* @__PURE__ */ jsxs24("div", { children: [
-            /* @__PURE__ */ jsx27("label", { className: "block text-sm font-medium text-violet-300 mb-2", children: "Discord" }),
+            /* @__PURE__ */ jsx27("label", { htmlFor: "discord", className: "block text-sm font-medium text-violet-300 mb-2", children: "Discord" }),
             /* @__PURE__ */ jsx27(
               "input",
               {
+                id: "discord",
                 type: "text",
                 name: "discord",
                 defaultValue: userData.profile?.discord || "",
@@ -14111,10 +13585,11 @@ function Settings() {
             )
           ] }),
           /* @__PURE__ */ jsxs24("div", { children: [
-            /* @__PURE__ */ jsx27("label", { className: "block text-sm font-medium text-violet-300 mb-2", children: "Reddit" }),
+            /* @__PURE__ */ jsx27("label", { htmlFor: "reddit", className: "block text-sm font-medium text-violet-300 mb-2", children: "Reddit" }),
             /* @__PURE__ */ jsx27(
               "input",
               {
+                id: "reddit",
                 type: "text",
                 name: "reddit",
                 defaultValue: userData.profile?.reddit || "",
@@ -14124,10 +13599,11 @@ function Settings() {
             )
           ] }),
           /* @__PURE__ */ jsxs24("div", { children: [
-            /* @__PURE__ */ jsx27("label", { className: "block text-sm font-medium text-violet-300 mb-2", children: "Medium" }),
+            /* @__PURE__ */ jsx27("label", { htmlFor: "medium", className: "block text-sm font-medium text-violet-300 mb-2", children: "Medium" }),
             /* @__PURE__ */ jsx27(
               "input",
               {
+                id: "medium",
                 type: "text",
                 name: "medium",
                 defaultValue: userData.profile?.medium || "",
@@ -14137,10 +13613,11 @@ function Settings() {
             )
           ] }),
           /* @__PURE__ */ jsxs24("div", { children: [
-            /* @__PURE__ */ jsx27("label", { className: "block text-sm font-medium text-violet-300 mb-2", children: "Stack Overflow" }),
+            /* @__PURE__ */ jsx27("label", { htmlFor: "stackoverflow", className: "block text-sm font-medium text-violet-300 mb-2", children: "Stack Overflow" }),
             /* @__PURE__ */ jsx27(
               "input",
               {
+                id: "stackoverflow",
                 type: "text",
                 name: "stackoverflow",
                 defaultValue: userData.profile?.stackoverflow || "",
@@ -14150,10 +13627,11 @@ function Settings() {
             )
           ] }),
           /* @__PURE__ */ jsxs24("div", { children: [
-            /* @__PURE__ */ jsx27("label", { className: "block text-sm font-medium text-violet-300 mb-2", children: "Dev.to" }),
+            /* @__PURE__ */ jsx27("label", { htmlFor: "devto", className: "block text-sm font-medium text-violet-300 mb-2", children: "Dev.to" }),
             /* @__PURE__ */ jsx27(
               "input",
               {
+                id: "devto",
                 type: "text",
                 name: "devto",
                 defaultValue: userData.profile?.devto || "",
@@ -14165,10 +13643,11 @@ function Settings() {
         ] }),
         activeTab === "account" && /* @__PURE__ */ jsxs24("div", { className: "space-y-6", children: [
           /* @__PURE__ */ jsxs24("div", { children: [
-            /* @__PURE__ */ jsx27("label", { className: "block text-sm font-medium text-violet-300 mb-2", children: "Email" }),
+            /* @__PURE__ */ jsx27("label", { htmlFor: "email", className: "block text-sm font-medium text-violet-300 mb-2", children: "Email" }),
             /* @__PURE__ */ jsx27(
               "input",
               {
+                id: "email",
                 type: "email",
                 value: userData.email,
                 disabled: !0,
@@ -14178,10 +13657,11 @@ function Settings() {
             )
           ] }),
           /* @__PURE__ */ jsxs24("div", { children: [
-            /* @__PURE__ */ jsx27("label", { className: "block text-sm font-medium text-violet-300 mb-2", children: "Username" }),
+            /* @__PURE__ */ jsx27("label", { htmlFor: "username", className: "block text-sm font-medium text-violet-300 mb-2", children: "Username" }),
             /* @__PURE__ */ jsx27(
               "input",
               {
+                id: "username",
                 type: "text",
                 value: userData.username,
                 disabled: !0,
@@ -14193,10 +13673,11 @@ function Settings() {
         ] }),
         activeTab === "security" && /* @__PURE__ */ jsxs24("div", { className: "space-y-6", children: [
           /* @__PURE__ */ jsxs24("div", { children: [
-            /* @__PURE__ */ jsx27("label", { className: "block text-sm font-medium text-violet-300 mb-2", children: "Current Password" }),
+            /* @__PURE__ */ jsx27("label", { htmlFor: "currentPassword", className: "block text-sm font-medium text-violet-300 mb-2", children: "Current Password" }),
             /* @__PURE__ */ jsx27(
               "input",
               {
+                id: "currentPassword",
                 type: "password",
                 name: "currentPassword",
                 placeholder: "Enter your current password",
@@ -14205,10 +13686,11 @@ function Settings() {
             )
           ] }),
           /* @__PURE__ */ jsxs24("div", { children: [
-            /* @__PURE__ */ jsx27("label", { className: "block text-sm font-medium text-violet-300 mb-2", children: "New Password" }),
+            /* @__PURE__ */ jsx27("label", { htmlFor: "newPassword", className: "block text-sm font-medium text-violet-300 mb-2", children: "New Password" }),
             /* @__PURE__ */ jsx27(
               "input",
               {
+                id: "newPassword",
                 type: "password",
                 name: "newPassword",
                 placeholder: "Enter your new password",
@@ -14217,10 +13699,11 @@ function Settings() {
             )
           ] }),
           /* @__PURE__ */ jsxs24("div", { children: [
-            /* @__PURE__ */ jsx27("label", { className: "block text-sm font-medium text-violet-300 mb-2", children: "Confirm New Password" }),
+            /* @__PURE__ */ jsx27("label", { htmlFor: "confirmPassword", className: "block text-sm font-medium text-violet-300 mb-2", children: "Confirm New Password" }),
             /* @__PURE__ */ jsx27(
               "input",
               {
+                id: "confirmPassword",
                 type: "password",
                 name: "confirmPassword",
                 placeholder: "Confirm your new password",
@@ -14250,11 +13733,11 @@ function Settings() {
 var privacy_exports = {};
 __export(privacy_exports, {
   default: () => PrivacyPolicy,
-  loader: () => loader20
+  loader: () => loader19
 });
-import { json as json34 } from "@remix-run/node";
+import { json as json33 } from "@remix-run/cloudflare";
 import { jsx as jsx28, jsxs as jsxs25 } from "react/jsx-runtime";
-var loader20 = async ({ request }) => json34({});
+var loader19 = async () => json33({});
 function PrivacyPolicy() {
   return /* @__PURE__ */ jsx28(Layout, { showNav: !1, children: /* @__PURE__ */ jsxs25("div", { className: "max-w-4xl mx-auto p-6", children: [
     /* @__PURE__ */ jsxs25("div", { className: "mb-6 flex justify-between items-center mt-16", children: [
@@ -14470,19 +13953,19 @@ function PrivacyPolicy() {
 var profile_exports = {};
 __export(profile_exports, {
   default: () => Profile,
-  loader: () => loader21,
-  meta: () => meta6
+  loader: () => loader20,
+  meta: () => meta7
 });
-import { useLoaderData as useLoaderData14, Link as Link15, Outlet as Outlet2, useLocation as useLocation2 } from "@remix-run/react";
-import { json as json35 } from "@remix-run/node";
+import { useLoaderData as useLoaderData13, Link as Link13, Outlet as Outlet2, useLocation as useLocation2 } from "@remix-run/react";
+import { json as json34 } from "@remix-run/node";
 
 // app/components/ProfilePictureUpload.tsx
-import { useState as useState16, useRef as useRef4 } from "react";
+import { useState as useState14, useRef as useRef3 } from "react";
 import { FiCamera } from "react-icons/fi";
 import { jsx as jsx29, jsxs as jsxs26 } from "react/jsx-runtime";
 var DEFAULT_PROFILE_PICTURE4 = "https://api.dicebear.com/7.x/initials/svg?seed=";
 function ProfilePictureUpload({ currentPicture, username }) {
-  let [preview, setPreview] = useState16(currentPicture), [isUploading, setIsUploading] = useState16(!1), fileInputRef = useRef4(null), getProfilePicture5 = (profilePicture, username2) => profilePicture || `${DEFAULT_PROFILE_PICTURE4}${encodeURIComponent(username2)}`, handleFileChange = async (e) => {
+  let [preview, setPreview] = useState14(currentPicture), [isUploading, setIsUploading] = useState14(!1), fileInputRef = useRef3(null), getProfilePicture5 = (profilePicture, username2) => profilePicture || `${DEFAULT_PROFILE_PICTURE4}${encodeURIComponent(username2)}`, handleFileChange = async (e) => {
     let file = e.target.files?.[0];
     if (!file)
       return;
@@ -14549,25 +14032,12 @@ function ProfilePictureUpload({ currentPicture, username }) {
 }
 
 // app/routes/profile.tsx
-import {
-  FaGithub as FaGithub2,
-  FaTwitter as FaTwitter2,
-  FaLinkedin as FaLinkedin2,
-  FaInstagram as FaInstagram2,
-  FaFacebook as FaFacebook2,
-  FaYoutube as FaYoutube2,
-  FaTiktok as FaTiktok2,
-  FaDiscord as FaDiscord2,
-  FaReddit as FaReddit2,
-  FaMedium as FaMedium2,
-  FaStackOverflow as FaStackOverflow2,
-  FaDev as FaDev2
-} from "react-icons/fa";
-import { FiThumbsUp as FiThumbsUp4, FiEdit2 as FiEdit24 } from "react-icons/fi";
+import { FaGithub as FaGithub2, FaTwitter as FaTwitter2, FaLinkedin as FaLinkedin2, FaInstagram as FaInstagram2, FaFacebook as FaFacebook2, FaYoutube as FaYoutube2, FaTiktok as FaTiktok2, FaDiscord as FaDiscord2, FaReddit as FaReddit2, FaMedium as FaMedium2, FaStackOverflow as FaStackOverflow2, FaDev as FaDev2 } from "react-icons/fa";
+import { FiThumbsUp as FiThumbsUp4, FiEdit2 as FiEdit23 } from "react-icons/fi";
 init_schema();
-import { eq as eq25, desc as desc11 } from "drizzle-orm";
+import { eq as eq25, desc as desc10 } from "drizzle-orm";
 import { jsx as jsx30, jsxs as jsxs27 } from "react/jsx-runtime";
-var meta6 = ({ data }) => {
+var meta7 = ({ data }) => {
   let username = data?.user?.username || "Profile";
   return [
     { title: `${username} - portal.ask` },
@@ -14580,21 +14050,21 @@ function truncateContent2(content) {
 function getProfilePicture4(profilePicture, username) {
   return profilePicture || `${DEFAULT_PROFILE_PICTURE5}${encodeURIComponent(username)}`;
 }
-var loader21 = async ({ request, context }) => {
+var loader20 = async ({ request, context }) => {
   let userId = await requireUserId(request), db = createDb(context.env.DB), userRows = await db.select().from(users).where(eq25(users.id, userId)).limit(1);
   if (!userRows.length)
     throw new Response("User not found", { status: 404 });
   let user = userRows[0], profile = (await db.select().from(profiles).where(eq25(profiles.userId, userId)).limit(1))[0] || null, userPosts = await db.select({
-    id: posts.id,
-    title: posts.title,
-    content: posts.content,
-    createdAt: posts.createdAt
-  }).from(posts).where(eq25(posts.authorId, userId)).orderBy(desc11(posts.createdAt)), repHistory = await db.select({
+    id: posts2.id,
+    title: posts2.title,
+    content: posts2.content,
+    createdAt: posts2.createdAt
+  }).from(posts2).where(eq25(posts2.authorId, userId)).orderBy(desc10(posts2.createdAt)), repHistory = await db.select({
     id: reputationHistory.id,
     points: reputationHistory.points,
     action: reputationHistory.action,
     createdAt: reputationHistory.createdAt
-  }).from(reputationHistory).where(eq25(reputationHistory.userId, userId)).orderBy(desc11(reputationHistory.createdAt)).limit(10), bookmarks2 = [];
+  }).from(reputationHistory).where(eq25(reputationHistory.userId, userId)).orderBy(desc10(reputationHistory.createdAt)).limit(10), bookmarks2 = [];
   try {
     bookmarks2 = (await getUserBookmarks(db, userId)).map((bm) => ({
       id: bm.id,
@@ -14652,7 +14122,7 @@ var loader21 = async ({ request, context }) => {
     posts: userPosts,
     reputationHistory: repHistory
   };
-  return json35({ user: userData, isAuthenticated: !0, bookmarks: bookmarks2 });
+  return json34({ user: userData, isAuthenticated: !0, bookmarks: bookmarks2 });
 }, SocialMediaIcons2 = ({ profile }) => {
   let socialLinks = [
     { icon: FaGithub2, url: profile.github, label: "GitHub", color: "hover:text-[#333]" },
@@ -14707,20 +14177,20 @@ function getActivityDescription3(action26) {
   }[action26] || action26;
 }
 function Profile() {
-  let { user, isAuthenticated, bookmarks: bookmarks2 } = useLoaderData14(), isActivityPage = useLocation2().pathname === "/profile/activity";
+  let { user, isAuthenticated, bookmarks: bookmarks2 } = useLoaderData13(), isActivityPage = useLocation2().pathname === "/profile/activity";
   if (!isAuthenticated)
     return /* @__PURE__ */ jsx30(AuthNotice, {});
   if (!user)
     return /* @__PURE__ */ jsx30(Layout, { children: /* @__PURE__ */ jsxs27("div", { className: "flex flex-col justify-center items-center w-full h-full", children: [
       /* @__PURE__ */ jsx30("h1", { className: "text-white text-2xl", children: "User not found" }),
-      /* @__PURE__ */ jsx30(Link15, { to: "/community", className: "mt-4 text-indigo-400 hover:text-indigo-300", children: "Go to Community" })
+      /* @__PURE__ */ jsx30(Link13, { to: "/community", className: "mt-4 text-indigo-400 hover:text-indigo-300", children: "Go to Community" })
     ] }) });
   let reputationLevel = getReputationLevel(user.reputationPoints || 0), recentActivities = user.reputationHistory.slice(0, 5);
   return /* @__PURE__ */ jsx30(Layout, { children: /* @__PURE__ */ jsxs27("div", { className: "w-auto max-w-8xl mx-auto mt-4 px-4 pb-16", children: [
     /* @__PURE__ */ jsxs27("div", { className: "mb-6 flex justify-between items-center mt-16", children: [
       /* @__PURE__ */ jsx30("h1", { className: "text-2xl font-bold text-white", children: "Profile" }),
       /* @__PURE__ */ jsxs27(
-        Link15,
+        Link13,
         {
           to: "/posts/create",
           className: "px-4 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-colors flex items-center gap-2 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)] hover:shadow-[0_0_20px_rgba(139,92,246,0.5)]",
@@ -14759,16 +14229,16 @@ function Profile() {
         /* @__PURE__ */ jsx30("h2", { className: "text-lg font-semibold text-violet-300 mb-4", children: "Profile Information" }),
         /* @__PURE__ */ jsxs27("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-6", children: [
           /* @__PURE__ */ jsxs27("div", { className: "bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30", children: [
-            /* @__PURE__ */ jsx30("label", { className: "block text-sm font-medium text-violet-300", children: "Bio" }),
-            /* @__PURE__ */ jsx30("p", { className: "mt-1 text-sm text-gray-300", children: user.profile?.bio || "No bio provided" })
+            /* @__PURE__ */ jsx30("label", { htmlFor: "bio", className: "block text-sm font-medium text-violet-300", children: "Bio" }),
+            /* @__PURE__ */ jsx30("p", { id: "bio", className: "mt-1 text-sm text-gray-300", children: user.profile?.bio || "No bio provided" })
           ] }),
           /* @__PURE__ */ jsxs27("div", { className: "bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30", children: [
-            /* @__PURE__ */ jsx30("label", { className: "block text-sm font-medium text-violet-300", children: "Location" }),
-            /* @__PURE__ */ jsx30("p", { className: "mt-1 text-sm text-gray-300", children: user.profile?.location || "No location provided" })
+            /* @__PURE__ */ jsx30("label", { htmlFor: "location", className: "block text-sm font-medium text-violet-300", children: "Location" }),
+            /* @__PURE__ */ jsx30("p", { id: "location", className: "mt-1 text-sm text-gray-300", children: user.profile?.location || "No location provided" })
           ] }),
           /* @__PURE__ */ jsxs27("div", { className: "bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30", children: [
-            /* @__PURE__ */ jsx30("label", { className: "block text-sm font-medium text-violet-300", children: "Website" }),
-            /* @__PURE__ */ jsx30("p", { className: "mt-1 text-sm text-gray-300", children: user.profile?.website ? /* @__PURE__ */ jsx30(
+            /* @__PURE__ */ jsx30("label", { htmlFor: "website", className: "block text-sm font-medium text-violet-300", children: "Website" }),
+            /* @__PURE__ */ jsx30("p", { id: "website", className: "mt-1 text-sm text-gray-300", children: user.profile?.website ? /* @__PURE__ */ jsx30(
               "a",
               {
                 href: user.profile.website,
@@ -14780,8 +14250,8 @@ function Profile() {
             ) : "No website provided" })
           ] }),
           /* @__PURE__ */ jsxs27("div", { className: "bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30", children: [
-            /* @__PURE__ */ jsx30("label", { className: "block text-sm font-medium text-violet-300", children: "Social Media" }),
-            /* @__PURE__ */ jsx30("div", { className: "mt-2", children: user.profile ? /* @__PURE__ */ jsx30(SocialMediaIcons2, { profile: user.profile }) : /* @__PURE__ */ jsx30("p", { className: "text-sm text-gray-300", children: "No social media links provided" }) })
+            /* @__PURE__ */ jsx30("label", { htmlFor: "socialMedia", className: "block text-sm font-medium text-violet-300", children: "Social Media" }),
+            /* @__PURE__ */ jsx30("div", { id: "socialMedia", className: "mt-2", children: user.profile ? /* @__PURE__ */ jsx30(SocialMediaIcons2, { profile: user.profile }) : /* @__PURE__ */ jsx30("p", { className: "text-sm text-gray-300", children: "No social media links provided" }) })
           ] })
         ] })
       ] }),
@@ -14815,14 +14285,14 @@ function Profile() {
                 history.points
               ] })
             ] }, history.id)),
-            user.reputationHistory.length > 5 && /* @__PURE__ */ jsx30("div", { className: "mt-3 text-center", children: /* @__PURE__ */ jsx30(Link15, { to: "/profile/activity", className: "inline-block px-3 py-1.5 text-sm bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors border border-violet-500/50 shadow-md", children: "View All Activity" }) })
+            user.reputationHistory.length > 5 && /* @__PURE__ */ jsx30("div", { className: "mt-3 text-center", children: /* @__PURE__ */ jsx30(Link13, { to: "/profile/activity", className: "inline-block px-3 py-1.5 text-sm bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors border border-violet-500/50 shadow-md", children: "View All Activity" }) })
           ] })
         ] }),
         /* @__PURE__ */ jsxs27("div", { children: [
           /* @__PURE__ */ jsx30("h2", { className: "text-lg font-semibold text-violet-300 mb-4", children: "Recent Posts" }),
-          /* @__PURE__ */ jsx30("div", { className: "space-y-2", children: user.posts.map((post) => /* @__PURE__ */ jsx30("div", { className: "p-3 bg-neutral-700/50 rounded-lg border border-violet-500/30", children: /* @__PURE__ */ jsxs27(Link15, { to: `/posts/${post.id}`, className: "block hover:bg-neutral-600/50 rounded-lg p-1.5 -m-1.5 transition-colors", children: [
+          /* @__PURE__ */ jsx30("div", { className: "space-y-2", children: user.posts.map((post) => /* @__PURE__ */ jsx30("div", { className: "p-3 bg-neutral-700/50 rounded-lg border border-violet-500/30", children: /* @__PURE__ */ jsxs27(Link13, { to: `/posts/${post.id}`, className: "block hover:bg-neutral-600/50 rounded-lg p-1.5 -m-1.5 transition-colors", children: [
             /* @__PURE__ */ jsxs27("div", { className: "flex items-center gap-2 mb-1", children: [
-              /* @__PURE__ */ jsx30("div", { className: "p-1.5 bg-violet-500/20 rounded-lg", children: /* @__PURE__ */ jsx30(FiEdit24, { className: "w-3.5 h-3.5 text-violet-300" }) }),
+              /* @__PURE__ */ jsx30("div", { className: "p-1.5 bg-violet-500/20 rounded-lg", children: /* @__PURE__ */ jsx30(FiEdit23, { className: "w-3.5 h-3.5 text-violet-300" }) }),
               /* @__PURE__ */ jsx30("h3", { className: "text-sm font-medium text-violet-300", children: post.title })
             ] }),
             /* @__PURE__ */ jsx30("p", { className: "text-xs text-gray-300 line-clamp-2", children: truncateContent2(post.content) }),
@@ -14835,7 +14305,7 @@ function Profile() {
       ] }),
       bookmarks2 && bookmarks2.length > 0 && /* @__PURE__ */ jsxs27("div", { className: "mt-8", children: [
         /* @__PURE__ */ jsx30("h2", { className: "text-xl font-bold text-yellow-400 mb-4", children: "Bookmarked Posts" }),
-        /* @__PURE__ */ jsx30("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4", children: bookmarks2.map((bm) => /* @__PURE__ */ jsx30("div", { className: "bg-neutral-800/80 rounded-lg p-4 border border-yellow-400/40 transition-all duration-300 hover:bg-neutral-700/80 hover:border-yellow-300/60 hover:shadow-lg hover:shadow-yellow-400/20 hover:scale-[1.02] group", children: /* @__PURE__ */ jsxs27(Link15, { to: `/posts/${bm.post.id}`, className: "block", children: [
+        /* @__PURE__ */ jsx30("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4", children: bookmarks2.map((bm) => /* @__PURE__ */ jsx30("div", { className: "bg-neutral-800/80 rounded-lg p-4 border border-yellow-400/40 transition-all duration-300 hover:bg-neutral-700/80 hover:border-yellow-300/60 hover:shadow-lg hover:shadow-yellow-400/20 hover:scale-[1.02] group", children: /* @__PURE__ */ jsxs27(Link13, { to: `/posts/${bm.post.id}`, className: "block", children: [
           /* @__PURE__ */ jsx30("h3", { className: "text-lg font-semibold text-white mb-2 group-hover:text-yellow-300 transition-colors duration-300", children: bm.post.title }),
           /* @__PURE__ */ jsx30("p", { className: "text-gray-300 mb-2 truncate group-hover:text-gray-200 transition-colors duration-300", children: bm.post.content.length > 100 ? bm.post.content.substring(0, 100) + "..." : bm.post.content }),
           /* @__PURE__ */ jsxs27("div", { className: "flex items-center space-x-2 mt-2", children: [
@@ -14854,7 +14324,7 @@ __export(logout_exports, {
   action: () => action23,
   default: () => Logout
 });
-var action23 = async ({ request }) => await logout(request);
+var action23 = async ({ request }) => logout(request);
 function Logout() {
   return null;
 }
@@ -14864,31 +14334,31 @@ var signup_exports = {};
 __export(signup_exports, {
   action: () => action24,
   default: () => SignUp,
-  loader: () => loader22,
-  meta: () => meta7
+  loader: () => loader21,
+  meta: () => meta8
 });
-import { json as json36, redirect as redirect6 } from "@remix-run/node";
-import { Form as Form9, useActionData as useActionData6, useSearchParams as useSearchParams4, Link as Link16 } from "@remix-run/react";
-import { useEffect as useEffect12, useRef as useRef5 } from "react";
+import { json as json35, redirect as redirect4 } from "@remix-run/node";
+import { Form as Form5, useActionData as useActionData4, useSearchParams as useSearchParams3, Link as Link14 } from "@remix-run/react";
+import { useEffect as useEffect10, useRef as useRef4 } from "react";
 import { jsx as jsx31, jsxs as jsxs28 } from "react/jsx-runtime";
-var meta7 = () => [
+var meta8 = () => [
   { title: "Sign Up - BountyHub" },
   { name: "description", content: "Create your BountyHub account" }
 ];
-async function loader22({ request, context }) {
+async function loader21({ request, context }) {
   let db = createDb(context.env.DB);
-  return await getUser(request, db) ? redirect6("/profile") : json36({});
+  return await getUser(request, db) ? redirect4("/profile") : json35({});
 }
 async function action24({ request, context }) {
   let form = await request.formData(), email = form.get("email"), password = form.get("password"), username = form.get("username"), redirectTo = form.get("redirectTo") || "/profile";
   if (!email || !password || !username)
-    return json36({ error: "Email, password, and username are required" }, { status: 400 });
+    return json35({ error: "Email, password, and username are required" }, { status: 400 });
   let db = createDb(context.env.DB), result = await register(db, { email, password, username, redirectTo });
-  return result instanceof Response ? result : json36(result, { status: 400 });
+  return result instanceof Response ? result : json35(result, { status: 400 });
 }
 function SignUp() {
-  let actionData = useActionData6(), [searchParams] = useSearchParams4(), emailRef = useRef5(null), passwordRef = useRef5(null), usernameRef = useRef5(null);
-  return useEffect12(() => {
+  let actionData = useActionData4(), [searchParams] = useSearchParams3(), emailRef = useRef4(null), passwordRef = useRef4(null), usernameRef = useRef4(null);
+  return useEffect10(() => {
     actionData?.error && (actionData.error.includes("password") ? passwordRef.current?.focus() : actionData.error.includes("email") ? emailRef.current?.focus() : usernameRef.current?.focus());
   }, [actionData]), /* @__PURE__ */ jsx31(Layout, { children: /* @__PURE__ */ jsx31("div", { className: "min-h-screen flex items-center justify-center bg-neutral-900/95 py-12 px-4 sm:px-6 lg:px-8", children: /* @__PURE__ */ jsxs28("div", { className: "max-w-md w-full space-y-8", children: [
     /* @__PURE__ */ jsxs28("div", { children: [
@@ -14897,7 +14367,7 @@ function SignUp() {
         "Or",
         " ",
         /* @__PURE__ */ jsx31(
-          Link16,
+          Link14,
           {
             to: "/login",
             className: "font-medium text-violet-400 hover:text-violet-300",
@@ -14906,7 +14376,7 @@ function SignUp() {
         )
       ] })
     ] }),
-    /* @__PURE__ */ jsxs28(Form9, { method: "post", className: "mt-8 space-y-6", children: [
+    /* @__PURE__ */ jsxs28(Form5, { method: "post", className: "mt-8 space-y-6", children: [
       /* @__PURE__ */ jsx31(
         "input",
         {
@@ -14989,23 +14459,21 @@ function SignUp() {
 // app/routes/wallet.tsx
 var wallet_exports = {};
 __export(wallet_exports, {
-  ErrorBoundary: () => ErrorBoundary4,
   default: () => WalletPage,
-  loader: () => loader23,
-  meta: () => meta8
+  loader: () => loader22,
+  meta: () => meta9
 });
+import { json as json36 } from "@remix-run/cloudflare";
+import { useLoaderData as useLoaderData14 } from "@remix-run/react";
 init_virtual_wallet_server();
-import { json as json37 } from "@remix-run/node";
-import { useLoaderData as useLoaderData15, useActionData as useActionData7, useRouteError as useRouteError4, isRouteErrorResponse as isRouteErrorResponse3 } from "@remix-run/react";
-import { useState as useState18 } from "react";
 
 // app/components/DirectDeposit.tsx
-import { useState as useState17, useEffect as useEffect13 } from "react";
+import { useState as useState15, useEffect as useEffect11 } from "react";
 import { jsx as jsx32, jsxs as jsxs29 } from "react/jsx-runtime";
-var TOKEN_SYMBOL5 = "BBUX";
+var TOKEN_SYMBOL3 = "BBUX";
 function DirectDeposit({ onError }) {
-  let [amount, setAmount] = useState17(""), [walletHooks, setWalletHooks] = useState17(null);
-  return useEffect13(() => {
+  let [amount, setAmount] = useState15(""), [walletHooks, setWalletHooks] = useState15(null);
+  return useEffect11(() => {
     typeof window < "u" && Promise.all([
       import("@solana/wallet-adapter-react"),
       import("@solana/web3.js")
@@ -15020,12 +14488,12 @@ function DirectDeposit({ onError }) {
   }, []), /* @__PURE__ */ jsxs29("div", { className: "bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]", children: [
     /* @__PURE__ */ jsxs29("h3", { className: "text-xl font-bold text-white mb-4", children: [
       "Direct ",
-      TOKEN_SYMBOL5,
+      TOKEN_SYMBOL3,
       " Deposit"
     ] }),
     /* @__PURE__ */ jsxs29("p", { className: "text-gray-400 mb-4", children: [
       "Send SOL directly to your virtual wallet. The equivalent amount in ",
-      TOKEN_SYMBOL5,
+      TOKEN_SYMBOL3,
       " will be credited to your account."
     ] }),
     /* @__PURE__ */ jsxs29("div", { className: "space-y-4", children: [
@@ -15068,11 +14536,10 @@ function DirectDeposit({ onError }) {
 }
 
 // app/routes/wallet.tsx
-init_bounty_bucks_info();
+import { useState as useState16 } from "react";
 
 // app/utils/token-supply.server.ts
-init_bounty_bucks_info();
-import { Connection as Connection2, PublicKey as PublicKey2 } from "@solana/web3.js";
+import { Connection, PublicKey as PublicKey2 } from "@solana/web3.js";
 import { getMint } from "@solana/spl-token";
 var SOLANA_RPC_URL = process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com", TOKEN_MINT2 = new PublicKey2(bounty_bucks_info_default.mint), INITIAL_SUPPLY = 1e9, TOKEN_DECIMALS = 9, TokenSupplyService = class {
   /**
@@ -15152,64 +14619,36 @@ var SOLANA_RPC_URL = process.env.SOLANA_RPC_URL || "https://api.devnet.solana.co
     }
   }
 };
-__publicField(TokenSupplyService, "connection", new Connection2(SOLANA_RPC_URL));
+__publicField(TokenSupplyService, "connection", new Connection(SOLANA_RPC_URL));
 
 // app/routes/wallet.tsx
 import { jsx as jsx33, jsxs as jsxs30 } from "react/jsx-runtime";
-var TOKEN_SYMBOL6 = bounty_bucks_info_default.symbol;
-var meta8 = () => [
+var TOKEN_SYMBOL4 = bounty_bucks_info_default.symbol, meta9 = () => [
   { title: "Wallet - BountyHub" },
   { name: "description", content: "Manage your virtual wallet and transactions" }
 ];
-async function loader23({ request, context }) {
+async function loader22({ request, context }) {
   let db = createDb(context.env.DB), user = await getUser(request, db);
   if (!user)
     throw new Response("Unauthorized", { status: 401 });
-  let walletData = await getWalletDetails(db, user.id), supplyStats = await TokenSupplyService.getSupplyStats();
-  return json37({ user, walletData, supplyStats });
+  let walletData = await getVirtualWallet(db, user.id), supplyStats = await TokenSupplyService.getSupplyStats();
+  return json36({ user, walletData, supplyStats });
 }
 function WalletPage() {
-  let { walletData, user, supplyStats } = useLoaderData15(), { wallet, transactions } = walletData, [activeTab, setActiveTab] = useState18("overview"), [showDepositModal, setShowDepositModal] = useState18(!1), [showWithdrawModal, setShowWithdrawModal] = useState18(!1), [showDepositConfirmation, setShowDepositConfirmation] = useState18(!1), [pendingDeposit, setPendingDeposit] = useState18(null), [depositResult, setDepositResult] = useState18(null), [isDepositLoading, setIsDepositLoading] = useState18(!1), [isConfirmLoading, setIsConfirmLoading] = useState18(!1), [depositMode, setDepositMode] = useState18("direct"), actionData = useActionData7(), [isWithdrawLoading, setIsWithdrawLoading] = useState18(!1), [withdrawResult, setWithdrawResult] = useState18(null), [withdrawError, setWithdrawError] = useState18(null), formatDate = (dateString) => new Date(dateString).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit"
-  }), getTransactionIcon = (type) => {
-    switch (type) {
-      case "DEPOSIT":
-        return "\u{1F4B0}";
-      case "WITHDRAW":
-        return "\u{1F4B8}";
-      case "BOUNTY_CREATED":
-        return "\u{1F3AF}";
-      case "BOUNTY_CLAIMED":
-        return "\u{1F3C6}";
-      case "BOUNTY_REFUNDED":
-        return "\u21A9\uFE0F";
-      default:
-        return "\u{1F4CA}";
-    }
-  }, getTransactionColor = (type) => {
-    switch (type) {
-      case "DEPOSIT":
-      case "BOUNTY_CLAIMED":
-      case "BOUNTY_REFUNDED":
-        return "text-green-600";
-      case "WITHDRAW":
-      case "BOUNTY_CREATED":
-        return "text-red-600";
-      default:
-        return "text-gray-600";
-    }
-  }, handleDeposit = async (amount) => {
+  let { walletData, user, supplyStats } = useLoaderData14(), [showDepositModal, setShowDepositModal] = useState16(!1), [showWithdrawModal, setShowWithdrawModal] = useState16(!1), [showDepositConfirmation, setShowDepositConfirmation] = useState16(!1), [depositMode, setDepositMode] = useState16("direct"), [withdrawResult, setWithdrawResult] = useState16(null), [withdrawError, setWithdrawError] = useState16(null);
+  if (!walletData)
+    return /* @__PURE__ */ jsx33(Layout, { children: /* @__PURE__ */ jsxs30("div", { className: "max-w-4xl mx-auto p-6", children: [
+      /* @__PURE__ */ jsx33("h1", { className: "text-3xl font-bold text-white mb-2", children: "My Wallet" }),
+      /* @__PURE__ */ jsx33("p", { className: "text-gray-300", children: "No wallet found for your account." })
+    ] }) });
+  let wallet = walletData, handleDeposit = async (amount) => {
     try {
       let result = await (await fetch("/api/wallet/deposit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount })
       })).json();
-      result.success ? (setDepositResult(result), setShowDepositModal(!1), setShowDepositConfirmation(!0)) : alert(result.error || "Failed to create deposit request");
+      result.success ? (setShowDepositModal(!1), setShowDepositConfirmation(!0)) : alert(result.error || "Failed to create deposit request");
     } catch (error) {
       console.error("Deposit error:", error), alert("Failed to create deposit request");
     }
@@ -15220,7 +14659,7 @@ function WalletPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ transactionId })
       })).json();
-      result.success ? (setDepositResult(result), setShowDepositConfirmation(!1), setTimeout(() => window.location.reload(), 1e3)) : alert(result.error || "Failed to confirm deposit");
+      result.success ? setTimeout(() => window.location.reload(), 1e3) : alert(result.error || "Failed to confirm deposit");
     } catch (error) {
       console.error("Confirm deposit error:", error), alert("Failed to confirm deposit");
     }
@@ -15235,13 +14674,13 @@ function WalletPage() {
     } catch (error) {
       console.error("Withdrawal error:", error), setWithdrawError("Withdrawal failed.");
     }
-  }, walletBalance = wallet?.balance || 0, walletTotalEarned = wallet?.totalEarned || 0, walletTotalSpent = wallet?.totalSpent || 0;
+  };
   return /* @__PURE__ */ jsx33(Layout, { children: /* @__PURE__ */ jsxs30("div", { className: "max-w-4xl mx-auto p-6", children: [
     /* @__PURE__ */ jsxs30("div", { className: "mb-8", children: [
       /* @__PURE__ */ jsx33("h1", { className: "text-3xl font-bold text-white mb-2", children: "My Wallet" }),
       /* @__PURE__ */ jsxs30("p", { className: "text-gray-300", children: [
         "Manage your virtual ",
-        TOKEN_SYMBOL6,
+        TOKEN_SYMBOL4,
         " balance and transactions"
       ] })
     ] }),
@@ -15251,7 +14690,7 @@ function WalletPage() {
         /* @__PURE__ */ jsxs30("p", { className: "text-3xl font-bold", children: [
           wallet ? wallet.balance.toFixed(4) : "0.0000",
           " ",
-          TOKEN_SYMBOL6
+          TOKEN_SYMBOL4
         ] }),
         /* @__PURE__ */ jsx33("p", { className: "text-blue-100 mt-2", children: "Available for bounties and withdrawals" })
       ] }),
@@ -15261,7 +14700,7 @@ function WalletPage() {
           /* @__PURE__ */ jsxs30("p", { className: "text-xl font-semibold", children: [
             wallet ? wallet.totalEarned.toFixed(4) : "0.0000",
             " ",
-            TOKEN_SYMBOL6
+            TOKEN_SYMBOL4
           ] })
         ] }),
         /* @__PURE__ */ jsxs30("div", { children: [
@@ -15269,7 +14708,7 @@ function WalletPage() {
           /* @__PURE__ */ jsxs30("p", { className: "text-xl font-semibold", children: [
             wallet ? wallet.totalSpent.toFixed(4) : "0.0000",
             " ",
-            TOKEN_SYMBOL6
+            TOKEN_SYMBOL4
           ] })
         ] })
       ] })
@@ -15282,7 +14721,7 @@ function WalletPage() {
           /* @__PURE__ */ jsxs30("span", { className: "font-mono text-lg text-yellow-200", children: [
             supplyStats.initialSupply.toLocaleString(),
             " ",
-            TOKEN_SYMBOL6
+            TOKEN_SYMBOL4
           ] })
         ] }),
         /* @__PURE__ */ jsxs30("div", { children: [
@@ -15290,7 +14729,7 @@ function WalletPage() {
           /* @__PURE__ */ jsxs30("span", { className: "font-mono text-lg text-yellow-200", children: [
             supplyStats.currentSupply.toLocaleString(),
             " ",
-            TOKEN_SYMBOL6
+            TOKEN_SYMBOL4
           ] })
         ] }),
         /* @__PURE__ */ jsxs30("div", { children: [
@@ -15298,7 +14737,7 @@ function WalletPage() {
           /* @__PURE__ */ jsxs30("span", { className: "font-mono text-lg text-yellow-200", children: [
             supplyStats.burnedAmount.toLocaleString(),
             " ",
-            TOKEN_SYMBOL6
+            TOKEN_SYMBOL4
           ] })
         ] }),
         /* @__PURE__ */ jsxs30("div", { children: [
@@ -15323,19 +14762,19 @@ function WalletPage() {
       /* @__PURE__ */ jsx33("h3", { className: "text-xl font-semibold mb-4 text-white", children: "Your Solana Addresses" }),
       /* @__PURE__ */ jsxs30("div", { className: "space-y-3", children: [
         user.solanaAddress && /* @__PURE__ */ jsxs30("div", { children: [
-          /* @__PURE__ */ jsx33("label", { className: "block text-sm font-medium text-gray-300 mb-1", children: "Wallet Address" }),
-          /* @__PURE__ */ jsx33("p", { className: "font-mono text-sm bg-neutral-700 p-2 rounded border border-neutral-600 break-all text-gray-200", children: user.solanaAddress }),
+          /* @__PURE__ */ jsx33("label", { htmlFor: "solanaAddress", className: "block text-sm font-medium text-gray-300 mb-1", children: "Wallet Address" }),
+          /* @__PURE__ */ jsx33("p", { id: "solanaAddress", className: "font-mono text-sm bg-neutral-700 p-2 rounded border border-neutral-600 break-all text-gray-200", children: user.solanaAddress }),
           /* @__PURE__ */ jsx33("p", { className: "text-xs text-gray-400 mt-1", children: "Your generated Solana wallet address" })
         ] }),
         user.tokenAccountAddress && /* @__PURE__ */ jsxs30("div", { children: [
-          /* @__PURE__ */ jsxs30("label", { className: "block text-sm font-medium text-gray-300 mb-1", children: [
-            TOKEN_SYMBOL6,
+          /* @__PURE__ */ jsxs30("label", { htmlFor: "tokenAccountAddress", className: "block text-sm font-medium text-gray-300 mb-1", children: [
+            TOKEN_SYMBOL4,
             " Token Account"
           ] }),
-          /* @__PURE__ */ jsx33("p", { className: "font-mono text-sm bg-neutral-700 p-2 rounded border border-neutral-600 break-all text-gray-200", children: user.tokenAccountAddress }),
+          /* @__PURE__ */ jsx33("p", { id: "tokenAccountAddress", className: "font-mono text-sm bg-neutral-700 p-2 rounded border border-neutral-600 break-all text-gray-200", children: user.tokenAccountAddress }),
           /* @__PURE__ */ jsxs30("p", { className: "text-xs text-gray-400 mt-1", children: [
             "Where your ",
-            TOKEN_SYMBOL6,
+            TOKEN_SYMBOL4,
             " tokens are stored"
           ] })
         ] })
@@ -15349,7 +14788,7 @@ function WalletPage() {
           className: "bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors",
           children: [
             "\u{1F4B0} Buy ",
-            TOKEN_SYMBOL6,
+            TOKEN_SYMBOL4,
             " with SOL"
           ]
         }
@@ -15361,7 +14800,7 @@ function WalletPage() {
           className: "bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors",
           children: [
             "\u{1F4B8} Sell ",
-            TOKEN_SYMBOL6,
+            TOKEN_SYMBOL4,
             " for SOL"
           ]
         }
@@ -15371,7 +14810,7 @@ function WalletPage() {
       /* @__PURE__ */ jsxs30("div", { className: "flex justify-between items-center mb-4", children: [
         /* @__PURE__ */ jsxs30("h3", { className: "text-xl font-semibold text-white", children: [
           "Buy ",
-          TOKEN_SYMBOL6,
+          TOKEN_SYMBOL4,
           " with SOL"
         ] }),
         /* @__PURE__ */ jsx33(
@@ -15419,10 +14858,11 @@ function WalletPage() {
           /* @__PURE__ */ jsx33("p", { className: "text-yellow-300 text-sm", children: "You'll need to manually send SOL from your wallet and then confirm the transaction" })
         ] }),
         /* @__PURE__ */ jsxs30("div", { children: [
-          /* @__PURE__ */ jsx33("label", { className: "block text-sm font-medium text-gray-300 mb-2", children: "Amount (SOL)" }),
+          /* @__PURE__ */ jsx33("label", { htmlFor: "amount", className: "block text-sm font-medium text-gray-300 mb-2", children: "Amount (SOL)" }),
           /* @__PURE__ */ jsx33(
             "input",
             {
+              id: "amount",
               type: "number",
               name: "amount",
               step: "0.001",
@@ -15435,7 +14875,7 @@ function WalletPage() {
           ),
           /* @__PURE__ */ jsxs30("p", { className: "text-sm text-gray-400 mt-1", children: [
             "You will receive the same amount in ",
-            TOKEN_SYMBOL6,
+            TOKEN_SYMBOL4,
             " tokens (1:1 exchange rate)"
           ] })
         ] }),
@@ -15453,9 +14893,8 @@ function WalletPage() {
             "button",
             {
               type: "submit",
-              disabled: isDepositLoading,
               className: "flex-1 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
-              children: isDepositLoading ? "Creating..." : "Create Deposit Request"
+              children: "Create Deposit Request"
             }
           )
         ] })
@@ -15468,7 +14907,7 @@ function WalletPage() {
           "button",
           {
             onClick: () => {
-              setShowDepositConfirmation(!1), setPendingDeposit(null);
+              setShowDepositConfirmation(!1);
             },
             className: "text-gray-400 hover:text-gray-200 text-2xl font-bold",
             children: "\xD7"
@@ -15477,22 +14916,20 @@ function WalletPage() {
       ] }),
       /* @__PURE__ */ jsxs30("div", { className: "bg-blue-900 border border-blue-700 rounded-lg p-4 mb-4", children: [
         /* @__PURE__ */ jsx33("h4", { className: "font-semibold text-blue-200 mb-2", children: "Instructions:" }),
-        /* @__PURE__ */ jsx33("ol", { className: "list-decimal list-inside space-y-1 text-blue-300", children: pendingDeposit.instructions?.map((instruction, index) => /* @__PURE__ */ jsx33("li", { children: instruction }, index)) })
+        /* @__PURE__ */ jsx33("ol", { className: "list-decimal list-inside space-y-1 text-blue-300" })
       ] }),
-      /* @__PURE__ */ jsxs30("div", { className: "bg-neutral-700 border border-neutral-600 rounded-lg p-4 mb-4", children: [
-        /* @__PURE__ */ jsx33("h4", { className: "font-semibold text-gray-200 mb-2", children: "Platform Address:" }),
-        /* @__PURE__ */ jsx33("p", { className: "font-mono text-sm bg-neutral-600 p-2 rounded border border-neutral-500 text-gray-200", children: pendingDeposit.platformAddress })
-      ] }),
+      /* @__PURE__ */ jsx33("div", { className: "bg-neutral-700 border border-neutral-600 rounded-lg p-4 mb-4", children: /* @__PURE__ */ jsx33("h4", { className: "font-semibold text-gray-200 mb-2", children: "Platform Address:" }) }),
       /* @__PURE__ */ jsxs30("form", { onSubmit: async (e) => {
         e.preventDefault();
         let formData = new FormData(e.currentTarget);
         await handleConfirmDeposit(formData.get("transactionId"));
       }, className: "space-y-4", children: [
         /* @__PURE__ */ jsxs30("div", { children: [
-          /* @__PURE__ */ jsx33("label", { className: "block text-sm font-medium text-gray-300 mb-2", children: "Transaction Signature" }),
+          /* @__PURE__ */ jsx33("label", { htmlFor: "transactionId", className: "block text-sm font-medium text-gray-300 mb-2", children: "Transaction Signature" }),
           /* @__PURE__ */ jsx33(
             "input",
             {
+              id: "transactionId",
               type: "text",
               name: "transactionId",
               required: !0,
@@ -15508,7 +14945,7 @@ function WalletPage() {
             {
               type: "button",
               onClick: () => {
-                setShowDepositConfirmation(!1), setPendingDeposit(null);
+                setShowDepositConfirmation(!1);
               },
               className: "flex-1 px-4 py-2 text-gray-300 bg-neutral-700 rounded-md hover:bg-neutral-600 transition-colors",
               children: "Cancel"
@@ -15518,31 +14955,18 @@ function WalletPage() {
             "button",
             {
               type: "submit",
-              disabled: isConfirmLoading,
               className: "flex-1 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
-              children: isConfirmLoading ? "Confirming..." : "Confirm Deposit"
+              children: "Confirm Deposit"
             }
           )
         ] })
       ] })
     ] }) }),
-    depositResult && /* @__PURE__ */ jsx33("div", { className: "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50", children: /* @__PURE__ */ jsx33("div", { className: "bg-neutral-800 border border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4", children: /* @__PURE__ */ jsxs30("div", { className: "bg-green-900 border border-green-700 rounded-lg p-4", children: [
-      /* @__PURE__ */ jsx33("h4", { className: "font-semibold text-green-200 mb-2", children: "Deposit Successful!" }),
-      /* @__PURE__ */ jsx33("p", { className: "text-green-300", children: depositResult.message }),
-      /* @__PURE__ */ jsx33(
-        "button",
-        {
-          onClick: () => setDepositResult(null),
-          className: "mt-4 w-full px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors",
-          children: "Close"
-        }
-      )
-    ] }) }) }),
     showWithdrawModal && /* @__PURE__ */ jsx33("div", { className: "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50", children: /* @__PURE__ */ jsxs30("div", { className: "bg-neutral-800 border border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4", children: [
       /* @__PURE__ */ jsxs30("div", { className: "flex justify-between items-center mb-4", children: [
         /* @__PURE__ */ jsxs30("h3", { className: "text-xl font-semibold text-white", children: [
           "Sell ",
-          TOKEN_SYMBOL6,
+          TOKEN_SYMBOL4,
           " for SOL"
         ] }),
         /* @__PURE__ */ jsx33(
@@ -15560,14 +14984,15 @@ function WalletPage() {
         await handleWithdraw(parseFloat(formData.get("amount")));
       }, className: "space-y-4", children: [
         /* @__PURE__ */ jsxs30("div", { children: [
-          /* @__PURE__ */ jsxs30("label", { className: "block text-sm font-medium text-gray-300 mb-2", children: [
+          /* @__PURE__ */ jsxs30("label", { htmlFor: "amountWithdraw", className: "block text-sm font-medium text-gray-300 mb-2", children: [
             "Amount (",
-            TOKEN_SYMBOL6,
+            TOKEN_SYMBOL4,
             ")"
           ] }),
           /* @__PURE__ */ jsx33(
             "input",
             {
+              id: "amountWithdraw",
               type: "number",
               name: "amount",
               step: "0.001",
@@ -15586,7 +15011,7 @@ function WalletPage() {
             "Available: ",
             wallet ? wallet.balance.toFixed(4) : "0.0000",
             " ",
-            TOKEN_SYMBOL6
+            TOKEN_SYMBOL4
           ] }),
           /* @__PURE__ */ jsxs30("div", { className: "mt-2 p-3 bg-neutral-700 rounded-md", children: [
             /* @__PURE__ */ jsxs30("div", { className: "flex justify-between text-sm", children: [
@@ -15601,10 +15026,11 @@ function WalletPage() {
           ] })
         ] }),
         /* @__PURE__ */ jsxs30("div", { children: [
-          /* @__PURE__ */ jsx33("label", { className: "block text-sm font-medium text-gray-300 mb-2", children: "Destination Solana Address" }),
+          /* @__PURE__ */ jsx33("label", { htmlFor: "destination", className: "block text-sm font-medium text-gray-300 mb-2", children: "Destination Solana Address" }),
           /* @__PURE__ */ jsx33(
             "input",
             {
+              id: "destination",
               type: "text",
               name: "destination",
               required: !0,
@@ -15628,81 +15054,16 @@ function WalletPage() {
             "button",
             {
               type: "submit",
-              disabled: isWithdrawLoading,
               className: "flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
-              children: isWithdrawLoading ? "Processing..." : "Withdraw"
+              children: "Withdraw"
             }
           )
         ] })
       ] })
     ] }) }),
-    withdrawResult && /* @__PURE__ */ jsx33("div", { className: "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50", children: /* @__PURE__ */ jsx33("div", { className: "bg-neutral-800 border border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4", children: /* @__PURE__ */ jsxs30("div", { className: "bg-blue-900 border border-blue-700 rounded-lg p-4", children: [
+    withdrawResult && withdrawResult.success && /* @__PURE__ */ jsx33("div", { className: "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50", children: /* @__PURE__ */ jsx33("div", { className: "bg-neutral-800 border border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4", children: /* @__PURE__ */ jsxs30("div", { className: "bg-blue-900 border border-blue-700 rounded-lg p-4", children: [
       /* @__PURE__ */ jsx33("h4", { className: "font-semibold text-blue-200 mb-2", children: "Withdrawal Successful!" }),
       /* @__PURE__ */ jsx33("p", { className: "text-blue-300 mb-2", children: "Your withdrawal has been processed." }),
-      /* @__PURE__ */ jsxs30("div", { className: "mb-4 p-3 bg-blue-800 rounded-md", children: [
-        /* @__PURE__ */ jsxs30("div", { className: "flex justify-between text-sm mb-1", children: [
-          /* @__PURE__ */ jsx33("span", { className: "text-blue-200", children: "Total Amount:" }),
-          /* @__PURE__ */ jsxs30("span", { className: "text-white", children: [
-            withdrawResult.totalAmount?.toFixed(4) || "N/A",
-            " ",
-            TOKEN_SYMBOL6
-          ] })
-        ] }),
-        /* @__PURE__ */ jsxs30("div", { className: "flex justify-between text-sm mb-1", children: [
-          /* @__PURE__ */ jsx33("span", { className: "text-blue-200", children: "Platform Fee (3%):" }),
-          /* @__PURE__ */ jsxs30("span", { className: "text-yellow-300", children: [
-            withdrawResult.platformFee?.toFixed(4) || "N/A",
-            " ",
-            TOKEN_SYMBOL6
-          ] })
-        ] }),
-        /* @__PURE__ */ jsxs30("div", { className: "flex justify-between text-sm font-medium", children: [
-          /* @__PURE__ */ jsx33("span", { className: "text-blue-200", children: "You received:" }),
-          /* @__PURE__ */ jsxs30("span", { className: "text-green-300", children: [
-            withdrawResult.netAmount?.toFixed(4) || "N/A",
-            " SOL"
-          ] })
-        ] })
-      ] }),
-      /* @__PURE__ */ jsxs30("div", { className: "mb-2", children: [
-        /* @__PURE__ */ jsx33("span", { className: "block text-sm text-gray-300", children: "Burn Transaction:" }),
-        /* @__PURE__ */ jsx33(
-          "a",
-          {
-            href: `https://explorer.solana.com/tx/${withdrawResult.burnSignature}?cluster=devnet`,
-            target: "_blank",
-            rel: "noopener noreferrer",
-            className: "text-blue-400 underline break-all",
-            children: withdrawResult.burnSignature
-          }
-        )
-      ] }),
-      /* @__PURE__ */ jsxs30("div", { className: "mb-2", children: [
-        /* @__PURE__ */ jsx33("span", { className: "block text-sm text-gray-300", children: "SOL Transaction:" }),
-        /* @__PURE__ */ jsx33(
-          "a",
-          {
-            href: `https://explorer.solana.com/tx/${withdrawResult.solSignature}?cluster=devnet`,
-            target: "_blank",
-            rel: "noopener noreferrer",
-            className: "text-blue-400 underline break-all",
-            children: withdrawResult.solSignature
-          }
-        )
-      ] }),
-      withdrawResult.platformFeeSignature && /* @__PURE__ */ jsxs30("div", { className: "mb-2", children: [
-        /* @__PURE__ */ jsx33("span", { className: "block text-sm text-gray-300", children: "Platform Fee Transaction:" }),
-        /* @__PURE__ */ jsx33(
-          "a",
-          {
-            href: `https://explorer.solana.com/tx/${withdrawResult.platformFeeSignature}?cluster=devnet`,
-            target: "_blank",
-            rel: "noopener noreferrer",
-            className: "text-blue-400 underline break-all",
-            children: withdrawResult.platformFeeSignature
-          }
-        )
-      ] }),
       /* @__PURE__ */ jsx33(
         "button",
         {
@@ -15711,85 +15072,7 @@ function WalletPage() {
           children: "Close"
         }
       )
-    ] }) }) }),
-    /* @__PURE__ */ jsxs30("div", { className: "bg-neutral-800 border border-neutral-700 rounded-lg p-6", children: [
-      /* @__PURE__ */ jsxs30("div", { className: "flex justify-between items-center mb-4", children: [
-        /* @__PURE__ */ jsx33("h3", { className: "text-xl font-semibold text-white", children: "Recent Transactions" }),
-        /* @__PURE__ */ jsx33(
-          "a",
-          {
-            href: "/transactions",
-            className: "text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors",
-            children: "See All Transactions \u2192"
-          }
-        )
-      ] }),
-      transactions.length === 0 ? /* @__PURE__ */ jsx33("p", { className: "text-gray-400 text-center py-8", children: "No transactions yet" }) : /* @__PURE__ */ jsxs30("div", { className: "space-y-3", children: [
-        transactions.map((transaction) => /* @__PURE__ */ jsxs30(
-          "div",
-          {
-            className: "flex items-center justify-between p-4 border border-neutral-700 rounded-lg hover:bg-neutral-700",
-            children: [
-              /* @__PURE__ */ jsxs30("div", { className: "flex items-center gap-3", children: [
-                /* @__PURE__ */ jsx33("span", { className: "text-2xl", children: getTransactionIcon(transaction.type) }),
-                /* @__PURE__ */ jsxs30("div", { children: [
-                  /* @__PURE__ */ jsx33("p", { className: "font-medium text-white", children: transaction.description }),
-                  /* @__PURE__ */ jsx33("p", { className: "text-sm text-gray-400", children: formatDate(transaction.createdAt) }),
-                  transaction.bounty && /* @__PURE__ */ jsxs30("p", { className: "text-sm text-blue-400", children: [
-                    "Bounty: ",
-                    transaction.bounty.post.title
-                  ] })
-                ] })
-              ] }),
-              /* @__PURE__ */ jsxs30("div", { className: "text-right", children: [
-                /* @__PURE__ */ jsxs30("p", { className: `font-semibold ${getTransactionColor(transaction.type)}`, children: [
-                  transaction.type === "WITHDRAW" || transaction.type === "BOUNTY_CREATED" ? "-" : "+",
-                  transaction.amount.toFixed(4),
-                  " ",
-                  TOKEN_SYMBOL6
-                ] }),
-                /* @__PURE__ */ jsxs30("p", { className: "text-sm text-gray-400", children: [
-                  "Balance: ",
-                  transaction.balanceAfter.toFixed(4),
-                  " ",
-                  TOKEN_SYMBOL6
-                ] })
-              ] })
-            ]
-          },
-          transaction.id
-        )),
-        transactions.length === 5 && /* @__PURE__ */ jsx33("div", { className: "text-center pt-4", children: /* @__PURE__ */ jsx33("p", { className: "text-gray-400 text-sm", children: "Showing 5 most recent transactions" }) })
-      ] })
-    ] })
-  ] }) });
-}
-function ErrorBoundary4() {
-  let error = useRouteError4();
-  return /* @__PURE__ */ jsx33("div", { className: "h-screen w-full bg-neutral-900 flex flex-col items-center justify-center", children: /* @__PURE__ */ jsxs30("div", { className: "w-full max-w-md p-8 space-y-8 bg-neutral-800 rounded-lg shadow-lg border border-red-500/30", children: [
-    /* @__PURE__ */ jsxs30("div", { className: "text-center", children: [
-      /* @__PURE__ */ jsx33("div", { className: "mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-500/10 mb-4", children: /* @__PURE__ */ jsx33("svg", { className: "h-6 w-6 text-red-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", children: /* @__PURE__ */ jsx33("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" }) }) }),
-      /* @__PURE__ */ jsx33("h1", { className: "text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-pink-600 mb-2", children: "Wallet Error" }),
-      /* @__PURE__ */ jsx33("p", { className: "text-gray-400 mb-6", children: isRouteErrorResponse3(error) ? error.status === 404 ? "The wallet page you're looking for doesn't exist." : "Failed to load wallet data. Please try again." : "An unexpected error occurred while loading your wallet." })
-    ] }),
-    /* @__PURE__ */ jsxs30("div", { className: "flex flex-col space-y-3", children: [
-      /* @__PURE__ */ jsx33(
-        "button",
-        {
-          onClick: () => window.location.reload(),
-          className: "w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors text-center",
-          children: "Try Again"
-        }
-      ),
-      /* @__PURE__ */ jsx33(
-        "a",
-        {
-          href: "/",
-          className: "w-full py-2 px-4 border border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-300 bg-neutral-700 hover:bg-neutral-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors text-center",
-          children: "Return Home"
-        }
-      )
-    ] })
+    ] }) }) })
   ] }) });
 }
 
@@ -15797,19 +15080,20 @@ function ErrorBoundary4() {
 var index_exports = {};
 __export(index_exports, {
   default: () => Index,
-  loader: () => loader24,
-  meta: () => meta9
+  loader: () => loader23,
+  meta: () => meta10
 });
-import { redirect as redirect7 } from "@remix-run/node";
-var meta9 = () => [
+import { redirect as redirect5 } from "@remix-run/cloudflare";
+var meta10 = () => [
   { title: "portal.ask" },
   { name: "description", content: "Welcome to portal.ask!" }
-], loader24 = async ({ request, context }) => {
-  if (console.log("Index loader called, method:", request.method), console.log("Index loader called, context exists:", !!context), console.log("Index loader called, context.env exists:", !!context?.env), !context || !context.env || !context.env.DB)
+], loader23 = async ({ request, context }) => {
+  let typedContext = context;
+  if (console.log("Index loader called, method:", request.method), console.log("Index loader called, context exists:", !!context), console.log("Index loader called, context.env exists:", !!typedContext?.env), !typedContext?.env?.DB)
     throw new Error("D1 Database binding is missing from context.env.DB");
-  context.env.SESSION_SECRET && (global.SESSION_SECRET = context.env.SESSION_SECRET);
-  let db = createDb(context.env.DB), user = await getUser(request, db);
-  return console.log("Index loader - user found:", !!user), user ? (console.log("Index loader - redirecting to /profile"), redirect7("/profile")) : (console.log("Index loader - redirecting to /login"), redirect7("/login"));
+  typedContext.env.SESSION_SECRET && (global.SESSION_SECRET = typedContext.env.SESSION_SECRET);
+  let db = createDb(typedContext.env.DB), user = await getUser(request, db);
+  return console.log("Index loader - user found:", !!user), user ? (console.log("Index loader - redirecting to /profile"), redirect5("/profile")) : (console.log("Index loader - redirecting to /login"), redirect5("/login"));
 };
 function Index() {
   return null;
@@ -15820,31 +15104,31 @@ var login_exports = {};
 __export(login_exports, {
   action: () => action25,
   default: () => Login,
-  loader: () => loader25,
-  meta: () => meta10
+  loader: () => loader24,
+  meta: () => meta11
 });
-import { json as json38, redirect as redirect8 } from "@remix-run/node";
-import { Form as Form11, useActionData as useActionData8, useSearchParams as useSearchParams5, Link as Link17 } from "@remix-run/react";
-import { useEffect as useEffect14, useRef as useRef6 } from "react";
+import { json as json37, redirect as redirect6 } from "@remix-run/node";
+import { Form as Form6, useActionData as useActionData5, useSearchParams as useSearchParams4, Link as Link15 } from "@remix-run/react";
+import { useEffect as useEffect12, useRef as useRef5 } from "react";
 import { jsx as jsx34, jsxs as jsxs31 } from "react/jsx-runtime";
-var meta10 = () => [
+var meta11 = () => [
   { title: "Login - BountyHub" },
   { name: "description", content: "Login to your BountyHub account" }
 ];
-async function loader25({ request, context }) {
+async function loader24({ request, context }) {
   let db = createDb(context.env.DB);
-  return await getUser(request, db) ? redirect8("/profile") : json38({});
+  return await getUser(request, db) ? redirect6("/profile") : json37({});
 }
 async function action25({ request, context }) {
   let form = await request.formData(), email = form.get("email"), password = form.get("password"), redirectTo = form.get("redirectTo") || "/profile";
   if (!email || !password)
-    return json38({ error: "Email and password are required" }, { status: 400 });
+    return json37({ error: "Email and password are required" }, { status: 400 });
   let db = createDb(context.env.DB), result = await login(db, { email, password, redirectTo });
-  return result instanceof Response ? result : json38(result, { status: 400 });
+  return result instanceof Response ? result : json37(result, { status: 400 });
 }
 function Login() {
-  let actionData = useActionData8(), [searchParams] = useSearchParams5(), emailRef = useRef6(null), passwordRef = useRef6(null);
-  return useEffect14(() => {
+  let actionData = useActionData5(), [searchParams] = useSearchParams4(), emailRef = useRef5(null), passwordRef = useRef5(null);
+  return useEffect12(() => {
     actionData?.error && (actionData.error === "Invalid credentials" ? passwordRef.current?.focus() : emailRef.current?.focus());
   }, [actionData]), /* @__PURE__ */ jsx34(Layout, { children: /* @__PURE__ */ jsx34("div", { className: "min-h-screen flex items-center justify-center bg-neutral-900/95 py-12 px-4 sm:px-6 lg:px-8", children: /* @__PURE__ */ jsxs31("div", { className: "max-w-md w-full space-y-8", children: [
     /* @__PURE__ */ jsxs31("div", { children: [
@@ -15853,7 +15137,7 @@ function Login() {
         "Or",
         " ",
         /* @__PURE__ */ jsx34(
-          Link17,
+          Link15,
           {
             to: "/signup",
             className: "font-medium text-violet-400 hover:text-violet-300",
@@ -15862,7 +15146,7 @@ function Login() {
         )
       ] })
     ] }),
-    /* @__PURE__ */ jsxs31(Form11, { method: "post", className: "mt-8 space-y-6", children: [
+    /* @__PURE__ */ jsxs31(Form6, { method: "post", className: "mt-8 space-y-6", children: [
       /* @__PURE__ */ jsx34(
         "input",
         {
@@ -15920,7 +15204,7 @@ function Login() {
         }
       ) }),
       /* @__PURE__ */ jsx34("div", { className: "flex items-center justify-between", children: /* @__PURE__ */ jsx34("div", { className: "text-sm", children: /* @__PURE__ */ jsx34(
-        Link17,
+        Link15,
         {
           to: "/forgot-password",
           className: "font-medium text-violet-400 hover:text-violet-300",
@@ -15935,11 +15219,11 @@ function Login() {
 var terms_exports = {};
 __export(terms_exports, {
   default: () => TermsOfService,
-  loader: () => loader26
+  loader: () => loader25
 });
-import { json as json39 } from "@remix-run/node";
+import { json as json38 } from "@remix-run/cloudflare";
 import { jsx as jsx35, jsxs as jsxs32 } from "react/jsx-runtime";
-var loader26 = async ({ request }) => json39({});
+var loader25 = async () => json38({});
 function TermsOfService() {
   return /* @__PURE__ */ jsx35(Layout, { showNav: !1, children: /* @__PURE__ */ jsxs32("div", { className: "max-w-4xl mx-auto p-6", children: [
     /* @__PURE__ */ jsxs32("div", { className: "mb-6 flex justify-between items-center mt-16", children: [
@@ -16169,11 +15453,11 @@ function TermsOfService() {
 var docs_exports = {};
 __export(docs_exports, {
   default: () => DocsPage,
-  loader: () => loader27,
-  meta: () => meta11
+  loader: () => loader26,
+  meta: () => meta12
 });
-import { json as json40 } from "@remix-run/node";
-import { useLoaderData as useLoaderData16, Link as Link18 } from "@remix-run/react";
+import { json as json39 } from "@remix-run/node";
+import { useLoaderData as useLoaderData15, Link as Link16 } from "@remix-run/react";
 import {
   FiBook,
   FiUser as FiUser2,
@@ -16181,15 +15465,15 @@ import {
   FiServer,
   FiCloud,
   FiShield as FiShield5,
-  FiExternalLink as FiExternalLink3,
+  FiExternalLink as FiExternalLink2,
   FiMessageSquare as FiMessageSquare3,
   FiMail as FiMail2
 } from "react-icons/fi";
 import { jsx as jsx36, jsxs as jsxs33 } from "react/jsx-runtime";
-var meta11 = () => [
+var meta12 = () => [
   { title: "Documentation - portal.ask" },
   { name: "description", content: "Learn how to use portal.ask and explore our documentation" }
-], loader27 = async () => json40({
+], loader26 = async () => json39({
   docs: [
     {
       title: "Platform Documentation",
@@ -16259,13 +15543,13 @@ var meta11 = () => [
     },
     {
       name: "legal",
-      title: "Legal & Compliance",
+      title: "Legal &amp; Compliance",
       description: "Legal documents and compliance information"
     }
   ]
 });
 function DocsPage() {
-  let data = useLoaderData16(), { docs, categories } = data, docsWithIcons = [
+  let data = useLoaderData15(), { docs, categories } = data, docsWithIcons = [
     { ...docs[0], icon: FiBook },
     { ...docs[1], icon: FiUser2 },
     { ...docs[2], icon: FiCode },
@@ -16277,12 +15561,12 @@ function DocsPage() {
   return /* @__PURE__ */ jsx36(Layout, { children: /* @__PURE__ */ jsxs33("div", { className: "w-auto max-w-8xl mx-auto mt-4 px-4 ml-24 pb-16", children: [
     /* @__PURE__ */ jsxs33("div", { className: "mb-8 mt-16", children: [
       /* @__PURE__ */ jsx36("h1", { className: "text-4xl font-bold text-white mb-4", children: "Documentation" }),
-      /* @__PURE__ */ jsx36("p", { className: "text-gray-400 text-lg max-w-3xl", children: "Welcome to the portal.ask documentation. Find everything you need to understand, use, and develop with our platform." })
+      /* @__PURE__ */ jsx36("p", { className: "text-gray-300 mb-4", children: "Welcome to portal.ask's documentation. Here you'll find comprehensive guides and information about our platform." })
     ] }),
     /* @__PURE__ */ jsxs33("div", { className: "mb-20", children: [
       /* @__PURE__ */ jsx36("h2", { className: "text-2xl font-semibold text-white mb-6", children: "Getting Started" }),
       /* @__PURE__ */ jsx36("div", { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6", children: (() => docsWithIcons.filter((doc) => doc.featured))().map((doc) => /* @__PURE__ */ jsxs33(
-        Link18,
+        Link16,
         {
           to: doc.href,
           className: "group block p-6 bg-neutral-800/80 rounded-lg border-2 border-violet-500/30 hover:border-violet-500/60 transition-all duration-300 shadow-lg hover:shadow-violet-500/20",
@@ -16294,7 +15578,7 @@ function DocsPage() {
             /* @__PURE__ */ jsx36("p", { className: "text-gray-400 group-hover:text-gray-300 transition-colors", children: doc.description }),
             /* @__PURE__ */ jsxs33("div", { className: "mt-4 flex items-center text-violet-400 group-hover:text-violet-300 transition-colors", children: [
               /* @__PURE__ */ jsx36("span", { className: "text-sm font-medium", children: "Read more" }),
-              /* @__PURE__ */ jsx36(FiExternalLink3, { className: "w-4 h-4 ml-2" })
+              /* @__PURE__ */ jsx36(FiExternalLink2, { className: "w-4 h-4 ml-2" })
             ] })
           ]
         },
@@ -16307,7 +15591,7 @@ function DocsPage() {
         /* @__PURE__ */ jsx36("p", { className: "text-gray-400", children: category.description })
       ] }),
       /* @__PURE__ */ jsx36("div", { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6", children: getCategoryDocs(category.name).map((doc) => /* @__PURE__ */ jsxs33(
-        Link18,
+        Link16,
         {
           to: doc.href,
           className: "group block p-6 bg-neutral-800/60 rounded-lg border border-violet-500/20 hover:border-violet-500/40 transition-all duration-300",
@@ -16326,7 +15610,7 @@ function DocsPage() {
       /* @__PURE__ */ jsx36("h2", { className: "text-2xl font-semibold text-white mb-6", children: "Quick Links" }),
       /* @__PURE__ */ jsxs33("div", { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6", children: [
         /* @__PURE__ */ jsxs33(
-          Link18,
+          Link16,
           {
             to: "/community",
             className: "flex items-center p-4 bg-neutral-800/60 rounded-lg hover:bg-neutral-700/60 transition-colors",
@@ -16337,7 +15621,7 @@ function DocsPage() {
           }
         ),
         /* @__PURE__ */ jsxs33(
-          Link18,
+          Link16,
           {
             to: "/posts/create",
             className: "flex items-center p-4 bg-neutral-800/60 rounded-lg hover:bg-neutral-700/60 transition-colors",
@@ -16348,7 +15632,7 @@ function DocsPage() {
           }
         ),
         /* @__PURE__ */ jsxs33(
-          Link18,
+          Link16,
           {
             to: "/wallet",
             className: "flex items-center p-4 bg-neutral-800/60 rounded-lg hover:bg-neutral-700/60 transition-colors",
@@ -16359,7 +15643,7 @@ function DocsPage() {
           }
         ),
         /* @__PURE__ */ jsxs33(
-          Link18,
+          Link16,
           {
             to: "/settings",
             className: "flex items-center p-4 bg-neutral-800/60 rounded-lg hover:bg-neutral-700/60 transition-colors",
@@ -16430,10 +15714,10 @@ function DocsPage() {
 }
 
 // server-assets-manifest:@remix-run/dev/assets-manifest
-var assets_manifest_default = { entry: { module: "/build/entry.client-GWH4SNRQ.js", imports: ["/build/_shared/chunk-NE4BQMTE.js", "/build/_shared/chunk-M52IJKKB.js", "/build/_shared/chunk-7ZSQYYGQ.js", "/build/_shared/chunk-G5WX4PPA.js"] }, routes: { root: { id: "root", parentId: void 0, path: "", index: void 0, caseSensitive: void 0, module: "/build/root-HTAYJXMP.js", imports: ["/build/_shared/chunk-6S2QUAFR.js", "/build/_shared/chunk-MQYEVBU3.js", "/build/_shared/chunk-5TRFQBKG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !0 }, "routes/$username": { id: "routes/$username", parentId: "root", path: ":username", index: void 0, caseSensitive: void 0, module: "/build/routes/$username-VN5M7RSP.js", imports: ["/build/_shared/chunk-PC65EDHQ.js", "/build/_shared/chunk-VI4IRXJP.js", "/build/_shared/chunk-DGIOIJIX.js", "/build/_shared/chunk-GE4ZJASY.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/$username.posts": { id: "routes/$username.posts", parentId: "routes/$username", path: "posts", index: void 0, caseSensitive: void 0, module: "/build/routes/$username.posts-CGN6HCUM.js", imports: ["/build/_shared/chunk-MQYEVBU3.js", "/build/_shared/chunk-5TRFQBKG.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/_index": { id: "routes/_index", parentId: "root", path: void 0, index: !0, caseSensitive: void 0, module: "/build/routes/_index-FSXDSYOK.js", imports: void 0, hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.answers.$answerId.vote": { id: "routes/api.answers.$answerId.vote", parentId: "root", path: "api/answers/:answerId/vote", index: void 0, caseSensitive: void 0, module: "/build/routes/api.answers.$answerId.vote-UW54CVND.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.bookmarks-status": { id: "routes/api.bookmarks-status", parentId: "root", path: "api/bookmarks-status", index: void 0, caseSensitive: void 0, module: "/build/routes/api.bookmarks-status-SUQV6H62.js", imports: void 0, hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.bookmarks-toggle": { id: "routes/api.bookmarks-toggle", parentId: "root", path: "api/bookmarks-toggle", index: void 0, caseSensitive: void 0, module: "/build/routes/api.bookmarks-toggle-Z6Y2EOUA.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.bounty.claim": { id: "routes/api.bounty.claim", parentId: "root", path: "api/bounty/claim", index: void 0, caseSensitive: void 0, module: "/build/routes/api.bounty.claim-4ZEDX5T5.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.comments.$commentId.vote": { id: "routes/api.comments.$commentId.vote", parentId: "root", path: "api/comments/:commentId/vote", index: void 0, caseSensitive: void 0, module: "/build/routes/api.comments.$commentId.vote-CZSD4KS5.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.integrity.rate": { id: "routes/api.integrity.rate", parentId: "root", path: "api/integrity/rate", index: void 0, caseSensitive: void 0, module: "/build/routes/api.integrity.rate-IMSSEOHP.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.integrity.report": { id: "routes/api.integrity.report", parentId: "root", path: "api/integrity/report", index: void 0, caseSensitive: void 0, module: "/build/routes/api.integrity.report-RSA6WKMA.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.posts.$postId": { id: "routes/api.posts.$postId", parentId: "root", path: "api/posts/:postId", index: void 0, caseSensitive: void 0, module: "/build/routes/api.posts.$postId-YGBZFLPW.js", imports: void 0, hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.posts.$postId.vote": { id: "routes/api.posts.$postId.vote", parentId: "routes/api.posts.$postId", path: "vote", index: void 0, caseSensitive: void 0, module: "/build/routes/api.posts.$postId.vote-NBKAYBLE.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.posts.delete": { id: "routes/api.posts.delete", parentId: "root", path: "api/posts/delete", index: void 0, caseSensitive: void 0, module: "/build/routes/api.posts.delete-FKKMFTNB.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.privacy.pdf": { id: "routes/api.privacy.pdf", parentId: "root", path: "api/privacy/pdf", index: void 0, caseSensitive: void 0, module: "/build/routes/api.privacy.pdf-KQJ6I5V7.js", imports: void 0, hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.profile.picture": { id: "routes/api.profile.picture", parentId: "root", path: "api/profile/picture", index: void 0, caseSensitive: void 0, module: "/build/routes/api.profile.picture-YAPKYI3V.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.refund.request": { id: "routes/api.refund.request", parentId: "root", path: "api/refund/request", index: void 0, caseSensitive: void 0, module: "/build/routes/api.refund.request-RUBNJAZZ.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.refund.requests": { id: "routes/api.refund.requests", parentId: "root", path: "api/refund/requests", index: void 0, caseSensitive: void 0, module: "/build/routes/api.refund.requests-O5BE6NVO.js", imports: void 0, hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.refund.vote": { id: "routes/api.refund.vote", parentId: "root", path: "api/refund/vote", index: void 0, caseSensitive: void 0, module: "/build/routes/api.refund.vote-BVIXA4VT.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.terms.pdf": { id: "routes/api.terms.pdf", parentId: "root", path: "api/terms/pdf", index: void 0, caseSensitive: void 0, module: "/build/routes/api.terms.pdf-HIAO46YQ.js", imports: void 0, hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.wallet.cancel-transaction": { id: "routes/api.wallet.cancel-transaction", parentId: "root", path: "api/wallet/cancel-transaction", index: void 0, caseSensitive: void 0, module: "/build/routes/api.wallet.cancel-transaction-QSFVUSIE.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.wallet.confirm-deposit": { id: "routes/api.wallet.confirm-deposit", parentId: "root", path: "api/wallet/confirm-deposit", index: void 0, caseSensitive: void 0, module: "/build/routes/api.wallet.confirm-deposit-MOIF5EVU.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.wallet.deposit": { id: "routes/api.wallet.deposit", parentId: "root", path: "api/wallet/deposit", index: void 0, caseSensitive: void 0, module: "/build/routes/api.wallet.deposit-5FTD6S54.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.wallet.withdraw": { id: "routes/api.wallet.withdraw", parentId: "root", path: "api/wallet/withdraw", index: void 0, caseSensitive: void 0, module: "/build/routes/api.wallet.withdraw-DZQ53G34.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/community": { id: "routes/community", parentId: "root", path: "community", index: void 0, caseSensitive: void 0, module: "/build/routes/community-666LOC7C.js", imports: ["/build/_shared/chunk-VI4IRXJP.js", "/build/_shared/chunk-QJHMVXXJ.js", "/build/_shared/chunk-DGIOIJIX.js", "/build/_shared/chunk-NTHRJKQW.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/default-avatar.png": { id: "routes/default-avatar.png", parentId: "root", path: "default-avatar/png", index: void 0, caseSensitive: void 0, module: "/build/routes/default-avatar.png-AHJ7WDHH.js", imports: void 0, hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/docs": { id: "routes/docs", parentId: "root", path: "docs", index: void 0, caseSensitive: void 0, module: "/build/routes/docs-O7EXHWWY.js", imports: ["/build/_shared/chunk-NTHRJKQW.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/docs.legal": { id: "routes/docs.legal", parentId: "routes/docs", path: "legal", index: void 0, caseSensitive: void 0, module: "/build/routes/docs.legal-YGONMULE.js", imports: ["/build/_shared/chunk-5TRFQBKG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/docs.platform": { id: "routes/docs.platform", parentId: "routes/docs", path: "platform", index: void 0, caseSensitive: void 0, module: "/build/routes/docs.platform-C3ALHO6X.js", imports: ["/build/_shared/chunk-5TRFQBKG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/docs.refund-system": { id: "routes/docs.refund-system", parentId: "routes/docs", path: "refund-system", index: void 0, caseSensitive: void 0, module: "/build/routes/docs.refund-system-CDPZHHG3.js", imports: ["/build/_shared/chunk-5TRFQBKG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/login": { id: "routes/login", parentId: "root", path: "login", index: void 0, caseSensitive: void 0, module: "/build/routes/login-HIVH4L2B.js", imports: ["/build/_shared/chunk-NTHRJKQW.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/logout": { id: "routes/logout", parentId: "root", path: "logout", index: void 0, caseSensitive: void 0, module: "/build/routes/logout-5YZOOWKM.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/posts.$postId": { id: "routes/posts.$postId", parentId: "root", path: "posts/:postId", index: void 0, caseSensitive: void 0, module: "/build/routes/posts.$postId-TDJKXYQ7.js", imports: ["/build/_shared/chunk-54UN6YQK.js", "/build/_shared/chunk-SICW524A.js", "/build/_shared/chunk-FUZFIQN5.js", "/build/_shared/chunk-2YZ7TZSG.js", "/build/_shared/chunk-FGS6CPL7.js", "/build/_shared/chunk-GW7FZVM5.js", "/build/_shared/chunk-DGXI5RJE.js", "/build/_shared/chunk-RM73K6RH.js", "/build/_shared/chunk-TV6J5LVP.js", "/build/_shared/chunk-F7QMDYXS.js", "/build/_shared/chunk-A6ZVAP33.js", "/build/_shared/chunk-KOU7KXJE.js", "/build/_shared/chunk-ZVDYBXYH.js", "/build/_shared/chunk-NWTBI763.js", "/build/_shared/chunk-RV3KCD2Q.js", "/build/_shared/chunk-FQTK4I2O.js", "/build/_shared/chunk-NCPUIDGO.js", "/build/_shared/chunk-EUY7HEKH.js", "/build/_shared/chunk-JVOZNRBH.js", "/build/_shared/chunk-XHVR4ZVO.js", "/build/_shared/chunk-G74JO6TW.js", "/build/_shared/chunk-OJWRQYFE.js", "/build/_shared/chunk-P6R5TE4B.js", "/build/_shared/chunk-3QEU627O.js", "/build/_shared/chunk-EMUF5WYA.js", "/build/_shared/chunk-MUCI2AX4.js", "/build/_shared/chunk-3SZQ2EU6.js", "/build/_shared/chunk-EJUGCY4O.js", "/build/_shared/chunk-RPN7754G.js", "/build/_shared/chunk-GE3LEUT5.js", "/build/_shared/chunk-3MPNIHC6.js", "/build/_shared/chunk-QUKSBBKR.js", "/build/_shared/chunk-Y56G7LIZ.js", "/build/_shared/chunk-W2BATQOT.js", "/build/_shared/chunk-4T2T64QM.js", "/build/_shared/chunk-D2YWGCXL.js", "/build/_shared/chunk-T6J2XV4P.js", "/build/_shared/chunk-V6GYY67B.js", "/build/_shared/chunk-VILKH7TY.js", "/build/_shared/chunk-RR4NJ5KE.js", "/build/_shared/chunk-6HSG7XTY.js", "/build/_shared/chunk-XYUYOA7A.js", "/build/_shared/chunk-NCEHAU4L.js", "/build/_shared/chunk-Z7YULZIH.js", "/build/_shared/chunk-YQXBHU4J.js", "/build/_shared/chunk-MR4RNV3R.js", "/build/_shared/chunk-GI2N4KBY.js", "/build/_shared/chunk-SZPWMCO5.js", "/build/_shared/chunk-2GDX3YAH.js", "/build/_shared/chunk-HTUCWV64.js", "/build/_shared/chunk-TCEARVXY.js", "/build/_shared/chunk-Z6AXIWND.js", "/build/_shared/chunk-LMCMPUVQ.js", "/build/_shared/chunk-5FXFPOX2.js", "/build/_shared/chunk-WYP3H2FD.js", "/build/_shared/chunk-774OMCZR.js", "/build/_shared/chunk-NBSC6XW7.js", "/build/_shared/chunk-CQ24AUPW.js", "/build/_shared/chunk-5ZSDEH4N.js", "/build/_shared/chunk-GMGJK3MR.js", "/build/_shared/chunk-4UOIOKXZ.js", "/build/_shared/chunk-E3BJX6GI.js", "/build/_shared/chunk-GGNTVNB7.js", "/build/_shared/chunk-I65YJ4QN.js", "/build/_shared/chunk-7GUBRWIJ.js", "/build/_shared/chunk-4WS66JBF.js", "/build/_shared/chunk-BFXNYLGG.js", "/build/_shared/chunk-TN2225VX.js", "/build/_shared/chunk-7ME3AMXU.js", "/build/_shared/chunk-3EFZLDUL.js", "/build/_shared/chunk-ZXNGIWOR.js", "/build/_shared/chunk-PJUNGHBU.js", "/build/_shared/chunk-F6SN3YQX.js", "/build/_shared/chunk-JJNOZJPV.js", "/build/_shared/chunk-SUP4S7DH.js", "/build/_shared/chunk-7QV7I6DD.js", "/build/_shared/chunk-JRSTKQLZ.js", "/build/_shared/chunk-6XRRSE7J.js", "/build/_shared/chunk-QED6EHTL.js", "/build/_shared/chunk-OOQIBJPY.js", "/build/_shared/chunk-LGU53J7E.js", "/build/_shared/chunk-JS7RKSJJ.js", "/build/_shared/chunk-TCN7IX6E.js", "/build/_shared/chunk-E4HQ5DYO.js", "/build/_shared/chunk-KXPPKHDA.js", "/build/_shared/chunk-J34RT64S.js", "/build/_shared/chunk-27UCNQHB.js", "/build/_shared/chunk-NIWVQP4L.js", "/build/_shared/chunk-2MQBF6KW.js", "/build/_shared/chunk-CVJWMYET.js", "/build/_shared/chunk-GKZPOANK.js", "/build/_shared/chunk-X4BBBUCM.js", "/build/_shared/chunk-YQ6A7ZUM.js", "/build/_shared/chunk-6UXMWLTK.js", "/build/_shared/chunk-CQR4IMFE.js", "/build/_shared/chunk-BDU2ZUML.js", "/build/_shared/chunk-G7YRGAP3.js", "/build/_shared/chunk-NQKFGVLM.js", "/build/_shared/chunk-I3D7JRIP.js", "/build/_shared/chunk-M2OZFYN7.js", "/build/_shared/chunk-QTNSPCLO.js", "/build/_shared/chunk-742BHR2L.js", "/build/_shared/chunk-CV5S5VRI.js", "/build/_shared/chunk-HHCX4CCT.js", "/build/_shared/chunk-25YI2XQS.js", "/build/_shared/chunk-BJDBBCOY.js", "/build/_shared/chunk-BHVITGKY.js", "/build/_shared/chunk-OYBZT2QD.js", "/build/_shared/chunk-ZDG2VPXG.js", "/build/_shared/chunk-AVJ366R7.js", "/build/_shared/chunk-72ZIPJCL.js", "/build/_shared/chunk-ZTPUC4LI.js", "/build/_shared/chunk-CHSUQ4ND.js", "/build/_shared/chunk-NAH44UAY.js", "/build/_shared/chunk-EHANKJMY.js", "/build/_shared/chunk-UMTVKZO5.js", "/build/_shared/chunk-4MH22FYW.js", "/build/_shared/chunk-FFQ2WFQV.js", "/build/_shared/chunk-YL6HEDYI.js", "/build/_shared/chunk-TZ3SBXU3.js", "/build/_shared/chunk-OBW6ELRI.js", "/build/_shared/chunk-CVVYYINL.js", "/build/_shared/chunk-STSVAWTV.js", "/build/_shared/chunk-TDCS52LA.js", "/build/_shared/chunk-GPD2HVBH.js", "/build/_shared/chunk-7VOVYIOR.js", "/build/_shared/chunk-GG2DVLU7.js", "/build/_shared/chunk-NKZ7WG2F.js", "/build/_shared/chunk-Q644C3ZM.js", "/build/_shared/chunk-R5YHXAJB.js", "/build/_shared/chunk-J77YZUUH.js", "/build/_shared/chunk-FQGFV7S6.js", "/build/_shared/chunk-MLRMLC5W.js", "/build/_shared/chunk-PFX42ENT.js", "/build/_shared/chunk-4MTAX3B7.js", "/build/_shared/chunk-GRACLWR7.js", "/build/_shared/chunk-IN5QRP4J.js", "/build/_shared/chunk-4OI3ONMS.js", "/build/_shared/chunk-HUM7GDMQ.js", "/build/_shared/chunk-EVMRHFSA.js", "/build/_shared/chunk-55J7H5PV.js", "/build/_shared/chunk-5BABC63H.js", "/build/_shared/chunk-EJA7S7FL.js", "/build/_shared/chunk-4F3DN6C2.js", "/build/_shared/chunk-ORHVMQEZ.js", "/build/_shared/chunk-QMIMEQQ7.js", "/build/_shared/chunk-QKHBSJO6.js", "/build/_shared/chunk-5RGFQ75H.js", "/build/_shared/chunk-BZRQRNKW.js", "/build/_shared/chunk-7VE54VCW.js", "/build/_shared/chunk-FLH4NYKM.js", "/build/_shared/chunk-BKYH4IG5.js", "/build/_shared/chunk-CNX46JYZ.js", "/build/_shared/chunk-WZFBIFLU.js", "/build/_shared/chunk-AGFX4QKM.js", "/build/_shared/chunk-NXFCNEHI.js", "/build/_shared/chunk-UCWRDS43.js", "/build/_shared/chunk-JYJVETIU.js", "/build/_shared/chunk-55CWZDEP.js", "/build/_shared/chunk-RNDXAVPV.js", "/build/_shared/chunk-TAMVGRME.js", "/build/_shared/chunk-BVGME64Y.js", "/build/_shared/chunk-SVPVNNLM.js", "/build/_shared/chunk-NEW3EYLA.js", "/build/_shared/chunk-JDD25MLV.js", "/build/_shared/chunk-EI5U3EWW.js", "/build/_shared/chunk-BCTKXJNK.js", "/build/_shared/chunk-NADSVA3P.js", "/build/_shared/chunk-D4C5GOMX.js", "/build/_shared/chunk-TB4MFSJU.js", "/build/_shared/chunk-2UE62OQV.js", "/build/_shared/chunk-QK7F7LV6.js", "/build/_shared/chunk-YOPGZ7DT.js", "/build/_shared/chunk-AWNESVSD.js", "/build/_shared/chunk-FHJKORSF.js", "/build/_shared/chunk-KTKIUP2N.js", "/build/_shared/chunk-FY2MEKS6.js", "/build/_shared/chunk-P3SQ7ISC.js", "/build/_shared/chunk-LDI56K2W.js", "/build/_shared/chunk-7VRO3RGC.js", "/build/_shared/chunk-YE6ZZKFE.js", "/build/_shared/chunk-5CHFHD27.js", "/build/_shared/chunk-EI4MJFEB.js", "/build/_shared/chunk-Y5OC5LXJ.js", "/build/_shared/chunk-QOFGSUOJ.js", "/build/_shared/chunk-ROD7YPKB.js", "/build/_shared/chunk-GJDLOPOZ.js", "/build/_shared/chunk-MDQESUKV.js", "/build/_shared/chunk-B27PKJLJ.js", "/build/_shared/chunk-SZLALUS7.js", "/build/_shared/chunk-3W3CG4HI.js", "/build/_shared/chunk-ILS2U7FD.js", "/build/_shared/chunk-PG45EBB7.js", "/build/_shared/chunk-NWWDDSG6.js", "/build/_shared/chunk-XSUTIV3F.js", "/build/_shared/chunk-4U4XFUZE.js", "/build/_shared/chunk-IEOKYWPS.js", "/build/_shared/chunk-WPQOHXYU.js", "/build/_shared/chunk-2KPSQ4JI.js", "/build/_shared/chunk-MCTX47TO.js", "/build/_shared/chunk-SYHMWHDH.js", "/build/_shared/chunk-UCSE3GNE.js", "/build/_shared/chunk-HRWYEMU3.js", "/build/_shared/chunk-H326XFSM.js", "/build/_shared/chunk-ZS7IAGLI.js", "/build/_shared/chunk-ABOB5II4.js", "/build/_shared/chunk-R7RQKAMU.js", "/build/_shared/chunk-VEOB2ARX.js", "/build/_shared/chunk-PMMWWJWD.js", "/build/_shared/chunk-SI3VXBJI.js", "/build/_shared/chunk-2MJQ2YTJ.js", "/build/_shared/chunk-DNGVS2K7.js", "/build/_shared/chunk-YF5VVCNL.js", "/build/_shared/chunk-YFHAFOGR.js", "/build/_shared/chunk-2XFGHJI5.js", "/build/_shared/chunk-KNBS4RWG.js", "/build/_shared/chunk-ZEL6RK6O.js", "/build/_shared/chunk-JHVZS4LF.js", "/build/_shared/chunk-MGWDYMTH.js", "/build/_shared/chunk-X3WUQR32.js", "/build/_shared/chunk-LO6GUOQO.js", "/build/_shared/chunk-RAV4OOIY.js", "/build/_shared/chunk-VRFV7LT2.js", "/build/_shared/chunk-ZKQKTAHO.js", "/build/_shared/chunk-3ZVNNSWE.js", "/build/_shared/chunk-BKZNFNZU.js", "/build/_shared/chunk-HB7O5XHF.js", "/build/_shared/chunk-QSDWSUKD.js", "/build/_shared/chunk-J76ULVJH.js", "/build/_shared/chunk-VLV5YAZ2.js", "/build/_shared/chunk-W3ECI43U.js", "/build/_shared/chunk-EX7JJ6Y4.js", "/build/_shared/chunk-ULVG3JS3.js", "/build/_shared/chunk-KSHVLVS4.js", "/build/_shared/chunk-E7HOBNAQ.js", "/build/_shared/chunk-PCFBRKVM.js", "/build/_shared/chunk-T43YGBBD.js", "/build/_shared/chunk-IGBJM24X.js", "/build/_shared/chunk-5FZDWD2A.js", "/build/_shared/chunk-VYOFQU6T.js", "/build/_shared/chunk-BFHEGUBO.js", "/build/_shared/chunk-LPB7OZKI.js", "/build/_shared/chunk-R4ZYW5HH.js", "/build/_shared/chunk-L5FZOWGA.js", "/build/_shared/chunk-BDHYV3IN.js", "/build/_shared/chunk-EXD2J3LC.js", "/build/_shared/chunk-O6QJCV2C.js", "/build/_shared/chunk-FDTMDRM4.js", "/build/_shared/chunk-XWZVQ2U2.js", "/build/_shared/chunk-IMMG5R2N.js", "/build/_shared/chunk-35PTE5Y2.js", "/build/_shared/chunk-C56HP5U3.js", "/build/_shared/chunk-2NCJ2OMO.js", "/build/_shared/chunk-WCUTGYEN.js", "/build/_shared/chunk-3I5JAIUQ.js", "/build/_shared/chunk-QXSEZ7RM.js", "/build/_shared/chunk-LWWGEE4G.js", "/build/_shared/chunk-FD65PSGW.js", "/build/_shared/chunk-T33PLEBE.js", "/build/_shared/chunk-5W2S54DT.js", "/build/_shared/chunk-KQFSTETP.js", "/build/_shared/chunk-JJNCUEZF.js", "/build/_shared/chunk-KGF6T672.js", "/build/_shared/chunk-SB57TS6O.js", "/build/_shared/chunk-E2JX3IFB.js", "/build/_shared/chunk-23K75456.js", "/build/_shared/chunk-CTO7HTKE.js", "/build/_shared/chunk-R57USJQ5.js", "/build/_shared/chunk-AVPKQCTS.js", "/build/_shared/chunk-5XV75YAP.js", "/build/_shared/chunk-YRSNOJZW.js", "/build/_shared/chunk-S4LAUDDS.js", "/build/_shared/chunk-JVMWRVME.js", "/build/_shared/chunk-GN2HRNWN.js", "/build/_shared/chunk-V2JHYFQI.js", "/build/_shared/chunk-27E6SFQY.js", "/build/_shared/chunk-IN6KKION.js", "/build/_shared/chunk-TXO2PBRC.js", "/build/_shared/chunk-PIOHKUGS.js", "/build/_shared/chunk-QJHMVXXJ.js", "/build/_shared/chunk-DGIOIJIX.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !0 }, "routes/posts.create": { id: "routes/posts.create", parentId: "root", path: "posts/create", index: void 0, caseSensitive: void 0, module: "/build/routes/posts.create-ZRWXMLEH.js", imports: ["/build/_shared/chunk-L6YYDTYS.js", "/build/_shared/chunk-XAB7PCAA.js", "/build/_shared/chunk-NTHRJKQW.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !0 }, "routes/privacy": { id: "routes/privacy", parentId: "root", path: "privacy", index: void 0, caseSensitive: void 0, module: "/build/routes/privacy-QJLP4XCL.js", imports: ["/build/_shared/chunk-NTHRJKQW.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/profile": { id: "routes/profile", parentId: "root", path: "profile", index: void 0, caseSensitive: void 0, module: "/build/routes/profile-AIJ6ECJZ.js", imports: ["/build/_shared/chunk-PC65EDHQ.js", "/build/_shared/chunk-VI4IRXJP.js", "/build/_shared/chunk-6NZWBXS4.js", "/build/_shared/chunk-DGIOIJIX.js", "/build/_shared/chunk-NTHRJKQW.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/profile.activity": { id: "routes/profile.activity", parentId: "routes/profile", path: "activity", index: void 0, caseSensitive: void 0, module: "/build/routes/profile.activity-PJZ4Q5DP.js", imports: ["/build/_shared/chunk-MQYEVBU3.js", "/build/_shared/chunk-5TRFQBKG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/refund-requests": { id: "routes/refund-requests", parentId: "root", path: "refund-requests", index: void 0, caseSensitive: void 0, module: "/build/routes/refund-requests-ZJBNIB5U.js", imports: ["/build/_shared/chunk-NTHRJKQW.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/settings": { id: "routes/settings", parentId: "root", path: "settings", index: void 0, caseSensitive: void 0, module: "/build/routes/settings-5SK5WBJM.js", imports: ["/build/_shared/chunk-6NZWBXS4.js", "/build/_shared/chunk-NTHRJKQW.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/signup": { id: "routes/signup", parentId: "root", path: "signup", index: void 0, caseSensitive: void 0, module: "/build/routes/signup-Q6DG73QS.js", imports: ["/build/_shared/chunk-NTHRJKQW.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/terms": { id: "routes/terms", parentId: "root", path: "terms", index: void 0, caseSensitive: void 0, module: "/build/routes/terms-C6NN623D.js", imports: ["/build/_shared/chunk-NTHRJKQW.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/transactions": { id: "routes/transactions", parentId: "root", path: "transactions", index: void 0, caseSensitive: void 0, module: "/build/routes/transactions-JPOT2WV4.js", imports: ["/build/_shared/chunk-NTHRJKQW.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/wallet": { id: "routes/wallet", parentId: "root", path: "wallet", index: void 0, caseSensitive: void 0, module: "/build/routes/wallet-B3U7YQGG.js", imports: ["/build/_shared/chunk-L6YYDTYS.js", "/build/_shared/chunk-XAB7PCAA.js", "/build/_shared/chunk-NTHRJKQW.js", "/build/_shared/chunk-Y3IVF2DN.js", "/build/_shared/chunk-3N6QMJTG.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !0 } }, version: "a9b4c7b0", hmr: void 0, url: "/build/manifest-A9B4C7B0.js" };
+var assets_manifest_default = { entry: { module: "/build/entry.client-4ZJ4BHJ3.js", imports: ["/build/_shared/chunk-SUGSQK25.js", "/build/_shared/chunk-M52IJKKB.js", "/build/_shared/chunk-7ZSQYYGQ.js", "/build/_shared/chunk-G5WX4PPA.js"] }, routes: { root: { id: "root", parentId: void 0, path: "", index: void 0, caseSensitive: void 0, module: "/build/root-44ECIKFZ.js", imports: ["/build/_shared/chunk-XMR4XXKI.js", "/build/_shared/chunk-M6YYSRTO.js", "/build/_shared/chunk-HNI33J5K.js", "/build/_shared/chunk-VGV3QROC.js", "/build/_shared/chunk-5TRFQBKG.js", "/build/_shared/chunk-6S2QUAFR.js", "/build/_shared/chunk-MQYEVBU3.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !0 }, "routes/$username": { id: "routes/$username", parentId: "root", path: ":username", index: void 0, caseSensitive: void 0, module: "/build/routes/$username-X3MWNRBL.js", imports: ["/build/_shared/chunk-F2E6JNSZ.js", "/build/_shared/chunk-QQJA2FKO.js", "/build/_shared/chunk-NJ6WXT5E.js", "/build/_shared/chunk-JBQ2AI7C.js", "/build/_shared/chunk-GE4ZJASY.js", "/build/_shared/chunk-3YO5IEDJ.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/$username.posts": { id: "routes/$username.posts", parentId: "routes/$username", path: "posts", index: void 0, caseSensitive: void 0, module: "/build/routes/$username.posts-NQIQVQRE.js", imports: ["/build/_shared/chunk-6S2QUAFR.js", "/build/_shared/chunk-MQYEVBU3.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/_index": { id: "routes/_index", parentId: "root", path: void 0, index: !0, caseSensitive: void 0, module: "/build/routes/_index-3Y6G5ISI.js", imports: ["/build/_shared/chunk-GE4ZJASY.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.answers.$answerId.vote": { id: "routes/api.answers.$answerId.vote", parentId: "root", path: "api/answers/:answerId/vote", index: void 0, caseSensitive: void 0, module: "/build/routes/api.answers.$answerId.vote-UW54CVND.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.bookmarks-status": { id: "routes/api.bookmarks-status", parentId: "root", path: "api/bookmarks-status", index: void 0, caseSensitive: void 0, module: "/build/routes/api.bookmarks-status-SUQV6H62.js", imports: void 0, hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.bookmarks-toggle": { id: "routes/api.bookmarks-toggle", parentId: "root", path: "api/bookmarks-toggle", index: void 0, caseSensitive: void 0, module: "/build/routes/api.bookmarks-toggle-Z6Y2EOUA.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.bounty.claim": { id: "routes/api.bounty.claim", parentId: "root", path: "api/bounty/claim", index: void 0, caseSensitive: void 0, module: "/build/routes/api.bounty.claim-4ZEDX5T5.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.comments.$commentId.vote": { id: "routes/api.comments.$commentId.vote", parentId: "root", path: "api/comments/:commentId/vote", index: void 0, caseSensitive: void 0, module: "/build/routes/api.comments.$commentId.vote-CZSD4KS5.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.integrity.rate": { id: "routes/api.integrity.rate", parentId: "root", path: "api/integrity/rate", index: void 0, caseSensitive: void 0, module: "/build/routes/api.integrity.rate-IMSSEOHP.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.integrity.report": { id: "routes/api.integrity.report", parentId: "root", path: "api/integrity/report", index: void 0, caseSensitive: void 0, module: "/build/routes/api.integrity.report-RSA6WKMA.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.posts.$postId": { id: "routes/api.posts.$postId", parentId: "root", path: "api/posts/:postId", index: void 0, caseSensitive: void 0, module: "/build/routes/api.posts.$postId-YGBZFLPW.js", imports: void 0, hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.posts.$postId.vote": { id: "routes/api.posts.$postId.vote", parentId: "routes/api.posts.$postId", path: "vote", index: void 0, caseSensitive: void 0, module: "/build/routes/api.posts.$postId.vote-NBKAYBLE.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.posts.delete": { id: "routes/api.posts.delete", parentId: "root", path: "api/posts/delete", index: void 0, caseSensitive: void 0, module: "/build/routes/api.posts.delete-FKKMFTNB.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.privacy.pdf": { id: "routes/api.privacy.pdf", parentId: "root", path: "api/privacy/pdf", index: void 0, caseSensitive: void 0, module: "/build/routes/api.privacy.pdf-KQJ6I5V7.js", imports: void 0, hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.profile.picture": { id: "routes/api.profile.picture", parentId: "root", path: "api/profile/picture", index: void 0, caseSensitive: void 0, module: "/build/routes/api.profile.picture-YAPKYI3V.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.refund.request": { id: "routes/api.refund.request", parentId: "root", path: "api/refund/request", index: void 0, caseSensitive: void 0, module: "/build/routes/api.refund.request-RUBNJAZZ.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.refund.requests": { id: "routes/api.refund.requests", parentId: "root", path: "api/refund/requests", index: void 0, caseSensitive: void 0, module: "/build/routes/api.refund.requests-O5BE6NVO.js", imports: void 0, hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.refund.vote": { id: "routes/api.refund.vote", parentId: "root", path: "api/refund/vote", index: void 0, caseSensitive: void 0, module: "/build/routes/api.refund.vote-BVIXA4VT.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.terms.pdf": { id: "routes/api.terms.pdf", parentId: "root", path: "api/terms/pdf", index: void 0, caseSensitive: void 0, module: "/build/routes/api.terms.pdf-HIAO46YQ.js", imports: void 0, hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.wallet.cancel-transaction": { id: "routes/api.wallet.cancel-transaction", parentId: "root", path: "api/wallet/cancel-transaction", index: void 0, caseSensitive: void 0, module: "/build/routes/api.wallet.cancel-transaction-QSFVUSIE.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.wallet.confirm-deposit": { id: "routes/api.wallet.confirm-deposit", parentId: "root", path: "api/wallet/confirm-deposit", index: void 0, caseSensitive: void 0, module: "/build/routes/api.wallet.confirm-deposit-MOIF5EVU.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.wallet.deposit": { id: "routes/api.wallet.deposit", parentId: "root", path: "api/wallet/deposit", index: void 0, caseSensitive: void 0, module: "/build/routes/api.wallet.deposit-5FTD6S54.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/api.wallet.withdraw": { id: "routes/api.wallet.withdraw", parentId: "root", path: "api/wallet/withdraw", index: void 0, caseSensitive: void 0, module: "/build/routes/api.wallet.withdraw-DZQ53G34.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/community": { id: "routes/community", parentId: "root", path: "community", index: void 0, caseSensitive: void 0, module: "/build/routes/community-UJL4IUUT.js", imports: ["/build/_shared/chunk-NJ6WXT5E.js", "/build/_shared/chunk-GRRWBXZD.js", "/build/_shared/chunk-JBQ2AI7C.js", "/build/_shared/chunk-GE4ZJASY.js", "/build/_shared/chunk-3YO5IEDJ.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/default-avatar.png": { id: "routes/default-avatar.png", parentId: "root", path: "default-avatar/png", index: void 0, caseSensitive: void 0, module: "/build/routes/default-avatar.png-AHJ7WDHH.js", imports: void 0, hasAction: !1, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/docs": { id: "routes/docs", parentId: "root", path: "docs", index: void 0, caseSensitive: void 0, module: "/build/routes/docs-76O5OR4D.js", imports: ["/build/_shared/chunk-GRRWBXZD.js", "/build/_shared/chunk-JBQ2AI7C.js", "/build/_shared/chunk-3YO5IEDJ.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/docs.legal": { id: "routes/docs.legal", parentId: "routes/docs", path: "legal", index: void 0, caseSensitive: void 0, module: "/build/routes/docs.legal-D2PB4FEY.js", imports: ["/build/_shared/chunk-GE4ZJASY.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/docs.platform": { id: "routes/docs.platform", parentId: "routes/docs", path: "platform", index: void 0, caseSensitive: void 0, module: "/build/routes/docs.platform-AT6SSBUI.js", imports: ["/build/_shared/chunk-GE4ZJASY.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/docs.refund-system": { id: "routes/docs.refund-system", parentId: "routes/docs", path: "refund-system", index: void 0, caseSensitive: void 0, module: "/build/routes/docs.refund-system-XGESLE75.js", imports: ["/build/_shared/chunk-GE4ZJASY.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/login": { id: "routes/login", parentId: "root", path: "login", index: void 0, caseSensitive: void 0, module: "/build/routes/login-3HDVV52V.js", imports: ["/build/_shared/chunk-GRRWBXZD.js", "/build/_shared/chunk-JBQ2AI7C.js", "/build/_shared/chunk-3YO5IEDJ.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/logout": { id: "routes/logout", parentId: "root", path: "logout", index: void 0, caseSensitive: void 0, module: "/build/routes/logout-H5LISC2A.js", imports: void 0, hasAction: !0, hasLoader: !1, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/posts.$postId": { id: "routes/posts.$postId", parentId: "root", path: "posts/:postId", index: void 0, caseSensitive: void 0, module: "/build/routes/posts.$postId-ANWXF3QY.js", imports: ["/build/_shared/chunk-N6CGDNAL.js", "/build/_shared/chunk-DGXI5RJE.js", "/build/_shared/chunk-RM73K6RH.js", "/build/_shared/chunk-TV6J5LVP.js", "/build/_shared/chunk-F7QMDYXS.js", "/build/_shared/chunk-A6ZVAP33.js", "/build/_shared/chunk-SICW524A.js", "/build/_shared/chunk-FUZFIQN5.js", "/build/_shared/chunk-RV3KCD2Q.js", "/build/_shared/chunk-FQTK4I2O.js", "/build/_shared/chunk-NCPUIDGO.js", "/build/_shared/chunk-EUY7HEKH.js", "/build/_shared/chunk-JVOZNRBH.js", "/build/_shared/chunk-2YZ7TZSG.js", "/build/_shared/chunk-FGS6CPL7.js", "/build/_shared/chunk-GW7FZVM5.js", "/build/_shared/chunk-P6R5TE4B.js", "/build/_shared/chunk-3QEU627O.js", "/build/_shared/chunk-EMUF5WYA.js", "/build/_shared/chunk-MUCI2AX4.js", "/build/_shared/chunk-3SZQ2EU6.js", "/build/_shared/chunk-KOU7KXJE.js", "/build/_shared/chunk-ZVDYBXYH.js", "/build/_shared/chunk-NWTBI763.js", "/build/_shared/chunk-3MPNIHC6.js", "/build/_shared/chunk-QUKSBBKR.js", "/build/_shared/chunk-Y56G7LIZ.js", "/build/_shared/chunk-W2BATQOT.js", "/build/_shared/chunk-XEUVD2LR.js", "/build/_shared/chunk-XHVR4ZVO.js", "/build/_shared/chunk-G74JO6TW.js", "/build/_shared/chunk-OJWRQYFE.js", "/build/_shared/chunk-VILKH7TY.js", "/build/_shared/chunk-RR4NJ5KE.js", "/build/_shared/chunk-6HSG7XTY.js", "/build/_shared/chunk-EJUGCY4O.js", "/build/_shared/chunk-XYUYOA7A.js", "/build/_shared/chunk-NCEHAU4L.js", "/build/_shared/chunk-RPN7754G.js", "/build/_shared/chunk-GE3LEUT5.js", "/build/_shared/chunk-GI2N4KBY.js", "/build/_shared/chunk-SZPWMCO5.js", "/build/_shared/chunk-2GDX3YAH.js", "/build/_shared/chunk-HTUCWV64.js", "/build/_shared/chunk-TCEARVXY.js", "/build/_shared/chunk-D2YWGCXL.js", "/build/_shared/chunk-T6J2XV4P.js", "/build/_shared/chunk-V6GYY67B.js", "/build/_shared/chunk-WYP3H2FD.js", "/build/_shared/chunk-774OMCZR.js", "/build/_shared/chunk-NBSC6XW7.js", "/build/_shared/chunk-CQ24AUPW.js", "/build/_shared/chunk-5ZSDEH4N.js", "/build/_shared/chunk-Z7YULZIH.js", "/build/_shared/chunk-YQXBHU4J.js", "/build/_shared/chunk-MR4RNV3R.js", "/build/_shared/chunk-GGNTVNB7.js", "/build/_shared/chunk-I65YJ4QN.js", "/build/_shared/chunk-7GUBRWIJ.js", "/build/_shared/chunk-4WS66JBF.js", "/build/_shared/chunk-BFXNYLGG.js", "/build/_shared/chunk-Z6AXIWND.js", "/build/_shared/chunk-LMCMPUVQ.js", "/build/_shared/chunk-5FXFPOX2.js", "/build/_shared/chunk-ZXNGIWOR.js", "/build/_shared/chunk-PJUNGHBU.js", "/build/_shared/chunk-F6SN3YQX.js", "/build/_shared/chunk-JJNOZJPV.js", "/build/_shared/chunk-SUP4S7DH.js", "/build/_shared/chunk-GMGJK3MR.js", "/build/_shared/chunk-4UOIOKXZ.js", "/build/_shared/chunk-E3BJX6GI.js", "/build/_shared/chunk-QED6EHTL.js", "/build/_shared/chunk-OOQIBJPY.js", "/build/_shared/chunk-LGU53J7E.js", "/build/_shared/chunk-JS7RKSJJ.js", "/build/_shared/chunk-TCN7IX6E.js", "/build/_shared/chunk-TN2225VX.js", "/build/_shared/chunk-7ME3AMXU.js", "/build/_shared/chunk-3EFZLDUL.js", "/build/_shared/chunk-27UCNQHB.js", "/build/_shared/chunk-NIWVQP4L.js", "/build/_shared/chunk-2MQBF6KW.js", "/build/_shared/chunk-CVJWMYET.js", "/build/_shared/chunk-GKZPOANK.js", "/build/_shared/chunk-7QV7I6DD.js", "/build/_shared/chunk-JRSTKQLZ.js", "/build/_shared/chunk-6XRRSE7J.js", "/build/_shared/chunk-CQR4IMFE.js", "/build/_shared/chunk-BDU2ZUML.js", "/build/_shared/chunk-G7YRGAP3.js", "/build/_shared/chunk-NQKFGVLM.js", "/build/_shared/chunk-I3D7JRIP.js", "/build/_shared/chunk-E4HQ5DYO.js", "/build/_shared/chunk-KXPPKHDA.js", "/build/_shared/chunk-J34RT64S.js", "/build/_shared/chunk-CV5S5VRI.js", "/build/_shared/chunk-HHCX4CCT.js", "/build/_shared/chunk-25YI2XQS.js", "/build/_shared/chunk-BJDBBCOY.js", "/build/_shared/chunk-BHVITGKY.js", "/build/_shared/chunk-X4BBBUCM.js", "/build/_shared/chunk-YQ6A7ZUM.js", "/build/_shared/chunk-6UXMWLTK.js", "/build/_shared/chunk-72ZIPJCL.js", "/build/_shared/chunk-ZTPUC4LI.js", "/build/_shared/chunk-CHSUQ4ND.js", "/build/_shared/chunk-NAH44UAY.js", "/build/_shared/chunk-EHANKJMY.js", "/build/_shared/chunk-M2OZFYN7.js", "/build/_shared/chunk-QTNSPCLO.js", "/build/_shared/chunk-742BHR2L.js", "/build/_shared/chunk-YL6HEDYI.js", "/build/_shared/chunk-TZ3SBXU3.js", "/build/_shared/chunk-OBW6ELRI.js", "/build/_shared/chunk-CVVYYINL.js", "/build/_shared/chunk-STSVAWTV.js", "/build/_shared/chunk-OYBZT2QD.js", "/build/_shared/chunk-ZDG2VPXG.js", "/build/_shared/chunk-AVJ366R7.js", "/build/_shared/chunk-GG2DVLU7.js", "/build/_shared/chunk-NKZ7WG2F.js", "/build/_shared/chunk-Q644C3ZM.js", "/build/_shared/chunk-R5YHXAJB.js", "/build/_shared/chunk-J77YZUUH.js", "/build/_shared/chunk-UMTVKZO5.js", "/build/_shared/chunk-4MH22FYW.js", "/build/_shared/chunk-FFQ2WFQV.js", "/build/_shared/chunk-PFX42ENT.js", "/build/_shared/chunk-GRACLWR7.js", "/build/_shared/chunk-IN5QRP4J.js", "/build/_shared/chunk-4OI3ONMS.js", "/build/_shared/chunk-HUM7GDMQ.js", "/build/_shared/chunk-TDCS52LA.js", "/build/_shared/chunk-GPD2HVBH.js", "/build/_shared/chunk-7VOVYIOR.js", "/build/_shared/chunk-EJA7S7FL.js", "/build/_shared/chunk-4F3DN6C2.js", "/build/_shared/chunk-ORHVMQEZ.js", "/build/_shared/chunk-QMIMEQQ7.js", "/build/_shared/chunk-QKHBSJO6.js", "/build/_shared/chunk-FQGFV7S6.js", "/build/_shared/chunk-MLRMLC5W.js", "/build/_shared/chunk-4MTAX3B7.js", "/build/_shared/chunk-FLH4NYKM.js", "/build/_shared/chunk-BKYH4IG5.js", "/build/_shared/chunk-CNX46JYZ.js", "/build/_shared/chunk-WZFBIFLU.js", "/build/_shared/chunk-EVMRHFSA.js", "/build/_shared/chunk-AGFX4QKM.js", "/build/_shared/chunk-55J7H5PV.js", "/build/_shared/chunk-5BABC63H.js", "/build/_shared/chunk-5QY2QXA4.js", "/build/_shared/chunk-RNDXAVPV.js", "/build/_shared/chunk-TAMVGRME.js", "/build/_shared/chunk-BVGME64Y.js", "/build/_shared/chunk-SVPVNNLM.js", "/build/_shared/chunk-5RGFQ75H.js", "/build/_shared/chunk-BZRQRNKW.js", "/build/_shared/chunk-7VE54VCW.js", "/build/_shared/chunk-BCTKXJNK.js", "/build/_shared/chunk-NADSVA3P.js", "/build/_shared/chunk-D4C5GOMX.js", "/build/_shared/chunk-TB4MFSJU.js", "/build/_shared/chunk-2UE62OQV.js", "/build/_shared/chunk-NXFCNEHI.js", "/build/_shared/chunk-UCWRDS43.js", "/build/_shared/chunk-55CWZDEP.js", "/build/_shared/chunk-FHJKORSF.js", "/build/_shared/chunk-KTKIUP2N.js", "/build/_shared/chunk-FY2MEKS6.js", "/build/_shared/chunk-P3SQ7ISC.js", "/build/_shared/chunk-LDI56K2W.js", "/build/_shared/chunk-NEW3EYLA.js", "/build/_shared/chunk-JDD25MLV.js", "/build/_shared/chunk-EI5U3EWW.js", "/build/_shared/chunk-EI4MJFEB.js", "/build/_shared/chunk-Y5OC5LXJ.js", "/build/_shared/chunk-QOFGSUOJ.js", "/build/_shared/chunk-ROD7YPKB.js", "/build/_shared/chunk-GJDLOPOZ.js", "/build/_shared/chunk-QK7F7LV6.js", "/build/_shared/chunk-YOPGZ7DT.js", "/build/_shared/chunk-AWNESVSD.js", "/build/_shared/chunk-3W3CG4HI.js", "/build/_shared/chunk-ILS2U7FD.js", "/build/_shared/chunk-PG45EBB7.js", "/build/_shared/chunk-NWWDDSG6.js", "/build/_shared/chunk-XSUTIV3F.js", "/build/_shared/chunk-7VRO3RGC.js", "/build/_shared/chunk-YE6ZZKFE.js", "/build/_shared/chunk-5CHFHD27.js", "/build/_shared/chunk-2KPSQ4JI.js", "/build/_shared/chunk-MCTX47TO.js", "/build/_shared/chunk-SYHMWHDH.js", "/build/_shared/chunk-UCSE3GNE.js", "/build/_shared/chunk-HRWYEMU3.js", "/build/_shared/chunk-MDQESUKV.js", "/build/_shared/chunk-B27PKJLJ.js", "/build/_shared/chunk-SZLALUS7.js", "/build/_shared/chunk-R7RQKAMU.js", "/build/_shared/chunk-VEOB2ARX.js", "/build/_shared/chunk-PMMWWJWD.js", "/build/_shared/chunk-SI3VXBJI.js", "/build/_shared/chunk-4U4XFUZE.js", "/build/_shared/chunk-2MJQ2YTJ.js", "/build/_shared/chunk-IEOKYWPS.js", "/build/_shared/chunk-WPQOHXYU.js", "/build/_shared/chunk-YFHAFOGR.js", "/build/_shared/chunk-KNBS4RWG.js", "/build/_shared/chunk-ZEL6RK6O.js", "/build/_shared/chunk-JHVZS4LF.js", "/build/_shared/chunk-MGWDYMTH.js", "/build/_shared/chunk-H326XFSM.js", "/build/_shared/chunk-ZS7IAGLI.js", "/build/_shared/chunk-ABOB5II4.js", "/build/_shared/chunk-VRFV7LT2.js", "/build/_shared/chunk-ZKQKTAHO.js", "/build/_shared/chunk-3ZVNNSWE.js", "/build/_shared/chunk-BKZNFNZU.js", "/build/_shared/chunk-HB7O5XHF.js", "/build/_shared/chunk-DNGVS2K7.js", "/build/_shared/chunk-YF5VVCNL.js", "/build/_shared/chunk-2XFGHJI5.js", "/build/_shared/chunk-W3ECI43U.js", "/build/_shared/chunk-EX7JJ6Y4.js", "/build/_shared/chunk-ULVG3JS3.js", "/build/_shared/chunk-KSHVLVS4.js", "/build/_shared/chunk-E7HOBNAQ.js", "/build/_shared/chunk-X3WUQR32.js", "/build/_shared/chunk-LO6GUOQO.js", "/build/_shared/chunk-RAV4OOIY.js", "/build/_shared/chunk-5FZDWD2A.js", "/build/_shared/chunk-VYOFQU6T.js", "/build/_shared/chunk-BFHEGUBO.js", "/build/_shared/chunk-LPB7OZKI.js", "/build/_shared/chunk-R4ZYW5HH.js", "/build/_shared/chunk-QSDWSUKD.js", "/build/_shared/chunk-J76ULVJH.js", "/build/_shared/chunk-VLV5YAZ2.js", "/build/_shared/chunk-O6QJCV2C.js", "/build/_shared/chunk-FDTMDRM4.js", "/build/_shared/chunk-XWZVQ2U2.js", "/build/_shared/chunk-IMMG5R2N.js", "/build/_shared/chunk-35PTE5Y2.js", "/build/_shared/chunk-PCFBRKVM.js", "/build/_shared/chunk-T43YGBBD.js", "/build/_shared/chunk-IGBJM24X.js", "/build/_shared/chunk-3I5JAIUQ.js", "/build/_shared/chunk-QXSEZ7RM.js", "/build/_shared/chunk-LWWGEE4G.js", "/build/_shared/chunk-FD65PSGW.js", "/build/_shared/chunk-T33PLEBE.js", "/build/_shared/chunk-L5FZOWGA.js", "/build/_shared/chunk-BDHYV3IN.js", "/build/_shared/chunk-EXD2J3LC.js", "/build/_shared/chunk-KQFSTETP.js", "/build/_shared/chunk-SB57TS6O.js", "/build/_shared/chunk-E2JX3IFB.js", "/build/_shared/chunk-23K75456.js", "/build/_shared/chunk-CTO7HTKE.js", "/build/_shared/chunk-C56HP5U3.js", "/build/_shared/chunk-2NCJ2OMO.js", "/build/_shared/chunk-WCUTGYEN.js", "/build/_shared/chunk-YRSNOJZW.js", "/build/_shared/chunk-S4LAUDDS.js", "/build/_shared/chunk-JVMWRVME.js", "/build/_shared/chunk-GN2HRNWN.js", "/build/_shared/chunk-V2JHYFQI.js", "/build/_shared/chunk-5W2S54DT.js", "/build/_shared/chunk-JJNCUEZF.js", "/build/_shared/chunk-KGF6T672.js", "/build/_shared/chunk-27E6SFQY.js", "/build/_shared/chunk-IN6KKION.js", "/build/_shared/chunk-TXO2PBRC.js", "/build/_shared/chunk-PIOHKUGS.js", "/build/_shared/chunk-R57USJQ5.js", "/build/_shared/chunk-AVPKQCTS.js", "/build/_shared/chunk-5XV75YAP.js", "/build/_shared/chunk-QQJA2FKO.js", "/build/_shared/chunk-JBQ2AI7C.js", "/build/_shared/chunk-GE4ZJASY.js", "/build/_shared/chunk-3YO5IEDJ.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !0 }, "routes/posts.create": { id: "routes/posts.create", parentId: "root", path: "posts/create", index: void 0, caseSensitive: void 0, module: "/build/routes/posts.create-H6YCSHCG.js", imports: ["/build/_shared/chunk-NJ6WXT5E.js", "/build/_shared/chunk-L6YYDTYS.js", "/build/_shared/chunk-XAB7PCAA.js", "/build/_shared/chunk-GRRWBXZD.js", "/build/_shared/chunk-JBQ2AI7C.js", "/build/_shared/chunk-GE4ZJASY.js", "/build/_shared/chunk-3YO5IEDJ.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !0 }, "routes/privacy": { id: "routes/privacy", parentId: "root", path: "privacy", index: void 0, caseSensitive: void 0, module: "/build/routes/privacy-ANYP4X7T.js", imports: ["/build/_shared/chunk-GRRWBXZD.js", "/build/_shared/chunk-JBQ2AI7C.js", "/build/_shared/chunk-GE4ZJASY.js", "/build/_shared/chunk-3YO5IEDJ.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/profile": { id: "routes/profile", parentId: "root", path: "profile", index: void 0, caseSensitive: void 0, module: "/build/routes/profile-TX637H2Y.js", imports: ["/build/_shared/chunk-F2E6JNSZ.js", "/build/_shared/chunk-Z2XEUTKX.js", "/build/_shared/chunk-QQJA2FKO.js", "/build/_shared/chunk-NJ6WXT5E.js", "/build/_shared/chunk-GRRWBXZD.js", "/build/_shared/chunk-JBQ2AI7C.js", "/build/_shared/chunk-3YO5IEDJ.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/profile.activity": { id: "routes/profile.activity", parentId: "routes/profile", path: "activity", index: void 0, caseSensitive: void 0, module: "/build/routes/profile.activity-ZLMRYKIF.js", imports: ["/build/_shared/chunk-GE4ZJASY.js", "/build/_shared/chunk-6S2QUAFR.js", "/build/_shared/chunk-MQYEVBU3.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/refund-requests": { id: "routes/refund-requests", parentId: "root", path: "refund-requests", index: void 0, caseSensitive: void 0, module: "/build/routes/refund-requests-2RDQ5XJ3.js", imports: ["/build/_shared/chunk-GRRWBXZD.js", "/build/_shared/chunk-JBQ2AI7C.js", "/build/_shared/chunk-GE4ZJASY.js", "/build/_shared/chunk-3YO5IEDJ.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/settings": { id: "routes/settings", parentId: "root", path: "settings", index: void 0, caseSensitive: void 0, module: "/build/routes/settings-4UTW6T2Z.js", imports: ["/build/_shared/chunk-Z2XEUTKX.js", "/build/_shared/chunk-GRRWBXZD.js", "/build/_shared/chunk-JBQ2AI7C.js", "/build/_shared/chunk-GE4ZJASY.js", "/build/_shared/chunk-3YO5IEDJ.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/signup": { id: "routes/signup", parentId: "root", path: "signup", index: void 0, caseSensitive: void 0, module: "/build/routes/signup-QS53727I.js", imports: ["/build/_shared/chunk-GRRWBXZD.js", "/build/_shared/chunk-JBQ2AI7C.js", "/build/_shared/chunk-3YO5IEDJ.js"], hasAction: !0, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/terms": { id: "routes/terms", parentId: "root", path: "terms", index: void 0, caseSensitive: void 0, module: "/build/routes/terms-ZROZT3R4.js", imports: ["/build/_shared/chunk-GRRWBXZD.js", "/build/_shared/chunk-JBQ2AI7C.js", "/build/_shared/chunk-GE4ZJASY.js", "/build/_shared/chunk-3YO5IEDJ.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/transactions": { id: "routes/transactions", parentId: "root", path: "transactions", index: void 0, caseSensitive: void 0, module: "/build/routes/transactions-UCRZ62QO.js", imports: ["/build/_shared/chunk-GRRWBXZD.js", "/build/_shared/chunk-JBQ2AI7C.js", "/build/_shared/chunk-GE4ZJASY.js", "/build/_shared/chunk-3YO5IEDJ.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 }, "routes/wallet": { id: "routes/wallet", parentId: "root", path: "wallet", index: void 0, caseSensitive: void 0, module: "/build/routes/wallet-NC56M7C6.js", imports: ["/build/_shared/chunk-L6YYDTYS.js", "/build/_shared/chunk-XAB7PCAA.js", "/build/_shared/chunk-GRRWBXZD.js", "/build/_shared/chunk-JBQ2AI7C.js", "/build/_shared/chunk-GE4ZJASY.js", "/build/_shared/chunk-3YO5IEDJ.js"], hasAction: !1, hasLoader: !0, hasClientAction: !1, hasClientLoader: !1, hasErrorBoundary: !1 } }, version: "9393dbc2", hmr: void 0, url: "/build/manifest-9393DBC2.js" };
 
 // server-entry-module:@remix-run/dev/server-build
-var mode = "production", assetsBuildDirectory = "public\\build", future = { v3_fetcherPersist: !1, v3_relativeSplatPath: !1, v3_throwAbortReason: !1, v3_routeConfig: !1, v3_singleFetch: !1, v3_lazyRouteDiscovery: !1, unstable_optimizeDeps: !1 }, publicPath = "/build/", entry = { module: entry_server_exports }, routes = {
+var mode = "production", assetsBuildDirectory = "public\\build", future = { v3_fetcherPersist: !1, v3_relativeSplatPath: !1, v3_throwAbortReason: !1 }, publicPath = "/build/", entry = { module: entry_server_exports }, routes = {
   root: {
     id: "root",
     parentId: void 0,

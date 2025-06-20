@@ -1,6 +1,6 @@
 import { json, type ActionFunctionArgs } from '@remix-run/cloudflare';
 import { z } from 'zod';
-import { rateUserIntegrity } from '~/utils/integrity.server';
+import { rateUser } from '~/utils/integrity.server';
 import { createDb } from '~/utils/db.server';
 import { getUser } from '~/utils/auth.server';
 
@@ -36,7 +36,7 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
     };
 
     const validatedData = RateUserSchema.parse(data);
-    await rateUserIntegrity(db, user, validatedData);
+    await rateUser(db, user, validatedData);
 
     return json({ 
       success: true, 

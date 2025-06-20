@@ -17,6 +17,7 @@
   "dependencies": {
     "@coral-xyz/anchor": "^0.31.1",
     "@remix-run/cloudflare": "^2.8.1",
+    "@remix-run/dev": "^2.8.1",
     "@remix-run/node": "2.8.1",
     "@remix-run/react": "2.8.1",
     "@solana/spl-token": "^0.4.13",
