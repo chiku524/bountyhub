@@ -22,14 +22,14 @@ SOLANA_WALLET_ADDRESS = "e6EdfgpEdo48zUKFC18cADxTqgbt68JE8uDjAgdCzkp"
 CLOUDINARY_CLOUD_NAME = "dqobhvk07"
 CLOUDINARY_API_KEY = "237281724716253"
 CLOUDINARY_API_SECRET = "N7Y40ttKyduI_5un60Cfv8kGfzI"
-CLOUDINARY_UPLOAD_PRESET = "portal"
+CLOUDINARY_UPLOAD_PRESET = "bountyhub"
 
 # HTML2PDF Configuration
 HTML2PDF_API_KEY = "28q7AasnbwG213fOLEt58Cjw4FEZVxNxAoaXl0MybGEGWeM9u73X4hGltgIMBz90"
 
 # Vite Client-Side Environment Variables (for direct uploads)
 VITE_CLOUDINARY_CLOUD_NAME = "dqobhvk07"
-VITE_CLOUDINARY_UPLOAD_PRESET = "portal"
+VITE_CLOUDINARY_UPLOAD_PRESET = "bountyhub"
 VITE_API_URL = "https://api.bountyhub.tech"
 
 # Database URLs (for compatibility with existing code)

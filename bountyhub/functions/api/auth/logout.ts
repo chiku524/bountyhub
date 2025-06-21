@@ -19,8 +19,11 @@ app.post(async (c) => {
     await deleteSession(sessionId, db)
   }
   
-  // Clear the session cookie
-  deleteCookie(c, 'session')
+  // Clear the session cookie with the same domain configuration
+  deleteCookie(c, 'session', {
+    domain: '.bountyhub.tech',
+    path: '/'
+  })
   
   return c.json({ success: true })
 })

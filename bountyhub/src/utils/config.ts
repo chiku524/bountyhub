@@ -11,7 +11,7 @@ export const config = {
   // Cloudinary Configuration
   cloudinary: {
     cloudName: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dqobhvk07',
-    uploadPreset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'portal',
+    uploadPreset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'bountyhub',
   },
   
   // App Configuration

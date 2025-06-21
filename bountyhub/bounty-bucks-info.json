@@ -2,7 +2,7 @@
   "name": "BountyBucks",
   "symbol": "BBUX",
   "mint": "8TxxzfEUbQcMTmsC5z1SS9TuLNzbL2iBVTLvb5JaKR6M",
-  "description": "BountyBucks (BBUX) is the native token for Portal's revolutionary decentralized bounty platform. Built on Solana, BBUX powers a hybrid virtual/real token model with innovative staking pools and an integrity rating system. Earn BBUX by completing bounties, stake for rewards, and participate in platform governance. The future of decentralized bounty platforms starts here.",
+  "description": "BountyBucks (BBUX) is the native token for bountyhub's revolutionary decentralized bounty platform. Built on Solana, BBUX powers a hybrid virtual/real token model with innovative staking pools and an integrity rating system. Earn BBUX by completing bounties, stake for rewards, and participate in platform governance. The future of decentralized bounty platforms starts here.",
   "image": "https://bountybucks.vercel.app/logo.svg",
   "external_url": "https://bountybucks.vercel.app/",
   "attributes": [
@@ -12,7 +12,7 @@
     { "trait_type": "Decimals", "value": "9" },
     { "trait_type": "Use Case", "value": "Bounty Platform Rewards" },
     { "trait_type": "Features", "value": "Staking, Governance, Liquidity Pools" },
-    { "trait_type": "Platform", "value": "Portal Bounty Platform" }
+    { "trait_type": "Platform", "value": "bountyhub Bounty Platform" }
   ],
   "properties": {
     "files": [

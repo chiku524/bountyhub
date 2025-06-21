@@ -12,7 +12,7 @@ export default function Home() {
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
             Welcome to{' '}
             <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-              Portal.ask
+              bountyhub
             </span>
           </h1>
           <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">

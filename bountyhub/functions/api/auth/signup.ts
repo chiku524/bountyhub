@@ -23,12 +23,13 @@ app.post(async (c) => {
     // Create a session for the user
     const sessionId = await createSession(result.user.id, db)
     
-    // Set the session cookie
+    // Set the session cookie with proper cross-subdomain configuration
     setCookie(c, 'session', sessionId, { 
       httpOnly: true, 
       path: '/',
-      secure: c.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      domain: '.bountyhub.tech', // Allow cookie to work across subdomains
+      secure: true, // Required for SameSite=None
+      sameSite: 'none', // Required for cross-subdomain requests
       maxAge: 60 * 60 * 24 * 30 // 30 days
     })
     

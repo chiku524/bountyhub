@@ -98,9 +98,9 @@ This guide explains how to set up and deploy BountyHub using a hybrid approach:
 
 ### Frontend (Vite)
 ```env
-VITE_API_URL=https://api.bountyhub.com
-VITE_CLOUDINARY_CLOUD_NAME=dqobhvk07
-VITE_CLOUDINARY_UPLOAD_PRESET=portal
+VITE_API_URL=https://api.bountyhub.tech
+VITE_CLOUDINARY_CLOUD_NAME=your-cloud-name
+VITE_CLOUDINARY_UPLOAD_PRESET=bountyhub
 ```
 
 ### Backend (Workers)
@@ -171,3 +171,17 @@ curl http://localhost:8788/api/auth/me
 3. Set up CI/CD pipeline
 4. Add environment-specific configurations
 5. Implement caching strategies 
+
+Create a `.env` file in the root directory with the following variables:
+
+```env
+# API Configuration
+VITE_API_URL=https://api.bountyhub.tech
+
+# Cloudinary Configuration
+VITE_CLOUDINARY_CLOUD_NAME=your-cloud-name
+VITE_CLOUDINARY_UPLOAD_PRESET=bountyhub
+
+# Database Configuration
+DATABASE_URL=your-database-url
+``` 

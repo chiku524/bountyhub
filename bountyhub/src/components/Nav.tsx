@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthProvider'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useWalletModal } from '@solana/wallet-adapter-react-ui'
 import { Notifications } from './Notifications'
+import logo from '/logo.svg'
 
 interface BubbleConfig {
   size: number
@@ -68,9 +69,24 @@ export function Nav() {
   const [mounted, setMounted] = useState(false)
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const [expanded, setExpanded] = useState(false)
 
   useEffect(() => {
     setMounted(true)
+  }, [])
+
+  // Detect expansion by mouse hover
+  useEffect(() => {
+    const nav = document.querySelector('.nav-container')
+    if (!nav) return
+    const handleMouseEnter = () => setExpanded(true)
+    const handleMouseLeave = () => setExpanded(false)
+    nav.addEventListener('mouseenter', handleMouseEnter)
+    nav.addEventListener('mouseleave', handleMouseLeave)
+    return () => {
+      nav.removeEventListener('mouseenter', handleMouseEnter)
+      nav.removeEventListener('mouseleave', handleMouseLeave)
+    }
   }, [])
 
   useEffect(() => {
@@ -153,13 +169,11 @@ export function Nav() {
 
       <div className="relative z-10 flex flex-col items-center w-full py-5">
         <div className="relative w-12 h-12 flex items-center justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-gray-300 transition-all duration-500 group-hover:text-indigo-300 group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" />
-            <line x1="12" y1="17" x2="12.01" y2="17" />
-          </svg>
+          <img src={logo} alt="bountyhub logo" className="w-10 h-10 object-contain" />
         </div>
-        <h1 className="text-gray-300 text-xs font-bold tracking-wider font-cursive transition-all duration-500 group-hover:text-indigo-300 group-hover:text-lg mt-2">portal.ask</h1>
+        <h1 className="text-gray-300 text-xs font-bold tracking-wider font-cursive transition-all duration-500 group-hover:text-indigo-300 group-hover:text-lg mt-2">
+          bountyhub
+        </h1>
       </div>
       <hr className='border-b border-gray-500 w-4/6 relative z-10'/>
 
@@ -167,7 +181,7 @@ export function Nav() {
         <Link to="/" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-white/5">
           <div className="relative flex items-center justify-center gap-4 px-4 py-1 w-full">
             <FiHome className="h-6 w-6 text-gray-300 transition-all duration-300 group-hover:text-indigo-300 group-hover:scale-110" />
-            <span className="text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-300 opacity-0 group-hover:opacity-100 whitespace-nowrap overflow-hidden max-w-0 group-hover:max-w-xs">Home</span>
+            {expanded && <span className="text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-300 whitespace-nowrap overflow-hidden max-w-xs">Home</span>}
           </div>
         </Link>
 
@@ -185,7 +199,7 @@ export function Nav() {
                   <span className="text-white text-xs font-bold">{user.username.charAt(0).toUpperCase()}</span>
                 </div>
               )}
-              <span className="text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-300 opacity-0 group-hover:opacity-100 whitespace-nowrap overflow-hidden max-w-0 group-hover:max-w-xs">Profile</span>
+              {expanded && <span className="text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-300 whitespace-nowrap overflow-hidden max-w-xs">Profile</span>}
             </div>
           </Link>
         )}
@@ -193,36 +207,36 @@ export function Nav() {
         <Link to="/community" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-white/5">
           <div className="relative flex items-center justify-center gap-4 px-4 py-1 w-full">
             <FiUsers className="h-6 w-6 text-gray-300 transition-all duration-300 group-hover:text-indigo-300 group-hover:scale-110" />
-            <span className="text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-300 opacity-0 group-hover:opacity-100 whitespace-nowrap overflow-hidden max-w-0 group-hover:max-w-xs">Community</span>
+            {expanded && <span className="text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-300 whitespace-nowrap overflow-hidden max-w-xs">Community</span>}
           </div>
         </Link>
 
         <Link to="/governance" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-white/5">
           <div className="relative flex items-center justify-center gap-4 px-4 py-1 w-full">
             <FiCheckSquare className="h-6 w-6 text-gray-300 transition-all duration-300 group-hover:text-indigo-300 group-hover:scale-110" />
-            <span className="text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-300 opacity-0 group-hover:opacity-100 whitespace-nowrap overflow-hidden max-w-0 group-hover:max-w-xs">Governance</span>
+            {expanded && <span className="text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-300 whitespace-nowrap overflow-hidden max-w-xs">Governance</span>}
           </div>
         </Link>
 
         <Link to="/wallet" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-white/5">
           <div className="relative flex items-center justify-center gap-4 px-4 py-1 w-full">
             <FiDollarSign className="h-6 w-6 text-gray-300 transition-all duration-300 group-hover:text-indigo-300 group-hover:scale-110" />
-            <span className="text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-300 opacity-0 group-hover:opacity-100 whitespace-nowrap overflow-hidden max-w-0 group-hover:max-w-xs">Wallet</span>
+            {expanded && <span className="text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-300 whitespace-nowrap overflow-hidden max-w-xs">Wallet</span>}
           </div>
         </Link>
 
         {/* Notifications */}
-        <div className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-white/5">
+        <button className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-white/5">
           <div className="relative flex items-center justify-center gap-4 px-4 py-1 w-full">
             <Notifications />
-            <span className="text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-300 opacity-0 group-hover:opacity-100 whitespace-nowrap overflow-hidden max-w-0 group-hover:max-w-xs">Notifications</span>
+            {expanded && <span className="text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-300 whitespace-nowrap overflow-hidden max-w-xs">Notifications</span>}
           </div>
-        </div>
+        </button>
 
         <Link to="/settings" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-white/5">
           <div className="relative flex items-center justify-center gap-4 px-4 py-1 w-full">
             <FiSettings className="h-6 w-6 text-gray-300 transition-all duration-300 group-hover:text-indigo-300 group-hover:scale-110" />
-            <span className="text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-300 opacity-0 group-hover:opacity-100 whitespace-nowrap overflow-hidden max-w-0 group-hover:max-w-xs">Settings</span>
+            {expanded && <span className="text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-300 whitespace-nowrap overflow-hidden max-w-xs">Settings</span>}
           </div>
         </Link>
       </div>
@@ -236,7 +250,7 @@ export function Nav() {
             className="w-full py-2 px-3 bg-red-600/20 border border-red-500/30 rounded-lg text-red-400 text-xs font-medium transition-all duration-300 hover:bg-red-600/30 hover:border-red-500/50 flex items-center justify-center gap-2"
           >
             <FiLogOut className="w-4 h-4" />
-            <span className="hidden group-hover:block">Logout</span>
+            {expanded && <span className="hidden group-hover:block">Logout</span>}
           </button>
         )}
       </div>

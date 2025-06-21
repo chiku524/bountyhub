@@ -8832,16 +8832,23 @@ function getReputationLevel(points) {
 }
 __name(getReputationLevel, "getReputationLevel");
 async function createSession(userId, db, expiresInHours = 24) {
-  const sessionId = crypto.randomUUID();
-  const now = /* @__PURE__ */ new Date();
-  const expiresAt = new Date(now.getTime() + expiresInHours * 60 * 60 * 1e3);
-  await db.insert(sessions).values({
-    id: sessionId,
-    userId,
-    createdAt: now,
-    expiresAt
-  });
-  return sessionId;
+  try {
+    const sessionId = crypto.randomUUID();
+    const now = /* @__PURE__ */ new Date();
+    const expiresAt = new Date(now.getTime() + expiresInHours * 60 * 60 * 1e3);
+    console.log("Creating session:", { sessionId, userId, now, expiresAt });
+    await db.insert(sessions).values({
+      id: sessionId,
+      userId,
+      createdAt: now,
+      expiresAt
+    });
+    console.log("Session created successfully:", sessionId);
+    return sessionId;
+  } catch (error3) {
+    console.error("Error creating session:", error3);
+    throw error3;
+  }
 }
 __name(createSession, "createSession");
 async function getUserIdFromSession(sessionId, db) {
@@ -9100,22 +9107,43 @@ __name(createDb, "createDb");
 // functions/api/auth/login.ts
 var app = new Hono2();
 app.post(async (c) => {
-  const { email, password } = await c.req.json();
-  const db = createDb(c.env.DB);
-  const result = await login({ email, password }, db);
-  if (result.success && result.user) {
-    const sessionId = await createSession(result.user.id, db);
-    setCookie(c, "session", sessionId, {
-      httpOnly: true,
-      path: "/",
-      secure: c.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 30
-      // 30 days
-    });
-    return c.json({ user: result.user });
+  try {
+    const { email, password } = await c.req.json();
+    const db = createDb(c.env.DB);
+    const result = await login({ email, password }, db);
+    if (result.success && result.user) {
+      try {
+        try {
+          await db.select().from(sessions).limit(1);
+          console.log("Sessions table exists and is accessible");
+        } catch (tableError) {
+          console.error("Sessions table error:", tableError);
+          return c.json({ error: "Database configuration error" }, 500);
+        }
+        const sessionId = await createSession(result.user.id, db);
+        setCookie(c, "session", sessionId, {
+          httpOnly: true,
+          path: "/",
+          domain: ".bountyhub.tech",
+          // Allow cookie to work across subdomains
+          secure: true,
+          // Required for SameSite=None
+          sameSite: "none",
+          // Required for cross-subdomain requests
+          maxAge: 60 * 60 * 24 * 30
+          // 30 days
+        });
+        return c.json({ user: result.user });
+      } catch (sessionError) {
+        console.error("Session creation error:", sessionError);
+        return c.json({ error: "Failed to create session" }, 500);
+      }
+    }
+    return c.json({ error: result.error || "Login failed" }, 400);
+  } catch (error3) {
+    console.error("Login endpoint error:", error3);
+    return c.json({ error: "Internal server error" }, 500);
   }
-  return c.json({ error: result.error || "Login failed" }, 400);
 });
 var login_default = app;
 
@@ -9127,7 +9155,10 @@ app2.post(async (c) => {
     const db = createDb(c.env.DB);
     await deleteSession(sessionId, db);
   }
-  deleteCookie(c, "session");
+  deleteCookie(c, "session", {
+    domain: ".bountyhub.tech",
+    path: "/"
+  });
   return c.json({ success: true });
 });
 var logout_default = app2;
@@ -9167,8 +9198,12 @@ app4.post(async (c) => {
     setCookie(c, "session", sessionId, {
       httpOnly: true,
       path: "/",
-      secure: c.env.NODE_ENV === "production",
-      sameSite: "lax",
+      domain: ".bountyhub.tech",
+      // Allow cookie to work across subdomains
+      secure: true,
+      // Required for SameSite=None
+      sameSite: "none",
+      // Required for cross-subdomain requests
       maxAge: 60 * 60 * 24 * 30
       // 30 days
     });
@@ -9696,7 +9731,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env3, _ctx, middlewareCtx
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-UAgTCa/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-HwpBI3/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -9728,7 +9763,7 @@ function __facade_invoke__(request, env3, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-UAgTCa/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-HwpBI3/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

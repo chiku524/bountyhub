@@ -87,10 +87,10 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
         setIsUploading(true);
         try {
           // Cloudinary config from env
-          const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'portal';
-          const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dqobhvk07';
+          const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'bountyhub';
+          const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'your-cloud-name';
           if (!uploadPreset || !cloudName) throw new Error('Cloudinary config missing');
-          const uploadResult = await uploadToCloudinary(blob, 'video', uploadPreset, cloudName, 'portal/posts');
+          const uploadResult = await uploadToCloudinary(blob, 'video', uploadPreset, cloudName, 'bountyhub/posts');
           const url = uploadResult.secure_url;
           // Generate thumbnail as before
           try {
@@ -190,13 +190,13 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
       }
 
       // Cloudinary config from env
-      const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'portal';
-      const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dqobhvk07';
+      const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'bountyhub';
+      const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'your-cloud-name';
       if (!uploadPreset || !cloudName) throw new Error('Cloudinary config missing');
 
       // Upload to Cloudinary
       const resourceType = isVideo ? 'video' : 'image';
-      const folder = 'portal/posts';
+      const folder = 'bountyhub/posts';
       const uploadResult = await uploadToCloudinary(file, resourceType, uploadPreset, cloudName, folder);
       const url = uploadResult.secure_url;
 

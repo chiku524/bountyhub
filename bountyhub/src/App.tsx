@@ -1,6 +1,6 @@
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { WalletProvider } from './contexts/WalletProvider'
-import { AuthProvider } from './contexts/AuthProvider'
+import { AuthProvider, useAuth } from './contexts/AuthProvider'
 import Layout from './components/Layout'
 import Home from './pages/Home'
 import Login from './pages/Login'
@@ -22,10 +22,15 @@ import Terms from './pages/Terms'
 
 function AppContent() {
   const location = useLocation()
+  const { user } = useAuth()
   const isHomePage = location.pathname === '/'
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup'
+  
+  // Show navbar only when user is authenticated and not on home page or auth pages
+  const showNav = Boolean(user) && !isHomePage && !isAuthPage
   
   return (
-    <Layout showNav={!isHomePage}>
+    <Layout showNav={showNav}>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />

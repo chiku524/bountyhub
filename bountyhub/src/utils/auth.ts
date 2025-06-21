@@ -190,16 +190,26 @@ function getReputationLevel(points: number): string {
 
 // Session management helpers
 export async function createSession(userId: string, db: Db, expiresInHours = 24): Promise<string> {
-  const sessionId = crypto.randomUUID()
-  const now = new Date()
-  const expiresAt = new Date(now.getTime() + expiresInHours * 60 * 60 * 1000)
-  await db.insert(sessions).values({
-    id: sessionId,
-    userId: userId,
-    createdAt: now,
-    expiresAt: expiresAt
-  })
-  return sessionId
+  try {
+    const sessionId = crypto.randomUUID()
+    const now = new Date()
+    const expiresAt = new Date(now.getTime() + expiresInHours * 60 * 60 * 1000)
+    
+    console.log('Creating session:', { sessionId, userId, now, expiresAt })
+    
+    await db.insert(sessions).values({
+      id: sessionId,
+      userId: userId,
+      createdAt: now,
+      expiresAt: expiresAt
+    })
+    
+    console.log('Session created successfully:', sessionId)
+    return sessionId
+  } catch (error) {
+    console.error('Error creating session:', error)
+    throw error
+  }
 }
 
 export async function getUserIdFromSession(sessionId: string, db: Db): Promise<string | null> {
