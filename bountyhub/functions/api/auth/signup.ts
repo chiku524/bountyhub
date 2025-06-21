@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { setCookie } from 'hono/cookie'
-import { register } from '../../../src/utils/auth'
+import { register, createSession } from '../../../src/utils/auth'
 import { createDb } from '../../../src/utils/db'
 
 interface Env {
@@ -20,7 +20,11 @@ app.post(async (c) => {
   const result = await register({ email, password, username }, db)
   
   if (result.success && result.user) {
-    setCookie(c, 'session', 'mock-session-token', { 
+    // Create a session for the user
+    const sessionId = await createSession(result.user.id, db)
+    
+    // Set the session cookie
+    setCookie(c, 'session', sessionId, { 
       httpOnly: true, 
       path: '/',
       secure: c.env.NODE_ENV === 'production',

@@ -325,6 +325,14 @@ export const integrityRatings = sqliteTable('integrity_ratings', {
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
+// Sessions table
+export const sessions = sqliteTable('sessions', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  expiresAt: integer('expires_at', { mode: 'timestamp' })
+});
+
 // Export all tables for use in the application
 export const schema = {
   users,
@@ -351,4 +359,5 @@ export const schema = {
   reports,
   bountyClaims,
   integrityRatings,
+  sessions,
 }; 

@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { getCookie } from 'hono/cookie'
-import { getUserById } from '../../../src/utils/auth'
+import { getUserById, getUserIdFromSession } from '../../../src/utils/auth'
 import { createDb } from '../../../src/utils/db'
 
 interface Env {
@@ -11,21 +11,30 @@ interface Env {
 const app = new Hono<{ Bindings: Env }>()
 
 app.get(async (c) => {
-  const session = getCookie(c, 'session')
+  const sessionId = getCookie(c, 'session')
   
-  if (session) {
-    // TODO: Implement proper session management to get userId from session
-    // For now, return mock user data until we implement proper session management
-    const db = createDb(c.env.DB)
+  if (!sessionId) {
+    return c.json(null, 401)
+  }
+
+  const db = createDb(c.env.DB)
+  
+  try {
+    // Get the user ID from the session
+    const userId = await getUserIdFromSession(sessionId, db)
     
-    // This is a placeholder - in a real implementation, you'd decode the session
-    // to get the userId and then fetch the user from the database
-    const mockUserId = '1' // This should come from session decoding
-    const user = await getUserById(mockUserId, db)
+    if (!userId) {
+      return c.json(null, 401)
+    }
+    
+    // Get the user data
+    const user = await getUserById(userId, db)
     
     if (user) {
       return c.json(user)
     }
+  } catch (error) {
+    console.error('Error getting user from session:', error)
   }
   
   return c.json(null, 401)

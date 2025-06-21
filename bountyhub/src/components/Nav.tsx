@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { gsap } from 'gsap'
-import { FiCreditCard, FiLogOut, FiHome, FiUsers, FiDollarSign, FiSettings, FiPlus, FiBell } from 'react-icons/fi'
+import { FiCreditCard, FiLogOut, FiHome, FiUsers, FiDollarSign, FiSettings, FiPlus, FiCheckSquare } from 'react-icons/fi'
 import { useAuth } from '../contexts/AuthProvider'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useWalletModal } from '@solana/wallet-adapter-react-ui'
@@ -197,6 +197,13 @@ export function Nav() {
           </div>
         </Link>
 
+        <Link to="/governance" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-white/5">
+          <div className="relative flex items-center justify-center gap-4 px-4 py-1 w-full">
+            <FiCheckSquare className="h-6 w-6 text-gray-300 transition-all duration-300 group-hover:text-indigo-300 group-hover:scale-110" />
+            <span className="text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-300 opacity-0 group-hover:opacity-100 whitespace-nowrap overflow-hidden max-w-0 group-hover:max-w-xs">Governance</span>
+          </div>
+        </Link>
+
         <Link to="/wallet" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-white/5">
           <div className="relative flex items-center justify-center gap-4 px-4 py-1 w-full">
             <FiDollarSign className="h-6 w-6 text-gray-300 transition-all duration-300 group-hover:text-indigo-300 group-hover:scale-110" />
@@ -204,20 +211,10 @@ export function Nav() {
           </div>
         </Link>
 
-        <Link to="/posts/create" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-white/5">
-          <div className="relative flex items-center justify-center gap-4 px-4 py-1 w-full">
-            <FiPlus className="h-6 w-6 text-gray-300 transition-all duration-300 group-hover:text-indigo-300 group-hover:scale-110" />
-            <span className="text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-300 opacity-0 group-hover:opacity-100 whitespace-nowrap overflow-hidden max-w-0 group-hover:max-w-xs">Create Post</span>
-          </div>
-        </Link>
-
         {/* Notifications */}
         <div className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-white/5">
           <div className="relative flex items-center justify-center gap-4 px-4 py-1 w-full">
-            <div className="relative">
-              <FiBell className="h-6 w-6 text-gray-300 transition-all duration-300 group-hover:text-indigo-300 group-hover:scale-110" />
-              <Notifications />
-            </div>
+            <Notifications />
             <span className="text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-300 opacity-0 group-hover:opacity-100 whitespace-nowrap overflow-hidden max-w-0 group-hover:max-w-xs">Notifications</span>
           </div>
         </div>

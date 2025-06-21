@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { setCookie } from 'hono/cookie'
-import { login } from '../../../src/utils/auth'
+import { login, createSession } from '../../../src/utils/auth'
 import { createDb } from '../../../src/utils/db'
 
 interface Env {
@@ -20,8 +20,11 @@ app.post(async (c) => {
   const result = await login({ email, password }, db)
   
   if (result.success && result.user) {
-    // Set session cookie
-    setCookie(c, 'session', 'mock-session-token', { 
+    // Create a session for the user
+    const sessionId = await createSession(result.user.id, db)
+    
+    // Set the session cookie
+    setCookie(c, 'session', sessionId, { 
       httpOnly: true, 
       path: '/',
       secure: c.env.NODE_ENV === 'production',
@@ -29,12 +32,10 @@ app.post(async (c) => {
       maxAge: 60 * 60 * 24 * 30 // 30 days
     })
     
-    // Return user data (without password)
-    const { password: _, ...userData } = result.user
-    return c.json({ user: userData })
+    return c.json({ user: result.user })
   }
   
-  return c.json({ error: result.error || 'Login failed' }, 401)
+  return c.json({ error: result.error || 'Login failed' }, 400)
 })
 
 export default app 

@@ -2,7 +2,7 @@
 // TODO: Re-implement with proper database integration
 
 import { eq } from 'drizzle-orm'
-import { users } from '../../drizzle/schema'
+import { users, sessions } from '../../drizzle/schema'
 import type { Db } from './db'
 
 export interface AuthError {
@@ -186,4 +186,29 @@ function getReputationLevel(points: number): string {
   if (points >= 50) return 'Regular'
   if (points >= 10) return 'Contributor'
   return 'Newbie'
+}
+
+// Session management helpers
+export async function createSession(userId: string, db: Db, expiresInHours = 24): Promise<string> {
+  const sessionId = crypto.randomUUID()
+  const now = new Date()
+  const expiresAt = new Date(now.getTime() + expiresInHours * 60 * 60 * 1000)
+  await db.insert(sessions).values({
+    id: sessionId,
+    userId: userId,
+    createdAt: now,
+    expiresAt: expiresAt
+  })
+  return sessionId
+}
+
+export async function getUserIdFromSession(sessionId: string, db: Db): Promise<string | null> {
+  const result = await db.select().from(sessions).where(eq(sessions.id, sessionId)).limit(1)
+  if (result.length === 0) return null
+  // Optionally, check for expiration here
+  return result[0].userId
+}
+
+export async function deleteSession(sessionId: string, db: Db): Promise<void> {
+  await db.delete(sessions).where(eq(sessions.id, sessionId))
 } 

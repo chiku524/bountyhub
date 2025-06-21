@@ -95,7 +95,7 @@ export interface Media {
   type: 'image' | 'video' | 'file'
   url: string
   thumbnailUrl?: string
-  isScreenRecording?: boolean
+  isScreenRecording: boolean
 }
 
 // Wallet types

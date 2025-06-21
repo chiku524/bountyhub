@@ -1,0 +1,15 @@
+# Cloudflare Pages configuration for frontend
+name = "bountyhub"
+compatibility_date = "2024-09-23"
+
+[build]
+command = "npm run build"
+
+[site]
+bucket = "./dist"
+
+# Environment variables for frontend
+[vars]
+VITE_API_URL = "https://api.bountyhub.com"
+VITE_CLOUDINARY_CLOUD_NAME = "dqobhvk07"
+VITE_CLOUDINARY_UPLOAD_PRESET = "portal" 

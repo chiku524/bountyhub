@@ -1,20 +1,35 @@
 import { Hono } from 'hono'
+import { cors } from 'hono/cors'
+import { getCookie } from 'hono/cookie'
 import { createDb } from '../../../src/utils/db'
+import { getUserIdFromSession } from '../../../src/utils/auth'
 import { users, profiles } from '../../../drizzle/schema'
 import { eq } from 'drizzle-orm'
 
 interface Env {
   DB: any
+  NODE_ENV: string
 }
 
 const app = new Hono<{ Bindings: Env }>()
 
 app.get(async (c) => {
+  const sessionId = getCookie(c, 'session')
+  
+  if (!sessionId) {
+    return c.json({ error: 'Unauthorized' }, 401)
+  }
+
   const db = createDb(c.env.DB)
-  // TODO: Replace with real userId from session
-  const userId = '1'
   
   try {
+    // Get the user ID from the session
+    const userId = await getUserIdFromSession(sessionId, db)
+    
+    if (!userId) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+    
     const userResult = await db
       .select({
         id: users.id,
@@ -86,11 +101,22 @@ app.get(async (c) => {
 })
 
 app.post(async (c) => {
+  const sessionId = getCookie(c, 'session')
+  
+  if (!sessionId) {
+    return c.json({ error: 'Unauthorized' }, 401)
+  }
+
   const db = createDb(c.env.DB)
-  // TODO: Replace with real userId from session
-  const userId = '1'
   
   try {
+    // Get the user ID from the session
+    const userId = await getUserIdFromSession(sessionId, db)
+    
+    if (!userId) {
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+    
     const body = await c.req.json()
     const { profile } = body
 
