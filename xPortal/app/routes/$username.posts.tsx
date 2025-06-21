@@ -33,7 +33,8 @@ export async function loader({ params, context, request }: LoaderFunctionArgs) {
   }
 
   try {
-    const db = createDb((context as { env: { DB: D1Database } }).env.DB);
+    const typedContext = context as { env: { DB: D1Database; SESSION_SECRET?: string } };
+  const db = createDb(typedContext.env.DB);
     const currentUser = await getUser(request, db);
 
     // Get user data
@@ -135,7 +136,7 @@ export async function loader({ params, context, request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request, context }: ActionFunctionArgs) {
-  const user = await getUser(request);
+  const user = await getUser(request, undefined, typedContext.env);
   
   if (!user) {
     throw new Response('Unauthorized', { status: 401 });
@@ -145,7 +146,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const action = formData.get('action') as string;
 
   try {
-    const db = createDb((context as { env: { DB: D1Database } }).env.DB);
+    const typedContext = context as { env: { DB: D1Database; SESSION_SECRET?: string } };
+  const db = createDb(typedContext.env.DB);
 
     switch (action) {
       case 'deletePost': {

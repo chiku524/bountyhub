@@ -11,4 +11,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const db = createDb((context as { env: { DB: D1Database } }).env.DB);
   const result = await toggleBookmark(db, postId, userId);
   return json(result);
+}
+
+export default function BookmarksToggle() {
+  return null;
 } 

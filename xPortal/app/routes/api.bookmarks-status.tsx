@@ -96,3 +96,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 }
 
+export default function BookmarksStatus() {
+  return null;
+}
+

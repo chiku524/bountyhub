@@ -6,8 +6,7 @@
 
 import { PassThrough } from "node:stream";
 
-import type { EntryContext } from "@remix-run/node";
-import { createReadableStreamFromReadable } from "@remix-run/node";
+import type { EntryContext } from "@remix-run/cloudflare";
 import { RemixServer } from "@remix-run/react";
 import { isbot } from "isbot";
 import { renderToPipeableStream } from "react-dom/server";
@@ -53,7 +52,13 @@ function handleBotRequest(
         onAllReady() {
           shellRendered = true;
           const body = new PassThrough();
-          const stream = createReadableStreamFromReadable(body);
+          const stream = new ReadableStream({
+            start(controller) {
+              body.on('data', (chunk) => controller.enqueue(chunk));
+              body.on('end', () => controller.close());
+              body.on('error', (err) => controller.error(err));
+            },
+          });
 
           responseHeaders.set("Content-Type", "text/html");
 
@@ -100,7 +105,13 @@ function handleBrowserRequest(
         onShellReady() {
           shellRendered = true;
           const body = new PassThrough();
-          const stream = createReadableStreamFromReadable(body);
+          const stream = new ReadableStream({
+            start(controller) {
+              body.on('data', (chunk) => controller.enqueue(chunk));
+              body.on('end', () => controller.close());
+              body.on('error', (err) => controller.error(err));
+            },
+          });
 
           responseHeaders.set("Content-Type", "text/html");
 

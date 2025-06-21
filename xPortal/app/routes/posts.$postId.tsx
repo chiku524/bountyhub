@@ -227,8 +227,9 @@ export const meta: MetaFunction = ({ data }) => {
 
 export const loader = async ({ request, params, context }: LoaderFunctionArgs) => {
   try {
-    const db = createDb((context as { env: { DB: D1Database } }).env.DB);
-    const user = await getUser(request, db);
+    const typedContext = context as { env: { DB: D1Database; SESSION_SECRET?: string } };
+  const db = createDb(typedContext.env.DB);
+    const user = await getUser(request, db, typedContext.env);
     const { postId } = params;
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -476,8 +477,9 @@ export const loader = async ({ request, params, context }: LoaderFunctionArgs) =
 };
 
 export const action = async ({ request, params, context }: ActionFunctionArgs) => {
-  const db = createDb((context as { env: { DB: D1Database } }).env.DB);
-  const user = await getUser(request, db);
+  const typedContext = context as { env: { DB: D1Database; SESSION_SECRET?: string } };
+  const db = createDb(typedContext.env.DB);
+  const user = await getUser(request, db, typedContext.env);
   if (!user) {
     return json({ error: 'Not authenticated' }, { status: 401 });
   }

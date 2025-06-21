@@ -19,8 +19,9 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
   }
 
   try {
-    const db = createDb((context as { env: { DB: D1Database } }).env.DB);
-    const user = await getUser(request, db);
+    const typedContext = context as { env: { DB: D1Database; SESSION_SECRET?: string } };
+  const db = createDb(typedContext.env.DB);
+    const user = await getUser(request, db, typedContext.env);
     if (!user) {
       return json({ error: 'User not authenticated' }, { status: 401 });
     }
@@ -47,4 +48,8 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
     console.error('Error processing integrity rating:', error);
     return json({ error: 'Failed to process rating' }, { status: 500 });
   }
-}; 
+};
+
+export default function IntegrityRate() {
+  return null;
+} 

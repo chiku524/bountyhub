@@ -1,4 +1,4 @@
-import { json, type ActionFunctionArgs, type LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node'
+import { json, type ActionFunctionArgs, type LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/cloudflare'
 import { Form, useActionData, useSearchParams, Link } from '@remix-run/react'
 import { useEffect, useRef } from 'react'
 import { register, getUser } from '~/utils/auth.server'
@@ -13,8 +13,9 @@ export const meta: MetaFunction = () => {
 }
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
-  const db = createDb((context as { env: { DB: D1Database } }).env.DB)
-  const user = await getUser(request, db)
+  const typedContext = context as { env: { DB: D1Database; SESSION_SECRET?: string } };
+  const db = createDb(typedContext.env.DB)
+  const user = await getUser(request, db, typedContext.env)
   if (user) return redirect('/profile')
   return json({})
 }
@@ -30,8 +31,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return json({ error: 'Email, password, and username are required' }, { status: 400 })
   }
 
-  const db = createDb((context as { env: { DB: D1Database } }).env.DB)
-  const result = await register(db, { email, password, username, redirectTo })
+  const typedContext = context as { env: { DB: D1Database; SESSION_SECRET?: string } };
+  const db = createDb(typedContext.env.DB)
+  const result = await register(db, { email, password, username, redirectTo }, typedContext.env)
 
   if (result instanceof Response) {
     return result

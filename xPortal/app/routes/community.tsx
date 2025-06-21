@@ -79,8 +79,9 @@ export const meta = () => {
 
 export const loader = async ({ request, context }: LoaderFunctionArgs) => {
   try {
-    const user = await getUser(request);
-    const db = createDb((context as { env: { DB: D1Database } }).env.DB);
+    const typedContext = context as { env: { DB: D1Database; SESSION_SECRET?: string } };
+    const user = await getUser(request, undefined, typedContext.env);
+    const db = createDb(typedContext.env.DB);
     
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -262,7 +263,8 @@ export const loader = async ({ request, context }: LoaderFunctionArgs) => {
 
 export const action = async ({ request, context }: LoaderFunctionArgs) => {
   try {
-    const user = await getUser(request);
+    const typedContext = context as { env: { DB: D1Database; SESSION_SECRET?: string } };
+    const user = await getUser(request, undefined, typedContext.env);
     if (!user) {
       return json({ error: 'You must be logged in to perform this action' }, { status: 401 });
     }

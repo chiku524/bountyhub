@@ -111,3 +111,7 @@ export async function action({ request, params, context }: ActionFunctionArgs) {
   }
 }
 
+export default function PostsVote() {
+  return null;
+}
+

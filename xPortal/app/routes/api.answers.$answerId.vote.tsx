@@ -107,4 +107,8 @@ export async function action({ request, params, context }: ActionFunctionArgs) {
     console.error('Error processing answer vote:', error);
     return json({ error: 'Failed to process vote' }, { status: 500 });
   }
+}
+
+export default function AnswersVote() {
+  return null;
 } 

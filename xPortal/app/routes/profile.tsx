@@ -1,6 +1,6 @@
 // app/routes/profile.tsx
 import { useLoaderData, Link, Outlet, useLocation } from "@remix-run/react"
-import { json, MetaFunction, LoaderFunctionArgs } from '@remix-run/node'
+import { json, MetaFunction, LoaderFunctionArgs } from '@remix-run/cloudflare'
 import { requireUserId } from '~/utils/auth.server'
 import { Layout } from '../components/Layout'
 
@@ -117,8 +117,9 @@ interface UserData {
 }
 
 export const loader = async ({ request, context }: LoaderFunctionArgs) => {
-    const userId = await requireUserId(request);
-    const db = createDb((context as { env: { DB: D1Database } }).env.DB);
+    const typedContext = context as { env: { DB: D1Database; SESSION_SECRET?: string } };
+    const userId = await requireUserId(request, typedContext.env);
+    const db = createDb(typedContext.env.DB);
 
     // Fetch user and profile
     const userRows = await db.select().from(users).where(eq(users.id, userId)).limit(1);

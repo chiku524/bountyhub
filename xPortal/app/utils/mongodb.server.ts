@@ -1,15 +1,18 @@
 import { MongoClient } from 'mongodb';
 
-if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL is not defined');
+function getDatabaseUrl(env: any): string {
+  if (!env.DATABASE_URL) {
+    throw new Error('DATABASE_URL is not defined');
+  }
+  return env.DATABASE_URL;
 }
 
-const uri = process.env.DATABASE_URL;
 let client: MongoClient;
 
-export async function getMongoClient() {
+export async function getMongoClient(env: any) {
   try {
     if (!client) {
+      const uri = getDatabaseUrl(env);
       client = new MongoClient(uri);
       await client.connect();
     }

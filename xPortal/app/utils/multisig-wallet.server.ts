@@ -1,4 +1,4 @@
-import { Connection, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 
 export interface MultisigConfig {
   threshold: number; // Number of signatures required
@@ -6,54 +6,76 @@ export interface MultisigConfig {
   multisigAddress: string; // The multisig wallet address
 }
 
-export class MultisigWalletService {
-  private static connection = new Connection(process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com");
-  
-  // Platform multisig configuration
-  private static readonly MULTISIG_CONFIG: MultisigConfig = {
-    threshold: 2, // Require 2 out of 3 signatures
-    signers: [
-      process.env.PLATFORM_SIGNER_1 || "",
-      process.env.PLATFORM_SIGNER_2 || "",
-      process.env.PLATFORM_SIGNER_3 || ""
-    ].filter(key => key.length > 0),
-    multisigAddress: process.env.PLATFORM_MULTISIG_ADDRESS || ""
+// Function to get RPC URL from env or fallback
+function getSolanaRpcUrl(env: any) {
+  return env.SOLANA_RPC_URL || 'https://api.devnet.solana.com';
+}
+
+async function solanaRpc(method: string, params: any[], rpcUrl: string) {
+  const body = {
+    jsonrpc: '2.0',
+    id: 1,
+    method,
+    params,
   };
+  const res = await fetch(rpcUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const json: any = await res.json();
+  if (json.error) throw new Error(json.error.message);
+  return json.result;
+}
+
+export class MultisigWalletService {
+  /**
+   * Get multisig configuration from environment
+   */
+  private static buildMultisigConfig(env: any): MultisigConfig {
+    return {
+      threshold: 2, // Require 2 out of 3 signatures
+      signers: [
+        env.PLATFORM_SIGNER_1 || "",
+        env.PLATFORM_SIGNER_2 || "",
+        env.PLATFORM_SIGNER_3 || ""
+      ].filter(key => key.length > 0),
+      multisigAddress: env.PLATFORM_MULTISIG_ADDRESS || ""
+    };
+  }
 
   /**
    * Get the platform's multisig wallet address
    */
-  static getMultisigAddress(): string {
-    if (!this.MULTISIG_CONFIG.multisigAddress) {
+  static getMultisigAddress(env: any): string {
+    const config = this.buildMultisigConfig(env);
+    if (!config.multisigAddress) {
       throw new Error("Multisig wallet address not configured");
     }
-    return this.MULTISIG_CONFIG.multisigAddress;
+    return config.multisigAddress;
   }
 
   /**
    * Get multisig configuration
    */
-  static getMultisigConfig(): MultisigConfig {
-    return this.MULTISIG_CONFIG;
+  static getMultisigConfig(env: any): MultisigConfig {
+    return this.buildMultisigConfig(env);
   }
 
   /**
    * Verify if a transaction has sufficient signatures
    */
-  static async verifyMultisigTransaction(transactionSignature: string): Promise<boolean> {
+  static async verifyMultisigTransaction(transactionSignature: string, env: any): Promise<boolean> {
     try {
-      const transaction = await this.connection.getTransaction(transactionSignature, {
-        commitment: "confirmed",
-      });
-
-      if (!transaction) {
+      const rpcUrl = getSolanaRpcUrl(env);
+      const value = await solanaRpc('getTransaction', [transactionSignature, { commitment: 'confirmed' }], rpcUrl);
+      if (!value) {
         return false;
       }
-
       // Check if transaction has required number of signatures
-      const requiredSignatures = this.MULTISIG_CONFIG.threshold;
-      const actualSignatures = transaction.transaction.signatures.length;
-
+      const config = this.buildMultisigConfig(env);
+      const requiredSignatures = config.threshold;
+      const actualSignatures = value.transaction.signatures.length;
       return actualSignatures >= requiredSignatures;
     } catch (error) {
       console.error("Error verifying multisig transaction:", error);
@@ -64,11 +86,13 @@ export class MultisigWalletService {
   /**
    * Get multisig wallet balance
    */
-  static async getMultisigBalance(): Promise<number> {
+  static async getMultisigBalance(env: any): Promise<number> {
     try {
-      const multisigPubkey = new PublicKey(this.MULTISIG_CONFIG.multisigAddress);
-      const balance = await this.connection.getBalance(multisigPubkey);
-      return balance / LAMPORTS_PER_SOL;
+      const config = this.buildMultisigConfig(env);
+      const rpcUrl = getSolanaRpcUrl(env);
+      const multisigPubkey = new PublicKey(config.multisigAddress);
+      const value = await solanaRpc('getBalance', [multisigPubkey.toBase58()], rpcUrl);
+      return value.value / LAMPORTS_PER_SOL;
     } catch (error) {
       console.error("Error getting multisig balance:", error);
       return 0;
@@ -78,8 +102,9 @@ export class MultisigWalletService {
   /**
    * Check if multisig is properly configured
    */
-  static isMultisigConfigured(): boolean {
-    return this.MULTISIG_CONFIG.multisigAddress.length > 0 && 
-           this.MULTISIG_CONFIG.signers.length >= this.MULTISIG_CONFIG.threshold;
+  static isMultisigConfigured(env: any): boolean {
+    const config = this.buildMultisigConfig(env);
+    return config.multisigAddress.length > 0 && 
+           config.signers.length >= config.threshold;
   }
 } 

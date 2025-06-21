@@ -9,7 +9,7 @@ import {
   isRouteErrorResponse,
   useLoaderData,
 } from "@remix-run/react";
-import { LinksFunction, json, LoaderFunctionArgs } from "@remix-run/node";
+import { LinksFunction, json, LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { useEffect } from "react";
 import { getUser } from "~/utils/auth.server";
 import { WalletProvider } from './components/WalletProvider';
@@ -117,7 +117,7 @@ export function ErrorBoundary() {
               </p>
               
               {/* Error Details (only in development) */}
-              {process.env.NODE_ENV === 'development' && error instanceof Error && (
+              {(typeof process !== 'undefined' ? process.env.NODE_ENV === 'development' : false) && error instanceof Error && (
                 <details className="mb-6 text-left">
                   <summary className="text-sm text-gray-500 cursor-pointer hover:text-gray-400 mb-2">
                     Technical Details
@@ -195,10 +195,11 @@ export const loader = async ({ request, context }: LoaderFunctionArgs) => {
   const db = createDb(ctx.env.DB);
   // Set the session secret for the auth system
   if (ctx.env.SESSION_SECRET) {
+    const global = globalThis as any;
     global.SESSION_SECRET = ctx.env.SESSION_SECRET;
   }
   return json({
-    user: await getUser(request, db),
+    user: await getUser(request, db, ctx.env),
   });
 };
 

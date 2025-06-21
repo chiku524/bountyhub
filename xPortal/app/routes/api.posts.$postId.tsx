@@ -17,7 +17,8 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
   }
 
   try {
-    const db = createDb((context as { env: { DB: D1Database } }).env.DB);
+    const typedContext = context as { env: { DB: D1Database; SESSION_SECRET?: string } };
+    const db = createDb(typedContext.env.DB);
 
     const post = await db
       .select()
@@ -44,8 +45,9 @@ export async function action({ request, params, context }: ActionFunctionArgs) {
   }
 
   try {
-    const db = createDb((context as { env: { DB: D1Database } }).env.DB);
-    const user = await getUser(request, db);
+    const typedContext = context as { env: { DB: D1Database; SESSION_SECRET?: string } };
+    const db = createDb(typedContext.env.DB);
+    const user = await getUser(request, db, typedContext.env);
     if (!user) {
       return json({ error: 'User not authenticated' }, { status: 401 });
     }
@@ -370,5 +372,9 @@ export async function action({ request, params, context }: ActionFunctionArgs) {
     console.error('Error processing action:', error);
     return json({ error: 'Failed to process action' }, { status: 500 });
   }
+}
+
+export default function PostsPostId() {
+  return null;
 }
 

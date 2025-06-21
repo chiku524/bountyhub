@@ -55,3 +55,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 }
 
+export default function RefundVote() {
+  return null;
+}
+

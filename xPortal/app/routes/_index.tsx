@@ -22,11 +22,12 @@ export const loader = async ({ request, context }: LoaderFunctionArgs) => {
   
   // Set the session secret for the auth system
   if (typedContext.env.SESSION_SECRET) {
-    (global as unknown as { SESSION_SECRET: string }).SESSION_SECRET = typedContext.env.SESSION_SECRET;
+    const global = globalThis as any;
+    global.SESSION_SECRET = typedContext.env.SESSION_SECRET;
   }
   
   const db = createDb(typedContext.env.DB);
-  const user = await getUser(request, db);
+  const user = await getUser(request, db, typedContext.env);
   console.log('Index loader - user found:', !!user);
   
   if (user) {

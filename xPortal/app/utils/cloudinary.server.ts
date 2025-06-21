@@ -11,14 +11,14 @@ export async function uploadToCloudinary(base64Data: string, options: {
   resourceType: 'image' | 'video';
   folder?: string;
   publicId?: string;
-}) {
+}, env: any) {
   try {
     // Remove the data URL prefix (e.g., "data:image/jpeg;base64,")
     const base64String = base64Data.split(',')[1];
     
-    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-    const apiKey = process.env.CLOUDINARY_API_KEY;
-    const apiSecret = process.env.CLOUDINARY_API_SECRET;
+    const cloudName = env.CLOUDINARY_CLOUD_NAME;
+    const apiKey = env.CLOUDINARY_API_KEY;
+    const apiSecret = env.CLOUDINARY_API_SECRET;
     
     if (!cloudName || !apiKey || !apiSecret) {
       throw new Error('Cloudinary configuration missing');
@@ -65,11 +65,11 @@ export async function uploadToCloudinary(base64Data: string, options: {
   }
 }
 
-export async function deleteFromCloudinary(publicId: string) {
+export async function deleteFromCloudinary(publicId: string, env: any) {
   try {
-    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-    const apiKey = process.env.CLOUDINARY_API_KEY;
-    const apiSecret = process.env.CLOUDINARY_API_SECRET;
+    const cloudName = env.CLOUDINARY_CLOUD_NAME;
+    const apiKey = env.CLOUDINARY_API_KEY;
+    const apiSecret = env.CLOUDINARY_API_SECRET;
     
     if (!cloudName || !apiKey || !apiSecret) {
       throw new Error('Cloudinary configuration missing');

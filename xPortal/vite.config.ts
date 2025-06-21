@@ -84,6 +84,9 @@ export default defineConfig({
   },
   define: {
     global: 'globalThis',
+    // Define Vite environment variables for client-side access
+    'import.meta.env.VITE_CLOUDINARY_CLOUD_NAME': JSON.stringify('dqobhvk07'),
+    'import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET': JSON.stringify('portal'),
   },
   ssr: {
     noExternal: ['@remix-run/cloudflare']

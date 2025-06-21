@@ -6,26 +6,24 @@ import { redirect, createCookieSessionStorage } from '@remix-run/node'
 import { createUser, getUserById, getUserByEmail, getUserByUsername } from './user.server'
 import type { Db } from './db.server'
 
-// Declare global interface for SESSION_SECRET
-declare global {
-  let SESSION_SECRET: string | undefined;
-}
-
 // Define session data type
 interface SessionData {
   userId: string;
 }
 
 // Lazy initialization of session secret
-function getSessionSecret(): string {
+function getSessionSecret(env: any): string {
   // Check global variable first (for Workers environment)
-  if (typeof global !== 'undefined' && (global as { SESSION_SECRET?: string }).SESSION_SECRET) {
-    return (global as { SESSION_SECRET: string }).SESSION_SECRET;
+  if (typeof globalThis !== 'undefined') {
+    const global = globalThis as any;
+    if (global.SESSION_SECRET) {
+      return global.SESSION_SECRET;
+    }
   }
 
-  // Fallback to process.env (for Node.js environment)
-  if (typeof process !== 'undefined' && process.env && process.env.SESSION_SECRET) {
-    return process.env.SESSION_SECRET;
+  // Check env parameter (for Cloudflare Workers)
+  if (env && env.SESSION_SECRET) {
+    return env.SESSION_SECRET;
   }
 
   throw new Error('SESSION_SECRET must be set')
@@ -34,13 +32,13 @@ function getSessionSecret(): string {
 // Lazy storage creation
 let storageInstance: ReturnType<typeof createCookieSessionStorage<SessionData>> | null = null;
 
-function getStorage() {
+function getStorage(env: any) {
   if (!storageInstance) {
-    const sessionSecret = getSessionSecret();
+    const sessionSecret = getSessionSecret(env);
     storageInstance = createCookieSessionStorage<SessionData>({
       cookie: {
         name: 'portal-session',
-        secure: process.env?.NODE_ENV === 'production' ? true : false,
+        secure: env?.NODE_ENV === 'production' ? true : false,
         secrets: [sessionSecret],
         sameSite: 'lax',
         path: '/',
@@ -61,8 +59,8 @@ export interface AuthError {
   };
 }
 
-export async function createUserSession(userId: string, redirectTo: string) {
-  const storage = getStorage();
+export async function createUserSession(userId: string, redirectTo: string, env: any) {
+  const storage = getStorage(env);
   const session = await storage.getSession()
   session.set('userId', userId)
   return redirect(redirectTo, {
@@ -72,7 +70,7 @@ export async function createUserSession(userId: string, redirectTo: string) {
   })
 }
 
-export async function register(db: Db, { email, password, username, redirectTo = '/profile' }: RegisterForm): Promise<Response | AuthError> {
+export async function register(db: Db, { email, password, username, redirectTo = '/profile' }: RegisterForm, env: any): Promise<Response | AuthError> {
   // Check if user exists by email or username
   const existingUserByEmail = await getUserByEmail(db, email);
   const existingUserByUsername = await getUserByUsername(db, username);
@@ -90,10 +88,10 @@ export async function register(db: Db, { email, password, username, redirectTo =
     return { error: 'Something went wrong trying to create a new user.' }
   }
 
-  return createUserSession(newUser.id, redirectTo)
+  return createUserSession(newUser.id, redirectTo, env)
 }
 
-export async function login(db: Db, { email, password, redirectTo = '/profile' }: LoginForm): Promise<Response | AuthError> {
+export async function login(db: Db, { email, password, redirectTo = '/profile' }: LoginForm, env: any): Promise<Response | AuthError> {
   const user = await getUserByEmail(db, email);
   
   if (!user) {
@@ -105,11 +103,11 @@ export async function login(db: Db, { email, password, redirectTo = '/profile' }
     return { error: 'Invalid credentials' }
   }
 
-  return createUserSession(user.id, redirectTo)
+  return createUserSession(user.id, redirectTo, env)
 }
 
-export async function requireUserId(request: Request, redirectTo: string = new URL(request.url).pathname) {
-  const session = await getUserSession(request)
+export async function requireUserId(request: Request, env: any, redirectTo: string = new URL(request.url).pathname) {
+  const session = await getUserSession(request, env)
   const userId = session.get('userId')
   if (!userId || typeof userId !== 'string') {
     throw redirect(`/login?redirectTo=${redirectTo}`)
@@ -117,20 +115,20 @@ export async function requireUserId(request: Request, redirectTo: string = new U
   return userId
 }
 
-function getUserSession(request: Request) {
-  const storage = getStorage();
+function getUserSession(request: Request, env: any) {
+  const storage = getStorage(env);
   return storage.getSession(request.headers.get('Cookie'))
 }
 
-async function getUserId(request: Request): Promise<string | null> {
-  const session = await getUserSession(request)
+async function getUserId(request: Request, env: any): Promise<string | null> {
+  const session = await getUserSession(request, env)
   const userId = session.get('userId')
   if (!userId || typeof userId !== 'string') return null
   return userId
 }
 
-export async function getUser(request: Request, db?: Db) {
-  const userId = await getUserId(request)
+export async function getUser(request: Request, db?: Db, env?: any) {
+  const userId = await getUserId(request, env || {})
   if (!userId || typeof userId !== 'string') {
     return null
   }
@@ -145,13 +143,13 @@ export async function getUser(request: Request, db?: Db) {
       return null
     }
   } catch {
-    throw logout(request)
+    throw logout(request, env || {})
   }
 }
 
-export async function logout(request: Request) {
-  const storage = getStorage();
-  const session = await getUserSession(request)
+export async function logout(request: Request, env: any) {
+  const storage = getStorage(env);
+  const session = await getUserSession(request, env)
   return redirect('/login', {
     headers: {
       'Set-Cookie': await storage.destroySession(session),

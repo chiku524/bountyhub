@@ -7,8 +7,9 @@ import { eq } from 'drizzle-orm';
 
 export async function action({ request, context }: ActionFunctionArgs) {
   try {
-    const db = createDb((context as { env: { DB: D1Database } }).env.DB)
-    const user = await getUser(request, db);
+    const typedContext = context as { env: { DB: D1Database; SESSION_SECRET?: string } };
+  const db = createDb(typedContext.env.DB)
+    const user = await getUser(request, db, typedContext.env);
     if (!user) {
       return json({ error: 'You must be logged in to perform this action' }, { status: 401 });
     }
@@ -51,5 +52,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
+}
+
+export default function ProfilePicture() {
+  return null;
 }
 

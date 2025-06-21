@@ -1,8 +1,27 @@
-import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { getAssociatedTokenAddress, createTransferInstruction } from '@solana/spl-token';
 
-// Initialize Solana connection
-const connection = new Connection(process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com', 'confirmed');
+// Function to get RPC URL from env or fallback
+function getSolanaRpcUrl(env: any) {
+  return env.SOLANA_RPC_URL || 'https://api.devnet.solana.com';
+}
+
+async function solanaRpc(method: string, params: any[], rpcUrl: string) {
+  const body = {
+    jsonrpc: '2.0',
+    id: 1,
+    method,
+    params,
+  };
+  const res = await fetch(rpcUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const json: any = await res.json();
+  if (json.error) throw new Error(json.error.message);
+  return json.result;
+}
 
 export async function createBountyTransaction(
   fromPublicKey: PublicKey,
@@ -40,27 +59,36 @@ export async function createBountyTransaction(
   return transaction;
 }
 
-export async function getBalance(publicKey: PublicKey): Promise<number> {
-  const balance = await connection.getBalance(publicKey);
-  return balance / LAMPORTS_PER_SOL;
-}
-
-export async function getTokenBalance(publicKey: PublicKey, mintAddress: string): Promise<number> {
-  const mintPubkey = new PublicKey(mintAddress);
-  const tokenAccount = await getAssociatedTokenAddress(mintPubkey, publicKey);
-  
+export async function getBalance(publicKey: PublicKey, env: any): Promise<number> {
   try {
-    const balance = await connection.getTokenAccountBalance(tokenAccount);
-    return Number(balance.value.amount) / Math.pow(10, balance.value.decimals);
+    const rpcUrl = getSolanaRpcUrl(env);
+    const value = await solanaRpc('getBalance', [publicKey.toBase58()], rpcUrl);
+    return value.value / LAMPORTS_PER_SOL;
   } catch (error) {
+    console.error('Error getting balance:', error);
     return 0;
   }
 }
 
-export async function verifyTransaction(signature: string): Promise<boolean> {
+export async function getTokenBalance(publicKey: PublicKey, mintAddress: string, env: any): Promise<number> {
   try {
-    const status = await connection.getSignatureStatus(signature);
-    return status.value?.confirmationStatus === 'confirmed' || status.value?.confirmationStatus === 'finalized';
+    const rpcUrl = getSolanaRpcUrl(env);
+    const mintPubkey = new PublicKey(mintAddress);
+    const tokenAccount = await getAssociatedTokenAddress(mintPubkey, publicKey);
+    const value = await solanaRpc('getTokenAccountBalance', [tokenAccount.toBase58()], rpcUrl);
+    return Number(value.value.amount) / Math.pow(10, value.value.decimals);
+  } catch (error) {
+    console.error('Error getting token balance:', error);
+    return 0;
+  }
+}
+
+export async function verifyTransaction(signature: string, env: any): Promise<boolean> {
+  try {
+    const rpcUrl = getSolanaRpcUrl(env);
+    const value = await solanaRpc('getSignatureStatuses', [[signature]], rpcUrl);
+    const status = value && value.value && value.value[0];
+    return status?.confirmationStatus === 'confirmed' || status?.confirmationStatus === 'finalized';
   } catch (error) {
     console.error('Error verifying transaction:', error);
     return false;

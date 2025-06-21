@@ -4,8 +4,9 @@ import { cancelTransaction } from "../utils/virtual-wallet.server";
 import { createDb } from "../utils/db.server";
 
 export async function action({ request, context }: ActionFunctionArgs) {
-  const db = createDb((context as { env: { DB: D1Database } }).env.DB);
-  const user = await getUser(request, db);
+  const typedContext = context as { env: { DB: D1Database; SESSION_SECRET?: string } };
+  const db = createDb(typedContext.env.DB);
+  const user = await getUser(request, db, typedContext.env);
   if (!user) {
     return json({ success: false, error: 'Unauthorized' }, { status: 401 });
   }
@@ -27,5 +28,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
   } catch (error) {
     return json({ success: false, error: 'Failed to cancel transaction' }, { status: 500 });
   }
+}
+
+export default function WalletCancelTransaction() {
+  return null;
 }
 

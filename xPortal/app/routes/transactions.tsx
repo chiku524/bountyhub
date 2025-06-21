@@ -14,8 +14,9 @@ export const meta: MetaFunction = () => {
 };
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
-  const db = createDb((context as { env: { DB: D1Database } }).env.DB);
-  const user = await getUser(request, db);
+  const typedContext = context as { env: { DB: D1Database; SESSION_SECRET?: string } };
+  const db = createDb(typedContext.env.DB);
+  const user = await getUser(request, db, typedContext.env);
   if (!user) {
     throw new Response("Unauthorized", { status: 401 });
   }

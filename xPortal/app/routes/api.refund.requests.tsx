@@ -5,8 +5,9 @@ import { refundRequests } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
-  const db = createDb((context as { env: { DB: D1Database } }).env.DB)
-  const user = await getUser(request, db);
+  const typedContext = context as { env: { DB: D1Database; SESSION_SECRET?: string } };
+  const db = createDb(typedContext.env.DB)
+  const user = await getUser(request, db, typedContext.env);
   if (!user) {
     return json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -21,5 +22,9 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   } catch (error) {
     return json({ error: "Failed to fetch refund requests" }, { status: 500 });
   }
+}
+
+export default function RefundRequests() {
+  return null;
 }
 

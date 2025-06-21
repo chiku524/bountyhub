@@ -10,8 +10,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
     }
 
     try {
-        const db = createDb((context as { env: { DB: D1Database } }).env.DB);
-        const user = await getUser(request, db);
+        const typedContext = context as { env: { DB: D1Database; SESSION_SECRET?: string } };
+  const db = createDb(typedContext.env.DB);
+        const user = await getUser(request, db, typedContext.env);
         
         if (!user) {
             return json({ error: 'User not authenticated' }, { status: 401 });
@@ -42,5 +43,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
         console.error('Delete post error:', error);
         return json({ error: 'Failed to delete post' }, { status: 500 });
     }
+}
+
+export default function PostsDelete() {
+  return null;
 }
 

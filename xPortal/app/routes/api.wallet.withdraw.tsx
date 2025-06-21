@@ -60,3 +60,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 }
 
+export default function WalletWithdraw() {
+  return null;
+}
+

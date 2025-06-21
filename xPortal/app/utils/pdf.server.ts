@@ -1,4 +1,3 @@
-// Remove the top-level Puppeteer import
 import { renderToString } from 'react-dom/server';
 import React from 'react';
 import { createDb } from './db.server';
@@ -22,60 +21,62 @@ export interface PDFOptions {
 }
 
 export class PDFService {
-  private static browser: import('puppeteer').Browser | null = null;
-
-  private static async getPuppeteer(): Promise<typeof import('puppeteer')> {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      return require('puppeteer');
-    } catch (error) {
-      throw new Error('Puppeteer is not available in this environment');
-    }
-  }
-
-  private static async getBrowser(): Promise<import('puppeteer').Browser> {
-    if (!this.browser) {
-      const puppeteer = await this.getPuppeteer();
-      this.browser = await puppeteer.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-      });
-    }
-    return this.browser;
-  }
+  private static readonly API_URL = 'https://api.html2pdf.app/v1/generate';
 
   static async generatePDF(
     htmlContent: string,
-    options: PDFOptions = {}
-  ): Promise<Buffer> {
-    const browser = await this.getBrowser();
-    const page = await browser.newPage();
+    options: PDFOptions = {},
+    env?: any
+  ): Promise<Uint8Array> {
+    const apiKey = env?.HTML2PDF_API_KEY;
     
+    if (!apiKey) {
+      throw new Error('HTML2PDF_API_KEY environment variable is required for PDF generation');
+    }
+    
+    const requestBody = {
+      html: htmlContent,
+      format: options.format || 'A4',
+      margin: {
+        top: options.margin?.top || '1in',
+        right: options.margin?.right || '1in',
+        bottom: options.margin?.bottom || '1in',
+        left: options.margin?.left || '1in'
+      },
+      printBackground: options.printBackground !== false,
+      displayHeaderFooter: options.displayHeaderFooter || false,
+      headerTemplate: options.headerTemplate || '',
+      footerTemplate: options.footerTemplate || ''
+    };
+
     try {
-      await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-      
-      const pdfBuffer = await page.pdf({
-        format: options.format || 'A4',
-        margin: options.margin || {
-          top: '1in',
-          right: '1in',
-          bottom: '1in',
-          left: '1in'
+      const response = await fetch(this.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
         },
-        printBackground: true
+        body: JSON.stringify(requestBody)
       });
-      
-      return pdfBuffer;
-    } finally {
-      await page.close();
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`PDF generation failed: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+
+      const pdfArrayBuffer = await response.arrayBuffer();
+      return new Uint8Array(pdfArrayBuffer);
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      throw new Error(`Failed to generate PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
   static async generatePDFFromReactComponent(
     component: React.ReactElement,
-    options: PDFOptions = {}
-  ): Promise<Buffer> {
-    const puppeteer = await this.getPuppeteer();
+    options: PDFOptions = {},
+    env?: any
+  ): Promise<Uint8Array> {
     const htmlString = renderToString(component);
     // Create a complete HTML document
     const fullHTML = `
@@ -122,19 +123,12 @@ export class PDFService {
         </body>
       </html>
     `;
-    return this.generatePDF(fullHTML, options);
-  }
-
-  static async closeBrowser(): Promise<void> {
-    if (this.browser) {
-      await this.browser.close();
-      this.browser = null;
-    }
+    return this.generatePDF(fullHTML, options, env);
   }
 
   // Check if PDF generation is available
   static isAvailable(): boolean {
-    return true; // Always available since we handle the error in getPuppeteer
+    return true; // Always available since we use a cloud API
   }
 }
 
@@ -142,8 +136,9 @@ export class PDFService {
 export async function createSimplePDF(
   title: string,
   content: string,
-  options: PDFOptions = {}
-): Promise<Buffer> {
+  options: PDFOptions = {},
+  env?: any
+): Promise<Uint8Array> {
   return PDFService.generatePDF(`
     <!DOCTYPE html>
     <html>
@@ -199,12 +194,13 @@ export async function createSimplePDF(
         </div>
       </body>
     </html>
-  `, options);
+  `, options, env);
 }
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
-  const db = createDb((context as { env: { DB: D1Database } }).env.DB);
-  const user = await getUser(request, db);
+  const typedContext = context as { env: { DB: D1Database; SESSION_SECRET?: string } };
+  const db = createDb(typedContext.env.DB);
+  const user = await getUser(request, db, typedContext.env);
   
   if (!user) {
     throw new Response('Unauthorized', { status: 401 });
@@ -220,24 +216,75 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     },
   });
 
-  // Generate PDF content
-  const pdfContent = generatePDFContent(userPosts);
+  try {
+    // Generate PDF content
+    const pdfContent = generatePDFContent(userPosts);
+    
+    // Generate PDF using the new service
+    const pdfBuffer = await createSimplePDF(
+      `Posts by ${user.username}`,
+      pdfContent,
+      {
+        format: 'A4',
+        margin: { top: '0.5in', right: '0.5in', bottom: '0.5in', left: '0.5in' },
+        printBackground: true
+      },
+      typedContext.env
+    );
 
-  return new Response(pdfContent, {
-    headers: {
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="user-posts-${user.username}.pdf"`,
-    },
-  });
+    return new Response(pdfBuffer, {
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="user-posts-${user.username}.pdf"`,
+      },
+    });
+  } catch (error) {
+    console.error('PDF generation error:', error);
+    throw new Response('Failed to generate PDF', { status: 500 });
+  }
 }
 
 function generatePDFContent(posts: unknown[]): string {
-  // This is a placeholder implementation
-  // In a real implementation, you would use a PDF library like jsPDF or puppeteer
-  const content = posts.map((post: unknown) => {
-    const p = post as { title: string; content: string; createdAt: string };
-    return `Title: ${p.title}\nContent: ${p.content}\nCreated: ${p.createdAt}\n\n`;
-  }).join('---\n');
+  if (!posts || posts.length === 0) {
+    return '<h2>No posts found</h2><p>This user has not created any posts yet.</p>';
+  }
 
-  return `PDF content would be generated here\n\n${content}`;
+  const postsHtml = posts.map((post: unknown) => {
+    const p = post as { 
+      title: string; 
+      content: string; 
+      createdAt: string;
+      tags?: Array<{ name: string; color: string }>;
+      bounty?: { amount: number; status: string } | null;
+    };
+    
+    const tagsHtml = p.tags && p.tags.length > 0 
+      ? `<p><strong>Tags:</strong> ${p.tags.map(tag => `<span style="color: ${tag.color}">${tag.name}</span>`).join(', ')}</p>`
+      : '';
+    
+    const bountyHtml = p.bounty 
+      ? `<p><strong>Bounty:</strong> ${p.bounty.amount} BBUX (${p.bounty.status})</p>`
+      : '';
+    
+    return `
+      <div class="section">
+        <h3>${p.title}</h3>
+        <p><strong>Created:</strong> ${new Date(p.createdAt).toLocaleDateString()}</p>
+        ${tagsHtml}
+        ${bountyHtml}
+        <div class="content">
+          ${p.content}
+        </div>
+      </div>
+      <hr style="margin: 20px 0;">
+    `;
+  }).join('');
+
+  return `
+    <h1>Posts by User</h1>
+    <p><strong>Total Posts:</strong> ${posts.length}</p>
+    <p><strong>Generated:</strong> ${new Date().toLocaleDateString()}</p>
+    <hr style="margin: 20px 0;">
+    ${postsHtml}
+  `;
 } 

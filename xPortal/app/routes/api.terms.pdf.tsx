@@ -36,3 +36,7 @@ export async function loader() {
   }
 }
 
+export default function TermsPDF() {
+  return null;
+}
+

@@ -1,17 +1,17 @@
 import { json, type ActionFunctionArgs } from "@remix-run/cloudflare";
-import { getUser } from "~/utils/auth.server";
+import { requireUserId } from "~/utils/auth.server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { bounties } from "../../drizzle/schema";
+import { bounties, posts } from "../../drizzle/schema";
 import { createDb } from "~/utils/db.server";
 
 const claimBountySchema = z.object({
   bountyId: z.string().min(1, "Bounty ID is required"),
 });
 
-export async function action({ request }: ActionFunctionArgs) {
+export async function action({ request, context }: ActionFunctionArgs) {
   try {
-    const userId = await getUser(request);
+    const userId = await requireUserId(request);
     const formData = await request.formData();
     
     const validation = claimBountySchema.safeParse({
@@ -23,7 +23,7 @@ export async function action({ request }: ActionFunctionArgs) {
     }
 
     const { bountyId } = validation.data;
-    const db = createDb();
+    const db = createDb((context as { env: { DB: any } }).env.DB);
 
     // Check if bounty exists and is active
     const bounty = await db.query.bounties.findFirst({
@@ -47,10 +47,7 @@ export async function action({ request }: ActionFunctionArgs) {
       return json({ error: "You cannot claim your own bounty" }, { status: 400 });
     }
 
-    // Claim the bounty
-    await claimBounty(db, userId, bounty.amount, bounty.id);
-
-    // Update bounty status
+    // Update bounty status to claimed
     await db.update(bounties)
       .set({ 
         status: 'CLAIMED',
@@ -67,5 +64,9 @@ export async function action({ request }: ActionFunctionArgs) {
     console.error("Claim bounty error:", error);
     return json({ error: "Failed to claim bounty" }, { status: 500 });
   }
+}
+
+export default function BountyClaim() {
+  return null;
 }
 

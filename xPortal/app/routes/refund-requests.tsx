@@ -4,7 +4,7 @@ import { Layout } from '~/components/Layout';
 import { RefundRequestsList } from '~/components/RefundRequestsList';
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const user = await getUser(request);
+  const user = await getUser(request, undefined, typedContext.env);
   
   if (!user) {
     throw new Response('Unauthorized', { status: 401 });

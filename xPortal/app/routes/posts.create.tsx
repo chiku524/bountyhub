@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { json, type ActionFunctionArgs, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/cloudflare";
 import { useLoaderData, useActionData, useRouteError, useNavigation, Form } from "@remix-run/react";
-import { redirect } from "@remix-run/node";
+import { redirect } from "@remix-run/cloudflare";
 import { createDb } from "~/utils/db.server";
 import { requireUserId } from "~/utils/auth.server";
 import { eq, asc } from "drizzle-orm";
