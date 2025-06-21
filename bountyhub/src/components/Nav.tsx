@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { gsap } from 'gsap'
-import { FiCreditCard, FiLogOut, FiHome, FiUsers, FiDollarSign, FiSettings, FiCheckSquare } from 'react-icons/fi'
+import { FiCreditCard, FiLogOut, FiUsers, FiDollarSign, FiSettings, FiCheckSquare } from 'react-icons/fi'
 import { useAuth } from '../contexts/AuthProvider'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useWalletModal } from '@solana/wallet-adapter-react-ui'
@@ -167,7 +167,7 @@ export function Nav() {
         {/* Bubbles will be added here by JavaScript */}
       </div>
 
-      <div className="relative z-10 flex flex-col items-center w-full py-5">
+      <div className="relative z-10 flex flex-col items-center w-full py-5 cursor-pointer" onClick={() => navigate('/')}>
         <div className="relative w-12 h-12 flex items-center justify-center">
           <img src={logo} alt="bountyhub logo" className="w-10 h-10 object-contain" />
         </div>
@@ -178,13 +178,6 @@ export function Nav() {
       <hr className='border-b border-gray-500 w-4/6 relative z-10'/>
 
       <div className="relative z-10 flex flex-col items-center w-full flex-1 justify-center">
-        <Link to="/" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-white/5">
-          <div className="relative flex items-center justify-center gap-4 px-4 py-1 w-full">
-            <FiHome className="h-6 w-6 text-gray-300 transition-all duration-300 group-hover:text-indigo-300 group-hover:scale-110" />
-            {expanded && <span className="text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-300 whitespace-nowrap overflow-hidden max-w-xs">Home</span>}
-          </div>
-        </Link>
-
         {user && (
           <Link to="/profile" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-white/5">
             <div className="relative flex items-center justify-center gap-4 px-4 py-1 w-full">
@@ -203,6 +196,7 @@ export function Nav() {
             </div>
           </Link>
         )}
+        {user && <hr className='border-b border-gray-500 w-4/6 relative z-10'/>}
 
         <Link to="/community" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-white/5">
           <div className="relative flex items-center justify-center gap-4 px-4 py-1 w-full">
@@ -210,6 +204,7 @@ export function Nav() {
             {expanded && <span className="text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-300 whitespace-nowrap overflow-hidden max-w-xs">Community</span>}
           </div>
         </Link>
+        <hr className='border-b border-gray-500 w-4/6 relative z-10'/>
 
         <Link to="/governance" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-white/5">
           <div className="relative flex items-center justify-center gap-4 px-4 py-1 w-full">
@@ -217,6 +212,7 @@ export function Nav() {
             {expanded && <span className="text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-300 whitespace-nowrap overflow-hidden max-w-xs">Governance</span>}
           </div>
         </Link>
+        <hr className='border-b border-gray-500 w-4/6 relative z-10'/>
 
         <Link to="/wallet" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-white/5">
           <div className="relative flex items-center justify-center gap-4 px-4 py-1 w-full">
@@ -224,6 +220,7 @@ export function Nav() {
             {expanded && <span className="text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-300 whitespace-nowrap overflow-hidden max-w-xs">Wallet</span>}
           </div>
         </Link>
+        <hr className='border-b border-gray-500 w-4/6 relative z-10'/>
 
         {/* Notifications */}
         <button className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-white/5">
@@ -232,6 +229,7 @@ export function Nav() {
             {expanded && <span className="text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-300 whitespace-nowrap overflow-hidden max-w-xs">Notifications</span>}
           </div>
         </button>
+        <hr className='border-b border-gray-500 w-4/6 relative z-10'/>
 
         <Link to="/settings" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-white/5">
           <div className="relative flex items-center justify-center gap-4 px-4 py-1 w-full">

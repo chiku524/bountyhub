@@ -8747,6 +8747,18 @@ async function register({
       updatedAt: /* @__PURE__ */ new Date()
     };
     await db.insert(users).values(newUser);
+    const walletId = crypto.randomUUID();
+    await db.insert(virtualWallets).values({
+      id: walletId,
+      userId,
+      balance: 0,
+      totalDeposited: 0,
+      totalWithdrawn: 0,
+      totalEarned: 0,
+      totalSpent: 0,
+      createdAt: /* @__PURE__ */ new Date(),
+      updatedAt: /* @__PURE__ */ new Date()
+    });
     return {
       success: true,
       user: {
@@ -9570,6 +9582,40 @@ app11.post(async (c) => {
 });
 var profile_default = app11;
 
+// src/utils/token-supply.ts
+var TokenSupplyService = class {
+  static async getSupplyStats(db) {
+    try {
+      const wallets = await db.select().from(virtualWallets);
+      const currentSupply = wallets.reduce((sum, wallet) => sum + wallet.balance, 0);
+      const transactions = await db.select().from(walletTransactions);
+      const totalDeposited = transactions.filter((tx) => tx.type === "DEPOSIT" && tx.status === "COMPLETED").reduce((sum, tx) => sum + tx.amount, 0);
+      const totalWithdrawn = transactions.filter((tx) => tx.type === "WITHDRAW" && tx.status === "COMPLETED").reduce((sum, tx) => sum + tx.amount, 0);
+      const burnedAmount = totalDeposited - currentSupply;
+      const burnPercentage = totalDeposited > 0 ? burnedAmount / totalDeposited * 100 : 0;
+      return {
+        initialSupply: totalDeposited,
+        currentSupply,
+        burnedAmount,
+        burnPercentage,
+        totalDeposited,
+        totalWithdrawn
+      };
+    } catch (error3) {
+      console.error("Error getting supply stats:", error3);
+      return {
+        initialSupply: 0,
+        currentSupply: 0,
+        burnedAmount: 0,
+        burnPercentage: 0,
+        totalDeposited: 0,
+        totalWithdrawn: 0
+      };
+    }
+  }
+};
+__name(TokenSupplyService, "TokenSupplyService");
+
 // functions/api/wallet/index.ts
 var app12 = new Hono2();
 app12.get(async (c) => {
@@ -9587,6 +9633,8 @@ app12.get(async (c) => {
     if (walletResult.length === 0)
       return c.json({ error: "Wallet not found" }, 404);
     const wallet = walletResult[0];
+    const user = await getUserById(userId, db);
+    const supplyStats = await TokenSupplyService.getSupplyStats(db);
     return c.json({
       address: wallet.id,
       balance: wallet.balance,
@@ -9595,7 +9643,9 @@ app12.get(async (c) => {
       totalEarned: wallet.totalEarned,
       totalSpent: wallet.totalSpent,
       createdAt: wallet.createdAt,
-      updatedAt: wallet.updatedAt
+      updatedAt: wallet.updatedAt,
+      user,
+      supplyStats
     });
   } catch (error3) {
     console.error("Error fetching wallet:", error3);

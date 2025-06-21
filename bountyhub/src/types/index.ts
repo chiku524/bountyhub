@@ -108,4 +108,13 @@ export interface WalletInfo {
   totalSpent: number
   createdAt: string
   updatedAt: string
+  user?: User
+  supplyStats?: {
+    initialSupply: number
+    currentSupply: number
+    burnedAmount: number
+    burnPercentage: number
+    totalDeposited: number
+    totalWithdrawn: number
+  }
 } 

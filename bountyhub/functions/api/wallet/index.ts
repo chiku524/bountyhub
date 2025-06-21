@@ -1,9 +1,10 @@
 import { Hono } from 'hono'
 import { getCookie } from 'hono/cookie'
 import { createDb } from '../../../src/utils/db'
-import { getUserIdFromSession } from '../../../src/utils/auth'
-import { virtualWallets } from '../../../drizzle/schema'
+import { getUserIdFromSession, getUserById } from '../../../src/utils/auth'
+import { virtualWallets, users } from '../../../drizzle/schema'
 import { eq } from 'drizzle-orm'
+import { TokenSupplyService } from '../../../src/utils/token-supply'
 
 interface Env {
   DB: any
@@ -30,6 +31,13 @@ app.get(async (c) => {
     const walletResult = await db.select().from(virtualWallets).where(eq(virtualWallets.userId, userId)).limit(1)
     if (walletResult.length === 0) return c.json({ error: 'Wallet not found' }, 404)
     const wallet = walletResult[0]
+    
+    // Get user info
+    const user = await getUserById(userId, db)
+    
+    // Get supply stats
+    const supplyStats = await TokenSupplyService.getSupplyStats(db)
+    
     return c.json({
       address: wallet.id,
       balance: wallet.balance,
@@ -38,7 +46,9 @@ app.get(async (c) => {
       totalEarned: wallet.totalEarned,
       totalSpent: wallet.totalSpent,
       createdAt: wallet.createdAt,
-      updatedAt: wallet.updatedAt
+      updatedAt: wallet.updatedAt,
+      user: user,
+      supplyStats: supplyStats
     })
   } catch (error) {
     console.error('Error fetching wallet:', error)

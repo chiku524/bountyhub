@@ -2,7 +2,7 @@
 // TODO: Re-implement with proper database integration
 
 import { eq } from 'drizzle-orm'
-import { users, sessions } from '../../drizzle/schema'
+import { users, sessions, virtualWallets } from '../../drizzle/schema'
 import type { Db } from './db'
 
 export interface AuthError {
@@ -57,6 +57,20 @@ export async function register({
     }
 
     await db.insert(users).values(newUser)
+
+    // Create virtual wallet for the new user
+    const walletId = crypto.randomUUID()
+    await db.insert(virtualWallets).values({
+      id: walletId,
+      userId: userId,
+      balance: 0,
+      totalDeposited: 0,
+      totalWithdrawn: 0,
+      totalEarned: 0,
+      totalSpent: 0,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    })
 
     return { 
       success: true, 
