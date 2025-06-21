@@ -30,7 +30,7 @@ HTML2PDF_API_KEY = "28q7AasnbwG213fOLEt58Cjw4FEZVxNxAoaXl0MybGEGWeM9u73X4hGltgIM
 # Vite Client-Side Environment Variables (for direct uploads)
 VITE_CLOUDINARY_CLOUD_NAME = "dqobhvk07"
 VITE_CLOUDINARY_UPLOAD_PRESET = "portal"
-VITE_API_URL = "https://bountyhub-api.nico-chikuji.workers.dev"
+VITE_API_URL = "https://api.bountyhub.tech"
 
 # Database URLs (for compatibility with existing code)
 DATABASE_URL = "mongodb+srv://nicochikuji:coDzZK4ZedwgJ4OQ@xportal.g7vzj.mongodb.net/xPortal?retryWrites=true&w=majority"
