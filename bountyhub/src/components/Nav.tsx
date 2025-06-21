@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { gsap } from 'gsap'
-import { FiCreditCard, FiLogOut, FiHome, FiUsers, FiDollarSign, FiSettings, FiPlus, FiCheckSquare } from 'react-icons/fi'
+import { FiCreditCard, FiLogOut, FiHome, FiUsers, FiDollarSign, FiSettings, FiCheckSquare } from 'react-icons/fi'
 import { useAuth } from '../contexts/AuthProvider'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useWalletModal } from '@solana/wallet-adapter-react-ui'

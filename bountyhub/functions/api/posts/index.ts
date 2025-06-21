@@ -1,10 +1,9 @@
 import { Hono } from 'hono'
-import { cors } from 'hono/cors'
 import { getCookie } from 'hono/cookie'
 import { createDb } from '../../../src/utils/db'
 import { getUserIdFromSession } from '../../../src/utils/auth'
-import { posts, tags, postTags, codeBlocks, media, bounties, virtualWallets } from '../../../drizzle/schema'
-import { eq, desc } from 'drizzle-orm'
+import { posts, postTags, bounties, virtualWallets } from '../../../drizzle/schema'
+import { eq } from 'drizzle-orm'
 
 interface Env {
   DB: any

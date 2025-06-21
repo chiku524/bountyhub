@@ -9236,8 +9236,8 @@ app7.post(async (c) => {
     title: title2,
     content,
     selectedTags = [],
-    codeBlocks: codeBlocks3 = [],
-    media: media3 = [],
+    codeBlocks: codeBlocks2 = [],
+    media: media2 = [],
     hasBounty = false,
     bountyAmount = 0,
     bountyDuration = 7
@@ -9279,8 +9279,8 @@ app7.post(async (c) => {
       }));
       await db.insert(postTags).values(tagRelations);
     }
-    if (codeBlocks3.length > 0) {
-      const codeBlockData = codeBlocks3.map((block) => ({
+    if (codeBlocks2.length > 0) {
+      const codeBlockData = codeBlocks2.map((block) => ({
         id: crypto.randomUUID(),
         language: block.language,
         code: block.code,
@@ -9289,10 +9289,10 @@ app7.post(async (c) => {
         createdAt: /* @__PURE__ */ new Date(),
         updatedAt: /* @__PURE__ */ new Date()
       }));
-      await db.insert(codeBlocks3).values(codeBlockData);
+      await db.insert(codeBlocks2).values(codeBlockData);
     }
-    if (media3.length > 0) {
-      const mediaData = media3.map((item) => ({
+    if (media2.length > 0) {
+      const mediaData = media2.map((item) => ({
         id: crypto.randomUUID(),
         type: item.type,
         url: item.url,
@@ -9303,7 +9303,7 @@ app7.post(async (c) => {
         createdAt: /* @__PURE__ */ new Date(),
         updatedAt: /* @__PURE__ */ new Date()
       }));
-      await db.insert(media3).values(mediaData);
+      await db.insert(media2).values(mediaData);
     }
     if (hasBounty && bountyAmount > 0) {
       const bountyId = crypto.randomUUID();
@@ -9336,8 +9336,8 @@ app7.post(async (c) => {
       data: {
         ...newPost,
         selectedTags,
-        codeBlocks: codeBlocks3,
-        media: media3,
+        codeBlocks: codeBlocks2,
+        media: media2,
         hasBounty,
         bountyAmount: hasBounty ? bountyAmount : 0
       }

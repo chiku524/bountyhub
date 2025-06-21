@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useAuth } from '../contexts/AuthProvider'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { ErrorMessage } from '../components/ErrorMessage'
 
@@ -31,7 +30,6 @@ interface RefundRequest {
 }
 
 export default function Governance() {
-  const { user } = useAuth()
   const [refundRequests, setRefundRequests] = useState<RefundRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

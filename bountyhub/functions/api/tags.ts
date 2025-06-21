@@ -1,5 +1,4 @@
 import { Hono } from 'hono'
-import { cors } from 'hono/cors'
 import { createDb } from '../../src/utils/db'
 import { tags } from '../../drizzle/schema'
 import { asc } from 'drizzle-orm'
