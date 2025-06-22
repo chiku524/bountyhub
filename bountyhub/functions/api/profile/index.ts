@@ -2,15 +2,23 @@ import { Hono } from 'hono'
 import { getCookie } from 'hono/cookie'
 import { createDb } from '../../../src/utils/db'
 import { getUserIdFromSession } from '../../../src/utils/auth'
-import { users, profiles } from '../../../drizzle/schema'
-import { eq } from 'drizzle-orm'
+import { users, profiles, posts, bookmarks, reputationHistory } from '../../../drizzle/schema'
+import { eq, desc } from 'drizzle-orm'
+import pictureRoutes from './picture'
 
 interface Env {
   DB: any
   NODE_ENV: string
+  CLOUDINARY_CLOUD_NAME: string
+  CLOUDINARY_API_KEY: string
+  CLOUDINARY_API_SECRET: string
+  CLOUDINARY_UPLOAD_PRESET: string
 }
 
 const app = new Hono<{ Bindings: Env }>()
+
+// Add picture routes
+app.route('/picture', pictureRoutes)
 
 app.get(async (c) => {
   const sessionId = getCookie(c, 'session')
@@ -29,6 +37,7 @@ app.get(async (c) => {
       return c.json({ error: 'Unauthorized' }, 401)
     }
     
+    // Query user and profile separately
     const userResult = await db
       .select({
         id: users.id,
@@ -39,29 +48,8 @@ app.get(async (c) => {
         totalRatings: users.totalRatings,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
-        profile: {
-          firstName: profiles.firstName,
-          lastName: profiles.lastName,
-          profilePicture: profiles.profilePicture,
-          bio: profiles.bio,
-          location: profiles.location,
-          website: profiles.website,
-          facebook: profiles.facebook,
-          twitter: profiles.twitter,
-          instagram: profiles.instagram,
-          linkedin: profiles.linkedin,
-          github: profiles.github,
-          youtube: profiles.youtube,
-          tiktok: profiles.tiktok,
-          discord: profiles.discord,
-          reddit: profiles.reddit,
-          medium: profiles.medium,
-          stackoverflow: profiles.stackoverflow,
-          devto: profiles.devto,
-        },
       })
       .from(users)
-      .leftJoin(profiles, eq(users.id, profiles.userId))
       .where(eq(users.id, userId))
       .limit(1)
 
@@ -70,6 +58,53 @@ app.get(async (c) => {
     }
 
     const user = userResult[0]
+    
+    // Query profile separately
+    const profileResult = await db
+      .select({
+        firstName: profiles.firstName,
+        lastName: profiles.lastName,
+        profilePicture: profiles.profilePicture,
+        bio: profiles.bio,
+        location: profiles.location,
+        website: profiles.website,
+        facebook: profiles.facebook,
+        twitter: profiles.twitter,
+        instagram: profiles.instagram,
+        linkedin: profiles.linkedin,
+        github: profiles.github,
+        youtube: profiles.youtube,
+        tiktok: profiles.tiktok,
+        discord: profiles.discord,
+        reddit: profiles.reddit,
+        medium: profiles.medium,
+        stackoverflow: profiles.stackoverflow,
+        devto: profiles.devto,
+      })
+      .from(profiles)
+      .where(eq(profiles.userId, userId))
+      .limit(1)
+
+    const profile = profileResult.length > 0 ? profileResult[0] : null
+    
+    // Get user's bookmarks with post details
+    const userBookmarks = await db.select({
+      id: bookmarks.id,
+      postId: bookmarks.postId,
+      createdAt: bookmarks.createdAt,
+      post: {
+        id: posts.id,
+        title: posts.title,
+        content: posts.content,
+        createdAt: posts.createdAt,
+        authorId: posts.authorId
+      }
+    })
+    .from(bookmarks)
+    .innerJoin(posts, eq(bookmarks.postId, posts.id))
+    .where(eq(bookmarks.userId, userId))
+    .orderBy(desc(bookmarks.createdAt))
+    .limit(10)
     
     // Calculate reputation level based on points
     const getReputationLevel = (points: number) => {
@@ -82,16 +117,31 @@ app.get(async (c) => {
       return 'Newbie'
     }
 
+    // Get user's reputation history
+    const userReputationHistory = await db.select({
+      id: reputationHistory.id,
+      points: reputationHistory.points,
+      action: reputationHistory.action,
+      createdAt: reputationHistory.createdAt
+    })
+    .from(reputationHistory)
+    .where(eq(reputationHistory.userId, userId))
+    .orderBy(desc(reputationHistory.createdAt))
+    .limit(20)
+
     return c.json({
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      profilePicture: user.profile?.profilePicture,
+      ...user,
+      profilePicture: profile?.profilePicture ?? null,
+      profile,
+      bookmarks: userBookmarks,
       reputation: user.reputationPoints,
       reputationLevel: getReputationLevel(user.reputationPoints),
+      reputationPoints: user.reputationPoints,
+      integrityScore: user.integrityScore,
+      totalRatings: user.totalRatings,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
-      profile: user.profile
+      reputationHistory: userReputationHistory
     })
   } catch (error) {
     console.error('Error fetching profile:', error)

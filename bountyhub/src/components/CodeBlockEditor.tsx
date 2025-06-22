@@ -1,170 +1,158 @@
-import { useState } from 'react';
-import { FiCopy, FiCheck, FiPlus, FiTrash2 } from 'react-icons/fi';
-
-interface CodeBlockForm {
-  language: string;
-  code: string;
-  description?: string;
-}
+import React, { useState } from 'react'
+import type { CodeBlock } from '../types'
 
 interface CodeBlockEditorProps {
-  codeBlocks: CodeBlockForm[];
-  onCodeBlocksChange: (blocks: CodeBlockForm[]) => void;
+  onAdd: (codeBlock: CodeBlock) => void
+  onCancel: () => void
 }
 
-const SUPPORTED_LANGUAGES = [
-  'javascript',
-  'typescript',
-  'python',
-  'java',
-  'cpp',
-  'csharp',
-  'php',
-  'ruby',
-  'swift',
-  'go',
-  'rust',
-  'html',
-  'css',
-  'sql',
-  'bash',
-  'json',
-  'yaml',
-  'markdown',
-  'plaintext'
-];
+const LANGUAGE_OPTIONS = [
+  { value: 'javascript', label: 'JavaScript' },
+  { value: 'typescript', label: 'TypeScript' },
+  { value: 'python', label: 'Python' },
+  { value: 'java', label: 'Java' },
+  { value: 'cpp', label: 'C++' },
+  { value: 'csharp', label: 'C#' },
+  { value: 'php', label: 'PHP' },
+  { value: 'ruby', label: 'Ruby' },
+  { value: 'go', label: 'Go' },
+  { value: 'rust', label: 'Rust' },
+  { value: 'swift', label: 'Swift' },
+  { value: 'kotlin', label: 'Kotlin' },
+  { value: 'scala', label: 'Scala' },
+  { value: 'html', label: 'HTML' },
+  { value: 'css', label: 'CSS' },
+  { value: 'sql', label: 'SQL' },
+  { value: 'bash', label: 'Bash' },
+  { value: 'powershell', label: 'PowerShell' },
+  { value: 'json', label: 'JSON' },
+  { value: 'xml', label: 'XML' },
+  { value: 'yaml', label: 'YAML' },
+  { value: 'markdown', label: 'Markdown' },
+  { value: 'plaintext', label: 'Plain Text' }
+]
 
-export default function CodeBlockEditor({ codeBlocks, onCodeBlocksChange }: CodeBlockEditorProps) {
-  const [currentBlock, setCurrentBlock] = useState<CodeBlockForm>({
-    language: '',
-    code: '',
-    description: ''
-  });
-  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+export const CodeBlockEditor: React.FC<CodeBlockEditorProps> = ({ onAdd, onCancel }) => {
+  const [language, setLanguage] = useState('javascript')
+  const [code, setCode] = useState('')
+  const [description, setDescription] = useState('')
+  const [isExpanded, setIsExpanded] = useState(false)
 
-  const handleAddCodeBlock = () => {
-    if (currentBlock.language && currentBlock.code) {
-      onCodeBlocksChange([...codeBlocks, currentBlock]);
-      setCurrentBlock({ language: '', code: '', description: '' });
-    }
-  };
+  const handleCancel = () => {
+    setCode('')
+    setDescription('')
+    setLanguage('javascript')
+    setIsExpanded(false)
+    onCancel()
+  }
 
-  const handleRemoveCodeBlock = (index: number) => {
-    onCodeBlocksChange(codeBlocks.filter((_, i) => i !== index));
-  };
-
-  const handleCopyCode = async (code: string, index: number) => {
-    try {
-      await navigator.clipboard.writeText(code);
-      setCopiedIndex(index);
-      setTimeout(() => setCopiedIndex(null), 2000);
-    } catch (err) {
-      // Removed all console.error statements for cleaner production code.
-    }
-  };
+  if (!isExpanded) {
+    return (
+      <button
+        onClick={() => setIsExpanded(true)}
+        className="flex items-center gap-2 px-3 py-2 bg-neutral-700 hover:bg-neutral-600 text-gray-300 hover:text-white rounded-lg transition-colors"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+        </svg>
+        Add Code Block
+      </button>
+    )
+  }
 
   return (
-    <div className="space-y-6">
-      {/* Existing Code Blocks */}
-      {codeBlocks.map((block, index) => (
-        <div key={index} className="bg-neutral-800/80 rounded-lg p-4 border border-violet-500/30">
-          <div className="flex justify-between items-center mb-2">
-            <div className="flex items-center gap-2">
-              <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded text-sm">
-                {block.language}
-              </span>
-              <button
-                type="button"
-                onClick={() => handleCopyCode(block.code, index)}
-                className="p-1 text-gray-400 hover:text-violet-400 transition-colors"
-                title="Copy code"
-              >
-                {copiedIndex === index ? (
-                  <FiCheck className="w-4 h-4" />
-                ) : (
-                  <FiCopy className="w-4 h-4" />
-                )}
-              </button>
-            </div>
-            <button
-              type="button"
-              onClick={() => handleRemoveCodeBlock(index)}
-              className="p-1 text-gray-400 hover:text-red-400 transition-colors"
-              title="Remove code block"
-            >
-              <FiTrash2 className="w-4 h-4" />
-            </button>
-          </div>
-          <pre className="bg-neutral-900/80 p-4 rounded-lg overflow-x-auto">
-            <code className="text-sm text-gray-300">{block.code}</code>
-          </pre>
-          {block.description && (
-            <p className="mt-2 text-sm text-gray-400">{block.description}</p>
-          )}
+    <div className="bg-neutral-800 border border-neutral-600 rounded-lg p-4 mb-4">
+      <div className="flex items-center justify-between mb-4">
+        <h4 className="text-white font-medium">Add Code Block</h4>
+        <button
+          onClick={handleCancel}
+          className="text-gray-400 hover:text-white transition-colors"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form className="space-y-4">
+        {/* Language Selection */}
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            Language
+          </label>
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="w-full p-2 bg-neutral-700 border border-neutral-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            {LANGUAGE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </div>
-      ))}
 
-      {/* Add New Code Block Form */}
-      <div className="bg-neutral-800/80 rounded-lg p-4 border border-violet-500/30">
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="language" className="block text-sm font-medium text-violet-300 mb-2">
-              Language
-            </label>
-            <select
-              id="language"
-              value={currentBlock.language}
-              onChange={(e) => setCurrentBlock({ ...currentBlock, language: e.target.value })}
-              className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
-            >
-              <option value="">Select a language</option>
-              {SUPPORTED_LANGUAGES.map((lang) => (
-                <option key={lang} value={lang}>
-                  {lang.charAt(0).toUpperCase() + lang.slice(1)}
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* Code Input */}
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            Code
+          </label>
+          <textarea
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            placeholder="Enter your code here..."
+            className="w-full p-3 bg-neutral-900 border border-neutral-600 rounded-lg text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm resize-none"
+            rows={8}
+            required
+          />
+        </div>
 
-          <div>
-            <label htmlFor="code" className="block text-sm font-medium text-violet-300 mb-2">
-              Code
-            </label>
-            <textarea
-              id="code"
-              value={currentBlock.code}
-              onChange={(e) => setCurrentBlock({ ...currentBlock, code: e.target.value })}
-              rows={6}
-              placeholder="Paste your code here..."
-              className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white font-mono text-sm focus:border-violet-500 focus:ring-violet-500"
-            />
-          </div>
+        {/* Description */}
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            Description (Optional)
+          </label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Brief description of what this code does..."
+            className="w-full p-2 bg-neutral-700 border border-neutral-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+            rows={2}
+          />
+        </div>
 
-          <div>
-            <label htmlFor="description" className="block text-sm font-medium text-violet-300 mb-2">
-              Description (optional)
-            </label>
-            <input
-              type="text"
-              id="description"
-              value={currentBlock.description}
-              onChange={(e) => setCurrentBlock({ ...currentBlock, description: e.target.value })}
-              placeholder="Add a brief description of the code..."
-              className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
-            />
-          </div>
-
+        {/* Action Buttons */}
+        <div className="flex justify-end gap-2">
           <button
             type="button"
-            onClick={handleAddCodeBlock}
-            disabled={!currentBlock.language || !currentBlock.code}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={handleCancel}
+            className="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 text-gray-300 hover:text-white rounded-lg transition-colors"
           >
-            <FiPlus className="w-4 h-4" />
+            Cancel
+          </button>
+          <button
+            type="button"
+            disabled={!code.trim()}
+            onClick={() => {
+              if (!code.trim()) return
+              const codeBlock: CodeBlock = {
+                language,
+                code: code.trim(),
+                description: description.trim() || undefined
+              }
+              onAdd(codeBlock)
+              setCode('')
+              setDescription('')
+              setLanguage('javascript')
+              setIsExpanded(false)
+            }}
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             Add Code Block
           </button>
         </div>
-      </div>
+      </form>
     </div>
-  );
+  )
 } 

@@ -11,6 +11,13 @@ import usersRoutes from './api/users'
 import profileRoutes from './api/profile'
 import walletRoutes from './api/wallet'
 import tagsRoutes from './api/tags'
+import statsRoutes from './api/stats'
+import integrityRoutes from './api/integrity'
+import bookmarksRoutes from './api/bookmarks'
+import refundRequestsRoutes from './api/refund-requests'
+import refundVoteRoutes from './api/refund/vote'
+import governanceRoutes from './api/governance'
+import adminRoutes from './api/admin'
 
 interface Env {
   DB: any
@@ -70,6 +77,13 @@ app.route('/api/users', usersRoutes)
 app.route('/api/profile', profileRoutes)
 app.route('/api/wallet', walletRoutes)
 app.route('/api/tags', tagsRoutes)
+app.route('/api/stats', statsRoutes)
+app.route('/api/integrity', integrityRoutes)
+app.route('/api/bookmarks', bookmarksRoutes)
+app.route('/api/refund-requests', refundRequestsRoutes)
+app.route('/api/refund', refundVoteRoutes)
+app.route('/api/governance', governanceRoutes)
+app.route('/api/admin', adminRoutes)
 
 // 404 handler
 app.notFound((c) => {

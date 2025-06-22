@@ -1,1 +1,0 @@
-import{b as t}from"/build/_shared/chunk-G5WX4PPA.js";var i=t((a,n)=>{function e(s){return{name:"VBScript in HTML",subLanguage:"xml",contains:[{begin:"<%",end:"%>",subLanguage:"vbscript"}]}}n.exports=e});export default i();

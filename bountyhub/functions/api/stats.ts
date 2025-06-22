@@ -1,0 +1,67 @@
+import { Hono } from 'hono'
+import { createDb } from '../../src/utils/db'
+import { posts, bounties, users, answers, virtualWallets } from '../../drizzle/schema'
+import { eq } from 'drizzle-orm'
+
+interface Env {
+  DB: any
+}
+
+const app = new Hono<{ Bindings: Env }>()
+
+app.get(async (c) => {
+  const db = createDb(c.env.DB)
+  
+  try {
+    // Get active bounties (posts with bounties that are ACTIVE)
+    const activeBountiesResult = await db.select().from(bounties).where(eq(bounties.status, 'ACTIVE'))
+    const activeBounties = activeBountiesResult.length
+
+    // Get total questions answered (posts with accepted answers)
+    const answeredQuestionsResult = await db.select().from(posts).where(eq(posts.status, 'COMPLETED'))
+    const questionsAnswered = answeredQuestionsResult.length
+
+    // Get total rewards (sum of all bounty amounts)
+    const totalRewardsResult = await db.select().from(bounties)
+    const totalRewards = totalRewardsResult.reduce((sum, bounty) => sum + bounty.amount, 0)
+
+    // Get community members (total users)
+    const communityMembersResult = await db.select().from(users)
+    const communityMembers = communityMembersResult.length
+
+    // Get total posts
+    const totalPostsResult = await db.select().from(posts)
+    const totalPosts = totalPostsResult.length
+
+    // Get total answers
+    const totalAnswersResult = await db.select().from(answers)
+    const totalAnswers = totalAnswersResult.length
+
+    // Get total BBUX in circulation (sum of all wallet balances)
+    const totalBBUXResult = await db.select().from(virtualWallets)
+    const totalBBUX = totalBBUXResult.reduce((sum, wallet) => sum + wallet.balance, 0)
+
+    return c.json({
+      activeBounties,
+      questionsAnswered,
+      totalRewards: totalRewards.toFixed(2),
+      communityMembers,
+      totalPosts,
+      totalAnswers,
+      totalBBUX: totalBBUX.toFixed(2)
+    })
+  } catch (error) {
+    console.error('Error fetching platform stats:', error)
+    return c.json({ 
+      activeBounties: 0,
+      questionsAnswered: 0,
+      totalRewards: '0.00',
+      communityMembers: 0,
+      totalPosts: 0,
+      totalAnswers: 0,
+      totalBBUX: '0.00'
+    }, 500)
+  }
+})
+
+export default app 

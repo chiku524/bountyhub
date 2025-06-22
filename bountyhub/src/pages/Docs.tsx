@@ -123,7 +123,7 @@ export default function Docs() {
 
   return (
     <div className="min-h-screen bg-neutral-900">
-      <div className="w-auto max-w-8xl mx-auto mt-4 px-4 ml-24 pb-16">
+      <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
         <div className="mb-8 mt-16">
           <h1 className="text-4xl font-bold text-white mb-4">
             Documentation

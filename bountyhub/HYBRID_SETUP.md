@@ -170,7 +170,34 @@ curl http://localhost:8788/api/auth/me
 2. Configure monitoring and logging
 3. Set up CI/CD pipeline
 4. Add environment-specific configurations
-5. Implement caching strategies 
+5. Implement caching strategies
+
+## 🔔 Notification System
+
+The platform includes a comprehensive real-time notification system:
+
+### Features
+- **Real-time notifications** for user interactions (comments, votes, answers, bounties)
+- **Database persistence** with proper indexing and relationships
+- **Frontend integration** with popup notifications and unread counts
+- **Navigation support** for direct links to relevant content
+
+### Recent Fixes (Latest Update)
+- ✅ **Removed unnecessary polling** - Eliminated 30-second API calls that were causing 500 errors
+- ✅ **Enhanced error handling** - Added detailed logging and better error messages
+- ✅ **Fixed data structure** - Resolved navigation object transformation issues
+- ✅ **Real-time creation** - Notifications are now created immediately when actions occur
+
+### API Endpoints
+- `GET /api/notifications` - Fetch user notifications
+- `POST /api/notifications/:id/read` - Mark notification as read
+- `POST /api/notifications/read-all` - Mark all notifications as read
+- `DELETE /api/notifications/:id` - Delete notification
+
+### Database Schema
+The notification system uses two tables:
+- `notifications` - Stores individual notifications
+- `notification_settings` - User notification preferences
 
 Create a `.env` file in the root directory with the following variables:
 

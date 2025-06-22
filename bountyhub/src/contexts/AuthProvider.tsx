@@ -36,12 +36,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const checkAuthStatus = async () => {
     try {
+      console.log('Checking authentication status...')
       const userData = await api.getCurrentUser()
+      console.log('getCurrentUser response:', userData)
       if (userData) {
+        console.log('Setting user in context:', userData)
         setUser(userData)
+      } else {
+        console.log('No user data returned, user is not authenticated')
+        setUser(null)
       }
     } catch (error) {
       console.error('Auth check failed:', error)
+      setUser(null)
     } finally {
       setLoading(false)
     }
@@ -59,10 +66,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signup = async (email: string, password: string, username: string) => {
     try {
+      console.log('Starting signup process...')
       const result = await api.signup({ email, password, username })
+      console.log('Signup API response:', result)
       setUser(result.user)
+      
+      // Add a small delay to ensure the session cookie is set before checking auth status
+      setTimeout(() => {
+        console.log('Re-checking auth status after signup...')
+        checkAuthStatus()
+      }, 100)
+      
       return { success: true }
     } catch (error) {
+      console.error('Signup error:', error)
       return { success: false, error: error instanceof Error ? error.message : 'Signup failed' }
     }
   }

@@ -19,11 +19,17 @@ app.post(async (c) => {
     await deleteSession(sessionId, db)
   }
   
-  // Clear the session cookie with the same domain configuration
-  deleteCookie(c, 'session', {
-    domain: '.bountyhub.tech',
+  // Clear the session cookie with proper configuration for development/production
+  const cookieOptions: any = {
     path: '/'
-  })
+  }
+  
+  // Configure cookie based on environment
+  if (c.env.NODE_ENV === 'production') {
+    cookieOptions.domain = '.bountyhub.tech'
+  }
+  
+  deleteCookie(c, 'session', cookieOptions)
   
   return c.json({ success: true })
 })

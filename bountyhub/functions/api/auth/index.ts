@@ -3,6 +3,7 @@ import login from './login'
 import logout from './logout'
 import me from './me'
 import signup from './signup'
+import changePassword from './change-password'
 
 interface Env {
   DB: any
@@ -30,5 +31,6 @@ app.route('/login', login)
 app.route('/logout', logout)
 app.route('/me', me)
 app.route('/signup', signup)
+app.route('/change-password', changePassword)
 
 export default app 

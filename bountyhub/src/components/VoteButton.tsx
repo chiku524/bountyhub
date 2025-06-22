@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useAuth } from '../contexts/AuthProvider'
+import { config } from '../utils/config'
 
 interface VoteButtonProps {
   itemId: string
@@ -7,7 +8,7 @@ interface VoteButtonProps {
   voteType: 'quality' | 'visibility'
   initialVotes: number
   userVote?: number
-  onVoteChange?: (newVotes: number) => void
+  onVoteChange?: (newVotes: number, newUserVote: number) => void
   className?: string
 }
 
@@ -31,27 +32,31 @@ export const VoteButton: React.FC<VoteButtonProps> = ({
     setLoading(true)
     try {
       const endpoint = itemType === 'post' 
-        ? `/api/posts/${itemId}/vote`
-        : `/api/comments/${itemId}/vote`
+        ? `${config.api.baseUrl}/api/posts/${itemId}/vote`
+        : `${config.api.baseUrl}/api/comments/${itemId}/vote`
 
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
-          userId: user.id,
           voteType,
           value
         })
       })
 
-      if (!response.ok) throw new Error('Failed to vote')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Failed to vote' }))
+        throw new Error(errorData.error || 'Failed to vote')
+      }
 
-      const { totalVotes } = await response.json()
-      setVotes(totalVotes)
-      setUserVoteState(value)
-      onVoteChange?.(totalVotes)
+      const result = await response.json()
+      setVotes(result.totalVotes)
+      setUserVoteState(result.userVote)
+      onVoteChange?.(result.totalVotes, result.userVote)
     } catch (error) {
       console.error('Vote error:', error)
+      // You could show a toast notification here
     } finally {
       setLoading(false)
     }
@@ -74,7 +79,7 @@ export const VoteButton: React.FC<VoteButtonProps> = ({
   }
 
   return (
-    <div className={`flex items-center space-x-2 ${className}`}>
+    <div className={`flex flex-col items-center justify-center space-y-1 ${className}`}>
       <button
         onClick={handleUpvote}
         disabled={loading || !user}

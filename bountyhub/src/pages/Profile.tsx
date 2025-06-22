@@ -1,18 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { api } from '../utils/api'
-import type { User, Post } from '../types'
-import { FiThumbsUp, FiEdit2, FiCamera, FiStar, FiShield } from 'react-icons/fi'
+import { FiCamera, FiShield, FiStar, FiThumbsUp } from 'react-icons/fi'
 import { FaGithub, FaTwitter, FaLinkedin, FaInstagram, FaFacebook, FaYoutube, FaTiktok, FaDiscord, FaReddit, FaMedium, FaStackOverflow, FaDev } from 'react-icons/fa'
-
-const DEFAULT_PROFILE_PICTURE = 'https://api.dicebear.com/7.x/initials/svg?seed='
-
-interface ReputationHistory {
-  id: string
-  points: number
-  action: string
-  createdAt: string
-}
+import { api } from '../utils/api'
+import type { User, Post, Bookmark, ReputationHistory } from '../types'
 
 interface ProfileData {
   firstName: string | null
@@ -48,7 +39,11 @@ function getProfilePicture(profilePicture: string | null, username: string): str
   if (profilePicture) {
     return profilePicture
   }
-  return `${DEFAULT_PROFILE_PICTURE}${encodeURIComponent(username)}`
+  
+  // Simple fallback using a basic SVG
+  const firstLetter = username.charAt(0).toUpperCase()
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><rect width="128" height="128" fill="#6366f1"/><text x="64" y="80" font-family="Arial, sans-serif" font-size="48" font-weight="bold" text-anchor="middle" fill="white">${firstLetter}</text></svg>`
+  return `data:image/svg+xml;base64,${btoa(svg)}`
 }
 
 function truncateContent(content: string | undefined | null): string {
@@ -120,9 +115,19 @@ const SocialMediaIcons = ({ profile }: { profile: ProfileData }) => {
   )
 }
 
-const ProfilePictureUpload = ({ currentPicture, username }: { currentPicture: string | null; username: string }) => {
+const ProfilePictureUpload = ({ currentPicture, username, onPictureUpdate }: { currentPicture: string | null; username: string; onPictureUpdate: (newPicture: string) => void }) => {
   const [preview, setPreview] = useState<string | null>(currentPicture)
   const [isUploading, setIsUploading] = useState(false)
+  const [imageError, setImageError] = useState(false)
+
+  const handleImageError = () => {
+    setImageError(true)
+  }
+
+  const getFallbackImage = () => {
+    const firstLetter = username.charAt(0).toUpperCase()
+    return `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><rect width="128" height="128" fill="#6366f1"/><text x="64" y="80" font-family="Arial, sans-serif" font-size="48" font-weight="bold" text-anchor="middle" fill="white">${firstLetter}</text></svg>`)}`
+  }
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -163,7 +168,8 @@ const ProfilePictureUpload = ({ currentPicture, username }: { currentPicture: st
 
       if (response.ok && result.success) {
         setPreview(result.profilePicture || null)
-        window.location.reload()
+        // Update the parent component's user state
+        onPictureUpdate(result.profilePicture || null)
       } else {
         alert(result.error || 'Failed to upload profile picture')
         setPreview(currentPicture)
@@ -180,9 +186,10 @@ const ProfilePictureUpload = ({ currentPicture, username }: { currentPicture: st
     <div className="relative group">
       <div className="relative w-32 h-32 rounded-full overflow-hidden">
         <img
-          src={preview || getProfilePicture(currentPicture, username)}
+          src={imageError ? getFallbackImage() : (preview || getProfilePicture(currentPicture, username))}
           alt={`${username}'s profile`}
           className="w-full h-full object-cover"
+          onError={handleImageError}
         />
         <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
           <button
@@ -211,9 +218,12 @@ const ProfilePictureUpload = ({ currentPicture, username }: { currentPicture: st
   )
 }
 
-const IntegrityDisplay = ({ user }: { user: { id: string; username: string; integrityScore: number; totalRatings: number } }) => {
-  const integrityLevel = getIntegrityLevel(user.integrityScore)
-  const integrityColor = getIntegrityColor(user.integrityScore)
+const IntegrityDisplay = ({ user }: { user: { id: string; username: string; integrityScore: number | undefined; totalRatings: number | undefined } }) => {
+  const integrityScore = user.integrityScore ?? 5.0 // Default to 5.0 if undefined
+  const totalRatings = user.totalRatings ?? 0 // Default to 0 if undefined
+  
+  const integrityLevel = getIntegrityLevel(integrityScore)
+  const integrityColor = getIntegrityColor(integrityScore)
 
   return (
     <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
@@ -228,7 +238,7 @@ const IntegrityDisplay = ({ user }: { user: { id: string; username: string; inte
         {/* Score Display */}
         <div className="text-center">
           <div className={`text-3xl font-bold ${integrityColor}`}>
-            {user.integrityScore.toFixed(1)}
+            {integrityScore.toFixed(1)}
           </div>
           <div className="text-sm text-gray-400">out of 10</div>
           <div className={`text-sm font-medium ${integrityColor} mt-1`}>
@@ -243,7 +253,7 @@ const IntegrityDisplay = ({ user }: { user: { id: string; username: string; inte
               <FiStar
                 key={star}
                 className={`w-4 h-4 ${
-                  star <= user.integrityScore
+                  star <= integrityScore
                     ? 'text-yellow-400 fill-current'
                     : 'text-gray-400'
                 }`}
@@ -251,23 +261,23 @@ const IntegrityDisplay = ({ user }: { user: { id: string; username: string; inte
             ))}
           </div>
           <div className="text-sm text-gray-400">
-            {user.totalRatings} rating{user.totalRatings !== 1 ? 's' : ''}
+            {totalRatings} rating{totalRatings !== 1 ? 's' : ''}
           </div>
         </div>
       </div>
 
       {/* Integrity Level Badge */}
       <div className="mt-3 flex justify-center">
-        <div className={`px-3 py-1 rounded-full text-sm font-medium border ${getIntegrityBadgeStyle(user.integrityScore)}`}>
+        <div className={`px-3 py-1 rounded-full text-sm font-medium border ${getIntegrityBadgeStyle(integrityScore)}`}>
           {integrityLevel} Integrity
         </div>
       </div>
 
       {/* Quick Stats */}
-      {user.totalRatings > 0 && (
+      {totalRatings > 0 && (
         <div className="mt-4 pt-3 border-t border-violet-500/20">
           <div className="text-xs text-gray-400 text-center">
-            Based on {user.totalRatings} community rating{user.totalRatings !== 1 ? 's' : ''}
+            Based on {totalRatings} community rating{totalRatings !== 1 ? 's' : ''}
           </div>
         </div>
       )}
@@ -311,11 +321,31 @@ export default function Profile() {
   const [user, setUser] = useState<User | null>(null)
   const [posts, setPosts] = useState<Post[]>([])
   const [reputationHistory, setReputationHistory] = useState<ReputationHistory[]>([])
+  const [bookmarks, setBookmarks] = useState<Bookmark[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Set limits for each section
+  const RECENT_ACTIVITY_LIMIT = 7;
+  const RECENT_POSTS_LIMIT = 5;
+  const BOOKMARKS_LIMIT = 4;
+
   useEffect(() => {
     loadProfileData()
+  }, [])
+
+  // Refresh data when page becomes visible (e.g., after performing actions)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        loadProfileData()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
   }, [])
 
   const loadProfileData = async () => {
@@ -334,12 +364,11 @@ export default function Profile() {
       const userPosts = postsData.filter(post => post.authorId === userData.id)
       setPosts(userPosts)
       
-      // Mock reputation history for now
-      setReputationHistory([
-        { id: '1', points: 10, action: 'POST_CREATED', createdAt: new Date().toISOString() },
-        { id: '2', points: 5, action: 'COMMENT_CREATED', createdAt: new Date(Date.now() - 86400000).toISOString() },
-        { id: '3', points: 15, action: 'ANSWER_ACCEPTED', createdAt: new Date(Date.now() - 172800000).toISOString() }
-      ])
+      // Use real bookmarks data from API
+      setBookmarks(userData.bookmarks || [])
+      
+      // Use real reputation history from API
+      setReputationHistory(userData.reputationHistory || [])
       
     } catch (err: any) {
       console.error('Profile error:', err)
@@ -385,8 +414,10 @@ export default function Profile() {
     )
   }
 
-  const reputationLevel = getReputationLevel(user.reputation)
-  const recentActivities = reputationHistory.slice(0, 5)
+  const reputationLevel = getReputationLevel(user.reputationPoints || 0)
+  const recentActivities = reputationHistory.slice(0, RECENT_ACTIVITY_LIMIT)
+  const limitedPosts = posts.slice(0, RECENT_POSTS_LIMIT)
+  const limitedBookmarks = bookmarks.slice(0, BOOKMARKS_LIMIT)
 
   return (
     <div className="min-h-screen bg-neutral-900">
@@ -409,6 +440,12 @@ export default function Profile() {
             <ProfilePictureUpload 
               currentPicture={user.profilePicture || null}
               username={user.username}
+              onPictureUpdate={(newPicture) => {
+                setUser({
+                  ...user,
+                  profilePicture: newPicture
+                })
+              }}
             />
             <div className="flex-1">
               <h2 className="text-xl font-semibold text-white">{user.username}</h2>
@@ -421,7 +458,7 @@ export default function Profile() {
                     <span className="text-violet-300 font-medium">{reputationLevel}</span>
                   </div>
                   <div className="bg-violet-500/20 px-3 py-1 rounded-full border border-violet-500/50">
-                    <span className="text-violet-300 font-medium">{user.reputation || 0} points</span>
+                    <span className="text-violet-300 font-medium">{user.reputationPoints || 0} points</span>
                   </div>
                 </div>
               </div>
@@ -469,8 +506,8 @@ export default function Profile() {
               user={{
                 id: user.id,
                 username: user.username,
-                integrityScore: 8.5, // Mock value for now
-                totalRatings: 12, // Mock value for now
+                integrityScore: user.integrityScore,
+                totalRatings: user.totalRatings,
               }}
             />
           </div>
@@ -497,10 +534,10 @@ export default function Profile() {
                     </span>
                   </div>
                 ))}
-                {reputationHistory.length > 5 && (
+                {reputationHistory.length > RECENT_ACTIVITY_LIMIT && (
                   <div className="mt-3 text-center">
                     <Link to="/profile/activity" className="inline-block px-3 py-1.5 text-sm bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors border border-violet-500/50 shadow-md">
-                      View All Activity
+                      See All Activity
                     </Link>
                   </div>
                 )}
@@ -510,12 +547,12 @@ export default function Profile() {
             <div>
               <h2 className="text-lg font-semibold text-violet-300 mb-4">Recent Posts</h2>
               <div className="space-y-2">
-                {posts.map((post) => (
+                {limitedPosts.map((post) => (
                   <div key={post.id} className="p-3 bg-neutral-700/50 rounded-lg border border-violet-500/30">
                     <Link to={`/posts/${post.id}`} className="block hover:bg-neutral-600/50 rounded-lg p-1.5 -m-1.5 transition-colors">
                       <div className="flex items-center gap-2 mb-1">
                         <div className="p-1.5 bg-violet-500/20 rounded-lg">
-                          <FiEdit2 className="w-3.5 h-3.5 text-violet-300" />
+                          <FiThumbsUp className="w-3.5 h-3.5 text-violet-300" />
                         </div>
                         <h3 className="text-sm font-medium text-violet-300">{post.title}</h3>
                       </div>
@@ -531,6 +568,13 @@ export default function Profile() {
                     </Link>
                   </div>
                 ))}
+                {posts.length > RECENT_POSTS_LIMIT && (
+                  <div className="mt-3 text-center">
+                    <Link to="/profile/posts" className="inline-block px-3 py-1.5 text-sm bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors border border-violet-500/50 shadow-md">
+                      See All Posts
+                    </Link>
+                  </div>
+                )}
                 {posts.length === 0 && (
                   <div className="p-3 bg-neutral-700/50 rounded-lg border border-violet-500/30">
                     <p className="text-sm text-gray-300">No posts yet</p>
@@ -538,6 +582,45 @@ export default function Profile() {
                 )}
               </div>
             </div>
+          </div>
+
+          {/* Bookmarks Section */}
+          <div className="mt-8">
+            <h2 className="text-xl font-bold text-yellow-400 mb-4">Bookmarked Posts</h2>
+            {limitedBookmarks.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {limitedBookmarks.map((bookmark) => (
+                  <div key={bookmark.id} className="bg-neutral-800/80 rounded-lg p-4 border border-yellow-400/40 transition-all duration-300 hover:bg-neutral-700/80 hover:border-yellow-300/60 hover:shadow-lg hover:shadow-yellow-400/20 hover:scale-[1.02] group">
+                    <Link to={`/posts/${bookmark.post.id}`} className="block">
+                      <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-yellow-300 transition-colors duration-300">
+                        {bookmark.post.title}
+                      </h3>
+                      <p className="text-gray-300 mb-2 truncate group-hover:text-gray-200 transition-colors duration-300">
+                        {bookmark.post.content.length > 100 ? bookmark.post.content.substring(0, 100) + '...' : bookmark.post.content}
+                      </p>
+                      <div className="flex items-center justify-between text-xs text-gray-400">
+                        <span>{new Date(bookmark.post.createdAt).toLocaleDateString()}</span>
+                        <span className="text-yellow-400 group-hover:text-yellow-300 transition-colors duration-300">
+                          Read post →
+                        </span>
+                      </div>
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-neutral-800/80 rounded-lg p-6 border border-yellow-400/40 text-center">
+                <p className="text-gray-400">No bookmarked posts yet</p>
+                <p className="text-sm text-gray-500 mt-1">Bookmark posts from the community to see them here</p>
+              </div>
+            )}
+            {bookmarks.length > BOOKMARKS_LIMIT && (
+              <div className="mt-3 text-center">
+                <Link to="/profile/bookmarks" className="inline-block px-3 py-1.5 text-sm bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors border border-yellow-400/50 shadow-md">
+                  See All Bookmarks
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>

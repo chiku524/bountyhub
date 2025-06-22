@@ -51,4 +51,28 @@
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
   }
+  
+  /* Custom scrollbar styles */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: #374151; /* neutral-700 */
+    border-radius: 3px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #4B5563; /* neutral-600 */
+    border-radius: 3px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #6B7280; /* neutral-500 */
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-corner {
+    background: #374151; /* neutral-700 */
+  }
 } 

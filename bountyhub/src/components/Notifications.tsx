@@ -1,28 +1,61 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useAuth } from '../contexts/AuthProvider'
+import { useNavigate } from 'react-router-dom'
 import { LoadingSpinner } from './LoadingSpinner'
 
 interface Notification {
   id: string
   userId: string
-  type: 'comment' | 'vote' | 'system'
+  type: 'comment' | 'vote' | 'answer' | 'bounty' | 'system'
   title: string
   message: string
   read: boolean
   createdAt: string
+  navigation?: {
+    type: 'post' | 'home' | 'profile' | 'wallet'
+    id?: string
+    url: string
+  }
 }
 
-export const Notifications: React.FC = () => {
+export interface NotificationsRef {
+  toggle: () => void
+}
+
+interface NotificationsProps {
+  onUnreadCountChange?: (count: number) => void
+}
+
+export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({ onUnreadCountChange }, ref) => {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
+  const [popupStyle, setPopupStyle] = useState<{ left?: string; right?: string; top: string }>({ top: '0px' })
+
+  useImperativeHandle(ref, () => ({
+    toggle: handleToggle
+  }))
+
+  // Fetch notifications on mount and when popup opens
+  useEffect(() => {
+    if (user) {
+      fetchNotifications()
+    }
+  }, [user])
 
   useEffect(() => {
     if (user && isOpen) {
       fetchNotifications()
     }
   }, [user, isOpen])
+
+  useEffect(() => {
+    if (onUnreadCountChange) {
+      onUnreadCountChange(unreadCount)
+    }
+  }, [notifications, onUnreadCountChange])
 
   const fetchNotifications = async () => {
     setLoading(true)
@@ -58,26 +91,78 @@ export const Notifications: React.FC = () => {
     }
   }
 
+  const handleNotificationClick = async (notification: Notification) => {
+    // Mark as read first
+    await markAsRead(notification.id)
+    
+    // Close the notifications popup
+    setIsOpen(false)
+    
+    // Navigate to the appropriate page
+    if (notification.navigation) {
+      navigate(notification.navigation.url)
+    }
+  }
+
   const unreadCount = notifications.filter(n => !n.read).length
 
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-gray-400 hover:text-white transition-colors"
-      >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-        </svg>
-        {user && unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-            {unreadCount > 9 ? '9+' : unreadCount}
-          </span>
-        )}
-      </button>
+  const handleToggle = () => {
+    if (!isOpen) {
+      // Find the notifications button
+      const notificationsButton = document.querySelector('[data-notifications-button]')
+      if (notificationsButton) {
+        const buttonRect = notificationsButton.getBoundingClientRect()
+        
+        const viewportWidth = window.innerWidth
+        const popupWidth = 320 // w-80 = 320px
+        const margin = 8 // ml-2 = 8px
+        
+        // Calculate available space on both sides
+        const spaceOnRight = viewportWidth - buttonRect.right - margin
+        const spaceOnLeft = buttonRect.left - margin
+        
+        // Calculate popup position
+        let newPopupStyle: { left?: string; right?: string; top: string }
+        
+        // Position on the side with more space, default to right
+        if (spaceOnRight >= popupWidth) {
+          newPopupStyle = {
+            left: `${buttonRect.right + margin}px`,
+            top: `${buttonRect.top}px`
+          }
+        } else if (spaceOnLeft >= popupWidth) {
+          newPopupStyle = {
+            right: `${viewportWidth - buttonRect.left + margin}px`,
+            top: `${buttonRect.top}px`
+          }
+        } else {
+          // If neither side has enough space, position on the side with more space
+          if (spaceOnRight > spaceOnLeft) {
+            newPopupStyle = {
+              left: `${buttonRect.right + margin}px`,
+              top: `${buttonRect.top}px`
+            }
+          } else {
+            newPopupStyle = {
+              right: `${viewportWidth - buttonRect.left + margin}px`,
+              top: `${buttonRect.top}px`
+            }
+          }
+        }
+        
+        setPopupStyle(newPopupStyle)
+      }
+    }
+    setIsOpen(!isOpen)
+  }
 
+  return (
+    <>
       {isOpen && (
-        <div className="absolute left-full ml-2 mt-2 w-80 bg-neutral-800 border border-neutral-700 rounded-lg shadow-lg z-50">
+        <div 
+          className="fixed w-80 bg-neutral-800 border border-neutral-700 rounded-lg shadow-lg z-[10000]"
+          style={popupStyle}
+        >
           {!user ? (
             <div className="p-6 text-center text-gray-400">
               <div className="mb-2">
@@ -117,19 +202,26 @@ export const Notifications: React.FC = () => {
                     {notifications.map((notification) => (
                       <div
                         key={notification.id}
-                        className={`p-4 hover:bg-neutral-700/50 cursor-pointer ${
+                        className={`p-4 hover:bg-neutral-700/50 cursor-pointer transition-colors ${
                           !notification.read ? 'bg-blue-500/10' : ''
                         }`}
-                        onClick={() => markAsRead(notification.id)}
+                        onClick={() => handleNotificationClick(notification)}
                       >
                         <div className="flex items-start space-x-3">
                           <div className={`w-2 h-2 rounded-full mt-2 ${
                             notification.read ? 'bg-gray-500' : 'bg-blue-500'
                           }`} />
                           <div className="flex-1">
-                            <h4 className="text-sm font-medium text-white">
-                              {notification.title}
-                            </h4>
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-sm font-medium text-white">
+                                {notification.title}
+                              </h4>
+                              {notification.navigation && (
+                                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                              )}
+                            </div>
                             <p className="text-sm text-gray-400 mt-1">
                               {notification.message}
                             </p>
@@ -147,6 +239,6 @@ export const Notifications: React.FC = () => {
           )}
         </div>
       )}
-    </div>
+    </>
   )
-} 
+}) 

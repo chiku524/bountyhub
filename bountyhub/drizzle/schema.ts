@@ -7,8 +7,8 @@ export const users = sqliteTable('users', {
   email: text('email').notNull().unique(),
   username: text('username').notNull().unique(),
   password: text('password').notNull(),
-  solanaAddress: text('solana_address').unique(),
   tokenAccountAddress: text('token_account_address'),
+  role: text('role', { enum: ['user', 'moderator', 'admin'] }).notNull().default('user'),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
   reputationPoints: integer('reputation_points').notNull().default(0),
@@ -50,6 +50,7 @@ export const posts = sqliteTable('posts', {
   authorId: text('author_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  editedAt: integer('edited_at', { mode: 'timestamp' }),
   visibilityVotes: integer('visibility_votes').notNull().default(0),
   qualityUpvotes: integer('quality_upvotes').notNull().default(0),
   qualityDownvotes: integer('quality_downvotes').notNull().default(0),
@@ -117,6 +118,17 @@ export const codeBlocks = sqliteTable('code_blocks', {
   code: text('code').notNull(),
   description: text('description'),
   postId: text('post_id').notNull().references(() => posts.id, { onDelete: 'cascade' }),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Answer code blocks table
+export const answerCodeBlocks = sqliteTable('answer_code_blocks', {
+  id: text('id').primaryKey(),
+  language: text('language').notNull(),
+  code: text('code').notNull(),
+  description: text('description'),
+  answerId: text('answer_id').notNull().references(() => answers.id, { onDelete: 'cascade' }),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
 });
@@ -333,6 +345,129 @@ export const sessions = sqliteTable('sessions', {
   expiresAt: integer('expires_at', { mode: 'timestamp' })
 });
 
+// Notifications table
+export const notifications = sqliteTable('notifications', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  type: text('type', { enum: ['comment', 'vote', 'answer', 'bounty', 'system'] }).notNull(),
+  title: text('title').notNull(),
+  message: text('message').notNull(),
+  read: integer('read', { mode: 'boolean' }).notNull().default(false),
+  navigationType: text('navigation_type'),
+  navigationId: text('navigation_id'),
+  navigationUrl: text('navigation_url'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Notification settings table
+export const notificationSettings = sqliteTable('notification_settings', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().unique().references(() => users.id, { onDelete: 'cascade' }),
+  emailNotifications: integer('email_notifications', { mode: 'boolean' }).notNull().default(true),
+  pushNotifications: integer('push_notifications', { mode: 'boolean' }).notNull().default(true),
+  commentNotifications: integer('comment_notifications', { mode: 'boolean' }).notNull().default(true),
+  voteNotifications: integer('vote_notifications', { mode: 'boolean' }).notNull().default(true),
+  bountyNotifications: integer('bounty_notifications', { mode: 'boolean' }).notNull().default(true),
+  systemNotifications: integer('system_notifications', { mode: 'boolean' }).notNull().default(true),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Governance treasury table
+export const governanceTreasury = sqliteTable('governance_treasury', {
+  id: text('id').primaryKey(),
+  balance: real('balance').notNull().default(0),
+  totalCollected: real('total_collected').notNull().default(0),
+  totalDistributed: real('total_distributed').notNull().default(0),
+  lastDistributionAt: integer('last_distribution_at', { mode: 'timestamp' }),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Governance stakes table
+export const governanceStakes = sqliteTable('governance_stakes', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  amount: real('amount').notNull(),
+  stakedAt: integer('staked_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  lastRewardAt: integer('last_reward_at', { mode: 'timestamp' }),
+  totalRewardsEarned: real('total_rewards_earned').notNull().default(0),
+  isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Governance rewards table
+export const governanceRewards = sqliteTable('governance_rewards', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  amount: real('amount').notNull(),
+  rewardType: text('reward_type', { enum: ['STAKING', 'ACTIVITY', 'BOUNTY_PLACEMENT', 'BOUNTY_CLAIM', 'DAILY_LOGIN', 'GOVERNANCE_PARTICIPATION'] }).notNull(),
+  description: text('description').notNull(),
+  referenceId: text('reference_id'),
+  referenceType: text('reference_type'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Governance activity table
+export const governanceActivity = sqliteTable('governance_activity', {
+  id: text('id').primaryKey(),
+  activityType: text('activity_type', { enum: ['FEE_COLLECTED', 'REWARD_DISTRIBUTED', 'STAKE_ADDED', 'STAKE_REMOVED', 'TREASURY_UPDATE'] }).notNull(),
+  amount: real('amount').notNull(),
+  description: text('description').notNull(),
+  userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
+  referenceId: text('reference_id'),
+  referenceType: text('reference_type'),
+  metadata: text('metadata'), // JSON string for additional data
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Transparency logs table
+export const transparencyLogs = sqliteTable('transparency_logs', {
+  id: text('id').primaryKey(),
+  logType: text('log_type', { enum: ['BOUNTY_PLACED', 'BOUNTY_CLAIMED', 'GOVERNANCE_FEE', 'REWARD_DISTRIBUTED', 'STAKE_ADDED', 'STAKE_REMOVED', 'TREASURY_UPDATE'] }).notNull(),
+  amount: real('amount').notNull(),
+  feeAmount: real('fee_amount').notNull().default(0),
+  description: text('description').notNull(),
+  userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
+  referenceId: text('reference_id'),
+  referenceType: text('reference_type'),
+  balanceBefore: real('balance_before'),
+  balanceAfter: real('balance_after'),
+  treasuryBalanceBefore: real('treasury_balance_before'),
+  treasuryBalanceAfter: real('treasury_balance_after'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Governance proposals table
+export const governanceProposals = sqliteTable('governance_proposals', {
+  id: text('id').primaryKey(),
+  title: text('title').notNull(),
+  description: text('description').notNull(),
+  proposerId: text('proposer_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  status: text('status', { enum: ['DRAFT', 'ACTIVE', 'PASSED', 'REJECTED', 'EXPIRED'] }).notNull().default('DRAFT'),
+  startDate: integer('start_date', { mode: 'timestamp' }),
+  endDate: integer('end_date', { mode: 'timestamp' }),
+  requiredStake: real('required_stake').notNull().default(0),
+  yesVotes: real('yes_votes').notNull().default(0),
+  noVotes: real('no_votes').notNull().default(0),
+  totalVotes: real('total_votes').notNull().default(0),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Governance votes table
+export const governanceVotes = sqliteTable('governance_votes', {
+  id: text('id').primaryKey(),
+  proposalId: text('proposal_id').notNull().references(() => governanceProposals.id, { onDelete: 'cascade' }),
+  voterId: text('voter_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  vote: integer('vote', { mode: 'boolean' }).notNull(), // true = yes, false = no
+  votingPower: real('voting_power').notNull(),
+  reason: text('reason'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
 // Export all tables for use in the application
 export const schema = {
   users,
@@ -343,6 +478,7 @@ export const schema = {
   answers,
   votes,
   codeBlocks,
+  answerCodeBlocks,
   reputationHistory,
   bounties,
   virtualWallets,
@@ -360,4 +496,13 @@ export const schema = {
   bountyClaims,
   integrityRatings,
   sessions,
+  notifications,
+  notificationSettings,
+  governanceTreasury,
+  governanceStakes,
+  governanceRewards,
+  governanceActivity,
+  transparencyLogs,
+  governanceProposals,
+  governanceVotes,
 }; 

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { api } from '../utils/api'
 import { useAuth } from '../contexts/AuthProvider'
 import TagSelector from '../components/TagSelector'
-import CodeBlockEditor from '../components/CodeBlockEditor'
+import { CodeBlockEditor } from '../components/CodeBlockEditor'
 import { MediaUpload } from '../components/MediaUpload'
 import { FaDollarSign, FaGift, FaClock as FaClockIcon } from 'react-icons/fa'
 import { FiInfo } from 'react-icons/fi'
@@ -69,10 +69,25 @@ export default function CreatePost() {
     setMedia(prev => prev.filter((_, i) => i !== index))
   }
 
+  const handleAddCodeBlock = (codeBlock: CodeBlock) => {
+    setCodeBlocks(prev => [...prev, codeBlock])
+  }
+
+  const handleRemoveCodeBlock = (index: number) => {
+    setCodeBlocks(prev => prev.filter((_, i) => i !== index))
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
+
+    // Validate that at least one tag is selected
+    if (selectedTags.length === 0) {
+      setError('At least one tag is required')
+      setLoading(false)
+      return
+    }
 
     try {
       const postData = {
@@ -166,9 +181,41 @@ export default function CreatePost() {
               Code Blocks
             </label>
             <CodeBlockEditor
-              codeBlocks={codeBlocks}
-              onCodeBlocksChange={setCodeBlocks}
+              onAdd={handleAddCodeBlock}
+              onCancel={() => {}}
             />
+            
+            {/* Display Added Code Blocks */}
+            {codeBlocks.length > 0 && (
+              <div className="mt-4 space-y-3">
+                <h4 className="text-sm font-medium text-gray-300">Added Code Blocks:</h4>
+                {codeBlocks.map((block, index) => (
+                  <div key={index} className="bg-neutral-900/80 rounded-lg p-4 border border-violet-500/30">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded text-sm">
+                        {block.language}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveCodeBlock(index)}
+                        className="text-gray-400 hover:text-red-400 transition-colors"
+                        title="Remove code block"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                    <pre className="bg-neutral-900/80 p-4 rounded-lg overflow-x-auto max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-600 scrollbar-track-neutral-800">
+                      <code className="text-sm text-gray-300">{block.code}</code>
+                    </pre>
+                    {block.description && (
+                      <p className="mt-2 text-sm text-gray-400">{block.description}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div>

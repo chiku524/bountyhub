@@ -35,15 +35,25 @@ app.post(async (c) => {
         // Create a session for the user
         const sessionId = await createSession(result.user.id, db)
         
-        // Set the session cookie with proper cross-subdomain configuration
-        setCookie(c, 'session', sessionId, { 
+        // Set the session cookie with proper configuration for development/production
+        const cookieOptions: any = {
           httpOnly: true, 
           path: '/',
-          domain: '.bountyhub.tech', // Allow cookie to work across subdomains
-          secure: true, // Required for SameSite=None
-          sameSite: 'none', // Required for cross-subdomain requests
           maxAge: 60 * 60 * 24 * 30 // 30 days
-        })
+        }
+        
+        // Configure cookie based on environment
+        if (c.env.NODE_ENV === 'production') {
+          cookieOptions.domain = '.bountyhub.tech'
+          cookieOptions.secure = true
+          cookieOptions.sameSite = 'none'
+        } else {
+          // Development configuration
+          cookieOptions.secure = false
+          cookieOptions.sameSite = 'lax'
+        }
+        
+        setCookie(c, 'session', sessionId, cookieOptions)
         
         return c.json({ user: result.user })
       } catch (sessionError) {

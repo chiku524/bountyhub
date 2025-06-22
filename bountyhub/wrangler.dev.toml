@@ -7,7 +7,6 @@ main = "functions/index.ts"
 # Local development settings
 [dev]
 port = 8788
-local = true
 
 [[d1_databases]]
 binding = "DB"
@@ -26,10 +25,10 @@ SOLANA_WALLET_ADDRESS = "dev-address"
 CLOUDINARY_CLOUD_NAME = "dqobhvk07"
 CLOUDINARY_API_KEY = "237281724716253"
 CLOUDINARY_API_SECRET = "N7Y40ttKyduI_5un60Cfv8kGfzI"
-CLOUDINARY_UPLOAD_PRESET = "portal"
+CLOUDINARY_UPLOAD_PRESET = "bountyhub"
 HTML2PDF_API_KEY = "dev-key"
 VITE_CLOUDINARY_CLOUD_NAME = "dqobhvk07"
-VITE_CLOUDINARY_UPLOAD_PRESET = "portal"
-VITE_API_URL = "https://bountyhub-api.nico-chikuji.workers.dev"
+VITE_CLOUDINARY_UPLOAD_PRESET = "bountyhub"
+VITE_API_URL = "http://localhost:8788"
 DATABASE_URL = "mongodb://localhost:27017/bountyhub-dev"
 MONGODB_URI = "mongodb://localhost:27017/bountyhub-dev" 

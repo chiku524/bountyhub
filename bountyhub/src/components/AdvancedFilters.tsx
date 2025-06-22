@@ -1,10 +1,20 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
+import { api } from '../utils/api'
+import TagSelector from './TagSelector'
 
 interface FilterOptions {
   status: string
   dateRange: string
   sortBy: string
   hasBounty: boolean
+  selectedTags: string[]
+}
+
+interface Tag {
+  id: string
+  name: string
+  description: string | null
+  color: string
 }
 
 interface AdvancedFiltersProps {
@@ -19,15 +29,73 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
   className = ''
 }) => {
   const [isOpen, setIsOpen] = useState(false)
+  const [availableTags, setAvailableTags] = useState<Tag[]>([])
+  const [loadingTags, setLoadingTags] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const toggleButtonRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (isOpen && availableTags.length === 0) {
+      fetchTags()
+    }
+  }, [isOpen])
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        toggleButtonRef.current &&
+        event.target !== toggleButtonRef.current
+      ) {
+        setIsOpen(false)
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isOpen])
+
+  const fetchTags = async () => {
+    setLoadingTags(true)
+    try {
+      const tags = await api.getTags()
+      setAvailableTags(tags)
+    } catch (error) {
+      console.error('Failed to fetch tags:', error)
+    } finally {
+      setLoadingTags(false)
+    }
+  }
 
   const handleFilterChange = (key: keyof FilterOptions, value: any) => {
     onFiltersChange({ ...filters, [key]: value })
   }
 
+  const handleTagsChange = (tagIds: string[]) => {
+    const selectedTagNames = availableTags
+      .filter(tag => tagIds.includes(tag.id))
+      .map(tag => tag.name)
+    handleFilterChange('selectedTags', selectedTagNames)
+  }
+
+  const handleToggleClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsOpen(!isOpen)
+  }
+
   return (
-    <div className={className}>
+    <div className={className} ref={dropdownRef}>
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        ref={toggleButtonRef}
+        onClick={handleToggleClick}
         className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -40,7 +108,7 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
       </button>
 
       {isOpen && (
-        <div className="mt-4 p-4 bg-neutral-800 border border-neutral-700 rounded-lg">
+        <div className="absolute right-0 left-auto top-full z-50 min-w-[36rem] w-full max-w-[calc(100vw-2rem)] ml-0 p-4 bg-neutral-800 border border-neutral-700 rounded-lg shadow-xl">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Status Filter */}
             <div>
@@ -114,14 +182,33 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
             </div>
           </div>
 
+          {/* Tags Filter */}
+          <div className="mt-4">
+            {loadingTags ? (
+              <div className="text-gray-400 text-sm">Loading tags...</div>
+            ) : (
+              <TagSelector
+                selectedTags={availableTags
+                  .filter(tag => filters.selectedTags.includes(tag.name))
+                  .map(tag => tag.id)
+                }
+                onTagsChange={handleTagsChange}
+                availableTags={availableTags}
+                required={false}
+                disableClickOutside={true}
+              />
+            )}
+          </div>
+
           {/* Clear Filters Button */}
           <div className="mt-4 flex justify-end">
             <button
               onClick={() => onFiltersChange({
                 status: '',
                 dateRange: '',
-                sortBy: 'newest',
-                hasBounty: false
+                sortBy: 'mostVoted',
+                hasBounty: false,
+                selectedTags: []
               })}
               className="text-sm text-gray-400 hover:text-white"
             >

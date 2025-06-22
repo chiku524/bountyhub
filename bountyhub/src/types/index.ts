@@ -3,9 +3,11 @@ export interface User {
   id: string
   email: string
   username: string
+  role?: 'user' | 'moderator' | 'admin'
   profilePicture?: string
-  reputation: number
-  reputationLevel: string
+  reputationPoints: number
+  integrityScore?: number
+  totalRatings?: number
   createdAt: string
   updatedAt: string
   profile?: {
@@ -26,7 +28,10 @@ export interface User {
     medium: string | null
     stackoverflow: string | null
     devto: string | null
+    profilePicture: string | null
   }
+  bookmarks?: Bookmark[]
+  reputationHistory?: ReputationHistory[]
 }
 
 // Post types
@@ -35,8 +40,10 @@ export interface Post {
   title: string
   content: string
   authorId: string
+  author?: User
   createdAt: string
   updatedAt: string
+  editedAt?: string
   status: 'open' | 'claimed' | 'closed'
   reward?: number
   qualityUpvotes?: number
@@ -44,6 +51,10 @@ export interface Post {
   visibilityVotes?: number
   commentCount?: number
   hasBounty?: boolean
+  codeBlocks?: CodeBlock[]
+  media?: Media[]
+  userVote?: number
+  tags?: string[]
 }
 
 // Comment types
@@ -56,6 +67,22 @@ export interface Comment {
   updatedAt: string
   upvotes: number
   downvotes: number
+  author?: User
+}
+
+// Answer types
+export interface Answer {
+  id: string
+  content: string
+  authorId: string
+  postId: string
+  createdAt: string
+  updatedAt: string
+  upvotes: number
+  downvotes: number
+  isAccepted: boolean
+  author?: User
+  codeBlocks?: CodeBlock[]
 }
 
 // API Response types
@@ -101,7 +128,10 @@ export interface Media {
 // Wallet types
 export interface WalletInfo {
   address: string
-  balance: number
+  bbuxBalance: number
+  solBalance: number
+  platformAddress: string
+  virtualBalance: number
   totalDeposited: number
   totalWithdrawn: number
   totalEarned: number
@@ -117,4 +147,44 @@ export interface WalletInfo {
     totalDeposited: number
     totalWithdrawn: number
   }
+}
+
+// Transaction types
+export interface Transaction {
+  id: string
+  userId: string
+  walletId: string
+  type: 'DEPOSIT' | 'WITHDRAW' | 'BOUNTY_CREATED' | 'BOUNTY_CLAIMED' | 'BOUNTY_REFUNDED' | 'BOUNTY_EARNED' | 'COMPENSATION'
+  amount: number
+  balanceBefore: number
+  balanceAfter: number
+  description: string
+  status: 'PENDING' | 'COMPLETED' | 'FAILED' | 'CANCELLED'
+  solanaSignature?: string
+  bountyId?: string
+  metadata?: string
+  createdAt: string
+  updatedAt: string
+}
+
+// Bookmark types
+export interface Bookmark {
+  id: string
+  postId: string
+  createdAt: string
+  post: {
+    id: string
+    title: string
+    content: string
+    createdAt: string
+    authorId: string
+  }
+}
+
+// Reputation History types
+export interface ReputationHistory {
+  id: string
+  points: number
+  action: string
+  createdAt: string
 } 

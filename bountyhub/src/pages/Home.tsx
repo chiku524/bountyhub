@@ -1,8 +1,66 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthProvider'
+import { useEffect, useState } from 'react'
+import { api } from '../utils/api'
+
+interface PlatformStats {
+  activeBounties: number
+  questionsAnswered: number
+  totalRewards: string
+  communityMembers: number
+  totalPosts: number
+  totalAnswers: number
+  totalBBUX: string
+}
 
 export default function Home() {
   const { user } = useAuth()
+  const [stats, setStats] = useState<PlatformStats | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const platformStats = await api.getPlatformStats()
+        setStats(platformStats)
+      } catch (error) {
+        console.error('Failed to fetch platform stats:', error)
+        // Set default values if API fails
+        setStats({
+          activeBounties: 0,
+          questionsAnswered: 0,
+          totalRewards: '0.00',
+          communityMembers: 0,
+          totalPosts: 0,
+          totalAnswers: 0,
+          totalBBUX: '0.00'
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchStats()
+  }, [])
+
+  const formatNumber = (num: number) => {
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + 'M'
+    } else if (num >= 1000) {
+      return (num / 1000).toFixed(1) + 'K'
+    }
+    return num.toString()
+  }
+
+  const formatCurrency = (amount: string) => {
+    const num = parseFloat(amount)
+    if (num >= 1000000) {
+      return '$' + (num / 1000000).toFixed(1) + 'M'
+    } else if (num >= 1000) {
+      return '$' + (num / 1000).toFixed(1) + 'K'
+    }
+    return '$' + num.toFixed(2)
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900">
@@ -105,19 +163,43 @@ export default function Home() {
           <h2 className="text-3xl font-bold text-white mb-8">Platform Statistics</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center">
-              <div className="text-3xl font-bold text-indigo-400 mb-2">1,234</div>
+              <div className="text-3xl font-bold text-indigo-400 mb-2">
+                {loading ? (
+                  <div className="animate-pulse bg-indigo-400/20 h-8 w-16 mx-auto rounded"></div>
+                ) : (
+                  formatNumber(stats?.activeBounties || 0)
+                )}
+              </div>
               <div className="text-gray-400">Active Bounties</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-green-400 mb-2">5,678</div>
+              <div className="text-3xl font-bold text-green-400 mb-2">
+                {loading ? (
+                  <div className="animate-pulse bg-green-400/20 h-8 w-16 mx-auto rounded"></div>
+                ) : (
+                  formatNumber(stats?.questionsAnswered || 0)
+                )}
+              </div>
               <div className="text-gray-400">Questions Answered</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-purple-400 mb-2">$123K</div>
+              <div className="text-3xl font-bold text-purple-400 mb-2">
+                {loading ? (
+                  <div className="animate-pulse bg-purple-400/20 h-8 w-16 mx-auto rounded"></div>
+                ) : (
+                  formatCurrency(stats?.totalRewards || '0.00')
+                )}
+              </div>
               <div className="text-gray-400">Total Rewards</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-yellow-400 mb-2">9,876</div>
+              <div className="text-3xl font-bold text-yellow-400 mb-2">
+                {loading ? (
+                  <div className="animate-pulse bg-yellow-400/20 h-8 w-16 mx-auto rounded"></div>
+                ) : (
+                  formatNumber(stats?.communityMembers || 0)
+                )}
+              </div>
               <div className="text-gray-400">Community Members</div>
             </div>
           </div>

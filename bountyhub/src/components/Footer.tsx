@@ -14,15 +14,15 @@ export function Footer() {
           </div>
           
           <div className="flex space-x-6">
-            <Link to="/docs" className="text-gray-400 hover:text-indigo-300 transition-colors text-sm">
+            <a href="/docs" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-indigo-300 transition-colors text-sm">
               Documentation
-            </Link>
-            <Link to="/privacy" className="text-gray-400 hover:text-indigo-300 transition-colors text-sm">
+            </a>
+            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-indigo-300 transition-colors text-sm">
               Privacy
-            </Link>
-            <Link to="/terms" className="text-gray-400 hover:text-indigo-300 transition-colors text-sm">
+            </a>
+            <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-indigo-300 transition-colors text-sm">
               Terms
-            </Link>
+            </a>
           </div>
         </div>
         

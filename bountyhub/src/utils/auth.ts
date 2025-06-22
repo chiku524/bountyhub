@@ -4,6 +4,7 @@
 import { eq } from 'drizzle-orm'
 import { users, sessions, virtualWallets } from '../../drizzle/schema'
 import type { Db } from './db'
+import bcrypt from 'bcryptjs'
 
 export interface AuthError {
   error: string
@@ -42,13 +43,16 @@ export async function register({
       return { success: false, error: 'Username already taken' }
     }
 
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 12)
+
     // Create new user
     const userId = crypto.randomUUID()
     const newUser = {
       id: userId,
       email,
       username,
-      password, // TODO: Hash password
+      password: hashedPassword,
       reputationPoints: 0,
       integrityScore: 5.0,
       totalRatings: 0,
@@ -72,6 +76,17 @@ export async function register({
       updatedAt: new Date()
     })
 
+    // Safely handle date conversion
+    const formatDate = (date: any) => {
+      if (!date) return null
+      try {
+        const dateObj = new Date(date)
+        return isNaN(dateObj.getTime()) ? null : dateObj.toISOString()
+      } catch {
+        return null
+      }
+    }
+
     return { 
       success: true, 
       user: {
@@ -80,8 +95,8 @@ export async function register({
         username: newUser.username,
         reputation: newUser.reputationPoints,
         reputationLevel: getReputationLevel(newUser.reputationPoints),
-        createdAt: newUser.createdAt.toISOString(),
-        updatedAt: newUser.updatedAt.toISOString()
+        createdAt: formatDate(newUser.createdAt),
+        updatedAt: formatDate(newUser.updatedAt)
       }
     }
   } catch (error) {
@@ -107,9 +122,38 @@ export async function login({
 
     const user = userResult[0]
     
-    // TODO: Verify password hash
-    if (user.password !== password) {
+    // Handle both plain text and hashed passwords during transition
+    let isValidPassword = false
+    
+    if (user.password.startsWith('$2b$') || user.password.startsWith('$2a$')) {
+      // Password is hashed, use bcrypt verification
+      isValidPassword = await bcrypt.compare(password, user.password)
+    } else {
+      // Password is plain text (legacy), compare directly
+      isValidPassword = user.password === password
+      
+      // If login successful, hash the password for future use
+      if (isValidPassword) {
+        const hashedPassword = await bcrypt.hash(password, 12)
+        await db.update(users)
+          .set({ password: hashedPassword, updatedAt: new Date() })
+          .where(eq(users.id, user.id))
+      }
+    }
+    
+    if (!isValidPassword) {
       return { success: false, error: 'Invalid credentials' }
+    }
+
+    // Safely handle date conversion
+    const formatDate = (date: any) => {
+      if (!date) return null
+      try {
+        const dateObj = new Date(date)
+        return isNaN(dateObj.getTime()) ? null : dateObj.toISOString()
+      } catch {
+        return null
+      }
     }
 
     return { 
@@ -120,8 +164,8 @@ export async function login({
         username: user.username,
         reputation: user.reputationPoints,
         reputationLevel: getReputationLevel(user.reputationPoints),
-        createdAt: user.createdAt?.toISOString(),
-        updatedAt: user.updatedAt?.toISOString()
+        createdAt: formatDate(user.createdAt),
+        updatedAt: formatDate(user.updatedAt)
       }
     }
   } catch (error) {
@@ -136,14 +180,26 @@ export async function getUserById(userId: string, db: Db) {
     if (userResult.length === 0) return null
     
     const user = userResult[0]
+    
+    // Safely handle date conversion
+    const formatDate = (date: any) => {
+      if (!date) return null
+      try {
+        const dateObj = new Date(date)
+        return isNaN(dateObj.getTime()) ? null : dateObj.toISOString()
+      } catch {
+        return null
+      }
+    }
+    
     return {
       id: user.id,
       email: user.email,
       username: user.username,
       reputation: user.reputationPoints,
       reputationLevel: getReputationLevel(user.reputationPoints),
-      createdAt: user.createdAt?.toISOString(),
-      updatedAt: user.updatedAt?.toISOString()
+      createdAt: formatDate(user.createdAt),
+      updatedAt: formatDate(user.updatedAt)
     }
   } catch (error) {
     console.error('Get user by ID error:', error)
@@ -157,14 +213,26 @@ export async function getUserByEmail(email: string, db: Db) {
     if (userResult.length === 0) return null
     
     const user = userResult[0]
+    
+    // Safely handle date conversion
+    const formatDate = (date: any) => {
+      if (!date) return null
+      try {
+        const dateObj = new Date(date)
+        return isNaN(dateObj.getTime()) ? null : dateObj.toISOString()
+      } catch {
+        return null
+      }
+    }
+    
     return {
       id: user.id,
       email: user.email,
       username: user.username,
       reputation: user.reputationPoints,
       reputationLevel: getReputationLevel(user.reputationPoints),
-      createdAt: user.createdAt?.toISOString(),
-      updatedAt: user.updatedAt?.toISOString()
+      createdAt: formatDate(user.createdAt),
+      updatedAt: formatDate(user.updatedAt)
     }
   } catch (error) {
     console.error('Get user by email error:', error)
@@ -178,14 +246,26 @@ export async function getUserByUsername(username: string, db: Db) {
     if (userResult.length === 0) return null
     
     const user = userResult[0]
+    
+    // Safely handle date conversion
+    const formatDate = (date: any) => {
+      if (!date) return null
+      try {
+        const dateObj = new Date(date)
+        return isNaN(dateObj.getTime()) ? null : dateObj.toISOString()
+      } catch {
+        return null
+      }
+    }
+    
     return {
       id: user.id,
       email: user.email,
       username: user.username,
       reputation: user.reputationPoints,
       reputationLevel: getReputationLevel(user.reputationPoints),
-      createdAt: user.createdAt?.toISOString(),
-      updatedAt: user.updatedAt?.toISOString()
+      createdAt: formatDate(user.createdAt),
+      updatedAt: formatDate(user.updatedAt)
     }
   } catch (error) {
     console.error('Get user by username error:', error)

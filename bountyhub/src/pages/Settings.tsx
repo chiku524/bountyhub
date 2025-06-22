@@ -21,6 +21,13 @@ interface ProfileData {
   medium: string
   stackoverflow: string
   devto: string
+  profilePicture: string | null
+}
+
+interface PasswordData {
+  currentPassword: string
+  newPassword: string
+  confirmPassword: string
 }
 
 export default function Settings() {
@@ -48,7 +55,14 @@ export default function Settings() {
     reddit: '',
     medium: '',
     stackoverflow: '',
-    devto: ''
+    devto: '',
+    profilePicture: null
+  })
+
+  const [passwordData, setPasswordData] = useState<PasswordData>({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
   })
 
   useEffect(() => {
@@ -81,7 +95,8 @@ export default function Settings() {
           reddit: userData.profile.reddit || '',
           medium: userData.profile.medium || '',
           stackoverflow: userData.profile.stackoverflow || '',
-          devto: userData.profile.devto || ''
+          devto: userData.profile.devto || '',
+          profilePicture: userData.profile.profilePicture || null
         })
       }
     } catch (err: any) {
@@ -94,6 +109,14 @@ export default function Settings() {
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // If we're on the security tab, handle password change
+    if (activeTab === 'security') {
+      await handlePasswordChange()
+      return
+    }
+    
+    // Otherwise handle profile update
     try {
       setSaving(true)
       setError(null)
@@ -104,7 +127,7 @@ export default function Settings() {
         profile: profileData
       })
       
-      setSuccess('Changes saved successfully!')
+      setSuccess('Profile changes saved successfully!')
       setTimeout(() => setSuccess(null), 3000)
     } catch (err: any) {
       setError(err.message || 'Failed to update profile')
@@ -113,8 +136,59 @@ export default function Settings() {
     }
   }
 
+  const handlePasswordChange = async () => {
+    try {
+      setSaving(true)
+      setError(null)
+      setSuccess(null)
+
+      // Validate password fields
+      if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+        setError('All password fields are required')
+        return
+      }
+
+      if (passwordData.newPassword.length < 8) {
+        setError('New password must be at least 8 characters long')
+        return
+      }
+
+      if (passwordData.newPassword !== passwordData.confirmPassword) {
+        setError('New password and confirm password do not match')
+        return
+      }
+
+      // Call API to change password
+      const result = await api.changePassword(passwordData.currentPassword, passwordData.newPassword)
+      
+      if (result.success) {
+        setSuccess('Password changed successfully!')
+        // Clear password fields
+        setPasswordData({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        })
+        setTimeout(() => setSuccess(null), 3000)
+      } else {
+        setError(result.message || 'Failed to change password')
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to change password')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   const handleInputChange = (field: keyof ProfileData, value: string) => {
     setProfileData(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  const handlePasswordInputChange = (field: keyof PasswordData, value: string) => {
+    setPasswordData(prev => ({
       ...prev,
       [field]: value
     }))
@@ -462,6 +536,8 @@ export default function Settings() {
                     <input
                       id="currentPassword"
                       type="password"
+                      value={passwordData.currentPassword}
+                      onChange={(e) => handlePasswordInputChange('currentPassword', e.target.value)}
                       placeholder="Enter your current password"
                       className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
                     />
@@ -473,6 +549,8 @@ export default function Settings() {
                     <input
                       id="newPassword"
                       type="password"
+                      value={passwordData.newPassword}
+                      onChange={(e) => handlePasswordInputChange('newPassword', e.target.value)}
                       placeholder="Enter your new password"
                       className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
                     />
@@ -484,6 +562,8 @@ export default function Settings() {
                     <input
                       id="confirmPassword"
                       type="password"
+                      value={passwordData.confirmPassword}
+                      onChange={(e) => handlePasswordInputChange('confirmPassword', e.target.value)}
                       placeholder="Confirm your new password"
                       className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
                     />
@@ -498,7 +578,12 @@ export default function Settings() {
                   className="flex items-center gap-2 px-6 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <FiSave className="w-5 h-5" />
-                  {saving ? 'Saving...' : 'Save Changes'}
+                  {saving 
+                    ? 'Saving...' 
+                    : activeTab === 'security' 
+                      ? 'Change Password' 
+                      : 'Save Changes'
+                  }
                 </button>
               </div>
             </form>

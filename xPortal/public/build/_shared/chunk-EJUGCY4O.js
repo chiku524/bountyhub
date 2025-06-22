@@ -1,1 +1,0 @@
-import{a as g}from"/build/_shared/chunk-XYUYOA7A.js";import{a as n}from"/build/_shared/chunk-NCEHAU4L.js";import{b as a}from"/build/_shared/chunk-G5WX4PPA.js";var l=a((u,r)=>{var i=g(),s=n();r.exports=t;t.displayName="t4Vb";t.aliases=[];function t(e){e.register(i),e.register(s),e.languages["t4-vb"]=e.languages["t4-templating"].createT4("vbnet")}});export{l as a};

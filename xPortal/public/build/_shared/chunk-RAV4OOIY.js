@@ -1,1 +1,0 @@
-import{b as e}from"/build/_shared/chunk-G5WX4PPA.js";var n=e((t,a)=>{a.exports=s;s.displayName="csv";s.aliases=[];function s(c){c.languages.csv={value:/[^\r\n,"]+|"(?:[^"]|"")*"(?!")/,punctuation:/,/}}});export{n as a};

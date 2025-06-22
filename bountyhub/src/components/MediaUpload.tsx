@@ -23,14 +23,24 @@ async function uploadToCloudinary(file: File | Blob, resourceType: 'image' | 'vi
   formData.append('upload_preset', uploadPreset);
   formData.append('folder', folder);
   const endpoint = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`;
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    body: formData,
-  });
-  if (!response.ok) {
-    throw new Error('Failed to upload to Cloudinary');
+  
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      body: formData,
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to upload to Cloudinary: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+    
+    const result = await response.json() as CloudinaryUploadResult;
+    return result;
+  } catch (error) {
+    console.error('Cloudinary upload error:', error);
+    throw error;
   }
-  return response.json() as Promise<CloudinaryUploadResult>;
 }
 
 export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: MediaUploadProps) {
@@ -88,7 +98,7 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
         try {
           // Cloudinary config from env
           const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'bountyhub';
-          const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'your-cloud-name';
+          const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dqobhvk07';
           if (!uploadPreset || !cloudName) throw new Error('Cloudinary config missing');
           const uploadResult = await uploadToCloudinary(blob, 'video', uploadPreset, cloudName, 'bountyhub/posts');
           const url = uploadResult.secure_url;
@@ -191,7 +201,8 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
 
       // Cloudinary config from env
       const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'bountyhub';
-      const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'your-cloud-name';
+      const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dqobhvk07';
+      
       if (!uploadPreset || !cloudName) throw new Error('Cloudinary config missing');
 
       // Upload to Cloudinary

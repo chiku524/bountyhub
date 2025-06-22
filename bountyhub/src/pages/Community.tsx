@@ -8,6 +8,7 @@ import { ErrorMessage } from '../components/ErrorMessage'
 import { AdvancedFilters } from '../components/AdvancedFilters'
 import { ExportButton } from '../components/ExportButton'
 import { VoteButton } from '../components/VoteButton'
+import { BookmarkButton } from '../components/BookmarkButton'
 import type { Post } from '../types'
 
 interface FilterOptions {
@@ -15,6 +16,76 @@ interface FilterOptions {
   dateRange: string
   sortBy: string
   hasBounty: boolean
+  selectedTags: string[]
+}
+
+// Separate component for post list to force re-render on sort changes
+const PostList: React.FC<{
+  posts: any[]
+  onVoteChange: (postId: string, newVotes: number, newUserVote?: number) => void
+}> = ({ posts, onVoteChange }) => {
+  return (
+    <ul className="divide-y divide-neutral-700">
+      {posts.map((post) => (
+        <li key={post.id} className="py-4">
+          <div className="flex space-x-4">
+            {/* Voting */}
+            <div className="flex-shrink-0 flex items-center justify-center w-16">
+              <VoteButton
+                itemId={post.id}
+                itemType="post"
+                voteType="quality"
+                initialVotes={post.qualityUpvotes || 0}
+                userVote={post.userVote || 0}
+                onVoteChange={(newVotes, newUserVote) => onVoteChange(post.id, newVotes, newUserVote)}
+              />
+            </div>
+            
+            {/* Post Content */}
+            <div className="flex-1">
+              <Link to={`/posts/${post.id}`} className="block hover:bg-neutral-700/40 rounded-lg p-2 transition">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                  <div className="flex-1">
+                    <h2 className="text-xl font-semibold text-white">{post.title}</h2>
+                    <p className="text-gray-400 mt-1 line-clamp-2">{post.content}</p>
+                    <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                      <span>By: <Link to={`/users/${post.author?.username || post.authorId}`} className="text-indigo-400 hover:text-indigo-300" onClick={(e) => e.stopPropagation()}>{post.author?.username || `User ${post.authorId}`}</Link></span>
+                      <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                      {post.reward && post.reward > 0 && (
+                        <span className="text-yellow-400">💰 {post.reward} bounty</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="mt-2 md:mt-0 flex items-center space-x-2">
+                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                      post.status === 'open' ? 'bg-green-600 text-white' :
+                      post.status === 'claimed' ? 'bg-yellow-600 text-white' :
+                      'bg-gray-600 text-white'
+                    }`}>
+                      {post.status}
+                    </span>
+                    {post.tags && post.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {post.tags.map((tagName: string, index: number) => (
+                          <span
+                            key={index}
+                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-violet-500/20 text-violet-400 border border-violet-500/40"
+                          >
+                            {tagName}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <BookmarkButton postId={post.id} size="sm" />
+                  </div>
+                </div>
+              </Link>
+            </div>
+          </div>
+        </li>
+      ))}
+    </ul>
+  )
 }
 
 export default function Community() {
@@ -23,11 +94,13 @@ export default function Community() {
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
+  const [sortTimestamp, setSortTimestamp] = useState(Date.now())
   const [filters, setFilters] = useState<FilterOptions>({
     status: '',
     dateRange: '',
     sortBy: 'newest',
-    hasBounty: false
+    hasBounty: false,
+    selectedTags: []
   })
   const postsPerPage = 10
 
@@ -58,13 +131,13 @@ export default function Community() {
       filtered = filtered.filter(post => 
         post.title.toLowerCase().includes(query) ||
         post.content.toLowerCase().includes(query) ||
-        post.authorId.toLowerCase().includes(query)
+        (post.author?.username && post.author.username.toLowerCase().includes(query))
       )
     }
 
     // Status filter
     if (filters.status) {
-      filtered = filtered.filter(post => post.status === filters.status)
+      filtered = filtered.filter(post => post.status.toLowerCase() === filters.status.toLowerCase())
     }
 
     // Date range filter
@@ -94,6 +167,16 @@ export default function Community() {
       }
     }
 
+    // Tags filter
+    if (filters.selectedTags.length > 0) {
+      filtered = filtered.filter(post => {
+        const postTags = post.tags || []
+        return filters.selectedTags.some(selectedTag => 
+          postTags.includes(selectedTag)
+        )
+      })
+    }
+
     // Bounty filter (mock implementation)
     if (filters.hasBounty) {
       filtered = filtered.filter(post => post.reward && post.reward > 0)
@@ -113,7 +196,8 @@ export default function Community() {
       }
     })
 
-    return filtered
+    // Force new array reference when sort changes to ensure React re-renders
+    return [...filtered]
   }, [posts, searchQuery, filters])
 
   // Paginate filtered posts
@@ -136,8 +220,26 @@ export default function Community() {
   }
 
   const handleFiltersChange = (newFilters: FilterOptions) => {
+    // If sortBy changed, increment sortTimestamp to force re-render
+    if (newFilters.sortBy !== filters.sortBy) {
+      setSortTimestamp(Date.now())
+      setCurrentPage(1)
+    }
     setFilters(newFilters)
-    setCurrentPage(1)
+  }
+
+  const handleVoteChange = (postId: string, newVotes: number, newUserVote?: number) => {
+    setPosts(prevPosts => 
+      prevPosts.map(post => 
+        post.id === postId 
+          ? { 
+              ...post, 
+              qualityUpvotes: newVotes,
+              userVote: newUserVote !== undefined ? newUserVote : post.userVote
+            }
+          : post
+      )
+    )
   }
 
   return (
@@ -145,7 +247,7 @@ export default function Community() {
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-white">Community</h1>
-          <div className="flex items-center space-x-4">
+          <div className="relative w-full flex items-center justify-end space-x-4">
             <AdvancedFilters 
               filters={filters}
               onFiltersChange={handleFiltersChange}
@@ -216,7 +318,8 @@ export default function Community() {
                       status: '',
                       dateRange: '',
                       sortBy: 'newest',
-                      hasBounty: false
+                      hasBounty: false,
+                      selectedTags: []
                     })
                   }}
                   className="text-indigo-400 hover:text-indigo-300"
@@ -229,51 +332,7 @@ export default function Community() {
           
           {!loading && !error && paginatedPosts.length > 0 && (
             <>
-              <ul className="divide-y divide-neutral-700">
-                {paginatedPosts.map((post) => (
-                  <li key={post.id} className="py-4">
-                    <div className="flex space-x-4">
-                      {/* Voting */}
-                      <div className="flex-shrink-0">
-                        <VoteButton
-                          itemId={post.id}
-                          itemType="post"
-                          voteType="quality"
-                          initialVotes={post.qualityUpvotes || 0}
-                        />
-                      </div>
-                      
-                      {/* Post Content */}
-                      <div className="flex-1">
-                        <Link to={`/posts/${post.id}`} className="block hover:bg-neutral-700/40 rounded-lg p-2 transition">
-                          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                            <div className="flex-1">
-                              <h2 className="text-xl font-semibold text-white">{post.title}</h2>
-                              <p className="text-gray-400 mt-1 line-clamp-2">{post.content}</p>
-                              <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
-                                <span>By: <Link to={`/${post.authorId}`} className="text-indigo-400 hover:text-indigo-300" onClick={(e) => e.stopPropagation()}>User {post.authorId}</Link></span>
-                                <span>{new Date(post.createdAt).toLocaleDateString()}</span>
-                                {post.reward && post.reward > 0 && (
-                                  <span className="text-yellow-400">💰 {post.reward} bounty</span>
-                                )}
-                              </div>
-                            </div>
-                            <div className="mt-2 md:mt-0">
-                              <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                                post.status === 'open' ? 'bg-green-600 text-white' :
-                                post.status === 'claimed' ? 'bg-yellow-600 text-white' :
-                                'bg-gray-600 text-white'
-                              }`}>
-                                {post.status}
-                              </span>
-                            </div>
-                          </div>
-                        </Link>
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              <PostList key={`postlist-${filters.sortBy}-${sortTimestamp}`} posts={paginatedPosts} onVoteChange={handleVoteChange} />
               
               {/* Pagination */}
               <div className="p-6 border-t border-neutral-700">

@@ -14,6 +14,7 @@ interface TagSelectorProps {
   availableTags: Tag[];
   error?: string;
   required?: boolean;
+  disableClickOutside?: boolean;
 }
 
 export default function TagSelector({ 
@@ -21,7 +22,8 @@ export default function TagSelector({
   onTagsChange, 
   availableTags, 
   error,
-  required = true 
+  required = true,
+  disableClickOutside = false
 }: TagSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -39,6 +41,8 @@ export default function TagSelector({
 
   // Handle click outside to close dropdown
   useEffect(() => {
+    if (disableClickOutside) return;
+    
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
@@ -53,7 +57,7 @@ export default function TagSelector({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isOpen]);
+  }, [isOpen, disableClickOutside]);
 
   const handleTagToggle = (tagId: string) => {
     const newSelectedTags = selectedTags.includes(tagId)
