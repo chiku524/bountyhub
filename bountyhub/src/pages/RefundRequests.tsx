@@ -28,6 +28,8 @@ interface Vote {
   voterUsername: string
 }
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 const RefundRequests: React.FC = () => {
   const { user } = useAuth()
   const [refundRequests, setRefundRequests] = useState<RefundRequest[]>([])
@@ -48,12 +50,22 @@ const RefundRequests: React.FC = () => {
     try {
       setLoading(true)
       setError(null)
-      const response = await fetch('/api/refund-requests')
-      if (!response.ok) throw new Error('Failed to fetch refund requests')
+      const response = await fetch(`${API_URL}/api/refund-requests`, { credentials: 'include' })
       const data = await response.json()
-      setRefundRequests(data)
+      if (!response.ok) {
+        setError(data.error || 'Failed to fetch refund requests')
+        setRefundRequests([])
+        return
+      }
+      if (Array.isArray(data)) {
+        setRefundRequests(data)
+      } else {
+        setError(data.error || 'Failed to fetch refund requests')
+        setRefundRequests([])
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch refund requests')
+      setRefundRequests([])
     } finally {
       setLoading(false)
     }
@@ -61,7 +73,7 @@ const RefundRequests: React.FC = () => {
 
   const fetchVotes = async (requestId: string) => {
     try {
-      const response = await fetch(`/api/refund-requests/${requestId}/votes`)
+      const response = await fetch(`${API_URL}/api/refund-requests/${requestId}/votes`, { credentials: 'include' })
       if (response.ok) {
         const votesData = await response.json()
         setVotes(prev => ({ ...prev, [requestId]: votesData }))
@@ -81,7 +93,7 @@ const RefundRequests: React.FC = () => {
       setVoting(true)
       setError(null)
       
-      const response = await fetch(`/api/refund-requests/${requestId}/vote`, {
+      const response = await fetch(`${API_URL}/api/refund-requests/${requestId}/vote`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -89,7 +101,8 @@ const RefundRequests: React.FC = () => {
         body: JSON.stringify({
           vote: vote ? 'approve' : 'reject',
           reason: voteReason
-        })
+        }),
+        credentials: 'include',
       })
 
       if (!response.ok) {

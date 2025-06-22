@@ -26,6 +26,8 @@ interface NotificationsProps {
   onUnreadCountChange?: (count: number) => void
 }
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({ onUnreadCountChange }, ref) => {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -60,7 +62,7 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
   const fetchNotifications = async () => {
     setLoading(true)
     try {
-      const response = await fetch('/api/notifications')
+      const response = await fetch(`${API_URL}/api/notifications`, { credentials: 'include' })
       if (!response.ok) throw new Error('Failed to fetch notifications')
       const data = await response.json()
       setNotifications(data)
@@ -73,7 +75,10 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
 
   const markAsRead = async (notificationId: string) => {
     try {
-      await fetch(`/api/notifications/${notificationId}/read`, { method: 'POST' })
+      await fetch(`${API_URL}/api/notifications/${notificationId}/read`, { 
+        method: 'POST',
+        credentials: 'include'
+      })
       setNotifications(prev => 
         prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
       )
@@ -84,7 +89,10 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
 
   const markAllAsRead = async () => {
     try {
-      await fetch('/api/notifications/read-all', { method: 'POST' })
+      await fetch(`${API_URL}/api/notifications/read-all`, { 
+        method: 'POST',
+        credentials: 'include'
+      })
       setNotifications(prev => prev.map(n => ({ ...n, read: true })))
     } catch (error) {
       console.error('Failed to mark all notifications as read:', error)

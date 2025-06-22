@@ -7,7 +7,7 @@ main = "functions/index.ts"
 [[d1_databases]]
 binding = "DB"
 database_name = "bountyhub-db"
-database_id = "4df28277-6977-4d38-b2d0-d0b48826c275"
+database_id = "062c1240-4857-4cb9-bb0c-e6880b1c48b6"
 migrations_dir = "drizzle/migrations"
 
 [vars]

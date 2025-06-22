@@ -452,16 +452,30 @@ export class GovernanceService {
    */
   static async getGovernanceStats(db: Db): Promise<GovernanceStats> {
     try {
-      const treasury = await db.select().from(governanceTreasury).limit(1)
+      // Get or create treasury
+      let treasury = await db.select().from(governanceTreasury).limit(1)
+      if (treasury.length === 0) {
+        const treasuryId = crypto.randomUUID()
+        await db.insert(governanceTreasury).values({
+          id: treasuryId,
+          balance: 0,
+          totalCollected: 0,
+          totalDistributed: 0,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+        treasury = await db.select().from(governanceTreasury).limit(1)
+      }
+
       const totalStaked = await db.select().from(governanceStakes).where(eq(governanceStakes.isActive, true))
       const proposals = await db.select().from(governanceProposals)
       const activeProposals = await db.select().from(governanceProposals).where(eq(governanceProposals.status, 'ACTIVE'))
 
       return {
         totalStaked: totalStaked.reduce((sum, stake) => sum + stake.amount, 0),
-        totalTreasury: treasury.length > 0 ? treasury[0].balance : 0,
-        totalCollected: treasury.length > 0 ? treasury[0].totalCollected : 0,
-        totalDistributed: treasury.length > 0 ? treasury[0].totalDistributed : 0,
+        totalTreasury: treasury[0].balance,
+        totalCollected: treasury[0].totalCollected,
+        totalDistributed: treasury[0].totalDistributed,
         activeStakers: totalStaked.length,
         totalProposals: proposals.length,
         activeProposals: activeProposals.length

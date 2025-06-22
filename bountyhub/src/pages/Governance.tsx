@@ -70,6 +70,8 @@ interface GovernanceActivity {
   createdAt: string
 }
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 const Governance: React.FC = () => {
   const { user } = useAuth()
   const [loading, setLoading] = useState(true)
@@ -97,49 +99,37 @@ const Governance: React.FC = () => {
       setError(null)
 
       const [statsRes, userStatsRes, rewardRateRes, userRewardRateRes, platformMetricsRes, logsRes, activityRes] = await Promise.all([
-        fetch('/api/governance?action=stats'),
-        fetch('/api/governance?action=user-stats'),
-        fetch('/api/governance?action=reward-rate'),
-        fetch('/api/governance?action=user-reward-rate'),
-        fetch('/api/governance?action=platform-metrics'),
-        fetch('/api/governance?action=transparency-logs&limit=20'),
-        fetch('/api/governance?action=governance-activity&limit=20')
+        fetch(`${API_URL}/api/governance?action=stats`, { credentials: 'include' }),
+        fetch(`${API_URL}/api/governance?action=user-stats`, { credentials: 'include' }),
+        fetch(`${API_URL}/api/governance?action=reward-rate`, { credentials: 'include' }),
+        fetch(`${API_URL}/api/governance?action=user-reward-rate`, { credentials: 'include' }),
+        fetch(`${API_URL}/api/governance?action=platform-metrics`, { credentials: 'include' }),
+        fetch(`${API_URL}/api/governance?action=transparency-logs&limit=20`, { credentials: 'include' }),
+        fetch(`${API_URL}/api/governance?action=governance-activity&limit=20`, { credentials: 'include' })
       ])
 
-      if (statsRes.ok) {
-        const statsData = await statsRes.json()
-        setStats(statsData.stats)
+      // Helper to handle error objects
+      const handleApiResponse = async (res: Response, setState: (v: any) => void, key: string) => {
+        const data = await res.json()
+        if (!res.ok || data.error) {
+          if (data.error === 'Invalid action') {
+            setError('Governance data is not available right now. (Invalid action)')
+          } else {
+            setError(data.error || 'Failed to load governance data')
+          }
+          setState(null)
+        } else {
+          setState(data[key])
+        }
       }
 
-      if (userStatsRes.ok) {
-        const userStatsData = await userStatsRes.json()
-        setUserStats(userStatsData.userStats)
-      }
-
-      if (rewardRateRes.ok) {
-        const rewardRateData = await rewardRateRes.json()
-        setRewardRate(rewardRateData.rewardRate)
-      }
-
-      if (userRewardRateRes.ok) {
-        const userRewardRateData = await userRewardRateRes.json()
-        setUserRewardRate(userRewardRateData.userRewardRate)
-      }
-
-      if (platformMetricsRes.ok) {
-        const platformMetricsData = await platformMetricsRes.json()
-        setPlatformMetrics(platformMetricsData.platformMetrics)
-      }
-
-      if (logsRes.ok) {
-        const logsData = await logsRes.json()
-        setTransparencyLogs(logsData.logs)
-      }
-
-      if (activityRes.ok) {
-        const activityData = await activityRes.json()
-        setGovernanceActivity(activityData.activity)
-      }
+      await handleApiResponse(statsRes, setStats, 'stats')
+      await handleApiResponse(userStatsRes, setUserStats, 'userStats')
+      await handleApiResponse(rewardRateRes, setRewardRate, 'rewardRate')
+      await handleApiResponse(userRewardRateRes, setUserRewardRate, 'userRewardRate')
+      await handleApiResponse(platformMetricsRes, setPlatformMetrics, 'platformMetrics')
+      await handleApiResponse(logsRes, setTransparencyLogs, 'logs')
+      await handleApiResponse(activityRes, setGovernanceActivity, 'activity')
     } catch (err) {
       setError('Failed to load governance data')
       console.error('Error loading governance data:', err)
@@ -158,10 +148,11 @@ const Governance: React.FC = () => {
       setStakingLoading(true)
       setError(null)
 
-      const response = await fetch('/api/governance', {
+      const response = await fetch(`${API_URL}/api/governance`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'stake', amount: parseFloat(stakeAmount) })
+        body: JSON.stringify({ action: 'stake', amount: parseFloat(stakeAmount) }),
+        credentials: 'include',
       })
 
       const result = await response.json()
@@ -190,10 +181,11 @@ const Governance: React.FC = () => {
       setStakingLoading(true)
       setError(null)
 
-      const response = await fetch('/api/governance', {
+      const response = await fetch(`${API_URL}/api/governance`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'unstake', amount: parseFloat(unstakeAmount) })
+        body: JSON.stringify({ action: 'unstake', amount: parseFloat(unstakeAmount) }),
+        credentials: 'include',
       })
 
       const result = await response.json()
@@ -534,71 +526,88 @@ const Governance: React.FC = () => {
           <p className="text-sm text-gray-400">Real-time transparency of all governance activities</p>
         </div>
         <div className="overflow-auto scrollbar-thin max-h-96">
-          <table className="min-w-full divide-y divide-neutral-700">
-            <thead className="bg-neutral-700">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Type</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Amount</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Fee</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Description</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
-              </tr>
-            </thead>
-            <tbody className="bg-neutral-800 divide-y divide-neutral-700">
-              {transparencyLogs.map((log) => (
-                <tr key={log.id} className="hover:bg-neutral-700">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`text-sm font-medium ${getLogTypeColor(log.logType)}`}>
-                      {log.logType.replace(/_/g, ' ')}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                    {formatAmount(log.amount)} BBUX
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                    {log.feeAmount > 0 ? `${formatAmount(log.feeAmount)} BBUX` : '-'}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-white">
-                    {log.description}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                    {formatDate(log.createdAt)}
-                  </td>
+          {transparencyLogs.length === 0 ? (
+            <div className="text-center text-gray-400 py-4">No transparency logs available.</div>
+          ) : (
+            <table className="min-w-full divide-y divide-neutral-700">
+              <thead className="bg-neutral-700">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Type</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Amount</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Fee</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Description</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="bg-neutral-800 divide-y divide-neutral-700">
+                {transparencyLogs.map((log) => (
+                  <tr key={log.id} className="hover:bg-neutral-700">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`text-sm font-medium ${getLogTypeColor(log.logType)}`}>
+                        {log.logType.replace(/_/g, ' ')}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                      {formatAmount(log.amount)} BBUX
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                      {log.feeAmount > 0 ? `${formatAmount(log.feeAmount)} BBUX` : '-'}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-white">
+                      {log.description}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                      {formatDate(log.createdAt)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
 
-      {/* Governance Activity */}
-      <div className="mt-8 bg-neutral-800 rounded-lg border border-neutral-700">
+      {/* Governance Activity Feed */}
+      <div className="bg-neutral-800 rounded-lg border border-neutral-700 mt-8">
         <div className="px-6 py-4 border-b border-neutral-700">
           <h2 className="text-lg font-semibold text-white">Governance Activity Feed</h2>
-          <p className="text-sm text-gray-400">Recent governance activities and events</p>
+          <p className="text-sm text-gray-400">Recent governance actions and events</p>
         </div>
-        <div className="p-6">
-          <div className="space-y-4">
-            {governanceActivity.map((activity) => (
-              <div key={activity.id} className="flex items-start space-x-3 p-4 bg-neutral-700 rounded-lg">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center">
-                    <span className="text-indigo-200 text-sm font-medium">
-                      {activity.activityType.charAt(0)}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white">
-                    {activity.description}
-                  </p>
-                  <p className="text-sm text-gray-400">
-                    {formatAmount(activity.amount)} BBUX • {formatDate(activity.createdAt)}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className="overflow-auto scrollbar-thin max-h-96">
+          {governanceActivity.length === 0 ? (
+            <div className="text-center text-gray-400 py-4">No governance activity available.</div>
+          ) : (
+            <table className="min-w-full divide-y divide-neutral-700">
+              <thead className="bg-neutral-700">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Type</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Amount</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Description</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
+                </tr>
+              </thead>
+              <tbody className="bg-neutral-800 divide-y divide-neutral-700">
+                {governanceActivity.map((activity) => (
+                  <tr key={activity.id} className="hover:bg-neutral-700">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`text-sm font-medium ${getLogTypeColor(activity.activityType)}`}>
+                        {activity.activityType.replace(/_/g, ' ')}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                      {formatAmount(activity.amount)} BBUX
+                    </td>
+                    <td className="px-6 py-4 text-sm text-white">
+                      {activity.description}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                      {formatDate(activity.createdAt)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>

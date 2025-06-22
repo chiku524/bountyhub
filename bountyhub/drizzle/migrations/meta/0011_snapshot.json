@@ -1,0 +1,9 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "id": "0011_initialize_treasury",
+  "prevId": "0010_insert_default_tags",
+  "tables": {},
+  "enums": {},
+  "schemas": {}
+} 

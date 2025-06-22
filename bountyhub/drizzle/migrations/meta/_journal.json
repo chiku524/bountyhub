@@ -64,6 +64,13 @@
       "when": 1750562596999,
       "tag": "0010_insert_default_tags",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1750562598000,
+      "tag": "0011_initialize_treasury",
+      "breakpoints": true
     }
   ]
 }
