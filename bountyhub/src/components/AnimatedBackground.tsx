@@ -125,10 +125,8 @@ export function AnimatedBackground({ children }: AnimatedBackgroundProps) {
           transition: 'opacity 0.3s ease-in-out'
         }}
       />
-      {/* Page Content - Rendered above canvas */}
-      <div style={{ position: 'relative', zIndex: 10 }}>
-        {children}
-      </div>
+      {/* Page Content - Rendered directly above canvas (no wrapper to prevent double rendering) */}
+      {children}
     </>
   )
 }
