@@ -124,11 +124,21 @@ app.all('/auth/callback', async (c) => {
     const state = c.req.query('state')
     const storedState = getCookie(c, 'github_oauth_state')
     
+    // Log all cookies for debugging
+    const allCookies = c.req.header('Cookie')
+    console.log('Callback received:', {
+      code: code ? `${code.substring(0, 10)}...` : 'missing',
+      state: state || 'missing',
+      storedState: storedState || 'missing',
+      allCookies: allCookies || 'no cookies'
+    })
+    
     const frontendUrl = c.env.NODE_ENV === 'production' 
       ? 'https://bountyhub.tech' 
       : 'http://localhost:5173'
     
     if (!code || !state) {
+      console.error('Missing code or state:', { code: !!code, state: !!state })
       return c.redirect(`${frontendUrl}/login?error=missing_code`)
     }
     
@@ -137,7 +147,8 @@ app.all('/auth/callback', async (c) => {
       console.error('State mismatch:', {
         receivedState: state,
         storedState: storedState,
-        hasStoredState: !!storedState
+        hasStoredState: !!storedState,
+        stateMatch: state === storedState
       })
       return c.redirect(`${frontendUrl}/login?error=invalid_state`)
     }
