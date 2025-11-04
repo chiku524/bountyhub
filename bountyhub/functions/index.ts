@@ -122,7 +122,23 @@ app.all('/auth/callback', async (c) => {
     const db = createDb(c.env.DB)
     const code = c.req.query('code')
     const state = c.req.query('state')
-    const storedState = getCookie(c, 'github_oauth_state')
+    
+    // Try to get state cookie - try multiple ways in case of cookie domain issues
+    let storedState = getCookie(c, 'github_oauth_state')
+    
+    // If cookie not found, try to parse from Cookie header manually
+    if (!storedState) {
+      const cookieHeader = c.req.header('Cookie')
+      if (cookieHeader) {
+        const cookies = cookieHeader.split(';').map(c => c.trim())
+        for (const cookie of cookies) {
+          if (cookie.startsWith('github_oauth_state=')) {
+            storedState = cookie.split('=')[1]
+            break
+          }
+        }
+      }
+    }
     
     // Log all cookies for debugging
     const allCookies = c.req.header('Cookie')
@@ -130,7 +146,10 @@ app.all('/auth/callback', async (c) => {
       code: code ? `${code.substring(0, 10)}...` : 'missing',
       state: state || 'missing',
       storedState: storedState || 'missing',
-      allCookies: allCookies || 'no cookies'
+      stateLength: state?.length || 0,
+      storedStateLength: storedState?.length || 0,
+      allCookies: allCookies || 'no cookies',
+      cookieHeader: allCookies
     })
     
     const frontendUrl = c.env.NODE_ENV === 'production' 

@@ -25,11 +25,12 @@ app.get('/', async (c) => {
   const scope = encodeURIComponent('user:email read:user')
   const state = crypto.randomUUID() // CSRF protection
   
-  // Store state in cookie for verification
+  // Store state in cookie for verification AND also pass it in the URL
+  // The cookie is the primary method, but we'll also verify it matches the URL state
   const cookieOptions: any = {
     httpOnly: true,
     secure: c.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    sameSite: c.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site redirects
     maxAge: 600, // 10 minutes
     path: '/'
   }
@@ -40,6 +41,14 @@ app.get('/', async (c) => {
   }
   
   setCookie(c, 'github_oauth_state', state, cookieOptions)
+  
+  console.log('Setting state cookie:', {
+    state: state.substring(0, 10) + '...',
+    domain: cookieOptions.domain,
+    sameSite: cookieOptions.sameSite,
+    secure: cookieOptions.secure,
+    path: cookieOptions.path
+  })
   
   const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}`
   
