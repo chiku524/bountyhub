@@ -51,7 +51,7 @@ export default function Legal() {
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">2. Description of Service</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">2. Description of Service</h3>
                 <p className="text-neutral-600 dark:text-gray-300 mb-2">
                   bountyhub is a decentralized Q&A platform that allows users to ask questions, provide answers, and earn BBUX tokens for quality contributions.
                 </p>
@@ -134,7 +134,7 @@ export default function Legal() {
         {/* Privacy Policy */}
         <section id="privacy" className="mb-12">
           <div className="flex justify-between items-start mb-4">
-            <h2 className="text-3xl font-bold text-white">Privacy Policy</h2>
+            <h2 className="text-3xl font-bold text-neutral-900 dark:text-white">Privacy Policy</h2">
             <span className="text-sm text-neutral-500 dark:text-gray-400">
               <strong>Last updated:</strong> June 23, 2025
             </span>
