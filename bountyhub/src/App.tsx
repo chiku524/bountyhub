@@ -70,7 +70,7 @@ function AppContent() {
   return (
     <AnimatedBackground>
       {/* Light/Dark mode container - theme transitions */}
-      <div className="relative z-10 min-h-screen w-full bg-white/30 dark:bg-neutral-900/30 transition-colors duration-200 flex flex-row">
+      <div className="min-h-screen w-full bg-white/20 dark:bg-neutral-900/20 transition-colors duration-200 flex flex-row">
         {/* Dynamic Navbar */}
         {isHomePage ? (
           <HomeNav onScrollTo={scrollToSection} />
@@ -117,8 +117,8 @@ function AppContent() {
           </Routes>
         </Layout>
         
-        {/* Footer - Show on authenticated pages and docs/legal pages */}
-        {!isHomePage && !isAuthPage && <Footer />}
+        {/* Footer - Show on every page */}
+        <Footer />
         
         {/* Mobile Navigation - Only for authenticated pages */}
         {showAuthenticatedNav && <MobileNav />}

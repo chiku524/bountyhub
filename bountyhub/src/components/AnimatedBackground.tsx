@@ -118,14 +118,17 @@ export function AnimatedBackground({ children }: AnimatedBackgroundProps) {
       {/* Canvas Background - Fixed behind all content */}
       <canvas
         ref={canvasRef}
-        className="fixed inset-0 pointer-events-none z-0"
+        className="fixed inset-0 pointer-events-none"
         style={{ 
-          opacity: theme === 'light' ? 0.7 : 0.5,
+          zIndex: 0,
+          opacity: theme === 'light' ? 0.8 : 0.6,
           transition: 'opacity 0.3s ease-in-out'
         }}
       />
-      {/* Page Content - Rendered above canvas (no wrapper to prevent double rendering) */}
-      {children}
+      {/* Page Content - Rendered above canvas */}
+      <div style={{ position: 'relative', zIndex: 10 }}>
+        {children}
+      </div>
     </>
   )
 }
