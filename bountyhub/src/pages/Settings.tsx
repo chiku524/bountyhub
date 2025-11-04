@@ -238,7 +238,7 @@ export default function Settings() {
           </div>
         )}
 
-        <div className="bg-neutral-800/80 rounded-lg border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+        <div className="bg-white dark:bg-neutral-800/80 rounded-lg border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)] dark:shadow-[0_0_15px_rgba(139,92,246,0.3)]">
           {/* Tabs */}
           <div className="flex flex-wrap border-b border-violet-500/30">
             {tabs.map((tab) => (
@@ -247,8 +247,8 @@ export default function Settings() {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center gap-2 px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium transition-colors ${
                   activeTab === tab.id
-                    ? 'text-violet-400 border-b-2 border-violet-400'
-                    : 'text-gray-400 hover:text-violet-300'
+                    ? 'text-violet-600 dark:text-violet-400 border-b-2 border-violet-600 dark:border-violet-400'
+                    : 'text-neutral-500 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-300'
                 }`}
               >
                 <tab.icon className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -265,7 +265,7 @@ export default function Settings() {
                 <div className="space-y-4 sm:space-y-6">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                     <div>
-                      <label htmlFor="firstName" className="block text-sm font-medium text-violet-300 mb-2">
+                      <label htmlFor="firstName" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
                         First Name
                       </label>
                       <input
@@ -274,7 +274,7 @@ export default function Settings() {
                         value={profileData.firstName}
                         onChange={(e) => handleInputChange('firstName', e.target.value)}
                         placeholder="Enter your first name"
-                        className="w-full px-3 sm:px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
+                        className="w-full px-3 sm:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
                       />
                     </div>
                     <div>
@@ -287,15 +287,15 @@ export default function Settings() {
                         value={profileData.lastName}
                         onChange={(e) => handleInputChange('lastName', e.target.value)}
                         placeholder="Enter your last name"
-                        className="w-full px-3 sm:px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
+                        className="w-full px-3 sm:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label htmlFor="bio" className="block text-sm font-medium text-violet-300 mb-2">
-                      Bio
-                    </label>
+                      <label htmlFor="bio" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
+                        Bio
+                      </label>
                     <textarea
                       id="bio"
                       value={profileData.bio}
@@ -307,9 +307,9 @@ export default function Settings() {
                   </div>
 
                   <div>
-                    <label htmlFor="location" className="block text-sm font-medium text-violet-300 mb-2">
-                      Location
-                    </label>
+                      <label htmlFor="location" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
+                        Location
+                      </label>
                     <input
                       id="location"
                       type="text"
@@ -321,9 +321,9 @@ export default function Settings() {
                   </div>
 
                   <div>
-                    <label htmlFor="website" className="block text-sm font-medium text-violet-300 mb-2">
-                      Website
-                    </label>
+                      <label htmlFor="website" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
+                        Website
+                      </label>
                     <input
                       id="website"
                       type="url"

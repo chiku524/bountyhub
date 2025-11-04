@@ -58,7 +58,7 @@ export default function Legal() {
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">3. User Accounts</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">3. User Accounts</h3>
                 <ul className="text-neutral-600 dark:text-gray-300 space-y-1">
                   <li>• You must be at least 18 years old to use the Service</li>
                   <li>• You are responsible for maintaining the confidentiality of your account</li>
@@ -68,7 +68,7 @@ export default function Legal() {
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">4. User Conduct</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">4. User Conduct</h3>
                 <p className="text-neutral-600 dark:text-gray-300 mb-2">You agree not to:</p>
                 <ul className="text-neutral-600 dark:text-gray-300 space-y-1">
                   <li>• Post content that is illegal, harmful, threatening, abusive, or defamatory</li>
@@ -81,7 +81,7 @@ export default function Legal() {
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">5. Content and Intellectual Property</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">5. Content and Intellectual Property</h3>
                 <ul className="text-neutral-600 dark:text-gray-300 space-y-1">
                   <li>• You retain ownership of content you post</li>
                   <li>• You grant us a license to use, modify, and distribute your content</li>
@@ -91,7 +91,7 @@ export default function Legal() {
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">6. BBUX Tokens and Blockchain</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">6. BBUX Tokens and Blockchain</h3>
                 <ul className="text-neutral-600 dark:text-gray-300 space-y-1">
                   <li>• BBUX tokens are utility tokens for platform features</li>
                   <li>• Token values may fluctuate and are not guaranteed</li>
@@ -101,28 +101,28 @@ export default function Legal() {
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">7. Termination</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">7. Termination</h3>
                 <p className="text-neutral-600 dark:text-gray-300 mb-2">
                   We may terminate or suspend your account at any time for violations of these Terms or for any other reason at our sole discretion.
                 </p>
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">8. Limitation of Liability</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">8. Limitation of Liability</h3>
                 <p className="text-neutral-600 dark:text-gray-300 mb-2">
                   In no event shall bountyhub be liable for any indirect, incidental, special, consequential, or punitive damages arising out of or relating to your use of the Service.
                 </p>
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">9. Changes to Terms</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">9. Changes to Terms</h3>
                 <p className="text-neutral-600 dark:text-gray-300 mb-2">
                   We reserve the right to modify these Terms at any time. We will notify users of any material changes via email or through the Service.
                 </p>
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">10. Governing Law</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">10. Governing Law</h3>
                 <p className="text-neutral-600 dark:text-gray-300 mb-2">
                   These Terms shall be governed by and construed in accordance with the laws of the United States of America, without regard to its conflict of law provisions.
                 </p>
@@ -142,10 +142,10 @@ export default function Legal() {
           <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 border border-neutral-200 dark:border-neutral-700">
             <div className="space-y-6">
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">1. Information We Collect</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">1. Information We Collect</h3>
                 <div className="space-y-4">
                   <div>
-                    <h4 className="text-lg font-semibold text-violet-400 mb-2">Personal Information</h4>
+                    <h4 className="text-lg font-semibold text-violet-600 dark:text-violet-400 mb-2">Personal Information</h4>
                     <ul className="text-neutral-600 dark:text-gray-300 space-y-1">
                       <li>• Username and email address</li>
                       <li>• Solana wallet address</li>
@@ -166,7 +166,7 @@ export default function Legal() {
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">2. How We Use Your Information</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">2. How We Use Your Information</h3>
                 <ul className="text-neutral-600 dark:text-gray-300 space-y-1">
                   <li>• Provide and maintain the Service</li>
                   <li>• Process transactions and manage BBUX tokens</li>
@@ -178,7 +178,7 @@ export default function Legal() {
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">3. Information Sharing</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">3. Information Sharing</h3>
                 <p className="text-neutral-600 dark:text-gray-300 mb-2">We do not sell, trade, or rent your personal information. We may share information in the following circumstances:</p>
                 <ul className="text-neutral-600 dark:text-gray-300 space-y-1">
                   <li>• With your consent</li>
@@ -189,7 +189,7 @@ export default function Legal() {
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">4. Data Security</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">4. Data Security</h3>
                 <ul className="text-neutral-600 dark:text-gray-300 space-y-1">
                   <li>• We implement appropriate security measures</li>
                   <li>• Data is encrypted in transit and at rest</li>
@@ -199,14 +199,14 @@ export default function Legal() {
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">5. Data Retention</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">5. Data Retention</h3>
                 <p className="text-neutral-600 dark:text-gray-300 mb-2">
                   We retain your information for as long as necessary to provide the Service and comply with legal obligations. You may request deletion of your account and data.
                 </p>
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">6. Your Rights</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">6. Your Rights</h3>
                 <ul className="text-neutral-600 dark:text-gray-300 space-y-1">
                   <li>• Access and review your personal information</li>
                   <li>• Update or correct your information</li>
@@ -217,28 +217,28 @@ export default function Legal() {
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">7. Cookies and Tracking</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">7. Cookies and Tracking</h3>
                 <p className="text-neutral-600 dark:text-gray-300 mb-2">
                   We use cookies and similar technologies to improve your experience, analyze usage, and provide personalized content.
                 </p>
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">8. Third-Party Services</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">8. Third-Party Services</h3>
                 <p className="text-neutral-600 dark:text-gray-300 mb-2">
                   Our Service may integrate with third-party services. We are not responsible for the privacy practices of these services.
                 </p>
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">9. International Transfers</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">9. International Transfers</h3>
                 <p className="text-neutral-600 dark:text-gray-300 mb-2">
                   Your information may be transferred to and processed in countries other than your own. We ensure appropriate safeguards are in place.
                 </p>
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">10. Changes to Privacy Policy</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">10. Changes to Privacy Policy</h3>
                 <p className="text-neutral-600 dark:text-gray-300 mb-2">
                   We may update this Privacy Policy from time to time. We will notify you of any material changes.
                 </p>
@@ -250,7 +250,7 @@ export default function Legal() {
         {/* Cookie Policy */}
         <section id="cookies" className="mb-12">
           <div className="flex justify-between items-start mb-4">
-            <h2 className="text-3xl font-bold text-white">Cookie Policy</h2>
+            <h2 className="text-3xl font-bold text-neutral-900 dark:text-white">Cookie Policy</h2>
             <span className="text-sm text-neutral-500 dark:text-gray-400">
               <strong>Last updated:</strong> June 23, 2025
             </span>
@@ -258,7 +258,7 @@ export default function Legal() {
           <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 border border-neutral-200 dark:border-neutral-700">
             <div className="space-y-6">
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">What Are Cookies?</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">What Are Cookies?</h3>
                 <p className="text-neutral-600 dark:text-gray-300 mb-2">
                   Cookies are small text files stored on your device that help us provide and improve our Service.
                 </p>
@@ -268,7 +268,7 @@ export default function Legal() {
                 <h3 className="text-xl font-semibold text-white mb-3">Types of Cookies We Use</h3>
                 <div className="space-y-4">
                   <div>
-                    <h4 className="text-lg font-semibold text-violet-400 mb-2">Essential Cookies</h4>
+                    <h4 className="text-lg font-semibold text-violet-600 dark:text-violet-400 mb-2">Essential Cookies</h4>
                     <p className="text-neutral-600 dark:text-gray-300 mb-2">Required for basic functionality:</p>
                     <ul className="text-neutral-600 dark:text-gray-300 space-y-1">
                       <li>• Authentication and session management</li>
@@ -298,7 +298,7 @@ export default function Legal() {
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">Managing Cookies</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">Managing Cookies</h3>
                 <ul className="text-neutral-600 dark:text-gray-300 space-y-1">
                   <li>• You can control cookies through your browser settings</li>
                   <li>• Disabling cookies may affect Service functionality</li>
@@ -312,18 +312,18 @@ export default function Legal() {
 
         {/* Disclaimer */}
         <section id="disclaimer" className="mb-12">
-          <h2 className="text-3xl font-bold text-white mb-6">Disclaimer</h2>
+          <h2 className="text-3xl font-bold text-neutral-900 dark:text-white mb-6">Disclaimer</h2>
           <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 border border-neutral-200 dark:border-neutral-700">
             <div className="space-y-6">
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">General Disclaimer</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">General Disclaimer</h3>
                 <p className="text-neutral-600 dark:text-gray-300 mb-2">
                   The information provided on bountyhub is for general informational purposes only. We make no representations or warranties about the accuracy, completeness, or reliability of any information.
                 </p>
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">Financial Disclaimer</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">Financial Disclaimer</h3>
                 <ul className="text-neutral-600 dark:text-gray-300 space-y-1">
                   <li>• BBUX tokens are utility tokens, not investment vehicles</li>
                   <li>• Token values may fluctuate significantly</li>
@@ -334,7 +334,7 @@ export default function Legal() {
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">Blockchain Disclaimer</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">Blockchain Disclaimer</h3>
                 <ul className="text-neutral-600 dark:text-gray-300 space-y-1">
                   <li>• Blockchain transactions are irreversible</li>
                   <li>• We are not responsible for transaction failures</li>
@@ -345,7 +345,7 @@ export default function Legal() {
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">Content Disclaimer</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">Content Disclaimer</h3>
                 <ul className="text-neutral-600 dark:text-gray-300 space-y-1">
                   <li>• User-generated content reflects individual opinions</li>
                   <li>• We do not endorse user content</li>
@@ -359,18 +359,18 @@ export default function Legal() {
 
         {/* Governance Terms */}
         <section id="governance" className="mb-12">
-          <h2 className="text-3xl font-bold text-white mb-6">Governance Terms</h2>
+          <h2 className="text-3xl font-bold text-neutral-900 dark:text-white mb-6">Governance Terms</h2>
           <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 border border-neutral-200 dark:border-neutral-700">
             <div className="space-y-6">
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">Platform Governance</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">Platform Governance</h3>
                 <p className="text-neutral-600 dark:text-gray-300 mb-2">
                   bountyhub operates as a decentralized platform with community governance mechanisms.
                 </p>
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">Voting Rights</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">Voting Rights</h3>
                 <ul className="text-neutral-600 dark:text-gray-300 space-y-1">
                   <li>• BBUX token holders can participate in governance</li>
                   <li>• Voting power is proportional to token holdings</li>
@@ -380,7 +380,7 @@ export default function Legal() {
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">Proposal Process</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">Proposal Process</h3>
                 <ul className="text-neutral-600 dark:text-gray-300 space-y-1">
                   <li>• Community members can submit proposals</li>
                   <li>• Proposals require community discussion</li>
@@ -390,7 +390,7 @@ export default function Legal() {
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">Emergency Powers</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">Emergency Powers</h3>
                 <p className="text-neutral-600 dark:text-gray-300 mb-2">
                   In emergency situations, the platform may implement temporary measures to ensure security and stability.
                 </p>
@@ -401,11 +401,11 @@ export default function Legal() {
 
         {/* Legal Contact */}
         <section id="contact" className="mb-12">
-          <h2 className="text-3xl font-bold text-white mb-6">Legal Contact</h2>
+          <h2 className="text-3xl font-bold text-neutral-900 dark:text-white mb-6">Legal Contact</h2>
           <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 border border-neutral-200 dark:border-neutral-700">
             <div className="space-y-6">
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">Contact Information</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">Contact Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <h4 className="text-lg font-semibold text-violet-400 mb-2">General Inquiries</h4>
@@ -427,7 +427,7 @@ export default function Legal() {
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">Response Times</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">Response Times</h3>
                 <ul className="text-neutral-600 dark:text-gray-300 space-y-1">
                   <li>• General inquiries: 2-3 business days</li>
                   <li>• Legal matters: 5-7 business days</li>

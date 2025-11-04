@@ -25,7 +25,7 @@ export default function Layout({ children, showNav = true }: LayoutProps) {
       {/* Animated Background */}
       <AnimatedBackground />
       
-      <div className="relative min-h-screen w-full bg-neutral-50/95 dark:bg-neutral-900/95 backdrop-blur-sm flex flex-row transition-colors duration-200">
+      <div className="relative min-h-screen w-full bg-white/60 dark:bg-neutral-900/60 flex flex-row transition-colors duration-200">
         {/* Desktop Navigation - Hidden on mobile */}
         {showNav && <div className="hidden md:block"><Nav /></div>}
         <div className={`flex-1 flex flex-col ${showNav ? 'md:ml-20' : ''} pb-16 md:pb-0 relative z-10`}>

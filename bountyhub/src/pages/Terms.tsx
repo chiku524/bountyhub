@@ -16,7 +16,7 @@ export default function Terms() {
             </a>
             <button
               onClick={() => window.print()}
-              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2"
+              className="px-4 py-2 bg-neutral-200 dark:bg-gray-600 text-neutral-900 dark:text-white rounded-lg hover:bg-neutral-300 dark:hover:bg-gray-700 transition-colors flex items-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
@@ -26,7 +26,7 @@ export default function Terms() {
           </div>
         </div>
 
-        <div className="bg-white text-gray-900 rounded-lg shadow-lg p-8 print:shadow-none">
+        <div className="bg-neutral-50 dark:bg-white text-neutral-900 dark:text-gray-900 rounded-lg shadow-lg p-8 print:shadow-none border border-neutral-200 dark:border-transparent">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold text-gray-900 mb-4">Terms of Service</h1>

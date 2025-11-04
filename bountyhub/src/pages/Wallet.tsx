@@ -473,21 +473,21 @@ function WalletContent() {
           </div>
 
           {/* Wallet Connection Status */}
-          <div className="bg-neutral-800 border border-neutral-700 rounded-lg p-4 sm:p-6 mb-6">
-            <h3 className="text-lg sm:text-xl font-semibold mb-4 text-white">Wallet Connection</h3>
+          <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 sm:p-6 mb-6">
+            <h3 className="text-lg sm:text-xl font-semibold mb-4 text-neutral-900 dark:text-white">Wallet Connection</h3>
             <div className="space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <span className="text-gray-300 text-sm sm:text-base">Connection Status:</span>
+                <span className="text-neutral-600 dark:text-gray-300 text-sm sm:text-base">Connection Status:</span>
                 <span className={`px-3 py-1 rounded-full text-xs sm:text-sm font-medium w-fit ${
-                  connected ? 'bg-green-900 text-green-200' : 'bg-red-900 text-red-200'
+                  connected ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200' : 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200'
                 }`}>
                   {connected ? 'Connected' : 'Disconnected'}
                 </span>
               </div>
               {connected && publicKey && (
                 <div>
-                  <span className="text-gray-300 text-sm sm:text-base">Connected Address:</span>
-                  <p className="font-mono text-xs sm:text-sm bg-neutral-700 p-2 rounded border border-neutral-600 break-all text-gray-200 mt-1">
+                  <span className="text-neutral-600 dark:text-gray-300 text-sm sm:text-base">Connected Address:</span>
+                  <p className="font-mono text-xs sm:text-sm bg-neutral-100 dark:bg-neutral-700 p-2 rounded border border-neutral-300 dark:border-neutral-600 break-all text-neutral-800 dark:text-gray-200 mt-1">
                     {publicKey}
                   </p>
                 </div>
@@ -530,26 +530,26 @@ function WalletContent() {
 
           {/* Deposit Modal */}
           {showDepositModal && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-              <div className="bg-neutral-800 border border-neutral-700 rounded-lg p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4">
+              <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg sm:text-xl font-semibold text-white">Buy BBUX with SOL</h3>
+                  <h3 className="text-lg sm:text-xl font-semibold text-neutral-900 dark:text-white">Buy BBUX with SOL</h3>
                   <button
                     onClick={() => setShowDepositModal(false)}
-                    className="text-gray-400 hover:text-gray-200 text-xl sm:text-2xl font-bold"
+                    className="text-neutral-500 dark:text-gray-400 hover:text-neutral-700 dark:hover:text-gray-200 text-xl sm:text-2xl font-bold"
                   >
                     ×
                   </button>
                 </div>
                 
                 {/* Deposit Mode Tabs */}
-                <div className="flex space-x-1 mb-6 bg-neutral-700 rounded-lg p-1">
+                <div className="flex space-x-1 mb-6 bg-neutral-100 dark:bg-neutral-700 rounded-lg p-1">
                   <button
                     onClick={() => setDepositMode('direct')}
                     className={`flex-1 py-2 px-2 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-colors ${
                       depositMode === 'direct'
                         ? 'bg-blue-500 text-white'
-                        : 'text-gray-300 hover:text-white'
+                        : 'text-neutral-600 dark:text-gray-300 hover:text-neutral-900 dark:hover:text-white'
                     }`}
                   >
                     🚀 Direct
@@ -559,7 +559,7 @@ function WalletContent() {
                     className={`flex-1 py-2 px-2 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-colors ${
                       depositMode === 'manual'
                         ? 'bg-blue-500 text-white'
-                        : 'text-gray-300 hover:text-white'
+                        : 'text-neutral-600 dark:text-gray-300 hover:text-neutral-900 dark:hover:text-white'
                     }`}
                   >
                     📝 Manual
@@ -582,7 +582,7 @@ function WalletContent() {
                     </div>
 
                     <div>
-                      <label htmlFor="directDepositAmount" className="block text-sm font-medium text-gray-300 mb-2">
+                      <label htmlFor="directDepositAmount" className="block text-sm font-medium text-neutral-700 dark:text-gray-300 mb-2">
                         Amount (SOL)
                       </label>
                       <input
@@ -594,10 +594,10 @@ function WalletContent() {
                         min="0.001"
                         max="1000"
                         required
-                        className="w-full px-3 py-2 border border-neutral-600 bg-neutral-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                         placeholder="0.1"
                       />
-                      <p className="text-sm text-gray-400 mt-1">
+                      <p className="text-sm text-neutral-500 dark:text-gray-400 mt-1">
                         You will receive the same amount in real BBUX tokens (1:1 exchange rate)
                       </p>
                     </div>

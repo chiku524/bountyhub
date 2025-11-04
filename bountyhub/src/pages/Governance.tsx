@@ -263,7 +263,7 @@ const Governance: React.FC = () => {
         <div className="flex justify-between items-center mb-4">
           <div>
             <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">Governance Dashboard</h1>
-            <p className="text-gray-400">Transparent virtual governance system for BountyBucks</p>
+            <p className="text-neutral-600 dark:text-gray-400">Transparent virtual governance system for BountyBucks</p>
           </div>
           <Link
             to="/refund-requests"
@@ -280,20 +280,20 @@ const Governance: React.FC = () => {
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
-            <h3 className="text-sm font-medium text-gray-400">Total Staked</h3>
+            <h3 className="text-sm font-medium text-neutral-600 dark:text-gray-400">Total Staked</h3>
             <p className="text-2xl font-bold text-neutral-900 dark:text-white">{formatAmount(stats.totalStaked)} BBUX</p>
           </div>
           <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
-            <h3 className="text-sm font-medium text-gray-400">Treasury Balance</h3>
-            <p className="text-2xl font-bold text-white">{formatAmount(stats.totalTreasury)} BBUX</p>
+            <h3 className="text-sm font-medium text-neutral-600 dark:text-gray-400">Treasury Balance</h3>
+            <p className="text-2xl font-bold text-neutral-900 dark:text-white">{formatAmount(stats.totalTreasury)} BBUX</p>
           </div>
           <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
-            <h3 className="text-sm font-medium text-gray-400">Total Collected</h3>
-            <p className="text-2xl font-bold text-white">{formatAmount(stats.totalCollected)} BBUX</p>
+            <h3 className="text-sm font-medium text-neutral-600 dark:text-gray-400">Total Collected</h3>
+            <p className="text-2xl font-bold text-neutral-900 dark:text-white">{formatAmount(stats.totalCollected)} BBUX</p>
           </div>
           <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
-            <h3 className="text-sm font-medium text-gray-400">Total Distributed</h3>
-            <p className="text-2xl font-bold text-white">{formatAmount(stats.totalDistributed)} BBUX</p>
+            <h3 className="text-sm font-medium text-neutral-600 dark:text-gray-400">Total Distributed</h3>
+            <p className="text-2xl font-bold text-neutral-900 dark:text-white">{formatAmount(stats.totalDistributed)} BBUX</p>
           </div>
         </div>
       )}
@@ -306,12 +306,12 @@ const Governance: React.FC = () => {
             <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700">
               <div className="px-6 py-4 border-b border-neutral-200 dark:border-neutral-700">
                 <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Dynamic Reward Rate</h2>
-                <p className="text-sm text-gray-400">Current daily staking reward breakdown</p>
+                <p className="text-sm text-neutral-600 dark:text-gray-400">Current daily staking reward breakdown</p>
               </div>
               <div className="p-6">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-400">Base Rate:</span>
+                    <span className="text-neutral-600 dark:text-gray-400">Base Rate:</span>
                     <span className="font-semibold text-neutral-900 dark:text-white">{formatPercentage(rewardRate.baseRate)}%</span>
                   </div>
                   <div className="flex justify-between items-center">
@@ -331,7 +331,7 @@ const Governance: React.FC = () => {
                     <span className="text-lg font-medium text-neutral-900 dark:text-white">Total Rate:</span>
                     <span className="text-xl font-bold text-indigo-400">{formatPercentage(rewardRate.totalRate)}%</span>
                   </div>
-                  <div className="text-xs text-gray-400">
+                  <div className="text-xs text-neutral-600 dark:text-gray-400">
                     Maximum rate: {formatPercentage(rewardRate.maxRate)}%
                   </div>
                 </div>
@@ -344,26 +344,26 @@ const Governance: React.FC = () => {
             <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700">
               <div className="px-6 py-4 border-b border-neutral-200 dark:border-neutral-700">
                 <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Platform Health</h2>
-                <p className="text-sm text-gray-400">Current platform activity metrics</p>
+                <p className="text-sm text-neutral-600 dark:text-gray-400">Current platform activity metrics</p>
               </div>
               <div className="p-6">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-400">Monthly Volume:</span>
-                    <span className="font-semibold text-white">{formatAmount(platformMetrics.monthlyVolume)} BBUX</span>
+                    <span className="text-neutral-600 dark:text-gray-400">Monthly Volume:</span>
+                    <span className="font-semibold text-neutral-900 dark:text-white">{formatAmount(platformMetrics.monthlyVolume)} BBUX</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-400">Active Stakers:</span>
-                    <span className="font-semibold text-white">{platformMetrics.activeStakers}</span>
+                    <span className="text-neutral-600 dark:text-gray-400">Active Stakers:</span>
+                    <span className="font-semibold text-neutral-900 dark:text-white">{platformMetrics.activeStakers}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-400">Treasury Health:</span>
+                    <span className="text-neutral-600 dark:text-gray-400">Treasury Health:</span>
                     <span className={`font-semibold ${getTreasuryHealthColor(platformMetrics.treasuryHealth)}`}>
                       {platformMetrics.treasuryHealth}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-400">Participation Level:</span>
+                    <span className="text-neutral-600 dark:text-gray-400">Participation Level:</span>
                     <span className={`font-semibold ${getParticipationLevelColor(platformMetrics.participationLevel)}`}>
                       {platformMetrics.participationLevel}
                     </span>
@@ -377,38 +377,38 @@ const Governance: React.FC = () => {
 
       {/* User's Personalized Reward Rate */}
       {userRewardRate && (
-        <div className="bg-gradient-to-r from-indigo-900/50 to-purple-900/50 border border-indigo-700 rounded-lg p-6 mb-8">
+        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/50 dark:to-purple-900/50 border border-indigo-200 dark:border-indigo-700 rounded-lg p-6 mb-8">
           <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-3">Your Personalized Reward Rate</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-gray-300">Base Rate:</span>
-                <span className="font-semibold text-white">{formatPercentage(userRewardRate.baseRate)}%</span>
+                <span className="text-neutral-700 dark:text-gray-300">Base Rate:</span>
+                <span className="font-semibold text-neutral-900 dark:text-white">{formatPercentage(userRewardRate.baseRate)}%</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-300">Activity Bonus:</span>
-                <span className="font-semibold text-green-400">+{formatPercentage(userRewardRate.activityBonus)}%</span>
+                <span className="text-neutral-700 dark:text-gray-300">Activity Bonus:</span>
+                <span className="font-semibold text-green-600 dark:text-green-400">+{formatPercentage(userRewardRate.activityBonus)}%</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-300">Treasury Bonus:</span>
-                <span className="font-semibold text-blue-400">+{formatPercentage(userRewardRate.treasuryBonus)}%</span>
+                <span className="text-neutral-700 dark:text-gray-300">Treasury Bonus:</span>
+                <span className="font-semibold text-blue-600 dark:text-blue-400">+{formatPercentage(userRewardRate.treasuryBonus)}%</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-300">Governance Bonus:</span>
-                <span className="font-semibold text-purple-400">+{formatPercentage(userRewardRate.governanceBonus)}%</span>
+                <span className="text-neutral-700 dark:text-gray-300">Governance Bonus:</span>
+                <span className="font-semibold text-purple-600 dark:text-purple-400">+{formatPercentage(userRewardRate.governanceBonus)}%</span>
               </div>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-gray-300">Participation Penalty:</span>
-                <span className="font-semibold text-red-400">-{formatPercentage(userRewardRate.participationPenalty)}%</span>
+                <span className="text-neutral-700 dark:text-gray-300">Participation Penalty:</span>
+                <span className="font-semibold text-red-600 dark:text-red-400">-{formatPercentage(userRewardRate.participationPenalty)}%</span>
               </div>
-              <hr className="border-indigo-700" />
+              <hr className="border-indigo-300 dark:border-indigo-700" />
               <div className="flex justify-between items-center">
-                <span className="text-lg font-medium text-white">Your Total Rate:</span>
-                <span className="text-xl font-bold text-indigo-300">{formatPercentage(userRewardRate.totalRate)}%</span>
+                <span className="text-lg font-medium text-neutral-900 dark:text-white">Your Total Rate:</span>
+                <span className="text-xl font-bold text-indigo-600 dark:text-indigo-300">{formatPercentage(userRewardRate.totalRate)}%</span>
               </div>
-              <div className="text-sm text-indigo-200">
+              <div className="text-sm text-indigo-700 dark:text-indigo-200">
                 {userRewardRate.governanceBonus > 0 ? 
                   "🎉 You qualify for governance participation bonus!" : 
                   "Participate in governance to earn bonus rewards!"
@@ -429,30 +429,30 @@ const Governance: React.FC = () => {
             {userStats ? (
               <div className="space-y-4">
                 <div className="flex justify-between">
-                  <span className="text-gray-400">Staked Amount:</span>
-                  <span className="font-semibold text-white">{formatAmount(userStats.stakedAmount)} BBUX</span>
+                  <span className="text-neutral-600 dark:text-gray-400">Staked Amount:</span>
+                  <span className="font-semibold text-neutral-900 dark:text-white">{formatAmount(userStats.stakedAmount)} BBUX</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-400">Total Rewards Earned:</span>
-                  <span className="font-semibold text-green-400">{formatAmount(userStats.totalRewardsEarned)} BBUX</span>
+                  <span className="text-neutral-600 dark:text-gray-400">Total Rewards Earned:</span>
+                  <span className="font-semibold text-green-600 dark:text-green-400">{formatAmount(userStats.totalRewardsEarned)} BBUX</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-400">Voting Power:</span>
-                  <span className="font-semibold text-white">{formatAmount(userStats.votingPower)} BBUX</span>
+                  <span className="text-neutral-600 dark:text-gray-400">Voting Power:</span>
+                  <span className="font-semibold text-neutral-900 dark:text-white">{formatAmount(userStats.votingPower)} BBUX</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-400">Governance Participation:</span>
-                  <span className="font-semibold text-white">{userStats.governanceParticipation} votes</span>
+                  <span className="text-neutral-600 dark:text-gray-400">Governance Participation:</span>
+                  <span className="font-semibold text-neutral-900 dark:text-white">{userStats.governanceParticipation} votes</span>
                 </div>
                 {userStats.lastRewardAt && (
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Last Reward:</span>
-                    <span className="font-semibold text-white">{formatDate(userStats.lastRewardAt)}</span>
+                    <span className="text-neutral-600 dark:text-gray-400">Last Reward:</span>
+                    <span className="font-semibold text-neutral-900 dark:text-white">{formatDate(userStats.lastRewardAt)}</span>
                   </div>
                 )}
               </div>
             ) : (
-              <p className="text-gray-400">No governance stats available</p>
+              <p className="text-neutral-600 dark:text-gray-400">No governance stats available</p>
             )}
           </div>
         </div>
@@ -465,7 +465,7 @@ const Governance: React.FC = () => {
           <div className="p-6 space-y-6">
             {/* Stake */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-neutral-700 dark:text-gray-300 mb-2">
                 Stake BBUX for Governance
               </label>
               <div className="flex gap-2">
@@ -474,7 +474,7 @@ const Governance: React.FC = () => {
                   value={stakeAmount}
                   onChange={(e) => setStakeAmount(e.target.value)}
                   placeholder="Amount to stake"
-                  className="flex-1 px-3 py-2 bg-neutral-700 border border-neutral-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400"
+                  className="flex-1 px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400"
                   min="0"
                   step="0.01"
                 />
@@ -486,14 +486,14 @@ const Governance: React.FC = () => {
                   {stakingLoading ? 'Staking...' : 'Stake'}
                 </button>
               </div>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-xs text-neutral-500 dark:text-gray-400 mt-1">
                 Earn {rewardRate ? formatPercentage(rewardRate.totalRate) : '0.000'}% daily rewards on staked amount
               </p>
             </div>
 
             {/* Unstake */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-neutral-700 dark:text-gray-300 mb-2">
                 Unstake BBUX from Governance
               </label>
               <div className="flex gap-2">
@@ -502,7 +502,7 @@ const Governance: React.FC = () => {
                   value={unstakeAmount}
                   onChange={(e) => setUnstakeAmount(e.target.value)}
                   placeholder="Amount to unstake"
-                  className="flex-1 px-3 py-2 bg-neutral-700 border border-neutral-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400"
+                  className="flex-1 px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400"
                   min="0"
                   step="0.01"
                 />
@@ -520,43 +520,43 @@ const Governance: React.FC = () => {
       </div>
 
       {/* Transparency Logs */}
-      <div className="mt-8 bg-neutral-800 rounded-lg border border-neutral-700">
-        <div className="px-6 py-4 border-b border-neutral-700">
-          <h2 className="text-lg font-semibold text-white">Transparency Logs</h2>
-          <p className="text-sm text-gray-400">Real-time transparency of all governance activities</p>
+      <div className="mt-8 bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700">
+        <div className="px-6 py-4 border-b border-neutral-200 dark:border-neutral-700">
+          <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Transparency Logs</h2>
+          <p className="text-sm text-neutral-600 dark:text-gray-400">Real-time transparency of all governance activities</p>
         </div>
         <div className="overflow-auto scrollbar-thin max-h-96">
           {transparencyLogs.length === 0 ? (
-            <div className="text-center text-gray-400 py-4">No transparency logs available.</div>
+            <div className="text-center text-neutral-500 dark:text-gray-400 py-4">No transparency logs available.</div>
           ) : (
-            <table className="min-w-full divide-y divide-neutral-700">
-              <thead className="bg-neutral-700">
+            <table className="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
+              <thead className="bg-neutral-100 dark:bg-neutral-700">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Type</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Amount</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Fee</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Description</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-gray-300 uppercase tracking-wider">Type</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-gray-300 uppercase tracking-wider">Amount</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-gray-300 uppercase tracking-wider">Fee</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-gray-300 uppercase tracking-wider">Description</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-gray-300 uppercase tracking-wider">Date</th>
                 </tr>
               </thead>
-              <tbody className="bg-neutral-800 divide-y divide-neutral-700">
+              <tbody className="bg-white dark:bg-neutral-800 divide-y divide-neutral-200 dark:divide-neutral-700">
                 {transparencyLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-neutral-700">
+                  <tr key={log.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-700">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`text-sm font-medium ${getLogTypeColor(log.logType)}`}>
                         {log.logType.replace(/_/g, ' ')}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-900 dark:text-white">
                       {formatAmount(log.amount)} BBUX
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-900 dark:text-white">
                       {log.feeAmount > 0 ? `${formatAmount(log.feeAmount)} BBUX` : '-'}
                     </td>
-                    <td className="px-6 py-4 text-sm text-white">
+                    <td className="px-6 py-4 text-sm text-neutral-900 dark:text-white">
                       {log.description}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-500 dark:text-gray-400">
                       {formatDate(log.createdAt)}
                     </td>
                   </tr>
@@ -568,39 +568,39 @@ const Governance: React.FC = () => {
       </div>
 
       {/* Governance Activity Feed */}
-      <div className="bg-neutral-800 rounded-lg border border-neutral-700 mt-8">
-        <div className="px-6 py-4 border-b border-neutral-700">
-          <h2 className="text-lg font-semibold text-white">Governance Activity Feed</h2>
-          <p className="text-sm text-gray-400">Recent governance actions and events</p>
+      <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 mt-8">
+        <div className="px-6 py-4 border-b border-neutral-200 dark:border-neutral-700">
+          <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Governance Activity Feed</h2>
+          <p className="text-sm text-neutral-600 dark:text-gray-400">Recent governance actions and events</p>
         </div>
         <div className="overflow-auto scrollbar-thin max-h-96">
           {governanceActivity.length === 0 ? (
-            <div className="text-center text-gray-400 py-4">No governance activity available.</div>
+            <div className="text-center text-neutral-500 dark:text-gray-400 py-4">No governance activity available.</div>
           ) : (
-            <table className="min-w-full divide-y divide-neutral-700">
-              <thead className="bg-neutral-700">
+            <table className="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
+              <thead className="bg-neutral-100 dark:bg-neutral-700">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Type</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Amount</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Description</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-gray-300 uppercase tracking-wider">Type</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-gray-300 uppercase tracking-wider">Amount</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-gray-300 uppercase tracking-wider">Description</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-gray-300 uppercase tracking-wider">Date</th>
                 </tr>
               </thead>
-              <tbody className="bg-neutral-800 divide-y divide-neutral-700">
+              <tbody className="bg-white dark:bg-neutral-800 divide-y divide-neutral-200 dark:divide-neutral-700">
                 {governanceActivity.map((activity) => (
-                  <tr key={activity.id} className="hover:bg-neutral-700">
+                  <tr key={activity.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-700">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`text-sm font-medium ${getLogTypeColor(activity.activityType)}`}>
                         {activity.activityType.replace(/_/g, ' ')}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-900 dark:text-white">
                       {formatAmount(activity.amount)} BBUX
                     </td>
-                    <td className="px-6 py-4 text-sm text-white">
+                    <td className="px-6 py-4 text-sm text-neutral-900 dark:text-white">
                       {activity.description}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-500 dark:text-gray-400">
                       {formatDate(activity.createdAt)}
                     </td>
                   </tr>

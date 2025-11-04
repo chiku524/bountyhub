@@ -432,7 +432,7 @@ export default function Profile() {
           </Link>
         </div>
 
-        <div className="bg-neutral-800/80 rounded-lg p-4 sm:p-6 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+        <div className="bg-white dark:bg-neutral-800/80 rounded-lg p-4 sm:p-6 border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)] dark:shadow-[0_0_15px_rgba(139,92,246,0.3)]">
           <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6">
             <ProfilePictureUpload 
               currentPicture={user.profilePicture || null}
@@ -453,11 +453,11 @@ export default function Profile() {
               </p>
               <div className="mt-4">
                 <div className="flex flex-wrap items-center gap-2">
-                  <div className="bg-violet-500/20 px-3 py-1 rounded-full border border-violet-500/50">
-                    <span className="text-violet-300 font-medium text-sm">{reputationLevel}</span>
+                  <div className="bg-violet-100 dark:bg-violet-500/20 px-3 py-1 rounded-full border border-violet-300 dark:border-violet-500/50">
+                    <span className="text-violet-700 dark:text-violet-300 font-medium text-sm">{reputationLevel}</span>
                   </div>
-                  <div className="bg-violet-500/20 px-3 py-1 rounded-full border border-violet-500/50">
-                    <span className="text-violet-300 font-medium text-sm">{user.reputationPoints || 0} points</span>
+                  <div className="bg-violet-100 dark:bg-violet-500/20 px-3 py-1 rounded-full border border-violet-300 dark:border-violet-500/50">
+                    <span className="text-violet-700 dark:text-violet-300 font-medium text-sm">{user.reputationPoints || 0} points</span>
                   </div>
                 </div>
               </div>

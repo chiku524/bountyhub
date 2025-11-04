@@ -28,9 +28,9 @@ const PostList: React.FC<{
   onVoteChange: (postId: string, newVotes: number, newUserVote?: number) => void
 }> = memo(({ posts, onVoteChange }) => {
   return (
-    <ul className="divide-y divide-neutral-700">
+    <ul className="divide-y divide-neutral-200 dark:divide-neutral-700">
       {posts.map((post) => (
-        <li key={post.id} className={`py-3 sm:py-4 ${post.reward && post.reward > 0 ? 'bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-400/30 rounded-lg' : ''}`}>
+        <li key={post.id} className={`py-3 sm:py-4 ${post.reward && post.reward > 0 ? 'bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-500/10 dark:to-blue-500/10 border border-cyan-200 dark:border-cyan-400/30 rounded-lg' : ''}`}>
           <div className="flex space-x-2 sm:space-x-4">
             {/* Voting */}
             <div className="flex-shrink-0 flex items-center justify-center w-12 sm:w-16">
@@ -46,15 +46,15 @@ const PostList: React.FC<{
             
             {/* Post Content */}
             <div className="flex-1 min-w-0">
-              <Link to={`/posts/${post.id}`} className={`block hover:bg-neutral-700/40 rounded-lg p-2 transition ${post.reward && post.reward > 0 ? 'hover:bg-cyan-500/10' : ''}`}>
+              <Link to={`/posts/${post.id}`} className={`block hover:bg-neutral-100 dark:hover:bg-neutral-700/40 rounded-lg p-2 transition ${post.reward && post.reward > 0 ? 'hover:bg-cyan-100 dark:hover:bg-cyan-500/10' : ''}`}>
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
                       <h2 className="text-base sm:text-xl font-semibold text-neutral-900 dark:text-white line-clamp-2 sm:line-clamp-1">{post.title.length > 60 ? post.title.slice(0, 60) + '...' : post.title}</h2>
                       {post.reward && post.reward > 0 && (
-                        <div className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/40 rounded-full w-fit">
-                          <span className="text-cyan-300 text-xs sm:text-sm font-medium">💰</span>
-                          <span className="text-cyan-200 text-xs sm:text-sm font-medium">{post.reward} BBUX</span>
+                        <div className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-cyan-100 to-blue-100 dark:from-cyan-500/20 dark:to-blue-500/20 border border-cyan-300 dark:border-cyan-400/40 rounded-full w-fit">
+                          <span className="text-cyan-600 dark:text-cyan-300 text-xs sm:text-sm font-medium">💰</span>
+                          <span className="text-cyan-700 dark:text-cyan-200 text-xs sm:text-sm font-medium">{post.reward} BBUX</span>
                         </div>
                       )}
                     </div>
@@ -62,23 +62,23 @@ const PostList: React.FC<{
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2 text-xs sm:text-sm text-neutral-400 dark:text-gray-500">
                       <span className="flex items-center space-x-2">
                         <ProfilePicture user={post.author} size="sm" />
-                        <span>By: <Link to={`/users/${post.author?.username || post.authorId}`} className="text-indigo-400 hover:text-indigo-300" onClick={(e) => e.stopPropagation()}>{post.author?.username || `User ${post.authorId}`}</Link></span>
+                        <span>By: <Link to={`/users/${post.author?.username || post.authorId}`} className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300" onClick={(e) => e.stopPropagation()}>{post.author?.username || `User ${post.authorId}`}</Link></span>
                       </span>
                       <span>{new Date(post.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
                   <div className="mt-2 lg:mt-0 flex flex-wrap items-center gap-2">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      post.status === 'OPEN' ? 'bg-green-600 text-white' :
-                      post.status === 'COMPLETED' ? 'bg-yellow-600 text-white' :
-                      'bg-gray-600 text-white'
+                      post.status === 'OPEN' ? 'bg-green-100 dark:bg-green-600 text-green-700 dark:text-white' :
+                      post.status === 'COMPLETED' ? 'bg-yellow-100 dark:bg-yellow-600 text-yellow-700 dark:text-white' :
+                      'bg-neutral-100 dark:bg-gray-600 text-neutral-700 dark:text-white'
                     }`}>{post.status}</span>
                     {post.tags && post.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1">
                         {post.tags.slice(0, 2).map((tagName: string, index: number) => (
                           <span
                             key={index}
-                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-violet-500/20 text-violet-400 border border-violet-500/40"
+                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-400 border border-violet-300 dark:border-violet-500/40"
                           >
                             {tagName}
                           </span>

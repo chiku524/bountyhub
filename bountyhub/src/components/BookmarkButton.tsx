@@ -90,8 +90,8 @@ export const BookmarkButton: React.FC<BookmarkButtonProps> = ({
       disabled={isLoading}
       className={`p-2 rounded-full transition-colors ${
         isBookmarked 
-          ? 'bg-yellow-400/20 text-yellow-400' 
-          : 'bg-neutral-700/50 text-yellow-400 hover:text-yellow-400 hover:bg-yellow-400/20'
+          ? 'bg-yellow-100 dark:bg-yellow-400/20 text-yellow-600 dark:text-yellow-400' 
+          : 'bg-neutral-200 dark:bg-neutral-700/50 text-yellow-500 dark:text-yellow-400 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-400/20'
       } ${className}`}
       title={isBookmarked ? 'Remove Bookmark' : 'Bookmark'}
     >

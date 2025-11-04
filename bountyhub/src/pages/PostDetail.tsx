@@ -185,17 +185,17 @@ export default function PostDetail() {
   }
 
   const renderCodeBlock = (block: any, index: number) => (
-    <div key={index} className="bg-neutral-900/80 rounded-lg p-4 border border-violet-500/30 mb-4">
+    <div key={index} className="bg-neutral-100 dark:bg-neutral-900/80 rounded-lg p-4 border border-violet-300 dark:border-violet-500/30 mb-4">
       <div className="flex items-center gap-2 mb-2">
-        <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded text-sm">
+        <span className="px-2 py-1 bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300 rounded text-sm">
           {block.language}
         </span>
       </div>
-      <pre className="bg-neutral-900/80 p-4 rounded-lg overflow-x-auto max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-600 scrollbar-track-neutral-800">
-        <code className="text-sm text-gray-300">{block.code}</code>
+      <pre className="bg-neutral-50 dark:bg-neutral-900/80 p-4 rounded-lg overflow-x-auto max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-300 dark:scrollbar-thumb-neutral-600 scrollbar-track-neutral-100 dark:scrollbar-track-neutral-800">
+        <code className="text-sm text-neutral-800 dark:text-gray-300">{block.code}</code>
       </pre>
       {block.description && (
-        <p className="mt-2 text-sm text-gray-400">{block.description}</p>
+        <p className="mt-2 text-sm text-neutral-600 dark:text-gray-400">{block.description}</p>
       )}
     </div>
   )
@@ -203,7 +203,7 @@ export default function PostDetail() {
   const renderMedia = (item: any, index: number) => (
     <div key={index} className="relative group">
       {item.type === 'IMAGE' ? (
-        <div className="relative overflow-hidden rounded-lg border border-neutral-600 bg-neutral-800">
+        <div className="relative overflow-hidden rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800">
           <img 
             src={item.url} 
             alt={`Media ${index + 1}`} 
@@ -219,7 +219,7 @@ export default function PostDetail() {
           </div>
         </div>
       ) : item.type === 'VIDEO' ? (
-        <div className="relative overflow-hidden rounded-lg border border-neutral-600 bg-neutral-800">
+        <div className="relative overflow-hidden rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800">
           <video 
             controls 
             className="w-full h-64 object-cover"
@@ -231,12 +231,12 @@ export default function PostDetail() {
           </video>
         </div>
       ) : (
-        <div className="p-4 bg-neutral-800 border border-neutral-600 rounded-lg h-64 flex items-center justify-center">
+        <div className="p-4 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-600 rounded-lg h-64 flex items-center justify-center">
           <a 
             href={item.url} 
             target="_blank" 
             rel="noopener noreferrer"
-            className="text-indigo-400 hover:text-indigo-300 flex flex-col items-center gap-2"
+            className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex flex-col items-center gap-2"
           >
             <span className="text-2xl">📎</span>
             <span className="text-sm">Download File</span>
@@ -247,19 +247,19 @@ export default function PostDetail() {
   )
 
   return (
-    <div className="min-h-screen bg-neutral-900 p-8">
+    <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200 p-8">
       <div className="max-w-7xl mx-auto">
         <div className="mb-4">
-          <Link to="/community" className="text-indigo-400 hover:text-indigo-300">
+          <Link to="/community" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300">
             ← Back to Community
           </Link>
         </div>
-        <h1 className="text-3xl font-bold text-white mb-8">Post Detail</h1>
-        <div className={`card bg-neutral-800 border-neutral-700 p-6 ${post?.reward && post.reward > 0 ? 'border-2 border-cyan-400/60 bg-gradient-to-br from-neutral-800 to-cyan-500/5' : ''}`}>
+        <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-8">Post Detail</h1>
+        <div className={`card bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 p-6 ${post?.reward && post.reward > 0 ? 'border-2 border-cyan-500/60 dark:border-cyan-400/60 bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-neutral-800 dark:to-cyan-500/5' : ''}`}>
           {loading && (
             <div className="p-8 text-center">
               <LoadingSpinner size="lg" className="mb-4" />
-              <p className="text-gray-300">Loading post...</p>
+              <p className="text-neutral-600 dark:text-gray-300">Loading post...</p>
             </div>
           )}
           
@@ -275,11 +275,11 @@ export default function PostDetail() {
               <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-4 gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <h2 className="text-2xl font-semibold text-white">{post.title}</h2>
+                    <h2 className="text-2xl font-semibold text-neutral-900 dark:text-white">{post.title}</h2>
                     {post.reward && post.reward > 0 && (
-                      <div className="flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/40 rounded-full">
-                        <span className="text-cyan-300 text-lg">💰</span>
-                        <span className="text-cyan-200 font-semibold">{post.reward} BBUX Bounty</span>
+                      <div className="flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-cyan-100 to-blue-100 dark:from-cyan-500/20 dark:to-blue-500/20 border border-cyan-300 dark:border-cyan-400/40 rounded-full">
+                        <span className="text-cyan-600 dark:text-cyan-300 text-lg">💰</span>
+                        <span className="text-cyan-700 dark:text-cyan-200 font-semibold">{post.reward} BBUX Bounty</span>
                       </div>
                     )}
                   </div>
@@ -291,7 +291,7 @@ export default function PostDetail() {
                       {post.tags.map((tagName, index) => (
                         <span
                           key={index}
-                          className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded text-xs font-medium border border-violet-500/30 whitespace-nowrap"
+                          className="px-2 py-1 bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300 rounded text-xs font-medium border border-violet-300 dark:border-violet-500/30 whitespace-nowrap"
                         >
                           {tagName}
                         </span>
@@ -323,14 +323,14 @@ export default function PostDetail() {
                     type="text"
                     value={editTitle}
                     onChange={e => setEditTitle(e.target.value)}
-                    className="w-full p-2 rounded border border-neutral-600 bg-neutral-900 text-white"
+                    className="w-full p-2 rounded border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white"
                     placeholder="Title"
                     disabled={editLoading}
                   />
                   <textarea
                     value={editContent}
                     onChange={e => setEditContent(e.target.value)}
-                    className="w-full p-2 rounded border border-neutral-600 bg-neutral-900 text-white"
+                    className="w-full p-2 rounded border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white"
                     placeholder="Content"
                     rows={6}
                     disabled={editLoading}
@@ -348,24 +348,24 @@ export default function PostDetail() {
 
                   {/* Code Blocks */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Code Blocks</label>
+                    <label className="block text-sm font-medium text-neutral-700 dark:text-gray-300 mb-2">Code Blocks</label>
                     <CodeBlockEditor 
                       onAdd={handleAddCodeBlock}
                       onCancel={() => {}}
                     />
                     {editCodeBlocks.length > 0 && (
                       <div className="mt-4 space-y-3">
-                        <h4 className="text-sm font-medium text-gray-300">Added Code Blocks:</h4>
+                        <h4 className="text-sm font-medium text-neutral-700 dark:text-gray-300">Added Code Blocks:</h4>
                         {editCodeBlocks.map((block, index) => (
-                          <div key={index} className="bg-neutral-900/80 rounded-lg p-4 border border-violet-500/30">
+                          <div key={index} className="bg-neutral-100 dark:bg-neutral-900/80 rounded-lg p-4 border border-violet-300 dark:border-violet-500/30">
                             <div className="flex items-center justify-between mb-2">
-                              <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded text-sm">
+                              <span className="px-2 py-1 bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300 rounded text-sm">
                                 {block.language}
                               </span>
                               <button
                                 type="button"
                                 onClick={() => handleRemoveCodeBlock(index)}
-                                className="text-gray-400 hover:text-red-400 transition-colors"
+                                className="text-neutral-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
                                 title="Remove code block"
                               >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -373,11 +373,11 @@ export default function PostDetail() {
                                 </svg>
                               </button>
                             </div>
-                            <pre className="bg-neutral-900/80 p-4 rounded-lg overflow-x-auto max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-600 scrollbar-track-neutral-800">
-                              <code className="text-sm text-gray-300">{block.code}</code>
+                            <pre className="bg-neutral-50 dark:bg-neutral-900/80 p-4 rounded-lg overflow-x-auto max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-300 dark:scrollbar-thumb-neutral-600 scrollbar-track-neutral-100 dark:scrollbar-track-neutral-800">
+                              <code className="text-sm text-neutral-800 dark:text-gray-300">{block.code}</code>
                             </pre>
                             {block.description && (
-                              <p className="mt-2 text-sm text-gray-400">{block.description}</p>
+                              <p className="mt-2 text-sm text-neutral-600 dark:text-gray-400">{block.description}</p>
                             )}
                           </div>
                         ))}
@@ -387,7 +387,7 @@ export default function PostDetail() {
 
                   {/* Media */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Media</label>
+                    <label className="block text-sm font-medium text-neutral-700 dark:text-gray-300 mb-2">Media</label>
                     <MediaUpload
                       onMediaUpload={handleAddMedia}
                       onMediaRemove={handleRemoveMedia}
@@ -421,18 +421,18 @@ export default function PostDetail() {
                 </form>
               ) : (
                 <>
-                  <p className="text-gray-400 mb-4 whitespace-pre-wrap">{post.content}</p>
+                  <p className="text-neutral-700 dark:text-gray-400 mb-4 whitespace-pre-wrap">{post.content}</p>
                   {/* Code Blocks */}
                   {post.codeBlocks && post.codeBlocks.length > 0 && (
                     <div className="mb-6">
-                      <h3 className="text-lg font-semibold text-white mb-3">Code Blocks</h3>
+                      <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-3">Code Blocks</h3>
                       {post.codeBlocks.map((block, index) => renderCodeBlock(block, index))}
                     </div>
                   )}
                   {/* Media */}
                   {post.media && post.media.length > 0 && (
                     <div className="mb-6">
-                      <h3 className="text-lg font-semibold text-white mb-3">Media ({post.media.length})</h3>
+                      <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-3">Media ({post.media.length})</h3>
                       <div className={`grid gap-4 ${
                         post.media.length === 1 ? 'grid-cols-1 max-w-2xl' :
                         post.media.length === 2 ? 'grid-cols-1 md:grid-cols-2' :
@@ -445,20 +445,20 @@ export default function PostDetail() {
                   )}
                 </>
               )}
-              <div className="flex items-center space-x-4 text-sm text-gray-500 mb-4">
+              <div className="flex items-center space-x-4 text-sm text-neutral-500 dark:text-gray-500 mb-4">
                 <span className="flex items-center space-x-2">
                   <ProfilePicture user={post.author} size="sm" />
                   <span>By: <Link 
                     to={`/users/${post.author?.username || post.authorId}`} 
-                    className="text-indigo-400 hover:text-indigo-300 hover:underline transition-colors"
+                    className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:underline transition-colors"
                   >
                     {post.author?.username || `User ${post.authorId}`}
                   </Link></span>
                 </span>
                 <span>Status: <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  post.status === 'OPEN' ? 'bg-green-600 text-white' :
-                  post.status === 'COMPLETED' ? 'bg-yellow-600 text-white' :
-                  'bg-gray-600 text-white'
+                  post.status === 'OPEN' ? 'bg-green-100 dark:bg-green-600 text-green-700 dark:text-white' :
+                  post.status === 'COMPLETED' ? 'bg-yellow-100 dark:bg-yellow-600 text-yellow-700 dark:text-white' :
+                  'bg-neutral-100 dark:bg-gray-600 text-neutral-700 dark:text-white'
                 }`}>{post.status}</span></span>
                 <span>Created: {formattedCreatedAt}</span>
                 {post.editedAt && <span>Last Edited: {formattedEditedAt}</span>}
@@ -483,14 +483,14 @@ export default function PostDetail() {
 
         {/* Delete Confirmation Modal */}
         {showDeleteConfirm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-neutral-800 border border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4">
-              <div className="bg-red-900 border border-red-700 rounded-lg p-4">
-                <h4 className="font-semibold text-red-200 mb-2">Delete Post</h4>
-                <p className="text-red-300 mb-4">
+          <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4">
+              <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg p-4">
+                <h4 className="font-semibold text-red-700 dark:text-red-200 mb-2">Delete Post</h4>
+                <p className="text-red-600 dark:text-red-300 mb-4">
                   Are you sure you want to delete this post? This action cannot be undone.
                   {post?.reward && post.reward > 0 && (
-                    <span className="block mt-2 text-yellow-300">
+                    <span className="block mt-2 text-yellow-600 dark:text-yellow-300">
                       ⚠️ If this post has an active bounty, it will be refunded to your wallet.
                     </span>
                   )}
@@ -499,7 +499,7 @@ export default function PostDetail() {
                   <button
                     onClick={handleDeleteCancel}
                     disabled={deleteLoading}
-                    className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors disabled:opacity-50"
+                    className="flex-1 px-4 py-2 bg-neutral-200 dark:bg-gray-600 text-neutral-900 dark:text-white rounded-md hover:bg-neutral-300 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
                   >
                     Cancel
                   </button>

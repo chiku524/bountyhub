@@ -3,30 +3,30 @@ import { FiArrowLeft, FiDownload, FiCode, FiServer, FiDatabase } from 'react-ico
 
 export default function DeveloperGuide() {
   return (
-    <div className="min-h-screen bg-neutral-900">
+    <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200">
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <Link
             to="/docs"
-            className="inline-flex items-center text-violet-400 hover:text-violet-300 transition-colors mb-4"
+            className="inline-flex items-center text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors mb-4"
           >
             <FiArrowLeft className="w-4 h-4 mr-2" />
             Back to Documentation
           </Link>
-          <h1 className="text-4xl font-bold text-white mb-4">Developer Guide</h1>
-          <p className="text-gray-300 text-lg">
+          <h1 className="text-4xl font-bold text-neutral-900 dark:text-white mb-4">Developer Guide</h1>
+          <p className="text-neutral-600 dark:text-neutral-600 dark:text-gray-300 text-lg">
             Technical documentation for developers, contributors, and integrators
           </p>
         </div>
 
         {/* Table of Contents */}
-        <div className="bg-neutral-800 rounded-lg p-6 mb-8">
-          <h2 className="text-xl font-semibold text-white mb-4">Table of Contents</h2>
-          <ul className="space-y-2 text-gray-300">
-            <li><a href="#overview" className="text-violet-400 hover:text-violet-300">Technical Overview</a></li>
-            <li><a href="#architecture" className="text-violet-400 hover:text-violet-300">System Architecture</a></li>
-            <li><a href="#setup" className="text-violet-400 hover:text-violet-300">Development Setup</a></li>
+        <div className="bg-white dark:bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6 mb-8 border border-neutral-200 dark:border-neutral-700">
+          <h2 className="text-xl font-semibold text-neutral-900 dark:text-white mb-4">Table of Contents</h2>
+          <ul className="space-y-2 text-neutral-600 dark:text-neutral-600 dark:text-gray-300">
+            <li><a href="#overview" className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300">Technical Overview</a></li>
+            <li><a href="#architecture" className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300">System Architecture</a></li>
+            <li><a href="#setup" className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300">Development Setup</a></li>
             <li><a href="#frontend" className="text-violet-400 hover:text-violet-300">Frontend Development</a></li>
             <li><a href="#backend" className="text-violet-400 hover:text-violet-300">Backend Development</a></li>
             <li><a href="#virtual-tokens" className="text-violet-400 hover:text-violet-300">Virtual Token System</a></li>
@@ -43,17 +43,17 @@ export default function DeveloperGuide() {
 
         {/* Technical Overview */}
         <section id="overview" className="mb-12">
-          <h2 className="text-3xl font-bold text-white mb-6">Technical Overview</h2>
-          <div className="bg-neutral-800 rounded-lg p-6">
-            <h3 className="text-xl font-semibold text-white mb-4">Technology Stack</h3>
-            <p className="text-gray-300 mb-4">
+          <h2 className="text-3xl font-bold text-neutral-900 dark:text-white mb-6">Technical Overview</h2>
+          <div className="bg-white dark:bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6 border border-neutral-200 dark:border-neutral-700">
+            <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-4">Technology Stack</h3>
+            <p className="text-neutral-600 dark:text-neutral-600 dark:text-gray-300 mb-4">
               bountyhub is built using modern web technologies with a focus on performance, scalability, and developer experience.
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <h4 className="text-lg font-semibold text-violet-400 mb-2">Frontend</h4>
-                <ul className="text-gray-400 space-y-1">
+                <h4 className="text-lg font-semibold text-violet-600 dark:text-violet-400 mb-2">Frontend</h4>
+                <ul className="text-neutral-600 dark:text-neutral-600 dark:text-gray-400 space-y-1">
                   <li>• React 18 with TypeScript</li>
                   <li>• Vite for build tooling</li>
                   <li>• Tailwind CSS for styling</li>
@@ -63,8 +63,8 @@ export default function DeveloperGuide() {
                 </ul>
               </div>
               <div>
-                <h4 className="text-lg font-semibold text-violet-400 mb-2">Backend</h4>
-                <ul className="text-gray-400 space-y-1">
+                <h4 className="text-lg font-semibold text-violet-600 dark:text-violet-400 mb-2">Backend</h4>
+                <ul className="text-neutral-600 dark:text-neutral-600 dark:text-gray-400 space-y-1">
                   <li>• Cloudflare Workers</li>
                   <li>• Hono framework</li>
                   <li>• D1 database (SQLite)</li>
@@ -76,8 +76,8 @@ export default function DeveloperGuide() {
             </div>
 
             <div className="mt-6">
-              <h4 className="text-lg font-semibold text-violet-400 mb-2">Virtual Token System</h4>
-              <ul className="text-gray-400 space-y-1">
+              <h4 className="text-lg font-semibold text-violet-600 dark:text-violet-400 mb-2">Virtual Token System</h4>
+              <ul className="text-neutral-600 dark:text-neutral-600 dark:text-gray-400 space-y-1">
                 <li>• Virtual BBUX tokens with unlimited supply</li>
                 <li>• Database-backed wallet system</li>
                 <li>• Real-time balance tracking</li>
@@ -92,33 +92,33 @@ export default function DeveloperGuide() {
         <section id="architecture" className="mb-12">
           <h2 className="text-3xl font-bold text-white mb-6">System Architecture</h2>
           <div className="space-y-6">
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">High-Level Architecture</h3>
-              <p className="text-gray-300 mb-4">
+              <p className="text-neutral-600 dark:text-gray-300 mb-4">
                 bountyhub follows a modern serverless architecture with edge computing capabilities.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="text-center p-4 bg-neutral-700 rounded-lg">
                   <FiCode className="w-8 h-8 text-violet-400 mx-auto mb-2" />
                   <h4 className="text-white font-semibold">Frontend</h4>
-                  <p className="text-gray-400 text-sm">React SPA with SSR</p>
+                  <p className="text-neutral-600 dark:text-gray-400 text-sm">React SPA with SSR</p>
                 </div>
                 <div className="text-center p-4 bg-neutral-700 rounded-lg">
                   <FiServer className="w-8 h-8 text-violet-400 mx-auto mb-2" />
                   <h4 className="text-white font-semibold">API Layer</h4>
-                  <p className="text-gray-400 text-sm">Cloudflare Workers</p>
+                  <p className="text-neutral-600 dark:text-gray-400 text-sm">Cloudflare Workers</p>
                 </div>
                 <div className="text-center p-4 bg-neutral-700 rounded-lg">
                   <FiDatabase className="w-8 h-8 text-violet-400 mx-auto mb-2" />
                   <h4 className="text-white font-semibold">Data Layer</h4>
-                  <p className="text-gray-400 text-sm">D1 + Virtual Tokens</p>
+                  <p className="text-neutral-600 dark:text-gray-400 text-sm">D1 + Virtual Tokens</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Data Flow</h3>
-              <ol className="text-gray-300 space-y-2">
+              <ol className="text-neutral-600 dark:text-gray-300 space-y-2">
                 <li>1. <strong>User Interaction:</strong> Frontend sends requests to API</li>
                 <li>2. <strong>Authentication:</strong> JWT tokens validate user sessions</li>
                 <li>3. <strong>Business Logic:</strong> Workers process requests</li>
@@ -128,9 +128,9 @@ export default function DeveloperGuide() {
               </ol>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Security Architecture</h3>
-              <ul className="text-gray-400 space-y-2">
+              <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                 <li>• JWT-based authentication with refresh tokens</li>
                 <li>• Rate limiting on all API endpoints</li>
                 <li>• Input validation and sanitization</li>
@@ -146,9 +146,9 @@ export default function DeveloperGuide() {
         <section id="setup" className="mb-12">
           <h2 className="text-3xl font-bold text-white mb-6">Development Setup</h2>
           <div className="space-y-6">
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Prerequisites</h3>
-              <ul className="text-gray-400 space-y-2">
+              <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                 <li>• Node.js 18+ and npm</li>
                 <li>• Git for version control</li>
                 <li>• Cloudflare account (for deployment)</li>
@@ -156,9 +156,9 @@ export default function DeveloperGuide() {
               </ul>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Local Development</h3>
-              <ol className="text-gray-300 space-y-2">
+              <ol className="text-neutral-600 dark:text-gray-300 space-y-2">
                 <li>1. Clone the repository: <code className="bg-neutral-700 px-2 py-1 rounded">git clone https://github.com/bountyhub/bountyhub.git</code></li>
                 <li>2. Install dependencies: <code className="bg-neutral-700 px-2 py-1 rounded">npm install</code></li>
                 <li>3. Set up environment variables: <code className="bg-neutral-700 px-2 py-1 rounded">cp .env.example .env</code></li>
@@ -167,7 +167,7 @@ export default function DeveloperGuide() {
               </ol>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Environment Variables</h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -178,7 +178,7 @@ export default function DeveloperGuide() {
                       <th className="text-left text-violet-400 py-2">Required</th>
                     </tr>
                   </thead>
-                  <tbody className="text-gray-300">
+                  <tbody className="text-neutral-600 dark:text-gray-300">
                     <tr className="border-b border-neutral-700">
                       <td className="py-2 font-mono">DATABASE_URL</td>
                       <td className="py-2">D1 database connection string</td>
@@ -210,7 +210,7 @@ export default function DeveloperGuide() {
         <section id="frontend" className="mb-12">
           <h2 className="text-3xl font-bold text-white mb-6">Frontend Development</h2>
           <div className="space-y-6">
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Project Structure</h3>
               <div className="bg-neutral-700 rounded-lg p-4 font-mono text-sm">
                 <div>src/</div>
@@ -225,12 +225,12 @@ export default function DeveloperGuide() {
               </div>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Key Components</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Core Components</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• Layout - Main app layout</li>
                     <li>• Nav - Navigation bar</li>
                     <li>• AuthProvider - Authentication context</li>
@@ -240,7 +240,7 @@ export default function DeveloperGuide() {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Feature Components</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• PostCard - Question/answer display</li>
                     <li>• VoteButton - Voting functionality</li>
                     <li>• CommentSection - Comments system</li>
@@ -251,12 +251,12 @@ export default function DeveloperGuide() {
               </div>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">State Management</h3>
-              <p className="text-gray-300 mb-4">
+              <p className="text-neutral-600 dark:text-gray-300 mb-4">
                 The app uses React Context for global state management with custom hooks for data fetching.
               </p>
-              <ul className="text-gray-400 space-y-2">
+              <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                 <li>• AuthProvider - User authentication state</li>
                 <li>• WalletProvider - Solana wallet connection</li>
                 <li>• Custom hooks for API calls</li>
@@ -265,12 +265,12 @@ export default function DeveloperGuide() {
               </ul>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Styling</h3>
-              <p className="text-gray-300 mb-4">
+              <p className="text-neutral-600 dark:text-gray-300 mb-4">
                 Tailwind CSS is used for styling with a custom design system.
               </p>
-              <ul className="text-gray-400 space-y-2">
+              <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                 <li>• Dark theme by default</li>
                 <li>• Violet accent colors</li>
                 <li>• Responsive design</li>
@@ -285,7 +285,7 @@ export default function DeveloperGuide() {
         <section id="backend" className="mb-12">
           <h2 className="text-3xl font-bold text-white mb-6">Backend Development</h2>
           <div className="space-y-6">
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">API Structure</h3>
               <div className="bg-neutral-700 rounded-lg p-4 font-mono text-sm">
                 <div>functions/api/</div>
@@ -298,12 +298,12 @@ export default function DeveloperGuide() {
               </div>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Request Handling</h3>
-              <p className="text-gray-300 mb-4">
+              <p className="text-neutral-600 dark:text-gray-300 mb-4">
                 All API requests go through a centralized handler with middleware for authentication, validation, and error handling.
               </p>
-              <ol className="text-gray-300 space-y-2">
+              <ol className="text-neutral-600 dark:text-gray-300 space-y-2">
                 <li>1. <strong>Request Validation:</strong> Validate input data and headers</li>
                 <li>2. <strong>Authentication:</strong> Verify JWT tokens</li>
                 <li>3. <strong>Rate Limiting:</strong> Check request frequency</li>
@@ -313,9 +313,9 @@ export default function DeveloperGuide() {
               </ol>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Authentication</h3>
-              <ul className="text-gray-400 space-y-2">
+              <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                 <li>• JWT-based authentication</li>
                 <li>• Refresh token rotation</li>
                 <li>• Session management</li>
@@ -324,12 +324,12 @@ export default function DeveloperGuide() {
               </ul>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Error Handling</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">HTTP Status Codes</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• 200 - Success</li>
                     <li>• 400 - Bad Request</li>
                     <li>• 401 - Unauthorized</li>
@@ -340,7 +340,7 @@ export default function DeveloperGuide() {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Error Response Format</h4>
-                  <pre className="bg-neutral-700 p-3 rounded text-sm text-gray-300">
+                  <pre className="bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "error": "Error message",
   "code": "ERROR_CODE",
@@ -357,9 +357,9 @@ export default function DeveloperGuide() {
         <section id="virtual-tokens" className="mb-12">
           <h2 className="text-3xl font-bold text-white mb-6">Virtual Token System</h2>
           <div className="space-y-6">
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">System Overview</h3>
-              <p className="text-gray-300 mb-4">
+              <p className="text-neutral-600 dark:text-gray-300 mb-4">
                 bountyhub uses a virtual BBUX token system that operates entirely within the platform. 
                 All token operations are handled through database transactions, providing a seamless 
                 user experience without requiring external blockchain interactions.
@@ -367,7 +367,7 @@ export default function DeveloperGuide() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Key Features</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• Virtual tokens with unlimited supply</li>
                     <li>• Database-backed wallet system</li>
                     <li>• Real-time balance tracking</li>
@@ -377,7 +377,7 @@ export default function DeveloperGuide() {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Benefits</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• No external wallet required</li>
                     <li>• Instant transactions</li>
                     <li>• No gas fees</li>
@@ -388,7 +388,7 @@ export default function DeveloperGuide() {
               </div>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Database Schema</h3>
               <div className="bg-neutral-700 rounded-lg p-4 font-mono text-sm">
                 <div>users table:</div>
@@ -412,12 +412,12 @@ export default function DeveloperGuide() {
               </div>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Token Operations</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Earning Tokens</h4>
-                  <ul className="text-gray-400 space-y-2">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                     <li>• <strong>Quality Answers:</strong> Earn BBUX for accepted answers</li>
                     <li>• <strong>Governance Participation:</strong> Rewards for voting</li>
                     <li>• <strong>Refund Voting:</strong> Earn tokens for participating in refund decisions</li>
@@ -427,7 +427,7 @@ export default function DeveloperGuide() {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Spending Tokens</h4>
-                  <ul className="text-gray-400 space-y-2">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                     <li>• <strong>Bounty Creation:</strong> Set bounties on questions</li>
                     <li>• <strong>Governance Staking:</strong> Stake tokens for voting power</li>
                     <li>• <strong>Platform Fees:</strong> 5% fee on bounty placements</li>
@@ -437,14 +437,14 @@ export default function DeveloperGuide() {
               </div>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Dynamic Reward System</h3>
-              <p className="text-gray-300 mb-4">
+              <p className="text-neutral-600 dark:text-gray-300 mb-4">
                 The platform features a dynamic reward system that adjusts based on platform activity and user participation.
               </p>
               <div className="bg-neutral-700 rounded-lg p-4 mb-4">
                 <h4 className="text-lg font-semibold text-violet-400 mb-2">Reward Rate Calculation</h4>
-                <ul className="text-gray-400 space-y-2">
+                <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                   <li>• <strong>Base Rate:</strong> 0.05% daily (18.25% APY)</li>
                   <li>• <strong>Activity Bonus:</strong> +0.02% for high platform volume</li>
                   <li>• <strong>Treasury Bonus:</strong> +0.01% when treasury is healthy</li>
@@ -453,17 +453,17 @@ export default function DeveloperGuide() {
                   <li>• <strong>Maximum Rate:</strong> 0.12% daily (43.8% APY)</li>
                 </ul>
               </div>
-              <p className="text-gray-300 text-sm">
+              <p className="text-neutral-600 dark:text-gray-300 text-sm">
                 Reward rates are calculated in real-time based on platform metrics and distributed automatically.
               </p>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Implementation Details</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Backend Services</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• <code className="bg-neutral-700 px-1 rounded">utils/token-supply.ts</code> - Token supply calculations</li>
                     <li>• <code className="bg-neutral-700 px-1 rounded">utils/governance.ts</code> - Governance and rewards</li>
                     <li>• <code className="bg-neutral-700 px-1 rounded">api/wallet/</code> - Wallet operations</li>
@@ -472,7 +472,7 @@ export default function DeveloperGuide() {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Frontend Components</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• <code className="bg-neutral-700 px-1 rounded">pages/Wallet.tsx</code> - Wallet interface</li>
                     <li>• <code className="bg-neutral-700 px-1 rounded">pages/Governance.tsx</code> - Governance dashboard</li>
                     <li>• <code className="bg-neutral-700 px-1 rounded">contexts/WalletProvider.tsx</code> - Wallet state</li>
@@ -488,16 +488,16 @@ export default function DeveloperGuide() {
         <section id="notification-system" className="mb-12">
           <h2 className="text-3xl font-bold text-white mb-6">Notification System</h2>
           <div className="space-y-6">
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Architecture Overview</h3>
-              <p className="text-gray-300 mb-4">
+              <p className="text-neutral-600 dark:text-gray-300 mb-4">
                 The notification system provides real-time alerts for user interactions and platform events.
                 It's designed for performance and scalability with minimal API overhead.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Frontend Components</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• Notifications.tsx - Main notification component</li>
                     <li>• Nav.tsx - Notification bell and badge</li>
                     <li>• useNotifications hook - State management</li>
@@ -506,7 +506,7 @@ export default function DeveloperGuide() {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Backend APIs</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• /api/notifications - List notifications</li>
                     <li>• /api/notifications/{'{id}'}/read - Mark as read</li>
                     <li>• /api/notifications/read-all - Mark all read</li>
@@ -516,7 +516,7 @@ export default function DeveloperGuide() {
               </div>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Database Schema</h3>
               <div className="bg-neutral-700 rounded-lg p-4 font-mono text-sm">
                 <div>notifications table:</div>
@@ -532,12 +532,12 @@ export default function DeveloperGuide() {
               </div>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Notification Types</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">User Interactions</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• <strong>comment:</strong> New comment on user's post</li>
                     <li>• <strong>vote:</strong> Vote on user's content</li>
                     <li>• <strong>answer:</strong> New answer to user's question</li>
@@ -546,7 +546,7 @@ export default function DeveloperGuide() {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">System Events</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• <strong>system:</strong> Platform announcements</li>
                     <li>• <strong>reputation:</strong> Reputation changes</li>
                     <li>• <strong>governance:</strong> Governance updates</li>
@@ -556,15 +556,15 @@ export default function DeveloperGuide() {
               </div>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Performance Optimizations</h3>
-              <p className="text-gray-300 mb-4">
+              <p className="text-neutral-600 dark:text-gray-300 mb-4">
                 The notification system has been optimized for performance and user experience.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Recent Improvements</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• Removed unnecessary API polling</li>
                     <li>• Real-time notification creation</li>
                     <li>• Efficient unread count endpoint</li>
@@ -574,7 +574,7 @@ export default function DeveloperGuide() {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Best Practices</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• Create notifications on user actions</li>
                     <li>• Use navigation data for direct links</li>
                     <li>• Implement proper error handling</li>
@@ -591,16 +591,16 @@ export default function DeveloperGuide() {
         <section id="chat-system" className="mb-12">
           <h2 className="text-3xl font-bold text-white mb-6">Chat System</h2>
           <div className="space-y-6">
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Architecture Overview</h3>
-              <p className="text-gray-300 mb-4">
+              <p className="text-neutral-600 dark:text-gray-300 mb-4">
                 The chat system provides real-time messaging capabilities with support for text, emojis, and GIFs.
                 It's built using a RESTful API approach with persistent message storage.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Frontend Components</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• ChatSidebar.tsx - Main chat interface</li>
                     <li>• Chat.tsx - Full chat page</li>
                     <li>• Emoji picker integration</li>
@@ -610,7 +610,7 @@ export default function DeveloperGuide() {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Backend APIs</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• /api/chat - Get chat rooms</li>
                     <li>• /api/chat/{'{roomId}'}/messages - Get/send messages</li>
                     <li>• /api/chat/{'{roomId}'}/join - Join chat room</li>
@@ -620,7 +620,7 @@ export default function DeveloperGuide() {
               </div>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Database Schema</h3>
               <div className="bg-neutral-700 rounded-lg p-4 font-mono text-sm">
                 <div>chat_rooms table:</div>
@@ -643,12 +643,12 @@ export default function DeveloperGuide() {
               </div>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Message Types</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Text Messages</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• Standard text content</li>
                     <li>• Markdown support</li>
                     <li>• Username display</li>
@@ -657,7 +657,7 @@ export default function DeveloperGuide() {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Emoji Messages</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• Emoji picker integration</li>
                     <li>• Popular emoji selection</li>
                     <li>• Unicode emoji support</li>
@@ -666,7 +666,7 @@ export default function DeveloperGuide() {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">GIF Messages</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• GIPHY API integration</li>
                     <li>• Search functionality</li>
                     <li>• Preview and selection</li>
@@ -676,15 +676,15 @@ export default function DeveloperGuide() {
               </div>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">GIF Integration</h3>
-              <p className="text-gray-300 mb-4">
+              <p className="text-neutral-600 dark:text-gray-300 mb-4">
                 The chat system integrates with GIPHY API for GIF search and sharing capabilities.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">GIPHY API Setup</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• Environment variable configuration</li>
                     <li>• API key management</li>
                     <li>• Rate limiting handling</li>
@@ -694,7 +694,7 @@ export default function DeveloperGuide() {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Frontend Integration</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• Search input with debouncing</li>
                     <li>• GIF grid display</li>
                     <li>• Loading states and error handling</li>
@@ -705,12 +705,12 @@ export default function DeveloperGuide() {
               </div>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Real-Time Features</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Message Updates</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• Polling-based message updates</li>
                     <li>• Optimistic UI updates</li>
                     <li>• Message history preservation</li>
@@ -720,7 +720,7 @@ export default function DeveloperGuide() {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">User Experience</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• Persistent chat sidebar</li>
                     <li>• Minimize/maximize functionality</li>
                     <li>• Mobile-responsive design</li>
@@ -731,12 +731,12 @@ export default function DeveloperGuide() {
               </div>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Security & Performance</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Security Measures</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• Authentication required for all endpoints</li>
                     <li>• Input validation and sanitization</li>
                     <li>• Rate limiting on message sending</li>
@@ -746,7 +746,7 @@ export default function DeveloperGuide() {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Performance Optimizations</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• Efficient database queries</li>
                     <li>• Message pagination</li>
                     <li>• GIF search caching</li>
@@ -763,15 +763,15 @@ export default function DeveloperGuide() {
         <section id="governance" className="mb-12">
           <h2 className="text-3xl font-bold text-white mb-6">Governance System</h2>
           <div className="space-y-6">
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Governance Overview</h3>
-              <p className="text-gray-300 mb-4">
+              <p className="text-neutral-600 dark:text-gray-300 mb-4">
                 The governance system allows users to participate in platform decisions and manage platform resources.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Governance Types</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• <strong>Proposal:</strong> New feature or change proposal</li>
                     <li>• <strong>Vote:</strong> Decision on a proposal</li>
                     <li>• <strong>Reputation:</strong> User reputation points</li>
@@ -779,7 +779,7 @@ export default function DeveloperGuide() {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Governance Process</h4>
-                  <ol className="text-gray-400 space-y-2">
+                  <ol className="text-neutral-600 dark:text-gray-400 space-y-2">
                     <li>1. <strong>Proposal Submission:</strong> User creates a proposal</li>
                     <li>2. <strong>Voting:</strong> Community votes on the proposal</li>
                     <li>3. <strong>Implementation:</strong> Proposal implemented if majority vote</li>
@@ -788,7 +788,7 @@ export default function DeveloperGuide() {
               </div>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Database Schema</h3>
               <div className="bg-neutral-700 rounded-lg p-4 font-mono text-sm">
                 <div>governance table:</div>
@@ -801,25 +801,25 @@ export default function DeveloperGuide() {
               </div>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Reputation System</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Reputation Calculation</h4>
-                  <p className="text-gray-300 mb-4">
+                  <p className="text-neutral-600 dark:text-gray-300 mb-4">
                     Reputation points are calculated based on user activity and contributions.
                   </p>
-                  <ul className="text-gray-400 space-y-2">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                     <li>• Positive actions (e.g., upvotes, helpful comments) increase reputation</li>
                     <li>• Negative actions (e.g., downvotes, harmful comments) decrease reputation</li>
                   </ul>
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Reputation Impact</h4>
-                  <p className="text-gray-300 mb-4">
+                  <p className="text-neutral-600 dark:text-gray-300 mb-4">
                     Reputation affects user privileges and access to platform features.
                   </p>
-                  <ul className="text-gray-400 space-y-2">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                     <li>• Higher reputation allows more voting power</li>
                     <li>• Lower reputation may limit voting power</li>
                   </ul>
@@ -833,15 +833,15 @@ export default function DeveloperGuide() {
         <section id="refund-system" className="mb-12">
           <h2 className="text-3xl font-bold text-white mb-6">Refund Request System</h2>
           <div className="space-y-6">
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Refund Request Overview</h3>
-              <p className="text-gray-300 mb-4">
+              <p className="text-neutral-600 dark:text-gray-300 mb-4">
                 The refund request system allows users to request a refund for a post or answer.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Refund Request Process</h4>
-                  <ol className="text-gray-400 space-y-2">
+                  <ol className="text-neutral-600 dark:text-gray-400 space-y-2">
                     <li>1. <strong>Request Submission:</strong> User submits a refund request</li>
                     <li>2. <strong>Review:</strong> Platform reviews the request</li>
                     <li>3. <strong>Decision:</strong> Platform decides on the request</li>
@@ -849,7 +849,7 @@ export default function DeveloperGuide() {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Refund Request Types</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• <strong>Post Refund:</strong> Refund for a post</li>
                     <li>• <strong>Answer Refund:</strong> Refund for an answer</li>
                   </ul>
@@ -857,7 +857,7 @@ export default function DeveloperGuide() {
               </div>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Database Schema</h3>
               <div className="bg-neutral-700 rounded-lg p-4 font-mono text-sm">
                 <div>refunds table:</div>
@@ -872,18 +872,18 @@ export default function DeveloperGuide() {
               </div>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Refund Request Types</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Post Refund</h4>
-                  <p className="text-gray-300 mb-4">
+                  <p className="text-neutral-600 dark:text-gray-300 mb-4">
                     Refund for a post, including all answers and comments.
                   </p>
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Answer Refund</h4>
-                  <p className="text-gray-300 mb-4">
+                  <p className="text-neutral-600 dark:text-gray-300 mb-4">
                     Refund for a specific answer.
                   </p>
                 </div>
@@ -896,12 +896,12 @@ export default function DeveloperGuide() {
         <section id="database" className="mb-12">
           <h2 className="text-3xl font-bold text-white mb-6">Database Schema</h2>
           <div className="space-y-6">
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Core Tables</h3>
               <div className="space-y-4">
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Users</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• id: Primary key</li>
                     <li>• username: Unique username</li>
                     <li>• email: User email</li>
@@ -913,7 +913,7 @@ export default function DeveloperGuide() {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Posts</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• id: Primary key</li>
                     <li>• user_id: Author user ID</li>
                     <li>• title: Post title</li>
@@ -926,7 +926,7 @@ export default function DeveloperGuide() {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Votes</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• id: Primary key</li>
                     <li>• user_id: Voter user ID</li>
                     <li>• post_id: Voted post ID</li>
@@ -937,9 +937,9 @@ export default function DeveloperGuide() {
               </div>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Relationships</h3>
-              <ul className="text-gray-400 space-y-2">
+              <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                 <li>• Users can have many Posts (one-to-many)</li>
                 <li>• Posts can have many Votes (one-to-many)</li>
                 <li>• Questions can have many Answers (one-to-many)</li>
@@ -954,13 +954,13 @@ export default function DeveloperGuide() {
         <section id="api" className="mb-12">
           <h2 className="text-3xl font-bold text-white mb-6">API Reference</h2>
           <div className="space-y-6">
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Authentication Endpoints</h3>
               <div className="space-y-4">
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">POST /api/auth/signup</h4>
-                  <p className="text-gray-300 mb-2">Create a new user account</p>
-                  <pre className="bg-neutral-700 p-3 rounded text-sm text-gray-300">
+                  <p className="text-neutral-600 dark:text-gray-300 mb-2">Create a new user account</p>
+                  <pre className="bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "username": "string",
   "email": "string",
@@ -971,8 +971,8 @@ export default function DeveloperGuide() {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">POST /api/auth/login</h4>
-                  <p className="text-gray-300 mb-2">Authenticate user and get JWT token</p>
-                  <pre className="bg-neutral-700 p-3 rounded text-sm text-gray-300">
+                  <p className="text-neutral-600 dark:text-gray-300 mb-2">Authenticate user and get JWT token</p>
+                  <pre className="bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "email": "string",
   "password": "string"
@@ -982,18 +982,18 @@ export default function DeveloperGuide() {
               </div>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Posts Endpoints</h3>
               <div className="space-y-4">
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">GET /api/posts</h4>
-                  <p className="text-gray-300 mb-2">Get paginated list of posts</p>
-                  <p className="text-gray-400 text-sm">Query params: page, limit, sort, filter</p>
+                  <p className="text-neutral-600 dark:text-gray-300 mb-2">Get paginated list of posts</p>
+                  <p className="text-neutral-600 dark:text-gray-400 text-sm">Query params: page, limit, sort, filter</p>
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">POST /api/posts</h4>
-                  <p className="text-gray-300 mb-2">Create a new post</p>
-                  <pre className="bg-neutral-700 p-3 rounded text-sm text-gray-300">
+                  <p className="text-neutral-600 dark:text-gray-300 mb-2">Create a new post</p>
+                  <pre className="bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "title": "string",
   "content": "string",
@@ -1005,8 +1005,8 @@ export default function DeveloperGuide() {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">POST /api/posts/{'{id}'}/vote</h4>
-                  <p className="text-gray-300 mb-2">Vote on a post</p>
-                  <pre className="bg-neutral-700 p-3 rounded text-sm text-gray-300">
+                  <p className="text-neutral-600 dark:text-gray-300 mb-2">Vote on a post</p>
+                  <pre className="bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "voteType": "up" | "down"
 }`}
@@ -1015,17 +1015,17 @@ export default function DeveloperGuide() {
               </div>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Wallet Endpoints</h3>
               <div className="space-y-4">
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">GET /api/wallet</h4>
-                  <p className="text-gray-300 mb-2">Get user's wallet information</p>
+                  <p className="text-neutral-600 dark:text-gray-300 mb-2">Get user's wallet information</p>
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">POST /api/wallet/deposit</h4>
-                  <p className="text-gray-300 mb-2">Initiate BBUX deposit</p>
-                  <pre className="bg-neutral-700 p-3 rounded text-sm text-gray-300">
+                  <p className="text-neutral-600 dark:text-gray-300 mb-2">Initiate BBUX deposit</p>
+                  <pre className="bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "amount": "number",
   "solAmount": "number"
@@ -1034,8 +1034,8 @@ export default function DeveloperGuide() {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">POST /api/wallet/withdraw</h4>
-                  <p className="text-gray-300 mb-2">Withdraw BBUX tokens</p>
-                  <pre className="bg-neutral-700 p-3 rounded text-sm text-gray-300">
+                  <p className="text-neutral-600 dark:text-gray-300 mb-2">Withdraw BBUX tokens</p>
+                  <pre className="bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "amount": "number"
 }`}
@@ -1050,12 +1050,12 @@ export default function DeveloperGuide() {
         <section id="deployment" className="mb-12">
           <h2 className="text-3xl font-bold text-white mb-6">Deployment</h2>
           <div className="space-y-6">
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Production Deployment</h3>
-              <p className="text-gray-300 mb-4">
+              <p className="text-neutral-600 dark:text-gray-300 mb-4">
                 bountyhub is deployed on Cloudflare Pages and Workers for optimal performance and scalability.
               </p>
-              <ol className="text-gray-300 space-y-2">
+              <ol className="text-neutral-600 dark:text-gray-300 space-y-2">
                 <li>1. <strong>Build:</strong> <code className="bg-neutral-700 px-2 py-1 rounded">npm run build</code></li>
                 <li>2. <strong>Deploy Frontend:</strong> <code className="bg-neutral-700 px-2 py-1 rounded">npm run deploy</code></li>
                 <li>3. <strong>Deploy Workers:</strong> <code className="bg-neutral-700 px-2 py-1 rounded">wrangler deploy</code></li>
@@ -1064,9 +1064,9 @@ export default function DeveloperGuide() {
               </ol>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Environment Configuration</h3>
-              <ul className="text-gray-400 space-y-2">
+              <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                 <li>• Use production Solana RPC endpoints</li>
                 <li>• Configure production database</li>
                 <li>• Set secure JWT secrets</li>
@@ -1075,9 +1075,9 @@ export default function DeveloperGuide() {
               </ul>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Monitoring</h3>
-              <ul className="text-gray-400 space-y-2">
+              <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                 <li>• Cloudflare Analytics for performance</li>
                 <li>• Error tracking and alerting</li>
                 <li>• Database performance monitoring</li>
@@ -1092,9 +1092,9 @@ export default function DeveloperGuide() {
         <section id="contributing" className="mb-12">
           <h2 className="text-3xl font-bold text-white mb-6">Contributing</h2>
           <div className="space-y-6">
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Development Workflow</h3>
-              <ol className="text-gray-300 space-y-2">
+              <ol className="text-neutral-600 dark:text-gray-300 space-y-2">
                 <li>1. Fork the repository</li>
                 <li>2. Create a feature branch: <code className="bg-neutral-700 px-2 py-1 rounded">git checkout -b feature/name</code></li>
                 <li>3. Make your changes</li>
@@ -1107,9 +1107,9 @@ export default function DeveloperGuide() {
               </ol>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Code Standards</h3>
-              <ul className="text-gray-400 space-y-2">
+              <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                 <li>• Follow TypeScript best practices</li>
                 <li>• Use ESLint and Prettier for formatting</li>
                 <li>• Write meaningful commit messages</li>
@@ -1119,12 +1119,12 @@ export default function DeveloperGuide() {
               </ul>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Getting Help</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Community</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• GitHub Discussions</li>
                     <li>• Discord server</li>
                     <li>• Community forum</li>
@@ -1133,7 +1133,7 @@ export default function DeveloperGuide() {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Resources</h4>
-                  <ul className="text-gray-400 space-y-1">
+                  <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• API documentation</li>
                     <li>• Architecture diagrams</li>
                     <li>• Development guides</li>
@@ -1151,33 +1151,33 @@ export default function DeveloperGuide() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Link
               to="/docs/api-reference"
-              className="block p-6 bg-neutral-800 rounded-lg border border-neutral-700 hover:border-violet-500/40 transition-all duration-300"
+              className="block p-6 bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 border border-neutral-700 hover:border-violet-500/40 transition-all duration-300"
             >
               <h3 className="text-lg font-semibold text-white mb-2">API Reference</h3>
-              <p className="text-gray-400 text-sm">Complete API documentation with examples</p>
+              <p className="text-neutral-600 dark:text-gray-400 text-sm">Complete API documentation with examples</p>
             </Link>
             <Link
               to="/docs/deployment-guide"
-              className="block p-6 bg-neutral-800 rounded-lg border border-neutral-700 hover:border-violet-500/40 transition-all duration-300"
+              className="block p-6 bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 border border-neutral-700 hover:border-violet-500/40 transition-all duration-300"
             >
               <h3 className="text-lg font-semibold text-white mb-2">Deployment Guide</h3>
-              <p className="text-gray-400 text-sm">Production deployment instructions</p>
+              <p className="text-neutral-600 dark:text-gray-400 text-sm">Production deployment instructions</p>
             </Link>
             <Link
               to="/docs/platform"
-              className="block p-6 bg-neutral-800 rounded-lg border border-neutral-700 hover:border-violet-500/40 transition-all duration-300"
+              className="block p-6 bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 border border-neutral-700 hover:border-violet-500/40 transition-all duration-300"
             >
               <h3 className="text-lg font-semibold text-white mb-2">Platform Documentation</h3>
-              <p className="text-gray-400 text-sm">Platform overview and architecture</p>
+              <p className="text-neutral-600 dark:text-gray-400 text-sm">Platform overview and architecture</p>
             </Link>
             <a
               href="https://github.com/bountyhub/bountyhub"
               target="_blank"
               rel="noopener noreferrer"
-              className="block p-6 bg-neutral-800 rounded-lg border border-neutral-700 hover:border-violet-500/40 transition-all duration-300"
+              className="block p-6 bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 border border-neutral-700 hover:border-violet-500/40 transition-all duration-300"
             >
               <h3 className="text-lg font-semibold text-white mb-2">GitHub Repository</h3>
-              <p className="text-gray-400 text-sm">Source code and issue tracking</p>
+              <p className="text-neutral-600 dark:text-gray-400 text-sm">Source code and issue tracking</p>
             </a>
           </div>
         </section>
@@ -1185,7 +1185,7 @@ export default function DeveloperGuide() {
         {/* Download PDF */}
         <div className="bg-violet-900/20 border border-violet-500/30 rounded-lg p-6 text-center">
           <h3 className="text-xl font-semibold text-white mb-2">Download Developer Guide</h3>
-          <p className="text-gray-400 mb-4">
+          <p className="text-neutral-600 dark:text-gray-400 mb-4">
             Get a PDF version of this developer guide for offline reading
           </p>
           <a

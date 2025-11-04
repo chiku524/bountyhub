@@ -3,29 +3,29 @@ import { FiArrowLeft, FiDownload, FiUsers, FiDollarSign, FiShield } from 'react-
 
 export default function PlatformDocs() {
   return (
-    <div className="min-h-screen bg-neutral-900">
+    <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200">
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <Link
             to="/docs"
-            className="inline-flex items-center text-violet-400 hover:text-violet-300 transition-colors mb-4"
+            className="inline-flex items-center text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors mb-4"
           >
             <FiArrowLeft className="w-4 h-4 mr-2" />
             Back to Documentation
           </Link>
-          <h1 className="text-4xl font-bold text-white mb-4">Platform Documentation</h1>
-          <p className="text-gray-300 text-lg">
+          <h1 className="text-4xl font-bold text-neutral-900 dark:text-white mb-4">Platform Documentation</h1>
+          <p className="text-neutral-600 dark:text-neutral-600 dark:text-gray-300 text-lg">
             Complete overview of bountyhub platform features, architecture, and functionality
           </p>
         </div>
 
         {/* Table of Contents */}
-        <div className="bg-neutral-800 rounded-lg p-6 mb-8">
-          <h2 className="text-xl font-semibold text-white mb-4">Table of Contents</h2>
-          <ul className="space-y-2 text-gray-300">
-            <li><a href="#overview" className="text-violet-400 hover:text-violet-300">Platform Overview</a></li>
-            <li><a href="#features" className="text-violet-400 hover:text-violet-300">Core Features</a></li>
+        <div className="bg-white dark:bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6 mb-8 border border-neutral-200 dark:border-neutral-700">
+          <h2 className="text-xl font-semibold text-neutral-900 dark:text-white mb-4">Table of Contents</h2>
+          <ul className="space-y-2 text-neutral-600 dark:text-neutral-600 dark:text-gray-300">
+            <li><a href="#overview" className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300">Platform Overview</a></li>
+            <li><a href="#features" className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300">Core Features</a></li>
             <li><a href="#architecture" className="text-violet-400 hover:text-violet-300">Architecture</a></li>
             <li><a href="#tokenomics" className="text-violet-400 hover:text-violet-300">BBUX Tokenomics</a></li>
             <li><a href="#governance" className="text-violet-400 hover:text-violet-300">Governance System</a></li>
@@ -37,32 +37,32 @@ export default function PlatformDocs() {
 
         {/* Platform Overview */}
         <section id="overview" className="mb-12">
-          <h2 className="text-3xl font-bold text-white mb-6">Platform Overview</h2>
-          <div className="bg-neutral-800 rounded-lg p-6">
-            <p className="text-gray-300 mb-4">
+          <h2 className="text-3xl font-bold text-neutral-900 dark:text-white mb-6">Platform Overview</h2>
+          <div className="bg-white dark:bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6 border border-neutral-200 dark:border-neutral-700">
+            <p className="text-neutral-600 dark:text-neutral-600 dark:text-gray-300 mb-4">
               bountyhub is a decentralized question-and-answer platform that incentivizes knowledge sharing through 
               a virtual token system. The platform uses BBUX tokens as an internal currency to reward quality 
               contributions and foster community engagement.
             </p>
-            <p className="text-gray-300 mb-4">
+            <p className="text-neutral-600 dark:text-neutral-600 dark:text-gray-300 mb-4">
               Our mission is to create a sustainable ecosystem where knowledge is valued and rewarded, 
               fostering a community of experts and learners who contribute to the collective intelligence.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-              <div className="text-center p-4 bg-neutral-700 rounded-lg">
-                <FiUsers className="w-8 h-8 text-violet-400 mx-auto mb-2" />
-                <h3 className="text-white font-semibold">Community-Driven</h3>
-                <p className="text-gray-400 text-sm">Built by and for the community</p>
+              <div className="text-center p-4 bg-neutral-100 dark:bg-neutral-700 rounded-lg border border-neutral-200 dark:border-neutral-600">
+                <FiUsers className="w-8 h-8 text-violet-600 dark:text-violet-400 mx-auto mb-2" />
+                <h3 className="text-neutral-900 dark:text-white font-semibold">Community-Driven</h3>
+                <p className="text-neutral-600 dark:text-neutral-600 dark:text-gray-400 text-sm">Built by and for the community</p>
               </div>
-              <div className="text-center p-4 bg-neutral-700 rounded-lg">
-                <FiDollarSign className="w-8 h-8 text-violet-400 mx-auto mb-2" />
-                <h3 className="text-white font-semibold">Virtual Token System</h3>
-                <p className="text-gray-400 text-sm">Earn BBUX for quality contributions</p>
+              <div className="text-center p-4 bg-neutral-100 dark:bg-neutral-700 rounded-lg border border-neutral-200 dark:border-neutral-600">
+                <FiDollarSign className="w-8 h-8 text-violet-600 dark:text-violet-400 mx-auto mb-2" />
+                <h3 className="text-neutral-900 dark:text-white font-semibold">Virtual Token System</h3>
+                <p className="text-neutral-600 dark:text-neutral-600 dark:text-gray-400 text-sm">Earn BBUX for quality contributions</p>
               </div>
-              <div className="text-center p-4 bg-neutral-700 rounded-lg">
-                <FiShield className="w-8 h-8 text-violet-400 mx-auto mb-2" />
-                <h3 className="text-white font-semibold">Transparent Governance</h3>
-                <p className="text-gray-400 text-sm">Community-driven decision making</p>
+              <div className="text-center p-4 bg-neutral-100 dark:bg-neutral-700 rounded-lg border border-neutral-200 dark:border-neutral-600">
+                <FiShield className="w-8 h-8 text-violet-600 dark:text-violet-400 mx-auto mb-2" />
+                <h3 className="text-neutral-900 dark:text-white font-semibold">Transparent Governance</h3>
+                <p className="text-neutral-600 dark:text-neutral-600 dark:text-gray-400 text-sm">Community-driven decision making</p>
               </div>
             </div>
           </div>
@@ -70,15 +70,15 @@ export default function PlatformDocs() {
 
         {/* Core Features */}
         <section id="features" className="mb-12">
-          <h2 className="text-3xl font-bold text-white mb-6">Core Features</h2>
+          <h2 className="text-3xl font-bold text-neutral-900 dark:text-white mb-6">Core Features</h2>
           <div className="space-y-6">
-            <div className="bg-neutral-800 rounded-lg p-6">
-              <h3 className="text-xl font-semibold text-white mb-3">Virtual Token System</h3>
-              <p className="text-gray-300 mb-4">
+            <div className="bg-white dark:bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6 border border-neutral-200 dark:border-neutral-700">
+              <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">Virtual Token System</h3>
+              <p className="text-neutral-600 dark:text-neutral-600 dark:text-gray-300 mb-4">
                 bountyhub uses a virtual BBUX token system that operates entirely within the platform. 
                 Users earn BBUX through various activities and can spend them on bounties and governance participation.
               </p>
-              <ul className="text-gray-400 space-y-2">
+              <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                 <li>• Virtual BBUX tokens with unlimited supply</li>
                 <li>• Earn tokens through quality contributions</li>
                 <li>• Spend tokens on bounties and governance</li>
@@ -87,13 +87,13 @@ export default function PlatformDocs() {
               </ul>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Bounty System</h3>
-              <p className="text-gray-300 mb-4">
+              <p className="text-neutral-600 dark:text-neutral-600 dark:text-gray-300 mb-4">
                 Users can create questions with attached bounties in BBUX tokens. When a question receives 
                 a satisfactory answer, the bounty is automatically distributed to the answerer.
               </p>
-              <ul className="text-gray-400 space-y-2">
+              <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                 <li>• Set custom bounty amounts for questions</li>
                 <li>• Automatic bounty distribution upon answer acceptance</li>
                 <li>• Time-based bounty expiration</li>
@@ -102,13 +102,13 @@ export default function PlatformDocs() {
               </ul>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Dynamic Governance System</h3>
-              <p className="text-gray-300 mb-4">
+              <p className="text-neutral-600 dark:text-neutral-600 dark:text-gray-300 mb-4">
                 Advanced governance system with dynamic reward rates based on platform activity, treasury health, 
                 and user participation.
               </p>
-              <ul className="text-gray-400 space-y-2">
+              <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                 <li>• Dynamic staking rewards (0.05% - 0.12% daily)</li>
                 <li>• Platform activity-based bonus rewards</li>
                 <li>• Treasury health indicators</li>
@@ -118,13 +118,13 @@ export default function PlatformDocs() {
               </ul>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Reputation System</h3>
-              <p className="text-gray-300 mb-4">
+              <p className="text-neutral-600 dark:text-neutral-600 dark:text-gray-300 mb-4">
                 Users build reputation through their contributions. Higher reputation unlocks additional 
                 platform features and voting power.
               </p>
-              <ul className="text-gray-400 space-y-2">
+              <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                 <li>• Earn reputation points for quality answers</li>
                 <li>• Unlock advanced features with higher reputation</li>
                 <li>• Increased voting power for trusted users</li>
@@ -133,13 +133,13 @@ export default function PlatformDocs() {
               </ul>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Refund Request System</h3>
-              <p className="text-gray-300 mb-4">
+              <p className="text-neutral-600 dark:text-neutral-600 dark:text-gray-300 mb-4">
                 Community-driven refund system where users can request refunds for unsatisfactory bounties, 
                 with community voting determining the outcome.
               </p>
-              <ul className="text-gray-400 space-y-2">
+              <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                 <li>• Submit refund requests with detailed reasoning</li>
                 <li>• Community voting on refund approval</li>
                 <li>• Earn rewards for participating in refund decisions</li>
@@ -148,13 +148,13 @@ export default function PlatformDocs() {
               </ul>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Notification System</h3>
-              <p className="text-gray-300 mb-4">
+              <p className="text-neutral-600 dark:text-neutral-600 dark:text-gray-300 mb-4">
                 Real-time notifications keep users informed about important events and activities 
                 on the platform.
               </p>
-              <ul className="text-gray-400 space-y-2">
+              <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                 <li>• Real-time notification creation for user interactions</li>
                 <li>• Direct navigation to relevant content</li>
                 <li>• Mark as read functionality and unread count tracking</li>
@@ -163,13 +163,13 @@ export default function PlatformDocs() {
               </ul>
             </div>
 
-            <div className="bg-neutral-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Global Chat System</h3>
-              <p className="text-gray-300 mb-4">
+              <p className="text-neutral-600 dark:text-neutral-600 dark:text-gray-300 mb-4">
                 Real-time community chat with support for text messages, emojis, and GIFs. 
                 Connect with other users instantly and build relationships within the community.
               </p>
-              <ul className="text-gray-400 space-y-2">
+              <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                 <li>• Real-time messaging with persistent chat history</li>
                 <li>• Emoji picker with popular emoji selection</li>
                 <li>• GIF search powered by GIPHY API integration</li>
@@ -184,12 +184,12 @@ export default function PlatformDocs() {
         {/* Architecture */}
         <section id="architecture" className="mb-12">
           <h2 className="text-3xl font-bold text-white mb-6">Architecture</h2>
-          <div className="bg-neutral-800 rounded-lg p-6">
+          <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
             <h3 className="text-xl font-semibold text-white mb-4">Technology Stack</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <h4 className="text-lg font-semibold text-violet-400 mb-2">Frontend</h4>
-                <ul className="text-gray-400 space-y-1">
+                <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                   <li>• React 18 with TypeScript</li>
                   <li>• Vite for build tooling</li>
                   <li>• Tailwind CSS for styling</li>
@@ -199,7 +199,7 @@ export default function PlatformDocs() {
               </div>
               <div>
                 <h4 className="text-lg font-semibold text-violet-400 mb-2">Backend</h4>
-                <ul className="text-gray-400 space-y-1">
+                <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                   <li>• Cloudflare Workers</li>
                   <li>• Hono framework</li>
                   <li>• D1 database (SQLite)</li>
@@ -211,7 +211,7 @@ export default function PlatformDocs() {
 
             <div className="mt-6">
               <h4 className="text-lg font-semibold text-violet-400 mb-2">Virtual Token System</h4>
-              <ul className="text-gray-400 space-y-2">
+              <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                 <li>• Virtual BBUX tokens with unlimited supply</li>
                 <li>• Database-backed wallet system</li>
                 <li>• Real-time balance tracking</li>
@@ -225,12 +225,12 @@ export default function PlatformDocs() {
         {/* Tokenomics */}
         <section id="tokenomics" className="mb-12">
           <h2 className="text-3xl font-bold text-white mb-6">BBUX Tokenomics</h2>
-          <div className="bg-neutral-800 rounded-lg p-6">
+          <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
             <h3 className="text-xl font-semibold text-white mb-4">Virtual Token Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
                 <h4 className="text-lg font-semibold text-violet-400 mb-2">Token Information</h4>
-                <ul className="text-gray-400 space-y-1">
+                <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                   <li>• Name: BountyBucks (BBUX)</li>
                   <li>• Symbol: BBUX</li>
                   <li>• Type: Virtual Platform Token</li>
@@ -240,7 +240,7 @@ export default function PlatformDocs() {
               </div>
               <div>
                 <h4 className="text-lg font-semibold text-violet-400 mb-2">Earning Mechanisms</h4>
-                <ul className="text-gray-400 space-y-1">
+                <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                   <li>• Quality answers to bountied questions</li>
                   <li>• Governance participation rewards</li>
                   <li>• Refund request voting</li>
@@ -253,10 +253,10 @@ export default function PlatformDocs() {
             <div className="mt-6">
               <h4 className="text-lg font-semibold text-violet-400 mb-2">Dynamic Reward System</h4>
               <div className="bg-neutral-700 rounded-lg p-4">
-                <p className="text-gray-300 mb-3">
+                <p className="text-neutral-600 dark:text-gray-300 mb-3">
                   The platform features a dynamic reward system that adjusts based on platform activity:
                 </p>
-                <ul className="text-gray-400 space-y-2">
+                <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                   <li>• <strong>Base Rate:</strong> 0.05% daily (18.25% APY)</li>
                   <li>• <strong>Activity Bonus:</strong> +0.02% for high platform volume</li>
                   <li>• <strong>Treasury Bonus:</strong> +0.01% when treasury is healthy</li>
@@ -272,9 +272,9 @@ export default function PlatformDocs() {
         {/* Governance System */}
         <section id="governance" className="mb-12">
           <h2 className="text-3xl font-bold text-white mb-6">Governance System</h2>
-          <div className="bg-neutral-800 rounded-lg p-6">
+          <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
             <h3 className="text-xl font-semibold text-white mb-4">Virtual Governance</h3>
-            <p className="text-gray-300 mb-4">
+            <p className="text-neutral-600 dark:text-neutral-600 dark:text-gray-300 mb-4">
               bountyhub features a comprehensive virtual governance system that allows users to participate 
               in platform decisions and earn rewards for their participation.
             </p>
@@ -282,7 +282,7 @@ export default function PlatformDocs() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
                 <h4 className="text-lg font-semibold text-violet-400 mb-2">Staking & Rewards</h4>
-                <ul className="text-gray-400 space-y-2">
+                <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                   <li>• Stake BBUX tokens for governance participation</li>
                   <li>• Dynamic reward rates based on platform metrics</li>
                   <li>• Real-time transparency logs</li>
@@ -292,7 +292,7 @@ export default function PlatformDocs() {
               </div>
               <div>
                 <h4 className="text-lg font-semibold text-violet-400 mb-2">Community Voting</h4>
-                <ul className="text-gray-400 space-y-2">
+                <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                   <li>• Vote on refund requests</li>
                   <li>• Earn rewards for voting participation</li>
                   <li>• Anti-gaming measures and requirements</li>
@@ -304,7 +304,7 @@ export default function PlatformDocs() {
 
             <div className="mt-6">
               <h4 className="text-lg font-semibold text-violet-400 mb-2">Platform Metrics</h4>
-              <ul className="text-gray-400 space-y-2">
+              <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                 <li>• <strong>Monthly Volume:</strong> Tracks bounty placements over 30 days</li>
                 <li>• <strong>Treasury Health:</strong> LOW/MEDIUM/HIGH based on treasury balance</li>
                 <li>• <strong>Participation Level:</strong> LOW/MEDIUM/HIGH based on active stakers</li>
@@ -317,9 +317,9 @@ export default function PlatformDocs() {
         {/* Global Chat */}
         <section id="chat" className="mb-12">
           <h2 className="text-3xl font-bold text-white mb-6">Global Chat</h2>
-          <div className="bg-neutral-800 rounded-lg p-6">
+          <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
             <h3 className="text-xl font-semibold text-white mb-4">Real-Time Community Communication</h3>
-            <p className="text-gray-300 mb-4">
+            <p className="text-neutral-600 dark:text-neutral-600 dark:text-gray-300 mb-4">
               The Global Chat system enables real-time communication between community members, fostering 
               relationships and facilitating quick knowledge sharing outside of formal Q&A interactions.
             </p>
@@ -327,7 +327,7 @@ export default function PlatformDocs() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
                 <h4 className="text-lg font-semibold text-violet-400 mb-2">Core Features</h4>
-                <ul className="text-gray-400 space-y-2">
+                <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                   <li>• Real-time messaging with persistent history</li>
                   <li>• Emoji picker with popular emoji selection</li>
                   <li>• GIF search powered by GIPHY API</li>
@@ -338,7 +338,7 @@ export default function PlatformDocs() {
               </div>
               <div>
                 <h4 className="text-lg font-semibold text-violet-400 mb-2">User Experience</h4>
-                <ul className="text-gray-400 space-y-2">
+                <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                   <li>• One-click access from any page</li>
                   <li>• Auto-join global chat room</li>
                   <li>• Minimize/maximize functionality</li>
@@ -351,7 +351,7 @@ export default function PlatformDocs() {
 
             <div className="mt-6">
               <h4 className="text-lg font-semibold text-violet-400 mb-2">Technical Implementation</h4>
-              <ul className="text-gray-400 space-y-2">
+              <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                 <li>• <strong>Database:</strong> Persistent message storage with chat_rooms and chat_messages tables</li>
                 <li>• <strong>API:</strong> RESTful endpoints for room management and messaging</li>
                 <li>• <strong>Frontend:</strong> React components with real-time updates</li>
@@ -363,7 +363,7 @@ export default function PlatformDocs() {
 
             <div className="mt-6">
               <h4 className="text-lg font-semibold text-violet-400 mb-2">Community Benefits</h4>
-              <ul className="text-gray-400 space-y-2">
+              <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                 <li>• <strong>Quick Questions:</strong> Get fast answers without creating formal posts</li>
                 <li>• <strong>Community Building:</strong> Foster relationships between users</li>
                 <li>• <strong>Knowledge Sharing:</strong> Share tips and insights informally</li>
@@ -378,12 +378,12 @@ export default function PlatformDocs() {
         {/* Security */}
         <section id="security" className="mb-12">
           <h2 className="text-3xl font-bold text-white mb-6">Security & Privacy</h2>
-          <div className="bg-neutral-800 rounded-lg p-6">
+          <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
             <h3 className="text-xl font-semibold text-white mb-4">Security Measures</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
                 <h4 className="text-lg font-semibold text-violet-400 mb-2">Platform Security</h4>
-                <ul className="text-gray-400 space-y-1">
+                <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                   <li>• HTTPS encryption</li>
                   <li>• Rate limiting</li>
                   <li>• Input validation</li>
@@ -393,7 +393,7 @@ export default function PlatformDocs() {
               </div>
               <div>
                 <h4 className="text-lg font-semibold text-violet-400 mb-2">Blockchain Security</h4>
-                <ul className="text-gray-400 space-y-1">
+                <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                   <li>• Solana network security</li>
                   <li>• Transaction verification</li>
                   <li>• Smart contract audits</li>
@@ -403,7 +403,7 @@ export default function PlatformDocs() {
             </div>
 
             <h4 className="text-lg font-semibold text-violet-400 mb-2">Privacy Protection</h4>
-            <ul className="text-gray-400 space-y-2">
+            <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
               <li>• No personal data collection</li>
               <li>• Pseudonymous user accounts</li>
               <li>• Encrypted data storage</li>
@@ -416,11 +416,11 @@ export default function PlatformDocs() {
         {/* Roadmap */}
         <section id="roadmap" className="mb-12">
           <h2 className="text-3xl font-bold text-white mb-6">Development Roadmap</h2>
-          <div className="bg-neutral-800 rounded-lg p-6">
+          <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
             <div className="space-y-6">
               <div>
                 <h3 className="text-xl font-semibold text-white mb-3">Phase 1: Foundation (Q1 2025)</h3>
-                <ul className="text-gray-400 space-y-1">
+                <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                   <li>• Core bounty platform launch</li>
                   <li>• User authentication and profiles</li>
                   <li>• Basic bounty creation and management</li>
@@ -431,7 +431,7 @@ export default function PlatformDocs() {
 
               <div>
                 <h3 className="text-xl font-semibold text-white mb-3">Phase 2: Enhancement (Q2 2025)</h3>
-                <ul className="text-gray-400 space-y-1">
+                <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                   <li>• Advanced filtering and search</li>
                   <li>• Media upload and code block support</li>
                   <li>• Enhanced reputation and integrity system</li>
@@ -442,7 +442,7 @@ export default function PlatformDocs() {
 
               <div>
                 <h3 className="text-xl font-semibold text-white mb-3">Phase 3: Expansion (Q3 2025)</h3>
-                <ul className="text-gray-400 space-y-1">
+                <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                   <li>• Governance system launch</li>
                   <li>• Advanced analytics and insights</li>
                   <li>• API documentation and developer tools</li>
@@ -453,7 +453,7 @@ export default function PlatformDocs() {
 
               <div>
                 <h3 className="text-xl font-semibold text-white mb-3">Phase 4: Ecosystem (Q4 2025)</h3>
-                <ul className="text-gray-400 space-y-1">
+                <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                   <li>• Advanced governance features</li>
                   <li>• Cross-chain compatibility</li>
                   <li>• Enterprise features and partnerships</li>
@@ -471,31 +471,31 @@ export default function PlatformDocs() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Link
               to="/docs/user-guide"
-              className="block p-6 bg-neutral-800 rounded-lg border border-neutral-700 hover:border-violet-500/40 transition-all duration-300"
+              className="block p-6 bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 border border-neutral-700 hover:border-violet-500/40 transition-all duration-300"
             >
               <h3 className="text-lg font-semibold text-white mb-2">User Guide</h3>
-              <p className="text-gray-400 text-sm">Complete user documentation and tutorials</p>
+              <p className="text-neutral-600 dark:text-gray-400 text-sm">Complete user documentation and tutorials</p>
             </Link>
             <Link
               to="/docs/developer-guide"
-              className="block p-6 bg-neutral-800 rounded-lg border border-neutral-700 hover:border-violet-500/40 transition-all duration-300"
+              className="block p-6 bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 border border-neutral-700 hover:border-violet-500/40 transition-all duration-300"
             >
               <h3 className="text-lg font-semibold text-white mb-2">Developer Guide</h3>
-              <p className="text-gray-400 text-sm">Technical documentation for developers</p>
+              <p className="text-neutral-600 dark:text-gray-400 text-sm">Technical documentation for developers</p>
             </Link>
             <Link
               to="/docs/api-reference"
-              className="block p-6 bg-neutral-800 rounded-lg border border-neutral-700 hover:border-violet-500/40 transition-all duration-300"
+              className="block p-6 bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 border border-neutral-700 hover:border-violet-500/40 transition-all duration-300"
             >
               <h3 className="text-lg font-semibold text-white mb-2">API Reference</h3>
-              <p className="text-gray-400 text-sm">Complete API documentation</p>
+              <p className="text-neutral-600 dark:text-gray-400 text-sm">Complete API documentation</p>
             </Link>
             <Link
               to="/docs/deployment-guide"
-              className="block p-6 bg-neutral-800 rounded-lg border border-neutral-700 hover:border-violet-500/40 transition-all duration-300"
+              className="block p-6 bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 border border-neutral-700 hover:border-violet-500/40 transition-all duration-300"
             >
               <h3 className="text-lg font-semibold text-white mb-2">Deployment Guide</h3>
-              <p className="text-gray-400 text-sm">Production deployment instructions</p>
+              <p className="text-neutral-600 dark:text-gray-400 text-sm">Production deployment instructions</p>
             </Link>
           </div>
         </section>
@@ -503,7 +503,7 @@ export default function PlatformDocs() {
         {/* Download PDF */}
         <div className="bg-violet-900/20 border border-violet-500/30 rounded-lg p-6 text-center">
           <h3 className="text-xl font-semibold text-white mb-2">Download Platform Documentation</h3>
-          <p className="text-gray-400 mb-4">
+          <p className="text-neutral-600 dark:text-gray-400 mb-4">
             Get a PDF version of this documentation for offline reading
           </p>
           <a
