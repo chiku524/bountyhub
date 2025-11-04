@@ -16,6 +16,10 @@ app.get(async (c) => {
   const db = createDb(c.env.DB)
   const submissionId = c.req.param('id')
   
+  if (!submissionId) {
+    return c.json({ error: 'Submission ID is required' }, 400)
+  }
+  
   try {
     const submission = await db
       .select()
@@ -49,6 +53,10 @@ app.put(async (c) => {
   const db = createDb(c.env.DB)
   const submissionId = c.req.param('id')
   
+  if (!submissionId) {
+    return c.json({ error: 'Submission ID is required' }, 400)
+  }
+  
   try {
     const sessionCookie = getCookie(c, 'session')
     if (!sessionCookie) {
@@ -77,15 +85,18 @@ app.put(async (c) => {
 
     // Only allow status updates and verification
     if (body.status !== undefined) {
-      updateData.status = body.status
-      if (body.status === 'VERIFIED') {
-        updateData.verifiedBy = userId
-        updateData.verifiedAt = new Date()
-      }
-      if (body.status === 'AWARDED') {
-        updateData.awardedAt = new Date()
-        if (body.rewardAmount !== undefined) {
-          updateData.rewardAmount = body.rewardAmount
+      const validStatuses = ['SUBMITTED', 'REVIEWING', 'VERIFIED', 'REJECTED', 'DUPLICATE', 'RESOLVED', 'AWARDED']
+      if (validStatuses.includes(body.status)) {
+        updateData.status = body.status as 'SUBMITTED' | 'REVIEWING' | 'VERIFIED' | 'REJECTED' | 'DUPLICATE' | 'RESOLVED' | 'AWARDED'
+        if (body.status === 'VERIFIED') {
+          updateData.verifiedBy = userId
+          updateData.verifiedAt = new Date()
+        }
+        if (body.status === 'AWARDED') {
+          updateData.awardedAt = new Date()
+          if (body.rewardAmount !== undefined) {
+            updateData.rewardAmount = body.rewardAmount
+          }
         }
       }
     }
@@ -107,16 +118,19 @@ app.put(async (c) => {
 
     // Create verification record if status changed
     if (body.status && body.status !== submission[0].status) {
-      await db.insert(bugSubmissionVerifications).values({
-        id: crypto.randomUUID(),
-        submissionId,
-        verifierId: userId,
-        step: 'VERIFICATION',
-        status: body.status === 'VERIFIED' || body.status === 'AWARDED' ? 'APPROVED' : 'REJECTED',
-        notes: body.verificationNotes || null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })
+      const validStatuses = ['SUBMITTED', 'REVIEWING', 'VERIFIED', 'REJECTED', 'DUPLICATE', 'RESOLVED', 'AWARDED']
+      if (validStatuses.includes(body.status)) {
+        await db.insert(bugSubmissionVerifications).values({
+          id: crypto.randomUUID(),
+          submissionId,
+          verifierId: userId,
+          step: 'VERIFICATION' as const,
+          status: (body.status === 'VERIFIED' || body.status === 'AWARDED' ? 'APPROVED' : 'REJECTED') as 'PENDING' | 'IN_PROGRESS' | 'APPROVED' | 'REJECTED',
+          notes: body.verificationNotes || null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+      }
     }
 
     return c.json(updated)

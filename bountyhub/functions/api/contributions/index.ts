@@ -44,7 +44,7 @@ app.get(async (c) => {
     const total = Number(totalResult[0]?.count || 0)
 
     // Get contributions with user and repository info
-    let query = db
+    const baseQuery = db
       .select({
         contribution: contributions,
         user: {
@@ -59,14 +59,16 @@ app.get(async (c) => {
       .leftJoin(profiles, eq(users.id, profiles.userId))
       .leftJoin(githubRepositories, eq(contributions.repositoryId, githubRepositories.id))
 
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions))
-    }
-
-    const contributionsList = await query
-      .orderBy(desc(contributions.contributionDate))
-      .limit(limit)
-      .offset(offset)
+    const contributionsList = conditions.length > 0
+      ? await baseQuery
+          .where(and(...conditions))
+          .orderBy(desc(contributions.contributionDate))
+          .limit(limit)
+          .offset(offset)
+      : await baseQuery
+          .orderBy(desc(contributions.contributionDate))
+          .limit(limit)
+          .offset(offset)
 
     return c.json({
       contributions: contributionsList.map(item => ({

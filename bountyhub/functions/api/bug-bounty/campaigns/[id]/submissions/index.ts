@@ -1,8 +1,8 @@
 import { Hono } from 'hono'
 import { getCookie } from 'hono/cookie'
-import { createDb } from '../../../../src/utils/db'
-import { getUserIdFromSession } from '../../../../src/utils/auth'
-import { bugSubmissions, bugBountyCampaigns, users, profiles } from '../../../../drizzle/schema'
+import { createDb } from '../../../../../../src/utils/db'
+import { getUserIdFromSession } from '../../../../../../src/utils/auth'
+import { bugSubmissions, bugBountyCampaigns, users, profiles } from '../../../../../../drizzle/schema'
 import { eq, sql, desc, and } from 'drizzle-orm'
 
 interface Env {
@@ -15,6 +15,10 @@ const app = new Hono<{ Bindings: Env }>()
 app.get(async (c) => {
   const db = createDb(c.env.DB)
   const campaignId = c.req.param('id')
+  
+  if (!campaignId) {
+    return c.json({ error: 'Campaign ID is required' }, 400)
+  }
   
   try {
     const page = parseInt(c.req.query('page') || '1', 10)
@@ -36,8 +40,12 @@ app.get(async (c) => {
 
     // Build conditions
     const conditions = [eq(bugSubmissions.campaignId, campaignId)]
-    if (status) conditions.push(eq(bugSubmissions.status, status))
-    if (severity) conditions.push(eq(bugSubmissions.severity, severity))
+    if (status && ['SUBMITTED', 'REVIEWING', 'VERIFIED', 'REJECTED', 'DUPLICATE', 'RESOLVED', 'AWARDED'].includes(status)) {
+      conditions.push(eq(bugSubmissions.status, status as 'SUBMITTED' | 'REVIEWING' | 'VERIFIED' | 'REJECTED' | 'DUPLICATE' | 'RESOLVED' | 'AWARDED'))
+    }
+    if (severity && ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFO'].includes(severity)) {
+      conditions.push(eq(bugSubmissions.severity, severity as 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'INFO'))
+    }
 
     // Get total count
     const totalResult = await db
@@ -87,6 +95,10 @@ app.get(async (c) => {
 app.post(async (c) => {
   const db = createDb(c.env.DB)
   const campaignId = c.req.param('id')
+  
+  if (!campaignId) {
+    return c.json({ error: 'Campaign ID is required' }, 400)
+  }
   
   try {
     const sessionCookie = getCookie(c, 'session')
@@ -143,8 +155,8 @@ app.post(async (c) => {
       submitterId: userId,
       title,
       description,
-      severity,
-      status: 'SUBMITTED',
+      severity: severity as 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'INFO',
+      status: 'SUBMITTED' as const,
       stepsToReproduce: stepsToReproduce || null,
       impact: impact || null,
       suggestedFix: suggestedFix || null,

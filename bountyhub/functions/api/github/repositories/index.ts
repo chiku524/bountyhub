@@ -127,7 +127,7 @@ app.post('/sync', async (c) => {
         .where(eq(githubRepositories.githubRepoId, repo.id))
         .limit(1)
 
-      const repoData = {
+      const repoData: any = {
         id: existing[0]?.id || crypto.randomUUID(),
         ownerId: userId,
         githubRepoId: repo.id,
@@ -144,17 +144,19 @@ app.post('/sync', async (c) => {
         defaultBranch: repo.default_branch || 'main',
         topics: repo.topics ? JSON.stringify(repo.topics) : null,
         lastSyncedAt: now,
-        createdAt: existing[0]?.createdAt || now,
         updatedAt: now,
       }
 
       if (existing[0]) {
+        // Preserve original createdAt for updates
+        repoData.createdAt = existing[0].createdAt
         await db
           .update(githubRepositories)
           .set(repoData)
           .where(eq(githubRepositories.id, existing[0].id))
         syncedRepos.push({ ...repoData, id: existing[0].id })
       } else {
+        repoData.createdAt = now
         const [inserted] = await db.insert(githubRepositories).values(repoData).returning()
         syncedRepos.push(inserted)
       }

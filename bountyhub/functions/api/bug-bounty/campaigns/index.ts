@@ -30,7 +30,7 @@ app.get(async (c) => {
     }
     if (ownerId) conditions.push(eq(bugBountyCampaigns.ownerId, ownerId))
     if (isPublic !== undefined) {
-      conditions.push(eq(bugBountyCampaigns.isPublic, isPublic === 'true' ? 1 : 0))
+      conditions.push(eq(bugBountyCampaigns.isPublic, isPublic === 'true'))
     }
 
     // Get total count
@@ -42,7 +42,7 @@ app.get(async (c) => {
     const total = Number(totalResult[0]?.count || 0)
 
     // Get campaigns with owner and repository info
-    let query = db
+    const baseQuery = db
       .select({
         campaign: bugBountyCampaigns,
         owner: {
@@ -62,14 +62,16 @@ app.get(async (c) => {
       .leftJoin(profiles, eq(users.id, profiles.userId))
       .leftJoin(githubRepositories, eq(bugBountyCampaigns.repositoryId, githubRepositories.id))
 
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions))
-    }
-
-    const campaigns = await query
-      .orderBy(desc(bugBountyCampaigns.createdAt))
-      .limit(limit)
-      .offset(offset)
+    const campaigns = conditions.length > 0
+      ? await baseQuery
+          .where(and(...conditions))
+          .orderBy(desc(bugBountyCampaigns.createdAt))
+          .limit(limit)
+          .offset(offset)
+      : await baseQuery
+          .orderBy(desc(bugBountyCampaigns.createdAt))
+          .limit(limit)
+          .offset(offset)
 
     // Count submissions for each campaign
     const campaignsWithStats = await Promise.all(
@@ -217,7 +219,7 @@ app.post(async (c) => {
       description,
       ownerId: userId,
       repositoryId: repositoryId || null,
-      status: 'DRAFT',
+      status: 'DRAFT' as const,
       totalBudget: totalBudget || 0,
       remainingBudget: totalBudget || 0,
       minReward: minReward || 0,
@@ -227,8 +229,8 @@ app.post(async (c) => {
       severityLevels: severityLevels ? JSON.stringify(severityLevels) : null,
       startDate: startDate ? new Date(startDate) : null,
       endDate: endDate ? new Date(endDate) : null,
-      isPublic: isPublic !== false ? 1 : 0,
-      allowTeamBounties: allowTeamBounties ? 1 : 0,
+      isPublic: isPublic !== false,
+      allowTeamBounties: allowTeamBounties || false,
       createdAt: now,
       updatedAt: now,
     }).returning()
@@ -244,6 +246,10 @@ app.post(async (c) => {
 app.put('/:id', async (c) => {
   const db = createDb(c.env.DB)
   const campaignId = c.req.param('id')
+  
+  if (!campaignId) {
+    return c.json({ error: 'Campaign ID is required' }, 400)
+  }
   
   try {
     const sessionCookie = getCookie(c, 'session')
@@ -279,7 +285,12 @@ app.put('/:id', async (c) => {
     // Only update provided fields
     if (body.title !== undefined) updateData.title = body.title
     if (body.description !== undefined) updateData.description = body.description
-    if (body.status !== undefined) updateData.status = body.status
+    if (body.status !== undefined) {
+      const validStatuses = ['DRAFT', 'ACTIVE', 'PAUSED', 'COMPLETED', 'CANCELLED']
+      if (validStatuses.includes(body.status)) {
+        updateData.status = body.status as 'DRAFT' | 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'CANCELLED'
+      }
+    }
     if (body.totalBudget !== undefined) {
       updateData.totalBudget = body.totalBudget
       // Adjust remaining budget proportionally
@@ -295,8 +306,8 @@ app.put('/:id', async (c) => {
     if (body.severityLevels !== undefined) updateData.severityLevels = JSON.stringify(body.severityLevels)
     if (body.startDate !== undefined) updateData.startDate = body.startDate ? new Date(body.startDate) : null
     if (body.endDate !== undefined) updateData.endDate = body.endDate ? new Date(body.endDate) : null
-    if (body.isPublic !== undefined) updateData.isPublic = body.isPublic ? 1 : 0
-    if (body.allowTeamBounties !== undefined) updateData.allowTeamBounties = body.allowTeamBounties ? 1 : 0
+    if (body.isPublic !== undefined) updateData.isPublic = body.isPublic
+    if (body.allowTeamBounties !== undefined) updateData.allowTeamBounties = body.allowTeamBounties
 
     const [updated] = await db
       .update(bugBountyCampaigns)
@@ -315,6 +326,10 @@ app.put('/:id', async (c) => {
 app.delete('/:id', async (c) => {
   const db = createDb(c.env.DB)
   const campaignId = c.req.param('id')
+  
+  if (!campaignId) {
+    return c.json({ error: 'Campaign ID is required' }, 400)
+  }
   
   try {
     const sessionCookie = getCookie(c, 'session')
