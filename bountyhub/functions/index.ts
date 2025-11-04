@@ -108,22 +108,26 @@ app.get('/cron', async (c) => {
 
 // GitHub OAuth callback route (mounted at /auth/callback as per user's OAuth app config)
 // This route MUST be defined before /api/auth routes to ensure it matches first
+// Handle the callback directly by importing and calling the GitHub callback handler
 app.all('/auth/callback', async (c) => {
+  // Import the GitHub handler module
+  const githubModule = await import('./api/auth/github')
+  const githubHandler = githubModule.default
+  
   // Create a new request with the correct path for the github router
-  // The github router is mounted at /api/auth/github, so /callback becomes /api/auth/github/callback
+  // The github router expects /api/auth/github/callback
   const url = new URL(c.req.url)
-  const newPath = '/api/auth/github/callback' + url.search
-  const newUrl = `${url.origin}${newPath}`
+  url.pathname = '/api/auth/github/callback'
   
   // Create a new request with modified URL
-  // For GET requests, we don't need a body
-  const newRequest = new Request(newUrl, {
+  const newRequest = new Request(url.toString(), {
     method: c.req.method,
     headers: c.req.header(),
   })
   
-  // Forward to auth routes handler
-  return authRoutes.fetch(newRequest, c.env, c.executionCtx)
+  // Call the GitHub handler's fetch method directly
+  // This will route to the /callback handler in the github router
+  return githubHandler.fetch(newRequest, c.env, c.executionCtx)
 })
 
 // API routes - mount after callback handler
