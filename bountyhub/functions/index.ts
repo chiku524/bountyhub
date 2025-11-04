@@ -134,8 +134,15 @@ app.all('/auth/callback', async (c) => {
     
     // Verify state to prevent CSRF attacks
     if (state !== storedState) {
+      console.error('State mismatch:', {
+        receivedState: state,
+        storedState: storedState,
+        hasStoredState: !!storedState
+      })
       return c.redirect(`${frontendUrl}/login?error=invalid_state`)
     }
+    
+    console.log('State verified, exchanging code for token...')
     
     // Exchange code for access token
     const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
@@ -153,26 +160,52 @@ app.all('/auth/callback', async (c) => {
     })
     
     if (!tokenResponse.ok) {
+      const errorText = await tokenResponse.text()
+      console.error('Token exchange error:', {
+        status: tokenResponse.status,
+        statusText: tokenResponse.statusText,
+        error: errorText
+      })
       return c.redirect(`${frontendUrl}/login?error=token_exchange_failed`)
     }
     
-    const tokenData = await tokenResponse.json() as { access_token?: string; error?: string }
+    const tokenData = await tokenResponse.json() as { access_token?: string; error?: string; error_description?: string }
     
     if (!tokenData.access_token || tokenData.error) {
+      console.error('Token exchange failed:', {
+        error: tokenData.error,
+        errorDescription: tokenData.error_description,
+        hasAccessToken: !!tokenData.access_token
+      })
       return c.redirect(`${frontendUrl}/login?error=token_exchange_failed`)
     }
     
     const accessToken = tokenData.access_token
+    console.log('Access token obtained, fetching user info from GitHub...')
     
     // Get user info from GitHub
     const userResponse = await fetch('https://api.github.com/user', {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
-        'Accept': 'application/vnd.github.v3+json'
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'BountyHub-OAuth'
       }
     })
     
+    console.log('GitHub API response:', {
+      status: userResponse.status,
+      statusText: userResponse.statusText,
+      ok: userResponse.ok
+    })
+    
     if (!userResponse.ok) {
+      const errorText = await userResponse.text()
+      console.error('GitHub API error:', {
+        status: userResponse.status,
+        statusText: userResponse.statusText,
+        error: errorText,
+        accessToken: accessToken ? `${accessToken.substring(0, 10)}...` : 'missing'
+      })
       return c.redirect(`${frontendUrl}/login?error=github_api_failed`)
     }
     
