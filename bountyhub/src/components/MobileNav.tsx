@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { FiUsers, FiCheckSquare, FiRefreshCw, FiDollarSign, FiSettings, FiHome, FiUser, FiBarChart2 } from 'react-icons/fi'
+import { FiUsers, FiCheckSquare, FiDollarSign, FiUser, FiBarChart2 } from 'react-icons/fi'
 import { useAuth } from '../contexts/AuthProvider'
 
 export function MobileNav() {
