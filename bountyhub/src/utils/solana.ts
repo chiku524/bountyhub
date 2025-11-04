@@ -18,7 +18,8 @@ export const loadPlatformWallet = async (): Promise<Keypair> => {
   }
 
   try {
-    const privateKeyString = import.meta.env.VITE_PLATFORM_PRIVATE_KEY
+    // Type guard for import.meta.env (Vite-specific, not available in Workers)
+    const privateKeyString = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_PLATFORM_PRIVATE_KEY) as string | undefined
     if (!privateKeyString) {
       throw new Error('Platform private key not configured')
     }
@@ -38,7 +39,8 @@ export class SolanaService {
     if (typeof window !== 'undefined') {
       // Frontend environment - use the proxy endpoint
       try {
-        const rpcUrl = import.meta.env.VITE_SOLANA_RPC_URL || 'https://api.bountyhub.tech/api/wallet/solana-proxy'
+        // Type guard for import.meta.env (Vite-specific)
+        const rpcUrl = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_SOLANA_RPC_URL) || 'https://api.bountyhub.tech/api/wallet/solana-proxy'
         return new Connection(rpcUrl, 'confirmed')
       } catch (error) {
         // Fallback if import.meta is not available
@@ -69,10 +71,10 @@ export class SolanaService {
       if (env && env.SOLANA_WALLET_PRIVATE_KEY) {
         console.log('Loading platform wallet from backend environment variables')
         privateKeyString = env.SOLANA_WALLET_PRIVATE_KEY
-      } else if (typeof import.meta !== 'undefined' && import.meta.env) {
-        // Frontend environment
+      } else if (typeof import.meta !== 'undefined' && (import.meta as any).env) {
+        // Frontend environment - type guard for Vite-specific import.meta.env
         console.log('Loading platform wallet from frontend environment variables')
-        privateKeyString = import.meta.env.VITE_PLATFORM_PRIVATE_KEY
+        privateKeyString = (import.meta as any).env?.VITE_PLATFORM_PRIVATE_KEY
       }
       
       console.log('Private key string available:', !!privateKeyString)
