@@ -107,11 +107,20 @@ app.get('/cron', async (c) => {
 })
 
 // GitHub OAuth callback route (mounted at /auth/callback as per user's OAuth app config)
-// This route forwards to the GitHub OAuth callback handler
+// This route handles the callback directly by forwarding to the GitHub handler
 app.all('/auth/callback', async (c) => {
-  // Simply forward to the GitHub callback handler
-  // The route will be handled by the auth/github route
-  return c.redirect(`/api/auth/github/callback${c.req.url.split('/auth/callback')[1] || ''}`)
+  // Create a new request with the correct path for the github router
+  const url = new URL(c.req.url)
+  const queryString = url.search
+  // Forward to the GitHub callback handler at /api/auth/github/callback
+  const newUrl = `${url.origin}/api/auth/github/callback${queryString}`
+  const newRequest = new Request(newUrl, {
+    method: c.req.method,
+    headers: c.req.header(),
+  })
+  
+  // Forward to auth routes handler
+  return authRoutes.fetch(newRequest, c.env, c.executionCtx)
 })
 
 // API routes
