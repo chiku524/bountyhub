@@ -30,15 +30,16 @@ app.get('/', async (c) => {
   const cookieOptions: any = {
     httpOnly: true,
     secure: c.env.NODE_ENV === 'production',
-    sameSite: c.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site redirects
+    sameSite: 'lax', // Use 'lax' since we're redirecting from api.bountyhub.tech back to api.bountyhub.tech (same-site)
     maxAge: 600, // 10 minutes
     path: '/'
   }
   
   // In production, set domain to allow cross-subdomain access
-  // Note: Domain with leading dot works for all subdomains
+  // Note: For OAuth redirects, we need to ensure the cookie works across subdomains
+  // Setting domain allows the cookie to be accessible from both api.bountyhub.tech and bountyhub.tech
   if (c.env.NODE_ENV === 'production') {
-    cookieOptions.domain = 'bountyhub.tech' // Without leading dot - works for both api.bountyhub.tech and bountyhub.tech
+    cookieOptions.domain = '.bountyhub.tech' // With leading dot for subdomain support
   }
   
   setCookie(c, 'github_oauth_state', state, cookieOptions)
