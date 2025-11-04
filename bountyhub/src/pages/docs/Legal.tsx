@@ -134,7 +134,7 @@ export default function Legal() {
         {/* Privacy Policy */}
         <section id="privacy" className="mb-12">
           <div className="flex justify-between items-start mb-4">
-            <h2 className="text-3xl font-bold text-neutral-900 dark:text-white">Privacy Policy</h2">
+            <h2 className="text-3xl font-bold text-neutral-900 dark:text-white">Privacy Policy</h2>
             <span className="text-sm text-neutral-500 dark:text-gray-400">
               <strong>Last updated:</strong> June 23, 2025
             </span>
