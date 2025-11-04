@@ -42,6 +42,9 @@ import ApiReference from './pages/docs/ApiReference'
 import DeploymentGuide from './pages/docs/DeploymentGuide'
 import Legal from './pages/docs/Legal'
 import RefundSystem from './pages/docs/RefundSystem'
+import BugBountyCampaigns from './pages/BugBountyCampaigns'
+import BugBountyCampaignCreate from './pages/BugBountyCampaignCreate'
+import BugBountyCampaignDetail from './pages/BugBountyCampaignDetail'
 import '@solana/wallet-adapter-react-ui/styles.css'
 
 function AppContent() {
@@ -119,6 +122,9 @@ function AppContent() {
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/admin" element={<Admin />} />
+              <Route path="/bug-bounty/campaigns" element={<BugBountyCampaigns />} />
+              <Route path="/bug-bounty/campaigns/create" element={<BugBountyCampaignCreate />} />
+              <Route path="/bug-bounty/campaigns/:id" element={<BugBountyCampaignDetail />} />
             </Routes>
           </Layout>
         </div>

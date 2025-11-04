@@ -1,4 +1,4 @@
-import type { LoginForm, SignupForm, PostForm, User, Post, WalletInfo, CodeBlock, Media, TransactionLog } from '../types'
+import type { LoginForm, SignupForm, PostForm, User, Post, WalletInfo, CodeBlock, Media, TransactionLog, BugBountyCampaign, BugSubmission, GitHubRepository } from '../types'
 import { config } from './config'
 
 interface Tag {
@@ -274,6 +274,138 @@ export class ApiClient {
     return this.request(`/api/admin/users/${userId}/role`, {
       method: 'PUT',
       body: JSON.stringify({ role }),
+    })
+  }
+
+  // Bug Bounty Campaign methods
+  async getBugBountyCampaigns(params?: {
+    page?: number
+    limit?: number
+    status?: string
+    ownerId?: string
+    isPublic?: boolean
+  }): Promise<{ campaigns: BugBountyCampaign[]; total: number; page: number; limit: number }> {
+    const queryParams = new URLSearchParams()
+    if (params?.page) queryParams.append('page', params.page.toString())
+    if (params?.limit) queryParams.append('limit', params.limit.toString())
+    if (params?.status) queryParams.append('status', params.status)
+    if (params?.ownerId) queryParams.append('ownerId', params.ownerId)
+    if (params?.isPublic !== undefined) queryParams.append('isPublic', params.isPublic.toString())
+    
+    const query = queryParams.toString()
+    return this.request(`/api/bug-bounty/campaigns${query ? `?${query}` : ''}`)
+  }
+
+  async getBugBountyCampaign(id: string): Promise<BugBountyCampaign> {
+    return this.request(`/api/bug-bounty/campaigns/${id}`)
+  }
+
+  async createBugBountyCampaign(data: {
+    title: string
+    description: string
+    repositoryId?: string
+    status?: 'DRAFT' | 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'CANCELLED'
+    totalBudget: number
+    minReward: number
+    maxReward: number
+    scope?: any
+    rules?: any
+    severityLevels?: any
+    startDate?: string
+    endDate?: string
+    isPublic?: boolean
+    allowTeamBounties?: boolean
+  }): Promise<BugBountyCampaign> {
+    return this.request('/api/bug-bounty/campaigns', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async updateBugBountyCampaign(id: string, data: Partial<{
+    title: string
+    description: string
+    status: 'DRAFT' | 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'CANCELLED'
+    totalBudget: number
+    minReward: number
+    maxReward: number
+    scope: any
+    rules: any
+    severityLevels: any
+    startDate: string
+    endDate: string
+    isPublic: boolean
+    allowTeamBounties: boolean
+  }>): Promise<BugBountyCampaign> {
+    return this.request(`/api/bug-bounty/campaigns/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async deleteBugBountyCampaign(id: string): Promise<{ success: boolean; message: string }> {
+    return this.request(`/api/bug-bounty/campaigns/${id}`, {
+      method: 'DELETE',
+    })
+  }
+
+  // Bug Submission methods
+  async getBugSubmissions(campaignId: string, params?: {
+    page?: number
+    limit?: number
+    status?: string
+    severity?: string
+  }): Promise<{ submissions: BugSubmission[]; total: number; page: number; limit: number }> {
+    const queryParams = new URLSearchParams()
+    if (params?.page) queryParams.append('page', params.page.toString())
+    if (params?.limit) queryParams.append('limit', params.limit.toString())
+    if (params?.status) queryParams.append('status', params.status)
+    if (params?.severity) queryParams.append('severity', params.severity)
+    
+    const query = queryParams.toString()
+    return this.request(`/api/bug-bounty/campaigns/${campaignId}/submissions${query ? `?${query}` : ''}`)
+  }
+
+  async getBugSubmission(id: string): Promise<BugSubmission> {
+    return this.request(`/api/bug-bounty/submissions/${id}`)
+  }
+
+  async createBugSubmission(campaignId: string, data: {
+    title: string
+    description: string
+    severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'INFO'
+    evidence?: any
+    stepsToReproduce?: string
+    impact?: string
+    suggestedFix?: string
+  }): Promise<BugSubmission> {
+    return this.request(`/api/bug-bounty/campaigns/${campaignId}/submissions`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async updateBugSubmission(id: string, data: Partial<{
+    status: 'SUBMITTED' | 'REVIEWING' | 'VERIFIED' | 'REJECTED' | 'DUPLICATE' | 'RESOLVED' | 'AWARDED'
+    verificationNotes: string
+    githubIssueUrl: string
+    githubIssueNumber: number
+    rewardAmount: number
+  }>): Promise<BugSubmission> {
+    return this.request(`/api/bug-bounty/submissions/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  }
+
+  // GitHub Repository methods
+  async getGitHubRepositories(): Promise<{ repositories: GitHubRepository[] }> {
+    return this.request('/api/github/repositories')
+  }
+
+  async syncGitHubRepositories(): Promise<{ repositories: GitHubRepository[]; message: string }> {
+    return this.request('/api/github/repositories/sync', {
+      method: 'POST',
     })
   }
 }

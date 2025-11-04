@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthProvider'
+import { config } from '../utils/config'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -122,7 +123,7 @@ export default function Login() {
 
             <div className="mt-6">
               <a
-                href="/api/auth/github"
+                href={`${config.api.baseUrl}/api/auth/github`}
                 className="w-full flex items-center justify-center gap-3 px-4 py-2 border border-neutral-300 dark:border-gray-600 rounded-md bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
