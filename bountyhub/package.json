@@ -10,6 +10,7 @@
     "dev:full": "concurrently \"npm run dev:api\" \"npm run dev:frontend\"",
     "dev:setup": "./scripts/dev-setup.sh",
     "dev:setup:win": "scripts\\dev-setup.bat",
+    "prebuild": "npm install --no-save @rollup/rollup-linux-x64-gnu || true",
     "build": "tsc && vite build",
     "build:api": "tsc --project functions/tsconfig.json",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
