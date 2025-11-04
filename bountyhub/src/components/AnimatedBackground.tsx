@@ -33,22 +33,22 @@ export function AnimatedBackground() {
     }
 
     const particles: Particle[] = []
-    const particleCount = 50
+    const particleCount = 80 // Increased from 50 to 80
 
     // Color scheme based on theme
     const colors = theme === 'light' 
-      ? ['#6366f1', '#8b5cf6', '#a855f7', '#ec4899'] // Indigo/Purple/Pink for light mode
-      : ['#6366f1', '#818cf8', '#a78bfa', '#c084fc'] // Indigo/Purple for dark mode
+      ? ['#6366f1', '#8b5cf6', '#a855f7', '#ec4899', '#f472b6', '#c084fc'] // Indigo/Purple/Pink for light mode
+      : ['#6366f1', '#818cf8', '#a78bfa', '#c084fc', '#e879f9', '#f472b6'] // Indigo/Purple for dark mode
 
-    // Create particles
+    // Create particles with varied sizes
     for (let i = 0; i < particleCount; i++) {
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-        radius: Math.random() * 3 + 1,
-        opacity: Math.random() * 0.5 + 0.2,
+        vx: (Math.random() - 0.5) * 0.6, // Slightly faster movement
+        vy: (Math.random() - 0.5) * 0.6,
+        radius: Math.random() * 4 + 1.5, // Varied sizes (1.5 to 5.5)
+        opacity: Math.random() * 0.6 + 0.3, // More visible opacity
         color: colors[Math.floor(Math.random() * colors.length)]
       })
     }
@@ -84,16 +84,30 @@ export function AnimatedBackground() {
           const dy = particle.y - otherParticle.y
           const distance = Math.sqrt(dx * dx + dy * dy)
 
-          if (distance < 150) {
-            const opacity = (1 - distance / 150) * 0.2
+          if (distance < 180) { // Increased connection distance from 150 to 180
+            const opacity = (1 - distance / 180) * 0.3 // Increased opacity for better visibility
             ctx.beginPath()
             ctx.moveTo(particle.x, particle.y)
             ctx.lineTo(otherParticle.x, otherParticle.y)
             ctx.strokeStyle = `${particle.color}${Math.floor(opacity * 255).toString(16).padStart(2, '0')}`
-            ctx.lineWidth = 0.5
+            ctx.lineWidth = 0.8 // Slightly thicker lines
             ctx.stroke()
           }
         })
+        
+        // Add glow effect to larger particles
+        if (particle.radius > 3) {
+          const gradient = ctx.createRadialGradient(
+            particle.x, particle.y, 0,
+            particle.x, particle.y, particle.radius * 2
+          )
+          gradient.addColorStop(0, `${particle.color}${Math.floor(particle.opacity * 255).toString(16).padStart(2, '0')}`)
+          gradient.addColorStop(1, `${particle.color}00`)
+          ctx.beginPath()
+          ctx.arc(particle.x, particle.y, particle.radius * 2, 0, Math.PI * 2)
+          ctx.fillStyle = gradient
+          ctx.fill()
+        }
       })
 
       animationId = requestAnimationFrame(animate)
@@ -115,7 +129,7 @@ export function AnimatedBackground() {
       className="fixed inset-0 pointer-events-none"
       style={{ 
         zIndex: 0,
-        opacity: theme === 'light' ? 0.8 : 0.6,
+        opacity: theme === 'light' ? 0.9 : 0.7,
         transition: 'opacity 0.3s ease-in-out'
       }}
     />

@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { gsap } from 'gsap'
 import { FiCreditCard, FiLogOut, FiUsers, FiDollarSign, FiSettings, FiCheckSquare, FiRefreshCw, FiBarChart2 } from 'react-icons/fi'
 import { useAuth } from '../contexts/AuthProvider'
 import { useWallet } from '@solana/wallet-adapter-react'
@@ -10,12 +9,6 @@ import { ThemeToggle } from './ThemeToggle'
 import type { NotificationsRef } from './Notifications'
 import logo from '/logo.svg'
 
-interface BubbleConfig {
-  size: number
-  opacity: number
-  duration: number
-  className: string
-}
 
 function WalletButton({ expanded }: { expanded: boolean }) {
   const { wallet, connected, disconnect } = useWallet()
@@ -74,7 +67,6 @@ function WalletButton({ expanded }: { expanded: boolean }) {
 }
 
 export function Nav() {
-  const [mounted, setMounted] = useState(false)
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [expanded, setExpanded] = useState(false)
@@ -85,10 +77,6 @@ export function Nav() {
   const handleNotificationsUpdate = (count: number) => {
     setUnreadCount(count)
   }
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   // Detect expansion by mouse hover
   useEffect(() => {
@@ -104,71 +92,6 @@ export function Nav() {
     }
   }, [])
 
-  useEffect(() => {
-    if (!mounted) return
-
-    const bubbleConfigs: BubbleConfig[] = [
-      { size: 4, opacity: 0.6, duration: 3.5, className: 'bubble' },
-      { size: 3, opacity: 0.6, duration: 4, className: 'bubble-1' },
-      { size: 2, opacity: 0.6, duration: 4.5, className: 'bubble-2' }
-    ]
-
-    const nav = document.querySelector('.nav-container')
-    if (!nav) return
-
-    const navHeight = nav.clientHeight
-
-    // Create and append bubbles
-    const container = document.querySelector('.bubble-container')
-    if (!container) return
-
-    // Clear existing bubbles
-    container.innerHTML = ''
-
-    // Function to create a single bubble
-    const createBubble = (config: BubbleConfig, index: number) => {
-      const bubble = document.createElement('div')
-      bubble.className = `${config.className}-${index} absolute rounded-full bg-indigo-500/60 shadow-[0_0_8px_rgba(99,102,241,0.6),0_0_15px_rgba(99,102,241,0.4)]`
-      bubble.style.width = `${config.size}px`
-      bubble.style.height = `${config.size}px`
-      bubble.style.opacity = config.opacity.toString()
-      bubble.style.left = `${Math.random() * 100}%`
-      bubble.style.top = '0%'
-
-      container.appendChild(bubble)
-
-      // Animate bubble
-      gsap.to(bubble, {
-        y: navHeight,
-        duration: config.duration + (Math.random() * 2),
-        ease: 'none',
-        onUpdate: function() {
-          // Add pulsing glow effect
-          const progress = this.progress()
-          const glowIntensity = 0.4 + Math.sin(progress * Math.PI * 2) * 0.3
-          bubble.style.boxShadow = `0 0 ${8 + glowIntensity * 8}px rgba(99,102,241,${0.4 + glowIntensity * 0.3}), 0 0 ${15 + glowIntensity * 15}px rgba(99,102,241,${0.3 + glowIntensity * 0.2})`
-        },
-        onComplete: function() {
-          // Remove the bubble when it reaches the bottom
-          bubble.remove()
-          // Create a new bubble at the top
-          createBubble(config, index)
-        }
-      })
-    }
-
-    // Create initial set of bubbles
-    bubbleConfigs.forEach((config) => {
-      for (let i = 0; i < 15; i++) {
-        createBubble(config, i)
-      }
-    })
-
-    // Cleanup
-    return () => {
-      gsap.killTweensOf('.bubble, .bubble-1, .bubble-2')
-    }
-  }, [mounted])
 
   const handleLogout = async () => {
     await logout()
@@ -176,11 +99,7 @@ export function Nav() {
   }
 
   return (
-    <div className='group fixed left-0 top-0 h-screen w-20 bg-white dark:bg-neutral-800 border-r border-neutral-200 dark:border-neutral-700 flex flex-col items-center transition-all duration-300 ease-in-out hover:w-64 overflow-y-hidden z-[9999] nav-container hidden md:flex'>
-      {/* Bubble Animation Container */}
-      <div className="absolute inset-0 overflow-hidden bubble-container pointer-events-none">
-        {/* Bubbles will be added here by JavaScript */}
-      </div>
+    <div className='group fixed left-0 top-0 h-screen w-20 bg-white/90 dark:bg-neutral-800/90 backdrop-blur-sm border-r border-neutral-200/50 dark:border-neutral-700/50 flex flex-col items-center transition-all duration-300 ease-in-out hover:w-64 overflow-y-hidden z-[9999] nav-container hidden md:flex'>
 
       <div className="relative z-10 flex flex-col items-center w-full py-5 cursor-pointer" onClick={() => navigate('/')}>
         <div className="relative w-12 h-12 flex items-center justify-center">
