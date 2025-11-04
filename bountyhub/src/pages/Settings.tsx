@@ -196,7 +196,7 @@ export default function Settings() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200 p-8">
+      <div className="p-8">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-8">Settings</h1>
           <div className="card bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 p-6">
@@ -218,8 +218,7 @@ export default function Settings() {
   ]
 
   return (
-    <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200">
-      <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
+    <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
         <div className="mb-6 flex justify-between items-center mt-16">
           <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-white">Settings</h1>
         </div>

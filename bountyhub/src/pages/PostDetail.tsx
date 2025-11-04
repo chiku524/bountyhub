@@ -247,7 +247,7 @@ export default function PostDetail() {
   )
 
   return (
-    <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200 p-8">
+    <div className="p-8">
       <div className="max-w-7xl mx-auto">
         <div className="mb-4">
           <Link to="/community" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300">

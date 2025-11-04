@@ -3,8 +3,7 @@ import { FiArrowLeft, FiDownload } from 'react-icons/fi'
 
 export default function ApiReference() {
   return (
-    <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <Link

@@ -56,12 +56,10 @@ export default function Analytics() {
 
   if (loading && !platformStats) {
     return (
-      <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto"></div>
-            <p className="mt-4 text-gray-600 dark:text-gray-400">Loading analytics...</p>
-          </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto"></div>
+          <p className="mt-4 text-neutral-600 dark:text-gray-400">Loading analytics...</p>
         </div>
       </div>
     )
@@ -69,19 +67,16 @@ export default function Analytics() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200">
-        <div className="container mx-auto px-4 py-8">
-          <div className="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-400 p-4 rounded-lg">
-            {error}
-          </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-400 p-4 rounded-lg">
+          {error}
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200">
-      <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>

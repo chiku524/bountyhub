@@ -292,23 +292,23 @@ function getIntegrityLevel(score: number): string {
 }
 
 function getIntegrityColor(score: number): string {
-  if (score >= 8.0) return 'text-green-400'
-  if (score >= 6.0) return 'text-yellow-400'
-  if (score >= 4.0) return 'text-orange-400'
-  return 'text-red-400'
+  if (score >= 8.0) return 'text-green-600 dark:text-green-400'
+  if (score >= 6.0) return 'text-yellow-600 dark:text-yellow-400'
+  if (score >= 4.0) return 'text-orange-600 dark:text-orange-400'
+  return 'text-red-600 dark:text-red-400'
 }
 
 function getIntegrityBadgeStyle(score: number): string {
   if (score >= 8.0) {
-    return 'bg-green-500/20 text-green-400 border-green-500/50'
+    return 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 border-green-300 dark:border-green-500/50'
   }
   if (score >= 6.0) {
-    return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50'
+    return 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-300 dark:border-yellow-500/50'
   }
   if (score >= 4.0) {
-    return 'bg-orange-500/20 text-orange-400 border-orange-500/50'
+    return 'bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400 border-orange-300 dark:border-orange-500/50'
   }
-  return 'bg-red-500/20 text-red-400 border-red-500/50'
+  return 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 border-red-300 dark:border-red-500/50'
 }
 
 export default function Profile() {
@@ -377,8 +377,7 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200">
-        <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
+      <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
           <div className="mb-6 flex justify-between items-center mt-16">
             <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Profile</h1>
           </div>
@@ -395,8 +394,7 @@ export default function Profile() {
 
   if (error || !user) {
     return (
-      <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200">
-        <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
+      <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
           <div className="mb-6 flex justify-between items-center mt-16">
             <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Profile</h1>
           </div>
@@ -417,8 +415,7 @@ export default function Profile() {
   const limitedBookmarks = bookmarks.slice(0, BOOKMARKS_LIMIT)
 
   return (
-    <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200">
-      <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
+    <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
         <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mt-16">
           <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-white">Profile</h1>
           <Link 

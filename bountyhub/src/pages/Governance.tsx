@@ -221,13 +221,13 @@ const Governance: React.FC = () => {
 
   const getLogTypeColor = (logType: string) => {
     switch (logType) {
-      case 'BOUNTY_PLACED': return 'text-blue-600'
-      case 'BOUNTY_CLAIMED': return 'text-green-600'
-      case 'GOVERNANCE_FEE': return 'text-purple-600'
-      case 'REWARD_DISTRIBUTED': return 'text-yellow-600'
-      case 'STAKE_ADDED': return 'text-indigo-600'
-      case 'STAKE_REMOVED': return 'text-red-600'
-      default: return 'text-gray-600'
+      case 'BOUNTY_PLACED': return 'text-blue-600 dark:text-blue-400'
+      case 'BOUNTY_CLAIMED': return 'text-green-600 dark:text-green-400'
+      case 'GOVERNANCE_FEE': return 'text-purple-600 dark:text-purple-400'
+      case 'REWARD_DISTRIBUTED': return 'text-yellow-600 dark:text-yellow-400'
+      case 'STAKE_ADDED': return 'text-indigo-600 dark:text-indigo-400'
+      case 'STAKE_REMOVED': return 'text-red-600 dark:text-red-400'
+      default: return 'text-neutral-600 dark:text-gray-400'
     }
   }
 

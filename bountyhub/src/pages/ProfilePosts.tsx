@@ -44,8 +44,7 @@ export default function ProfilePosts() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200">
-        <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
+      <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
           <div className="mb-6 flex justify-between items-center mt-16">
             <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">All Posts</h1>
           </div>
@@ -62,8 +61,7 @@ export default function ProfilePosts() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200">
-        <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
+      <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
           <div className="mb-6 flex justify-between items-center mt-16">
             <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">All Posts</h1>
           </div>
@@ -81,8 +79,7 @@ export default function ProfilePosts() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200">
-      <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
+    <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
         <div className="mb-6 flex justify-between items-center mt-16">
           <div className="flex items-center gap-4">
             <Link 

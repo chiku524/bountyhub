@@ -122,8 +122,7 @@ export default function Docs() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200">
-      <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
+    <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
         <div className="mb-8 mt-16">
           <h1 className="text-4xl font-bold text-neutral-900 dark:text-white mb-4">
             Documentation

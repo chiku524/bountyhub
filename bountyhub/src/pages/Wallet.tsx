@@ -363,7 +363,7 @@ function WalletContent() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200 p-8">
+      <div className="p-8">
         <div className="max-w-4xl mx-auto">
           <div className="animate-pulse">
             <div className="h-8 bg-neutral-800 rounded w-1/4 mb-8"></div>
@@ -380,7 +380,7 @@ function WalletContent() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200 p-8">
+      <div className="p-8">
         <div className="max-w-4xl mx-auto">
           <div className="text-center">
             <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-4">Wallet Access Required</h1>
@@ -399,7 +399,7 @@ function WalletContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200 p-8">
+      <div className="p-8">
         <div className="max-w-4xl mx-auto">
           <div className="animate-pulse">
             <div className="h-8 bg-neutral-800 rounded w-1/4 mb-8"></div>
@@ -421,7 +421,7 @@ function WalletContent() {
         description="Manage your BBUX tokens, view transaction history, and handle deposits and withdrawals on the bountyhub platform. Secure cryptocurrency wallet management."
         keywords="wallet, BBUX, tokens, transactions, cryptocurrency, solana, deposits, withdrawals, balance"
       />
-      <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200 p-4 sm:p-8">
+      <div className="p-4 sm:p-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-6 sm:mb-8">
             <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-white mb-2">My Wallet</h1>

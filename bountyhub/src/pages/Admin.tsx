@@ -102,8 +102,7 @@ const Admin: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200">
-      <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">Admin Panel</h1>
           <p className="text-neutral-600 dark:text-gray-400">Manage users and platform settings</p>

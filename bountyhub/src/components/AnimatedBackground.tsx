@@ -112,7 +112,7 @@ export function AnimatedBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-0"
+      className="fixed inset-0 pointer-events-none z-[1]"
       style={{ 
         opacity: theme === 'light' ? 0.6 : 0.4,
         transition: 'opacity 0.3s ease-in-out'

@@ -274,7 +274,7 @@ export default function Community() {
         description="Browse active bounties, ask questions, and find opportunities to earn cryptocurrency rewards in the bountyhub community. Join thousands of users earning BBUX tokens."
         keywords="community, bounties, questions, cryptocurrency, rewards, BBUX, active bounties, earn crypto"
       />
-      <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200 p-4 sm:p-8">
+      <div className="p-4 sm:p-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
             <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-white">Community</h1>

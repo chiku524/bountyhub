@@ -47,7 +47,7 @@ export default function CreatePost() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200 flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-4">Please log in to create a post</h1>
         </div>
@@ -120,7 +120,7 @@ export default function CreatePost() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200 p-4 sm:p-8">
+    <div className="p-4 sm:p-8">
       <div className="max-w-4xl mx-auto">
         <div className="mb-6 flex justify-between items-center mt-16">
           <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-white">Create New Post</h1>
