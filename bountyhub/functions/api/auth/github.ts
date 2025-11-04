@@ -26,13 +26,20 @@ app.get('/', async (c) => {
   const state = crypto.randomUUID() // CSRF protection
   
   // Store state in cookie for verification
-  setCookie(c, 'github_oauth_state', state, {
+  const cookieOptions: any = {
     httpOnly: true,
     secure: c.env.NODE_ENV === 'production',
     sameSite: 'lax',
     maxAge: 600, // 10 minutes
     path: '/'
-  })
+  }
+  
+  // In production, set domain to allow cross-subdomain access
+  if (c.env.NODE_ENV === 'production') {
+    cookieOptions.domain = '.bountyhub.tech'
+  }
+  
+  setCookie(c, 'github_oauth_state', state, cookieOptions)
   
   const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}`
   

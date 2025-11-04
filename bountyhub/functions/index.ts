@@ -228,26 +228,62 @@ app.all('/auth/callback', async (c) => {
       name?: string
     }
     
+    console.log('GitHub user data:', {
+      id: githubUser.id,
+      login: githubUser.login,
+      hasEmail: !!githubUser.email,
+      email: githubUser.email || 'not provided'
+    })
+    
     // Get user email if not public
     let email = githubUser.email
     if (!email) {
+      console.log('Email not in user profile, fetching from /user/emails endpoint...')
       const emailsResponse = await fetch('https://api.github.com/user/emails', {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
-          'Accept': 'application/vnd.github.v3+json'
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'BountyHub-OAuth'
         }
+      })
+      
+      console.log('Emails API response:', {
+        status: emailsResponse.status,
+        statusText: emailsResponse.statusText,
+        ok: emailsResponse.ok
       })
       
       if (emailsResponse.ok) {
         const emails = await emailsResponse.json() as Array<{ email: string; primary: boolean; verified: boolean }>
+        console.log('Emails received:', {
+          count: emails.length,
+          emails: emails.map(e => ({ email: e.email, primary: e.primary, verified: e.verified }))
+        })
+        
+        // Try to find primary verified email first
         const primaryEmail = emails.find((e: { email: string; primary: boolean; verified: boolean }) => e.primary && e.verified)
-        email = primaryEmail?.email || emails[0]?.email
+        // Then try any verified email
+        const verifiedEmail = emails.find((e: { email: string; primary: boolean; verified: boolean }) => e.verified)
+        // Finally, use primary email even if not verified, or first email
+        email = primaryEmail?.email || verifiedEmail?.email || (emails.find(e => e.primary)?.email) || emails[0]?.email
+      } else {
+        const errorText = await emailsResponse.text()
+        console.error('Failed to fetch emails:', {
+          status: emailsResponse.status,
+          statusText: emailsResponse.statusText,
+          error: errorText
+        })
       }
     }
     
+    // If still no email, use GitHub's noreply email as fallback
     if (!email) {
-      return c.redirect(`${frontendUrl}/login?error=no_email`)
+      // GitHub provides noreply emails for users who don't share their email
+      email = `${githubUser.id}+${githubUser.login}@users.noreply.github.com`
+      console.log('No email found, using GitHub noreply email:', email)
     }
+    
+    console.log('Final email to use:', email)
     
     // Check if user already exists with this GitHub ID
     const existingUser = await db.select().from(users).where(eq(users.githubId, githubUser.id.toString())).limit(1)
