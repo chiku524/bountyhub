@@ -12,23 +12,81 @@ This is the recommended approach for optimal CI/CD workflow.
 
 ## Cloudflare Pages (Frontend) - Auto-Deployment
 
-### Setup (One-time)
+### ⚠️ Important: GitHub Integration Limitation
 
-1. **Connect GitHub Repository**
+**Cloudflare Pages does NOT support adding GitHub integration to an existing project.** 
+
+If you already have a Pages project (created via manual deployment), you have two options:
+
+1. **Delete and recreate** (recommended for auto-deployment)
+   - **If project has 100+ deployments**: Use the cleanup script (see below)
+   - Delete the existing Pages project (via Dashboard or API)
+   - Create a new project and connect to GitHub during creation
+
+2. **Keep manual deployment** (current setup)
+   - Continue using `npm run deploy:frontend:local` for deployments
+   - No GitHub integration available
+
+### ⚠️ Deleting a Project with 100+ Deployments
+
+If your Pages project has over 100 deployments, you **cannot delete it** until you delete some deployments first. This is a [known Cloudflare limitation](https://developers.cloudflare.com/pages/platform/known-issues/#delete-a-project-with-a-high-amount-of-deployments).
+
+**Solution**: Use the deployment cleanup script in `../cloudflare-cleanup/`:
+
+1. **Get your Cloudflare credentials**:
+   - **API Token**: Dashboard → My Profile → API Tokens → Create Token
+     - Use **Edit Cloudflare Workers** template or custom: **Account** → **Cloudflare Pages** → **Edit**
+   - **Account ID**: Dashboard → Any domain → Right sidebar → Account ID
+   - **Project Name**: Your Pages project name (e.g., `bountyhub`)
+
+2. **Run the cleanup script**:
+   ```bash
+   cd ../cloudflare-cleanup
+   npm install
+   
+   # Set environment variables (replace with your values)
+   export CF_API_TOKEN=your_api_token
+   export CF_ACCOUNT_ID=your_account_id
+   export CF_PAGES_PROJECT_NAME=bountyhub
+   
+   # Run the script
+   npm start
+   ```
+
+3. **After cleanup completes**:
+   - Go to Cloudflare Dashboard → Workers & Pages → Pages → **bountyhub**
+   - Click **Settings** → **General** → **Delete project**
+   - Project should now be deletable!
+
+**Note**: The script preserves your **live production deployment** and only deletes old deployments. See `../cloudflare-cleanup/README.md` for detailed instructions.
+
+### Setup (One-time) - Create New Project with GitHub
+
+1. **Create a New Pages Project**
    - Go to [Cloudflare Dashboard](https://dash.cloudflare.com/)
-   - Navigate to **Pages** → **bountyhub**
-   - Click **Connect to Git**
-   - Authorize Cloudflare to access your GitHub repository
-   - Select the repository and branch (`main`)
+   - Navigate to **Workers & Pages** → **Pages**
+   - Click **Create application** → **Pages** → **Connect to Git**
+   - **This option is ONLY available when creating a new project**
 
-2. **Configure Build Settings**
-   - **Build command**: `npm run build`
-   - **Build output directory**: `dist`
-   - **Root directory**: `/` (leave empty)
-   - **Node version**: `18` or `20`
+2. **Connect to GitHub**
+   - Authorize Cloudflare to access your GitHub account
+   - Select your repository (e.g., `chiku524/portal` or `chiku524/bountyhub`)
+   - Select the branch (`main`)
 
-3. **Set Environment Variables**
-   Go to **Settings** → **Environment variables** → **Production**:
+3. **Configure Build Settings** (during project creation)
+
+   - **Root directory**: `bountyhub` (REQUIRED - project is in a subdirectory)
+   - **Build command**: `npm run build` (REQUIRED for static sites)
+   - **Build output directory**: `dist` (REQUIRED)
+   - **Node version**: `20` (REQUIRED - Node 22 has Rollup native module issues)
+   
+   **⚠️ Important**: Do NOT use Node 22 - it causes Rollup native dependency errors. Use Node 20 instead.
+   
+   **Note**: Cloudflare Pages does NOT use a separate "deploy command" for static sites. After the build completes, Pages automatically deploys the `dist/` directory. If you see a "deploy command" field, you are in the **Workers** setup (which is different from Pages).
+
+4. **Set Environment Variables** (after project creation)
+   - Go to **Settings** → **Environment variables** → **Production**
+   - Add the following variables:
    ```
    VITE_API_URL=https://api.bountyhub.tech
    VITE_CLOUDINARY_CLOUD_NAME=dqobhvk07
@@ -54,7 +112,23 @@ npm run deploy:frontend:local
 
 ## Cloudflare Workers (API) - Manual Deployment
 
-### Deployment Command
+### GitHub Integration (Optional - Auto-Deploy)
+
+If you want Workers to auto-deploy from GitHub:
+
+1. **Connect GitHub Repository**
+   - Go to [Cloudflare Dashboard](https://dash.cloudflare.com/)
+   - Navigate to **Workers & Pages** → **Workers** → **bountyhub-api**
+   - Go to **Settings** → **Integrations** → **GitHub**
+   - Click **Connect to GitHub** and authorize
+   - Select repository and branch (`main`)
+
+2. **Configure Build Settings**
+   - **Build command**: `npm run build:api` (OPTIONAL - can leave empty if no build needed)
+   - **Deploy command**: `npx wrangler deploy --config wrangler.workers.toml` (REQUIRED)
+   - Or use: `npm run deploy:workers`
+
+### Manual Deployment (Current Setup)
 
 ```bash
 npm run deploy:workers
