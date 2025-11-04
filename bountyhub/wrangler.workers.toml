@@ -38,3 +38,9 @@ HTML2PDF_API_KEY = "28q7AasnbwG213fOLEt58Cjw4FEZVxNxAoaXl0MybGEGWeM9u73X4hGltgIM
 VITE_CLOUDINARY_CLOUD_NAME = "dqobhvk07"
 VITE_CLOUDINARY_UPLOAD_PRESET = "bountyhub"
 VITE_API_URL = "https://api.bountyhub.tech"
+
+# GitHub OAuth Configuration
+# Note: GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET should be set as secrets in Cloudflare Dashboard
+# Set via: wrangler secret put GITHUB_CLIENT_ID
+# Set via: wrangler secret put GITHUB_CLIENT_SECRET
+GITHUB_CALLBACK_URL = "https://api.bountyhub.tech/auth/callback"

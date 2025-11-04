@@ -31,3 +31,8 @@ VITE_CLOUDINARY_CLOUD_NAME = "dqobhvk07"
 VITE_CLOUDINARY_UPLOAD_PRESET = "bountyhub"
 VITE_API_URL = "http://localhost:8788"
 VITE_GIPHY_API_KEY = "8tPzDynfDBevgXLsAaPztARWyvWzNLPK"
+
+# GitHub OAuth Configuration (Development)
+GITHUB_CLIENT_ID = "Ov23liVwcihvw3cEMGWC"
+GITHUB_CLIENT_SECRET = "c0be0053c57a56409761b55f573243335aa27300"
+GITHUB_CALLBACK_URL = "http://localhost:8788/auth/callback"
