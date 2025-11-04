@@ -112,14 +112,22 @@ export default function UserPosts() {
           ) : (
             <div className="space-y-4">
               {posts.map((post) => (
-                <div key={post.id} className="p-4 bg-neutral-700/50 rounded-lg border border-violet-500/30">
-                  <Link to={`/posts/${post.id}`} className="block hover:bg-neutral-600/50 rounded-lg p-2 -m-2 transition-colors">
+                <div key={post.id} className={`p-4 bg-neutral-700/50 rounded-lg border border-violet-500/30 ${post.reward && post.reward > 0 ? 'border-l-4 border-cyan-400/60 bg-gradient-to-r from-cyan-500/5 to-neutral-700/50' : ''}`}>
+                  <Link to={`/posts/${post.id}`} className={`block hover:bg-neutral-600/50 rounded-lg p-2 -m-2 transition-colors ${post.reward && post.reward > 0 ? 'hover:bg-cyan-500/10' : ''}`}>
                     <div className="flex items-start gap-3">
                       <div className="p-2 bg-violet-500/20 rounded-lg flex-shrink-0">
                         <FiEdit2 className="w-4 h-4 text-violet-300" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-medium text-violet-300 mb-2">{post.title}</h3>
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="text-lg font-medium text-violet-300">{post.title}</h3>
+                          {post.reward && post.reward > 0 && (
+                            <div className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/40 rounded-full">
+                              <span className="text-cyan-300 text-sm">💰</span>
+                              <span className="text-cyan-200 text-sm font-medium">{post.reward} BBUX</span>
+                            </div>
+                          )}
+                        </div>
                         <p className="text-sm text-gray-300 mb-3 line-clamp-3">{truncateContent(post.content)}</p>
                         <div className="flex items-center justify-between text-xs text-gray-400">
                           <span>{new Date(post.createdAt).toLocaleDateString()}</span>

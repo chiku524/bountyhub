@@ -49,6 +49,6 @@ CREATE TABLE `sessions` (
 );
 
 -- Migration: add_default_tags
--- Created at: 2024-12-19 10:30:00
+-- Created at: 2025-12-19 10:30:00
 
 -- Add default tags

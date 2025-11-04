@@ -1,5 +1,4 @@
-import type { LoginForm, SignupForm, PostForm, User, Post, WalletInfo, CodeBlock, Media } from '../types'
-import type { Transaction } from '../types'
+import type { LoginForm, SignupForm, PostForm, User, Post, WalletInfo, CodeBlock, Media, TransactionLog } from '../types'
 import { config } from './config'
 
 interface Tag {
@@ -20,9 +19,10 @@ interface CreatePostData {
   bountyDuration: number;
 }
 
-class ApiClient {
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+export class ApiClient {
+  public async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${config.api.baseUrl}${endpoint}`
+    
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
@@ -37,7 +37,8 @@ class ApiClient {
       throw new Error(error.error || `HTTP ${response.status}`)
     }
 
-    return response.json()
+    const data = await response.json()
+    return data
   }
 
   // Special method for tags that uses production API in development
@@ -106,11 +107,25 @@ class ApiClient {
   }
 
   // Posts
-  async getPosts(): Promise<Post[]> {
-    return this.request('/api/posts')
+  async getPosts(page: number = 1, limit: number = 20): Promise<{ posts: Post[], pagination: { page: number, limit: number, total: number, totalPages: number, hasNextPage: boolean, hasPrevPage: boolean } } | Post[]> {
+    const response = await this.request<{ posts: Post[], pagination: any } | Post[]>(`/api/posts?page=${page}&limit=${limit}`)
+    // Backward compatibility: if response is array, return it; otherwise return posts array
+    if (Array.isArray(response)) {
+      return response
+    }
+    return response
+  }
+  
+  // Get all posts (for backward compatibility, fetches all with pagination)
+  async getAllPosts(): Promise<Post[]> {
+    const response = await this.request<{ posts: Post[], pagination: any } | Post[]>(`/api/posts?limit=1000`)
+    if (Array.isArray(response)) {
+      return response
+    }
+    return response.posts || []
   }
 
-  async createPost(data: CreatePostData): Promise<{ success: boolean; data: Post }> {
+  async createPost(data: CreatePostData): Promise<{ success: boolean; post: Post; message: string }> {
     return this.request('/api/posts', {
       method: 'POST',
       body: JSON.stringify(data),
@@ -149,8 +164,12 @@ class ApiClient {
     return this.request('/api/wallet')
   }
 
-  async getRecentTransactions(): Promise<Transaction[]> {
+  async getRecentTransactions(): Promise<TransactionLog[]> {
     return this.request('/api/wallet/transactions')
+  }
+
+  async getAllTransactions(page: number = 1, limit: number = 20): Promise<{ transactions: TransactionLog[], pagination: { page: number, limit: number, total: number, totalPages: number } }> {
+    return this.request(`/api/wallet/transactions/all?page=${page}&limit=${limit}`)
   }
 
   async performWalletAction(action: string, amount: number): Promise<{ success: boolean; transactionId?: string; message?: string; platformAddress?: string }> {
@@ -168,10 +187,10 @@ class ApiClient {
   }
 
   // Additional wallet methods for deposit/withdrawal flow
-  async confirmDirectDeposit(amount: number, signature: string): Promise<{ success: boolean; transactionId?: string; message?: string }> {
+  async confirmDirectDeposit(amount: number, signature: string, destinationAddress: string): Promise<{ success: boolean; transactionId?: string; message?: string }> {
     return this.request('/api/wallet/confirm-direct-deposit', {
       method: 'POST',
-      body: JSON.stringify({ amount, signature }),
+      body: JSON.stringify({ amount, signature, destinationAddress }),
     })
   }
 
@@ -199,6 +218,25 @@ class ApiClient {
       method: 'POST',
       body: JSON.stringify(data),
     })
+  }
+
+  async uploadProfilePicture(file: File): Promise<{ success: boolean; message: string; profilePicture: string }> {
+    const formData = new FormData()
+    formData.append('profilePicture', file)
+    
+    const url = `${config.api.baseUrl}/api/profile/picture`
+    const response = await fetch(url, {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+    })
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Network error' }))
+      throw new Error(error.error || `HTTP ${response.status}`)
+    }
+
+    return response.json()
   }
 
   // User profiles

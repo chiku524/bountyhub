@@ -10,6 +10,13 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  define: {
+    // Inject environment variables at build time
+    'import.meta.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://api.bountyhub.tech')),
+    'import.meta.env.VITE_GIPHY_API_KEY': JSON.stringify(process.env.VITE_GIPHY_API_KEY || '8tPzDynfDBevgXLsAaPztARWyvWzNLPK'),
+    'import.meta.env.VITE_CLOUDINARY_CLOUD_NAME': JSON.stringify(process.env.VITE_CLOUDINARY_CLOUD_NAME || 'dqobhvk07'),
+    'import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET': JSON.stringify(process.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'bountyhub'),
+  },
   build: {
     outDir: 'dist',
     rollupOptions: {

@@ -4,7 +4,7 @@ import { WalletModalProvider, useWalletModal } from '@solana/wallet-adapter-reac
 import { PhantomWalletAdapter, SolflareWalletAdapter } from '@solana/wallet-adapter-wallets';
 import '@solana/wallet-adapter-react-ui/styles.css';
 
-const endpoint = 'https://api.devnet.solana.com'; // Use devnet for testing
+const endpoint = import.meta.env.VITE_SOLANA_RPC_URL || 'https://api.bountyhub.tech/api/wallet/solana-proxy'
 
 interface SolanaWalletContextType {
   connected: boolean;
@@ -29,15 +29,31 @@ const SolanaWalletInner: FC<{ children: ReactNode }> = ({ children }) => {
   const { setVisible } = useWalletModal();
 
   const connect = () => {
-    setVisible(true);
+    try {
+      setVisible(true);
+    } catch (error) {
+      console.error('Error opening wallet modal:', error);
+    }
+  };
+
+  const safeSignTransaction = async (transaction: any) => {
+    if (!signTransaction) {
+      throw new Error('Wallet not connected or signTransaction not available');
+    }
+    try {
+      return await signTransaction(transaction);
+    } catch (error) {
+      console.error('Error signing transaction:', error);
+      throw error;
+    }
   };
 
   const value = {
     connected,
     connect,
-    disconnect,
+    disconnect: disconnect || (() => {}),
     publicKey: publicKey?.toString() || null,
-    signTransaction: signTransaction || (() => Promise.reject(new Error('Wallet not connected'))),
+    signTransaction: safeSignTransaction,
   };
 
   return (

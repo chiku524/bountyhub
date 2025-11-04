@@ -87,7 +87,7 @@ anchor deploy</code></pre>
         <p>Configure your production settings:</p>
         <pre><code>name = "bountyhub"
 main = "functions/index.ts"
-compatibility_date = "2024-01-01"
+compatibility_date = "2025-01-01"
 
 [env.production]
 name = "bountyhub-prod"

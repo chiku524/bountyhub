@@ -176,31 +176,13 @@ export const virtualWallets = sqliteTable('virtual_wallets', {
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-// Wallet transactions table
-export const walletTransactions = sqliteTable('wallet_transactions', {
-  id: text('id').primaryKey(),
-  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  walletId: text('wallet_id').notNull().references(() => virtualWallets.id, { onDelete: 'cascade' }),
-  type: text('type', { enum: ['DEPOSIT', 'WITHDRAW', 'BOUNTY_CREATED', 'BOUNTY_CLAIMED', 'BOUNTY_REFUNDED', 'BOUNTY_EARNED', 'COMPENSATION'] }).notNull(),
-  amount: real('amount').notNull(),
-  balanceBefore: real('balance_before').notNull(),
-  balanceAfter: real('balance_after').notNull(),
-  description: text('description').notNull(),
-  status: text('status', { enum: ['PENDING', 'COMPLETED', 'FAILED', 'CANCELLED'] }).notNull().default('PENDING'),
-  solanaSignature: text('solana_signature'),
-  bountyId: text('bounty_id').references(() => bounties.id, { onDelete: 'set null' }),
-  metadata: text('metadata'),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
-});
-
 // Transaction logs table
 export const transactionLogs = sqliteTable('transaction_logs', {
   id: text('id').primaryKey(),
   type: text('type').notNull(),
   userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   amount: real('amount').notNull(),
-  transactionId: text('transaction_id').notNull(),
+  transactionId: text('transaction_id').notNull().unique(),
   timestamp: integer('timestamp', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
   status: text('status').notNull(),
   metadata: text('metadata'),
@@ -468,6 +450,63 @@ export const governanceVotes = sqliteTable('governance_votes', {
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
+// Chat rooms table
+export const chatRooms = sqliteTable('chat_rooms', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  description: text('description'),
+  type: text('type', { enum: ['GLOBAL', 'PRIVATE', 'GROUP'] }).notNull().default('GLOBAL'),
+  createdBy: text('created_by').references(() => users.id, { onDelete: 'set null' }),
+  isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Chat messages table
+export const chatMessages = sqliteTable('chat_messages', {
+  id: text('id').primaryKey(),
+  roomId: text('room_id').notNull().references(() => chatRooms.id, { onDelete: 'cascade' }),
+  authorId: text('author_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  content: text('content').notNull(),
+  messageType: text('message_type', { enum: ['TEXT', 'IMAGE', 'FILE', 'SYSTEM'] }).notNull().default('TEXT'),
+  mediaUrl: text('media_url'),
+  fileName: text('file_name'),
+  fileSize: integer('file_size'),
+  replyToId: text('reply_to_id'), // Will be handled in application logic
+  isEdited: integer('is_edited', { mode: 'boolean' }).notNull().default(false),
+  editedAt: integer('edited_at', { mode: 'timestamp' }),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Chat room participants table
+export const chatRoomParticipants = sqliteTable('chat_room_participants', {
+  id: text('id').primaryKey(),
+  roomId: text('room_id').notNull().references(() => chatRooms.id, { onDelete: 'cascade' }),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  role: text('role', { enum: ['MEMBER', 'MODERATOR', 'ADMIN'] }).notNull().default('MEMBER'),
+  joinedAt: integer('joined_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  lastReadAt: integer('last_read_at', { mode: 'timestamp' }),
+  isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+});
+
+// Chat message reactions table
+export const chatMessageReactions = sqliteTable('chat_message_reactions', {
+  id: text('id').primaryKey(),
+  messageId: text('message_id').notNull().references(() => chatMessages.id, { onDelete: 'cascade' }),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  reaction: text('reaction').notNull(), // emoji or reaction type
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Chat message reads table
+export const chatMessageReads = sqliteTable('chat_message_reads', {
+  id: text('id').primaryKey(),
+  messageId: text('message_id').notNull().references(() => chatMessages.id, { onDelete: 'cascade' }),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  readAt: integer('read_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
 // Export all tables for use in the application
 export const schema = {
   users,
@@ -482,7 +521,6 @@ export const schema = {
   reputationHistory,
   bounties,
   virtualWallets,
-  walletTransactions,
   transactionLogs,
   userRatings,
   integrityViolations,
@@ -505,4 +543,9 @@ export const schema = {
   transparencyLogs,
   governanceProposals,
   governanceVotes,
+  chatRooms,
+  chatMessages,
+  chatRoomParticipants,
+  chatMessageReactions,
+  chatMessageReads,
 }; 

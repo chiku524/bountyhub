@@ -122,12 +122,28 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
         const buttonRect = notificationsButton.getBoundingClientRect()
         
         const viewportWidth = window.innerWidth
+        const viewportHeight = window.innerHeight
         const popupWidth = 320 // w-80 = 320px
+        const popupHeight = 384 // max-h-96 = 384px (plus header height)
         const margin = 8 // ml-2 = 8px
         
         // Calculate available space on both sides
         const spaceOnRight = viewportWidth - buttonRect.right - margin
         const spaceOnLeft = buttonRect.left - margin
+        
+        // Calculate vertical positioning to prevent overflow
+        let topPosition = buttonRect.top - 50 // Raise the popup by 50px
+        const bottomSpace = viewportHeight - (topPosition + popupHeight)
+        
+        // If there's not enough space at the bottom, adjust the top position
+        if (bottomSpace < 20) { // 20px minimum margin from bottom
+          topPosition = viewportHeight - popupHeight - 20
+        }
+        
+        // Ensure the popup doesn't go above the viewport
+        if (topPosition < 20) {
+          topPosition = 20
+        }
         
         // Calculate popup position
         let newPopupStyle: { left?: string; right?: string; top: string }
@@ -136,24 +152,24 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
         if (spaceOnRight >= popupWidth) {
           newPopupStyle = {
             left: `${buttonRect.right + margin}px`,
-            top: `${buttonRect.top}px`
+            top: `${topPosition}px`
           }
         } else if (spaceOnLeft >= popupWidth) {
           newPopupStyle = {
             right: `${viewportWidth - buttonRect.left + margin}px`,
-            top: `${buttonRect.top}px`
+            top: `${topPosition}px`
           }
         } else {
           // If neither side has enough space, position on the side with more space
           if (spaceOnRight > spaceOnLeft) {
             newPopupStyle = {
               left: `${buttonRect.right + margin}px`,
-              top: `${buttonRect.top}px`
+              top: `${topPosition}px`
             }
           } else {
             newPopupStyle = {
               right: `${viewportWidth - buttonRect.left + margin}px`,
-              top: `${buttonRect.top}px`
+              top: `${topPosition}px`
             }
           }
         }

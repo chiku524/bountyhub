@@ -33,6 +33,7 @@ export default function DeveloperGuide() {
             <li><a href="#governance" className="text-violet-400 hover:text-violet-300">Governance System</a></li>
             <li><a href="#refund-system" className="text-violet-400 hover:text-violet-300">Refund Request System</a></li>
             <li><a href="#notification-system" className="text-violet-400 hover:text-violet-300">Notification System</a></li>
+            <li><a href="#chat-system" className="text-violet-400 hover:text-violet-300">Chat System</a></li>
             <li><a href="#database" className="text-violet-400 hover:text-violet-300">Database Schema</a></li>
             <li><a href="#api" className="text-violet-400 hover:text-violet-300">API Reference</a></li>
             <li><a href="#deployment" className="text-violet-400 hover:text-violet-300">Deployment</a></li>
@@ -579,6 +580,178 @@ export default function DeveloperGuide() {
                     <li>• Implement proper error handling</li>
                     <li>• Cache unread counts locally</li>
                     <li>• Batch notification operations</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Chat System */}
+        <section id="chat-system" className="mb-12">
+          <h2 className="text-3xl font-bold text-white mb-6">Chat System</h2>
+          <div className="space-y-6">
+            <div className="bg-neutral-800 rounded-lg p-6">
+              <h3 className="text-xl font-semibold text-white mb-3">Architecture Overview</h3>
+              <p className="text-gray-300 mb-4">
+                The chat system provides real-time messaging capabilities with support for text, emojis, and GIFs.
+                It's built using a RESTful API approach with persistent message storage.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="text-lg font-semibold text-violet-400 mb-2">Frontend Components</h4>
+                  <ul className="text-gray-400 space-y-1">
+                    <li>• ChatSidebar.tsx - Main chat interface</li>
+                    <li>• Chat.tsx - Full chat page</li>
+                    <li>• Emoji picker integration</li>
+                    <li>• GIF search with GIPHY API</li>
+                    <li>• Real-time message updates</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-violet-400 mb-2">Backend APIs</h4>
+                  <ul className="text-gray-400 space-y-1">
+                    <li>• /api/chat - Get chat rooms</li>
+                    <li>• /api/chat/{'{roomId}'}/messages - Get/send messages</li>
+                    <li>• /api/chat/{'{roomId}'}/join - Join chat room</li>
+                    <li>• /api/gifs/search - Search GIFs</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-neutral-800 rounded-lg p-6">
+              <h3 className="text-xl font-semibold text-white mb-3">Database Schema</h3>
+              <div className="bg-neutral-700 rounded-lg p-4 font-mono text-sm">
+                <div>chat_rooms table:</div>
+                <div className="ml-4">├── id: string (primary key)</div>
+                <div className="ml-4">├── name: string</div>
+                <div className="ml-4">├── type: enum (GLOBAL, PRIVATE)</div>
+                <div className="ml-4">├── description: string</div>
+                <div className="ml-4">├── memberCount: number</div>
+                <div className="ml-4">├── createdAt: timestamp</div>
+                <div className="ml-4">└── updatedAt: timestamp</div>
+                <div className="mt-2">chat_messages table:</div>
+                <div className="ml-4">├── id: string (primary key)</div>
+                <div className="ml-4">├── roomId: string (foreign key)</div>
+                <div className="ml-4">├── userId: number (foreign key)</div>
+                <div className="ml-4">├── content: string</div>
+                <div className="ml-4">├── type: enum (text, gif, emoji)</div>
+                <div className="ml-4">├── gifUrl: string (optional)</div>
+                <div className="ml-4">├── createdAt: timestamp</div>
+                <div className="ml-4">└── updatedAt: timestamp</div>
+              </div>
+            </div>
+
+            <div className="bg-neutral-800 rounded-lg p-6">
+              <h3 className="text-xl font-semibold text-white mb-3">Message Types</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <h4 className="text-lg font-semibold text-violet-400 mb-2">Text Messages</h4>
+                  <ul className="text-gray-400 space-y-1">
+                    <li>• Standard text content</li>
+                    <li>• Markdown support</li>
+                    <li>• Username display</li>
+                    <li>• Timestamp tracking</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-violet-400 mb-2">Emoji Messages</h4>
+                  <ul className="text-gray-400 space-y-1">
+                    <li>• Emoji picker integration</li>
+                    <li>• Popular emoji selection</li>
+                    <li>• Unicode emoji support</li>
+                    <li>• Quick reaction system</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-violet-400 mb-2">GIF Messages</h4>
+                  <ul className="text-gray-400 space-y-1">
+                    <li>• GIPHY API integration</li>
+                    <li>• Search functionality</li>
+                    <li>• Preview and selection</li>
+                    <li>• Direct GIF sending</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-neutral-800 rounded-lg p-6">
+              <h3 className="text-xl font-semibold text-white mb-3">GIF Integration</h3>
+              <p className="text-gray-300 mb-4">
+                The chat system integrates with GIPHY API for GIF search and sharing capabilities.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="text-lg font-semibold text-violet-400 mb-2">GIPHY API Setup</h4>
+                  <ul className="text-gray-400 space-y-1">
+                    <li>• Environment variable configuration</li>
+                    <li>• API key management</li>
+                    <li>• Rate limiting handling</li>
+                    <li>• Error handling and fallbacks</li>
+                    <li>• Search result pagination</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-violet-400 mb-2">Frontend Integration</h4>
+                  <ul className="text-gray-400 space-y-1">
+                    <li>• Search input with debouncing</li>
+                    <li>• GIF grid display</li>
+                    <li>• Loading states and error handling</li>
+                    <li>• Responsive design for mobile</li>
+                    <li>• Click-to-send functionality</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-neutral-800 rounded-lg p-6">
+              <h3 className="text-xl font-semibold text-white mb-3">Real-Time Features</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="text-lg font-semibold text-violet-400 mb-2">Message Updates</h4>
+                  <ul className="text-gray-400 space-y-1">
+                    <li>• Polling-based message updates</li>
+                    <li>• Optimistic UI updates</li>
+                    <li>• Message history preservation</li>
+                    <li>• Pagination for large chat histories</li>
+                    <li>• Auto-scroll to latest messages</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-violet-400 mb-2">User Experience</h4>
+                  <ul className="text-gray-400 space-y-1">
+                    <li>• Persistent chat sidebar</li>
+                    <li>• Minimize/maximize functionality</li>
+                    <li>• Mobile-responsive design</li>
+                    <li>• Dark theme integration</li>
+                    <li>• Loading and error states</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-neutral-800 rounded-lg p-6">
+              <h3 className="text-xl font-semibold text-white mb-3">Security & Performance</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="text-lg font-semibold text-violet-400 mb-2">Security Measures</h4>
+                  <ul className="text-gray-400 space-y-1">
+                    <li>• Authentication required for all endpoints</li>
+                    <li>• Input validation and sanitization</li>
+                    <li>• Rate limiting on message sending</li>
+                    <li>• Content moderation capabilities</li>
+                    <li>• User permission checks</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-violet-400 mb-2">Performance Optimizations</h4>
+                  <ul className="text-gray-400 space-y-1">
+                    <li>• Efficient database queries</li>
+                    <li>• Message pagination</li>
+                    <li>• GIF search caching</li>
+                    <li>• Optimized API responses</li>
+                    <li>• Minimal re-renders</li>
                   </ul>
                 </div>
               </div>

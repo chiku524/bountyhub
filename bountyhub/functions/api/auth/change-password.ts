@@ -37,22 +37,8 @@ app.post('/', async (c) => {
       return c.json({ error: 'User not found' }, 404)
     }
 
-    console.log('Debug: User found:', { id: user.id, email: user.email })
-    console.log('Debug: Stored password hash:', user.password ? user.password.substring(0, 20) + '...' : 'null')
-    console.log('Debug: Current password provided:', currentPassword ? 'provided' : 'not provided')
-
     // Verify current password
-    let isValidPassword = false
-    
-    if (user.password.startsWith('$2b$') || user.password.startsWith('$2a$')) {
-      // Password is hashed, use bcrypt verification
-      isValidPassword = await verifyPassword(currentPassword, user.password)
-    } else {
-      // Password is plain text (legacy), compare directly
-      isValidPassword = user.password === currentPassword
-    }
-    
-    console.log('Debug: Password verification result:', isValidPassword)
+    const isValidPassword = await verifyPassword(currentPassword, user.password)
     
     if (!isValidPassword) {
       return c.json({ error: 'Current password is incorrect' }, 400)

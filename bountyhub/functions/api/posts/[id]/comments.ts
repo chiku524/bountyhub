@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { getCookie } from 'hono/cookie'
 import { createDb } from '../../../../src/utils/db'
 import { getUserIdFromSession } from '../../../../src/utils/auth'
-import { comments, users, votes, posts } from '../../../../drizzle/schema'
+import { comments, users, votes, posts, profiles } from '../../../../drizzle/schema'
 import { eq, and } from 'drizzle-orm'
 import { updateReputation } from '../../../../src/utils/reputation'
 import { createCommentNotification } from '../../../../src/utils/notifications'
@@ -33,11 +33,13 @@ app.get(async (c) => {
       author: {
         id: users.id,
         username: users.username,
-        email: users.email
+        email: users.email,
+        profilePicture: profiles.profilePicture
       }
     })
     .from(comments)
     .leftJoin(users, eq(comments.authorId, users.id))
+    .leftJoin(profiles, eq(users.id, profiles.userId))
     .where(eq(comments.postId, postId))
 
     // Get current user's votes if authenticated

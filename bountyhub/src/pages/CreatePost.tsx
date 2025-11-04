@@ -16,7 +16,7 @@ interface Tag {
   color: string;
 }
 
-const TOKEN_SYMBOL = 'SOL'
+const TOKEN_SYMBOL = 'BBUX'
 
 export default function CreatePost() {
   const { user } = useAuth()
@@ -108,7 +108,7 @@ export default function CreatePost() {
 
       const response = await api.createPost(postData)
       if (response.success) {
-        navigate('/community')
+        navigate(`/posts/${response.post.id}`)
       } else {
         setError('Failed to create post')
       }
@@ -120,10 +120,10 @@ export default function CreatePost() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-900 p-8">
+    <div className="min-h-screen bg-neutral-900 p-4 sm:p-8">
       <div className="max-w-4xl mx-auto">
         <div className="mb-6 flex justify-between items-center mt-16">
-          <h1 className="text-2xl font-bold text-white">Create New Post</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-white">Create New Post</h1>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto">
@@ -146,7 +146,7 @@ export default function CreatePost() {
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
               required
             />
           </div>
@@ -160,7 +160,7 @@ export default function CreatePost() {
               value={content}
               onChange={(e) => setContent(e.target.value)}
               rows={6}
-              className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
               required
             />
           </div>
@@ -190,9 +190,9 @@ export default function CreatePost() {
               <div className="mt-4 space-y-3">
                 <h4 className="text-sm font-medium text-gray-300">Added Code Blocks:</h4>
                 {codeBlocks.map((block, index) => (
-                  <div key={index} className="bg-neutral-900/80 rounded-lg p-4 border border-violet-500/30">
+                  <div key={index} className="bg-neutral-900/80 rounded-lg p-3 sm:p-4 border border-violet-500/30">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded text-sm">
+                      <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded text-xs sm:text-sm">
                         {block.language}
                       </span>
                       <button
@@ -206,11 +206,11 @@ export default function CreatePost() {
                         </svg>
                       </button>
                     </div>
-                    <pre className="bg-neutral-900/80 p-4 rounded-lg overflow-x-auto max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-600 scrollbar-track-neutral-800">
-                      <code className="text-sm text-gray-300">{block.code}</code>
+                    <pre className="bg-neutral-900/80 p-3 sm:p-4 rounded-lg overflow-x-auto max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-600 scrollbar-track-neutral-800">
+                      <code className="text-xs sm:text-sm text-gray-300">{block.code}</code>
                     </pre>
                     {block.description && (
-                      <p className="mt-2 text-sm text-gray-400">{block.description}</p>
+                      <p className="mt-2 text-xs sm:text-sm text-gray-400">{block.description}</p>
                     )}
                   </div>
                 ))}
@@ -226,9 +226,9 @@ export default function CreatePost() {
               </div>
             </h3>
             
-            <div className="bg-gradient-to-br from-neutral-800/60 to-neutral-900/60 border border-violet-500/20 rounded-xl p-6 backdrop-blur-sm">
+            <div className="bg-gradient-to-br from-neutral-800/60 to-neutral-900/60 border border-violet-500/20 rounded-xl p-4 sm:p-6 backdrop-blur-sm">
               {/* Bounty Toggle */}
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                 <div className="flex items-center gap-3">
                   <div className="relative">
                     <label htmlFor="hasBounty" className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out cursor-pointer ${hasBounty ? 'bg-violet-500' : 'bg-neutral-600'}`}>
@@ -245,30 +245,30 @@ export default function CreatePost() {
                     </label>
                   </div>
                   <div>
-                    <span className="text-white font-medium cursor-pointer">
+                    <span className="text-white font-medium cursor-pointer text-sm sm:text-base">
                       Add Crypto Bounty
                     </span>
-                    <p className="text-gray-400 text-sm">Reward the best answer with tokens</p>
+                    <p className="text-gray-400 text-xs sm:text-sm">Reward the best answer with tokens</p>
                   </div>
                 </div>
                 
                 {hasBounty && (
                   <div className="flex items-center gap-2 px-3 py-1 bg-violet-500/20 border border-violet-500/30 rounded-full">
                     <FaGift className="w-4 h-4 text-violet-300" />
-                    <span className="text-violet-300 text-sm font-medium">Active</span>
+                    <span className="text-violet-300 text-xs sm:text-sm font-medium">Active</span>
                   </div>
                 )}
               </div>
 
               {/* Bounty Configuration */}
               {hasBounty && (
-                <div className="space-y-6 animate-in slide-in-from-top-2 duration-300">
+                <div className="space-y-4 sm:space-y-6 animate-in slide-in-from-top-2 duration-300">
                   {/* Amount Section */}
-                  <div className="bg-neutral-700/30 rounded-lg p-4 border border-neutral-600/50">
+                  <div className="bg-neutral-700/30 rounded-lg p-3 sm:p-4 border border-neutral-600/50">
                     <div className="flex items-center gap-2 mb-3">
                       <FaDollarSign className="w-4 h-4 text-yellow-400" />
                     </div>
-                    <label htmlFor="bountyAmount" className="text-white font-medium mb-1 block">Bounty Amount</label>
+                    <label htmlFor="bountyAmount" className="text-white font-medium mb-1 block text-sm sm:text-base">Bounty Amount</label>
                     <div className="relative">
                       <input
                         id="bountyAmount"
@@ -279,9 +279,9 @@ export default function CreatePost() {
                         step="0.01"
                         required
                         placeholder="0.00"
-                        className="w-full px-4 py-3 bg-neutral-800/50 border border-neutral-600/50 rounded-lg text-white placeholder-gray-400 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all duration-200"
+                        className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-neutral-800/50 border border-neutral-600/50 rounded-lg text-white placeholder-gray-400 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all duration-200 text-sm sm:text-base"
                       />
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs sm:text-sm">
                         {TOKEN_SYMBOL}
                       </div>
                     </div>
@@ -292,11 +292,11 @@ export default function CreatePost() {
                   </div>
 
                   {/* Duration Section */}
-                  <div className="bg-neutral-700/30 rounded-lg p-4 border border-neutral-600/50">
+                  <div className="bg-neutral-700/30 rounded-lg p-3 sm:p-4 border border-neutral-600/50">
                     <div className="flex items-center gap-2 mb-3">
                       <FaClockIcon className="w-4 h-4 text-blue-400" />
                     </div>
-                    <label htmlFor="bountyDuration" className="text-white font-medium mb-1 block">Bounty Duration</label>
+                    <label htmlFor="bountyDuration" className="text-white font-medium mb-1 block text-sm sm:text-base">Bounty Duration</label>
                     <div className="grid grid-cols-2 gap-3">
                       <input
                         id="bountyDuration"
@@ -306,9 +306,9 @@ export default function CreatePost() {
                         min="1"
                         max="30"
                         required
-                        className="px-4 py-3 bg-neutral-800/50 border border-neutral-600/50 rounded-lg text-white focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all duration-200"
+                        className="px-3 sm:px-4 py-2 sm:py-3 bg-neutral-800/50 border border-neutral-600/50 rounded-lg text-white focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all duration-200 text-sm sm:text-base"
                       />
-                      <div className="flex items-center justify-center px-4 py-3 bg-neutral-800/30 border border-neutral-600/30 rounded-lg text-gray-300 text-sm">
+                      <div className="flex items-center justify-center px-3 sm:px-4 py-2 sm:py-3 bg-neutral-800/30 border border-neutral-600/30 rounded-lg text-gray-300 text-xs sm:text-sm">
                         days
                       </div>
                     </div>
@@ -319,13 +319,13 @@ export default function CreatePost() {
                   </div>
 
                   {/* Summary Card */}
-                  <div className="bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/30 rounded-lg p-4">
-                    <h4 className="text-violet-300 font-medium mb-2">Bounty Summary</h4>
-                    <div className="space-y-2 text-sm">
+                  <div className="bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/30 rounded-lg p-3 sm:p-4">
+                    <h4 className="text-violet-300 font-medium mb-2 text-sm sm:text-base">Bounty Summary</h4>
+                    <div className="space-y-2 text-xs sm:text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-400">Amount:</span>
                         <span className="text-white font-medium">
-                          {bountyAmount ? `${parseFloat(bountyAmount).toFixed(2)} ${TOKEN_SYMBOL}` : '0.00 SOL'}
+                          {bountyAmount ? `${parseFloat(bountyAmount).toFixed(2)} ${TOKEN_SYMBOL}` : `0.00 ${TOKEN_SYMBOL}`}
                         </span>
                       </div>
                       <div className="flex justify-between">
@@ -335,14 +335,14 @@ export default function CreatePost() {
                       <div className="flex justify-between">
                         <span className="text-gray-400">Governance Fee:</span>
                         <span className="text-yellow-400 font-medium">
-                          {bountyAmount ? `${(parseFloat(bountyAmount) * 0.05).toFixed(3)} ${TOKEN_SYMBOL}` : '0.000 SOL'}
+                          {bountyAmount ? `${(parseFloat(bountyAmount) * 0.05).toFixed(3)} ${TOKEN_SYMBOL}` : `0.000 ${TOKEN_SYMBOL}`}
                         </span>
                       </div>
                       <div className="border-t border-violet-500/20 pt-2 mt-2">
                         <div className="flex justify-between">
                           <span className="text-gray-400">Total Cost:</span>
                           <span className="text-violet-300 font-semibold">
-                            {bountyAmount ? `${(parseFloat(bountyAmount) * 1.05).toFixed(3)} ${TOKEN_SYMBOL}` : '0.000 SOL'}
+                            {bountyAmount ? `${(parseFloat(bountyAmount) * 1.05).toFixed(3)} ${TOKEN_SYMBOL}` : `0.000 ${TOKEN_SYMBOL}`}
                           </span>
                         </div>
                       </div>
@@ -353,12 +353,12 @@ export default function CreatePost() {
 
               {/* Info Card when bounty is disabled */}
               {!hasBounty && (
-                <div className="bg-neutral-700/20 rounded-lg p-4 border border-neutral-600/30">
+                <div className="bg-neutral-700/20 rounded-lg p-3 sm:p-4 border border-neutral-600/30">
                   <div className="flex items-start gap-3">
                     <FiInfo className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
                     <div>
-                      <h4 className="text-gray-300 font-medium mb-1">No Bounty Selected</h4>
-                      <p className="text-gray-400 text-sm">
+                      <h4 className="text-gray-300 font-medium mb-1 text-sm sm:text-base">No Bounty Selected</h4>
+                      <p className="text-gray-400 text-xs sm:text-sm">
                         Enable bounty to reward the best answer with tokens. This will attract more attention to your question and incentivize quality responses.
                       </p>
                     </div>
@@ -369,7 +369,7 @@ export default function CreatePost() {
           </div>
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-500 px-4 py-2 rounded-lg">
+            <div className="bg-red-500/10 border border-red-500/30 text-red-500 px-3 sm:px-4 py-2 rounded-lg text-sm sm:text-base">
               {error}
             </div>
           )}
@@ -378,7 +378,7 @@ export default function CreatePost() {
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 disabled:bg-violet-500/50 disabled:cursor-not-allowed disabled:hover:bg-violet-500/50 transition-colors"
+              className="px-4 sm:px-6 py-2 sm:py-3 bg-violet-500 text-white rounded-lg hover:bg-violet-600 disabled:bg-violet-500/50 disabled:cursor-not-allowed disabled:hover:bg-violet-500/50 transition-colors text-sm sm:text-base"
             >
               {loading ? "Creating Post..." : "Create Post"}
             </button>

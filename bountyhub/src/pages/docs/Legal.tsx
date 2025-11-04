@@ -35,17 +35,13 @@ export default function Legal() {
 
         {/* Terms of Service */}
         <section id="terms" className="mb-12">
-          <h2 className="text-3xl font-bold text-white mb-6">Terms of Service</h2>
+          <div className="flex justify-between items-start mb-4">
+            <h2 className="text-3xl font-bold text-white">Terms of Service</h2>
+            <span className="text-sm text-gray-400">
+              <strong>Last updated:</strong> June 23, 2025
+            </span>
+          </div>
           <div className="bg-neutral-800 rounded-lg p-6">
-            <div className="mb-6">
-              <p className="text-gray-300 mb-4">
-                <strong>Last updated:</strong> January 1, 2024
-              </p>
-              <p className="text-gray-300 mb-4">
-                These Terms of Service ("Terms") govern your use of bountyhub ("Service") operated by bountyhub ("we," "us," or "our").
-              </p>
-            </div>
-
             <div className="space-y-6">
               <div>
                 <h3 className="text-xl font-semibold text-white mb-3">1. Acceptance of Terms</h3>
@@ -128,7 +124,7 @@ export default function Legal() {
               <div>
                 <h3 className="text-xl font-semibold text-white mb-3">10. Governing Law</h3>
                 <p className="text-gray-300 mb-2">
-                  These Terms shall be governed by and construed in accordance with the laws of [Jurisdiction], without regard to its conflict of law provisions.
+                  These Terms shall be governed by and construed in accordance with the laws of the United States of America, without regard to its conflict of law provisions.
                 </p>
               </div>
             </div>
@@ -137,17 +133,13 @@ export default function Legal() {
 
         {/* Privacy Policy */}
         <section id="privacy" className="mb-12">
-          <h2 className="text-3xl font-bold text-white mb-6">Privacy Policy</h2>
+          <div className="flex justify-between items-start mb-4">
+            <h2 className="text-3xl font-bold text-white">Privacy Policy</h2>
+            <span className="text-sm text-gray-400">
+              <strong>Last updated:</strong> June 23, 2025
+            </span>
+          </div>
           <div className="bg-neutral-800 rounded-lg p-6">
-            <div className="mb-6">
-              <p className="text-gray-300 mb-4">
-                <strong>Last updated:</strong> January 1, 2024
-              </p>
-              <p className="text-gray-300 mb-4">
-                This Privacy Policy describes how bountyhub collects, uses, and protects your personal information.
-              </p>
-            </div>
-
             <div className="space-y-6">
               <div>
                 <h3 className="text-xl font-semibold text-white mb-3">1. Information We Collect</h3>
@@ -257,17 +249,13 @@ export default function Legal() {
 
         {/* Cookie Policy */}
         <section id="cookies" className="mb-12">
-          <h2 className="text-3xl font-bold text-white mb-6">Cookie Policy</h2>
+          <div className="flex justify-between items-start mb-4">
+            <h2 className="text-3xl font-bold text-white">Cookie Policy</h2>
+            <span className="text-sm text-gray-400">
+              <strong>Last updated:</strong> June 23, 2025
+            </span>
+          </div>
           <div className="bg-neutral-800 rounded-lg p-6">
-            <div className="mb-6">
-              <p className="text-gray-300 mb-4">
-                <strong>Last updated:</strong> January 1, 2024
-              </p>
-              <p className="text-gray-300 mb-4">
-                This Cookie Policy explains how bountyhub uses cookies and similar technologies.
-              </p>
-            </div>
-
             <div className="space-y-6">
               <div>
                 <h3 className="text-xl font-semibold text-white mb-3">What Are Cookies?</h3>
@@ -446,16 +434,6 @@ export default function Legal() {
                   <li>• Urgent issues: 24-48 hours</li>
                   <li>• Emergency situations: Immediate response</li>
                 </ul>
-              </div>
-
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-3">Legal Address</h3>
-                <p className="text-gray-300 mb-2">
-                  [Company Name]<br />
-                  [Street Address]<br />
-                  [City, State, ZIP]<br />
-                  [Country]
-                </p>
               </div>
             </div>
           </div>

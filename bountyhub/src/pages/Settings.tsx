@@ -221,48 +221,49 @@ export default function Settings() {
     <div className="min-h-screen bg-neutral-900">
       <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
         <div className="mb-6 flex justify-between items-center mt-16">
-          <h1 className="text-2xl font-bold text-white">Settings</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-white">Settings</h1>
         </div>
 
         {/* Success Notice */}
         {success && (
-          <div className="mb-6 p-4 bg-green-500/20 border border-green-500/50 rounded-lg flex items-center gap-2 text-green-400">
+          <div className="mb-6 p-3 sm:p-4 bg-green-500/20 border border-green-500/50 rounded-lg flex items-center gap-2 text-green-400 text-sm sm:text-base">
             <FiCheck className="w-5 h-5" />
             <span>{success}</span>
           </div>
         )}
 
         {error && (
-          <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg flex items-center gap-2 text-red-400">
+          <div className="mb-6 p-3 sm:p-4 bg-red-500/20 border border-red-500/50 rounded-lg flex items-center gap-2 text-red-400 text-sm sm:text-base">
             <span>{error}</span>
           </div>
         )}
 
         <div className="bg-neutral-800/80 rounded-lg border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
           {/* Tabs */}
-          <div className="flex border-b border-violet-500/30">
+          <div className="flex flex-wrap border-b border-violet-500/30">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-6 py-4 text-sm font-medium transition-colors ${
+                className={`flex items-center gap-2 px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium transition-colors ${
                   activeTab === tab.id
                     ? 'text-violet-400 border-b-2 border-violet-400'
                     : 'text-gray-400 hover:text-violet-300'
                 }`}
               >
-                <tab.icon className="w-5 h-5" />
-                {tab.label}
+                <tab.icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
               </button>
             ))}
           </div>
 
           {/* Tab Content */}
-          <div className="p-6">
-            <form onSubmit={handleProfileUpdate} className="space-y-6">
+          <div className="p-4 sm:p-6">
+            <form onSubmit={handleProfileUpdate} className="space-y-4 sm:space-y-6">
               {activeTab === 'profile' && (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                     <div>
                       <label htmlFor="firstName" className="block text-sm font-medium text-violet-300 mb-2">
                         First Name
@@ -273,7 +274,7 @@ export default function Settings() {
                         value={profileData.firstName}
                         onChange={(e) => handleInputChange('firstName', e.target.value)}
                         placeholder="Enter your first name"
-                        className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                        className="w-full px-3 sm:px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
                       />
                     </div>
                     <div>
@@ -286,7 +287,7 @@ export default function Settings() {
                         value={profileData.lastName}
                         onChange={(e) => handleInputChange('lastName', e.target.value)}
                         placeholder="Enter your last name"
-                        className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                        className="w-full px-3 sm:px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
                       />
                     </div>
                   </div>
@@ -301,7 +302,7 @@ export default function Settings() {
                       onChange={(e) => handleInputChange('bio', e.target.value)}
                       placeholder="Tell us about yourself..."
                       rows={4}
-                      className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                      className="w-full px-3 sm:px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
                     />
                   </div>
 
@@ -315,7 +316,7 @@ export default function Settings() {
                       value={profileData.location}
                       onChange={(e) => handleInputChange('location', e.target.value)}
                       placeholder="City, Country"
-                      className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                      className="w-full px-3 sm:px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
                     />
                   </div>
 
@@ -329,14 +330,14 @@ export default function Settings() {
                       value={profileData.website}
                       onChange={(e) => handleInputChange('website', e.target.value)}
                       placeholder="https://your-website.com"
-                      className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                      className="w-full px-3 sm:px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
                     />
                   </div>
                 </div>
               )}
 
               {activeTab === 'social' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                   <div>
                     <label htmlFor="facebook" className="block text-sm font-medium text-violet-300 mb-2">
                       Facebook
@@ -347,7 +348,7 @@ export default function Settings() {
                       value={profileData.facebook}
                       onChange={(e) => handleInputChange('facebook', e.target.value)}
                       placeholder="facebook.com/username"
-                      className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                      className="w-full px-3 sm:px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
                     />
                   </div>
                   <div>
@@ -360,7 +361,7 @@ export default function Settings() {
                       value={profileData.twitter}
                       onChange={(e) => handleInputChange('twitter', e.target.value)}
                       placeholder="@username"
-                      className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                      className="w-full px-3 sm:px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
                     />
                   </div>
                   <div>
@@ -373,7 +374,7 @@ export default function Settings() {
                       value={profileData.instagram}
                       onChange={(e) => handleInputChange('instagram', e.target.value)}
                       placeholder="@username"
-                      className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                      className="w-full px-3 sm:px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
                     />
                   </div>
                   <div>
@@ -386,7 +387,7 @@ export default function Settings() {
                       value={profileData.linkedin}
                       onChange={(e) => handleInputChange('linkedin', e.target.value)}
                       placeholder="linkedin.com/in/username"
-                      className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                      className="w-full px-3 sm:px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
                     />
                   </div>
                   <div>
@@ -399,7 +400,7 @@ export default function Settings() {
                       value={profileData.github}
                       onChange={(e) => handleInputChange('github', e.target.value)}
                       placeholder="github.com/username"
-                      className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                      className="w-full px-3 sm:px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
                     />
                   </div>
                   <div>
@@ -412,7 +413,7 @@ export default function Settings() {
                       value={profileData.youtube}
                       onChange={(e) => handleInputChange('youtube', e.target.value)}
                       placeholder="youtube.com/@username"
-                      className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                      className="w-full px-3 sm:px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
                     />
                   </div>
                   <div>

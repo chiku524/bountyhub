@@ -96,20 +96,20 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
       <button
         ref={toggleButtonRef}
         onClick={handleToggleClick}
-        className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
+        className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors text-sm sm:text-base"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
         </svg>
         <span>Filters</span>
-        <svg className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 left-auto top-full z-50 min-w-[36rem] w-full max-w-[calc(100vw-2rem)] ml-0 p-4 bg-neutral-800 border border-neutral-700 rounded-lg shadow-xl">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="absolute right-0 left-auto top-full z-50 min-w-[280px] sm:min-w-[36rem] w-full max-w-[calc(100vw-2rem)] ml-0 p-3 sm:p-4 bg-neutral-800 border border-neutral-700 rounded-lg shadow-xl">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {/* Status Filter */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -118,7 +118,7 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
               <select
                 value={filters.status}
                 onChange={(e) => handleFilterChange('status', e.target.value)}
-                className="w-full p-2 bg-neutral-700 border border-neutral-600 rounded text-white"
+                className="w-full p-2 bg-neutral-700 border border-neutral-600 rounded text-white text-sm"
               >
                 <option value="">All Status</option>
                 <option value="open">Open</option>
@@ -135,7 +135,7 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
               <select
                 value={filters.dateRange}
                 onChange={(e) => handleFilterChange('dateRange', e.target.value)}
-                className="w-full p-2 bg-neutral-700 border border-neutral-600 rounded text-white"
+                className="w-full p-2 bg-neutral-700 border border-neutral-600 rounded text-white text-sm"
               >
                 <option value="">All Time</option>
                 <option value="today">Today</option>
@@ -153,7 +153,7 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
               <select
                 value={filters.sortBy}
                 onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                className="w-full p-2 bg-neutral-700 border border-neutral-600 rounded text-white"
+                className="w-full p-2 bg-neutral-700 border border-neutral-600 rounded text-white text-sm"
               >
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>

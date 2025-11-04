@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../utils/api'
 import { LoadingSpinner } from '../components/LoadingSpinner'
@@ -10,6 +10,7 @@ import { BookmarkButton } from '../components/BookmarkButton'
 import { CodeBlockEditor } from '../components/CodeBlockEditor'
 import TagSelector from '../components/TagSelector'
 import { MediaUpload } from '../components/MediaUpload'
+import { ProfilePicture } from '../components/ProfilePicture'
 import { useAuth } from '../contexts/AuthProvider'
 import type { Post, CodeBlock, Media } from '../types'
 
@@ -28,6 +29,31 @@ export default function PostDetail() {
   const [editError, setEditError] = useState<string | null>(null)
   const [editLoading, setEditLoading] = useState(false)
   const [availableTags, setAvailableTags] = useState<Array<{ id: string; name: string; color: string; description: string | null }>>([])
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
+  // Memoize formatted dates to prevent them from changing on re-renders
+  const formattedCreatedAt = useMemo(() => {
+    if (!post?.createdAt) return ''
+    try {
+      const date = new Date(post.createdAt)
+      return date.toLocaleString()
+    } catch (error) {
+      console.error('Error formatting createdAt date:', error)
+      return 'Invalid date'
+    }
+  }, [post?.createdAt])
+
+  const formattedEditedAt = useMemo(() => {
+    if (!post?.editedAt) return ''
+    try {
+      const date = new Date(post.editedAt)
+      return date.toLocaleString()
+    } catch (error) {
+      console.error('Error formatting editedAt date:', error)
+      return 'Invalid date'
+    }
+  }, [post?.editedAt])
 
   useEffect(() => {
     if (!postId) return
@@ -89,14 +115,6 @@ export default function PostDetail() {
     setEditLoading(true)
     setEditError(null)
     try {
-      console.log('Submitting edit with data:', {
-        title: editTitle.trim(),
-        content: editContent.trim(),
-        tags: editTags,
-        codeBlocks: editCodeBlocks,
-        media: editMedia,
-      })
-      
       const updated = await api.editPost(postId, {
         title: editTitle.trim(),
         content: editContent.trim(),
@@ -105,14 +123,12 @@ export default function PostDetail() {
         media: editMedia,
       })
       
-      console.log('API response:', updated)
       setPost(updated)
       setEditing(false)
       
       // Refresh the post data to ensure we have the latest state
       await fetchPost()
     } catch (err: any) {
-      console.error('Edit error:', err)
       setEditError(err.message || 'Failed to update post')
     } finally {
       setEditLoading(false)
@@ -138,6 +154,34 @@ export default function PostDetail() {
 
   const handleRemoveMedia = (index: number) => {
     setEditMedia(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true)
+  }
+
+  const handleDeleteCancel = () => {
+    setShowDeleteConfirm(false)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!postId) return
+    
+    setDeleteLoading(true)
+    try {
+      const response = await api.deletePost(postId)
+      if (response.success) {
+        // Redirect to community page after successful deletion
+        window.location.href = '/community'
+      } else {
+        console.error('Failed to delete post')
+      }
+    } catch (err: any) {
+      console.error('Error deleting post:', err)
+    } finally {
+      setDeleteLoading(false)
+      setShowDeleteConfirm(false)
+    }
   }
 
   const renderCodeBlock = (block: any, index: number) => (
@@ -211,7 +255,7 @@ export default function PostDetail() {
           </Link>
         </div>
         <h1 className="text-3xl font-bold text-white mb-8">Post Detail</h1>
-        <div className="card bg-neutral-800 border-neutral-700 p-6">
+        <div className={`card bg-neutral-800 border-neutral-700 p-6 ${post?.reward && post.reward > 0 ? 'border-2 border-cyan-400/60 bg-gradient-to-br from-neutral-800 to-cyan-500/5' : ''}`}>
           {loading && (
             <div className="p-8 text-center">
               <LoadingSpinner size="lg" className="mb-4" />
@@ -229,7 +273,17 @@ export default function PostDetail() {
           {!loading && !error && post && (
             <div>
               <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-4 gap-4">
-                <h2 className="text-2xl font-semibold text-white flex-1">{post.title}</h2>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h2 className="text-2xl font-semibold text-white">{post.title}</h2>
+                    {post.reward && post.reward > 0 && (
+                      <div className="flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/40 rounded-full">
+                        <span className="text-cyan-300 text-lg">💰</span>
+                        <span className="text-cyan-200 font-semibold">{post.reward} BBUX Bounty</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   {/* Tags */}
                   {post.tags && post.tags.length > 0 && (
@@ -251,6 +305,14 @@ export default function PostDetail() {
                       onClick={handleEditClick}
                     >
                       Edit Post
+                    </button>
+                  )}
+                  {canEdit && !editing && (
+                    <button
+                      className="ml-2 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded transition-colors"
+                      onClick={handleDeleteClick}
+                    >
+                      Delete Post
                     </button>
                   )}
                 </div>
@@ -384,19 +446,22 @@ export default function PostDetail() {
                 </>
               )}
               <div className="flex items-center space-x-4 text-sm text-gray-500 mb-4">
-                <span>By: <Link 
-                  to={`/users/${post.author?.username || post.authorId}`} 
-                  className="text-indigo-400 hover:text-indigo-300 hover:underline transition-colors"
-                >
-                  {post.author?.username || `User ${post.authorId}`}
-                </Link></span>
+                <span className="flex items-center space-x-2">
+                  <ProfilePicture user={post.author} size="sm" />
+                  <span>By: <Link 
+                    to={`/users/${post.author?.username || post.authorId}`} 
+                    className="text-indigo-400 hover:text-indigo-300 hover:underline transition-colors"
+                  >
+                    {post.author?.username || `User ${post.authorId}`}
+                  </Link></span>
+                </span>
                 <span>Status: <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  post.status === 'open' ? 'bg-green-600 text-white' :
-                  post.status === 'claimed' ? 'bg-yellow-600 text-white' :
+                  post.status === 'OPEN' ? 'bg-green-600 text-white' :
+                  post.status === 'COMPLETED' ? 'bg-yellow-600 text-white' :
                   'bg-gray-600 text-white'
                 }`}>{post.status}</span></span>
-                <span>Created: {new Date(post.createdAt).toLocaleString()}</span>
-                {post.editedAt && <span>Last Edited: {new Date(post.editedAt).toLocaleString()}</span>}
+                <span>Created: {formattedCreatedAt}</span>
+                {post.editedAt && <span>Last Edited: {formattedEditedAt}</span>}
               </div>
             </div>
           )}
@@ -413,6 +478,41 @@ export default function PostDetail() {
         {!loading && !error && post && postId && (
           <div className="mt-8">
             <Comments postId={postId} />
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-neutral-800 border border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4">
+              <div className="bg-red-900 border border-red-700 rounded-lg p-4">
+                <h4 className="font-semibold text-red-200 mb-2">Delete Post</h4>
+                <p className="text-red-300 mb-4">
+                  Are you sure you want to delete this post? This action cannot be undone.
+                  {post?.reward && post.reward > 0 && (
+                    <span className="block mt-2 text-yellow-300">
+                      ⚠️ If this post has an active bounty, it will be refunded to your wallet.
+                    </span>
+                  )}
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleDeleteCancel}
+                    disabled={deleteLoading}
+                    className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDeleteConfirm}
+                    disabled={deleteLoading}
+                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50"
+                  >
+                    {deleteLoading ? 'Deleting...' : 'Delete'}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>

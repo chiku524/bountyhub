@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, memo } from 'react'
 import { useAuth } from '../contexts/AuthProvider'
 import { LoadingSpinner } from './LoadingSpinner'
 import { ErrorMessage } from './ErrorMessage'
+import { ProfilePicture } from './ProfilePicture'
 import { config } from '../utils/config'
 import { Link } from 'react-router-dom'
 import type { Comment } from '../types'
@@ -10,7 +11,7 @@ interface CommentsProps {
   postId: string
 }
 
-export const Comments: React.FC<CommentsProps> = ({ postId }) => {
+export const Comments: React.FC<CommentsProps> = memo(({ postId }) => {
   const { user } = useAuth()
   const [comments, setComments] = useState<Comment[]>([])
   const [loading, setLoading] = useState(true)
@@ -39,7 +40,7 @@ export const Comments: React.FC<CommentsProps> = ({ postId }) => {
     }
   }
 
-  const handleVote = async (commentId: string, value: number) => {
+  const handleVote = useCallback(async (commentId: string, value: number) => {
     if (!user) return
 
     try {
@@ -73,9 +74,9 @@ export const Comments: React.FC<CommentsProps> = ({ postId }) => {
       console.error('Vote error:', err)
       // You could show a toast notification here
     }
-  }
+  }, [user, postId])
 
-  const handleSubmitComment = async (e: React.FormEvent) => {
+  const handleSubmitComment = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     if (!user || !newComment.trim()) return
 
@@ -104,7 +105,7 @@ export const Comments: React.FC<CommentsProps> = ({ postId }) => {
     } finally {
       setSubmitting(false)
     }
-  }
+  }, [user, postId, newComment])
 
   const VoteButtons = ({ comment }: { comment: Comment }) => {
     const userVote = userVotes[comment.id] || 0
@@ -211,6 +212,7 @@ export const Comments: React.FC<CommentsProps> = ({ postId }) => {
             <div key={comment.id} className="bg-neutral-800/50 rounded-lg p-4 border border-neutral-700">
               <div className="flex items-start justify-between mb-2">
                 <div className="flex items-center space-x-2">
+                  <ProfilePicture user={comment.author} size="sm" />
                   <span className="text-indigo-400 font-medium">
                     <Link 
                       to={`/users/${comment.author?.username}`}
@@ -232,4 +234,4 @@ export const Comments: React.FC<CommentsProps> = ({ postId }) => {
       </div>
     </div>
   )
-} 
+}) 

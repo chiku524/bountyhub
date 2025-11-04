@@ -44,7 +44,7 @@ export interface Post {
   createdAt: string
   updatedAt: string
   editedAt?: string
-  status: 'open' | 'claimed' | 'closed'
+  status: 'OPEN' | 'CLOSED' | 'COMPLETED'
   reward?: number
   qualityUpvotes?: number
   qualityDownvotes?: number
@@ -149,7 +149,7 @@ export interface WalletInfo {
   }
 }
 
-// Transaction types
+// Transaction types (legacy wallet transactions)
 export interface Transaction {
   id: string
   userId: string
@@ -163,6 +163,22 @@ export interface Transaction {
   solanaSignature?: string
   bountyId?: string
   metadata?: string
+  createdAt: string
+  updatedAt: string
+}
+
+// New transaction log types (for transactionLogs table)
+export interface TransactionLog {
+  id: string
+  type: string
+  userId: string
+  amount: number
+  transactionId: string
+  timestamp: string
+  status: string
+  metadata?: string
+  ipAddress?: string
+  userAgent?: string
   createdAt: string
   updatedAt: string
 }

@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { createDb } from '../../../src/utils/db'
-import { users, profiles, posts, reputationHistory, bookmarks } from '../../../drizzle/schema'
+import { users, profiles, posts, reputationHistory, bookmarks, bounties } from '../../../drizzle/schema'
 import { eq, desc } from 'drizzle-orm'
 
 interface Env {
@@ -42,16 +42,19 @@ app.get(async (c) => {
     // Get user profile information if it exists
     const profileResult = await db.select().from(profiles).where(eq(profiles.userId, user.id)).limit(1)
     
-    // Get user's recent posts
+    // Get user's recent posts with bounty information
     const userPosts = await db.select({
       id: posts.id,
       title: posts.title,
       content: posts.content,
       createdAt: posts.createdAt,
       qualityUpvotes: posts.qualityUpvotes,
-      qualityDownvotes: posts.qualityDownvotes
+      qualityDownvotes: posts.qualityDownvotes,
+      hasBounty: posts.hasBounty,
+      reward: bounties.amount
     })
     .from(posts)
+    .leftJoin(bounties, eq(posts.id, bounties.postId))
     .where(eq(posts.authorId, user.id))
     .orderBy(desc(posts.createdAt))
     .limit(5)

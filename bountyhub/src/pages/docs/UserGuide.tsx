@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { FiArrowLeft, FiDownload, FiUser, FiDollarSign, FiMessageSquare, FiStar } from 'react-icons/fi'
+import { FiArrowLeft, FiDownload, FiUser, FiDollarSign, FiMessageSquare, FiStar, FiMessageCircle, FiImage } from 'react-icons/fi'
 
 export default function UserGuide() {
   return (
@@ -30,6 +30,7 @@ export default function UserGuide() {
             <li><a href="#asking-questions" className="text-violet-400 hover:text-violet-300">Asking Questions</a></li>
             <li><a href="#answering-questions" className="text-violet-400 hover:text-violet-300">Answering Questions</a></li>
             <li><a href="#bounty-system" className="text-violet-400 hover:text-violet-300">Bounty System</a></li>
+            <li><a href="#global-chat" className="text-violet-400 hover:text-violet-300">Global Chat</a></li>
             <li><a href="#refund-system" className="text-violet-400 hover:text-violet-300">Refund Request System</a></li>
             <li><a href="#reputation-system" className="text-violet-400 hover:text-violet-300">Reputation System</a></li>
             <li><a href="#governance" className="text-violet-400 hover:text-violet-300">Governance & Staking</a></li>
@@ -312,6 +313,149 @@ export default function UserGuide() {
                 <li>5. <strong>Distribution:</strong> Bounty is automatically paid to winner</li>
                 <li>6. <strong>Completion:</strong> Question is marked as resolved</li>
               </ol>
+            </div>
+          </div>
+        </section>
+
+        {/* Global Chat */}
+        <section id="global-chat" className="mb-12">
+          <h2 className="text-3xl font-bold text-white mb-6">Global Chat</h2>
+          <div className="space-y-6">
+            <div className="bg-neutral-800 rounded-lg p-6">
+              <h3 className="text-xl font-semibold text-white mb-3">Real-Time Community Chat</h3>
+              <p className="text-gray-300 mb-4">
+                Connect with the bountyhub community in real-time through our global chat feature. Share ideas, 
+                ask quick questions, and build relationships with other users.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="text-center p-4 bg-neutral-700 rounded-lg">
+                  <FiMessageSquare className="w-8 h-8 text-violet-400 mx-auto mb-2" />
+                  <h4 className="text-white font-semibold">Global Chat</h4>
+                  <p className="text-gray-400 text-sm">Community-wide conversation</p>
+                </div>
+                <div className="text-center p-4 bg-neutral-700 rounded-lg">
+                  <FiMessageCircle className="w-8 h-8 text-violet-400 mx-auto mb-2" />
+                  <h4 className="text-white font-semibold">Real-Time</h4>
+                  <p className="text-gray-400 text-sm">Instant messaging</p>
+                </div>
+                <div className="text-center p-4 bg-neutral-700 rounded-lg">
+                  <FiImage className="w-8 h-8 text-violet-400 mx-auto mb-2" />
+                  <h4 className="text-white font-semibold">GIFs & Emojis</h4>
+                  <p className="text-gray-400 text-sm">Express yourself</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-neutral-800 rounded-lg p-6">
+              <h3 className="text-xl font-semibold text-white mb-3">Accessing the Chat</h3>
+              <p className="text-gray-300 mb-4">
+                The global chat is easily accessible from any page on the platform.
+              </p>
+              <ol className="text-gray-300 space-y-2">
+                <li>1. <strong>Chat Button:</strong> Look for the message icon in the bottom-right corner of any page</li>
+                <li>2. <strong>Auto-Join:</strong> You'll automatically join the global chat room when you click the button</li>
+                <li>3. <strong>Persistent:</strong> The chat sidebar stays open as you navigate between pages</li>
+                <li>4. <strong>Close:</strong> Click the X button to minimize the chat sidebar</li>
+              </ol>
+            </div>
+
+            <div className="bg-neutral-800 rounded-lg p-6">
+              <h3 className="text-xl font-semibold text-white mb-3">Chat Features</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="text-lg font-semibold text-violet-400 mb-2">Text Messages</h4>
+                  <ul className="text-gray-400 space-y-1">
+                    <li>• Type and send text messages</li>
+                    <li>• Real-time message delivery</li>
+                    <li>• Message history preserved</li>
+                    <li>• Username display for each message</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-violet-400 mb-2">Rich Content</h4>
+                  <ul className="text-gray-400 space-y-1">
+                    <li>• Emoji picker with popular emojis</li>
+                    <li>• GIF search powered by GIPHY</li>
+                    <li>• Send GIFs to express reactions</li>
+                    <li>• Visual message content</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-neutral-800 rounded-lg p-6">
+              <h3 className="text-xl font-semibold text-white mb-3">Using GIFs and Emojis</h3>
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-lg font-semibold text-violet-400 mb-2">Emoji Picker</h4>
+                  <ol className="text-gray-300 space-y-1">
+                    <li>1. Click the smiley face icon in the chat input</li>
+                    <li>2. Browse through the emoji grid</li>
+                    <li>3. Click any emoji to add it to your message</li>
+                    <li>4. Continue typing or send the message</li>
+                  </ol>
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-violet-400 mb-2">GIF Search</h4>
+                  <ol className="text-gray-300 space-y-1">
+                    <li>1. Click the image icon in the chat input</li>
+                    <li>2. Type a search term (e.g., "cat", "hello", "congratulations")</li>
+                    <li>3. Browse through the GIF results</li>
+                    <li>4. Click any GIF to send it immediately</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-neutral-800 rounded-lg p-6">
+              <h3 className="text-xl font-semibold text-white mb-3">Chat Etiquette</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="text-lg font-semibold text-violet-400 mb-2">Do's</h4>
+                  <ul className="text-gray-400 space-y-1">
+                    <li>• Be respectful and friendly</li>
+                    <li>• Ask questions about the platform</li>
+                    <li>• Share relevant knowledge and tips</li>
+                    <li>• Use GIFs and emojis appropriately</li>
+                    <li>• Help new users get started</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-violet-400 mb-2">Don'ts</h4>
+                  <ul className="text-gray-400 space-y-1">
+                    <li>• Spam or send excessive messages</li>
+                    <li>• Use inappropriate language or content</li>
+                    <li>• Share personal information</li>
+                    <li>• Promote external services aggressively</li>
+                    <li>• Engage in arguments or conflicts</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-neutral-800 rounded-lg p-6">
+              <h3 className="text-xl font-semibold text-white mb-3">Chat Tips</h3>
+              <div className="space-y-4">
+                <div className="p-4 bg-violet-900/20 border border-violet-500/30 rounded-lg">
+                  <h4 className="text-violet-400 font-semibold mb-2">💡 Pro Tips</h4>
+                  <ul className="text-gray-300 text-sm space-y-1">
+                    <li>• Use the chat to ask quick questions before creating formal posts</li>
+                    <li>• Share interesting bounty questions you've seen</li>
+                    <li>• Celebrate when you win bounties or reach reputation milestones</li>
+                    <li>• Use GIFs to react to others' messages and make conversations more engaging</li>
+                    <li>• The chat is perfect for getting feedback on question ideas</li>
+                  </ul>
+                </div>
+                <div className="p-4 bg-neutral-700 rounded-lg">
+                  <h4 className="text-white font-semibold mb-2">�� Technical Notes</h4>
+                  <ul className="text-gray-400 text-sm space-y-1">
+                    <li>• Messages are stored and persist between sessions</li>
+                    <li>• GIF search is powered by GIPHY API</li>
+                    <li>• Chat works on all devices and screen sizes</li>
+                    <li>• You can minimize the chat to focus on other tasks</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         </section>

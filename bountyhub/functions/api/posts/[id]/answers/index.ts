@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { getCookie } from 'hono/cookie'
 import { createDb } from '../../../../../src/utils/db'
 import { getUserIdFromSession } from '../../../../../src/utils/auth'
-import { answers, users, votes, posts, answerCodeBlocks } from '../../../../../drizzle/schema'
+import { answers, users, votes, posts, answerCodeBlocks, profiles } from '../../../../../drizzle/schema'
 import { eq, and } from 'drizzle-orm'
 import { updateReputation } from '../../../../../src/utils/reputation'
 import { createAnswerNotification } from '../../../../../src/utils/notifications'
@@ -34,11 +34,13 @@ app.get(async (c) => {
       author: {
         id: users.id,
         username: users.username,
-        email: users.email
+        email: users.email,
+        profilePicture: profiles.profilePicture
       }
     })
     .from(answers)
     .leftJoin(users, eq(answers.authorId, users.id))
+    .leftJoin(profiles, eq(users.id, profiles.userId))
     .where(eq(answers.postId, postId))
 
     // Get code blocks for each answer

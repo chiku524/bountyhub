@@ -2,7 +2,7 @@
 export const config = {
   // API Configuration
   api: {
-    baseUrl: import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:8788' : 'https://api.bountyhub.tech'),
+    baseUrl: import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:8788' : 'https://bountyhub-api.nico-chikuji.workers.dev'),
     timeout: 10000,
   },
   
@@ -10,6 +10,13 @@ export const config = {
   cloudinary: {
     cloudName: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dqobhvk07',
     uploadPreset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'bountyhub',
+  },
+  
+  // GIPHY Configuration
+  giphy: {
+    // For production, this will be injected by Vite's define option
+    // For development, we'll use a hardcoded key (only for local dev)
+    apiKey: import.meta.env.VITE_GIPHY_API_KEY || (import.meta.env.DEV ? '8tPzDynfDBevgXLsAaPztARWyvWzNLPK' : ''),
   },
   
   // App Configuration

@@ -218,7 +218,7 @@ export default function Terms() {
               <section>
                 <h2 className="text-xl font-semibold text-gray-900 mb-3">11. Governing Law</h2>
                 <p className="text-gray-700">
-                  These Terms shall be governed by and construed in accordance with the laws of [Your Jurisdiction], without regard to its conflict of law provisions.
+                  These Terms shall be governed by and construed in accordance with the laws of the United States of America, without regard to its conflict of law provisions.
                 </p>
               </section>
 
@@ -245,7 +245,6 @@ export default function Terms() {
                 <ul className="list-disc list-inside text-gray-700 space-y-1">
                   <li>Email: legal@bountyhub.tech</li>
                   <li>Website: https://bountyhub.tech</li>
-                  <li>Address: [Your Business Address]</li>
                 </ul>
               </section>
             </div>

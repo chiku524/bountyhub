@@ -4,73 +4,143 @@
   "entries": [
     {
       "idx": 0,
-      "version": "6",
-      "when": 1750372513288,
-      "tag": "0000_gorgeous_centennial",
-      "breakpoints": true
+      "version": "7",
+      "dialect": "sqlite",
+      "id": "0000_gorgeous_centennial",
+      "prevId": null,
+      "tables": {},
+      "enums": {},
+      "schemas": {}
     },
     {
       "idx": 1,
-      "version": "6",
-      "when": 1750483820153,
-      "tag": "0003_add_default_tags",
-      "breakpoints": true
+      "version": "7",
+      "dialect": "sqlite",
+      "id": "0001_snapshot",
+      "prevId": "0000_gorgeous_centennial",
+      "tables": {},
+      "enums": {},
+      "schemas": {}
     },
     {
       "idx": 2,
-      "version": "6",
-      "when": 1750540332688,
-      "tag": "0004_messy_misty_knight",
-      "breakpoints": true
+      "version": "7",
+      "dialect": "sqlite",
+      "id": "0002_snapshot",
+      "prevId": "0001_snapshot",
+      "tables": {},
+      "enums": {},
+      "schemas": {}
     },
     {
       "idx": 3,
-      "version": "6",
-      "when": 1750542248126,
-      "tag": "0005_absent_romulus",
-      "breakpoints": true
+      "version": "7",
+      "dialect": "sqlite",
+      "id": "0003_add_default_tags",
+      "prevId": "0002_snapshot",
+      "tables": {},
+      "enums": {},
+      "schemas": {}
     },
     {
       "idx": 4,
-      "version": "6",
-      "when": 1750545144145,
-      "tag": "0006_lyrical_stephen_strange",
-      "breakpoints": true
+      "version": "7",
+      "dialect": "sqlite",
+      "id": "0004_messy_misty_knight",
+      "prevId": "0003_add_default_tags",
+      "tables": {},
+      "enums": {},
+      "schemas": {}
     },
     {
       "idx": 5,
-      "version": "6",
-      "when": 1750558797390,
-      "tag": "0007_glossy_red_shift",
-      "breakpoints": true
+      "version": "7",
+      "dialect": "sqlite",
+      "id": "0005_absent_romulus",
+      "prevId": "0004_messy_misty_knight",
+      "tables": {},
+      "enums": {},
+      "schemas": {}
     },
     {
       "idx": 6,
-      "version": "6",
-      "when": 1750559958142,
-      "tag": "0008_dizzy_ronan",
-      "breakpoints": true
+      "version": "7",
+      "dialect": "sqlite",
+      "id": "0006_lyrical_stephen_strange",
+      "prevId": "0005_absent_romulus",
+      "tables": {},
+      "enums": {},
+      "schemas": {}
     },
     {
       "idx": 7,
-      "version": "6",
-      "when": 1750562595999,
-      "tag": "0009_narrow_shooting_star",
-      "breakpoints": true
+      "version": "7",
+      "dialect": "sqlite",
+      "id": "0007_glossy_red_shift",
+      "prevId": "0006_lyrical_stephen_strange",
+      "tables": {},
+      "enums": {},
+      "schemas": {}
     },
     {
       "idx": 8,
-      "version": "6",
-      "when": 1750562596999,
-      "tag": "0010_insert_default_tags",
-      "breakpoints": true
+      "version": "7",
+      "dialect": "sqlite",
+      "id": "0008_dizzy_ronan",
+      "prevId": "0007_glossy_red_shift",
+      "tables": {},
+      "enums": {},
+      "schemas": {}
     },
     {
       "idx": 9,
-      "version": "6",
-      "when": 1750562598000,
-      "tag": "0011_initialize_treasury",
-      "breakpoints": true
+      "version": "7",
+      "dialect": "sqlite",
+      "id": "0009_narrow_shooting_star",
+      "prevId": "0008_dizzy_ronan",
+      "tables": {},
+      "enums": {},
+      "schemas": {}
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "dialect": "sqlite",
+      "id": "0010_insert_default_tags",
+      "prevId": "0009_narrow_shooting_star",
+      "tables": {},
+      "enums": {},
+      "schemas": {}
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "dialect": "sqlite",
+      "id": "0011_initialize_treasury",
+      "prevId": "0010_insert_default_tags",
+      "tables": {},
+      "enums": {},
+      "schemas": {}
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "dialect": "sqlite",
+      "id": "0012_add_chat_tables",
+      "prevId": "0011_initialize_treasury",
+      "tables": {},
+      "enums": {},
+      "schemas": {}
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "dialect": "sqlite",
+      "id": "0014_migrate_transactions",
+      "prevId": "0012_add_chat_tables",
+      "tables": {},
+      "enums": {},
+      "schemas": {}
     }
   ]
-}
+} 

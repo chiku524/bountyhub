@@ -63,6 +63,12 @@ app.post(async (c) => {
       updatedAt: new Date()
     }).where(eq(answers.id, answerId))
 
+    // Update post status to COMPLETED when an answer is accepted
+    await db.update(posts).set({ 
+      status: 'COMPLETED',
+      updatedAt: new Date()
+    }).where(eq(posts.id, postId))
+
     // Award reputation to the answer author
     const answerAuthorId = answerResult[0].authorId
     await updateReputation(db, answerAuthorId, 'ANSWER_ACCEPTED', answerId)

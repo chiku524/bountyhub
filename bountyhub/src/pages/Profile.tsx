@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { FiCamera, FiShield, FiStar, FiThumbsUp } from 'react-icons/fi'
 import { FaGithub, FaTwitter, FaLinkedin, FaInstagram, FaFacebook, FaYoutube, FaTiktok, FaDiscord, FaReddit, FaMedium, FaStackOverflow, FaDev } from 'react-icons/fa'
 import { api } from '../utils/api'
+import { useAuth } from '../contexts/AuthProvider'
 import type { User, Post, Bookmark, ReputationHistory } from '../types'
 
 interface ProfileData {
@@ -155,27 +156,20 @@ const ProfilePictureUpload = ({ currentPicture, username, onPictureUpdate }: { c
     reader.readAsDataURL(file)
 
     // Upload file
-    const formData = new FormData()
-    formData.append('profilePicture', file)
-
     try {
-      const response = await fetch('/api/profile/picture', {
-        method: 'POST',
-        body: formData,
-      })
+      const result = await api.uploadProfilePicture(file)
 
-      const result = await response.json()
-
-      if (response.ok && result.success) {
+      if (result.success) {
         setPreview(result.profilePicture || null)
         // Update the parent component's user state
-        onPictureUpdate(result.profilePicture || null)
+        onPictureUpdate(result.profilePicture)
       } else {
-        alert(result.error || 'Failed to upload profile picture')
+        alert('Failed to upload profile picture')
         setPreview(currentPicture)
       }
     } catch (error) {
-      alert('Failed to upload profile picture')
+      console.error('Upload error:', error)
+      alert(error instanceof Error ? error.message : 'Failed to upload profile picture')
       setPreview(currentPicture)
     } finally {
       setIsUploading(false)
@@ -318,6 +312,7 @@ function getIntegrityBadgeStyle(score: number): string {
 }
 
 export default function Profile() {
+  const { updateUser } = useAuth()
   const [user, setUser] = useState<User | null>(null)
   const [posts, setPosts] = useState<Post[]>([])
   const [reputationHistory, setReputationHistory] = useState<ReputationHistory[]>([])
@@ -422,11 +417,11 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-neutral-900">
       <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
-        <div className="mb-6 flex justify-between items-center mt-16">
-          <h1 className="text-2xl font-bold text-white">Profile</h1>
+        <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mt-16">
+          <h1 className="text-xl sm:text-2xl font-bold text-white">Profile</h1>
           <Link 
             to="/posts/create" 
-            className="px-4 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-colors flex items-center gap-2 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)] hover:shadow-[0_0_20px_rgba(139,92,246,0.5)]"
+            className="px-4 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-colors flex items-center gap-2 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)] hover:shadow-[0_0_20px_rgba(139,92,246,0.5)] w-fit"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
@@ -435,59 +430,61 @@ export default function Profile() {
           </Link>
         </div>
 
-        <div className="bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
-          <div className="flex items-start space-x-6">
+        <div className="bg-neutral-800/80 rounded-lg p-4 sm:p-6 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6">
             <ProfilePictureUpload 
               currentPicture={user.profilePicture || null}
               username={user.username}
               onPictureUpdate={(newPicture) => {
-                setUser({
+                const updatedUser = {
                   ...user,
                   profilePicture: newPicture
-                })
+                }
+                setUser(updatedUser)
+                updateUser({ profilePicture: newPicture })
               }}
             />
             <div className="flex-1">
-              <h2 className="text-xl font-semibold text-white">{user.username}</h2>
-              <p className="text-gray-400 mt-1">
+              <h2 className="text-lg sm:text-xl font-semibold text-white">{user.username}</h2>
+              <p className="text-sm sm:text-base text-gray-400 mt-1">
                 Member since {new Date(user.createdAt).toLocaleDateString()}
               </p>
               <div className="mt-4">
-                <div className="flex items-center space-x-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <div className="bg-violet-500/20 px-3 py-1 rounded-full border border-violet-500/50">
-                    <span className="text-violet-300 font-medium">{reputationLevel}</span>
+                    <span className="text-violet-300 font-medium text-sm">{reputationLevel}</span>
                   </div>
                   <div className="bg-violet-500/20 px-3 py-1 rounded-full border border-violet-500/50">
-                    <span className="text-violet-300 font-medium">{user.reputationPoints || 0} points</span>
+                    <span className="text-violet-300 font-medium text-sm">{user.reputationPoints || 0} points</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="mt-8">
-            <h2 className="text-lg font-semibold text-violet-300 mb-4">Profile Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
+          <div className="mt-6 sm:mt-8">
+            <h2 className="text-base sm:text-lg font-semibold text-violet-300 mb-4">Profile Information</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+              <div className="bg-neutral-700/50 rounded-lg p-3 sm:p-4 border border-violet-500/30">
                 <label htmlFor="bio" className="block text-sm font-medium text-violet-300">Bio</label>
                 <p id="bio" className="mt-1 text-sm text-gray-300">{user.profile?.bio || 'No bio provided'}</p>
               </div>
-              <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
+              <div className="bg-neutral-700/50 rounded-lg p-3 sm:p-4 border border-violet-500/30">
                 <label htmlFor="location" className="block text-sm font-medium text-violet-300">Location</label>
                 <p id="location" className="mt-1 text-sm text-gray-300">{user.profile?.location || 'No location provided'}</p>
               </div>
-              <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
+              <div className="bg-neutral-700/50 rounded-lg p-3 sm:p-4 border border-violet-500/30">
                 <label htmlFor="website" className="block text-sm font-medium text-violet-300">Website</label>
                 <p id="website" className="mt-1 text-sm text-gray-300">
                   {user.profile?.website ? (
                     <a href={user.profile.website} target="_blank" rel="noopener noreferrer" 
-                       className="text-violet-400 hover:text-violet-300">
+                       className="text-violet-400 hover:text-violet-300 break-all">
                       {user.profile.website}
                     </a>
                   ) : 'No website provided'}
                 </p>
               </div>
-              <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
+              <div className="bg-neutral-700/50 rounded-lg p-3 sm:p-4 border border-violet-500/30">
                 <label htmlFor="socialMedia" className="block text-sm font-medium text-violet-300">Social Media</label>
                 <div id="socialMedia" className="mt-2">
                   {user.profile ? (
@@ -501,7 +498,7 @@ export default function Profile() {
           </div>
 
           {/* Integrity Display */}
-          <div className="mt-8">
+          <div className="mt-6 sm:mt-8">
             <IntegrityDisplay
               user={{
                 id: user.id,
@@ -512,24 +509,24 @@ export default function Profile() {
             />
           </div>
 
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="mt-6 sm:mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
-              <h2 className="text-lg font-semibold text-violet-300 mb-4">Recent Activity</h2>
+              <h2 className="text-base sm:text-lg font-semibold text-violet-300 mb-4">Recent Activity</h2>
               <div className="space-y-2">
                 {recentActivities.map((history) => (
                   <div key={history.id} className="flex items-center justify-between p-3 bg-neutral-700/50 rounded-lg border border-violet-500/30">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 bg-violet-500/20 rounded-lg">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <div className="p-1.5 bg-violet-500/20 rounded-lg flex-shrink-0">
                         <FiThumbsUp className="w-3.5 h-3.5 text-violet-300" />
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-violet-300">{getActivityDescription(history.action)}</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-violet-300 truncate">{getActivityDescription(history.action)}</p>
                         <p className="text-xs text-gray-400 mt-0.5">
                           {new Date(history.createdAt).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
-                    <span className={`text-sm font-medium ${history.points > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    <span className={`text-sm font-medium flex-shrink-0 ml-2 ${history.points > 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {history.points > 0 ? '+' : ''}{history.points}
                     </span>
                   </div>
@@ -545,16 +542,24 @@ export default function Profile() {
             </div>
 
             <div>
-              <h2 className="text-lg font-semibold text-violet-300 mb-4">Recent Posts</h2>
+              <h2 className="text-base sm:text-lg font-semibold text-violet-300 mb-4">Recent Posts</h2>
               <div className="space-y-2">
                 {limitedPosts.map((post) => (
-                  <div key={post.id} className="p-3 bg-neutral-700/50 rounded-lg border border-violet-500/30">
+                  <div key={post.id} className={`p-3 bg-neutral-700/50 rounded-lg border border-violet-500/30 ${post.reward && post.reward > 0 ? 'border-l-4 border-cyan-400/60 bg-gradient-to-r from-cyan-500/5 to-neutral-700/50' : ''}`}>
                     <Link to={`/posts/${post.id}`} className="block hover:bg-neutral-600/50 rounded-lg p-1.5 -m-1.5 transition-colors">
                       <div className="flex items-center gap-2 mb-1">
-                        <div className="p-1.5 bg-violet-500/20 rounded-lg">
+                        <div className="p-1.5 bg-violet-500/20 rounded-lg flex-shrink-0">
                           <FiThumbsUp className="w-3.5 h-3.5 text-violet-300" />
                         </div>
-                        <h3 className="text-sm font-medium text-violet-300">{post.title}</h3>
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <h3 className="text-sm font-medium text-violet-300 truncate">{post.title}</h3>
+                          {post.reward && post.reward > 0 && (
+                            <div className="flex items-center gap-1 px-1.5 py-0.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/40 rounded-full flex-shrink-0">
+                              <span className="text-cyan-300 text-xs">💰</span>
+                              <span className="text-cyan-200 text-xs font-medium">{post.reward}</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <p className="text-xs text-gray-300 line-clamp-2">{truncateContent(post.content)}</p>
                       <div className="mt-1 flex items-center justify-between">
@@ -585,17 +590,17 @@ export default function Profile() {
           </div>
 
           {/* Bookmarks Section */}
-          <div className="mt-8">
-            <h2 className="text-xl font-bold text-yellow-400 mb-4">Bookmarked Posts</h2>
+          <div className="mt-6 sm:mt-8">
+            <h2 className="text-lg sm:text-xl font-bold text-yellow-400 mb-4">Bookmarked Posts</h2>
             {limitedBookmarks.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {limitedBookmarks.map((bookmark) => (
                   <div key={bookmark.id} className="bg-neutral-800/80 rounded-lg p-4 border border-yellow-400/40 transition-all duration-300 hover:bg-neutral-700/80 hover:border-yellow-300/60 hover:shadow-lg hover:shadow-yellow-400/20 hover:scale-[1.02] group">
                     <Link to={`/posts/${bookmark.post.id}`} className="block">
-                      <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-yellow-300 transition-colors duration-300">
+                      <h3 className="text-base sm:text-lg font-semibold text-white mb-2 group-hover:text-yellow-300 transition-colors duration-300 line-clamp-2">
                         {bookmark.post.title}
                       </h3>
-                      <p className="text-gray-300 mb-2 truncate group-hover:text-gray-200 transition-colors duration-300">
+                      <p className="text-sm text-gray-300 mb-2 line-clamp-2 group-hover:text-gray-200 transition-colors duration-300">
                         {bookmark.post.content.length > 100 ? bookmark.post.content.substring(0, 100) + '...' : bookmark.post.content}
                       </p>
                       <div className="flex items-center justify-between text-xs text-gray-400">
@@ -609,7 +614,7 @@ export default function Profile() {
                 ))}
               </div>
             ) : (
-              <div className="bg-neutral-800/80 rounded-lg p-6 border border-yellow-400/40 text-center">
+              <div className="bg-neutral-800/80 rounded-lg p-4 sm:p-6 border border-yellow-400/40 text-center">
                 <p className="text-gray-400">No bookmarked posts yet</p>
                 <p className="text-sm text-gray-500 mt-1">Bookmark posts from the community to see them here</p>
               </div>

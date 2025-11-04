@@ -1,70 +1,67 @@
 import { Hono } from 'hono'
-import { setCookie } from 'hono/cookie'
-import { login, createSession } from '../../../src/utils/auth'
 import { createDb } from '../../../src/utils/db'
-import { sessions } from '../../../drizzle/schema'
+import { users } from '../../../drizzle/schema'
+import { eq } from 'drizzle-orm'
+import bcrypt from 'bcryptjs'
+import { createSession } from '../../../src/utils/auth'
 
 interface Env {
-  NODE_ENV: string
   DB: any
+  NODE_ENV: string
 }
 
 const app = new Hono<{ Bindings: Env }>()
 
-app.post(async (c) => {
+app.post('/', async (c) => {
   try {
     const { email, password } = await c.req.json()
     
-    // Create database instance
+    if (!email || !password) {
+      return c.json({ error: 'Email and password are required' }, 400)
+    }
+
     const db = createDb(c.env.DB)
     
-    // Use auth function with database
-    const result = await login({ email, password }, db)
+    // Find user by email
+    const userResult = await db.select().from(users).where(eq(users.email, email)).limit(1)
     
-    if (result.success && result.user) {
-      try {
-        // Test if sessions table exists by trying to query it
-        try {
-          await db.select().from(sessions).limit(1)
-          console.log('Sessions table exists and is accessible')
-        } catch (tableError) {
-          console.error('Sessions table error:', tableError)
-          return c.json({ error: 'Database configuration error' }, 500)
-        }
-        
-        // Create a session for the user
-        const sessionId = await createSession(result.user.id, db)
-        
-        // Set the session cookie with proper configuration for development/production
-        const cookieOptions: any = {
-          httpOnly: true, 
-          path: '/',
-          maxAge: 60 * 60 * 24 * 30 // 30 days
-        }
-        
-        // Configure cookie based on environment
-        if (c.env.NODE_ENV === 'production') {
-          cookieOptions.domain = '.bountyhub.tech'
-          cookieOptions.secure = true
-          cookieOptions.sameSite = 'none'
-        } else {
-          // Development configuration
-          cookieOptions.secure = false
-          cookieOptions.sameSite = 'lax'
-        }
-        
-        setCookie(c, 'session', sessionId, cookieOptions)
-        
-        return c.json({ user: result.user })
-      } catch (sessionError) {
-        console.error('Session creation error:', sessionError)
-        return c.json({ error: 'Failed to create session' }, 500)
-      }
+    if (userResult.length === 0) {
+      return c.json({ error: 'Invalid email or password' }, 401)
     }
+
+    const user = userResult[0]
     
-    return c.json({ error: result.error || 'Login failed' }, 400)
+    // Verify password
+    const isValidPassword = await bcrypt.compare(password, user.password)
+    
+    if (!isValidPassword) {
+      return c.json({ error: 'Invalid email or password' }, 401)
+    }
+
+    // Create session
+    const sessionId = await createSession(user.id, db)
+    
+    if (!sessionId) {
+      return c.json({ error: 'Failed to create session' }, 500)
+    }
+
+    // Set session cookie
+    const isProduction = c.env.NODE_ENV === 'production'
+    
+    c.header('Set-Cookie', `session=${sessionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400${isProduction ? '' : '; Domain=localhost'}`)
+
+    return c.json({ 
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
+      }
+    })
   } catch (error) {
-    console.error('Login endpoint error:', error)
+    console.error('Login error:', error)
     return c.json({ error: 'Internal server error' }, 500)
   }
 })

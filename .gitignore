@@ -10,6 +10,12 @@ node_modules/
 build/
 dist/
 
+# Local database files
+*.db
+*.db-shm
+*.db-wal
+local.db
+
 # Cloudflare auto-generated files
 wrangler.toml.bak
 *.wrangler.toml

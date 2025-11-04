@@ -1,10 +1,10 @@
 import { Routes, Route, useLocation } from 'react-router-dom'
+import { HelmetProvider } from 'react-helmet-async'
 import { WalletProvider } from './contexts/WalletProvider'
-import { ConnectionProvider, WalletProvider as SolanaWalletProvider } from '@solana/wallet-adapter-react'
-import { WalletModalProvider } from '@solana/wallet-adapter-react-ui'
-import { PhantomWalletAdapter, SolflareWalletAdapter } from '@solana/wallet-adapter-wallets'
 import { AuthProvider, useAuth } from './contexts/AuthProvider'
+import { SolanaWalletProvider } from './contexts/SolanaWalletProvider'
 import Layout from './components/Layout'
+import { PageMetadata } from './components/PageMetadata'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
@@ -48,6 +48,7 @@ function AppContent() {
   
   return (
     <Layout showNav={showNav}>
+      <PageMetadata />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
@@ -84,21 +85,16 @@ function AppContent() {
 }
 
 function App() {
-  const wallets = [new PhantomWalletAdapter(), new SolflareWalletAdapter()]
-  const endpoint = 'https://api.devnet.solana.com'
-
   return (
-    <AuthProvider>
-      <ConnectionProvider endpoint={endpoint}>
-        <SolanaWalletProvider wallets={wallets} autoConnect>
-          <WalletModalProvider>
-            <WalletProvider>
-              <AppContent />
-            </WalletProvider>
-          </WalletModalProvider>
+    <HelmetProvider>
+      <AuthProvider>
+        <SolanaWalletProvider>
+          <WalletProvider>
+            <AppContent />
+          </WalletProvider>
         </SolanaWalletProvider>
-      </ConnectionProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </HelmetProvider>
   )
 }
 

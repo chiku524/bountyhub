@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm'
 
 interface Env {
   DB: any
+  CACHE?: Cache // Cloudflare Cache API
 }
 
 const app = new Hono<{ Bindings: Env }>()
@@ -12,13 +13,21 @@ const app = new Hono<{ Bindings: Env }>()
 app.get(async (c) => {
   const db = createDb(c.env.DB)
   
+  // Cache key - cache for 5 minutes (300 seconds)
+  // Use Cloudflare's cache API headers for edge caching
+  const cacheKey = c.req.url
+  
   try {
     // Get active bounties (posts with bounties that are ACTIVE)
     const activeBountiesResult = await db.select().from(bounties).where(eq(bounties.status, 'ACTIVE'))
     const activeBounties = activeBountiesResult.length
 
     // Get total questions answered (posts with accepted answers)
-    const answeredQuestionsResult = await db.select().from(posts).where(eq(posts.status, 'COMPLETED'))
+    const answeredQuestionsResult = await db
+      .selectDistinct({ id: posts.id })
+      .from(posts)
+      .innerJoin(answers, eq(posts.id, answers.postId))
+      .where(eq(answers.isAccepted, true))
     const questionsAnswered = answeredQuestionsResult.length
 
     // Get total rewards (sum of all bounty amounts)
@@ -41,7 +50,7 @@ app.get(async (c) => {
     const totalBBUXResult = await db.select().from(virtualWallets)
     const totalBBUX = totalBBUXResult.reduce((sum, wallet) => sum + wallet.balance, 0)
 
-    return c.json({
+    const stats = {
       activeBounties,
       questionsAnswered,
       totalRewards: totalRewards.toFixed(2),
@@ -49,6 +58,13 @@ app.get(async (c) => {
       totalPosts,
       totalAnswers,
       totalBBUX: totalBBUX.toFixed(2)
+    }
+
+    // Set cache headers for Cloudflare edge caching (5 minutes)
+    return c.json(stats, 200, {
+      'Cache-Control': 'public, max-age=300, s-maxage=300',
+      'CDN-Cache-Control': 'public, max-age=300',
+      'Vary': 'Accept'
     })
   } catch (error) {
     console.error('Error fetching platform stats:', error)

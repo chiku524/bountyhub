@@ -4,6 +4,10 @@ compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 main = "functions/index.ts"
 
+# Cron trigger to run cleanup every hour
+[triggers]
+crons = ["0 * * * *"]
+
 [[d1_databases]]
 binding = "DB"
 database_name = "bountyhub-db"
@@ -13,7 +17,7 @@ migrations_dir = "drizzle/migrations"
 [vars]
 NODE_ENV = "production"
 SESSION_SECRET = "mysupersecretpassword"
-SOLANA_RPC_URL = "https://api.mainnet-beta.solana.com"
+SOLANA_RPC_URL = "https://mainnet.helius-rpc.com/?api-key=22e3e8b6-b2a0-4b4d-944a-226099908bd6"
 SOLANA_DEVNET_RPC_URL = "https://api.devnet.solana.com"
 SOLANA_WALLET_PRIVATE_KEY = "xZK9zb3WUAHoLmrFrPq6pWxbPQWkgxyeAgDb/3dblw0JgGjCG2FTsm+zbVDykC0Ufc8IAnvgqH9H01s52bmRiQ=="
 SOLANA_WALLET_ADDRESS = "e6EdfgpEdo48zUKFC18cADxTqgbt68JE8uDjAgdCzkp"
@@ -24,6 +28,9 @@ CLOUDINARY_API_KEY = "237281724716253"
 CLOUDINARY_API_SECRET = "N7Y40ttKyduI_5un60Cfv8kGfzI"
 CLOUDINARY_UPLOAD_PRESET = "bountyhub"
 
+# GIPHY Configuration
+VITE_GIPHY_API_KEY = "8tPzDynfDBevgXLsAaPztARWyvWzNLPK"
+
 # HTML2PDF Configuration
 HTML2PDF_API_KEY = "28q7AasnbwG213fOLEt58Cjw4FEZVxNxAoaXl0MybGEGWeM9u73X4hGltgIMBz90"
 
@@ -31,7 +38,3 @@ HTML2PDF_API_KEY = "28q7AasnbwG213fOLEt58Cjw4FEZVxNxAoaXl0MybGEGWeM9u73X4hGltgIM
 VITE_CLOUDINARY_CLOUD_NAME = "dqobhvk07"
 VITE_CLOUDINARY_UPLOAD_PRESET = "bountyhub"
 VITE_API_URL = "https://api.bountyhub.tech"
-
-# Database URLs (for compatibility with existing code)
-DATABASE_URL = "mongodb+srv://nicochikuji:coDzZK4ZedwgJ4OQ@xportal.g7vzj.mongodb.net/xPortal?retryWrites=true&w=majority"
-MONGODB_URI = "mongodb+srv://vercel-admin-user:cOF7czE7Gc7awGp1@xportal.g7vzj.mongodb.net/myFirstDatabase?retryWrites=true&w=majority" 

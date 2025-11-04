@@ -29,6 +29,7 @@ export default function PlatformDocs() {
             <li><a href="#architecture" className="text-violet-400 hover:text-violet-300">Architecture</a></li>
             <li><a href="#tokenomics" className="text-violet-400 hover:text-violet-300">BBUX Tokenomics</a></li>
             <li><a href="#governance" className="text-violet-400 hover:text-violet-300">Governance System</a></li>
+            <li><a href="#chat" className="text-violet-400 hover:text-violet-300">Global Chat</a></li>
             <li><a href="#security" className="text-violet-400 hover:text-violet-300">Security & Privacy</a></li>
             <li><a href="#roadmap" className="text-violet-400 hover:text-violet-300">Development Roadmap</a></li>
           </ul>
@@ -159,6 +160,22 @@ export default function PlatformDocs() {
                 <li>• Mark as read functionality and unread count tracking</li>
                 <li>• Notification preferences and filtering</li>
                 <li>• Performance-optimized with minimal API calls</li>
+              </ul>
+            </div>
+
+            <div className="bg-neutral-800 rounded-lg p-6">
+              <h3 className="text-xl font-semibold text-white mb-3">Global Chat System</h3>
+              <p className="text-gray-300 mb-4">
+                Real-time community chat with support for text messages, emojis, and GIFs. 
+                Connect with other users instantly and build relationships within the community.
+              </p>
+              <ul className="text-gray-400 space-y-2">
+                <li>• Real-time messaging with persistent chat history</li>
+                <li>• Emoji picker with popular emoji selection</li>
+                <li>• GIF search powered by GIPHY API integration</li>
+                <li>• Persistent chat sidebar accessible from any page</li>
+                <li>• Mobile-responsive design with dark theme</li>
+                <li>• Message types: text, emoji, and GIF support</li>
               </ul>
             </div>
           </div>
@@ -297,6 +314,67 @@ export default function PlatformDocs() {
           </div>
         </section>
 
+        {/* Global Chat */}
+        <section id="chat" className="mb-12">
+          <h2 className="text-3xl font-bold text-white mb-6">Global Chat</h2>
+          <div className="bg-neutral-800 rounded-lg p-6">
+            <h3 className="text-xl font-semibold text-white mb-4">Real-Time Community Communication</h3>
+            <p className="text-gray-300 mb-4">
+              The Global Chat system enables real-time communication between community members, fostering 
+              relationships and facilitating quick knowledge sharing outside of formal Q&A interactions.
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <h4 className="text-lg font-semibold text-violet-400 mb-2">Core Features</h4>
+                <ul className="text-gray-400 space-y-2">
+                  <li>• Real-time messaging with persistent history</li>
+                  <li>• Emoji picker with popular emoji selection</li>
+                  <li>• GIF search powered by GIPHY API</li>
+                  <li>• Persistent chat sidebar accessible from any page</li>
+                  <li>• Mobile-responsive design with dark theme</li>
+                  <li>• Message types: text, emoji, and GIF support</li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-lg font-semibold text-violet-400 mb-2">User Experience</h4>
+                <ul className="text-gray-400 space-y-2">
+                  <li>• One-click access from any page</li>
+                  <li>• Auto-join global chat room</li>
+                  <li>• Minimize/maximize functionality</li>
+                  <li>• Message history preservation</li>
+                  <li>• Real-time message updates</li>
+                  <li>• Community etiquette guidelines</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <h4 className="text-lg font-semibold text-violet-400 mb-2">Technical Implementation</h4>
+              <ul className="text-gray-400 space-y-2">
+                <li>• <strong>Database:</strong> Persistent message storage with chat_rooms and chat_messages tables</li>
+                <li>• <strong>API:</strong> RESTful endpoints for room management and messaging</li>
+                <li>• <strong>Frontend:</strong> React components with real-time updates</li>
+                <li>• <strong>GIF Integration:</strong> GIPHY API for search and selection</li>
+                <li>• <strong>Security:</strong> Authentication required for all chat operations</li>
+                <li>• <strong>Performance:</strong> Optimized queries and efficient message pagination</li>
+              </ul>
+            </div>
+
+            <div className="mt-6">
+              <h4 className="text-lg font-semibold text-violet-400 mb-2">Community Benefits</h4>
+              <ul className="text-gray-400 space-y-2">
+                <li>• <strong>Quick Questions:</strong> Get fast answers without creating formal posts</li>
+                <li>• <strong>Community Building:</strong> Foster relationships between users</li>
+                <li>• <strong>Knowledge Sharing:</strong> Share tips and insights informally</li>
+                <li>• <strong>Platform Feedback:</strong> Discuss features and improvements</li>
+                <li>• <strong>Celebration:</strong> Share achievements and bounty wins</li>
+                <li>• <strong>Support:</strong> Help new users get started</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
         {/* Security */}
         <section id="security" className="mb-12">
           <h2 className="text-3xl font-bold text-white mb-6">Security & Privacy</h2>
@@ -341,42 +419,46 @@ export default function PlatformDocs() {
           <div className="bg-neutral-800 rounded-lg p-6">
             <div className="space-y-6">
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">Phase 1: Foundation (Q1 2024)</h3>
+                <h3 className="text-xl font-semibold text-white mb-3">Phase 1: Foundation (Q1 2025)</h3>
                 <ul className="text-gray-400 space-y-1">
-                  <li>• Core platform development</li>
-                  <li>• BBUX token deployment</li>
-                  <li>• Basic bounty system</li>
-                  <li>• User authentication</li>
+                  <li>• Core bounty platform launch</li>
+                  <li>• User authentication and profiles</li>
+                  <li>• Basic bounty creation and management</li>
+                  <li>• Answer submission and acceptance</li>
+                  <li>• Reputation system implementation</li>
                 </ul>
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">Phase 2: Enhancement (Q2 2024)</h3>
+                <h3 className="text-xl font-semibold text-white mb-3">Phase 2: Enhancement (Q2 2025)</h3>
                 <ul className="text-gray-400 space-y-1">
-                  <li>• Advanced reputation system</li>
-                  <li>• Governance implementation</li>
-                  <li>• Mobile app development</li>
-                  <li>• API documentation</li>
+                  <li>• Advanced filtering and search</li>
+                  <li>• Media upload and code block support</li>
+                  <li>• Enhanced reputation and integrity system</li>
+                  <li>• Mobile responsiveness improvements</li>
+                  <li>• Performance optimizations</li>
                 </ul>
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">Phase 3: Expansion (Q3 2024)</h3>
+                <h3 className="text-xl font-semibold text-white mb-3">Phase 3: Expansion (Q3 2025)</h3>
                 <ul className="text-gray-400 space-y-1">
-                  <li>• Multi-language support</li>
-                  <li>• Advanced analytics</li>
-                  <li>• Third-party integrations</li>
-                  <li>• Community features</li>
+                  <li>• Governance system launch</li>
+                  <li>• Advanced analytics and insights</li>
+                  <li>• API documentation and developer tools</li>
+                  <li>• Community features and moderation</li>
+                  <li>• Integration with external services</li>
                 </ul>
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">Phase 4: Ecosystem (Q4 2024)</h3>
+                <h3 className="text-xl font-semibold text-white mb-3">Phase 4: Ecosystem (Q4 2025)</h3>
                 <ul className="text-gray-400 space-y-1">
-                  <li>• DeFi integrations</li>
-                  <li>• Cross-chain bridges</li>
-                  <li>• Enterprise solutions</li>
-                  <li>• Global expansion</li>
+                  <li>• Advanced governance features</li>
+                  <li>• Cross-chain compatibility</li>
+                  <li>• Enterprise features and partnerships</li>
+                  <li>• Advanced AI and automation</li>
+                  <li>• Global expansion and localization</li>
                 </ul>
               </div>
             </div>

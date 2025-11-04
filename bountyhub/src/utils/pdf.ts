@@ -39,9 +39,6 @@ export class PDFService {
       footerTemplate: options.footerTemplate || ''
     };
 
-    console.log('PDF Service: Starting PDF generation with API key:', apiKey ? 'Present' : 'Missing');
-    console.log('PDF Service: Request body:', JSON.stringify(requestBody, null, 2));
-
     try {
       const response = await fetch(this.API_URL, {
         method: 'POST',
@@ -52,17 +49,12 @@ export class PDFService {
         body: JSON.stringify(requestBody)
       });
 
-      console.log('PDF Service: Response status:', response.status);
-      console.log('PDF Service: Response headers:', Object.fromEntries(response.headers.entries()));
-
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('PDF Service: Error response:', errorText);
         throw new Error(`PDF generation failed: ${response.status} ${response.statusText} - ${errorText}`);
       }
 
       const pdfArrayBuffer = await response.arrayBuffer();
-      console.log('PDF Service: PDF generated successfully, size:', pdfArrayBuffer.byteLength, 'bytes');
       return new Uint8Array(pdfArrayBuffer);
     } catch (error) {
       console.error('PDF Service: Generation error:', error);

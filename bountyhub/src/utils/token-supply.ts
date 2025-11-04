@@ -1,6 +1,6 @@
-import { virtualWallets, walletTransactions } from '../../drizzle/schema'
+import { virtualWallets, transactionLogs } from '../../drizzle/schema'
 import { SolanaService } from './solana'
-import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js'
+import { PublicKey } from '@solana/web3.js'
 import { getMint } from '@solana/spl-token'
 import bountyBucksInfo from '../../bounty-bucks-info.json'
 
@@ -8,7 +8,7 @@ const BBUX_MINT = new PublicKey(bountyBucksInfo.mint)
 
 export class TokenSupplyService {
   // Use mainnet for live data
-  private static connection = new Connection(clusterApiUrl('mainnet-beta'))
+  private static connection = SolanaService.getConnection()
 
   static async getSupplyStats(db: any) {
     try {
@@ -24,24 +24,24 @@ export class TokenSupplyService {
         .filter((wallet: any) => wallet.userId !== 'system' && wallet.userId !== 'platform')
         .reduce((sum: number, wallet: any) => sum + wallet.balance, 0)
       
-      // Get all transactions
-      const transactions = await db.select().from(walletTransactions)
+      // Get all transactions from the new transactionLogs table
+      const transactions = await db.select().from(transactionLogs)
       
       // Calculate total deposited and withdrawn
       const totalDeposited = transactions
-        .filter((tx: any) => tx.type === 'DEPOSIT' && tx.status === 'COMPLETED')
+        .filter((tx: any) => tx.type === 'manual_deposit' && tx.status === 'completed')
         .reduce((sum: number, tx: any) => sum + tx.amount, 0)
       
       const totalWithdrawn = transactions
-        .filter((tx: any) => tx.type === 'WITHDRAW' && tx.status === 'COMPLETED')
-        .reduce((sum: number, tx: any) => sum + tx.amount, 0)
+        .filter((tx: any) => tx.type === 'withdrawal' && tx.status === 'completed')
+        .reduce((sum: number, tx: any) => sum + Math.abs(tx.amount), 0)
       
       // Calculate burned amount (system transactions representing burned tokens)
       const burnedAmount = transactions
         .filter((tx: any) => 
           tx.userId === 'system' && 
-          tx.type === 'BOUNTY_EARNED' && 
-          tx.status === 'COMPLETED'
+          tx.type === 'bounty_earned' && 
+          tx.status === 'completed'
         )
         .reduce((sum: number, tx: any) => sum + tx.amount, 0)
       

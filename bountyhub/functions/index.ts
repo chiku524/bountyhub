@@ -18,6 +18,8 @@ import refundRequestsRoutes from './api/refund-requests'
 import refundVoteRoutes from './api/refund/vote'
 import governanceRoutes from './api/governance'
 import adminRoutes from './api/admin'
+import chatRoutes from './api/chat'
+import cleanupRoutes from './api/cleanup-pending-transactions'
 
 interface Env {
   DB: any
@@ -69,6 +71,35 @@ app.get('/', (c) => {
   })
 })
 
+// Cron trigger handler for cleanup jobs
+app.get('/cron', async (c) => {
+  try {
+    // Call the cleanup endpoint
+    const cleanupResponse = await fetch(`${c.req.url.replace('/cron', '/api/cleanup/cron')}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    
+    const result = await cleanupResponse.json()
+    
+    return c.json({
+      success: true,
+      message: 'Cron job executed successfully',
+      cleanup: result,
+      timestamp: new Date().toISOString()
+    })
+  } catch (error) {
+    console.error('Cron job error:', error)
+    return c.json({
+      success: false,
+      error: 'Failed to execute cron job',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500)
+  }
+})
+
 // API routes
 app.route('/api/auth', authRoutes)
 app.route('/api/notifications', notificationsRoutes)
@@ -84,6 +115,8 @@ app.route('/api/refund-requests', refundRequestsRoutes)
 app.route('/api/refund', refundVoteRoutes)
 app.route('/api/governance', governanceRoutes)
 app.route('/api/admin', adminRoutes)
+app.route('/api/chat', chatRoutes)
+app.route('/api/cleanup', cleanupRoutes)
 
 // 404 handler
 app.notFound((c) => {

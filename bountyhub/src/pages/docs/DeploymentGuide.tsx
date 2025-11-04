@@ -152,7 +152,7 @@ export default function DeploymentGuide() {
                   <pre className="bg-neutral-700 p-3 rounded text-sm text-gray-300">
 {`name = "bountyhub-api"
 main = "functions/index.ts"
-compatibility_date = "2024-01-01"
+compatibility_date = "2025-01-01"
 
 [env.production]
 name = "bountyhub-api-prod"
@@ -292,7 +292,7 @@ database_id = "your-database-id"`}
                   <pre className="bg-neutral-700 p-3 rounded text-sm text-gray-300">
 {`# .env file
 JWT_SECRET=your-dev-secret-key
-SOLANA_RPC_URL=https://api.devnet.solana.com
+SOLANA_RPC_URL=https://proud-quick-haze.solana-mainnet.quiknode.pro/6ef6dbb1b21d654b4e164546f9c925d47e24dcc1/
 BBUX_TOKEN_ADDRESS=your-dev-token-address
 PLATFORM_WALLET_ADDRESS=your-dev-wallet
 ENVIRONMENT=development`}

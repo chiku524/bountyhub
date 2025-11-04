@@ -30,6 +30,7 @@ export default function ApiReference() {
             <li><a href="#virtual-tokens" className="text-violet-400 hover:text-violet-300">Virtual Token System</a></li>
             <li><a href="#governance" className="text-violet-400 hover:text-violet-300">Governance API</a></li>
             <li><a href="#refunds" className="text-violet-400 hover:text-violet-300">Refund Requests</a></li>
+            <li><a href="#chat" className="text-violet-400 hover:text-violet-300">Chat API</a></li>
             <li><a href="#models" className="text-violet-400 hover:text-violet-300">Data Models</a></li>
             <li><a href="#errors" className="text-violet-400 hover:text-violet-300">Error Handling</a></li>
             <li><a href="#rate-limiting" className="text-violet-400 hover:text-violet-300">Rate Limiting</a></li>
@@ -298,7 +299,7 @@ Content-Type: application/json
     "type": "question",
     "bountyAmount": 100,
     "tags": ["javascript", "react"],
-    "createdAt": "2024-01-01T00:00:00Z"
+    "createdAt": "2025-01-01T00:00:00Z"
   }
 }`}
                     </pre>
@@ -592,6 +593,191 @@ Content-Type: application/json
 {`{
   "success": true,
   "count": 5
+}`}
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Chat Endpoints */}
+          <div className="mb-8">
+            <h3 className="text-2xl font-bold text-white mb-4">Chat</h3>
+            <div className="space-y-4">
+              <div className="bg-neutral-800 rounded-lg p-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-lg font-semibold text-violet-400">GET /api/chat</h4>
+                  <span className="text-yellow-400 text-sm">Authenticated</span>
+                </div>
+                <p className="text-gray-300 mb-3">Get available chat rooms</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h5 className="text-white font-semibold mb-2">No Parameters</h5>
+                    <p className="text-gray-400 text-sm">Returns list of available chat rooms</p>
+                  </div>
+                  <div>
+                    <h5 className="text-white font-semibold mb-2">Response</h5>
+                    <pre className="bg-neutral-700 p-3 rounded text-sm text-gray-300">
+{`{
+  "success": true,
+  "rooms": [
+    {
+      "id": "global-chat",
+      "name": "Global Chat",
+      "type": "GLOBAL",
+      "description": "Community-wide conversation",
+      "memberCount": 42
+    }
+  ]
+}`}
+                    </pre>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-neutral-800 rounded-lg p-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-lg font-semibold text-violet-400">GET /api/chat/{'{roomId}'}/messages</h4>
+                  <span className="text-yellow-400 text-sm">Authenticated</span>
+                </div>
+                <p className="text-gray-300 mb-3">Get messages from a specific chat room</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h5 className="text-white font-semibold mb-2">Query Parameters</h5>
+                    <ul className="text-gray-400 space-y-1 text-sm">
+                      <li>• limit: Number of messages to return (default: 30)</li>
+                      <li>• before: Get messages before this timestamp</li>
+                      <li>• after: Get messages after this timestamp</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="text-white font-semibold mb-2">Response</h5>
+                    <pre className="bg-neutral-700 p-3 rounded text-sm text-gray-300">
+{`{
+  "success": true,
+  "messages": [
+    {
+      "id": "string",
+      "roomId": "global-chat",
+      "userId": "number",
+      "username": "string",
+      "content": "string",
+      "type": "text" | "gif" | "emoji",
+      "gifUrl": "string (optional)",
+      "createdAt": "string (ISO 8601)"
+    }
+  ]
+}`}
+                    </pre>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-neutral-800 rounded-lg p-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-lg font-semibold text-violet-400">POST /api/chat/{'{roomId}'}/messages</h4>
+                  <span className="text-yellow-400 text-sm">Authenticated</span>
+                </div>
+                <p className="text-gray-300 mb-3">Send a message to a chat room</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h5 className="text-white font-semibold mb-2">Request Body</h5>
+                    <pre className="bg-neutral-700 p-3 rounded text-sm text-gray-300">
+{`{
+  "content": "string",
+  "type": "text" | "gif" | "emoji",
+  "gifUrl": "string (optional, for GIF messages)"
+}`}
+                    </pre>
+                  </div>
+                  <div>
+                    <h5 className="text-white font-semibold mb-2">Response</h5>
+                    <pre className="bg-neutral-700 p-3 rounded text-sm text-gray-300">
+{`{
+  "success": true,
+  "message": {
+    "id": "string",
+    "roomId": "global-chat",
+    "userId": "number",
+    "username": "string",
+    "content": "string",
+    "type": "text" | "gif" | "emoji",
+    "gifUrl": "string (optional)",
+    "createdAt": "string (ISO 8601)"
+  }
+}`}
+                    </pre>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-neutral-800 rounded-lg p-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-lg font-semibold text-violet-400">POST /api/chat/{'{roomId}'}/join</h4>
+                  <span className="text-yellow-400 text-sm">Authenticated</span>
+                </div>
+                <p className="text-gray-300 mb-3">Join a chat room</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h5 className="text-white font-semibold mb-2">Request Body</h5>
+                    <pre className="bg-neutral-700 p-3 rounded text-sm text-gray-300">
+{`{}`}
+                    </pre>
+                  </div>
+                  <div>
+                    <h5 className="text-white font-semibold mb-2">Response</h5>
+                    <pre className="bg-neutral-700 p-3 rounded text-sm text-gray-300">
+{`{
+  "success": true,
+  "message": "Successfully joined chat room",
+  "room": {
+    "id": "global-chat",
+    "name": "Global Chat",
+    "type": "GLOBAL",
+    "memberCount": 43
+  }
+}`}
+                    </pre>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-neutral-800 rounded-lg p-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-lg font-semibold text-violet-400">GET /api/gifs/search</h4>
+                  <span className="text-yellow-400 text-sm">Authenticated</span>
+                </div>
+                <p className="text-gray-300 mb-3">Search for GIFs using GIPHY API</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h5 className="text-white font-semibold mb-2">Query Parameters</h5>
+                    <ul className="text-gray-400 space-y-1 text-sm">
+                      <li>• q: Search query (required)</li>
+                      <li>• limit: Number of results (default: 10, max: 25)</li>
+                      <li>• offset: Pagination offset (default: 0)</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="text-white font-semibold mb-2">Response</h5>
+                    <pre className="bg-neutral-700 p-3 rounded text-sm text-gray-300">
+{`{
+  "success": true,
+  "gifs": [
+    {
+      "id": "string",
+      "title": "string",
+      "url": "string",
+      "previewUrl": "string",
+      "width": "number",
+      "height": "number"
+    }
+  ],
+  "pagination": {
+    "total": 100,
+    "count": 10,
+    "offset": 0
+  }
 }`}
                     </pre>
                   </div>

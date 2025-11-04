@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, memo } from 'react'
 import { useAuth } from '../contexts/AuthProvider'
 import { LoadingSpinner } from './LoadingSpinner'
 import { ErrorMessage } from './ErrorMessage'
 import { CodeBlockEditor } from './CodeBlockEditor'
+import { ProfilePicture } from './ProfilePicture'
 import { config } from '../utils/config'
 import { Link } from 'react-router-dom'
 import type { Answer, Post, CodeBlock } from '../types'
@@ -12,7 +13,7 @@ interface AnswersProps {
   post: Post
 }
 
-export const Answers: React.FC<AnswersProps> = ({ postId, post }) => {
+export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
   const { user } = useAuth()
   const [answers, setAnswers] = useState<Answer[]>([])
   const [loading, setLoading] = useState(true)
@@ -42,7 +43,7 @@ export const Answers: React.FC<AnswersProps> = ({ postId, post }) => {
     }
   }
 
-  const handleVote = async (answerId: string, value: number) => {
+  const handleVote = useCallback(async (answerId: string, value: number) => {
     if (!user) return
 
     try {
@@ -75,9 +76,9 @@ export const Answers: React.FC<AnswersProps> = ({ postId, post }) => {
     } catch (err: any) {
       console.error('Vote error:', err)
     }
-  }
+  }, [user, postId])
 
-  const handleAcceptAnswer = async (answerId: string) => {
+  const handleAcceptAnswer = useCallback(async (answerId: string) => {
     if (!user || user.id !== post.authorId) return
 
     try {
@@ -100,9 +101,9 @@ export const Answers: React.FC<AnswersProps> = ({ postId, post }) => {
     } catch (err: any) {
       console.error('Accept answer error:', err)
     }
-  }
+  }, [user, post, postId])
 
-  const handleSubmitAnswer = async (e: React.FormEvent) => {
+  const handleSubmitAnswer = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     if (!user || !newAnswer.trim()) return
 
@@ -133,15 +134,15 @@ export const Answers: React.FC<AnswersProps> = ({ postId, post }) => {
     } finally {
       setSubmitting(false)
     }
-  }
+  }, [user, postId, newAnswer, answerCodeBlocks])
 
-  const handleAddCodeBlock = (codeBlock: CodeBlock) => {
+  const handleAddCodeBlock = useCallback((codeBlock: CodeBlock) => {
     setAnswerCodeBlocks(prev => [...prev, codeBlock])
-  }
+  }, [])
 
-  const handleRemoveCodeBlock = (index: number) => {
+  const handleRemoveCodeBlock = useCallback((index: number) => {
     setAnswerCodeBlocks(prev => prev.filter((_, i) => i !== index))
-  }
+  }, [])
 
   const VoteButtons = ({ answer }: { answer: Answer }) => {
     const userVote = userVotes[answer.id] || 0
@@ -298,6 +299,7 @@ export const Answers: React.FC<AnswersProps> = ({ postId, post }) => {
             }`}>
               <div className="flex items-start justify-between mb-2">
                 <div className="flex items-center space-x-2">
+                  <ProfilePicture user={answer.author} size="sm" />
                   <span className="text-indigo-400 font-medium">
                     <Link 
                       to={`/users/${answer.author?.username}`}
@@ -357,4 +359,4 @@ export const Answers: React.FC<AnswersProps> = ({ postId, post }) => {
       </div>
     </div>
   )
-} 
+}) 

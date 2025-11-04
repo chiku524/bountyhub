@@ -2,7 +2,7 @@
 // TODO: Re-implement with proper database integration
 
 import { eq } from 'drizzle-orm'
-import { users, sessions, virtualWallets } from '../../drizzle/schema'
+import { users, sessions, virtualWallets, profiles } from '../../drizzle/schema'
 import type { Db } from './db'
 import bcrypt from 'bcryptjs'
 
@@ -43,6 +43,11 @@ export async function register({
       return { success: false, error: 'Username already taken' }
     }
 
+    // Check if this is the first user (to grant admin role)
+    const allUsers = await db.select().from(users).limit(1)
+    const isFirstUser = allUsers.length === 0
+    const userRole: 'user' | 'moderator' | 'admin' = isFirstUser ? 'admin' : 'user'
+
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12)
 
@@ -53,6 +58,7 @@ export async function register({
       email,
       username,
       password: hashedPassword,
+      role: userRole, // Grant admin role to first user
       reputationPoints: 0,
       integrityScore: 5.0,
       totalRatings: 0,
@@ -93,6 +99,7 @@ export async function register({
         id: newUser.id,
         email: newUser.email,
         username: newUser.username,
+        role: newUser.role,
         reputation: newUser.reputationPoints,
         reputationLevel: getReputationLevel(newUser.reputationPoints),
         createdAt: formatDate(newUser.createdAt),
@@ -162,6 +169,7 @@ export async function login({
         id: user.id,
         email: user.email,
         username: user.username,
+        role: user.role,
         reputation: user.reputationPoints,
         reputationLevel: getReputationLevel(user.reputationPoints),
         createdAt: formatDate(user.createdAt),
@@ -176,7 +184,24 @@ export async function login({
 
 export async function getUserById(userId: string, db: Db) {
   try {
-    const userResult = await db.select().from(users).where(eq(users.id, userId)).limit(1)
+    const userResult = await db
+      .select({
+        id: users.id,
+        email: users.email,
+        username: users.username,
+        reputationPoints: users.reputationPoints,
+        integrityScore: users.integrityScore,
+        totalRatings: users.totalRatings,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+        profilePicture: profiles.profilePicture,
+        role: users.role
+      })
+      .from(users)
+      .leftJoin(profiles, eq(users.id, profiles.userId))
+      .where(eq(users.id, userId))
+      .limit(1)
+    
     if (userResult.length === 0) return null
     
     const user = userResult[0]
@@ -196,13 +221,17 @@ export async function getUserById(userId: string, db: Db) {
       id: user.id,
       email: user.email,
       username: user.username,
+      role: user.role,
+      profilePicture: user.profilePicture,
       reputation: user.reputationPoints,
       reputationLevel: getReputationLevel(user.reputationPoints),
+      integrityScore: user.integrityScore,
+      totalRatings: user.totalRatings,
       createdAt: formatDate(user.createdAt),
       updatedAt: formatDate(user.updatedAt)
     }
   } catch (error) {
-    console.error('Get user by ID error:', error)
+    console.error('Error getting user by ID:', error)
     return null
   }
 }
@@ -289,16 +318,13 @@ export async function createSession(userId: string, db: Db, expiresInHours = 24)
     const now = new Date()
     const expiresAt = new Date(now.getTime() + expiresInHours * 60 * 60 * 1000)
     
-    console.log('Creating session:', { sessionId, userId, now, expiresAt })
-    
     await db.insert(sessions).values({
       id: sessionId,
-      userId: userId,
-      createdAt: now,
-      expiresAt: expiresAt
+      userId,
+      expiresAt,
+      createdAt: now
     })
     
-    console.log('Session created successfully:', sessionId)
     return sessionId
   } catch (error) {
     console.error('Error creating session:', error)
@@ -307,10 +333,21 @@ export async function createSession(userId: string, db: Db, expiresInHours = 24)
 }
 
 export async function getUserIdFromSession(sessionId: string, db: Db): Promise<string | null> {
-  const result = await db.select().from(sessions).where(eq(sessions.id, sessionId)).limit(1)
-  if (result.length === 0) return null
-  // Optionally, check for expiration here
-  return result[0].userId
+  try {
+    const sessionResult = await db.select().from(sessions).where(eq(sessions.id, sessionId)).get()
+    if (!sessionResult) return null
+
+    // Check if session is expired
+    if (sessionResult.expiresAt && new Date() > new Date(sessionResult.expiresAt)) {
+      await db.delete(sessions).where(eq(sessions.id, sessionId))
+      return null
+    }
+
+    return sessionResult.userId
+  } catch (error) {
+    console.error('Session error:', error)
+    return null
+  }
 }
 
 export async function deleteSession(sessionId: string, db: Db): Promise<void> {
