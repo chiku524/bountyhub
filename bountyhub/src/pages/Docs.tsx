@@ -224,7 +224,6 @@ export default function Docs() {
             </div>
           </div>
         </div>
-      </div>
     </div>
   )
 } 

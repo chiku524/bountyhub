@@ -513,7 +513,6 @@ export default function PlatformDocs() {
             Download PDF
           </a>
         </div>
-      </div>
     </div>
   )
 } 

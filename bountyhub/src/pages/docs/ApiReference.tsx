@@ -1553,7 +1553,6 @@ curl -X POST https://api.bountyhub.tech/api/posts \\
             Download PDF
           </a>
         </div>
-      </div>
     </div>
   )
 } 

@@ -249,7 +249,6 @@ export default function Terms() {
             </div>
           </div>
         </div>
-      </div>
     </div>
   )
 } 

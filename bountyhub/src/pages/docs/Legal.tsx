@@ -503,7 +503,6 @@ export default function Legal() {
             </a>
           </div>
         </div>
-      </div>
     </div>
   )
 } 

@@ -857,7 +857,6 @@ export default function UserGuide() {
             Download PDF
           </a>
         </div>
-      </div>
     </div>
   )
 } 

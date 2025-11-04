@@ -1195,7 +1195,6 @@ export default function DeveloperGuide() {
             Download PDF
           </a>
         </div>
-      </div>
     </div>
   )
 } 

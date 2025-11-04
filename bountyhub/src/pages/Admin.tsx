@@ -217,7 +217,6 @@ const Admin: React.FC = () => {
             </table>
           </div>
         </div>
-      </div>
     </div>
   );
 };

@@ -55,7 +55,6 @@ export default function ProfilePosts() {
             </div>
           </div>
         </div>
-      </div>
     )
   }
 
@@ -74,7 +73,6 @@ export default function ProfilePosts() {
             </div>
           </div>
         </div>
-      </div>
     )
   }
 
@@ -152,7 +150,6 @@ export default function ProfilePosts() {
             </div>
           )}
         </div>
-      </div>
     </div>
   )
 } 

@@ -707,7 +707,6 @@ wrangler d1 migrations list bountyhub-prod`}
             Download PDF
           </a>
         </div>
-      </div>
     </div>
   )
 } 

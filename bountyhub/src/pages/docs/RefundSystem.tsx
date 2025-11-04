@@ -170,7 +170,6 @@ export default function RefundSystem() {
             </Link>
           </div>
         </section>
-      </div>
     </div>
   )
 } 
