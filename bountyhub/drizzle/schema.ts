@@ -513,6 +513,159 @@ export const chatMessageReads = sqliteTable('chat_message_reads', {
   readAt: integer('read_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
+// GitHub Repositories table (must be defined before bugBountyCampaigns)
+export const githubRepositories = sqliteTable('github_repositories', {
+  id: text('id').primaryKey(),
+  ownerId: text('owner_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  githubRepoId: integer('github_repo_id').notNull(), // GitHub repository ID
+  name: text('name').notNull(),
+  fullName: text('full_name').notNull(), // owner/repo-name
+  description: text('description'),
+  url: text('url').notNull(),
+  htmlUrl: text('html_url').notNull(),
+  language: text('language'),
+  stars: integer('stars').notNull().default(0),
+  forks: integer('forks').notNull().default(0),
+  isPrivate: integer('is_private', { mode: 'boolean' }).notNull().default(false),
+  isFork: integer('is_fork', { mode: 'boolean' }).notNull().default(false),
+  defaultBranch: text('default_branch').notNull().default('main'),
+  topics: text('topics'), // JSON array of topics
+  lastSyncedAt: integer('last_synced_at', { mode: 'timestamp' }),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Bug Bounty Campaigns table
+export const bugBountyCampaigns = sqliteTable('bug_bounty_campaigns', {
+  id: text('id').primaryKey(),
+  title: text('title').notNull(),
+  description: text('description').notNull(),
+  ownerId: text('owner_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  repositoryId: text('repository_id').references(() => githubRepositories.id, { onDelete: 'set null' }),
+  status: text('status', { enum: ['DRAFT', 'ACTIVE', 'PAUSED', 'COMPLETED', 'CANCELLED'] }).notNull().default('DRAFT'),
+  totalBudget: real('total_budget').notNull().default(0),
+  remainingBudget: real('remaining_budget').notNull().default(0),
+  minReward: real('min_reward').notNull().default(0),
+  maxReward: real('max_reward').notNull().default(0),
+  scope: text('scope'), // JSON string for scope definition
+  rules: text('rules'), // JSON string for rules
+  severityLevels: text('severity_levels'), // JSON string for severity definitions
+  startDate: integer('start_date', { mode: 'timestamp' }),
+  endDate: integer('end_date', { mode: 'timestamp' }),
+  isPublic: integer('is_public', { mode: 'boolean' }).notNull().default(true),
+  allowTeamBounties: integer('allow_team_bounties', { mode: 'boolean' }).notNull().default(false),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Bug Submissions table
+export const bugSubmissions = sqliteTable('bug_submissions', {
+  id: text('id').primaryKey(),
+  campaignId: text('campaign_id').notNull().references(() => bugBountyCampaigns.id, { onDelete: 'cascade' }),
+  submitterId: text('submitter_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  title: text('title').notNull(),
+  description: text('description').notNull(),
+  severity: text('severity', { enum: ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFO'] }).notNull(),
+  status: text('status', { enum: ['SUBMITTED', 'REVIEWING', 'VERIFIED', 'REJECTED', 'DUPLICATE', 'RESOLVED', 'AWARDED'] }).notNull().default('SUBMITTED'),
+  rewardAmount: real('reward_amount'),
+  githubIssueUrl: text('github_issue_url'),
+  githubIssueNumber: integer('github_issue_number'),
+  evidence: text('evidence'), // JSON string for evidence (screenshots, videos, etc.)
+  stepsToReproduce: text('steps_to_reproduce'),
+  impact: text('impact'),
+  suggestedFix: text('suggested_fix'),
+  verificationNotes: text('verification_notes'),
+  verifiedBy: text('verified_by').references(() => users.id, { onDelete: 'set null' }),
+  verifiedAt: integer('verified_at', { mode: 'timestamp' }),
+  awardedAt: integer('awarded_at', { mode: 'timestamp' }),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Bug Submission Verification Workflow table
+export const bugSubmissionVerifications = sqliteTable('bug_submission_verifications', {
+  id: text('id').primaryKey(),
+  submissionId: text('submission_id').notNull().references(() => bugSubmissions.id, { onDelete: 'cascade' }),
+  verifierId: text('verifier_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  step: text('step', { enum: ['INITIAL_REVIEW', 'REPRODUCTION', 'IMPACT_ASSESSMENT', 'VERIFICATION', 'FINAL_REVIEW'] }).notNull(),
+  status: text('status', { enum: ['PENDING', 'IN_PROGRESS', 'APPROVED', 'REJECTED'] }).notNull().default('PENDING'),
+  notes: text('notes'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Contributions table
+export const contributions = sqliteTable('contributions', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  repositoryId: text('repository_id').references(() => githubRepositories.id, { onDelete: 'set null' }),
+  type: text('type', { enum: ['COMMIT', 'PULL_REQUEST', 'ISSUE', 'CODE_REVIEW', 'BUG_SUBMISSION', 'FEATURE_SUGGESTION', 'DOCUMENTATION'] }).notNull(),
+  title: text('title').notNull(),
+  description: text('description'),
+  githubUrl: text('github_url'),
+  githubId: integer('github_id'), // GitHub PR/Issue/Commit ID
+  status: text('status', { enum: ['PENDING', 'APPROVED', 'MERGED', 'CLOSED', 'REJECTED'] }).notNull().default('PENDING'),
+  contributionDate: integer('contribution_date', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  rewardAmount: real('reward_amount').notNull().default(0),
+  points: integer('points').notNull().default(0),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Badges table
+export const badges = sqliteTable('badges', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull().unique(),
+  description: text('description').notNull(),
+  icon: text('icon').notNull(), // Icon URL or emoji
+  category: text('category', { enum: ['CONTRIBUTION', 'ACHIEVEMENT', 'COLLABORATION', 'EXPERTISE', 'COMMUNITY'] }).notNull(),
+  rarity: text('rarity', { enum: ['COMMON', 'UNCOMMON', 'RARE', 'EPIC', 'LEGENDARY'] }).notNull().default('COMMON'),
+  requirements: text('requirements'), // JSON string for badge requirements
+  points: integer('points').notNull().default(0),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+// User Badges junction table
+export const userBadges = sqliteTable('user_badges', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  badgeId: text('badge_id').notNull().references(() => badges.id, { onDelete: 'cascade' }),
+  earnedAt: integer('earned_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  referenceId: text('reference_id'), // ID of contribution/activity that earned the badge
+  referenceType: text('reference_type'), // Type of reference (contribution, campaign, etc.)
+});
+
+// Team Bounties table
+export const teamBounties = sqliteTable('team_bounties', {
+  id: text('id').primaryKey(),
+  campaignId: text('campaign_id').notNull().references(() => bugBountyCampaigns.id, { onDelete: 'cascade' }),
+  submissionId: text('submission_id').references(() => bugSubmissions.id, { onDelete: 'set null' }),
+  teamName: text('team_name').notNull(),
+  rewardAmount: real('reward_amount').notNull(),
+  status: text('status', { enum: ['PENDING', 'ACTIVE', 'COMPLETED', 'CANCELLED'] }).notNull().default('PENDING'),
+  teamMembers: text('team_members'), // JSON array of user IDs
+  contributionDistribution: text('contribution_distribution'), // JSON object mapping user IDs to contribution percentages
+  completedAt: integer('completed_at', { mode: 'timestamp' }),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+// GitHub Activity Feed table
+export const githubActivity = sqliteTable('github_activity', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  repositoryId: text('repository_id').references(() => githubRepositories.id, { onDelete: 'set null' }),
+  activityType: text('activity_type', { enum: ['COMMIT', 'PULL_REQUEST', 'PULL_REQUEST_REVIEW', 'ISSUE', 'ISSUE_COMMENT', 'FORK', 'STAR', 'RELEASE'] }).notNull(),
+  title: text('title').notNull(),
+  description: text('description'),
+  githubUrl: text('github_url').notNull(),
+  githubId: integer('github_id'), // GitHub event ID
+  metadata: text('metadata'), // JSON string for additional activity data
+  activityDate: integer('activity_date', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
 // Export all tables for use in the application
 export const schema = {
   users,
@@ -554,4 +707,13 @@ export const schema = {
   chatRoomParticipants,
   chatMessageReactions,
   chatMessageReads,
+  bugBountyCampaigns,
+  bugSubmissions,
+  bugSubmissionVerifications,
+  githubRepositories,
+  contributions,
+  badges,
+  userBadges,
+  teamBounties,
+  githubActivity,
 }; 
