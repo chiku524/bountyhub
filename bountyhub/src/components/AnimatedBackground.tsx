@@ -1,11 +1,7 @@
-import { useEffect, useRef, ReactNode } from 'react'
+import { useEffect, useRef } from 'react'
 import { useTheme } from '../contexts/ThemeProvider'
 
-interface AnimatedBackgroundProps {
-  children: ReactNode
-}
-
-export function AnimatedBackground({ children }: AnimatedBackgroundProps) {
+export function AnimatedBackground() {
   const { theme } = useTheme()
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -114,20 +110,15 @@ export function AnimatedBackground({ children }: AnimatedBackgroundProps) {
   }, [theme])
 
   return (
-    <>
-      {/* Canvas Background - Fixed behind all content */}
-      <canvas
-        ref={canvasRef}
-        className="fixed inset-0 pointer-events-none"
-        style={{ 
-          zIndex: 0,
-          opacity: theme === 'light' ? 0.8 : 0.6,
-          transition: 'opacity 0.3s ease-in-out'
-        }}
-      />
-      {/* Page Content - Rendered directly above canvas (no wrapper to prevent double rendering) */}
-      {children}
-    </>
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 pointer-events-none"
+      style={{ 
+        zIndex: 0,
+        opacity: theme === 'light' ? 0.8 : 0.6,
+        transition: 'opacity 0.3s ease-in-out'
+      }}
+    />
   )
 }
 

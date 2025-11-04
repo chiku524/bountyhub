@@ -68,11 +68,14 @@ function AppContent() {
   }
   
   return (
-    <AnimatedBackground>
-      {/* Light/Dark mode container - theme transitions */}
+    <>
+      {/* Animated Background - Canvas only, no children */}
+      <AnimatedBackground />
+      
+      {/* Light/Dark mode container - Always flex-col, inner flex-row when authenticated */}
       <div className="relative z-10 min-h-screen w-full bg-white/20 dark:bg-neutral-900/20 transition-colors duration-200 flex flex-col">
-        {/* Main content area - flex row for Nav and Layout */}
-        <div className="flex flex-row flex-1">
+        {/* Main content area - flex-row when authenticated (Nav + Layout), flex-col otherwise */}
+        <div className={`flex-1 flex ${showAuthenticatedNav ? 'flex-row' : 'flex-col'}`}>
           {/* Dynamic Navbar */}
           {isHomePage ? (
             <HomeNav onScrollTo={scrollToSection} />
@@ -132,7 +135,7 @@ function AppContent() {
         {/* PWA Install Prompt */}
         <InstallPrompt />
       </div>
-    </AnimatedBackground>
+    </>
   )
 }
 
