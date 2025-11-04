@@ -29,7 +29,6 @@ app.get(async (c) => {
     // Get pagination parameters from query string
     const page = parseInt(c.req.query('page') || '1', 10)
     const limit = parseInt(c.req.query('limit') || '20', 10)
-    const offset = (page - 1) * limit
     
     // Validate pagination parameters
     const validPage = Math.max(1, page)

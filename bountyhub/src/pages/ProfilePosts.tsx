@@ -29,7 +29,9 @@ export default function ProfilePosts() {
       ])
       
       // Filter posts for current user
-      const userPosts = postsData.filter(post => post.authorId === userData.id)
+      // Handle both array and paginated response
+      const posts = Array.isArray(postsData) ? postsData : postsData.posts
+      const userPosts = posts.filter((post: Post) => post.authorId === userData.id)
       setPosts(userPosts)
       
     } catch (err: any) {

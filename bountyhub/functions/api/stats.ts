@@ -13,10 +13,8 @@ const app = new Hono<{ Bindings: Env }>()
 app.get(async (c) => {
   const db = createDb(c.env.DB)
   
-  // Cache key - cache for 5 minutes (300 seconds)
+  // Cache for 5 minutes (300 seconds)
   // Use Cloudflare's cache API headers for edge caching
-  const cacheKey = c.req.url
-  
   try {
     // Get active bounties (posts with bounties that are ACTIVE)
     const activeBountiesResult = await db.select().from(bounties).where(eq(bounties.status, 'ACTIVE'))

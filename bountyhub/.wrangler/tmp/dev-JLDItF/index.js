@@ -3903,7 +3903,7 @@ var require_bn = __commonJS({
         assert5((this.negative | num.negative) === 0);
         return this.iuor(num);
       }, "ior");
-      BN2.prototype.or = /* @__PURE__ */ __name(function or2(num) {
+      BN2.prototype.or = /* @__PURE__ */ __name(function or3(num) {
         if (this.length > num.length) return this.clone().ior(num);
         return num.clone().ior(this);
       }, "or");
@@ -4831,23 +4831,23 @@ var require_bn = __commonJS({
           iws[N - i - 1] = -t;
         }
       }, "conjugate");
-      FFTM.prototype.normalize13b = /* @__PURE__ */ __name(function normalize13b(ws, N) {
+      FFTM.prototype.normalize13b = /* @__PURE__ */ __name(function normalize13b(ws2, N) {
         var carry = 0;
         for (var i = 0; i < N / 2; i++) {
-          var w = Math.round(ws[2 * i + 1] / N) * 8192 + Math.round(ws[2 * i] / N) + carry;
-          ws[i] = w & 67108863;
+          var w = Math.round(ws2[2 * i + 1] / N) * 8192 + Math.round(ws2[2 * i] / N) + carry;
+          ws2[i] = w & 67108863;
           if (w < 67108864) {
             carry = 0;
           } else {
             carry = w / 67108864 | 0;
           }
         }
-        return ws;
+        return ws2;
       }, "normalize13b");
-      FFTM.prototype.convert13b = /* @__PURE__ */ __name(function convert13b(ws, len, rws, N) {
+      FFTM.prototype.convert13b = /* @__PURE__ */ __name(function convert13b(ws2, len, rws, N) {
         var carry = 0;
         for (var i = 0; i < len; i++) {
-          carry = carry + (ws[i] | 0);
+          carry = carry + (ws2[i] | 0);
           rws[2 * i] = carry & 8191;
           carry = carry >>> 13;
           rws[2 * i + 1] = carry & 8191;
@@ -9601,13 +9601,13 @@ var require_browser2 = __commonJS({
   }
 });
 
-// .wrangler/tmp/bundle-Am8AfT/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-yc4B9W/middleware-loader.entry.ts
 init_modules_watch_stub();
 init_virtual_unenv_global_polyfill_cloudflare_unenv_preset_node_process();
 init_virtual_unenv_global_polyfill_cloudflare_unenv_preset_node_console();
 init_performance2();
 
-// .wrangler/tmp/bundle-Am8AfT/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-yc4B9W/middleware-insertion-facade.js
 init_modules_watch_stub();
 init_virtual_unenv_global_polyfill_cloudflare_unenv_preset_node_process();
 init_virtual_unenv_global_polyfill_cloudflare_unenv_preset_node_console();
@@ -17838,6 +17838,55 @@ var governanceVotes = sqliteTable("governance_votes", {
   reason: text("reason"),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`)
 });
+var chatRooms = sqliteTable("chat_rooms", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  type: text("type", { enum: ["GLOBAL", "PRIVATE", "GROUP"] }).notNull().default("GLOBAL"),
+  createdBy: text("created_by").references(() => users.id, { onDelete: "set null" }),
+  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`)
+});
+var chatMessages = sqliteTable("chat_messages", {
+  id: text("id").primaryKey(),
+  roomId: text("room_id").notNull().references(() => chatRooms.id, { onDelete: "cascade" }),
+  authorId: text("author_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  content: text("content").notNull(),
+  messageType: text("message_type", { enum: ["TEXT", "IMAGE", "FILE", "SYSTEM"] }).notNull().default("TEXT"),
+  mediaUrl: text("media_url"),
+  fileName: text("file_name"),
+  fileSize: integer("file_size"),
+  replyToId: text("reply_to_id"),
+  // Will be handled in application logic
+  isEdited: integer("is_edited", { mode: "boolean" }).notNull().default(false),
+  editedAt: integer("edited_at", { mode: "timestamp" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`)
+});
+var chatRoomParticipants = sqliteTable("chat_room_participants", {
+  id: text("id").primaryKey(),
+  roomId: text("room_id").notNull().references(() => chatRooms.id, { onDelete: "cascade" }),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  role: text("role", { enum: ["MEMBER", "MODERATOR", "ADMIN"] }).notNull().default("MEMBER"),
+  joinedAt: integer("joined_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  lastReadAt: integer("last_read_at", { mode: "timestamp" }),
+  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true)
+});
+var chatMessageReactions = sqliteTable("chat_message_reactions", {
+  id: text("id").primaryKey(),
+  messageId: text("message_id").notNull().references(() => chatMessages.id, { onDelete: "cascade" }),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  reaction: text("reaction").notNull(),
+  // emoji or reaction type
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`)
+});
+var chatMessageReads = sqliteTable("chat_message_reads", {
+  id: text("id").primaryKey(),
+  messageId: text("message_id").notNull().references(() => chatMessages.id, { onDelete: "cascade" }),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  readAt: integer("read_at", { mode: "timestamp" }).notNull().default(sql`CURRENT_TIMESTAMP`)
+});
 
 // src/utils/auth.ts
 var import_bcryptjs = __toESM(require_bcrypt(), 1);
@@ -17855,6 +17904,9 @@ async function register({
     if (existingUsername.length > 0) {
       return { success: false, error: "Username already taken" };
     }
+    const allUsers = await db.select().from(users).limit(1);
+    const isFirstUser = allUsers.length === 0;
+    const userRole = isFirstUser ? "admin" : "user";
     const hashedPassword = await import_bcryptjs.default.hash(password, 12);
     const userId = crypto.randomUUID();
     const newUser = {
@@ -17862,6 +17914,8 @@ async function register({
       email,
       username,
       password: hashedPassword,
+      role: userRole,
+      // Grant admin role to first user
       reputationPoints: 0,
       integrityScore: 5,
       totalRatings: 0,
@@ -17896,6 +17950,7 @@ async function register({
         id: newUser.id,
         email: newUser.email,
         username: newUser.username,
+        role: newUser.role,
         reputation: newUser.reputationPoints,
         reputationLevel: getReputationLevel(newUser.reputationPoints),
         createdAt: formatDate(newUser.createdAt),
@@ -17946,6 +18001,7 @@ async function login({
         id: user.id,
         email: user.email,
         username: user.username,
+        role: user.role,
         reputation: user.reputationPoints,
         reputationLevel: getReputationLevel(user.reputationPoints),
         createdAt: formatDate(user.createdAt),
@@ -17960,7 +18016,18 @@ async function login({
 __name(login, "login");
 async function getUserById(userId, db) {
   try {
-    const userResult = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+    const userResult = await db.select({
+      id: users.id,
+      email: users.email,
+      username: users.username,
+      reputationPoints: users.reputationPoints,
+      integrityScore: users.integrityScore,
+      totalRatings: users.totalRatings,
+      createdAt: users.createdAt,
+      updatedAt: users.updatedAt,
+      profilePicture: profiles.profilePicture,
+      role: users.role
+    }).from(users).leftJoin(profiles, eq(users.id, profiles.userId)).where(eq(users.id, userId)).limit(1);
     if (userResult.length === 0) return null;
     const user = userResult[0];
     const formatDate = /* @__PURE__ */ __name((date) => {
@@ -17976,13 +18043,17 @@ async function getUserById(userId, db) {
       id: user.id,
       email: user.email,
       username: user.username,
+      role: user.role,
+      profilePicture: user.profilePicture,
       reputation: user.reputationPoints,
       reputationLevel: getReputationLevel(user.reputationPoints),
+      integrityScore: user.integrityScore,
+      totalRatings: user.totalRatings,
       createdAt: formatDate(user.createdAt),
       updatedAt: formatDate(user.updatedAt)
     };
   } catch (error3) {
-    console.error("Get user by ID error:", error3);
+    console.error("Error getting user by ID:", error3);
     return null;
   }
 }
@@ -19377,9 +19448,10 @@ app8.get(async (c) => {
       author: {
         id: users.id,
         username: users.username,
-        email: users.email
+        email: users.email,
+        profilePicture: profiles.profilePicture
       }
-    }).from(comments).leftJoin(users, eq(comments.authorId, users.id)).where(eq(comments.postId, postId));
+    }).from(comments).leftJoin(users, eq(comments.authorId, users.id)).leftJoin(profiles, eq(users.id, profiles.userId)).where(eq(comments.postId, postId));
     const sessionCookie = getCookie(c, "session");
     let userVotes = {};
     if (sessionCookie) {
@@ -19720,9 +19792,10 @@ app11.get(async (c) => {
       author: {
         id: users.id,
         username: users.username,
-        email: users.email
+        email: users.email,
+        profilePicture: profiles.profilePicture
       }
-    }).from(answers).leftJoin(users, eq(answers.authorId, users.id)).where(eq(answers.postId, postId));
+    }).from(answers).leftJoin(users, eq(answers.authorId, users.id)).leftJoin(profiles, eq(users.id, profiles.userId)).where(eq(answers.postId, postId));
     const answersWithCodeBlocks = await Promise.all(
       postAnswers.map(async (answer) => {
         const codeBlocks2 = await db.select({
@@ -20054,9 +20127,10 @@ app14.get(async (c) => {
       author: {
         id: users.id,
         username: users.username,
-        email: users.email
+        email: users.email,
+        profilePicture: profiles.profilePicture
       }
-    }).from(posts).leftJoin(users, eq(posts.authorId, users.id));
+    }).from(posts).leftJoin(users, eq(posts.authorId, users.id)).leftJoin(profiles, eq(users.id, profiles.userId));
     const postTagsData = await db.select({
       postId: postTags.postId,
       tagName: tags.name
@@ -20083,11 +20157,35 @@ app14.get(async (c) => {
         return acc;
       }, {});
     }
-    const postsWithVotes = postsWithAuthors.map((post) => ({
-      ...post,
-      userVote: userVotes[post.id] || 0,
-      tags: tagsByPostId[post.id] || []
-    }));
+    const postsWithVotes = postsWithAuthors.map((post) => {
+      const formatDate = /* @__PURE__ */ __name((dateValue) => {
+        if (!dateValue) return (/* @__PURE__ */ new Date()).toISOString();
+        try {
+          let date;
+          if (typeof dateValue === "number") {
+            date = new Date(dateValue);
+          } else if (typeof dateValue === "string") {
+            date = new Date(dateValue);
+          } else {
+            date = dateValue;
+          }
+          if (isNaN(date.getTime())) {
+            return (/* @__PURE__ */ new Date()).toISOString();
+          }
+          return date.toISOString();
+        } catch (error3) {
+          console.error("Error formatting date:", error3);
+          return (/* @__PURE__ */ new Date()).toISOString();
+        }
+      }, "formatDate");
+      return {
+        ...post,
+        userVote: userVotes[post.id] || 0,
+        tags: tagsByPostId[post.id] || [],
+        createdAt: formatDate(post.createdAt),
+        updatedAt: formatDate(post.updatedAt)
+      };
+    });
     return c.json(postsWithVotes);
   } catch (error3) {
     console.error("Error fetching posts:", error3);
@@ -20110,11 +20208,14 @@ app14.post(async (c) => {
     if (!selectedTags || selectedTags.length === 0) {
       return c.json({ error: "At least one tag is required" }, 400);
     }
+    const now = /* @__PURE__ */ new Date();
     const [post] = await db.insert(posts).values({
       id: crypto.randomUUID(),
       title: title2,
       content,
       authorId: userId,
+      createdAt: now,
+      updatedAt: now,
       editedAt: null
     }).returning();
     const postId = post.id;
@@ -20168,8 +20269,8 @@ app14.post(async (c) => {
     }
     if (hasBounty && bountyAmount > 0) {
       const bountyId = crypto.randomUUID();
-      const now = /* @__PURE__ */ new Date();
-      const expiresAt = new Date(now);
+      const now2 = /* @__PURE__ */ new Date();
+      const expiresAt = new Date(now2);
       expiresAt.setDate(expiresAt.getDate() + bountyDuration);
       const governanceResult = await GovernanceService.collectGovernanceFee(
         db,
@@ -20193,13 +20294,63 @@ app14.post(async (c) => {
         refundPenalty: 0,
         communityFee: 0.05,
         expiresAt,
-        createdAt: now,
-        updatedAt: now
+        createdAt: now2,
+        updatedAt: now2
       });
     }
+    const [fullPost] = await db.select({
+      id: posts.id,
+      title: posts.title,
+      content: posts.content,
+      authorId: posts.authorId,
+      createdAt: posts.createdAt,
+      updatedAt: posts.updatedAt,
+      visibilityVotes: posts.visibilityVotes,
+      qualityUpvotes: posts.qualityUpvotes,
+      qualityDownvotes: posts.qualityDownvotes,
+      hasBounty: posts.hasBounty,
+      status: posts.status,
+      author: {
+        id: users.id,
+        username: users.username,
+        email: users.email,
+        profilePicture: profiles.profilePicture
+      }
+    }).from(posts).leftJoin(users, eq(posts.authorId, users.id)).leftJoin(profiles, eq(users.id, profiles.userId)).where(eq(posts.id, postId));
+    const postTagsData = await db.select({
+      postId: postTags.postId,
+      tagName: tags.name
+    }).from(postTags).leftJoin(tags, eq(postTags.tagId, tags.id)).where(eq(postTags.postId, postId));
+    const tagsList = postTagsData.map((item) => item.tagName).filter(Boolean);
+    const formatDate = /* @__PURE__ */ __name((dateValue) => {
+      if (!dateValue) return (/* @__PURE__ */ new Date()).toISOString();
+      try {
+        let date;
+        if (typeof dateValue === "number") {
+          date = new Date(dateValue);
+        } else if (typeof dateValue === "string") {
+          date = new Date(dateValue);
+        } else {
+          date = dateValue;
+        }
+        if (isNaN(date.getTime())) {
+          return (/* @__PURE__ */ new Date()).toISOString();
+        }
+        return date.toISOString();
+      } catch (error3) {
+        console.error("Error formatting date:", error3);
+        return (/* @__PURE__ */ new Date()).toISOString();
+      }
+    }, "formatDate");
+    const postWithValidDates = {
+      ...fullPost,
+      createdAt: formatDate(fullPost.createdAt),
+      updatedAt: formatDate(fullPost.updatedAt),
+      tags: tagsList
+    };
     return c.json({
       success: true,
-      postId,
+      post: postWithValidDates,
       message: "Post created successfully"
     }, 201);
   } catch (error3) {
@@ -20218,13 +20369,41 @@ app14.get("/:id", async (c) => {
     const [codeBlocksResult, mediaResult, authorResult, tagsResult] = await Promise.all([
       db.select().from(codeBlocks).where(eq(codeBlocks.postId, id)),
       db.select().from(media).where(eq(media.postId, id)),
-      db.select().from(users).where(eq(users.id, post.authorId)).limit(1),
+      db.select({
+        id: users.id,
+        username: users.username,
+        email: users.email,
+        profilePicture: profiles.profilePicture
+      }).from(users).leftJoin(profiles, eq(users.id, profiles.userId)).where(eq(users.id, post.authorId)).limit(1),
       db.select({
         tagName: tags.name
       }).from(postTags).leftJoin(tags, eq(postTags.tagId, tags.id)).where(eq(postTags.postId, id))
     ]);
+    const formatDate = /* @__PURE__ */ __name((dateValue) => {
+      if (!dateValue) return (/* @__PURE__ */ new Date()).toISOString();
+      try {
+        let date;
+        if (typeof dateValue === "number") {
+          date = new Date(dateValue);
+        } else if (typeof dateValue === "string") {
+          date = new Date(dateValue);
+        } else {
+          date = dateValue;
+        }
+        if (isNaN(date.getTime())) {
+          return (/* @__PURE__ */ new Date()).toISOString();
+        }
+        return date.toISOString();
+      } catch (error3) {
+        console.error("Error formatting date:", error3);
+        return (/* @__PURE__ */ new Date()).toISOString();
+      }
+    }, "formatDate");
     return c.json({
       ...post,
+      createdAt: formatDate(post.createdAt),
+      updatedAt: formatDate(post.updatedAt),
+      editedAt: post.editedAt ? formatDate(post.editedAt) : null,
       codeBlocks: codeBlocksResult,
       media: mediaResult,
       author: authorResult[0] || null,
@@ -36069,6 +36248,296 @@ app34.get("/stats", async (c) => {
 });
 var admin_default = app34;
 
+// functions/api/chat/index.ts
+init_modules_watch_stub();
+init_virtual_unenv_global_polyfill_cloudflare_unenv_preset_node_process();
+init_virtual_unenv_global_polyfill_cloudflare_unenv_preset_node_console();
+init_performance2();
+
+// functions/api/chat/ws.ts
+init_modules_watch_stub();
+init_virtual_unenv_global_polyfill_cloudflare_unenv_preset_node_process();
+init_virtual_unenv_global_polyfill_cloudflare_unenv_preset_node_console();
+init_performance2();
+var ws = new Hono2();
+var sockets = /* @__PURE__ */ new Set();
+ws.get("/", (c) => {
+  const upgrade = c.req.raw.headers.get("upgrade");
+  if (upgrade !== "websocket") {
+    return c.text("Expected websocket", 400);
+  }
+  const { 0: client, 1: server } = new WebSocketPair();
+  server.accept();
+  sockets.add(server);
+  server.addEventListener("open", () => {
+    console.log("WebSocket connected");
+  });
+  server.addEventListener("message", async (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      if (data.type === "message") {
+        const db = drizzle(c.env.DB);
+        const msg = {
+          id: crypto.randomUUID(),
+          roomId: "global-chat",
+          authorId: data.authorId,
+          content: data.content,
+          messageType: "TEXT",
+          isEdited: false
+        };
+        await db.insert(chatMessages).values(msg);
+        const payload = JSON.stringify({ type: "message", message: { ...msg, author: data.author } });
+        for (const client2 of sockets) {
+          if (client2.readyState === 1) client2.send(payload);
+        }
+      }
+    } catch (error3) {
+      console.error("WebSocket message error:", error3);
+    }
+  });
+  server.addEventListener("close", () => {
+    sockets.delete(server);
+    console.log("WebSocket disconnected");
+  });
+  server.addEventListener("error", (error3) => {
+    console.error("WebSocket error:", error3);
+    sockets.delete(server);
+  });
+  return new Response(null, {
+    status: 101,
+    webSocket: client
+  });
+});
+var ws_default = ws;
+
+// functions/api/chat/index.ts
+var chat = new Hono2();
+chat.route("/ws", ws_default);
+chat.get("/", async (c) => {
+  try {
+    const db = createDb(c.env.DB);
+    const rooms = await db.select({
+      id: chatRooms.id,
+      name: chatRooms.name,
+      description: chatRooms.description,
+      type: chatRooms.type,
+      isActive: chatRooms.isActive,
+      createdAt: chatRooms.createdAt,
+      participantCount: chatRoomParticipants.id
+    }).from(chatRooms).leftJoin(chatRoomParticipants, eq(chatRooms.id, chatRoomParticipants.roomId)).where(eq(chatRooms.isActive, true)).groupBy(chatRooms.id);
+    return c.json({ success: true, rooms });
+  } catch (error3) {
+    console.error("Error fetching chat rooms:", error3);
+    return c.json({ success: false, error: "Failed to fetch chat rooms" }, 500);
+  }
+});
+chat.get("/:roomId", async (c) => {
+  try {
+    const roomId = c.req.param("roomId");
+    const db = createDb(c.env.DB);
+    const room = await db.select().from(chatRooms).where(eq(chatRooms.id, roomId)).limit(1);
+    if (!room.length) {
+      return c.json({ success: false, error: "Chat room not found" }, 404);
+    }
+    return c.json({ success: true, room: room[0] });
+  } catch (error3) {
+    console.error("Error fetching chat room:", error3);
+    return c.json({ success: false, error: "Failed to fetch chat room" }, 500);
+  }
+});
+chat.post("/", async (c) => {
+  try {
+    const sessionCookie = getCookie(c, "session");
+    if (!sessionCookie) {
+      return c.json({ success: false, error: "Unauthorized" }, 401);
+    }
+    const db = createDb(c.env.DB);
+    const userId = await getUserIdFromSession(sessionCookie, db);
+    if (!userId) {
+      return c.json({ success: false, error: "Invalid session" }, 401);
+    }
+    const { name, description, type: type2 = "GLOBAL" } = await c.req.json();
+    if (!name) {
+      return c.json({ success: false, error: "Room name is required" }, 400);
+    }
+    const roomId = crypto.randomUUID();
+    const newRoom = {
+      id: roomId,
+      name,
+      description,
+      type: type2,
+      createdBy: userId,
+      isActive: true
+    };
+    await db.insert(chatRooms).values(newRoom);
+    await db.insert(chatRoomParticipants).values({
+      id: crypto.randomUUID(),
+      roomId,
+      userId,
+      role: "ADMIN",
+      isActive: true
+    });
+    return c.json({ success: true, room: newRoom });
+  } catch (error3) {
+    console.error("Error creating chat room:", error3);
+    return c.json({ success: false, error: "Failed to create chat room" }, 500);
+  }
+});
+chat.get("/:roomId/messages", async (c) => {
+  try {
+    const roomId = c.req.param("roomId");
+    const limit = parseInt(c.req.query("limit") || "50");
+    const offset2 = parseInt(c.req.query("offset") || "0");
+    const db = createDb(c.env.DB);
+    const messages = await db.select({
+      id: chatMessages.id,
+      content: chatMessages.content,
+      messageType: chatMessages.messageType,
+      mediaUrl: chatMessages.mediaUrl,
+      fileName: chatMessages.fileName,
+      fileSize: chatMessages.fileSize,
+      replyToId: chatMessages.replyToId,
+      isEdited: chatMessages.isEdited,
+      editedAt: chatMessages.editedAt,
+      createdAt: chatMessages.createdAt,
+      author: {
+        id: users.id,
+        username: users.username,
+        role: users.role
+      },
+      profile: {
+        profilePicture: profiles.profilePicture
+      }
+    }).from(chatMessages).innerJoin(users, eq(chatMessages.authorId, users.id)).leftJoin(profiles, eq(users.id, profiles.userId)).where(eq(chatMessages.roomId, roomId)).orderBy(desc(chatMessages.createdAt)).limit(limit).offset(offset2);
+    return c.json({ success: true, messages: messages.reverse() });
+  } catch (error3) {
+    console.error("Error fetching messages:", error3);
+    return c.json({ success: false, error: "Failed to fetch messages" }, 500);
+  }
+});
+chat.post("/:roomId/messages", async (c) => {
+  try {
+    const sessionCookie = getCookie(c, "session");
+    if (!sessionCookie) {
+      return c.json({ success: false, error: "Unauthorized" }, 401);
+    }
+    const db = createDb(c.env.DB);
+    const userId = await getUserIdFromSession(sessionCookie, db);
+    if (!userId) {
+      return c.json({ success: false, error: "Invalid session" }, 401);
+    }
+    const roomId = c.req.param("roomId");
+    const { content, messageType = "TEXT", mediaUrl, fileName, fileSize, replyToId } = await c.req.json();
+    if (!content) {
+      return c.json({ success: false, error: "Message content is required" }, 400);
+    }
+    const participant = await db.select().from(chatRoomParticipants).where(and(
+      eq(chatRoomParticipants.roomId, roomId),
+      eq(chatRoomParticipants.userId, userId),
+      eq(chatRoomParticipants.isActive, true)
+    )).limit(1);
+    if (!participant.length) {
+      return c.json({ success: false, error: "You are not a participant in this room" }, 403);
+    }
+    const messageId = crypto.randomUUID();
+    const newMessage = {
+      id: messageId,
+      roomId,
+      authorId: userId,
+      content,
+      messageType,
+      mediaUrl,
+      fileName,
+      fileSize,
+      replyToId,
+      isEdited: false
+    };
+    await db.insert(chatMessages).values(newMessage);
+    const message = await db.select({
+      id: chatMessages.id,
+      content: chatMessages.content,
+      messageType: chatMessages.messageType,
+      mediaUrl: chatMessages.mediaUrl,
+      fileName: chatMessages.fileName,
+      fileSize: chatMessages.fileSize,
+      replyToId: chatMessages.replyToId,
+      isEdited: chatMessages.isEdited,
+      editedAt: chatMessages.editedAt,
+      createdAt: chatMessages.createdAt,
+      author: {
+        id: users.id,
+        username: users.username,
+        role: users.role
+      },
+      profile: {
+        profilePicture: profiles.profilePicture
+      }
+    }).from(chatMessages).innerJoin(users, eq(chatMessages.authorId, users.id)).leftJoin(profiles, eq(users.id, profiles.userId)).where(eq(chatMessages.id, messageId)).limit(1);
+    return c.json({ success: true, message: message[0] });
+  } catch (error3) {
+    console.error("Error sending message:", error3);
+    return c.json({ success: false, error: "Failed to send message" }, 500);
+  }
+});
+chat.post("/:roomId/join", async (c) => {
+  try {
+    const sessionCookie = getCookie(c, "session");
+    if (!sessionCookie) {
+      return c.json({ success: false, error: "Unauthorized" }, 401);
+    }
+    const db = createDb(c.env.DB);
+    const userId = await getUserIdFromSession(sessionCookie, db);
+    if (!userId) {
+      return c.json({ success: false, error: "Invalid session" }, 401);
+    }
+    const roomId = c.req.param("roomId");
+    const existingParticipant = await db.select().from(chatRoomParticipants).where(and(
+      eq(chatRoomParticipants.roomId, roomId),
+      eq(chatRoomParticipants.userId, userId)
+    )).limit(1);
+    if (existingParticipant.length) {
+      if (!existingParticipant[0].isActive) {
+        await db.update(chatRoomParticipants).set({ isActive: true, lastReadAt: /* @__PURE__ */ new Date() }).where(eq(chatRoomParticipants.id, existingParticipant[0].id));
+      }
+      return c.json({ success: true, message: "Already a participant" });
+    }
+    await db.insert(chatRoomParticipants).values({
+      id: crypto.randomUUID(),
+      roomId,
+      userId,
+      role: "MEMBER",
+      isActive: true
+    });
+    return c.json({ success: true, message: "Joined chat room successfully" });
+  } catch (error3) {
+    console.error("Error joining chat room:", error3);
+    return c.json({ success: false, error: "Failed to join chat room" }, 500);
+  }
+});
+chat.post("/:roomId/leave", async (c) => {
+  try {
+    const sessionCookie = getCookie(c, "session");
+    if (!sessionCookie) {
+      return c.json({ success: false, error: "Unauthorized" }, 401);
+    }
+    const db = createDb(c.env.DB);
+    const userId = await getUserIdFromSession(sessionCookie, db);
+    if (!userId) {
+      return c.json({ success: false, error: "Invalid session" }, 401);
+    }
+    const roomId = c.req.param("roomId");
+    await db.update(chatRoomParticipants).set({ isActive: false }).where(and(
+      eq(chatRoomParticipants.roomId, roomId),
+      eq(chatRoomParticipants.userId, userId)
+    ));
+    return c.json({ success: true, message: "Left chat room successfully" });
+  } catch (error3) {
+    console.error("Error leaving chat room:", error3);
+    return c.json({ success: false, error: "Failed to leave chat room" }, 500);
+  }
+});
+var chat_default = chat;
+
 // functions/index.ts
 var app35 = new Hono2();
 var corsMiddleware = cors({
@@ -36108,6 +36577,7 @@ app35.route("/api/refund-requests", refund_requests_default);
 app35.route("/api/refund", vote_default4);
 app35.route("/api/governance", governance_default);
 app35.route("/api/admin", admin_default);
+app35.route("/api/chat", chat_default);
 app35.notFound((c) => {
   return c.json({ error: "Not Found" }, 404);
 });
@@ -36166,7 +36636,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env2, _ctx, middlewareCtx
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-Am8AfT/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-yc4B9W/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -36202,7 +36672,7 @@ function __facade_invoke__(request, env2, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-Am8AfT/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-yc4B9W/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

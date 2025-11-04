@@ -356,7 +356,9 @@ export default function Profile() {
       setUser(userData)
       
       // Filter posts for current user (in a real app, you'd have a specific endpoint)
-      const userPosts = postsData.filter(post => post.authorId === userData.id)
+      // Handle both array and paginated response
+      const posts = Array.isArray(postsData) ? postsData : postsData.posts
+      const userPosts = posts.filter((post: Post) => post.authorId === userData.id)
       setPosts(userPosts)
       
       // Use real bookmarks data from API
