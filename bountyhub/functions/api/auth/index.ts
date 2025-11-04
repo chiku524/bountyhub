@@ -36,6 +36,7 @@ app.route('/logout', logout)
 app.route('/me', me)
 app.route('/signup', signup)
 app.route('/change-password', changePassword)
+// Mount GitHub OAuth routes - this handles /api/auth/github
 app.route('/github', github)
 
 export default app 
