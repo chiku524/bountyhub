@@ -158,6 +158,153 @@ Deploy Workers when:
 
 ---
 
+## Custom Domains & DNS Setup
+
+### Prerequisites
+
+- Domain `bountyhub.tech` must be added to your Cloudflare account
+- Domain must be using Cloudflare nameservers
+- DNS should be proxied (orange cloud) for SSL/TLS
+
+### Step 1: Add Custom Domain to Cloudflare Pages (Frontend)
+
+1. **Go to Cloudflare Dashboard**
+   - Navigate to **Workers & Pages** → **Pages** → **bountyhub**
+   - Click **Custom domains** tab
+   - Click **Set up a custom domain**
+
+2. **Add Main Domain**
+   - Enter: `bountyhub.tech`
+   - Click **Continue**
+   - Cloudflare will automatically create DNS records
+
+3. **Add WWW Subdomain (Optional)**
+   - Click **Set up a custom domain** again
+   - Enter: `www.bountyhub.tech`
+   - Click **Continue**
+
+4. **Verify DNS Records**
+   - Cloudflare should automatically create:
+     - **CNAME** record: `bountyhub.tech` → `bountyhub.pages.dev`
+     - **CNAME** record: `www.bountyhub.tech` → `bountyhub.pages.dev`
+   - Wait for DNS propagation (usually a few minutes)
+
+5. **Activate Domains**
+   - Click **Check DNS** for each domain
+   - Once verified, click **Activate domain**
+   - SSL certificates will be automatically provisioned
+
+### Step 2: Configure Workers Custom Domain (API)
+
+Your API Worker needs to be accessible at `api.bountyhub.tech`.
+
+1. **Go to Workers Dashboard**
+   - Navigate to **Workers & Pages** → **Workers** → **bountyhub-api**
+   - Click **Triggers** tab
+   - Scroll to **Routes** section
+
+2. **Add Custom Domain Route**
+   - Click **Add route**
+   - **Route**: `api.bountyhub.tech/*`
+   - **Zone**: `bountyhub.tech`
+   - Click **Add route**
+
+3. **Create DNS Record**
+   - Go to **Cloudflare Dashboard** → **DNS** → **Records**
+   - Click **Add record**
+   - **Type**: `CNAME` or `A` (if using apex domain, use A record)
+   - **Name**: `api`
+   - **Target**: 
+     - For CNAME: Use the Workers route target (Cloudflare will show this)
+     - For A record: Use Cloudflare's apex proxy IPs if needed
+   - **Proxy status**: ✅ Proxied (orange cloud)
+   - Click **Save**
+
+4. **Verify API Route**
+   - Test: `https://api.bountyhub.tech/api/stats`
+   - Should return API response
+   - SSL certificate will be automatically provisioned
+
+### Step 3: DNS Records Summary
+
+Your `bountyhub.tech` DNS zone should have these records:
+
+| Type | Name | Target | Proxy | Purpose |
+|------|------|--------|-------|---------|
+| **CNAME** | `@` (apex) | `bountyhub.pages.dev` | ✅ Proxied | Main domain |
+| **CNAME** | `www` | `bountyhub.pages.dev` | ✅ Proxied | WWW subdomain |
+| **CNAME** | `api` | Workers route | ✅ Proxied | API subdomain |
+
+**Note**: If using apex domain (`bountyhub.tech`), Cloudflare Pages may create an A record instead of CNAME. This is normal.
+
+### Step 4: SSL/TLS Configuration
+
+1. **Verify SSL Status**
+   - Go to **SSL/TLS** → **Overview**
+   - Ensure **SSL/TLS encryption mode** is set to **Full (strict)**
+   - SSL certificates are automatically provisioned by Cloudflare
+
+2. **Check Certificate Status**
+   - Go to **SSL/TLS** → **Edge Certificates**
+   - Verify certificates are issued for:
+     - `bountyhub.tech`
+     - `www.bountyhub.tech`
+     - `api.bountyhub.tech`
+
+### Step 5: Redirect www to Non-www (Optional)
+
+To redirect `www.bountyhub.tech` → `bountyhub.tech`:
+
+1. **Go to Cloudflare Dashboard**
+   - Navigate to **Rules** → **Redirect Rules**
+   - Click **Create rule**
+
+2. **Configure Redirect**
+   - **Rule name**: `Redirect www to non-www`
+   - **If URI matches**: `www.bountyhub.tech/*`
+   - **Then**: Redirect to `https://bountyhub.tech/$1`
+   - **Status code**: `301` (Permanent)
+   - Click **Deploy**
+
+### Step 6: Verify Everything Works
+
+1. **Test Frontend**
+   - Visit: `https://bountyhub.tech`
+   - Should load your React app
+   - Check browser console for errors
+
+2. **Test API**
+   - Visit: `https://api.bountyhub.tech/api/stats`
+   - Should return JSON response
+   - Verify CORS headers if needed
+
+3. **Test WWW Redirect** (if configured)
+   - Visit: `https://www.bountyhub.tech`
+   - Should redirect to `https://bountyhub.tech`
+
+### Troubleshooting
+
+**DNS Not Propagating:**
+- Wait 5-10 minutes for DNS propagation
+- Check DNS records in Cloudflare Dashboard
+- Verify nameservers are correct
+
+**SSL Certificate Not Issuing:**
+- Ensure DNS records are proxied (orange cloud)
+- Wait up to 24 hours for certificate provisioning
+- Check SSL/TLS → Edge Certificates for status
+
+**API Not Accessible:**
+- Verify Workers route is configured
+- Check Workers logs for errors
+- Ensure CORS is configured for custom domain
+
+**CORS Errors:**
+- Update `functions/index.ts` to include `https://bountyhub.tech` in allowed origins
+- Ensure `VITE_API_URL` environment variable is set correctly
+
+---
+
 ## Deployment Workflow
 
 ### Typical Workflow

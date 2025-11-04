@@ -26,30 +26,30 @@ export default function Terms() {
           </div>
         </div>
 
-        <div className="bg-neutral-50 dark:bg-white text-neutral-900 dark:text-gray-900 rounded-lg shadow-lg p-8 print:shadow-none border border-neutral-200 dark:border-transparent">
+        <div className="bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white rounded-lg shadow-lg p-8 print:shadow-none border border-neutral-200 dark:border-neutral-700">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">Terms of Service</h1>
-              <p className="text-gray-600">Last updated: {new Date().toLocaleDateString()}</p>
+              <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-4">Terms of Service</h1>
+              <p className="text-neutral-600 dark:text-gray-400">Last updated: {new Date().toLocaleDateString()}</p>
             </div>
 
             <div className="space-y-6 text-sm leading-relaxed">
               <section>
-                <h2 className="text-xl font-semibold text-gray-900 mb-3">1. Acceptance of Terms</h2>
-                <p className="text-gray-700 mb-3">
+                <h2 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">1. Acceptance of Terms</h2>
+                <p className="text-neutral-700 dark:text-gray-300 mb-3">
                   By accessing and using bountyhub ("the Platform"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
                 </p>
-                <p className="text-gray-700">
+                <p className="text-neutral-700 dark:text-gray-300">
                   These Terms of Service ("Terms") govern your use of our decentralized platform for knowledge sharing, community building, and reputation-based interactions.
                 </p>
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold text-gray-900 mb-3">2. Description of Service</h2>
-                <p className="text-gray-700 mb-3">
+                <h2 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">2. Description of Service</h2>
+                <p className="text-neutral-700 dark:text-gray-300 mb-3">
                   bountyhub is a decentralized platform that provides:
                 </p>
-                <ul className="list-disc list-inside text-gray-700 mb-4 space-y-1">
+                <ul className="list-disc list-inside text-neutral-700 dark:text-gray-300 mb-4 space-y-1">
                   <li>Knowledge sharing and Q&A functionality</li>
                   <li>Community building and interaction tools</li>
                   <li>Reputation and integrity scoring systems</li>
@@ -60,12 +60,12 @@ export default function Terms() {
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold text-gray-900 mb-3">3. User Accounts and Registration</h2>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">3.1 Account Creation</h3>
-                <p className="text-gray-700 mb-3">
+                <h2 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">3. User Accounts and Registration</h2>
+                <h3 className="text-lg font-medium text-neutral-900 dark:text-white mb-2">3.1 Account Creation</h3>
+                <p className="text-neutral-700 dark:text-gray-300 mb-3">
                   To access certain features of the Platform, you must create an account. You agree to:
                 </p>
-                <ul className="list-disc list-inside text-gray-700 mb-4 space-y-1">
+                <ul className="list-disc list-inside text-neutral-700 dark:text-gray-300 mb-4 space-y-1">
                   <li>Provide accurate, current, and complete information</li>
                   <li>Maintain and update your account information</li>
                   <li>Keep your account credentials secure</li>

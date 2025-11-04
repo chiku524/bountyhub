@@ -884,9 +884,9 @@ function WalletContent() {
           )}
 
           {/* Recent Transactions */}
-          <div className="bg-neutral-800 border border-neutral-700 rounded-lg p-6">
+          <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-white">Recent Transactions</h3>
+              <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Recent Transactions</h3>
               {transactions.length > 0 && (
                 <Link
                   to="/transactions"
@@ -897,23 +897,23 @@ function WalletContent() {
               )}
             </div>
             {transactions.length === 0 ? (
-              <p className="text-gray-400">No transactions yet</p>
+              <p className="text-neutral-600 dark:text-gray-400">No transactions yet</p>
             ) : (
               <div className="space-y-4">
                 {transactions.slice(0, 5).map((tx) => (
-                  <div key={tx.id} className="border border-neutral-700 rounded-lg p-4">
+                  <div key={tx.id} className="border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 bg-neutral-50 dark:bg-neutral-700/50">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h4 className="font-medium text-white capitalize">{tx.type?.replace('_', ' ')}</h4>
-                        <p className="text-sm text-gray-400">
+                        <h4 className="font-medium text-neutral-900 dark:text-white capitalize">{tx.type?.replace('_', ' ')}</h4>
+                        <p className="text-sm text-neutral-600 dark:text-gray-400">
                           {getTransactionAction(tx.metadata)}
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-neutral-500 dark:text-gray-500 mt-1">
                           {formatTransactionDate(tx.createdAt)}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className={`font-medium ${tx.amount >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        <p className={`font-medium ${tx.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                           {tx.amount >= 0 ? '+' : ''}{tx.amount.toFixed(4)} BBUX
                         </p>
                         <p className={`text-sm font-medium ${getStatusColor(tx.status)}`}>

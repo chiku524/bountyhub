@@ -26,32 +26,32 @@ export default function Privacy() {
           </div>
         </div>
 
-        <div className="bg-neutral-50 dark:bg-white text-neutral-900 dark:text-gray-900 rounded-lg shadow-lg p-8 print:shadow-none border border-neutral-200 dark:border-transparent">
+        <div className="bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white rounded-lg shadow-lg p-8 print:shadow-none border border-neutral-200 dark:border-neutral-700">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">Privacy Policy</h1>
-              <p className="text-gray-600">Last updated: {new Date().toLocaleDateString()}</p>
+              <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-4">Privacy Policy</h1>
+              <p className="text-neutral-600 dark:text-gray-400">Last updated: {new Date().toLocaleDateString()}</p>
             </div>
 
             <div className="space-y-6 text-sm leading-relaxed">
               <section>
-                <h2 className="text-xl font-semibold text-gray-900 mb-3">1. Introduction</h2>
-                <p className="text-gray-700 mb-3">
+                <h2 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">1. Introduction</h2>
+                <p className="text-neutral-700 dark:text-gray-300 mb-3">
                   Welcome to bountyhub ("we," "our," or "us"). We are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our decentralized platform for knowledge sharing and community building.
                 </p>
-                <p className="text-gray-700">
+                <p className="text-neutral-700 dark:text-gray-300">
                   By using bountyhub, you consent to the data practices described in this policy.
                 </p>
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold text-gray-900 mb-3">2. Information We Collect</h2>
+                <h2 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">2. Information We Collect</h2>
                 
-                <h3 className="text-lg font-medium text-gray-900 mb-2">2.1 Personal Information</h3>
-                <p className="text-gray-700 mb-3">
+                <h3 className="text-lg font-medium text-neutral-900 dark:text-white mb-2">2.1 Personal Information</h3>
+                <p className="text-neutral-700 dark:text-gray-300 mb-3">
                   We may collect the following personal information:
                 </p>
-                <ul className="list-disc list-inside text-gray-700 mb-4 space-y-1">
+                <ul className="list-disc list-inside text-neutral-700 dark:text-gray-300 mb-4 space-y-1">
                   <li>Email address</li>
                   <li>Username</li>
                   <li>Profile information (bio, location, website)</li>
@@ -60,11 +60,11 @@ export default function Privacy() {
                   <li>Solana wallet addresses</li>
                 </ul>
 
-                <h3 className="text-lg font-medium text-gray-900 mb-2">2.2 Usage Information</h3>
-                <p className="text-gray-700 mb-3">
+                <h3 className="text-lg font-medium text-neutral-900 dark:text-white mb-2">2.2 Usage Information</h3>
+                <p className="text-neutral-700 dark:text-gray-300 mb-3">
                   We automatically collect certain information about your use of our platform:
                 </p>
-                <ul className="list-disc list-inside text-gray-700 mb-4 space-y-1">
+                <ul className="list-disc list-inside text-neutral-700 dark:text-gray-300 mb-4 space-y-1">
                   <li>Posts, comments, and interactions</li>
                   <li>Voting and reputation data</li>
                   <li>Transaction history</li>

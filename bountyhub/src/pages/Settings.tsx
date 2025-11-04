@@ -278,9 +278,9 @@ export default function Settings() {
                       />
                     </div>
                     <div>
-                      <label htmlFor="lastName" className="block text-sm font-medium text-violet-300 mb-2">
-                        Last Name
-                      </label>
+                    <label htmlFor="lastName" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
+                      Last Name
+                    </label>
                       <input
                         id="lastName"
                         type="text"
@@ -302,7 +302,7 @@ export default function Settings() {
                       onChange={(e) => handleInputChange('bio', e.target.value)}
                       placeholder="Tell us about yourself..."
                       rows={4}
-                      className="w-full px-3 sm:px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
+                      className="w-full px-3 sm:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
                     />
                   </div>
 
@@ -316,7 +316,7 @@ export default function Settings() {
                       value={profileData.location}
                       onChange={(e) => handleInputChange('location', e.target.value)}
                       placeholder="City, Country"
-                      className="w-full px-3 sm:px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
+                      className="w-full px-3 sm:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
                     />
                   </div>
 
@@ -330,7 +330,7 @@ export default function Settings() {
                       value={profileData.website}
                       onChange={(e) => handleInputChange('website', e.target.value)}
                       placeholder="https://your-website.com"
-                      className="w-full px-3 sm:px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
+                      className="w-full px-3 sm:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
                     />
                   </div>
                 </div>
@@ -339,7 +339,7 @@ export default function Settings() {
               {activeTab === 'social' && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                   <div>
-                    <label htmlFor="facebook" className="block text-sm font-medium text-violet-300 mb-2">
+                    <label htmlFor="facebook" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
                       Facebook
                     </label>
                     <input
@@ -348,11 +348,11 @@ export default function Settings() {
                       value={profileData.facebook}
                       onChange={(e) => handleInputChange('facebook', e.target.value)}
                       placeholder="facebook.com/username"
-                      className="w-full px-3 sm:px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
+                      className="w-full px-3 sm:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
                     />
                   </div>
                   <div>
-                    <label htmlFor="twitter" className="block text-sm font-medium text-violet-300 mb-2">
+                    <label htmlFor="twitter" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
                       Twitter
                     </label>
                     <input
@@ -361,11 +361,11 @@ export default function Settings() {
                       value={profileData.twitter}
                       onChange={(e) => handleInputChange('twitter', e.target.value)}
                       placeholder="@username"
-                      className="w-full px-3 sm:px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
+                      className="w-full px-3 sm:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
                     />
                   </div>
                   <div>
-                    <label htmlFor="instagram" className="block text-sm font-medium text-violet-300 mb-2">
+                    <label htmlFor="instagram" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
                       Instagram
                     </label>
                     <input
@@ -374,11 +374,11 @@ export default function Settings() {
                       value={profileData.instagram}
                       onChange={(e) => handleInputChange('instagram', e.target.value)}
                       placeholder="@username"
-                      className="w-full px-3 sm:px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
+                      className="w-full px-3 sm:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
                     />
                   </div>
                   <div>
-                    <label htmlFor="linkedin" className="block text-sm font-medium text-violet-300 mb-2">
+                    <label htmlFor="linkedin" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
                       LinkedIn
                     </label>
                     <input
@@ -387,11 +387,11 @@ export default function Settings() {
                       value={profileData.linkedin}
                       onChange={(e) => handleInputChange('linkedin', e.target.value)}
                       placeholder="linkedin.com/in/username"
-                      className="w-full px-3 sm:px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
+                      className="w-full px-3 sm:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
                     />
                   </div>
                   <div>
-                    <label htmlFor="github" className="block text-sm font-medium text-violet-300 mb-2">
+                    <label htmlFor="github" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
                       GitHub
                     </label>
                     <input
@@ -400,11 +400,11 @@ export default function Settings() {
                       value={profileData.github}
                       onChange={(e) => handleInputChange('github', e.target.value)}
                       placeholder="github.com/username"
-                      className="w-full px-3 sm:px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
+                      className="w-full px-3 sm:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
                     />
                   </div>
                   <div>
-                    <label htmlFor="youtube" className="block text-sm font-medium text-violet-300 mb-2">
+                    <label htmlFor="youtube" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
                       YouTube
                     </label>
                     <input
@@ -413,11 +413,11 @@ export default function Settings() {
                       value={profileData.youtube}
                       onChange={(e) => handleInputChange('youtube', e.target.value)}
                       placeholder="youtube.com/@username"
-                      className="w-full px-3 sm:px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
+                      className="w-full px-3 sm:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
                     />
                   </div>
                   <div>
-                    <label htmlFor="tiktok" className="block text-sm font-medium text-violet-300 mb-2">
+                    <label htmlFor="tiktok" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
                       TikTok
                     </label>
                     <input
@@ -426,11 +426,11 @@ export default function Settings() {
                       value={profileData.tiktok}
                       onChange={(e) => handleInputChange('tiktok', e.target.value)}
                       placeholder="@username"
-                      className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                      className="w-full px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500"
                     />
                   </div>
                   <div>
-                    <label htmlFor="discord" className="block text-sm font-medium text-violet-300 mb-2">
+                    <label htmlFor="discord" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
                       Discord
                     </label>
                     <input
@@ -439,11 +439,11 @@ export default function Settings() {
                       value={profileData.discord}
                       onChange={(e) => handleInputChange('discord', e.target.value)}
                       placeholder="username#0000"
-                      className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                      className="w-full px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500"
                     />
                   </div>
                   <div>
-                    <label htmlFor="reddit" className="block text-sm font-medium text-violet-300 mb-2">
+                    <label htmlFor="reddit" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
                       Reddit
                     </label>
                     <input
@@ -452,11 +452,11 @@ export default function Settings() {
                       value={profileData.reddit}
                       onChange={(e) => handleInputChange('reddit', e.target.value)}
                       placeholder="u/username"
-                      className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                      className="w-full px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500"
                     />
                   </div>
                   <div>
-                    <label htmlFor="medium" className="block text-sm font-medium text-violet-300 mb-2">
+                    <label htmlFor="medium" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
                       Medium
                     </label>
                     <input
@@ -465,11 +465,11 @@ export default function Settings() {
                       value={profileData.medium}
                       onChange={(e) => handleInputChange('medium', e.target.value)}
                       placeholder="medium.com/@username"
-                      className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                      className="w-full px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500"
                     />
                   </div>
                   <div>
-                    <label htmlFor="stackoverflow" className="block text-sm font-medium text-violet-300 mb-2">
+                    <label htmlFor="stackoverflow" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
                       Stack Overflow
                     </label>
                     <input
@@ -478,11 +478,11 @@ export default function Settings() {
                       value={profileData.stackoverflow}
                       onChange={(e) => handleInputChange('stackoverflow', e.target.value)}
                       placeholder="stackoverflow.com/users/username"
-                      className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                      className="w-full px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500"
                     />
                   </div>
                   <div>
-                    <label htmlFor="devto" className="block text-sm font-medium text-violet-300 mb-2">
+                    <label htmlFor="devto" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
                       Dev.to
                     </label>
                     <input
@@ -491,7 +491,7 @@ export default function Settings() {
                       value={profileData.devto}
                       onChange={(e) => handleInputChange('devto', e.target.value)}
                       placeholder="dev.to/username"
-                      className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                      className="w-full px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500"
                     />
                   </div>
                 </div>
@@ -500,7 +500,7 @@ export default function Settings() {
               {activeTab === 'account' && (
                 <div className="space-y-6">
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-violet-300 mb-2">
+                    <label htmlFor="email" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
                       Email
                     </label>
                     <input
@@ -509,11 +509,11 @@ export default function Settings() {
                       value={user?.email || ''}
                       disabled
                       placeholder="Your email address"
-                      className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-gray-400 cursor-not-allowed"
+                      className="w-full px-4 py-2 bg-neutral-100 dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-500 dark:text-gray-400 cursor-not-allowed"
                     />
                   </div>
                   <div>
-                    <label htmlFor="username" className="block text-sm font-medium text-violet-300 mb-2">
+                    <label htmlFor="username" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
                       Username
                     </label>
                     <input
@@ -522,7 +522,7 @@ export default function Settings() {
                       value={user?.username || ''}
                       disabled
                       placeholder="Your username"
-                      className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-gray-400 cursor-not-allowed"
+                      className="w-full px-4 py-2 bg-neutral-100 dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-500 dark:text-gray-400 cursor-not-allowed"
                     />
                   </div>
                 </div>
@@ -531,7 +531,7 @@ export default function Settings() {
               {activeTab === 'security' && (
                 <div className="space-y-6">
                   <div>
-                    <label htmlFor="currentPassword" className="block text-sm font-medium text-violet-300 mb-2">
+                    <label htmlFor="currentPassword" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
                       Current Password
                     </label>
                     <input
@@ -540,11 +540,11 @@ export default function Settings() {
                       value={passwordData.currentPassword}
                       onChange={(e) => handlePasswordInputChange('currentPassword', e.target.value)}
                       placeholder="Enter your current password"
-                      className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                      className="w-full px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500"
                     />
                   </div>
                   <div>
-                    <label htmlFor="newPassword" className="block text-sm font-medium text-violet-300 mb-2">
+                    <label htmlFor="newPassword" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
                       New Password
                     </label>
                     <input
@@ -553,11 +553,11 @@ export default function Settings() {
                       value={passwordData.newPassword}
                       onChange={(e) => handlePasswordInputChange('newPassword', e.target.value)}
                       placeholder="Enter your new password"
-                      className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                      className="w-full px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500"
                     />
                   </div>
                   <div>
-                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-violet-300 mb-2">
+                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
                       Confirm New Password
                     </label>
                     <input
@@ -566,7 +566,7 @@ export default function Settings() {
                       value={passwordData.confirmPassword}
                       onChange={(e) => handlePasswordInputChange('confirmPassword', e.target.value)}
                       placeholder="Confirm your new password"
-                      className="w-full px-4 py-2 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500"
+                      className="w-full px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500"
                     />
                   </div>
                 </div>
