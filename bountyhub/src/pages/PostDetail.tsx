@@ -247,7 +247,7 @@ export default function PostDetail() {
   )
 
   return (
-    <div className="p-8">
+    <div className="p-8 min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div className="mb-4">
           <Link to="/community" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300">
@@ -323,14 +323,14 @@ export default function PostDetail() {
                     type="text"
                     value={editTitle}
                     onChange={e => setEditTitle(e.target.value)}
-                    className="w-full p-2 rounded border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white"
+                    className="w-full p-2 rounded border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
                     placeholder="Title"
                     disabled={editLoading}
                   />
                   <textarea
                     value={editContent}
                     onChange={e => setEditContent(e.target.value)}
-                    className="w-full p-2 rounded border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white"
+                    className="w-full p-2 rounded border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
                     placeholder="Content"
                     rows={6}
                     disabled={editLoading}
@@ -404,7 +404,7 @@ export default function PostDetail() {
                   <div className="flex gap-2 justify-end">
                     <button
                       type="button"
-                      className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded"
+                      className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded"
                       onClick={handleEditCancel}
                       disabled={editLoading}
                     >
@@ -458,7 +458,7 @@ export default function PostDetail() {
                 <span>Status: <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                   post.status === 'OPEN' ? 'bg-green-100 dark:bg-green-600 text-green-700 dark:text-white' :
                   post.status === 'COMPLETED' ? 'bg-yellow-100 dark:bg-yellow-600 text-yellow-700 dark:text-white' :
-                  'bg-neutral-100 dark:bg-gray-600 text-neutral-700 dark:text-white'
+                  'bg-neutral-100 dark:bg-neutral-600 text-neutral-700 dark:text-white'
                 }`}>{post.status}</span></span>
                 <span>Created: {formattedCreatedAt}</span>
                 {post.editedAt && <span>Last Edited: {formattedEditedAt}</span>}
@@ -499,7 +499,7 @@ export default function PostDetail() {
                   <button
                     onClick={handleDeleteCancel}
                     disabled={deleteLoading}
-                    className="flex-1 px-4 py-2 bg-neutral-200 dark:bg-gray-600 text-neutral-900 dark:text-white rounded-md hover:bg-neutral-300 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+                    className="flex-1 px-4 py-2 bg-neutral-200 dark:bg-neutral-600 text-neutral-900 dark:text-white rounded-md hover:bg-neutral-300 dark:hover:bg-neutral-700 transition-colors disabled:opacity-50"
                   >
                     Cancel
                   </button>

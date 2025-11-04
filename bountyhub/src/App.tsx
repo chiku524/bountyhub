@@ -73,7 +73,7 @@ function AppContent() {
       <AnimatedBackground />
       
       {/* Light/Dark mode container - Always flex-col, inner flex-row when authenticated */}
-      <div className="relative z-10 min-h-screen w-full bg-white/20 dark:bg-neutral-900/20 transition-colors duration-200 flex flex-col">
+      <div className="relative z-10 min-h-screen w-full bg-white/10 dark:bg-neutral-900/10 transition-colors duration-200 flex flex-col">
         {/* Main content area - flex-row when authenticated (Nav + Layout), flex-col otherwise */}
         <div className={`flex-1 flex ${showAuthenticatedNav ? 'flex-row' : 'flex-col'}`}>
           {/* Dynamic Navbar */}

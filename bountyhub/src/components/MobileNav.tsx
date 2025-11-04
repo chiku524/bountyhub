@@ -10,7 +10,7 @@ export function MobileNav() {
   if (!user) return null
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-neutral-800 border-t border-neutral-200 dark:border-neutral-700 md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-neutral-800/90 backdrop-blur-sm border-t border-neutral-200/50 dark:border-neutral-700/50 md:hidden">
       <div className="flex items-center justify-around h-16 px-2 overflow-x-auto">
         <Link
           to="/community"
