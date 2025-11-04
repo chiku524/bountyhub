@@ -262,7 +262,7 @@ const Governance: React.FC = () => {
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Governance Dashboard</h1>
+            <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">Governance Dashboard</h1>
             <p className="text-gray-400">Transparent virtual governance system for BountyBucks</p>
           </div>
           <Link
@@ -279,19 +279,19 @@ const Governance: React.FC = () => {
       {/* Governance Statistics */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-neutral-800 rounded-lg border border-neutral-700 p-6">
+          <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
             <h3 className="text-sm font-medium text-gray-400">Total Staked</h3>
-            <p className="text-2xl font-bold text-white">{formatAmount(stats.totalStaked)} BBUX</p>
+            <p className="text-2xl font-bold text-neutral-900 dark:text-white">{formatAmount(stats.totalStaked)} BBUX</p>
           </div>
-          <div className="bg-neutral-800 rounded-lg border border-neutral-700 p-6">
+          <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
             <h3 className="text-sm font-medium text-gray-400">Treasury Balance</h3>
             <p className="text-2xl font-bold text-white">{formatAmount(stats.totalTreasury)} BBUX</p>
           </div>
-          <div className="bg-neutral-800 rounded-lg border border-neutral-700 p-6">
+          <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
             <h3 className="text-sm font-medium text-gray-400">Total Collected</h3>
             <p className="text-2xl font-bold text-white">{formatAmount(stats.totalCollected)} BBUX</p>
           </div>
-          <div className="bg-neutral-800 rounded-lg border border-neutral-700 p-6">
+          <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
             <h3 className="text-sm font-medium text-gray-400">Total Distributed</h3>
             <p className="text-2xl font-bold text-white">{formatAmount(stats.totalDistributed)} BBUX</p>
           </div>
@@ -303,16 +303,16 @@ const Governance: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Dynamic Reward Rate Breakdown */}
           {rewardRate && (
-            <div className="bg-neutral-800 rounded-lg border border-neutral-700">
-              <div className="px-6 py-4 border-b border-neutral-700">
-                <h2 className="text-lg font-semibold text-white">Dynamic Reward Rate</h2>
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700">
+              <div className="px-6 py-4 border-b border-neutral-200 dark:border-neutral-700">
+                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Dynamic Reward Rate</h2>
                 <p className="text-sm text-gray-400">Current daily staking reward breakdown</p>
               </div>
               <div className="p-6">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-400">Base Rate:</span>
-                    <span className="font-semibold text-white">{formatPercentage(rewardRate.baseRate)}%</span>
+                    <span className="font-semibold text-neutral-900 dark:text-white">{formatPercentage(rewardRate.baseRate)}%</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-400">Activity Bonus:</span>
@@ -328,7 +328,7 @@ const Governance: React.FC = () => {
                   </div>
                   <hr className="border-neutral-700" />
                   <div className="flex justify-between items-center">
-                    <span className="text-lg font-medium text-white">Total Rate:</span>
+                    <span className="text-lg font-medium text-neutral-900 dark:text-white">Total Rate:</span>
                     <span className="text-xl font-bold text-indigo-400">{formatPercentage(rewardRate.totalRate)}%</span>
                   </div>
                   <div className="text-xs text-gray-400">
@@ -341,9 +341,9 @@ const Governance: React.FC = () => {
 
           {/* Platform Metrics */}
           {platformMetrics && (
-            <div className="bg-neutral-800 rounded-lg border border-neutral-700">
-              <div className="px-6 py-4 border-b border-neutral-700">
-                <h2 className="text-lg font-semibold text-white">Platform Health</h2>
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700">
+              <div className="px-6 py-4 border-b border-neutral-200 dark:border-neutral-700">
+                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Platform Health</h2>
                 <p className="text-sm text-gray-400">Current platform activity metrics</p>
               </div>
               <div className="p-6">
@@ -378,7 +378,7 @@ const Governance: React.FC = () => {
       {/* User's Personalized Reward Rate */}
       {userRewardRate && (
         <div className="bg-gradient-to-r from-indigo-900/50 to-purple-900/50 border border-indigo-700 rounded-lg p-6 mb-8">
-          <h2 className="text-lg font-semibold text-white mb-3">Your Personalized Reward Rate</h2>
+          <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-3">Your Personalized Reward Rate</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <div className="flex justify-between items-center">
@@ -421,9 +421,9 @@ const Governance: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* User Governance Stats */}
-        <div className="bg-neutral-800 rounded-lg border border-neutral-700">
-          <div className="px-6 py-4 border-b border-neutral-700">
-            <h2 className="text-lg font-semibold text-white">Your Governance Stats</h2>
+        <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700">
+          <div className="px-6 py-4 border-b border-neutral-200 dark:border-neutral-700">
+            <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Your Governance Stats</h2>
           </div>
           <div className="p-6">
             {userStats ? (
@@ -458,9 +458,9 @@ const Governance: React.FC = () => {
         </div>
 
         {/* Staking Actions */}
-        <div className="bg-neutral-800 rounded-lg border border-neutral-700">
-          <div className="px-6 py-4 border-b border-neutral-700">
-            <h2 className="text-lg font-semibold text-white">Staking Actions</h2>
+        <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700">
+          <div className="px-6 py-4 border-b border-neutral-200 dark:border-neutral-700">
+            <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Staking Actions</h2>
           </div>
           <div className="p-6 space-y-6">
             {/* Stake */}

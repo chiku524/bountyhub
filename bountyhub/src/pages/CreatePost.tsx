@@ -47,9 +47,9 @@ export default function CreatePost() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-neutral-900 flex items-center justify-center">
+      <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">Please log in to create a post</h1>
+          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-4">Please log in to create a post</h1>
         </div>
       </div>
     )
@@ -120,10 +120,10 @@ export default function CreatePost() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-900 p-4 sm:p-8">
+    <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200 p-4 sm:p-8">
       <div className="max-w-4xl mx-auto">
         <div className="mb-6 flex justify-between items-center mt-16">
-          <h1 className="text-xl sm:text-2xl font-bold text-white">Create New Post</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-white">Create New Post</h1>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto">
@@ -138,7 +138,7 @@ export default function CreatePost() {
           </div>
 
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-violet-300 mb-2">
+            <label htmlFor="title" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
               Title
             </label>
             <input
@@ -146,13 +146,13 @@ export default function CreatePost() {
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="content" className="block text-sm font-medium text-violet-300 mb-2">
+            <label htmlFor="content" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
               Content
             </label>
             <textarea
@@ -160,7 +160,7 @@ export default function CreatePost() {
               value={content}
               onChange={(e) => setContent(e.target.value)}
               rows={6}
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-neutral-700/50 border border-violet-500/30 rounded-lg text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
               required
             />
           </div>

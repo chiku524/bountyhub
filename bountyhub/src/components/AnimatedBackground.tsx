@@ -4,7 +4,6 @@ import { useTheme } from '../contexts/ThemeProvider'
 export function AnimatedBackground() {
   const { theme } = useTheme()
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const animationFrameRef = useRef<number | null>(null)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -55,6 +54,7 @@ export function AnimatedBackground() {
     }
 
     // Animation loop
+    let animationId: number
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
@@ -96,15 +96,15 @@ export function AnimatedBackground() {
         })
       })
 
-      animationFrameRef.current = requestAnimationFrame(animate)
+      animationId = requestAnimationFrame(animate)
     }
 
     animate()
 
     return () => {
       window.removeEventListener('resize', resizeCanvas)
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current)
+      if (animationId) {
+        cancelAnimationFrame(animationId)
       }
     }
   }, [theme])

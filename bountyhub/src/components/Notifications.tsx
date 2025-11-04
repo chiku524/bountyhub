@@ -245,23 +245,23 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
     <>
       {isOpen && (
         <div 
-          className="fixed w-80 bg-neutral-800 border border-neutral-700 rounded-lg shadow-lg z-[10000]"
+          className="fixed w-80 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-lg z-[10000] text-neutral-900 dark:text-white"
           style={popupStyle}
         >
           {!user ? (
-            <div className="p-6 text-center text-gray-400">
+            <div className="p-6 text-center text-neutral-500 dark:text-gray-400">
               <div className="mb-2">
-                <svg className="w-8 h-8 mx-auto text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-8 h-8 mx-auto text-neutral-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                 </svg>
               </div>
-              <div className="text-lg font-semibold">Sign in to view notifications</div>
+              <div className="text-lg font-semibold text-neutral-900 dark:text-white">Sign in to view notifications</div>
             </div>
           ) : (
             <>
-              <div className="p-4 border-b border-neutral-700">
+              <div className="p-4 border-b border-neutral-200 dark:border-neutral-700">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-white">Notifications</h3>
+                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Notifications</h3>
                   {unreadCount > 0 && (
                     <button
                       onClick={markAllAsRead}
@@ -279,38 +279,38 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
                     <LoadingSpinner size="sm" />
                   </div>
                 ) : notifications.length === 0 ? (
-                  <div className="p-4 text-center text-gray-400">
+                  <div className="p-4 text-center text-neutral-500 dark:text-gray-400">
                     No notifications
                   </div>
                 ) : (
-                  <div className="divide-y divide-neutral-700">
+                  <div className="divide-y divide-neutral-200 dark:divide-neutral-700">
                     {notifications.map((notification) => (
                       <div
                         key={notification.id}
-                        className={`p-4 hover:bg-neutral-700/50 cursor-pointer transition-colors ${
-                          !notification.read ? 'bg-blue-500/10' : ''
+                        className={`p-4 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 cursor-pointer transition-colors ${
+                          !notification.read ? 'bg-blue-500/10 dark:bg-blue-500/10' : ''
                         }`}
                         onClick={() => handleNotificationClick(notification)}
                       >
                         <div className="flex items-start space-x-3">
                           <div className={`w-2 h-2 rounded-full mt-2 ${
-                            notification.read ? 'bg-gray-500' : 'bg-blue-500'
+                            notification.read ? 'bg-neutral-400 dark:bg-gray-500' : 'bg-blue-500'
                           }`} />
                           <div className="flex-1">
                             <div className="flex items-center justify-between">
-                              <h4 className="text-sm font-medium text-white">
+                              <h4 className="text-sm font-medium text-neutral-900 dark:text-white">
                                 {notification.title}
                               </h4>
                               {notification.navigation && (
-                                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4 text-neutral-400 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                 </svg>
                               )}
                             </div>
-                            <p className="text-sm text-gray-400 mt-1">
+                            <p className="text-sm text-neutral-600 dark:text-gray-400 mt-1">
                               {notification.message}
                             </p>
-                            <p className="text-xs text-gray-500 mt-2">
+                            <p className="text-xs text-neutral-400 dark:text-gray-500 mt-2">
                               {new Date(notification.createdAt).toLocaleDateString()}
                             </p>
                           </div>

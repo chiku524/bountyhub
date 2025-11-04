@@ -44,12 +44,12 @@ export default function ProfilePosts() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-900">
+      <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200">
         <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
           <div className="mb-6 flex justify-between items-center mt-16">
             <h1 className="text-2xl font-bold text-white">All Posts</h1>
           </div>
-          <div className="bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+          <div className="bg-white dark:bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)] dark:shadow-[0_0_15px_rgba(139,92,246,0.3)]">
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-500"></div>
               <span className="ml-3 text-gray-300">Loading posts...</span>
@@ -62,12 +62,12 @@ export default function ProfilePosts() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-neutral-900">
+      <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200">
         <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
           <div className="mb-6 flex justify-between items-center mt-16">
             <h1 className="text-2xl font-bold text-white">All Posts</h1>
           </div>
-          <div className="bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+          <div className="bg-white dark:bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)] dark:shadow-[0_0_15px_rgba(139,92,246,0.3)]">
             <div className="text-center">
               <p className="text-red-400">{error}</p>
               <Link to="/profile" className="mt-4 inline-block text-violet-400 hover:text-violet-300">

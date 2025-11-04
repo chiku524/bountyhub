@@ -377,15 +377,15 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-900">
+      <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200">
         <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
           <div className="mb-6 flex justify-between items-center mt-16">
-            <h1 className="text-2xl font-bold text-white">Profile</h1>
+            <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Profile</h1>
           </div>
-          <div className="bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+          <div className="bg-white dark:bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)] dark:shadow-[0_0_15px_rgba(139,92,246,0.3)]">
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-500"></div>
-              <span className="ml-3 text-gray-300">Loading profile...</span>
+              <span className="ml-3 text-neutral-600 dark:text-gray-300">Loading profile...</span>
             </div>
           </div>
         </div>
@@ -395,14 +395,14 @@ export default function Profile() {
 
   if (error || !user) {
     return (
-      <div className="min-h-screen bg-neutral-900">
+      <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200">
         <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
           <div className="mb-6 flex justify-between items-center mt-16">
-            <h1 className="text-2xl font-bold text-white">Profile</h1>
+            <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Profile</h1>
           </div>
-          <div className="bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+          <div className="bg-white dark:bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)] dark:shadow-[0_0_15px_rgba(139,92,246,0.3)]">
             <div className="flex flex-col justify-center items-center w-full h-full">
-              <h1 className="text-white text-2xl">User not found</h1>
+              <h1 className="text-neutral-900 dark:text-white text-2xl">User not found</h1>
               <Link to="/community" className="mt-4 text-violet-400 hover:text-violet-300">Go to Community</Link>
             </div>
           </div>
@@ -417,10 +417,10 @@ export default function Profile() {
   const limitedBookmarks = bookmarks.slice(0, BOOKMARKS_LIMIT)
 
   return (
-    <div className="min-h-screen bg-neutral-900">
+    <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200">
       <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
         <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mt-16">
-          <h1 className="text-xl sm:text-2xl font-bold text-white">Profile</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-white">Profile</h1>
           <Link 
             to="/posts/create" 
             className="px-4 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-colors flex items-center gap-2 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)] hover:shadow-[0_0_20px_rgba(139,92,246,0.5)] w-fit"
@@ -447,8 +447,8 @@ export default function Profile() {
               }}
             />
             <div className="flex-1">
-              <h2 className="text-lg sm:text-xl font-semibold text-white">{user.username}</h2>
-              <p className="text-sm sm:text-base text-gray-400 mt-1">
+              <h2 className="text-lg sm:text-xl font-semibold text-neutral-900 dark:text-white">{user.username}</h2>
+              <p className="text-sm sm:text-base text-neutral-500 dark:text-gray-400 mt-1">
                 Member since {new Date(user.createdAt).toLocaleDateString()}
               </p>
               <div className="mt-4">
@@ -465,19 +465,19 @@ export default function Profile() {
           </div>
 
           <div className="mt-6 sm:mt-8">
-            <h2 className="text-base sm:text-lg font-semibold text-violet-300 mb-4">Profile Information</h2>
+            <h2 className="text-base sm:text-lg font-semibold text-violet-600 dark:text-violet-300 mb-4">Profile Information</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-              <div className="bg-neutral-700/50 rounded-lg p-3 sm:p-4 border border-violet-500/30">
-                <label htmlFor="bio" className="block text-sm font-medium text-violet-300">Bio</label>
-                <p id="bio" className="mt-1 text-sm text-gray-300">{user.profile?.bio || 'No bio provided'}</p>
+              <div className="bg-neutral-100 dark:bg-neutral-700/50 rounded-lg p-3 sm:p-4 border border-violet-500/30 dark:border-violet-500/30">
+                <label htmlFor="bio" className="block text-sm font-medium text-violet-600 dark:text-violet-300">Bio</label>
+                <p id="bio" className="mt-1 text-sm text-neutral-600 dark:text-gray-300">{user.profile?.bio || 'No bio provided'}</p>
               </div>
-              <div className="bg-neutral-700/50 rounded-lg p-3 sm:p-4 border border-violet-500/30">
-                <label htmlFor="location" className="block text-sm font-medium text-violet-300">Location</label>
-                <p id="location" className="mt-1 text-sm text-gray-300">{user.profile?.location || 'No location provided'}</p>
+              <div className="bg-neutral-100 dark:bg-neutral-700/50 rounded-lg p-3 sm:p-4 border border-violet-500/30 dark:border-violet-500/30">
+                <label htmlFor="location" className="block text-sm font-medium text-violet-600 dark:text-violet-300">Location</label>
+                <p id="location" className="mt-1 text-sm text-neutral-600 dark:text-gray-300">{user.profile?.location || 'No location provided'}</p>
               </div>
-              <div className="bg-neutral-700/50 rounded-lg p-3 sm:p-4 border border-violet-500/30">
-                <label htmlFor="website" className="block text-sm font-medium text-violet-300">Website</label>
-                <p id="website" className="mt-1 text-sm text-gray-300">
+              <div className="bg-neutral-100 dark:bg-neutral-700/50 rounded-lg p-3 sm:p-4 border border-violet-500/30 dark:border-violet-500/30">
+                <label htmlFor="website" className="block text-sm font-medium text-violet-600 dark:text-violet-300">Website</label>
+                <p id="website" className="mt-1 text-sm text-neutral-600 dark:text-gray-300">
                   {user.profile?.website ? (
                     <a href={user.profile.website} target="_blank" rel="noopener noreferrer" 
                        className="text-violet-400 hover:text-violet-300 break-all">
@@ -486,13 +486,13 @@ export default function Profile() {
                   ) : 'No website provided'}
                 </p>
               </div>
-              <div className="bg-neutral-700/50 rounded-lg p-3 sm:p-4 border border-violet-500/30">
-                <label htmlFor="socialMedia" className="block text-sm font-medium text-violet-300">Social Media</label>
+              <div className="bg-neutral-100 dark:bg-neutral-700/50 rounded-lg p-3 sm:p-4 border border-violet-500/30 dark:border-violet-500/30">
+                <label htmlFor="socialMedia" className="block text-sm font-medium text-violet-600 dark:text-violet-300">Social Media</label>
                 <div id="socialMedia" className="mt-2">
                   {user.profile ? (
                     <SocialMediaIcons profile={user.profile} />
                   ) : (
-                    <p className="text-sm text-gray-300">No social media links provided</p>
+                    <p className="text-sm text-neutral-600 dark:text-gray-300">No social media links provided</p>
                   )}
                 </div>
               </div>
@@ -513,17 +513,17 @@ export default function Profile() {
 
           <div className="mt-6 sm:mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
-              <h2 className="text-base sm:text-lg font-semibold text-violet-300 mb-4">Recent Activity</h2>
+              <h2 className="text-base sm:text-lg font-semibold text-violet-600 dark:text-violet-300 mb-4">Recent Activity</h2>
               <div className="space-y-2">
                 {recentActivities.map((history) => (
-                  <div key={history.id} className="flex items-center justify-between p-3 bg-neutral-700/50 rounded-lg border border-violet-500/30">
+                  <div key={history.id} className="flex items-center justify-between p-3 bg-neutral-100 dark:bg-neutral-700/50 rounded-lg border border-violet-500/30 dark:border-violet-500/30">
                     <div className="flex items-center gap-2 min-w-0 flex-1">
                       <div className="p-1.5 bg-violet-500/20 rounded-lg flex-shrink-0">
                         <FiThumbsUp className="w-3.5 h-3.5 text-violet-300" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-violet-300 truncate">{getActivityDescription(history.action)}</p>
-                        <p className="text-xs text-gray-400 mt-0.5">
+                        <p className="text-sm font-medium text-violet-600 dark:text-violet-300 truncate">{getActivityDescription(history.action)}</p>
+                        <p className="text-xs text-neutral-500 dark:text-gray-400 mt-0.5">
                           {new Date(history.createdAt).toLocaleDateString()}
                         </p>
                       </div>
@@ -544,17 +544,17 @@ export default function Profile() {
             </div>
 
             <div>
-              <h2 className="text-base sm:text-lg font-semibold text-violet-300 mb-4">Recent Posts</h2>
+              <h2 className="text-base sm:text-lg font-semibold text-violet-600 dark:text-violet-300 mb-4">Recent Posts</h2>
               <div className="space-y-2">
                 {limitedPosts.map((post) => (
-                  <div key={post.id} className={`p-3 bg-neutral-700/50 rounded-lg border border-violet-500/30 ${post.reward && post.reward > 0 ? 'border-l-4 border-cyan-400/60 bg-gradient-to-r from-cyan-500/5 to-neutral-700/50' : ''}`}>
+                  <div key={post.id} className={`p-3 bg-neutral-100 dark:bg-neutral-700/50 rounded-lg border border-violet-500/30 dark:border-violet-500/30 ${post.reward && post.reward > 0 ? 'border-l-4 border-cyan-400/60 bg-gradient-to-r from-cyan-500/5 to-neutral-100 dark:to-neutral-700/50' : ''}`}>
                     <Link to={`/posts/${post.id}`} className="block hover:bg-neutral-600/50 rounded-lg p-1.5 -m-1.5 transition-colors">
                       <div className="flex items-center gap-2 mb-1">
                         <div className="p-1.5 bg-violet-500/20 rounded-lg flex-shrink-0">
-                          <FiThumbsUp className="w-3.5 h-3.5 text-violet-300" />
+                          <FiThumbsUp className="w-3.5 h-3.5 text-violet-600 dark:text-violet-300" />
                         </div>
                         <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <h3 className="text-sm font-medium text-violet-300 truncate">{post.title}</h3>
+                          <h3 className="text-sm font-medium text-violet-600 dark:text-violet-300 truncate">{post.title}</h3>
                           {post.reward && post.reward > 0 && (
                             <div className="flex items-center gap-1 px-1.5 py-0.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/40 rounded-full flex-shrink-0">
                               <span className="text-cyan-300 text-xs">💰</span>
@@ -563,9 +563,9 @@ export default function Profile() {
                           )}
                         </div>
                       </div>
-                      <p className="text-xs text-gray-300 line-clamp-2">{truncateContent(post.content)}</p>
+                      <p className="text-xs text-neutral-600 dark:text-gray-300 line-clamp-2">{truncateContent(post.content)}</p>
                       <div className="mt-1 flex items-center justify-between">
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-neutral-500 dark:text-gray-400">
                           {new Date(post.createdAt).toLocaleDateString()}
                         </p>
                         <span className="text-xs text-violet-400 hover:text-violet-300 transition-colors">
@@ -583,8 +583,8 @@ export default function Profile() {
                   </div>
                 )}
                 {posts.length === 0 && (
-                  <div className="p-3 bg-neutral-700/50 rounded-lg border border-violet-500/30">
-                    <p className="text-sm text-gray-300">No posts yet</p>
+                  <div className="p-3 bg-neutral-100 dark:bg-neutral-700/50 rounded-lg border border-violet-500/30 dark:border-violet-500/30">
+                    <p className="text-sm text-neutral-600 dark:text-gray-300">No posts yet</p>
                   </div>
                 )}
               </div>
@@ -593,19 +593,19 @@ export default function Profile() {
 
           {/* Bookmarks Section */}
           <div className="mt-6 sm:mt-8">
-            <h2 className="text-lg sm:text-xl font-bold text-yellow-400 mb-4">Bookmarked Posts</h2>
+            <h2 className="text-lg sm:text-xl font-bold text-yellow-600 dark:text-yellow-400 mb-4">Bookmarked Posts</h2>
             {limitedBookmarks.length > 0 ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {limitedBookmarks.map((bookmark) => (
-                  <div key={bookmark.id} className="bg-neutral-800/80 rounded-lg p-4 border border-yellow-400/40 transition-all duration-300 hover:bg-neutral-700/80 hover:border-yellow-300/60 hover:shadow-lg hover:shadow-yellow-400/20 hover:scale-[1.02] group">
+                  <div key={bookmark.id} className="bg-white dark:bg-neutral-800/80 rounded-lg p-4 border border-yellow-400/40 dark:border-yellow-400/40 transition-all duration-300 hover:bg-neutral-50 dark:hover:bg-neutral-700/80 hover:border-yellow-300/60 dark:hover:border-yellow-300/60 hover:shadow-lg hover:shadow-yellow-400/20 dark:hover:shadow-yellow-400/20 hover:scale-[1.02] group">
                     <Link to={`/posts/${bookmark.post.id}`} className="block">
-                      <h3 className="text-base sm:text-lg font-semibold text-white mb-2 group-hover:text-yellow-300 transition-colors duration-300 line-clamp-2">
+                      <h3 className="text-base sm:text-lg font-semibold text-neutral-900 dark:text-white mb-2 group-hover:text-yellow-600 dark:group-hover:text-yellow-300 transition-colors duration-300 line-clamp-2">
                         {bookmark.post.title}
                       </h3>
-                      <p className="text-sm text-gray-300 mb-2 line-clamp-2 group-hover:text-gray-200 transition-colors duration-300">
+                      <p className="text-sm text-neutral-600 dark:text-gray-300 mb-2 line-clamp-2 group-hover:text-neutral-700 dark:group-hover:text-gray-200 transition-colors duration-300">
                         {bookmark.post.content.length > 100 ? bookmark.post.content.substring(0, 100) + '...' : bookmark.post.content}
                       </p>
-                      <div className="flex items-center justify-between text-xs text-gray-400">
+                      <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-gray-400">
                         <span>{new Date(bookmark.post.createdAt).toLocaleDateString()}</span>
                         <span className="text-yellow-400 group-hover:text-yellow-300 transition-colors duration-300">
                           Read post →
@@ -616,9 +616,9 @@ export default function Profile() {
                 ))}
               </div>
             ) : (
-              <div className="bg-neutral-800/80 rounded-lg p-4 sm:p-6 border border-yellow-400/40 text-center">
-                <p className="text-gray-400">No bookmarked posts yet</p>
-                <p className="text-sm text-gray-500 mt-1">Bookmark posts from the community to see them here</p>
+              <div className="bg-white dark:bg-neutral-800/80 rounded-lg p-4 sm:p-6 border border-yellow-400/40 dark:border-yellow-400/40 text-center">
+                <p className="text-neutral-500 dark:text-gray-400">No bookmarked posts yet</p>
+                <p className="text-sm text-neutral-400 dark:text-gray-500 mt-1">Bookmark posts from the community to see them here</p>
               </div>
             )}
             {bookmarks.length > BOOKMARKS_LIMIT && (

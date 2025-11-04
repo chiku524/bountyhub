@@ -165,26 +165,26 @@ const RefundRequests: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Refund Requests</h1>
-        <p className="text-gray-400">
+        <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">Refund Requests</h1>
+        <p className="text-neutral-500 dark:text-gray-400">
           Help the community by voting on refund requests. Earn tokens for participating in governance!
         </p>
       </div>
 
-      <div className="bg-neutral-800/50 border border-neutral-700 rounded-lg p-6 mb-6">
-        <h2 className="text-lg font-semibold text-indigo-400 mb-3">How it works</h2>
+      <div className="bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 rounded-lg p-6 mb-6">
+        <h2 className="text-lg font-semibold text-indigo-600 dark:text-indigo-400 mb-3">How it works</h2>
         <div className="grid md:grid-cols-3 gap-4 text-sm">
-          <div className="bg-neutral-800 p-4 rounded-lg border border-neutral-700">
-            <h3 className="font-medium text-indigo-400 mb-2">1. Review Requests</h3>
-            <p className="text-gray-300">Read the refund reason and check if the bounty has helpful answers.</p>
+          <div className="bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg border border-neutral-200 dark:border-neutral-700">
+            <h3 className="font-medium text-indigo-600 dark:text-indigo-400 mb-2">1. Review Requests</h3>
+            <p className="text-neutral-600 dark:text-gray-300">Read the refund reason and check if the bounty has helpful answers.</p>
           </div>
-          <div className="bg-neutral-800 p-4 rounded-lg border border-neutral-700">
-            <h3 className="font-medium text-indigo-400 mb-2">2. Vote Wisely</h3>
-            <p className="text-gray-300">Approve legitimate refunds, reject attempts to get free help.</p>
+          <div className="bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg border border-neutral-200 dark:border-neutral-700">
+            <h3 className="font-medium text-indigo-600 dark:text-indigo-400 mb-2">2. Vote Wisely</h3>
+            <p className="text-neutral-600 dark:text-gray-300">Approve legitimate refunds, reject attempts to get free help.</p>
           </div>
-          <div className="bg-neutral-800 p-4 rounded-lg border border-neutral-700">
-            <h3 className="font-medium text-indigo-400 mb-2">3. Earn Rewards</h3>
-            <p className="text-gray-300">Get tokens and reputation points for participating in governance.</p>
+          <div className="bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg border border-neutral-200 dark:border-neutral-700">
+            <h3 className="font-medium text-indigo-600 dark:text-indigo-400 mb-2">3. Earn Rewards</h3>
+            <p className="text-neutral-600 dark:text-gray-300">Get tokens and reputation points for participating in governance.</p>
           </div>
         </div>
       </div>
@@ -193,38 +193,38 @@ const RefundRequests: React.FC = () => {
 
       {refundRequests.length === 0 ? (
         <div className="text-center py-12">
-          <div className="text-gray-500 text-6xl mb-4">📋</div>
-          <h3 className="text-lg font-medium text-white mb-2">No active refund requests</h3>
-          <p className="text-gray-400">Check back later for new requests to vote on!</p>
+          <div className="text-neutral-400 dark:text-gray-500 text-6xl mb-4">📋</div>
+          <h3 className="text-lg font-medium text-neutral-900 dark:text-white mb-2">No active refund requests</h3>
+          <p className="text-neutral-500 dark:text-gray-400">Check back later for new requests to vote on!</p>
         </div>
       ) : (
         <div className="space-y-6">
           {refundRequests.map((request) => (
-            <div key={request.id} className="bg-neutral-800 rounded-lg border border-neutral-700 overflow-hidden">
+            <div key={request.id} className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 overflow-hidden">
               <div className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-white">
+                      <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">
                         Refund Request by @{request.requesterUsername}
                       </h3>
                       {getStatusBadge(request.status)}
                     </div>
-                    <p className="text-gray-400 text-sm mb-2">
+                    <p className="text-neutral-500 dark:text-gray-400 text-sm mb-2">
                       <strong>Bounty:</strong> {request.bountyAmount} BBUX • <strong>Post:</strong> {request.postTitle}
                     </p>
-                    <p className="text-gray-500 text-xs">
+                    <p className="text-neutral-400 dark:text-gray-500 text-xs">
                       {formatTimeRemaining(request.expiresAt)} • {request.communityVotes}/{request.requiredVotes} votes
                     </p>
                   </div>
                   <div className="text-right">
-                    <span className="text-yellow-400 font-semibold text-lg">{request.bountyAmount} BBUX</span>
+                    <span className="text-yellow-600 dark:text-yellow-400 font-semibold text-lg">{request.bountyAmount} BBUX</span>
                   </div>
                 </div>
 
                 <div className="mb-4">
-                  <h4 className="font-medium text-white mb-2">Refund Reason:</h4>
-                  <p className="text-gray-300 bg-neutral-700 p-3 rounded-lg">
+                  <h4 className="font-medium text-neutral-900 dark:text-white mb-2">Refund Reason:</h4>
+                  <p className="text-neutral-600 dark:text-gray-300 bg-neutral-100 dark:bg-neutral-700 p-3 rounded-lg">
                     {request.reason}
                   </p>
                 </div>
@@ -232,20 +232,20 @@ const RefundRequests: React.FC = () => {
                 {/* Vote Results */}
                 {votes[request.id] && votes[request.id].length > 0 && (
                   <div className="mb-4">
-                    <h4 className="font-medium text-white mb-2">Votes:</h4>
+                    <h4 className="font-medium text-neutral-900 dark:text-white mb-2">Votes:</h4>
                     <div className="space-y-2">
                       {votes[request.id].map((vote) => (
-                        <div key={vote.id} className="flex items-center justify-between bg-neutral-700 p-2 rounded">
+                        <div key={vote.id} className="flex items-center justify-between bg-neutral-100 dark:bg-neutral-700 p-2 rounded">
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-white">@{vote.voterUsername}</span>
+                            <span className="text-sm font-medium text-neutral-900 dark:text-white">@{vote.voterUsername}</span>
                             <span className={`text-xs px-2 py-1 rounded ${
-                              vote.vote ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'
+                              vote.vote ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' : 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300'
                             }`}>
                               {vote.vote ? 'Approve' : 'Reject'}
                             </span>
                           </div>
                           {vote.reason && (
-                            <span className="text-xs text-gray-400 truncate max-w-xs">
+                            <span className="text-xs text-neutral-500 dark:text-gray-400 truncate max-w-xs">
                               "{vote.reason}"
                             </span>
                           )}
@@ -287,7 +287,7 @@ const RefundRequests: React.FC = () => {
                     )}
                   </div>
 
-                  <div className="text-xs text-gray-400">
+                  <div className="text-xs text-neutral-500 dark:text-gray-400">
                     {votes[request.id] && (
                       <span>
                         {votes[request.id].filter(v => v.vote).length} approve, {votes[request.id].filter(v => !v.vote).length} reject
@@ -298,15 +298,15 @@ const RefundRequests: React.FC = () => {
 
                 {/* Vote Modal */}
                 {selectedRequest === request.id && request.status === 'PENDING' && (
-                  <div className="mt-6 p-4 bg-neutral-700 rounded-lg border border-neutral-600">
-                    <h4 className="text-indigo-400 font-medium mb-3">
+                  <div className="mt-6 p-4 bg-neutral-100 dark:bg-neutral-700 rounded-lg border border-neutral-200 dark:border-neutral-600">
+                    <h4 className="text-indigo-600 dark:text-indigo-400 font-medium mb-3">
                       Vote on Refund Request
                     </h4>
                     
                     {/* Anti-gaming requirements */}
-                    <div className="mb-4 p-3 bg-blue-900/20 border border-blue-500/30 rounded text-xs text-blue-300">
+                    <div className="mb-4 p-3 bg-blue-100 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-500/30 rounded text-xs text-blue-700 dark:text-blue-300">
                       <p className="font-medium mb-1">Voting Requirements:</p>
-                      <ul className="space-y-1 text-blue-200">
+                      <ul className="space-y-1 text-blue-600 dark:text-blue-200">
                         <li>• 50+ reputation points & 7+ days account age</li>
                         <li>• Must have previously engaged with this post</li>
                         <li>• Minimum 20 characters of reasoning required</li>
@@ -316,7 +316,7 @@ const RefundRequests: React.FC = () => {
                     </div>
 
                     <div className="mb-4">
-                      <label htmlFor="voteReason" className="block text-sm font-medium text-gray-300 mb-2">
+                      <label htmlFor="voteReason" className="block text-sm font-medium text-neutral-700 dark:text-gray-300 mb-2">
                         Reasoning for Vote *
                       </label>
                       <textarea
@@ -326,10 +326,10 @@ const RefundRequests: React.FC = () => {
                         required
                         minLength={20}
                         rows={3}
-                        className="w-full px-3 py-2 bg-neutral-600 border border-neutral-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400"
+                        className="w-full px-3 py-2 bg-white dark:bg-neutral-600 border border-neutral-300 dark:border-neutral-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400"
                         placeholder="Explain your vote reasoning (minimum 20 characters)..."
                       />
-                      <p className="text-xs text-gray-400 mt-1">
+                      <p className="text-xs text-neutral-500 dark:text-gray-400 mt-1">
                         {voteReason.length}/20 characters minimum
                       </p>
                     </div>

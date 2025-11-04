@@ -50,7 +50,7 @@ const PostList: React.FC<{
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
-                      <h2 className="text-base sm:text-xl font-semibold text-white line-clamp-2 sm:line-clamp-1">{post.title.length > 60 ? post.title.slice(0, 60) + '...' : post.title}</h2>
+                      <h2 className="text-base sm:text-xl font-semibold text-neutral-900 dark:text-white line-clamp-2 sm:line-clamp-1">{post.title.length > 60 ? post.title.slice(0, 60) + '...' : post.title}</h2>
                       {post.reward && post.reward > 0 && (
                         <div className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/40 rounded-full w-fit">
                           <span className="text-cyan-300 text-xs sm:text-sm font-medium">💰</span>
@@ -58,8 +58,8 @@ const PostList: React.FC<{
                         </div>
                       )}
                     </div>
-                    <p className="text-sm sm:text-base text-gray-400 mt-1 line-clamp-2">{post.content.length > 120 ? post.content.slice(0, 120) + '...' : post.content}</p>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2 text-xs sm:text-sm text-gray-500">
+                    <p className="text-sm sm:text-base text-neutral-500 dark:text-gray-400 mt-1 line-clamp-2">{post.content.length > 120 ? post.content.slice(0, 120) + '...' : post.content}</p>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2 text-xs sm:text-sm text-neutral-400 dark:text-gray-500">
                       <span className="flex items-center space-x-2">
                         <ProfilePicture user={post.author} size="sm" />
                         <span>By: <Link to={`/users/${post.author?.username || post.authorId}`} className="text-indigo-400 hover:text-indigo-300" onClick={(e) => e.stopPropagation()}>{post.author?.username || `User ${post.authorId}`}</Link></span>
@@ -84,7 +84,7 @@ const PostList: React.FC<{
                           </span>
                         ))}
                         {post.tags.length > 2 && (
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-500/20 text-gray-400 border border-gray-500/40">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-neutral-200 dark:bg-gray-500/20 text-neutral-600 dark:text-gray-400 border border-neutral-300 dark:border-gray-500/40">
                             +{post.tags.length - 2}
                           </span>
                         )}
@@ -274,10 +274,10 @@ export default function Community() {
         description="Browse active bounties, ask questions, and find opportunities to earn cryptocurrency rewards in the bountyhub community. Join thousands of users earning BBUX tokens."
         keywords="community, bounties, questions, cryptocurrency, rewards, BBUX, active bounties, earn crypto"
       />
-      <div className="min-h-screen bg-neutral-900 p-4 sm:p-8">
+      <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200 p-4 sm:p-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-white">Community</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-white">Community</h1>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
               <AdvancedFilters 
                 filters={filters}
@@ -301,17 +301,17 @@ export default function Community() {
 
           {/* Results Summary */}
           {!loading && !error && (
-            <div className="mb-4 text-gray-400 text-sm sm:text-base">
+            <div className="mb-4 text-neutral-500 dark:text-gray-400 text-sm sm:text-base">
               Showing {paginatedPosts.length} of {filteredPosts.length} posts
               {searchQuery && ` matching "${searchQuery}"`}
             </div>
           )}
 
-          <div className="card bg-neutral-800 border-neutral-700">
+          <div className="card bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700">
             {loading && (
               <div className="p-4 sm:p-8">
                 <LoadingSpinner size="lg" className="mb-4" />
-                <p className="text-gray-300 text-center">Loading posts...</p>
+                <p className="text-neutral-600 dark:text-gray-300 text-center">Loading posts...</p>
                 <div className="mt-6 space-y-4">
                   {[...Array(3)].map((_, i) => (
                     <PostSkeleton key={i} />
@@ -331,7 +331,7 @@ export default function Community() {
             
             {!loading && !error && paginatedPosts.length === 0 && (
               <div className="p-4 sm:p-8 text-center">
-                <div className="text-gray-400 mb-4">
+                <div className="text-neutral-500 dark:text-gray-400 mb-4">
                   {searchQuery || Object.values(filters).some(f => f !== '' && f !== false) ? (
                     <>
                       <p className="text-base sm:text-lg mb-2">No posts found matching your criteria</p>

@@ -3,7 +3,7 @@ import { FiArrowLeft, FiDownload } from 'react-icons/fi'
 
 export default function Legal() {
   return (
-    <div className="min-h-screen bg-neutral-900">
+    <div className="min-h-screen bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white transition-colors duration-200">
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -14,15 +14,15 @@ export default function Legal() {
             <FiArrowLeft className="w-4 h-4 mr-2" />
             Back to Documentation
           </Link>
-          <h1 className="text-4xl font-bold text-white mb-4">Legal Documents</h1>
+          <h1 className="text-4xl font-bold text-neutral-900 dark:text-white mb-4">Legal Documents</h1>
           <p className="text-gray-300 text-lg">
             Terms of service, privacy policy, and other legal information
           </p>
         </div>
 
         {/* Table of Contents */}
-        <div className="bg-neutral-800 rounded-lg p-6 mb-8">
-          <h2 className="text-xl font-semibold text-white mb-4">Table of Contents</h2>
+        <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 mb-8 border border-neutral-200 dark:border-neutral-700">
+          <h2 className="text-xl font-semibold text-neutral-900 dark:text-white mb-4">Table of Contents</h2>
           <ul className="space-y-2 text-gray-300">
             <li><a href="#terms" className="text-violet-400 hover:text-violet-300">Terms of Service</a></li>
             <li><a href="#privacy" className="text-violet-400 hover:text-violet-300">Privacy Policy</a></li>
@@ -36,15 +36,15 @@ export default function Legal() {
         {/* Terms of Service */}
         <section id="terms" className="mb-12">
           <div className="flex justify-between items-start mb-4">
-            <h2 className="text-3xl font-bold text-white">Terms of Service</h2>
+            <h2 className="text-3xl font-bold text-neutral-900 dark:text-white">Terms of Service</h2>
             <span className="text-sm text-gray-400">
               <strong>Last updated:</strong> June 23, 2025
             </span>
           </div>
-          <div className="bg-neutral-800 rounded-lg p-6">
+          <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 border border-neutral-200 dark:border-neutral-700">
             <div className="space-y-6">
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3">1. Acceptance of Terms</h3>
+                <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">1. Acceptance of Terms</h3>
                 <p className="text-gray-300 mb-2">
                   By accessing and using bountyhub, you accept and agree to be bound by the terms and provision of this agreement.
                 </p>
@@ -139,7 +139,7 @@ export default function Legal() {
               <strong>Last updated:</strong> June 23, 2025
             </span>
           </div>
-          <div className="bg-neutral-800 rounded-lg p-6">
+          <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 border border-neutral-200 dark:border-neutral-700">
             <div className="space-y-6">
               <div>
                 <h3 className="text-xl font-semibold text-white mb-3">1. Information We Collect</h3>
@@ -255,7 +255,7 @@ export default function Legal() {
               <strong>Last updated:</strong> June 23, 2025
             </span>
           </div>
-          <div className="bg-neutral-800 rounded-lg p-6">
+          <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 border border-neutral-200 dark:border-neutral-700">
             <div className="space-y-6">
               <div>
                 <h3 className="text-xl font-semibold text-white mb-3">What Are Cookies?</h3>
@@ -313,7 +313,7 @@ export default function Legal() {
         {/* Disclaimer */}
         <section id="disclaimer" className="mb-12">
           <h2 className="text-3xl font-bold text-white mb-6">Disclaimer</h2>
-          <div className="bg-neutral-800 rounded-lg p-6">
+          <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 border border-neutral-200 dark:border-neutral-700">
             <div className="space-y-6">
               <div>
                 <h3 className="text-xl font-semibold text-white mb-3">General Disclaimer</h3>
@@ -360,7 +360,7 @@ export default function Legal() {
         {/* Governance Terms */}
         <section id="governance" className="mb-12">
           <h2 className="text-3xl font-bold text-white mb-6">Governance Terms</h2>
-          <div className="bg-neutral-800 rounded-lg p-6">
+          <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 border border-neutral-200 dark:border-neutral-700">
             <div className="space-y-6">
               <div>
                 <h3 className="text-xl font-semibold text-white mb-3">Platform Governance</h3>
@@ -402,7 +402,7 @@ export default function Legal() {
         {/* Legal Contact */}
         <section id="contact" className="mb-12">
           <h2 className="text-3xl font-bold text-white mb-6">Legal Contact</h2>
-          <div className="bg-neutral-800 rounded-lg p-6">
+          <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 border border-neutral-200 dark:border-neutral-700">
             <div className="space-y-6">
               <div>
                 <h3 className="text-xl font-semibold text-white mb-3">Contact Information</h3>
