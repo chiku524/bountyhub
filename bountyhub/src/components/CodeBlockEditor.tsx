@@ -50,7 +50,7 @@ export const CodeBlockEditor: React.FC<CodeBlockEditorProps> = ({ onAdd, onCance
     return (
       <button
         onClick={() => setIsExpanded(true)}
-        className="flex items-center gap-2 px-3 py-2 bg-neutral-700 hover:bg-neutral-600 text-gray-300 hover:text-white rounded-lg transition-colors"
+        className="flex items-center gap-2 px-3 py-2 bg-neutral-100 dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-600 text-neutral-700 dark:text-gray-300 hover:text-neutral-900 dark:hover:text-white rounded-lg transition-colors"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
@@ -61,12 +61,12 @@ export const CodeBlockEditor: React.FC<CodeBlockEditorProps> = ({ onAdd, onCance
   }
 
   return (
-    <div className="bg-neutral-800 border border-neutral-600 rounded-lg p-4 mb-4">
+    <div className="bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-600 rounded-lg p-4 mb-4">
       <div className="flex items-center justify-between mb-4">
-        <h4 className="text-white font-medium">Add Code Block</h4>
+        <h4 className="text-neutral-900 dark:text-white font-medium">Add Code Block</h4>
         <button
           onClick={handleCancel}
-          className="text-gray-400 hover:text-white transition-colors"
+          className="text-neutral-500 dark:text-gray-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -77,13 +77,13 @@ export const CodeBlockEditor: React.FC<CodeBlockEditorProps> = ({ onAdd, onCance
       <form className="space-y-4">
         {/* Language Selection */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-neutral-700 dark:text-gray-300 mb-2">
             Language
           </label>
           <select
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
-            className="w-full p-2 bg-neutral-700 border border-neutral-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full p-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-lg text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             {LANGUAGE_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -95,14 +95,14 @@ export const CodeBlockEditor: React.FC<CodeBlockEditorProps> = ({ onAdd, onCance
 
         {/* Code Input */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-neutral-700 dark:text-gray-300 mb-2">
             Code
           </label>
           <textarea
             value={code}
             onChange={(e) => setCode(e.target.value)}
             placeholder="Enter your code here..."
-            className="w-full p-3 bg-neutral-900 border border-neutral-600 rounded-lg text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm resize-none"
+            className="w-full p-3 bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-600 rounded-lg text-neutral-900 dark:text-gray-300 placeholder-neutral-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm resize-none"
             rows={8}
             required
           />
@@ -110,14 +110,14 @@ export const CodeBlockEditor: React.FC<CodeBlockEditorProps> = ({ onAdd, onCance
 
         {/* Description */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-neutral-700 dark:text-gray-300 mb-2">
             Description (Optional)
           </label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Brief description of what this code does..."
-            className="w-full p-2 bg-neutral-700 border border-neutral-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+            className="w-full p-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-lg text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
             rows={2}
           />
         </div>
@@ -127,7 +127,7 @@ export const CodeBlockEditor: React.FC<CodeBlockEditorProps> = ({ onAdd, onCance
           <button
             type="button"
             onClick={handleCancel}
-            className="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 text-gray-300 hover:text-white rounded-lg transition-colors"
+            className="px-4 py-2 bg-neutral-100 dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-600 text-neutral-700 dark:text-gray-300 hover:text-neutral-900 dark:hover:text-white rounded-lg transition-colors"
           >
             Cancel
           </button>

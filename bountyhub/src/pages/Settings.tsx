@@ -65,9 +65,80 @@ export default function Settings() {
     confirmPassword: ''
   })
 
+  const [githubConnected, setGithubConnected] = useState(false)
+  const [githubUsername, setGithubUsername] = useState<string | null>(null)
+  const [githubLoading, setGithubLoading] = useState(false)
+
   useEffect(() => {
     loadUserData()
+    loadGitHubStatus()
   }, [])
+
+  const loadGitHubStatus = async () => {
+    try {
+      const response = await fetch('/api/auth/github/profile', {
+        credentials: 'include'
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setGithubConnected(true)
+        setGithubUsername(data.githubUsername)
+      } else {
+        setGithubConnected(false)
+        setGithubUsername(null)
+      }
+    } catch (error) {
+      setGithubConnected(false)
+      setGithubUsername(null)
+    }
+  }
+
+  const handleGitHubConnect = async () => {
+    try {
+      setGithubLoading(true)
+      const response = await fetch('/api/auth/github/connect', {
+        method: 'POST',
+        credentials: 'include'
+      })
+      const data = await response.json()
+      if (data.redirectUrl) {
+        window.location.href = data.redirectUrl
+      } else {
+        setError('Failed to initiate GitHub connection')
+      }
+    } catch (error) {
+      setError('Failed to connect GitHub account')
+    } finally {
+      setGithubLoading(false)
+    }
+  }
+
+  const handleGitHubDisconnect = async () => {
+    if (!confirm('Are you sure you want to disconnect your GitHub account? You will need to set a password if you don\'t have one.')) {
+      return
+    }
+    
+    try {
+      setGithubLoading(true)
+      const response = await fetch('/api/auth/github/disconnect', {
+        method: 'POST',
+        credentials: 'include'
+      })
+      const data = await response.json()
+      if (data.success) {
+        setGithubConnected(false)
+        setGithubUsername(null)
+        setSuccess('GitHub account disconnected successfully')
+        setTimeout(() => setSuccess(null), 3000)
+      } else {
+        setError(data.error || 'Failed to disconnect GitHub account')
+      }
+    } catch (error) {
+      setError('Failed to disconnect GitHub account')
+    } finally {
+      setGithubLoading(false)
+    }
+  }
 
   const loadUserData = async () => {
     try {
@@ -523,6 +594,55 @@ export default function Settings() {
                       placeholder="Your username"
                       className="w-full px-4 py-2 bg-neutral-100 dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-500 dark:text-gray-400 cursor-not-allowed"
                     />
+                  </div>
+
+                  {/* GitHub Integration */}
+                  <div className="pt-6 border-t border-neutral-200 dark:border-violet-500/30">
+                    <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">GitHub Integration</h3>
+                    {githubConnected ? (
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
+                          <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 24 24">
+                            <path fillRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" clipRule="evenodd" />
+                          </svg>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-green-800 dark:text-green-200">
+                              Connected to GitHub
+                            </p>
+                            {githubUsername && (
+                              <p className="text-xs text-green-600 dark:text-green-400">
+                                @{githubUsername}
+                              </p>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleGitHubDisconnect}
+                            disabled={githubLoading}
+                            className="px-4 py-2 text-sm bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors disabled:opacity-50"
+                          >
+                            {githubLoading ? 'Disconnecting...' : 'Disconnect'}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <p className="text-sm text-neutral-600 dark:text-gray-400">
+                          Connect your GitHub account to enable features like bug bounty campaigns, repository integration, and contribution tracking.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={handleGitHubConnect}
+                          disabled={githubLoading}
+                          className="flex items-center gap-3 px-4 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-gray-600 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-600 transition-colors disabled:opacity-50"
+                        >
+                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path fillRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" clipRule="evenodd" />
+                          </svg>
+                          <span>{githubLoading ? 'Connecting...' : 'Connect GitHub Account'}</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

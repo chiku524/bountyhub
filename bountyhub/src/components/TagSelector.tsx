@@ -82,10 +82,10 @@ export default function TagSelector({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <label className="block text-sm font-medium text-white">
-          Tags {required && <span className="text-red-400">*</span>}
+        <label className="block text-sm font-medium text-neutral-700 dark:text-white">
+          Tags {required && <span className="text-red-500 dark:text-red-400">*</span>}
         </label>
-        <span className="text-xs text-gray-400">
+        <span className="text-xs text-neutral-500 dark:text-gray-400">
           {selectedTags.length} selected
         </span>
       </div>
@@ -122,14 +122,14 @@ export default function TagSelector({
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className={`w-full px-4 py-3 text-left bg-neutral-800/60 border rounded-lg transition-colors ${
+          className={`w-full px-4 py-3 text-left bg-white dark:bg-neutral-800/60 border border-neutral-300 dark:border-violet-500/30 rounded-lg transition-colors ${
             error 
-              ? 'border-red-500/50 focus:border-red-500' 
-              : 'border-violet-500/30 focus:border-violet-500'
+              ? 'border-red-500/50 dark:border-red-500/50 focus:border-red-500' 
+              : 'border-neutral-300 dark:border-violet-500/30 focus:border-violet-500'
           } ${isOpen ? 'border-violet-500' : 'hover:border-violet-500/50'}`}
         >
           <div className="flex items-center justify-between">
-            <span className={selectedTags.length === 0 ? 'text-gray-400' : 'text-white'}>
+            <span className={selectedTags.length === 0 ? 'text-neutral-400 dark:text-gray-400' : 'text-neutral-900 dark:text-white'}>
               {selectedTags.length === 0 
                 ? 'Select at least one tag...' 
                 : `${selectedTags.length} tag${selectedTags.length === 1 ? '' : 's'} selected`
@@ -137,12 +137,12 @@ export default function TagSelector({
             </span>
             <div className="flex items-center space-x-2">
               {selectedTags.length > 0 && (
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-neutral-500 dark:text-gray-400">
                   {selectedTags.length}/10
                 </span>
               )}
               <svg
-                className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                className={`w-4 h-4 text-neutral-400 dark:text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -154,23 +154,23 @@ export default function TagSelector({
         </button>
 
         {isOpen && (
-          <div className="absolute z-50 w-full mt-1 bg-neutral-800 border border-violet-500/30 rounded-lg shadow-xl max-h-64 overflow-hidden" ref={dropdownRef}>
+          <div className="absolute z-50 w-full mt-1 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-violet-500/30 rounded-lg shadow-xl max-h-64 overflow-hidden" ref={dropdownRef}>
             {/* Search Input */}
-            <div className="p-3 border-b border-violet-500/20">
+            <div className="p-3 border-b border-neutral-200 dark:border-violet-500/20">
               <input
                 type="text"
                 placeholder="Search tags..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="w-full px-3 py-2 bg-neutral-700/50 border border-violet-500/20 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-violet-500"
+                className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/20 rounded-md text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400 focus:outline-none focus:border-violet-500"
               />
             </div>
 
             {/* Tags List */}
             <div className="max-h-48 overflow-y-auto">
               {filteredTags.length === 0 ? (
-                <div className="p-4 text-center text-gray-400">
+                <div className="p-4 text-center text-neutral-500 dark:text-gray-400">
                   No tags found matching &quot;{searchTerm}&quot;
                 </div>
               ) : (
@@ -184,8 +184,8 @@ export default function TagSelector({
                         onClick={() => handleTagToggle(tag.id)}
                         className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
                           isSelected 
-                            ? 'bg-violet-500/20 border border-violet-500/40' 
-                            : 'hover:bg-neutral-700/50 border border-transparent'
+                            ? 'bg-violet-100 dark:bg-violet-500/20 border border-violet-300 dark:border-violet-500/40' 
+                            : 'hover:bg-neutral-100 dark:hover:bg-neutral-700/50 border border-transparent'
                         }`}
                       >
                         <div className="flex items-center space-x-3">
@@ -194,8 +194,8 @@ export default function TagSelector({
                             style={{ backgroundColor: tag.color }}
                           />
                           <div className="text-left">
-                            <div className="font-medium text-white">{tag.name}</div>
-                            <div className="text-sm text-gray-400">{tag.description || 'No description'}</div>
+                            <div className="font-medium text-neutral-900 dark:text-white">{tag.name}</div>
+                            <div className="text-sm text-neutral-500 dark:text-gray-400">{tag.description || 'No description'}</div>
                           </div>
                         </div>
                         {isSelected && (
@@ -213,13 +213,13 @@ export default function TagSelector({
             </div>
 
             {/* Footer */}
-            <div className="p-3 border-t border-violet-500/20 bg-neutral-700/30">
+            <div className="p-3 border-t border-neutral-200 dark:border-violet-500/20 bg-neutral-50 dark:bg-neutral-700/30">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-400">
+                <span className="text-neutral-500 dark:text-gray-400">
                   {selectedTags.length} of {availableTags.length} tags selected
                 </span>
                 {required && selectedTags.length === 0 && (
-                  <span className="text-red-400">At least one tag required</span>
+                  <span className="text-red-500 dark:text-red-400">At least one tag required</span>
                 )}
               </div>
             </div>
@@ -229,11 +229,11 @@ export default function TagSelector({
 
       {/* Error Message */}
       {error && (
-        <p className="text-sm text-red-400">{error}</p>
+        <p className="text-sm text-red-500 dark:text-red-400">{error}</p>
       )}
 
       {/* Help Text */}
-      <p className="text-xs text-gray-400">
+      <p className="text-xs text-neutral-500 dark:text-gray-400">
         Tags help categorize your post and make it easier for others to find. 
         Select tags that best describe your content.
       </p>

@@ -4,6 +4,7 @@ import logout from './logout'
 import me from './me'
 import signup from './signup'
 import changePassword from './change-password'
+import github from './github'
 
 interface Env {
   DB: any
@@ -22,6 +23,9 @@ interface Env {
   VITE_CLOUDINARY_UPLOAD_PRESET: string
   DATABASE_URL: string
   MONGODB_URI: string
+  GITHUB_CLIENT_ID: string
+  GITHUB_CLIENT_SECRET: string
+  GITHUB_CALLBACK_URL: string
 }
 
 const app = new Hono<{ Bindings: Env }>()
@@ -32,5 +36,6 @@ app.route('/logout', logout)
 app.route('/me', me)
 app.route('/signup', signup)
 app.route('/change-password', changePassword)
+app.route('/github', github)
 
 export default app 

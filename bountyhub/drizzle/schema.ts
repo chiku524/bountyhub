@@ -14,6 +14,12 @@ export const users = sqliteTable('users', {
   reputationPoints: integer('reputation_points').notNull().default(0),
   integrityScore: real('integrity_score').notNull().default(5.0),
   totalRatings: integer('total_ratings').notNull().default(0),
+  // GitHub integration fields
+  githubId: text('github_id').unique(),
+  githubUsername: text('github_username'),
+  githubAccessToken: text('github_access_token'), // Should be encrypted in production
+  githubAvatarUrl: text('github_avatar_url'),
+  githubConnectedAt: integer('github_connected_at', { mode: 'timestamp' }),
 });
 
 // Profiles table

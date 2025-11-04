@@ -38,6 +38,9 @@ interface Env {
   VITE_CLOUDINARY_UPLOAD_PRESET: string
   DATABASE_URL: string
   MONGODB_URI: string
+  GITHUB_CLIENT_ID: string
+  GITHUB_CLIENT_SECRET: string
+  GITHUB_CALLBACK_URL: string
 }
 
 const app = new Hono<{ Bindings: Env }>()
@@ -98,6 +101,14 @@ app.get('/cron', async (c) => {
       details: error instanceof Error ? error.message : 'Unknown error'
     }, 500)
   }
+})
+
+// GitHub OAuth callback route (mounted at /auth/callback as per user's OAuth app config)
+// This route forwards to the GitHub OAuth callback handler
+app.all('/auth/callback', async (c) => {
+  // Simply forward to the GitHub callback handler
+  // The route will be handled by the auth/github route
+  return c.redirect(`/api/auth/github/callback${c.req.url.split('/auth/callback')[1] || ''}`)
 })
 
 // API routes
