@@ -15,9 +15,9 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "deploy:api": "wrangler deploy --config wrangler.workers.toml",
-    "deploy:frontend": "wrangler pages deploy . --project-name bountyhub",
+    "deploy:frontend": "wrangler pages deploy ./dist --project-name bountyhub",
     "deploy:frontend:local": "npm run build && wrangler pages deploy ./dist --project-name bountyhub",
-    "deploy:all": "npm run deploy:api && npm run deploy:frontend:local",
+    "deploy:workers": "wrangler deploy --config wrangler.workers.toml",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "wrangler d1 migrations apply bountyhub-db",
     "db:studio": "drizzle-kit studio"
