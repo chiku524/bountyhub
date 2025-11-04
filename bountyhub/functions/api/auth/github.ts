@@ -232,9 +232,10 @@ app.get('/callback', async (c) => {
     }
     
     if (c.env.NODE_ENV === 'production') {
+      // Use domain with dot for cross-subdomain cookies (works for both api.bountyhub.tech and bountyhub.tech)
       cookieOptions.domain = '.bountyhub.tech'
       cookieOptions.secure = true
-      cookieOptions.sameSite = 'none'
+      cookieOptions.sameSite = 'none' // Required for cross-site cookies
     } else {
       cookieOptions.secure = false
       cookieOptions.sameSite = 'lax'
