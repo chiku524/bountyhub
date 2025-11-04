@@ -114,8 +114,8 @@ export function AnimatedBackground({ children }: AnimatedBackgroundProps) {
   }, [theme])
 
   return (
-    <div className="relative min-h-screen w-full">
-      {/* Canvas Background - Behind all content */}
+    <>
+      {/* Canvas Background - Fixed behind all content */}
       <canvas
         ref={canvasRef}
         className="fixed inset-0 pointer-events-none z-0"
@@ -124,11 +124,11 @@ export function AnimatedBackground({ children }: AnimatedBackgroundProps) {
           transition: 'opacity 0.3s ease-in-out'
         }}
       />
-      {/* Page Content - Wrapped in relative container for proper z-index */}
-      <div className="relative z-10 min-h-screen">
+      {/* Page Content - Rendered above canvas */}
+      <div className="relative z-10">
         {children}
       </div>
-    </div>
+    </>
   )
 }
 

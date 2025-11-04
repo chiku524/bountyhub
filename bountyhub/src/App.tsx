@@ -4,6 +4,7 @@ import { WalletProvider } from './contexts/WalletProvider'
 import { AuthProvider, useAuth } from './contexts/AuthProvider'
 import { SolanaWalletProvider } from './contexts/SolanaWalletProvider'
 import Layout from './components/Layout'
+import { AnimatedBackground } from './components/AnimatedBackground'
 import { PageMetadata } from './components/PageMetadata'
 import Home from './pages/Home'
 import Login from './pages/Login'
@@ -48,41 +49,43 @@ function AppContent() {
   const showNav = Boolean(user) && !isHomePage && !isAuthPage && !isLegalPage
   
   return (
-    <Layout showNav={showNav}>
-      <PageMetadata />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/profile/activity" element={<ProfileActivity />} />
-        <Route path="/profile/posts" element={<ProfilePosts />} />
-        <Route path="/profile/bookmarks" element={<ProfileBookmarks />} />
-        <Route path="/community" element={<Community />} />
-        <Route path="/governance" element={<Governance />} />
-        <Route path="/analytics" element={<Analytics />} />
-        <Route path="/wallet" element={<Wallet />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/posts/create" element={<CreatePost />} />
-        <Route path="/posts/:postId" element={<PostDetail />} />
-        <Route path="/users/:username" element={<UserProfile />} />
-        <Route path="/users/:username/posts" element={<UserPosts />} />
-        <Route path="/:username" element={<UserProfile />} />
-        <Route path="/transactions" element={<Transactions />} />
-        <Route path="/refund-requests" element={<RefundRequests />} />
-        <Route path="/docs" element={<Docs />} />
-        <Route path="/docs/platform" element={<PlatformDocs />} />
-        <Route path="/docs/user-guide" element={<UserGuide />} />
-        <Route path="/docs/developer-guide" element={<DeveloperGuide />} />
-        <Route path="/docs/api-reference" element={<ApiReference />} />
-        <Route path="/docs/deployment-guide" element={<DeploymentGuide />} />
-        <Route path="/docs/legal" element={<Legal />} />
-        <Route path="/docs/refund-system" element={<RefundSystem />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/admin" element={<Admin />} />
-      </Routes>
-    </Layout>
+    <AnimatedBackground>
+      <Layout showNav={showNav}>
+        <PageMetadata />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/profile/activity" element={<ProfileActivity />} />
+          <Route path="/profile/posts" element={<ProfilePosts />} />
+          <Route path="/profile/bookmarks" element={<ProfileBookmarks />} />
+          <Route path="/community" element={<Community />} />
+          <Route path="/governance" element={<Governance />} />
+          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/wallet" element={<Wallet />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/posts/create" element={<CreatePost />} />
+          <Route path="/posts/:postId" element={<PostDetail />} />
+          <Route path="/users/:username" element={<UserProfile />} />
+          <Route path="/users/:username/posts" element={<UserPosts />} />
+          <Route path="/:username" element={<UserProfile />} />
+          <Route path="/transactions" element={<Transactions />} />
+          <Route path="/refund-requests" element={<RefundRequests />} />
+          <Route path="/docs" element={<Docs />} />
+          <Route path="/docs/platform" element={<PlatformDocs />} />
+          <Route path="/docs/user-guide" element={<UserGuide />} />
+          <Route path="/docs/developer-guide" element={<DeveloperGuide />} />
+          <Route path="/docs/api-reference" element={<ApiReference />} />
+          <Route path="/docs/deployment-guide" element={<DeploymentGuide />} />
+          <Route path="/docs/legal" element={<Legal />} />
+          <Route path="/docs/refund-system" element={<RefundSystem />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/admin" element={<Admin />} />
+        </Routes>
+      </Layout>
+    </AnimatedBackground>
   )
 }
 
