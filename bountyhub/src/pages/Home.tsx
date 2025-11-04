@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthProvider'
 import { useEffect, useState } from 'react'
 import { api } from '../utils/api'
 import { PageMetadata } from '../components/PageMetadata'
+import { ThemeToggle } from '../components/ThemeToggle'
 
 interface PlatformStats {
   activeBounties: number
