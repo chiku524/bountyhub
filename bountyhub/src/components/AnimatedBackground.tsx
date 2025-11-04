@@ -124,10 +124,8 @@ export function AnimatedBackground({ children }: AnimatedBackgroundProps) {
           transition: 'opacity 0.3s ease-in-out'
         }}
       />
-      {/* Page Content - Rendered above canvas */}
-      <div className="relative z-10">
-        {children}
-      </div>
+      {/* Page Content - Rendered above canvas (no wrapper to prevent double rendering) */}
+      {children}
     </>
   )
 }

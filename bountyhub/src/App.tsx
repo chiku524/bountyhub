@@ -5,7 +5,14 @@ import { AuthProvider, useAuth } from './contexts/AuthProvider'
 import { SolanaWalletProvider } from './contexts/SolanaWalletProvider'
 import Layout from './components/Layout'
 import { AnimatedBackground } from './components/AnimatedBackground'
+import { Nav } from './components/Nav'
+import { HomeNav } from './components/HomeNav'
+import { Footer } from './components/Footer'
+import { MobileNav } from './components/MobileNav'
 import { PageMetadata } from './components/PageMetadata'
+import { useBountyNotifications } from './hooks/useBountyNotifications'
+import ChatSidebar from './components/ChatSidebar'
+import { InstallPrompt } from './components/InstallPrompt'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
@@ -45,46 +52,83 @@ function AppContent() {
   const isDocsPage = location.pathname.startsWith('/docs')
   const isLegalPage = isDocsPage || location.pathname === '/privacy' || location.pathname === '/terms'
   
-  // Show navbar only when user is authenticated and not on home page, auth pages, or legal pages
-  const showNav = Boolean(user) && !isHomePage && !isAuthPage && !isLegalPage
+  // Determine which navbar to show
+  const isPublicPage = isHomePage || isAuthPage || isLegalPage
+  const showAuthenticatedNav = Boolean(user) && !isPublicPage
+  
+  // Enable bounty notifications polling
+  useBountyNotifications()
+  
+  // Scroll to section handler for HomeNav
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId)
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
   
   return (
     <AnimatedBackground>
-      <Layout showNav={showNav}>
-        <PageMetadata />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/profile/activity" element={<ProfileActivity />} />
-          <Route path="/profile/posts" element={<ProfilePosts />} />
-          <Route path="/profile/bookmarks" element={<ProfileBookmarks />} />
-          <Route path="/community" element={<Community />} />
-          <Route path="/governance" element={<Governance />} />
-          <Route path="/analytics" element={<Analytics />} />
-          <Route path="/wallet" element={<Wallet />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/posts/create" element={<CreatePost />} />
-          <Route path="/posts/:postId" element={<PostDetail />} />
-          <Route path="/users/:username" element={<UserProfile />} />
-          <Route path="/users/:username/posts" element={<UserPosts />} />
-          <Route path="/:username" element={<UserProfile />} />
-          <Route path="/transactions" element={<Transactions />} />
-          <Route path="/refund-requests" element={<RefundRequests />} />
-          <Route path="/docs" element={<Docs />} />
-          <Route path="/docs/platform" element={<PlatformDocs />} />
-          <Route path="/docs/user-guide" element={<UserGuide />} />
-          <Route path="/docs/developer-guide" element={<DeveloperGuide />} />
-          <Route path="/docs/api-reference" element={<ApiReference />} />
-          <Route path="/docs/deployment-guide" element={<DeploymentGuide />} />
-          <Route path="/docs/legal" element={<Legal />} />
-          <Route path="/docs/refund-system" element={<RefundSystem />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/admin" element={<Admin />} />
-        </Routes>
-      </Layout>
+      {/* Light/Dark mode container - theme transitions */}
+      <div className="relative z-10 min-h-screen w-full bg-white/30 dark:bg-neutral-900/30 transition-colors duration-200 flex flex-row">
+        {/* Dynamic Navbar */}
+        {isHomePage ? (
+          <HomeNav onScrollTo={scrollToSection} />
+        ) : showAuthenticatedNav ? (
+          <div className="hidden md:block relative z-20">
+            <Nav />
+          </div>
+        ) : null}
+        
+        {/* Layout - Page content */}
+        <Layout showNav={showAuthenticatedNav}>
+          <PageMetadata />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile/activity" element={<ProfileActivity />} />
+            <Route path="/profile/posts" element={<ProfilePosts />} />
+            <Route path="/profile/bookmarks" element={<ProfileBookmarks />} />
+            <Route path="/community" element={<Community />} />
+            <Route path="/governance" element={<Governance />} />
+            <Route path="/analytics" element={<Analytics />} />
+            <Route path="/wallet" element={<Wallet />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/posts/create" element={<CreatePost />} />
+            <Route path="/posts/:postId" element={<PostDetail />} />
+            <Route path="/users/:username" element={<UserProfile />} />
+            <Route path="/users/:username/posts" element={<UserPosts />} />
+            <Route path="/:username" element={<UserProfile />} />
+            <Route path="/transactions" element={<Transactions />} />
+            <Route path="/refund-requests" element={<RefundRequests />} />
+            <Route path="/docs" element={<Docs />} />
+            <Route path="/docs/platform" element={<PlatformDocs />} />
+            <Route path="/docs/user-guide" element={<UserGuide />} />
+            <Route path="/docs/developer-guide" element={<DeveloperGuide />} />
+            <Route path="/docs/api-reference" element={<ApiReference />} />
+            <Route path="/docs/deployment-guide" element={<DeploymentGuide />} />
+            <Route path="/docs/legal" element={<Legal />} />
+            <Route path="/docs/refund-system" element={<RefundSystem />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/admin" element={<Admin />} />
+          </Routes>
+        </Layout>
+        
+        {/* Footer - Show on authenticated pages and docs/legal pages */}
+        {!isHomePage && !isAuthPage && <Footer />}
+        
+        {/* Mobile Navigation - Only for authenticated pages */}
+        {showAuthenticatedNav && <MobileNav />}
+        
+        {/* Chat Sidebar - Only for authenticated pages */}
+        {!isPublicPage && <ChatSidebar />}
+        
+        {/* PWA Install Prompt */}
+        <InstallPrompt />
+      </div>
     </AnimatedBackground>
   )
 }
