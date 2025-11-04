@@ -45,6 +45,8 @@ import RefundSystem from './pages/docs/RefundSystem'
 import BugBountyCampaigns from './pages/BugBountyCampaigns'
 import BugBountyCampaignCreate from './pages/BugBountyCampaignCreate'
 import BugBountyCampaignDetail from './pages/BugBountyCampaignDetail'
+import Repositories from './pages/Repositories'
+import Contributions from './pages/Contributions'
 import '@solana/wallet-adapter-react-ui/styles.css'
 
 function AppContent() {
@@ -125,6 +127,8 @@ function AppContent() {
               <Route path="/bug-bounty/campaigns" element={<BugBountyCampaigns />} />
               <Route path="/bug-bounty/campaigns/create" element={<BugBountyCampaignCreate />} />
               <Route path="/bug-bounty/campaigns/:id" element={<BugBountyCampaignDetail />} />
+              <Route path="/repositories" element={<Repositories />} />
+              <Route path="/contributions" element={<Contributions />} />
             </Routes>
           </Layout>
         </div>

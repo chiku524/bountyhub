@@ -408,6 +408,27 @@ export class ApiClient {
       method: 'POST',
     })
   }
+
+  // Contribution methods
+  async getContributions(params?: {
+    userId?: string
+    repositoryId?: string
+    type?: string
+    status?: string
+    page?: number
+    limit?: number
+  }): Promise<{ contributions: any[]; pagination?: { page: number; limit: number; total: number; totalPages: number } }> {
+    const queryParams = new URLSearchParams()
+    if (params?.userId) queryParams.append('userId', params.userId)
+    if (params?.repositoryId) queryParams.append('repositoryId', params.repositoryId)
+    if (params?.type) queryParams.append('type', params.type)
+    if (params?.status) queryParams.append('status', params.status)
+    if (params?.page) queryParams.append('page', params.page.toString())
+    if (params?.limit) queryParams.append('limit', params.limit.toString())
+    
+    const query = queryParams.toString()
+    return this.request(`/api/contributions${query ? `?${query}` : ''}`)
+  }
 }
 
 export const api = new ApiClient() 

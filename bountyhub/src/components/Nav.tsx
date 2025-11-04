@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { FiCreditCard, FiLogOut, FiUsers, FiDollarSign, FiSettings, FiCheckSquare, FiRefreshCw, FiBarChart2, FiShield } from 'react-icons/fi'
+import { FiCreditCard, FiLogOut, FiUsers, FiDollarSign, FiSettings, FiCheckSquare, FiRefreshCw, FiBarChart2, FiShield, FiGithub, FiAward } from 'react-icons/fi'
 import { useAuth } from '../contexts/AuthProvider'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useWalletModal } from '@solana/wallet-adapter-react-ui'
@@ -152,6 +152,22 @@ export function Nav() {
           <div className="relative flex items-center justify-center gap-4 px-4 py-1 w-full">
             <FiShield className="h-6 w-6 text-gray-600 dark:text-gray-300 transition-all duration-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 group-hover:scale-110" />
             {expanded && <span className="text-gray-600 dark:text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 whitespace-nowrap overflow-hidden max-w-xs">Bug Bounty</span>}
+          </div>
+        </Link>
+        <hr className='border-b border-gray-300 dark:border-gray-500 w-4/6 relative z-10'/>
+
+        <Link to="/repositories" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-neutral-100 dark:hover:bg-white/5">
+          <div className="relative flex items-center justify-center gap-4 px-4 py-1 w-full">
+            <FiGithub className="h-6 w-6 text-gray-600 dark:text-gray-300 transition-all duration-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 group-hover:scale-110" />
+            {expanded && <span className="text-gray-600 dark:text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 whitespace-nowrap overflow-hidden max-w-xs">Repositories</span>}
+          </div>
+        </Link>
+        <hr className='border-b border-gray-300 dark:border-gray-500 w-4/6 relative z-10'/>
+
+        <Link to="/contributions" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-neutral-100 dark:hover:bg-white/5">
+          <div className="relative flex items-center justify-center gap-4 px-4 py-1 w-full">
+            <FiAward className="h-6 w-6 text-gray-600 dark:text-gray-300 transition-all duration-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 group-hover:scale-110" />
+            {expanded && <span className="text-gray-600 dark:text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 whitespace-nowrap overflow-hidden max-w-xs">Contributions</span>}
           </div>
         </Link>
         <hr className='border-b border-gray-300 dark:border-gray-500 w-4/6 relative z-10'/>
