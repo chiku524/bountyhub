@@ -36,8 +36,9 @@ app.get('/', async (c) => {
   }
   
   // In production, set domain to allow cross-subdomain access
+  // Note: Domain with leading dot works for all subdomains
   if (c.env.NODE_ENV === 'production') {
-    cookieOptions.domain = '.bountyhub.tech'
+    cookieOptions.domain = 'bountyhub.tech' // Without leading dot - works for both api.bountyhub.tech and bountyhub.tech
   }
   
   setCookie(c, 'github_oauth_state', state, cookieOptions)
