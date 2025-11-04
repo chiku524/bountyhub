@@ -18,6 +18,7 @@ interface Env {
 const app = new Hono<{ Bindings: Env }>()
 
 // Initiate GitHub OAuth flow
+// Handle root path (mounted at /api/auth/github)
 app.get('/', async (c) => {
   const clientId = c.env.GITHUB_CLIENT_ID
   const redirectUri = encodeURIComponent(c.env.GITHUB_CALLBACK_URL)
