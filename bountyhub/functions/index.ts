@@ -108,26 +108,228 @@ app.get('/cron', async (c) => {
 
 // GitHub OAuth callback route (mounted at /auth/callback as per user's OAuth app config)
 // This route MUST be defined before /api/auth routes to ensure it matches first
-// Handle the callback directly by importing and calling the GitHub callback handler
+// Handle the callback directly by reusing the callback logic from github.ts
 app.all('/auth/callback', async (c) => {
-  // Import the GitHub handler module
-  const githubModule = await import('./api/auth/github')
-  const githubHandler = githubModule.default
+  // Import the callback handler function directly
+  const { getCookie, setCookie } = await import('hono/cookie')
+  const { createDb } = await import('../src/utils/db')
+  const { createSession } = await import('../src/utils/auth')
+  const { users, profiles, virtualWallets } = await import('../drizzle/schema')
+  const { eq } = await import('drizzle-orm')
+  const bcrypt = (await import('bcryptjs')).default
   
-  // Create a new request with the correct path for the github router
-  // The github router expects /api/auth/github/callback
-  const url = new URL(c.req.url)
-  url.pathname = '/api/auth/github/callback'
-  
-  // Create a new request with modified URL
-  const newRequest = new Request(url.toString(), {
-    method: c.req.method,
-    headers: c.req.header(),
-  })
-  
-  // Call the GitHub handler's fetch method directly
-  // This will route to the /callback handler in the github router
-  return githubHandler.fetch(newRequest, c.env, c.executionCtx)
+  try {
+    const db = createDb(c.env.DB)
+    const code = c.req.query('code')
+    const state = c.req.query('state')
+    const storedState = getCookie(c, 'github_oauth_state')
+    
+    const frontendUrl = c.env.NODE_ENV === 'production' 
+      ? 'https://bountyhub.tech' 
+      : 'http://localhost:5173'
+    
+    if (!code || !state) {
+      return c.redirect(`${frontendUrl}/login?error=missing_code`)
+    }
+    
+    // Verify state to prevent CSRF attacks
+    if (state !== storedState) {
+      return c.redirect(`${frontendUrl}/login?error=invalid_state`)
+    }
+    
+    // Exchange code for access token
+    const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        client_id: c.env.GITHUB_CLIENT_ID,
+        client_secret: c.env.GITHUB_CLIENT_SECRET,
+        code,
+        redirect_uri: c.env.GITHUB_CALLBACK_URL
+      })
+    })
+    
+    if (!tokenResponse.ok) {
+      return c.redirect(`${frontendUrl}/login?error=token_exchange_failed`)
+    }
+    
+    const tokenData = await tokenResponse.json() as { access_token?: string; error?: string }
+    
+    if (!tokenData.access_token || tokenData.error) {
+      return c.redirect(`${frontendUrl}/login?error=token_exchange_failed`)
+    }
+    
+    const accessToken = tokenData.access_token
+    
+    // Get user info from GitHub
+    const userResponse = await fetch('https://api.github.com/user', {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    })
+    
+    if (!userResponse.ok) {
+      return c.redirect(`${frontendUrl}/login?error=github_api_failed`)
+    }
+    
+    const githubUser = await userResponse.json() as {
+      id: number
+      login: string
+      email?: string
+      avatar_url?: string
+      name?: string
+    }
+    
+    // Get user email if not public
+    let email = githubUser.email
+    if (!email) {
+      const emailsResponse = await fetch('https://api.github.com/user/emails', {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      })
+      
+      if (emailsResponse.ok) {
+        const emails = await emailsResponse.json() as Array<{ email: string; primary: boolean; verified: boolean }>
+        const primaryEmail = emails.find((e: { email: string; primary: boolean; verified: boolean }) => e.primary && e.verified)
+        email = primaryEmail?.email || emails[0]?.email
+      }
+    }
+    
+    if (!email) {
+      return c.redirect(`${frontendUrl}/login?error=no_email`)
+    }
+    
+    // Check if user already exists with this GitHub ID
+    const existingUser = await db.select().from(users).where(eq(users.githubId, githubUser.id.toString())).limit(1)
+    
+    let userId: string
+    let isNewUser = false
+    
+    if (existingUser.length > 0) {
+      // User exists, update GitHub info
+      userId = existingUser[0].id
+      await db.update(users)
+        .set({
+          githubUsername: githubUser.login,
+          githubAvatarUrl: githubUser.avatar_url || null,
+          githubAccessToken: accessToken, // In production, encrypt this
+          githubConnectedAt: new Date(),
+          updatedAt: new Date()
+        })
+        .where(eq(users.id, userId))
+    } else {
+      // Check if user exists with this email
+      const existingEmailUser = await db.select().from(users).where(eq(users.email, email)).limit(1)
+      
+      if (existingEmailUser.length > 0) {
+        // Link existing account to GitHub
+        userId = existingEmailUser[0].id
+        await db.update(users)
+          .set({
+            githubId: githubUser.id.toString(),
+            githubUsername: githubUser.login,
+            githubAvatarUrl: githubUser.avatar_url || null,
+            githubAccessToken: accessToken,
+            githubConnectedAt: new Date(),
+            updatedAt: new Date()
+          })
+          .where(eq(users.id, userId))
+      } else {
+        // Create new user
+        isNewUser = true
+        userId = crypto.randomUUID()
+        const username = githubUser.login || `github_${githubUser.id}`
+        
+        // Generate a random password (GitHub users won't use password auth)
+        const randomPassword = crypto.randomUUID()
+        const hashedPassword = await bcrypt.hash(randomPassword, 12)
+        
+        await db.insert(users).values({
+          id: userId,
+          email,
+          username,
+          password: hashedPassword,
+          role: 'user',
+          githubId: githubUser.id.toString(),
+          githubUsername: githubUser.login,
+          githubAvatarUrl: githubUser.avatar_url || null,
+          githubAccessToken: accessToken,
+          githubConnectedAt: new Date(),
+          reputationPoints: 0,
+          integrityScore: 5.0,
+          totalRatings: 0,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+        
+        // Create virtual wallet
+        await db.insert(virtualWallets).values({
+          id: crypto.randomUUID(),
+          userId,
+          balance: 0,
+          totalDeposited: 0,
+          totalWithdrawn: 0,
+          totalEarned: 0,
+          totalSpent: 0,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+        
+        // Create profile
+        await db.insert(profiles).values({
+          id: crypto.randomUUID(),
+          userId,
+          profilePicture: githubUser.avatar_url || null,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+      }
+    }
+    
+    // Create session
+    const sessionId = await createSession(userId, db, 720) // 30 days
+    
+    // Set session cookie
+    const cookieOptions: any = {
+      httpOnly: true,
+      path: '/',
+      maxAge: 60 * 60 * 24 * 30 // 30 days
+    }
+    
+    if (c.env.NODE_ENV === 'production') {
+      // Use domain with dot for cross-subdomain cookies (works for both api.bountyhub.tech and bountyhub.tech)
+      cookieOptions.domain = '.bountyhub.tech'
+      cookieOptions.secure = true
+      cookieOptions.sameSite = 'none' // Required for cross-site cookies
+    } else {
+      cookieOptions.secure = false
+      cookieOptions.sameSite = 'lax'
+    }
+    
+    setCookie(c, 'session', sessionId, cookieOptions)
+    
+    // Clear OAuth state cookie
+    setCookie(c, 'github_oauth_state', '', {
+      httpOnly: true,
+      path: '/',
+      maxAge: 0
+    })
+    
+    // Redirect to profile or community
+    return c.redirect(`${frontendUrl}${isNewUser ? '/profile?welcome=true' : '/community'}`)
+  } catch (error) {
+    console.error('GitHub OAuth error:', error)
+    const frontendUrl = c.env.NODE_ENV === 'production' 
+      ? 'https://bountyhub.tech' 
+      : 'http://localhost:5173'
+    return c.redirect(`${frontendUrl}/login?error=oauth_failed`)
+  }
 })
 
 // API routes - mount after callback handler
