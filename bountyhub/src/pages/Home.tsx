@@ -70,8 +70,8 @@ export default function Home() {
         description="The decentralized bounty platform where questions meet rewards. Ask questions, offer bounties, and earn cryptocurrency rewards on Solana. Join the future of decentralized knowledge sharing."
         keywords="bounty, cryptocurrency, solana, blockchain, rewards, questions, answers, BBUX, decentralized, knowledge sharing"
       />
-      <div className="min-h-screen bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="min-h-screen bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
           {/* Hero Section */}
           <div className="text-center mb-16">
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">

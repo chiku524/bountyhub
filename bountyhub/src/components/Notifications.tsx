@@ -2,6 +2,7 @@ import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useAuth } from '../contexts/AuthProvider'
 import { useNavigate } from 'react-router-dom'
 import { LoadingSpinner } from './LoadingSpinner'
+import { browserNotificationService } from '../utils/browserNotifications'
 
 interface Notification {
   id: string
@@ -44,6 +45,8 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
   useEffect(() => {
     if (user) {
       fetchNotifications()
+      // Request browser notification permission
+      browserNotificationService.requestPermission()
     }
   }, [user])
 
@@ -52,6 +55,64 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
       fetchNotifications()
     }
   }, [user, isOpen])
+
+  // Poll for new notifications every 30 seconds
+  useEffect(() => {
+    if (!user) return
+
+    const pollInterval = setInterval(() => {
+      fetchNotifications()
+    }, 30000) // Poll every 30 seconds
+
+    return () => clearInterval(pollInterval)
+  }, [user])
+
+  // Show browser notifications for new unread notifications
+  useEffect(() => {
+    if (!user || notifications.length === 0) return
+
+    // Check for new unread notifications
+    const unreadNotifications = notifications.filter(n => !n.read)
+    
+    if (unreadNotifications.length > 0 && browserNotificationService.isEnabled()) {
+      // Show notification for the most recent unread
+      const latest = unreadNotifications[0]
+      
+      // Only show if it's a bounty notification or recently created (within last minute)
+      const isRecent = new Date(latest.createdAt).getTime() > Date.now() - 60000
+      
+      if (latest.type === 'bounty' || isRecent) {
+        if (latest.type === 'bounty') {
+          browserNotificationService.showBountyNotification(
+            latest.title,
+            latest.message,
+            latest.navigation?.id,
+            undefined // amount not available in notification
+          )
+        } else if (latest.type === 'answer') {
+          browserNotificationService.showAnswerNotification(
+            latest.title,
+            latest.message,
+            latest.navigation?.id || ''
+          )
+        } else if (latest.type === 'comment') {
+          browserNotificationService.showCommentNotification(
+            latest.title,
+            latest.message,
+            latest.navigation?.id || ''
+          )
+        } else {
+          browserNotificationService.showNotification(latest.title, {
+            body: latest.message,
+            data: {
+              url: latest.navigation?.url || '/',
+              type: latest.type
+            }
+          })
+        }
+      }
+    }
+  }, [notifications, user])
 
   useEffect(() => {
     if (onUnreadCountChange) {

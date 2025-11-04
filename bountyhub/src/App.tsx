@@ -15,6 +15,7 @@ import ProfileBookmarks from './pages/ProfileBookmarks'
 import Community from './pages/Community'
 import Governance from './pages/Governance'
 import Admin from './pages/Admin'
+import Analytics from './pages/Analytics'
 import Wallet from './pages/Wallet'
 import Settings from './pages/Settings'
 import CreatePost from './pages/CreatePost'
@@ -59,6 +60,7 @@ function AppContent() {
         <Route path="/profile/bookmarks" element={<ProfileBookmarks />} />
         <Route path="/community" element={<Community />} />
         <Route path="/governance" element={<Governance />} />
+        <Route path="/analytics" element={<Analytics />} />
         <Route path="/wallet" element={<Wallet />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/posts/create" element={<CreatePost />} />
