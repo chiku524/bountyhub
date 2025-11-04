@@ -85,26 +85,27 @@ export function AnimatedBackground() {
           const distance = Math.sqrt(dx * dx + dy * dy)
 
           if (distance < 180) { // Increased connection distance from 150 to 180
-            const opacity = (1 - distance / 180) * 0.3 // Increased opacity for better visibility
+            const opacity = (1 - distance / 180) * 0.5 // Increased opacity for better visibility (0.3 -> 0.5)
             ctx.beginPath()
             ctx.moveTo(particle.x, particle.y)
             ctx.lineTo(otherParticle.x, otherParticle.y)
             ctx.strokeStyle = `${particle.color}${Math.floor(opacity * 255).toString(16).padStart(2, '0')}`
-            ctx.lineWidth = 0.8 // Slightly thicker lines
+            ctx.lineWidth = 1.0 // Slightly thicker lines (0.8 -> 1.0)
             ctx.stroke()
           }
         })
         
-        // Add glow effect to larger particles
-        if (particle.radius > 3) {
+        // Add glow effect to larger particles (reduced threshold from 3 to 2.5 for more glows)
+        if (particle.radius > 2.5) {
           const gradient = ctx.createRadialGradient(
             particle.x, particle.y, 0,
-            particle.x, particle.y, particle.radius * 2
+            particle.x, particle.y, particle.radius * 2.5
           )
-          gradient.addColorStop(0, `${particle.color}${Math.floor(particle.opacity * 255).toString(16).padStart(2, '0')}`)
+          const glowOpacity = particle.opacity * 0.6 // More visible glow
+          gradient.addColorStop(0, `${particle.color}${Math.floor(glowOpacity * 255).toString(16).padStart(2, '0')}`)
           gradient.addColorStop(1, `${particle.color}00`)
           ctx.beginPath()
-          ctx.arc(particle.x, particle.y, particle.radius * 2, 0, Math.PI * 2)
+          ctx.arc(particle.x, particle.y, particle.radius * 2.5, 0, Math.PI * 2)
           ctx.fillStyle = gradient
           ctx.fill()
         }

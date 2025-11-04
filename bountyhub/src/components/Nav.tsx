@@ -99,7 +99,7 @@ export function Nav() {
   }
 
   return (
-    <div className='group fixed left-0 top-0 h-screen w-20 bg-white/90 dark:bg-neutral-800/90 backdrop-blur-sm border-r border-neutral-200/50 dark:border-neutral-700/50 flex flex-col items-center transition-all duration-300 ease-in-out hover:w-64 overflow-y-hidden z-[9999] nav-container hidden md:flex'>
+    <div className='group fixed left-0 top-0 h-screen w-20 bg-white/70 dark:bg-neutral-800/70 backdrop-blur-sm border-r border-neutral-200/50 dark:border-neutral-700/50 flex flex-col items-center transition-all duration-300 ease-in-out hover:w-64 overflow-y-hidden z-[9999] nav-container hidden md:flex'>
 
       <div className="relative z-10 flex flex-col items-center w-full py-5 cursor-pointer" onClick={() => navigate('/')}>
         <div className="relative w-12 h-12 flex items-center justify-center">

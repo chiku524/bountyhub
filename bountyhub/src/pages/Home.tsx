@@ -79,7 +79,7 @@ export default function Home() {
         keywords="bounty, cryptocurrency, solana, blockchain, rewards, questions, answers, BBUX, decentralized, knowledge sharing"
       />
       <HomeNav onScrollTo={scrollToSection} />
-      <div className="min-h-screen bg-gradient-to-br from-neutral-50/80 via-white/80 to-neutral-50/80 dark:from-neutral-900/80 dark:via-neutral-800/80 dark:to-neutral-900/80 backdrop-blur-sm text-neutral-900 dark:text-white transition-colors duration-200 pt-16">
+      <div className="min-h-screen bg-gradient-to-br from-neutral-50/50 via-white/50 to-neutral-50/50 dark:from-neutral-900/50 dark:via-neutral-800/50 dark:to-neutral-900/50 backdrop-blur-sm text-neutral-900 dark:text-white transition-colors duration-200 pt-16">
         {/* Hero Section */}
         <section id="hero" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
           <div className="text-center">

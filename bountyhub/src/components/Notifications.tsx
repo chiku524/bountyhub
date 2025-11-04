@@ -185,53 +185,44 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
         const viewportWidth = window.innerWidth
         const viewportHeight = window.innerHeight
         const popupWidth = 320 // w-80 = 320px
-        const popupHeight = 384 // max-h-96 = 384px (plus header height)
-        const margin = 8 // ml-2 = 8px
+        const popupHeight = 400 // max-h-96 + header + padding = ~400px
+        const margin = 16 // 16px margin from button
         
         // Calculate available space on both sides
         const spaceOnRight = viewportWidth - buttonRect.right - margin
         const spaceOnLeft = buttonRect.left - margin
         
         // Calculate vertical positioning to prevent overflow
-        let topPosition = buttonRect.top - 50 // Raise the popup by 50px
-        const bottomSpace = viewportHeight - (topPosition + popupHeight)
+        let topPosition = buttonRect.top + (buttonRect.height / 2) - (popupHeight / 2)
         
-        // If there's not enough space at the bottom, adjust the top position
-        if (bottomSpace < 20) { // 20px minimum margin from bottom
-          topPosition = viewportHeight - popupHeight - 20
+        // Ensure popup doesn't go above viewport
+        if (topPosition < margin) {
+          topPosition = margin
         }
         
-        // Ensure the popup doesn't go above the viewport
-        if (topPosition < 20) {
-          topPosition = 20
+        // Ensure popup doesn't go below viewport
+        if (topPosition + popupHeight > viewportHeight - margin) {
+          topPosition = viewportHeight - popupHeight - margin
         }
         
-        // Calculate popup position
+        // Calculate popup position - always position to the right of the navbar
         let newPopupStyle: { left?: string; right?: string; top: string }
         
-        // Position on the side with more space, default to right
-        if (spaceOnRight >= popupWidth) {
+        // Position to the right of the navbar (button is in the left sidebar)
+        // Calculate left position from button's right edge
+        const leftPosition = buttonRect.right + margin
+        
+        // Ensure popup doesn't overflow viewport width
+        if (leftPosition + popupWidth > viewportWidth - margin) {
+          // If popup would overflow, position it with margin from right edge
           newPopupStyle = {
-            left: `${buttonRect.right + margin}px`,
-            top: `${topPosition}px`
-          }
-        } else if (spaceOnLeft >= popupWidth) {
-          newPopupStyle = {
-            right: `${viewportWidth - buttonRect.left + margin}px`,
+            right: `${margin}px`,
             top: `${topPosition}px`
           }
         } else {
-          // If neither side has enough space, position on the side with more space
-          if (spaceOnRight > spaceOnLeft) {
-            newPopupStyle = {
-              left: `${buttonRect.right + margin}px`,
-              top: `${topPosition}px`
-            }
-          } else {
-            newPopupStyle = {
-              right: `${viewportWidth - buttonRect.left + margin}px`,
-              top: `${topPosition}px`
-            }
+          newPopupStyle = {
+            left: `${leftPosition}px`,
+            top: `${topPosition}px`
           }
         }
         
