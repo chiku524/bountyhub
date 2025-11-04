@@ -188,10 +188,6 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
         const popupHeight = 400 // max-h-96 + header + padding = ~400px
         const margin = 16 // 16px margin from button
         
-        // Calculate available space on both sides
-        const spaceOnRight = viewportWidth - buttonRect.right - margin
-        const spaceOnLeft = buttonRect.left - margin
-        
         // Calculate vertical positioning to prevent overflow
         let topPosition = buttonRect.top + (buttonRect.height / 2) - (popupHeight / 2)
         

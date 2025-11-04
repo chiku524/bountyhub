@@ -1,8 +1,8 @@
 import { Hono } from 'hono'
 import { getCookie } from 'hono/cookie'
-import { createDb } from '../../../../../src/utils/db'
-import { getUserIdFromSession } from '../../../../../src/utils/auth'
-import { bugSubmissions, bugBountyCampaigns, users, profiles } from '../../../../../drizzle/schema'
+import { createDb } from '../../../../src/utils/db'
+import { getUserIdFromSession } from '../../../../src/utils/auth'
+import { bugSubmissions, bugBountyCampaigns, users, profiles } from '../../../../drizzle/schema'
 import { eq, sql, desc, and } from 'drizzle-orm'
 
 interface Env {
@@ -66,7 +66,7 @@ app.get(async (c) => {
       .offset(offset)
 
     return c.json({
-      submissions: submissions.map(item => ({
+      submissions: submissions.map((item: any) => ({
         ...item.submission,
         submitter: item.submitter,
       })),

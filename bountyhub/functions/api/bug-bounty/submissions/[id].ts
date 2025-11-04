@@ -1,8 +1,8 @@
 import { Hono } from 'hono'
 import { getCookie } from 'hono/cookie'
-import { createDb } from '../../../src/utils/db'
-import { getUserIdFromSession } from '../../../src/utils/auth'
-import { bugSubmissions, bugSubmissionVerifications, users } from '../../../drizzle/schema'
+import { createDb } from '../../../../src/utils/db'
+import { getUserIdFromSession } from '../../../../src/utils/auth'
+import { bugSubmissions, bugSubmissionVerifications } from '../../../../drizzle/schema'
 import { eq, desc } from 'drizzle-orm'
 
 interface Env {

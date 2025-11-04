@@ -28,8 +28,12 @@ app.get(async (c) => {
     const conditions = []
     if (userId) conditions.push(eq(contributions.userId, userId))
     if (repositoryId) conditions.push(eq(contributions.repositoryId, repositoryId))
-    if (type) conditions.push(eq(contributions.type, type))
-    if (status) conditions.push(eq(contributions.status, status))
+    if (type && ['COMMIT', 'PULL_REQUEST', 'ISSUE', 'CODE_REVIEW', 'BUG_SUBMISSION', 'FEATURE_SUGGESTION', 'DOCUMENTATION'].includes(type)) {
+      conditions.push(eq(contributions.type, type as 'COMMIT' | 'PULL_REQUEST' | 'ISSUE' | 'CODE_REVIEW' | 'BUG_SUBMISSION' | 'FEATURE_SUGGESTION' | 'DOCUMENTATION'))
+    }
+    if (status && ['PENDING', 'APPROVED', 'MERGED', 'CLOSED', 'REJECTED'].includes(status)) {
+      conditions.push(eq(contributions.status, status as 'PENDING' | 'APPROVED' | 'MERGED' | 'CLOSED' | 'REJECTED'))
+    }
 
     // Get total count
     const totalResult = await db
@@ -54,15 +58,15 @@ app.get(async (c) => {
       .leftJoin(users, eq(contributions.userId, users.id))
       .leftJoin(profiles, eq(users.id, profiles.userId))
       .leftJoin(githubRepositories, eq(contributions.repositoryId, githubRepositories.id))
-      .orderBy(desc(contributions.contributionDate))
-      .limit(limit)
-      .offset(offset)
 
     if (conditions.length > 0) {
       query = query.where(and(...conditions))
     }
 
     const contributionsList = await query
+      .orderBy(desc(contributions.contributionDate))
+      .limit(limit)
+      .offset(offset)
 
     return c.json({
       contributions: contributionsList.map(item => ({

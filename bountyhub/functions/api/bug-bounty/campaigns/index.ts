@@ -3,7 +3,7 @@ import { getCookie } from 'hono/cookie'
 import { createDb } from '../../../../src/utils/db'
 import { getUserIdFromSession } from '../../../../src/utils/auth'
 import { bugBountyCampaigns, githubRepositories, users, profiles } from '../../../../drizzle/schema'
-import { eq, sql, desc, and, or } from 'drizzle-orm'
+import { eq, sql, desc, and } from 'drizzle-orm'
 
 interface Env {
   DB: any
@@ -25,9 +25,13 @@ app.get(async (c) => {
 
     // Build query conditions
     const conditions = []
-    if (status) conditions.push(eq(bugBountyCampaigns.status, status))
+    if (status && ['DRAFT', 'ACTIVE', 'PAUSED', 'COMPLETED', 'CANCELLED'].includes(status)) {
+      conditions.push(eq(bugBountyCampaigns.status, status as 'DRAFT' | 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'CANCELLED'))
+    }
     if (ownerId) conditions.push(eq(bugBountyCampaigns.ownerId, ownerId))
-    if (isPublic !== undefined) conditions.push(eq(bugBountyCampaigns.isPublic, isPublic === 'true' ? 1 : 0))
+    if (isPublic !== undefined) {
+      conditions.push(eq(bugBountyCampaigns.isPublic, isPublic === 'true' ? 1 : 0))
+    }
 
     // Get total count
     const totalResult = await db
@@ -57,15 +61,15 @@ app.get(async (c) => {
       .leftJoin(users, eq(bugBountyCampaigns.ownerId, users.id))
       .leftJoin(profiles, eq(users.id, profiles.userId))
       .leftJoin(githubRepositories, eq(bugBountyCampaigns.repositoryId, githubRepositories.id))
-      .orderBy(desc(bugBountyCampaigns.createdAt))
-      .limit(limit)
-      .offset(offset)
 
     if (conditions.length > 0) {
       query = query.where(and(...conditions))
     }
 
     const campaigns = await query
+      .orderBy(desc(bugBountyCampaigns.createdAt))
+      .limit(limit)
+      .offset(offset)
 
     // Count submissions for each campaign
     const campaignsWithStats = await Promise.all(
