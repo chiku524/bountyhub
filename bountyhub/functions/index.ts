@@ -439,8 +439,9 @@ app.all('/auth/callback', async (c) => {
       maxAge: 0
     })
     
-    // Redirect to profile or community
-    return c.redirect(`${frontendUrl}${isNewUser ? '/profile?welcome=true' : '/community'}`)
+    // Redirect to profile or community with oauth_success parameter to force refresh
+    const redirectPath = isNewUser ? '/profile?welcome=true&oauth_success=true' : '/community?oauth_success=true'
+    return c.redirect(`${frontendUrl}${redirectPath}`)
   } catch (error) {
     console.error('GitHub OAuth error:', error)
     const frontendUrl = c.env.NODE_ENV === 'production' 

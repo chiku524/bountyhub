@@ -34,6 +34,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     checkAuthStatus()
   }, [])
 
+  // Check for OAuth success parameter and refresh after auth loads
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('oauth_success') === 'true' && !loading && user) {
+      // Remove the query parameter and update URL without reload
+      urlParams.delete('oauth_success')
+      const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '')
+      window.history.replaceState({}, '', newUrl)
+    }
+  }, [loading, user])
+
   const checkAuthStatus = async () => {
     try {
       const userData = await api.getCurrentUser()

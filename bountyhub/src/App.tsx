@@ -51,7 +51,7 @@ import '@solana/wallet-adapter-react-ui/styles.css'
 
 function AppContent() {
   const location = useLocation()
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
   const isHomePage = location.pathname === '/'
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup'
   const isDocsPage = location.pathname.startsWith('/docs')
@@ -59,7 +59,20 @@ function AppContent() {
   
   // Determine which navbar to show
   const isPublicPage = isHomePage || isAuthPage || isLegalPage
-  const showAuthenticatedNav = Boolean(user) && !isPublicPage
+  const showAuthenticatedNav = Boolean(user) && !isPublicPage && !loading
+  
+  // Handle OAuth redirect - wait for auth to load before showing authenticated layout
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('oauth_success') === 'true' && !loading) {
+      // If auth is loaded but user is null, wait a bit more for cookie to be available
+      if (!user) {
+        setTimeout(() => {
+          window.location.reload()
+        }, 500)
+      }
+    }
+  }, [loading, user])
   
   // Enable bounty notifications polling
   useBountyNotifications()
