@@ -6,10 +6,9 @@ import { AuthProvider, useAuth } from './contexts/AuthProvider'
 import { SolanaWalletProvider } from './contexts/SolanaWalletProvider'
 import Layout from './components/Layout'
 import { AnimatedBackground } from './components/AnimatedBackground'
-import { Nav } from './components/Nav'
+import { TopNav } from './components/TopNav'
 import { HomeNav } from './components/HomeNav'
 import { Footer } from './components/Footer'
-import { MobileNav } from './components/MobileNav'
 import { PageMetadata } from './components/PageMetadata'
 import { useBountyNotifications } from './hooks/useBountyNotifications'
 import ChatSidebar from './components/ChatSidebar'
@@ -91,21 +90,17 @@ function AppContent() {
       {/* Animated Background - Canvas only, no children */}
       <AnimatedBackground />
       
-      {/* Light/Dark mode container - Always flex-col, inner flex-row when authenticated */}
+      {/* Light/Dark mode container - Always flex-col */}
       <div className="relative z-10 min-h-screen w-full bg-white/10 dark:bg-neutral-900/10 transition-colors duration-200 flex flex-col">
-        {/* Main content area - flex-row when authenticated (Nav + Layout), flex-col otherwise */}
-        <div className={`flex-1 flex ${showAuthenticatedNav ? 'flex-row' : 'flex-col'}`}>
-          {/* Dynamic Navbar */}
-          {isHomePage ? (
-            <HomeNav onScrollTo={scrollToSection} />
-          ) : showAuthenticatedNav ? (
-            <div className="hidden md:block relative z-20">
-              <Nav />
-            </div>
-          ) : null}
-          
-          {/* Layout - Page content */}
-          <Layout showNav={showAuthenticatedNav}>
+        {/* Dynamic Navbar - Top navbar for authenticated pages */}
+        {isHomePage ? (
+          <HomeNav onScrollTo={scrollToSection} />
+        ) : showAuthenticatedNav ? (
+          <TopNav />
+        ) : null}
+        
+        {/* Layout - Page content with top padding for navbar */}
+        <Layout showNav={showAuthenticatedNav}>
             <PageMetadata />
             <Routes>
               <Route path="/" element={<Home />} />
@@ -149,9 +144,6 @@ function AppContent() {
         
         {/* Footer - Show on every page, full width below content */}
         <Footer />
-        
-        {/* Mobile Navigation - Only for authenticated pages */}
-        {showAuthenticatedNav && <MobileNav />}
         
         {/* Chat Sidebar - Only for authenticated pages */}
         {!isPublicPage && <ChatSidebar />}

@@ -16,12 +16,12 @@ export default function Layout({ children, showNav = true }: LayoutProps) {
   const isLegalPage = isDocsPage || location.pathname === '/privacy' || location.pathname === '/terms'
   const isPublicPage = isHomePage || isAuthPage || isLegalPage
   
-  // Determine if we need sidebar margin for authenticated nav
+  // Determine if we need top padding for authenticated nav (top navbar)
   const showAuthenticatedNav = Boolean(user) && !isPublicPage
-  const needsSidebarMargin = showAuthenticatedNav && showNav
+  const needsTopPadding = showAuthenticatedNav && showNav
   
   return (
-    <div className={`flex-1 flex flex-col ${needsSidebarMargin ? 'md:ml-20' : ''} pb-16 md:pb-0`}>
+    <div className={`flex-1 flex flex-col ${needsTopPadding ? 'pt-16' : ''} pb-16 md:pb-0`}>
       <main className="flex-1 overflow-y-auto">
         {children}
       </main>
