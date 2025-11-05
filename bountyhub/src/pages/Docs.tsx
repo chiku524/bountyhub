@@ -200,7 +200,7 @@ export default function Docs() {
         </div>
 
         {/* Contact Section */}
-        <div className="mt-20 p-8 bg-white dark:bg-neutral-800/80 rounded-lg border-2 border-neutral-200 dark:border-violet-500/30">
+        <div className="mt-20 p-8 bg-white/80 dark:bg-neutral-800/80 rounded-lg border-2 border-neutral-200 dark:border-violet-500/30">
           <div className="text-center">
             <h2 className="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">Need Help?</h2>
             <p className="text-neutral-600 dark:text-gray-400 mb-6">

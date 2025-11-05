@@ -265,6 +265,7 @@ export function TopNav() {
             {/* Notifications */}
             <div className="relative">
               <button
+                data-notifications-button-topnav
                 onClick={() => notificationsRef.current?.toggle()}
                 className="p-2 rounded-md text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors relative"
               >

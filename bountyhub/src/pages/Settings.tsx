@@ -308,7 +308,7 @@ export default function Settings() {
           </div>
         )}
 
-        <div className="bg-white dark:bg-neutral-800/80 rounded-lg border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)] dark:shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+        <div className="bg-white/80 dark:bg-neutral-800/80 rounded-lg border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)] dark:shadow-[0_0_15px_rgba(139,92,246,0.3)]">
           {/* Tabs */}
           <div className="flex flex-wrap border-b border-violet-500/30">
             {tabs.map((tab) => (

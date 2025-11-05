@@ -1,4 +1,4 @@
-import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
+import { useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react'
 import { useAuth } from '../contexts/AuthProvider'
 import { useNavigate } from 'react-router-dom'
 import { LoadingSpinner } from './LoadingSpinner'
@@ -36,6 +36,7 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
   const [loading, setLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [popupStyle, setPopupStyle] = useState<{ left?: string; right?: string; top: string }>({ top: '0px' })
+  const popupRef = useRef<HTMLDivElement>(null)
 
   useImperativeHandle(ref, () => ({
     toggle: handleToggle
@@ -177,8 +178,11 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
 
   const handleToggle = () => {
     if (!isOpen) {
-      // Find the notifications button
-      const notificationsButton = document.querySelector('[data-notifications-button]')
+      // Find the notifications button - check both sidebar and top navbar
+      const sidebarButton = document.querySelector('[data-notifications-button]') as HTMLElement
+      const topNavButton = document.querySelector('[data-notifications-button-topnav]') as HTMLElement
+      const notificationsButton = sidebarButton || topNavButton
+      
       if (notificationsButton) {
         const buttonRect = notificationsButton.getBoundingClientRect()
         
@@ -188,37 +192,61 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
         const popupHeight = 400 // max-h-96 + header + padding = ~400px
         const margin = 16 // 16px margin from button
         
-        // Calculate vertical positioning to prevent overflow
-        let topPosition = buttonRect.top + (buttonRect.height / 2) - (popupHeight / 2)
+        // Determine if button is in top navbar (TopNav) or sidebar (Nav)
+        const isTopNav = !!topNavButton
         
-        // Ensure popup doesn't go above viewport
-        if (topPosition < margin) {
-          topPosition = margin
-        }
-        
-        // Ensure popup doesn't go below viewport
-        if (topPosition + popupHeight > viewportHeight - margin) {
-          topPosition = viewportHeight - popupHeight - margin
-        }
-        
-        // Calculate popup position - always position to the right of the navbar
         let newPopupStyle: { left?: string; right?: string; top: string }
         
-        // Position to the right of the navbar (button is in the left sidebar)
-        // Calculate left position from button's right edge
-        const leftPosition = buttonRect.right + margin
-        
-        // Ensure popup doesn't overflow viewport width
-        if (leftPosition + popupWidth > viewportWidth - margin) {
-          // If popup would overflow, position it with margin from right edge
+        if (isTopNav) {
+          // For TopNav: position below the button, aligned to the right edge
+          let topPosition = buttonRect.bottom + margin
+          
+          // If popup would overflow bottom, position it above the button
+          if (topPosition + popupHeight > viewportHeight - margin) {
+            topPosition = buttonRect.top - popupHeight - margin
+            // Ensure it doesn't go above viewport
+            if (topPosition < margin) {
+              topPosition = margin
+            }
+          }
+          
+          // Align to the right edge of the button
+          const rightPosition = viewportWidth - buttonRect.right
+          
           newPopupStyle = {
-            right: `${margin}px`,
+            right: `${rightPosition}px`,
             top: `${topPosition}px`
           }
         } else {
-          newPopupStyle = {
-            left: `${leftPosition}px`,
-            top: `${topPosition}px`
+          // For sidebar: position to the right of the button
+          // Calculate vertical positioning to prevent overflow
+          let topPosition = buttonRect.top + (buttonRect.height / 2) - (popupHeight / 2)
+          
+          // Ensure popup doesn't go above viewport
+          if (topPosition < margin) {
+            topPosition = margin
+          }
+          
+          // Ensure popup doesn't go below viewport
+          if (topPosition + popupHeight > viewportHeight - margin) {
+            topPosition = viewportHeight - popupHeight - margin
+          }
+          
+          // Calculate left position from button's right edge
+          const leftPosition = buttonRect.right + margin
+          
+          // Ensure popup doesn't overflow viewport width
+          if (leftPosition + popupWidth > viewportWidth - margin) {
+            // If popup would overflow, position it with margin from right edge
+            newPopupStyle = {
+              right: `${margin}px`,
+              top: `${topPosition}px`
+            }
+          } else {
+            newPopupStyle = {
+              left: `${leftPosition}px`,
+              top: `${topPosition}px`
+            }
           }
         }
         
@@ -228,10 +256,38 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
     setIsOpen(!isOpen)
   }
 
+  // Handle click outside to close popup
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isOpen && popupRef.current && !popupRef.current.contains(event.target as Node)) {
+        // Check if click is on the notifications button
+        const target = event.target as HTMLElement
+        const sidebarButton = document.querySelector('[data-notifications-button]')
+        const topNavButton = document.querySelector('[data-notifications-button-topnav]')
+        const notificationsButton = sidebarButton || topNavButton
+        
+        if (notificationsButton && (notificationsButton.contains(target) || notificationsButton === target)) {
+          // Don't close if clicking the button itself
+          return
+        }
+        
+        setIsOpen(false)
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside)
+      }
+    }
+  }, [isOpen])
+
   return (
     <>
       {isOpen && (
         <div 
+          ref={popupRef}
           className="fixed w-80 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-lg z-[10000] text-neutral-900 dark:text-white"
           style={popupStyle}
         >

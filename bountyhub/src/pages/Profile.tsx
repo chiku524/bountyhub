@@ -381,7 +381,7 @@ export default function Profile() {
           <div className="mb-6 flex justify-between items-center mt-16">
             <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Profile</h1>
           </div>
-          <div className="bg-white dark:bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)] dark:shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+          <div className="bg-white/80 dark:bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)] dark:shadow-[0_0_15px_rgba(139,92,246,0.3)]">
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-500"></div>
               <span className="ml-3 text-neutral-600 dark:text-gray-300">Loading profile...</span>
@@ -397,7 +397,7 @@ export default function Profile() {
           <div className="mb-6 flex justify-between items-center mt-16">
             <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Profile</h1>
           </div>
-          <div className="bg-white dark:bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)] dark:shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+          <div className="bg-white/80 dark:bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)] dark:shadow-[0_0_15px_rgba(139,92,246,0.3)]">
             <div className="flex flex-col justify-center items-center w-full h-full">
               <h1 className="text-neutral-900 dark:text-white text-2xl">User not found</h1>
               <Link to="/community" className="mt-4 text-violet-400 hover:text-violet-300">Go to Community</Link>
@@ -427,7 +427,7 @@ export default function Profile() {
           </Link>
         </div>
 
-        <div className="bg-white dark:bg-neutral-800/80 rounded-lg p-4 sm:p-6 border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)] dark:shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+        <div className="bg-white/80 dark:bg-neutral-800/80 rounded-lg p-4 sm:p-6 border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)] dark:shadow-[0_0_15px_rgba(139,92,246,0.3)]">
           <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6">
             <ProfilePictureUpload 
               currentPicture={user.profilePicture || null}
