@@ -1,4 +1,5 @@
 import { Routes, Route, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import { HelmetProvider } from 'react-helmet-async'
 import { WalletProvider } from './contexts/WalletProvider'
 import { AuthProvider, useAuth } from './contexts/AuthProvider'
