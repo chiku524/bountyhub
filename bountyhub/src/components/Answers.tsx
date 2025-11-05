@@ -156,7 +156,7 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
           className={`p-1 rounded transition-colors ${
             userVote === 1 
               ? 'text-green-400 hover:text-green-300' 
-              : 'text-gray-400 hover:text-green-400'
+              : 'text-neutral-500 dark:text-gray-400 hover:text-green-500 dark:hover:text-green-400'
           }`}
           title="Upvote"
         >
@@ -169,7 +169,7 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
         <span className={`text-sm font-medium px-1 min-w-[2rem] text-center ${
           totalVotes > 0 ? 'text-green-400' : 
           totalVotes < 0 ? 'text-red-400' : 
-          'text-gray-400'
+          'text-neutral-500 dark:text-gray-400'
         }`}>
           {totalVotes}
         </span>
@@ -180,7 +180,7 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
           className={`p-1 rounded transition-colors ${
             userVote === -1 
               ? 'text-red-400 hover:text-red-300' 
-              : 'text-gray-400 hover:text-red-400'
+              : 'text-neutral-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400'
           }`}
           title="Downvote"
         >
@@ -195,7 +195,7 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
   if (loading) {
     return (
       <div className="mt-8">
-        <h3 className="text-xl font-semibold text-white mb-4">Answers</h3>
+        <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-4">Answers</h3>
         <LoadingSpinner size="md" />
       </div>
     )
@@ -203,7 +203,7 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
 
   return (
     <div className="mt-8">
-      <h3 className="text-xl font-semibold text-white mb-4">
+      <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-4">
         Answers ({answers.length})
       </h3>
 
@@ -222,7 +222,7 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
             value={newAnswer}
             onChange={(e) => setNewAnswer(e.target.value)}
             placeholder="Write your answer..."
-            className="w-full p-3 bg-neutral-800 border border-neutral-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+            className="w-full p-3 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-600 rounded-lg text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
             rows={6}
             disabled={submitting}
           />
@@ -238,17 +238,17 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
           {/* Display Added Code Blocks */}
           {answerCodeBlocks.length > 0 && (
             <div className="mt-4 space-y-3">
-              <h4 className="text-sm font-medium text-gray-300">Added Code Blocks:</h4>
+              <h4 className="text-sm font-medium text-neutral-700 dark:text-gray-300">Added Code Blocks:</h4>
               {answerCodeBlocks.map((block, index) => (
-                <div key={index} className="bg-neutral-900/80 rounded-lg p-4 border border-violet-500/30">
+                <div key={index} className="bg-white dark:bg-neutral-900/80 rounded-lg p-4 border border-violet-300 dark:border-violet-500/30">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded text-sm">
+                    <span className="px-2 py-1 bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300 rounded text-sm">
                       {block.language}
                     </span>
                     <button
                       type="button"
                       onClick={() => handleRemoveCodeBlock(index)}
-                      className="text-gray-400 hover:text-red-400 transition-colors"
+                      className="text-neutral-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
                       title="Remove code block"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -256,11 +256,11 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
                       </svg>
                     </button>
                   </div>
-                  <pre className="bg-neutral-900/80 p-4 rounded-lg overflow-x-auto max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-600 scrollbar-track-neutral-800">
-                    <code className="text-sm text-gray-300">{block.code}</code>
+                  <pre className="bg-white dark:bg-neutral-900/80 p-4 rounded-lg overflow-x-auto max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-600 scrollbar-track-neutral-800 border border-neutral-200 dark:border-neutral-700">
+                    <code className="text-sm text-neutral-900 dark:text-gray-300">{block.code}</code>
                   </pre>
                   {block.description && (
-                    <p className="mt-2 text-sm text-gray-400">{block.description}</p>
+                    <p className="mt-2 text-sm text-neutral-600 dark:text-gray-400">{block.description}</p>
                   )}
                 </div>
               ))}
@@ -282,7 +282,7 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
       {/* Answers List */}
       <div className="space-y-4 max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-600 scrollbar-track-neutral-800 pr-2">
         {answers.length === 0 ? (
-          <p className="text-gray-400 text-center py-4">No answers yet. Be the first to answer!</p>
+          <p className="text-neutral-500 dark:text-gray-400 text-center py-4">No answers yet. Be the first to answer!</p>
         ) : (
           answers
             .sort((a, b) => {
@@ -292,10 +292,10 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
               return (b.upvotes - b.downvotes) - (a.upvotes - a.downvotes)
             })
             .map((answer) => (
-            <div key={answer.id} className={`bg-neutral-800/50 rounded-lg p-4 border ${
+            <div key={answer.id} className={`bg-white dark:bg-neutral-800/50 rounded-lg p-4 border ${
               answer.isAccepted 
-                ? 'border-green-500 bg-green-900/20' 
-                : 'border-neutral-700'
+                ? 'border-green-500 dark:border-green-500 bg-green-50 dark:bg-green-900/20' 
+                : 'border-neutral-200 dark:border-neutral-700'
             }`}>
               <div className="flex items-start justify-between mb-2">
                 <div className="flex items-center space-x-2">
@@ -308,7 +308,7 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
                       {answer.author?.username || `User ${answer.authorId}`}
                     </Link>
                   </span>
-                  <span className="text-gray-500 text-sm">
+                  <span className="text-neutral-500 dark:text-gray-500 text-sm">
                     {new Date(answer.createdAt).toLocaleDateString()}
                   </span>
                   {answer.isAccepted && (
@@ -330,24 +330,24 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
                   )}
                 </div>
               </div>
-              <p className="text-gray-300 whitespace-pre-wrap">{answer.content}</p>
+              <p className="text-neutral-700 dark:text-gray-300 whitespace-pre-wrap">{answer.content}</p>
               
               {/* Code Blocks */}
               {answer.codeBlocks && answer.codeBlocks.length > 0 && (
                 <div className="mt-4 space-y-3">
-                  <h4 className="text-sm font-medium text-gray-300">Code Blocks:</h4>
+                  <h4 className="text-sm font-medium text-neutral-700 dark:text-gray-300">Code Blocks:</h4>
                   {answer.codeBlocks.map((block, index) => (
-                    <div key={index} className="bg-neutral-900/80 rounded-lg p-4 border border-violet-500/30">
+                    <div key={index} className="bg-white dark:bg-neutral-900/80 rounded-lg p-4 border border-violet-300 dark:border-violet-500/30">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded text-sm">
+                        <span className="px-2 py-1 bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300 rounded text-sm">
                           {block.language}
                         </span>
                       </div>
-                      <pre className="bg-neutral-900/80 p-4 rounded-lg overflow-x-auto max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-600 scrollbar-track-neutral-800">
-                        <code className="text-sm text-gray-300">{block.code}</code>
+                      <pre className="bg-white dark:bg-neutral-900/80 p-4 rounded-lg overflow-x-auto max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-600 scrollbar-track-neutral-800 border border-neutral-200 dark:border-neutral-700">
+                        <code className="text-sm text-neutral-900 dark:text-gray-300">{block.code}</code>
                       </pre>
                       {block.description && (
-                        <p className="mt-2 text-sm text-gray-400">{block.description}</p>
+                        <p className="mt-2 text-sm text-neutral-600 dark:text-gray-400">{block.description}</p>
                       )}
                     </div>
                   ))}

@@ -185,14 +185,14 @@ export default function PostDetail() {
   }
 
   const renderCodeBlock = (block: any, index: number) => (
-    <div key={index} className="bg-neutral-100 dark:bg-neutral-900/80 rounded-lg p-4 border border-violet-300 dark:border-violet-500/30 mb-4">
+    <div key={index} className="bg-white dark:bg-neutral-900/80 rounded-lg p-4 border border-violet-300 dark:border-violet-500/30 mb-4">
       <div className="flex items-center gap-2 mb-2">
         <span className="px-2 py-1 bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300 rounded text-sm">
           {block.language}
         </span>
       </div>
-      <pre className="bg-neutral-50 dark:bg-neutral-900/80 p-4 rounded-lg overflow-x-auto max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-300 dark:scrollbar-thumb-neutral-600 scrollbar-track-neutral-100 dark:scrollbar-track-neutral-800">
-        <code className="text-sm text-neutral-800 dark:text-gray-300">{block.code}</code>
+      <pre className="bg-white dark:bg-neutral-900/80 p-4 rounded-lg overflow-x-auto max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-300 dark:scrollbar-thumb-neutral-600 scrollbar-track-neutral-100 dark:scrollbar-track-neutral-800 border border-neutral-200 dark:border-neutral-700">
+        <code className="text-sm text-neutral-900 dark:text-gray-300">{block.code}</code>
       </pre>
       {block.description && (
         <p className="mt-2 text-sm text-neutral-600 dark:text-gray-400">{block.description}</p>
@@ -357,7 +357,7 @@ export default function PostDetail() {
                       <div className="mt-4 space-y-3">
                         <h4 className="text-sm font-medium text-neutral-700 dark:text-gray-300">Added Code Blocks:</h4>
                         {editCodeBlocks.map((block, index) => (
-                          <div key={index} className="bg-neutral-100 dark:bg-neutral-900/80 rounded-lg p-4 border border-violet-300 dark:border-violet-500/30">
+                          <div key={index} className="bg-white dark:bg-neutral-900/80 rounded-lg p-4 border border-violet-300 dark:border-violet-500/30">
                             <div className="flex items-center justify-between mb-2">
                               <span className="px-2 py-1 bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300 rounded text-sm">
                                 {block.language}
@@ -373,8 +373,8 @@ export default function PostDetail() {
                                 </svg>
                               </button>
                             </div>
-                            <pre className="bg-neutral-50 dark:bg-neutral-900/80 p-4 rounded-lg overflow-x-auto max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-300 dark:scrollbar-thumb-neutral-600 scrollbar-track-neutral-100 dark:scrollbar-track-neutral-800">
-                              <code className="text-sm text-neutral-800 dark:text-gray-300">{block.code}</code>
+                            <pre className="bg-white dark:bg-neutral-900/80 p-4 rounded-lg overflow-x-auto max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-300 dark:scrollbar-thumb-neutral-600 scrollbar-track-neutral-100 dark:scrollbar-track-neutral-800 border border-neutral-200 dark:border-neutral-700">
+                              <code className="text-sm text-neutral-900 dark:text-gray-300">{block.code}</code>
                             </pre>
                             {block.description && (
                               <p className="mt-2 text-sm text-neutral-600 dark:text-gray-400">{block.description}</p>

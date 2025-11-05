@@ -119,7 +119,7 @@ export const Comments: React.FC<CommentsProps> = memo(({ postId }) => {
           className={`p-1 rounded transition-colors ${
             userVote === 1 
               ? 'text-green-400 hover:text-green-300' 
-              : 'text-gray-400 hover:text-green-400'
+              : 'text-neutral-500 dark:text-gray-400 hover:text-green-500 dark:hover:text-green-400'
           }`}
           title="Upvote"
         >
@@ -132,7 +132,7 @@ export const Comments: React.FC<CommentsProps> = memo(({ postId }) => {
         <span className={`text-sm font-medium px-1 min-w-[2rem] text-center ${
           totalVotes > 0 ? 'text-green-400' : 
           totalVotes < 0 ? 'text-red-400' : 
-          'text-gray-400'
+          'text-neutral-500 dark:text-gray-400'
         }`}>
           {totalVotes}
         </span>
@@ -143,7 +143,7 @@ export const Comments: React.FC<CommentsProps> = memo(({ postId }) => {
           className={`p-1 rounded transition-colors ${
             userVote === -1 
               ? 'text-red-400 hover:text-red-300' 
-              : 'text-gray-400 hover:text-red-400'
+              : 'text-neutral-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400'
           }`}
           title="Downvote"
         >
@@ -158,7 +158,7 @@ export const Comments: React.FC<CommentsProps> = memo(({ postId }) => {
   if (loading) {
     return (
       <div className="mt-8">
-        <h3 className="text-xl font-semibold text-white mb-4">Comments</h3>
+        <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-4">Comments</h3>
         <LoadingSpinner size="md" />
       </div>
     )
@@ -166,7 +166,7 @@ export const Comments: React.FC<CommentsProps> = memo(({ postId }) => {
 
   return (
     <div className="mt-8">
-      <h3 className="text-xl font-semibold text-white mb-4">
+      <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-4">
         Comments ({comments.length})
       </h3>
 
@@ -185,7 +185,7 @@ export const Comments: React.FC<CommentsProps> = memo(({ postId }) => {
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Add a comment..."
-            className="w-full p-3 bg-neutral-800 border border-neutral-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+            className="w-full p-3 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-600 rounded-lg text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
             rows={3}
             disabled={submitting}
           />
@@ -204,12 +204,12 @@ export const Comments: React.FC<CommentsProps> = memo(({ postId }) => {
       {/* Comments List */}
       <div className="space-y-4 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-600 scrollbar-track-neutral-800 pr-2">
         {comments.length === 0 ? (
-          <p className="text-gray-400 text-center py-4">No comments yet. Be the first to comment!</p>
+          <p className="text-neutral-500 dark:text-gray-400 text-center py-4">No comments yet. Be the first to comment!</p>
         ) : (
           comments
             .sort((a, b) => (b.upvotes - b.downvotes) - (a.upvotes - a.downvotes)) // Sort by vote count (highest first)
             .map((comment) => (
-            <div key={comment.id} className="bg-neutral-800/50 rounded-lg p-4 border border-neutral-700">
+            <div key={comment.id} className="bg-white dark:bg-neutral-800/50 rounded-lg p-4 border border-neutral-200 dark:border-neutral-700">
               <div className="flex items-start justify-between mb-2">
                 <div className="flex items-center space-x-2">
                   <ProfilePicture user={comment.author} size="sm" />
@@ -221,13 +221,13 @@ export const Comments: React.FC<CommentsProps> = memo(({ postId }) => {
                       {comment.author?.username || `User ${comment.authorId}`}
                     </Link>
                   </span>
-                  <span className="text-gray-500 text-sm">
+                  <span className="text-neutral-500 dark:text-gray-500 text-sm">
                     {new Date(comment.createdAt).toLocaleDateString()}
                   </span>
                 </div>
                 <VoteButtons comment={comment} />
               </div>
-              <p className="text-gray-300 whitespace-pre-wrap">{comment.content}</p>
+              <p className="text-neutral-700 dark:text-gray-300 whitespace-pre-wrap">{comment.content}</p>
             </div>
           ))
         )}

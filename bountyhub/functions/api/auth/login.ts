@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import { setCookie } from 'hono/cookie'
 import { createDb } from '../../../src/utils/db'
 import { users } from '../../../drizzle/schema'
 import { eq } from 'drizzle-orm'
@@ -45,10 +46,23 @@ app.post('/', async (c) => {
       return c.json({ error: 'Failed to create session' }, 500)
     }
 
-    // Set session cookie
-    const isProduction = c.env.NODE_ENV === 'production'
+    // Set session cookie with proper configuration
+    const cookieOptions: any = {
+      httpOnly: true,
+      path: '/',
+      maxAge: 60 * 60 * 24 * 30 // 30 days
+    }
     
-    c.header('Set-Cookie', `session=${sessionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400${isProduction ? '' : '; Domain=localhost'}`)
+    if (c.env.NODE_ENV === 'production') {
+      cookieOptions.domain = '.bountyhub.tech'
+      cookieOptions.secure = true
+      cookieOptions.sameSite = 'none'
+    } else {
+      cookieOptions.secure = false
+      cookieOptions.sameSite = 'lax'
+    }
+    
+    setCookie(c, 'session', sessionId, cookieOptions)
 
     return c.json({ 
       user: {

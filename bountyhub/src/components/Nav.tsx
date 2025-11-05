@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { FiCreditCard, FiLogOut, FiUsers, FiDollarSign, FiSettings, FiCheckSquare, FiRefreshCw, FiBarChart2, FiShield, FiGithub, FiAward } from 'react-icons/fi'
+import { FiCreditCard, FiLogOut, FiUsers, FiDollarSign, FiSettings, FiCheckSquare, FiRefreshCw, FiBarChart2, FiShield, FiGithub, FiAward, FiChevronDown, FiChevronUp } from 'react-icons/fi'
 import { useAuth } from '../contexts/AuthProvider'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useWalletModal } from '@solana/wallet-adapter-react-ui'
@@ -70,6 +70,8 @@ export function Nav() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [expanded, setExpanded] = useState(false)
+  const [openSourceOpen, setOpenSourceOpen] = useState(false)
+  const [toolsOpen, setToolsOpen] = useState(false)
   const notificationsRef = useRef<NotificationsRef>(null)
   const [unreadCount, setUnreadCount] = useState(0)
 
@@ -148,44 +150,78 @@ export function Nav() {
         </Link>
         <hr className='border-b border-gray-300 dark:border-gray-500 w-4/6 relative z-10'/>
 
-        <Link to="/bug-bounty/campaigns" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-neutral-100 dark:hover:bg-white/5">
-          <div className="relative flex items-center justify-center gap-4 px-4 py-1 w-full">
-            <FiShield className="h-6 w-6 text-gray-600 dark:text-gray-300 transition-all duration-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 group-hover:scale-110" />
-            {expanded && <span className="text-gray-600 dark:text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 whitespace-nowrap overflow-hidden max-w-xs">Bug Bounty</span>}
-          </div>
-        </Link>
+        {/* Open Source Dropdown */}
+        <div className="w-full relative group/dropdown">
+          <button
+            onClick={() => setOpenSourceOpen(!openSourceOpen)}
+            className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-neutral-100 dark:hover:bg-white/5"
+          >
+            <div className="relative flex items-center justify-center gap-4 px-4 py-1 w-full">
+              <FiGithub className="h-6 w-6 text-gray-600 dark:text-gray-300 transition-all duration-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 group-hover:scale-110" />
+              {expanded && (
+                <>
+                  <span className="text-gray-600 dark:text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 whitespace-nowrap overflow-hidden max-w-xs">Open Source</span>
+                  {openSourceOpen ? (
+                    <FiChevronUp className="h-4 w-4 text-gray-600 dark:text-gray-300 ml-auto" />
+                  ) : (
+                    <FiChevronDown className="h-4 w-4 text-gray-600 dark:text-gray-300 ml-auto" />
+                  )}
+                </>
+              )}
+            </div>
+          </button>
+          {expanded && openSourceOpen && (
+            <div className="w-full bg-white dark:bg-neutral-800/90 border border-neutral-200 dark:border-neutral-700 rounded-lg mt-1 mb-2 overflow-hidden">
+              <Link to="/bug-bounty/campaigns" className="w-full py-2 px-4 flex items-center gap-3 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors">
+                <FiShield className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                <span className="text-gray-600 dark:text-gray-300 text-sm">Bug Bounty</span>
+              </Link>
+              <Link to="/repositories" className="w-full py-2 px-4 flex items-center gap-3 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors">
+                <FiGithub className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                <span className="text-gray-600 dark:text-gray-300 text-sm">Repositories</span>
+              </Link>
+              <Link to="/contributions" className="w-full py-2 px-4 flex items-center gap-3 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors">
+                <FiAward className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                <span className="text-gray-600 dark:text-gray-300 text-sm">Contributions</span>
+              </Link>
+            </div>
+          )}
+        </div>
         <hr className='border-b border-gray-300 dark:border-gray-500 w-4/6 relative z-10'/>
 
-        <Link to="/repositories" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-neutral-100 dark:hover:bg-white/5">
-          <div className="relative flex items-center justify-center gap-4 px-4 py-1 w-full">
-            <FiGithub className="h-6 w-6 text-gray-600 dark:text-gray-300 transition-all duration-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 group-hover:scale-110" />
-            {expanded && <span className="text-gray-600 dark:text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 whitespace-nowrap overflow-hidden max-w-xs">Repositories</span>}
-          </div>
-        </Link>
-        <hr className='border-b border-gray-300 dark:border-gray-500 w-4/6 relative z-10'/>
-
-        <Link to="/contributions" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-neutral-100 dark:hover:bg-white/5">
-          <div className="relative flex items-center justify-center gap-4 px-4 py-1 w-full">
-            <FiAward className="h-6 w-6 text-gray-600 dark:text-gray-300 transition-all duration-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 group-hover:scale-110" />
-            {expanded && <span className="text-gray-600 dark:text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 whitespace-nowrap overflow-hidden max-w-xs">Contributions</span>}
-          </div>
-        </Link>
-        <hr className='border-b border-gray-300 dark:border-gray-500 w-4/6 relative z-10'/>
-        
-        <Link to="/analytics" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-neutral-100 dark:hover:bg-white/5">
-          <div className="relative flex items-center justify-center gap-4 px-4 py-1 w-full">
-            <FiBarChart2 className="h-6 w-6 text-gray-600 dark:text-gray-300 transition-all duration-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 group-hover:scale-110" />
-            {expanded && <span className="text-gray-600 dark:text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 whitespace-nowrap overflow-hidden max-w-xs">Analytics</span>}
-          </div>
-        </Link>
-        <hr className='border-b border-gray-300 dark:border-gray-500 w-4/6 relative z-10'/>
-
-        <Link to="/refund-requests" className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-neutral-100 dark:hover:bg-white/5">
-          <div className="relative flex items-center justify-center gap-4 px-4 py-1 w-full">
-            <FiRefreshCw className="h-6 w-6 text-gray-600 dark:text-gray-300 transition-all duration-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 group-hover:scale-110" />
-            {expanded && <span className="text-gray-600 dark:text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 whitespace-nowrap overflow-hidden max-w-xs">Refund Requests</span>}
-          </div>
-        </Link>
+        {/* Tools Dropdown */}
+        <div className="w-full relative group/dropdown">
+          <button
+            onClick={() => setToolsOpen(!toolsOpen)}
+            className="w-full py-3 flex justify-center items-center transition-all duration-300 group/item hover:bg-neutral-100 dark:hover:bg-white/5"
+          >
+            <div className="relative flex items-center justify-center gap-4 px-4 py-1 w-full">
+              <FiBarChart2 className="h-6 w-6 text-gray-600 dark:text-gray-300 transition-all duration-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 group-hover:scale-110" />
+              {expanded && (
+                <>
+                  <span className="text-gray-600 dark:text-gray-300 text-sm font-medium transition-all duration-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 whitespace-nowrap overflow-hidden max-w-xs">Tools</span>
+                  {toolsOpen ? (
+                    <FiChevronUp className="h-4 w-4 text-gray-600 dark:text-gray-300 ml-auto" />
+                  ) : (
+                    <FiChevronDown className="h-4 w-4 text-gray-600 dark:text-gray-300 ml-auto" />
+                  )}
+                </>
+              )}
+            </div>
+          </button>
+          {expanded && toolsOpen && (
+            <div className="w-full bg-white dark:bg-neutral-800/90 border border-neutral-200 dark:border-neutral-700 rounded-lg mt-1 mb-2 overflow-hidden">
+              <Link to="/analytics" className="w-full py-2 px-4 flex items-center gap-3 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors">
+                <FiBarChart2 className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                <span className="text-gray-600 dark:text-gray-300 text-sm">Analytics</span>
+              </Link>
+              <Link to="/refund-requests" className="w-full py-2 px-4 flex items-center gap-3 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors">
+                <FiRefreshCw className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                <span className="text-gray-600 dark:text-gray-300 text-sm">Refund Requests</span>
+              </Link>
+            </div>
+          )}
+        </div>
         <hr className='border-b border-gray-300 dark:border-gray-500 w-4/6 relative z-10'/>
 
         {/* Admin Panel - Only show for admin users */}
