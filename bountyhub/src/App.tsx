@@ -101,46 +101,45 @@ function AppContent() {
         
         {/* Layout - Page content with top padding for navbar */}
         <Layout showNav={showAuthenticatedNav}>
-            <PageMetadata />
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/profile/activity" element={<ProfileActivity />} />
-              <Route path="/profile/posts" element={<ProfilePosts />} />
-              <Route path="/profile/bookmarks" element={<ProfileBookmarks />} />
-              <Route path="/community" element={<Community />} />
-              <Route path="/governance" element={<Governance />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/wallet" element={<Wallet />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/posts/create" element={<CreatePost />} />
-              <Route path="/posts/:postId" element={<PostDetail />} />
-              <Route path="/users/:username" element={<UserProfile />} />
-              <Route path="/users/:username/posts" element={<UserPosts />} />
-              <Route path="/:username" element={<UserProfile />} />
-              <Route path="/transactions" element={<Transactions />} />
-              <Route path="/refund-requests" element={<RefundRequests />} />
-              <Route path="/docs" element={<Docs />} />
-              <Route path="/docs/platform" element={<PlatformDocs />} />
-              <Route path="/docs/user-guide" element={<UserGuide />} />
-              <Route path="/docs/developer-guide" element={<DeveloperGuide />} />
-              <Route path="/docs/api-reference" element={<ApiReference />} />
-              <Route path="/docs/deployment-guide" element={<DeploymentGuide />} />
-              <Route path="/docs/legal" element={<Legal />} />
-              <Route path="/docs/refund-system" element={<RefundSystem />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="/bug-bounty/campaigns" element={<BugBountyCampaigns />} />
-              <Route path="/bug-bounty/campaigns/create" element={<BugBountyCampaignCreate />} />
-              <Route path="/bug-bounty/campaigns/:id" element={<BugBountyCampaignDetail />} />
-              <Route path="/repositories" element={<Repositories />} />
-              <Route path="/contributions" element={<Contributions />} />
-            </Routes>
-          </Layout>
-        </div>
+          <PageMetadata />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile/activity" element={<ProfileActivity />} />
+            <Route path="/profile/posts" element={<ProfilePosts />} />
+            <Route path="/profile/bookmarks" element={<ProfileBookmarks />} />
+            <Route path="/community" element={<Community />} />
+            <Route path="/governance" element={<Governance />} />
+            <Route path="/analytics" element={<Analytics />} />
+            <Route path="/wallet" element={<Wallet />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/posts/create" element={<CreatePost />} />
+            <Route path="/posts/:postId" element={<PostDetail />} />
+            <Route path="/users/:username" element={<UserProfile />} />
+            <Route path="/users/:username/posts" element={<UserPosts />} />
+            <Route path="/:username" element={<UserProfile />} />
+            <Route path="/transactions" element={<Transactions />} />
+            <Route path="/refund-requests" element={<RefundRequests />} />
+            <Route path="/docs" element={<Docs />} />
+            <Route path="/docs/platform" element={<PlatformDocs />} />
+            <Route path="/docs/user-guide" element={<UserGuide />} />
+            <Route path="/docs/developer-guide" element={<DeveloperGuide />} />
+            <Route path="/docs/api-reference" element={<ApiReference />} />
+            <Route path="/docs/deployment-guide" element={<DeploymentGuide />} />
+            <Route path="/docs/legal" element={<Legal />} />
+            <Route path="/docs/refund-system" element={<RefundSystem />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/bug-bounty/campaigns" element={<BugBountyCampaigns />} />
+            <Route path="/bug-bounty/campaigns/create" element={<BugBountyCampaignCreate />} />
+            <Route path="/bug-bounty/campaigns/:id" element={<BugBountyCampaignDetail />} />
+            <Route path="/repositories" element={<Repositories />} />
+            <Route path="/contributions" element={<Contributions />} />
+          </Routes>
+        </Layout>
         
         {/* Footer - Show on every page, full width below content */}
         <Footer />
