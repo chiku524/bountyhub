@@ -65,13 +65,20 @@ export function TopNav() {
   const [unreadCount, setUnreadCount] = useState(0)
 
   // Close dropdowns when clicking outside
-  const handleClickOutside = (e: MouseEvent) => {
-    const target = e.target as HTMLElement
-    if (!target.closest('.dropdown-menu') && !target.closest('.dropdown-trigger')) {
-      setGovernanceOpen(false)
-      setOpenSourceOpen(false)
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      if (!target.closest('.dropdown-menu') && !target.closest('.dropdown-trigger')) {
+        setGovernanceOpen(false)
+        setOpenSourceOpen(false)
+      }
     }
-  }
+    
+    if (governanceOpen || openSourceOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [governanceOpen, openSourceOpen])
 
   // Fetch unread count from Notifications component
   const handleNotificationsUpdate = (count: number) => {
