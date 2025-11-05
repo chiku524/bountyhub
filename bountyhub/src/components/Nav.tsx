@@ -85,7 +85,12 @@ export function Nav() {
     const nav = document.querySelector('.nav-container')
     if (!nav) return
     const handleMouseEnter = () => setExpanded(true)
-    const handleMouseLeave = () => setExpanded(false)
+    const handleMouseLeave = () => {
+      setExpanded(false)
+      // Close dropdowns when navbar collapses
+      setOpenSourceOpen(false)
+      setToolsOpen(false)
+    }
     nav.addEventListener('mouseenter', handleMouseEnter)
     nav.addEventListener('mouseleave', handleMouseLeave)
     return () => {
