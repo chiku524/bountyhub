@@ -24,6 +24,16 @@ export function InstallPrompt() {
       return
     }
 
+    // Check if user dismissed prompt recently (before setting up listeners)
+    const dismissed = localStorage.getItem('installPromptDismissed')
+    if (dismissed) {
+      const dismissedTime = parseInt(dismissed, 10)
+      const daysSinceDismissed = (Date.now() - dismissedTime) / (1000 * 60 * 60 * 24)
+      if (daysSinceDismissed < 7) {
+        return // Don't show prompt if dismissed recently
+      }
+    }
+
     // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault()
@@ -64,21 +74,10 @@ export function InstallPrompt() {
 
   const handleDismiss = () => {
     setShowPrompt(false)
+    setDeferredPrompt(null)
     // Store dismissal in localStorage to avoid showing again for 7 days
     localStorage.setItem('installPromptDismissed', Date.now().toString())
   }
-
-  useEffect(() => {
-    // Check if user dismissed prompt recently
-    const dismissed = localStorage.getItem('installPromptDismissed')
-    if (dismissed) {
-      const dismissedTime = parseInt(dismissed, 10)
-      const daysSinceDismissed = (Date.now() - dismissedTime) / (1000 * 60 * 60 * 24)
-      if (daysSinceDismissed < 7) {
-        setShowPrompt(false)
-      }
-    }
-  }, [])
 
   if (isInstalled || !showPrompt || !deferredPrompt) {
     return null
@@ -101,7 +100,7 @@ export function InstallPrompt() {
         <div className="flex items-center gap-2">
           <button
             onClick={handleInstall}
-            className="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
+            className="p-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors"
             aria-label="Install app"
           >
             <FiDownload className="w-5 h-5" />
