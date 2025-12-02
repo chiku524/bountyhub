@@ -310,9 +310,9 @@ export default function Home() {
 
         {/* CTA Section */}
         <section id="cta" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-500 dark:to-purple-500 rounded-2xl p-12 text-center text-white">
-            <h2 className="text-4xl font-bold mb-4">Ready to Get Started?</h2>
-            <p className="text-xl mb-8 text-indigo-100 max-w-2xl mx-auto">
+          <div className="bg-white/80 dark:bg-neutral-800/80 backdrop-blur-sm rounded-2xl p-12 text-center border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_20px_rgba(139,92,246,0.2)] dark:shadow-[0_0_20px_rgba(139,92,246,0.3)]">
+            <h2 className="text-4xl font-bold mb-4 text-neutral-900 dark:text-white">Ready to Get Started?</h2>
+            <p className="text-xl mb-8 text-neutral-600 dark:text-neutral-300 max-w-2xl mx-auto">
               Join the decentralized bounty platform and start earning rewards today
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -320,13 +320,13 @@ export default function Home() {
                 <>
                   <Link
                     to="/posts/create"
-                    className="px-8 py-4 bg-white text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors font-semibold text-lg"
+                    className="px-8 py-4 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors font-semibold text-lg shadow-lg hover:shadow-violet-500/50"
                   >
                     Create Your First Bounty
                   </Link>
                   <Link
                     to="/community"
-                    className="px-8 py-4 bg-indigo-700 text-white rounded-lg hover:bg-indigo-800 transition-colors font-semibold text-lg border-2 border-white/20"
+                    className="px-8 py-4 bg-white dark:bg-neutral-700 text-violet-600 dark:text-violet-400 rounded-lg hover:bg-violet-50 dark:hover:bg-neutral-600 transition-colors font-semibold text-lg border-2 border-violet-500/30 dark:border-violet-500/30"
                   >
                     Browse Community
                   </Link>
@@ -335,13 +335,13 @@ export default function Home() {
                 <>
                   <Link
                     to="/signup"
-                    className="px-8 py-4 bg-white text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors font-semibold text-lg"
+                    className="px-8 py-4 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors font-semibold text-lg shadow-lg hover:shadow-violet-500/50"
                   >
                     Sign Up Free
                   </Link>
                   <Link
                     to="/login"
-                    className="px-8 py-4 bg-indigo-700 text-white rounded-lg hover:bg-indigo-800 transition-colors font-semibold text-lg border-2 border-white/20"
+                    className="px-8 py-4 bg-white dark:bg-neutral-700 text-violet-600 dark:text-violet-400 rounded-lg hover:bg-violet-50 dark:hover:bg-neutral-600 transition-colors font-semibold text-lg border-2 border-violet-500/30 dark:border-violet-500/30"
                   >
                     Sign In
                   </Link>
