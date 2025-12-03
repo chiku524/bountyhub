@@ -156,9 +156,28 @@ app.post('/sync', async (c) => {
       if (githubResponse.status === 401) {
         return c.json({ 
           error: 'GitHub access token is invalid or expired. Please reconnect your GitHub account.',
-          details: errorJson?.message || errorText
+          details: errorJson?.message || errorText,
+          requiresReconnect: true
         }, 401)
       } else if (githubResponse.status === 403) {
+        // Check if it's a permissions issue (likely missing repo scope)
+        const isPermissionsError = errorText.includes('permission') || 
+                                   errorText.includes('scope') || 
+                                   errorText.includes('insufficient') ||
+                                   (errorJson?.message && (
+                                     errorJson.message.includes('permission') ||
+                                     errorJson.message.includes('scope') ||
+                                     errorJson.message.includes('insufficient')
+                                   ))
+        
+        if (isPermissionsError) {
+          return c.json({ 
+            error: 'GitHub token does not have repository access permissions. Please disconnect and reconnect your GitHub account to grant repository access.',
+            details: errorJson?.message || errorText,
+            requiresReconnect: true
+          }, 403)
+        }
+        
         return c.json({ 
           error: 'GitHub API rate limit exceeded or insufficient permissions.',
           details: errorJson?.message || errorText
