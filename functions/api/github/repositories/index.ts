@@ -113,26 +113,60 @@ app.post('/sync', async (c) => {
     })
 
     if (!githubResponse.ok) {
-      const errorText = await githubResponse.text()
+      let errorText = ''
+      let errorJson: any = null
+      
+      try {
+        errorText = await githubResponse.text()
+        try {
+          errorJson = JSON.parse(errorText)
+        } catch {
+          // Not JSON, use text as is
+        }
+      } catch (e) {
+        errorText = 'Failed to read error response'
+      }
+      
       console.error('GitHub API error:', {
         status: githubResponse.status,
         statusText: githubResponse.statusText,
         error: errorText,
+        errorJson,
         hasToken: !!user[0].githubAccessToken,
-        tokenLength: user[0].githubAccessToken?.length || 0
+        tokenLength: user[0].githubAccessToken?.length || 0,
+        tokenPrefix: user[0].githubAccessToken?.substring(0, 10) || 'none'
       })
       
       // Provide more specific error messages
       if (githubResponse.status === 401) {
-        return c.json({ error: 'GitHub access token is invalid or expired. Please reconnect your GitHub account.' }, 401)
+        return c.json({ 
+          error: 'GitHub access token is invalid or expired. Please reconnect your GitHub account.',
+          details: errorJson?.message || errorText
+        }, 401)
       } else if (githubResponse.status === 403) {
-        return c.json({ error: 'GitHub API rate limit exceeded or insufficient permissions.' }, 403)
+        return c.json({ 
+          error: 'GitHub API rate limit exceeded or insufficient permissions.',
+          details: errorJson?.message || errorText
+        }, 403)
       }
       
-      return c.json({ error: `Failed to fetch repositories from GitHub: ${githubResponse.statusText}` }, 500)
+      return c.json({ 
+        error: `Failed to fetch repositories from GitHub: ${githubResponse.statusText}`,
+        details: errorJson?.message || errorText,
+        status: githubResponse.status
+      }, 500)
     }
 
-    const githubRepos = await githubResponse.json() as any[]
+    let githubRepos: any[] = []
+    try {
+      githubRepos = await githubResponse.json() as any[]
+    } catch (parseError: any) {
+      console.error('Error parsing GitHub response:', parseError)
+      return c.json({ 
+        error: 'Failed to parse GitHub API response',
+        details: parseError?.message || 'Invalid JSON response from GitHub'
+      }, 500)
+    }
     const now = new Date()
 
     console.log(`Syncing ${githubRepos.length} repositories for user ${userId}`)
@@ -217,14 +251,14 @@ app.post('/sync', async (c) => {
       userId: userId || 'unknown'
     })
     
-    // Return more detailed error information
+    // Return more detailed error information (but don't expose stack in production)
     const errorMessage = error?.message || 'Unknown error'
-    const errorDetails = error?.stack ? error.stack.substring(0, 500) : 'No stack trace'
+    const isProduction = c.env.NODE_ENV === 'production'
     
     return c.json({ 
       error: 'Failed to sync repositories',
       details: errorMessage,
-      stack: errorDetails
+      ...(isProduction ? {} : { stack: error?.stack?.substring(0, 500) })
     }, 500)
   }
 })
