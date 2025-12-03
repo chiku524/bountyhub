@@ -121,9 +121,20 @@ app.post('/disconnect', async (c) => {
       return c.json({ error: 'GitHub account not connected' }, 400)
     }
     
-    // Check if user has a password (required for disconnecting GitHub)
-    if (!user[0].password || user[0].password.startsWith('$2b$') || user[0].password.startsWith('$2a$')) {
-      // User has password, safe to disconnect
+    // Check if user has a valid password (required for disconnecting GitHub)
+    // A valid password should be a bcrypt hash starting with $2b$ or $2a$
+    const hasValidPassword = user[0].password && 
+                            (user[0].password.startsWith('$2b$') || user[0].password.startsWith('$2a$'))
+    
+    if (!hasValidPassword) {
+      return c.json({ 
+        error: 'Cannot disconnect GitHub account. Please set a password first in the Security tab.',
+        requiresPassword: true
+      }, 400)
+    }
+    
+    // User has valid password, safe to disconnect
+    try {
       await db.update(users)
         .set({
           githubId: null,
@@ -135,13 +146,30 @@ app.post('/disconnect', async (c) => {
         })
         .where(eq(users.id, userId))
       
-      return c.json({ success: true, message: 'GitHub account disconnected' })
-    } else {
-      return c.json({ error: 'Cannot disconnect GitHub account. Please set a password first.' }, 400)
+      console.log('GitHub account disconnected successfully for user:', userId)
+      return c.json({ success: true, message: 'GitHub account disconnected successfully' })
+    } catch (dbError: any) {
+      console.error('Database error during disconnect:', {
+        message: dbError?.message,
+        stack: dbError?.stack,
+        userId
+      })
+      return c.json({ 
+        error: 'Failed to disconnect GitHub account',
+        details: dbError?.message || 'Database error'
+      }, 500)
     }
-  } catch (error) {
-    console.error('GitHub disconnect error:', error)
-    return c.json({ error: 'Failed to disconnect GitHub account' }, 500)
+  } catch (error: any) {
+    console.error('GitHub disconnect error:', {
+      message: error?.message,
+      stack: error?.stack,
+      name: error?.name,
+      error: error
+    })
+    return c.json({ 
+      error: 'Failed to disconnect GitHub account',
+      details: error?.message || 'Unknown error'
+    }, 500)
   }
 })
 
