@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { FiCamera, FiShield, FiStar, FiThumbsUp } from 'react-icons/fi'
 import { FaGithub, FaTwitter, FaLinkedin, FaInstagram, FaFacebook, FaYoutube, FaTiktok, FaDiscord, FaReddit, FaMedium, FaStackOverflow, FaDev } from 'react-icons/fa'
 import { api } from '../utils/api'
+import { config } from '../utils/config'
 import { useAuth } from '../contexts/AuthProvider'
 import type { User, Post, Bookmark, ReputationHistory } from '../types'
 
@@ -334,7 +335,7 @@ export default function Profile() {
 
   const loadGitHubStatus = async () => {
     try {
-      const response = await fetch('/api/auth/github/profile', {
+      const response = await fetch(`${config.api.baseUrl}/api/auth/github/profile`, {
         credentials: 'include'
       })
       if (response.ok) {

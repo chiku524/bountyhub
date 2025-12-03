@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../utils/api'
+import { config } from '../utils/config'
 import type { User } from '../types'
 import { FiUser, FiLink, FiMail, FiLock, FiSave, FiCheck } from 'react-icons/fi'
 
@@ -76,7 +77,7 @@ export default function Settings() {
 
   const loadGitHubStatus = async () => {
     try {
-      const response = await fetch('/api/auth/github/profile', {
+      const response = await fetch(`${config.api.baseUrl}/api/auth/github/profile`, {
         credentials: 'include'
       })
       if (response.ok) {
@@ -96,7 +97,7 @@ export default function Settings() {
   const handleGitHubConnect = async () => {
     try {
       setGithubLoading(true)
-      const response = await fetch('/api/auth/github/connect', {
+      const response = await fetch(`${config.api.baseUrl}/api/auth/github/connect`, {
         method: 'POST',
         credentials: 'include'
       })
@@ -120,7 +121,7 @@ export default function Settings() {
     
     try {
       setGithubLoading(true)
-      const response = await fetch('/api/auth/github/disconnect', {
+      const response = await fetch(`${config.api.baseUrl}/api/auth/github/disconnect`, {
         method: 'POST',
         credentials: 'include'
       })

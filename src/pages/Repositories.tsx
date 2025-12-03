@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../utils/api'
+import { config } from '../utils/config'
 import { useAuth } from '../contexts/AuthProvider'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { ErrorMessage } from '../components/ErrorMessage'
@@ -31,7 +32,7 @@ export default function Repositories() {
   const checkGitHubConnection = async () => {
     try {
       setCheckingConnection(true)
-      const response = await fetch('/api/auth/github/profile', {
+      const response = await fetch(`${config.api.baseUrl}/api/auth/github/profile`, {
         credentials: 'include'
       })
       if (response.ok) {
@@ -81,7 +82,7 @@ export default function Repositories() {
 
   const handleConnectGitHub = async () => {
     try {
-      const response = await fetch('/api/auth/github/connect', {
+      const response = await fetch(`${config.api.baseUrl}/api/auth/github/connect`, {
         method: 'POST',
         credentials: 'include'
       })
