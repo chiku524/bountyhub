@@ -79,6 +79,7 @@ app.get(async (c) => {
 // POST sync repositories from GitHub
 app.post('/sync', async (c) => {
   const db = createDb(c.env.DB)
+  let userId: string | null = null
   
   try {
     const sessionCookie = getCookie(c, 'session')
@@ -86,7 +87,7 @@ app.post('/sync', async (c) => {
       return c.json({ error: 'Not authenticated' }, 401)
     }
 
-    const userId = await getUserIdFromSession(sessionCookie, db)
+    userId = await getUserIdFromSession(sessionCookie, db)
     if (!userId) {
       return c.json({ error: 'Invalid session' }, 401)
     }
