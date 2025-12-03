@@ -74,7 +74,20 @@ export default function Repositories() {
       const response = await api.syncGitHubRepositories()
       setRepositories(response.repositories)
     } catch (err: any) {
-      setError(err.message || 'Failed to sync repositories')
+      // Try to extract detailed error message
+      let errorMessage = err.message || 'Failed to sync repositories'
+      if (err.response) {
+        try {
+          const errorData = await err.response.json()
+          if (errorData.details) {
+            errorMessage = `${errorMessage}: ${errorData.details}`
+          }
+        } catch {
+          // If response isn't JSON, use the message as is
+        }
+      }
+      console.error('Sync error:', err)
+      setError(errorMessage)
     } finally {
       setSyncing(false)
     }
