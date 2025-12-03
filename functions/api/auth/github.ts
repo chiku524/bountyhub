@@ -443,58 +443,6 @@ app.get('/callback', async (c) => {
   }
 })
 
-// Disconnect GitHub account
-app.post('/disconnect', async (c) => {
-  try {
-    const db = createDb(c.env.DB)
-    const sessionCookie = getCookie(c, 'session')
-    
-    if (!sessionCookie) {
-      return c.json({ error: 'Not authenticated' }, 401)
-    }
-    
-    const { getUserIdFromSession } = await import('../../../src/utils/auth')
-    const userId = await getUserIdFromSession(sessionCookie, db)
-    
-    if (!userId) {
-      return c.json({ error: 'Invalid session' }, 401)
-    }
-    
-    // Check if user has GitHub connected
-    const user = await db.select().from(users).where(eq(users.id, userId)).limit(1)
-    
-    if (user.length === 0) {
-      return c.json({ error: 'User not found' }, 404)
-    }
-    
-    if (!user[0].githubId) {
-      return c.json({ error: 'GitHub account not connected' }, 400)
-    }
-    
-    // Check if user has a password (required for disconnecting GitHub)
-    if (!user[0].password || user[0].password.startsWith('$2b$') || user[0].password.startsWith('$2a$')) {
-      // User has password, safe to disconnect
-      await db.update(users)
-        .set({
-          githubId: null,
-          githubUsername: null,
-          githubAccessToken: null,
-          githubAvatarUrl: null,
-          githubConnectedAt: null,
-          updatedAt: new Date()
-        })
-        .where(eq(users.id, userId))
-      
-      return c.json({ success: true, message: 'GitHub account disconnected' })
-    } else {
-      return c.json({ error: 'Cannot disconnect GitHub account. Please set a password first.' }, 400)
-    }
-  } catch (error) {
-    console.error('GitHub disconnect error:', error)
-    return c.json({ error: 'Failed to disconnect GitHub account' }, 500)
-  }
-})
-
 // Get GitHub profile info
 app.get('/profile', async (c) => {
   try {
