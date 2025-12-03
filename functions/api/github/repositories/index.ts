@@ -99,9 +99,24 @@ app.post('/sync', async (c) => {
       .where(eq(users.id, userId))
       .limit(1)
 
-    if (!user[0]?.githubAccessToken) {
-      return c.json({ error: 'GitHub account not connected' }, 400)
+    if (user.length === 0) {
+      console.error('User not found:', userId)
+      return c.json({ error: 'User not found' }, 404)
     }
+
+    if (!user[0]?.githubAccessToken) {
+      console.error('No GitHub access token for user:', userId, {
+        hasGithubId: !!user[0].githubId,
+        hasGithubUsername: !!user[0].githubUsername
+      })
+      return c.json({ error: 'GitHub account not connected. Please reconnect your GitHub account.' }, 400)
+    }
+
+    console.log('Fetching repositories for user:', userId, {
+      hasToken: !!user[0].githubAccessToken,
+      tokenLength: user[0].githubAccessToken.length,
+      githubUsername: user[0].githubUsername
+    })
 
     // Fetch repositories from GitHub API
     const githubResponse = await fetch('https://api.github.com/user/repos?per_page=100&sort=updated', {
