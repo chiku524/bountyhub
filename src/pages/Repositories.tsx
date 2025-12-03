@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../utils/api'
 import { config } from '../utils/config'
@@ -19,34 +19,39 @@ export default function Repositories() {
   const [filterLanguage, setFilterLanguage] = useState('')
   const [githubConnected, setGithubConnected] = useState(false)
   const [checkingConnection, setCheckingConnection] = useState(true)
+  const isMountedRef = useRef(true)
 
   useEffect(() => {
-    let isMounted = true
+    isMountedRef.current = true
     
     if (user) {
       checkGitHubConnection().catch(err => {
-        if (isMounted) {
+        if (isMountedRef.current) {
           console.error('Error checking GitHub connection:', err)
         }
       })
     } else {
-      if (isMounted) {
+      if (isMountedRef.current) {
         setLoading(false)
         setCheckingConnection(false)
       }
     }
     
     return () => {
-      isMounted = false
+      isMountedRef.current = false
     }
   }, [user])
 
   const checkGitHubConnection = async () => {
+    if (!isMountedRef.current) return
+    
     try {
       setCheckingConnection(true)
       const response = await fetch(`${config.api.baseUrl}/api/auth/github/profile`, {
         credentials: 'include'
       })
+      if (!isMountedRef.current) return
+      
       if (response.ok) {
         setGithubConnected(true)
         await loadRepositories()
@@ -55,11 +60,14 @@ export default function Repositories() {
         setLoading(false)
       }
     } catch (error) {
+      if (!isMountedRef.current) return
       console.error('Error checking GitHub connection:', error)
       setGithubConnected(false)
       setLoading(false)
     } finally {
-      setCheckingConnection(false)
+      if (isMountedRef.current) {
+        setCheckingConnection(false)
+      }
     }
   }
 
