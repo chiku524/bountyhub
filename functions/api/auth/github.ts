@@ -58,7 +58,7 @@ app.post('/connect', async (c) => {
     // Redirect to GitHub OAuth with state indicating this is a connect action
     const clientId = c.env.GITHUB_CLIENT_ID
     const redirectUri = encodeURIComponent(`${c.env.GITHUB_CALLBACK_URL}?action=connect`)
-    const scope = encodeURIComponent('user:email read:user')
+    const scope = encodeURIComponent('user:email read:user repo')
     const state = crypto.randomUUID()
     
     // Store state and user ID for verification
@@ -185,7 +185,7 @@ app.get('/profile', async (c) => {
 app.get('/', async (c) => {
   const clientId = c.env.GITHUB_CLIENT_ID
   const redirectUri = encodeURIComponent(c.env.GITHUB_CALLBACK_URL)
-  const scope = encodeURIComponent('user:email read:user')
+  const scope = encodeURIComponent('user:email read:user repo')
   const state = crypto.randomUUID() // CSRF protection
   
   // Store state in cookie for verification AND also pass it in the URL
