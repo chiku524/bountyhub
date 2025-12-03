@@ -184,9 +184,17 @@ app.post('/sync', async (c) => {
       count: syncedRepos.length,
       repositories: syncedRepos,
     })
-  } catch (error) {
-    console.error('Error syncing repositories:', error)
-    return c.json({ error: 'Failed to sync repositories' }, 500)
+  } catch (error: any) {
+    console.error('Error syncing repositories:', {
+      message: error?.message,
+      stack: error?.stack,
+      name: error?.name,
+      error: error
+    })
+    return c.json({ 
+      error: 'Failed to sync repositories',
+      details: error?.message || 'Unknown error'
+    }, 500)
   }
 })
 
