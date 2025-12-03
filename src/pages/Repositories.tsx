@@ -100,6 +100,12 @@ export default function Repositories() {
       
       if (err?.message) {
         errorMessage = err.message
+        // Add details if available
+        if (err?.errorData?.details) {
+          errorMessage = `${errorMessage}: ${err.errorData.details}`
+        } else if (err?.errorData?.error && err.errorData.error !== errorMessage) {
+          errorMessage = `${errorMessage}: ${err.errorData.error}`
+        }
       } else if (err?.errorData?.error) {
         errorMessage = err.errorData.error
         if (err.errorData.details) {
@@ -109,7 +115,11 @@ export default function Repositories() {
         errorMessage = err
       }
       
-      console.error('Sync error:', err)
+      console.error('Sync error:', {
+        message: err?.message,
+        errorData: err?.errorData,
+        error: err
+      })
       setError(errorMessage)
     } finally {
       setSyncing(false)
