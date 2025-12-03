@@ -121,11 +121,26 @@ export default function Settings() {
     
     try {
       setGithubLoading(true)
+      setError(null)
       const response = await fetch(`${config.api.baseUrl}/api/auth/github/disconnect`, {
         method: 'POST',
         credentials: 'include'
       })
+      
       const data = await response.json()
+      
+      if (!response.ok) {
+        // Handle error response
+        if (data.requiresPassword) {
+          setError(`${data.error} Please go to the Security tab to set a password first.`)
+          // Optionally switch to security tab
+          setActiveTab('security')
+        } else {
+          setError(data.error || data.details || 'Failed to disconnect GitHub account')
+        }
+        return
+      }
+      
       if (data.success) {
         setGithubConnected(false)
         setGithubUsername(null)
@@ -134,8 +149,9 @@ export default function Settings() {
       } else {
         setError(data.error || 'Failed to disconnect GitHub account')
       }
-    } catch (error) {
-      setError('Failed to disconnect GitHub account')
+    } catch (error: any) {
+      console.error('Disconnect error:', error)
+      setError(error?.message || 'Failed to disconnect GitHub account')
     } finally {
       setGithubLoading(false)
     }
