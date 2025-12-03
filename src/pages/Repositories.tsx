@@ -115,6 +115,11 @@ export default function Repositories() {
         errorMessage = err
       }
       
+      // If error indicates reconnection is needed, provide helpful message
+      if (err?.errorData?.requiresReconnect) {
+        errorMessage = `${errorMessage}\n\nPlease disconnect and reconnect your GitHub account from Settings to grant repository access permissions.`
+      }
+      
       console.error('Sync error:', {
         message: err?.message,
         errorData: err?.errorData,
