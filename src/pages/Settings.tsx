@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { api } from '../utils/api'
 import { config } from '../utils/config'
 import type { User } from '../types'
@@ -32,6 +33,7 @@ interface PasswordData {
 }
 
 export default function Settings() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -73,7 +75,35 @@ export default function Settings() {
   useEffect(() => {
     loadUserData()
     loadGitHubStatus()
-  }, [])
+    
+    // Check for GitHub connection status from query params
+    const githubConnected = searchParams.get('github_connected')
+    const githubError = searchParams.get('error')
+    
+    if (githubConnected === 'true') {
+      setSuccess('GitHub account connected successfully')
+      setTimeout(() => setSuccess(null), 5000)
+      // Reload GitHub status to update UI
+      loadGitHubStatus()
+      // Clear the query parameter
+      searchParams.delete('github_connected')
+      setSearchParams(searchParams, { replace: true })
+    }
+    
+    if (githubError) {
+      let errorMessage = 'Failed to connect GitHub account'
+      if (githubError === 'github_already_connected') {
+        errorMessage = 'This GitHub account is already connected to another user'
+      } else if (githubError === 'user_not_found') {
+        errorMessage = 'User not found. Please try again.'
+      }
+      setError(errorMessage)
+      setTimeout(() => setError(null), 5000)
+      // Clear the query parameter
+      searchParams.delete('error')
+      setSearchParams(searchParams, { replace: true })
+    }
+  }, [searchParams, setSearchParams])
 
   const loadGitHubStatus = async () => {
     try {

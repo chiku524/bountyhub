@@ -362,7 +362,32 @@ app.all('/auth/callback', async (c) => {
     let userId: string
     let isNewUser = false
     
-    if (action === 'connect' && parsedConnectState && parsedConnectUserId && state === parsedConnectState) {
+    if (action === 'connect') {
+      // This is a connect action - verify state and link GitHub to existing account
+      if (!parsedConnectState || !parsedConnectUserId || state !== parsedConnectState) {
+        console.error('Connect action failed: invalid state or missing cookies', {
+          hasState: !!parsedConnectState,
+          hasUserId: !!parsedConnectUserId,
+          stateMatch: state === parsedConnectState,
+          receivedState: state,
+          storedState: parsedConnectState
+        })
+        // Clear any stale cookies
+        setCookie(c, 'github_connect_state', '', {
+          httpOnly: true,
+          path: '/',
+          maxAge: 0,
+          domain: c.env.NODE_ENV === 'production' ? '.bountyhub.tech' : undefined
+        })
+        setCookie(c, 'github_connect_user_id', '', {
+          httpOnly: true,
+          path: '/',
+          maxAge: 0,
+          domain: c.env.NODE_ENV === 'production' ? '.bountyhub.tech' : undefined
+        })
+        return c.redirect(`${frontendUrl}/settings?error=connect_failed`)
+      }
+      
       // This is a connect action - link GitHub to existing account
       console.log('Connecting GitHub account to existing user:', parsedConnectUserId)
       userId = parsedConnectUserId
@@ -392,17 +417,19 @@ app.all('/auth/callback', async (c) => {
         .where(eq(users.id, userId))
       
       // Clear connect cookies
-      setCookie(c, 'github_connect_state', '', {
+      const cookieOptions: any = {
         httpOnly: true,
         path: '/',
         maxAge: 0
-      })
-      setCookie(c, 'github_connect_user_id', '', {
-        httpOnly: true,
-        path: '/',
-        maxAge: 0
-      })
+      }
+      if (c.env.NODE_ENV === 'production') {
+        cookieOptions.domain = '.bountyhub.tech'
+      }
       
+      setCookie(c, 'github_connect_state', '', cookieOptions)
+      setCookie(c, 'github_connect_user_id', '', cookieOptions)
+      
+      console.log('GitHub account connected successfully for user:', userId)
       // Redirect to settings with success message
       return c.redirect(`${frontendUrl}/settings?github_connected=true`)
     } else {
