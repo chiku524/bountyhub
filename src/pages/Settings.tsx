@@ -96,6 +96,8 @@ export default function Settings() {
         errorMessage = 'This GitHub account is already connected to another user'
       } else if (githubError === 'user_not_found') {
         errorMessage = 'User not found. Please try again.'
+      } else if (githubError === 'connect_failed') {
+        errorMessage = 'Connection failed. Please try connecting again.'
       }
       setError(errorMessage)
       setTimeout(() => setError(null), 5000)
