@@ -105,13 +105,30 @@ app.post('/sync', async (c) => {
     // Fetch repositories from GitHub API
     const githubResponse = await fetch('https://api.github.com/user/repos?per_page=100&sort=updated', {
       headers: {
-        'Authorization': `token ${user[0].githubAccessToken}`,
+        'Authorization': `Bearer ${user[0].githubAccessToken}`,
         'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'BountyHub-API'
       }
     })
 
     if (!githubResponse.ok) {
-      return c.json({ error: 'Failed to fetch repositories from GitHub' }, 500)
+      const errorText = await githubResponse.text()
+      console.error('GitHub API error:', {
+        status: githubResponse.status,
+        statusText: githubResponse.statusText,
+        error: errorText,
+        hasToken: !!user[0].githubAccessToken,
+        tokenLength: user[0].githubAccessToken?.length || 0
+      })
+      
+      // Provide more specific error messages
+      if (githubResponse.status === 401) {
+        return c.json({ error: 'GitHub access token is invalid or expired. Please reconnect your GitHub account.' }, 401)
+      } else if (githubResponse.status === 403) {
+        return c.json({ error: 'GitHub API rate limit exceeded or insufficient permissions.' }, 403)
+      }
+      
+      return c.json({ error: `Failed to fetch repositories from GitHub: ${githubResponse.statusText}` }, 500)
     }
 
     const githubRepos = await githubResponse.json() as any[]
