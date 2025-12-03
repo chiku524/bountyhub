@@ -21,11 +21,23 @@ export default function Repositories() {
   const [checkingConnection, setCheckingConnection] = useState(true)
 
   useEffect(() => {
+    let isMounted = true
+    
     if (user) {
-      checkGitHubConnection()
+      checkGitHubConnection().catch(err => {
+        if (isMounted) {
+          console.error('Error checking GitHub connection:', err)
+        }
+      })
     } else {
-      setLoading(false)
-      setCheckingConnection(false)
+      if (isMounted) {
+        setLoading(false)
+        setCheckingConnection(false)
+      }
+    }
+    
+    return () => {
+      isMounted = false
     }
   }, [user])
 
@@ -37,12 +49,13 @@ export default function Repositories() {
       })
       if (response.ok) {
         setGithubConnected(true)
-        loadRepositories()
+        await loadRepositories()
       } else {
         setGithubConnected(false)
         setLoading(false)
       }
     } catch (error) {
+      console.error('Error checking GitHub connection:', error)
       setGithubConnected(false)
       setLoading(false)
     } finally {
@@ -74,18 +87,20 @@ export default function Repositories() {
       const response = await api.syncGitHubRepositories()
       setRepositories(response.repositories)
     } catch (err: any) {
-      // Try to extract detailed error message
-      let errorMessage = err.message || 'Failed to sync repositories'
-      if (err.response) {
-        try {
-          const errorData = await err.response.json()
-          if (errorData.details) {
-            errorMessage = `${errorMessage}: ${errorData.details}`
-          }
-        } catch {
-          // If response isn't JSON, use the message as is
+      // Extract error message safely
+      let errorMessage = 'Failed to sync repositories'
+      
+      if (err?.message) {
+        errorMessage = err.message
+      } else if (err?.errorData?.error) {
+        errorMessage = err.errorData.error
+        if (err.errorData.details) {
+          errorMessage = `${errorMessage}: ${err.errorData.details}`
         }
+      } else if (typeof err === 'string') {
+        errorMessage = err
       }
+      
       console.error('Sync error:', err)
       setError(errorMessage)
     } finally {
