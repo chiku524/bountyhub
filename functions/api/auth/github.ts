@@ -315,21 +315,21 @@ app.post('/connect', async (c) => {
     const state = crypto.randomUUID()
     
     // Store state and user ID for verification
-    setCookie(c, 'github_connect_state', state, {
+    const cookieOptions: any = {
       httpOnly: true,
       secure: c.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 600,
       path: '/'
-    })
+    }
     
-    setCookie(c, 'github_connect_user_id', userId, {
-      httpOnly: true,
-      secure: c.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 600,
-      path: '/'
-    })
+    // In production, set domain to allow cross-subdomain access
+    if (c.env.NODE_ENV === 'production') {
+      cookieOptions.domain = '.bountyhub.tech'
+    }
+    
+    setCookie(c, 'github_connect_state', state, cookieOptions)
+    setCookie(c, 'github_connect_user_id', userId, cookieOptions)
     
     const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}`
     

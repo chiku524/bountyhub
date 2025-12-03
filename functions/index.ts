@@ -122,9 +122,13 @@ app.all('/auth/callback', async (c) => {
     const db = createDb(c.env.DB)
     const code = c.req.query('code')
     const state = c.req.query('state')
+    const action = c.req.query('action')
+    
+    // Determine which state cookie to check based on action
+    const stateCookieName = action === 'connect' ? 'github_connect_state' : 'github_oauth_state'
     
     // Try to get state cookie - try multiple ways in case of cookie domain issues
-    let storedState = getCookie(c, 'github_oauth_state')
+    let storedState = getCookie(c, stateCookieName)
     
     // If cookie not found, try to parse from Cookie header manually
     if (!storedState) {
@@ -132,7 +136,7 @@ app.all('/auth/callback', async (c) => {
       if (cookieHeader) {
         const cookies = cookieHeader.split(';').map(c => c.trim())
         for (const cookie of cookies) {
-          if (cookie.startsWith('github_oauth_state=')) {
+          if (cookie.startsWith(`${stateCookieName}=`)) {
             storedState = cookie.split('=')[1]
             break
           }
@@ -145,6 +149,8 @@ app.all('/auth/callback', async (c) => {
     console.log('Callback received:', {
       code: code ? `${code.substring(0, 10)}...` : 'missing',
       state: state || 'missing',
+      action: action || 'none',
+      stateCookieName,
       storedState: storedState || 'missing',
       stateLength: state?.length || 0,
       storedStateLength: storedState?.length || 0,
@@ -167,7 +173,8 @@ app.all('/auth/callback', async (c) => {
     if (!storedState) {
       console.warn('State cookie not found, validating state parameter format instead:', {
         state: state,
-        stateLength: state?.length || 0
+        stateLength: state?.length || 0,
+        action
       })
       
       // If cookie is missing but state is present, validate it's a valid UUID format
@@ -186,12 +193,19 @@ app.all('/auth/callback', async (c) => {
         hasStoredState: !!storedState,
         stateMatch: state === storedState,
         stateLength: state?.length || 0,
-        storedStateLength: storedState?.length || 0
+        storedStateLength: storedState?.length || 0,
+        action
       })
       return c.redirect(`${frontendUrl}/login?error=invalid_state`)
     }
     
     console.log('State verified, exchanging code for token...')
+    
+    // Construct redirect URI - include action parameter if present
+    let redirectUri = c.env.GITHUB_CALLBACK_URL
+    if (action === 'connect') {
+      redirectUri = `${c.env.GITHUB_CALLBACK_URL}?action=connect`
+    }
     
     // Exchange code for access token
     const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
@@ -204,7 +218,7 @@ app.all('/auth/callback', async (c) => {
         client_id: c.env.GITHUB_CLIENT_ID,
         client_secret: c.env.GITHUB_CLIENT_SECRET,
         code,
-        redirect_uri: c.env.GITHUB_CALLBACK_URL
+        redirect_uri: redirectUri
       })
     })
     
@@ -323,90 +337,158 @@ app.all('/auth/callback', async (c) => {
     
     console.log('Final email to use:', email)
     
-    // Check if user already exists with this GitHub ID
-    const existingUser = await db.select().from(users).where(eq(users.githubId, githubUser.id.toString())).limit(1)
+    // Check if this is a "connect" action (linking existing account)
+    const connectState = getCookie(c, 'github_connect_state')
+    const connectUserId = getCookie(c, 'github_connect_user_id')
+    
+    // If connect state cookie not found, try parsing from header
+    let parsedConnectState = connectState
+    let parsedConnectUserId = connectUserId
+    if (!parsedConnectState || !parsedConnectUserId) {
+      const cookieHeader = c.req.header('Cookie')
+      if (cookieHeader) {
+        const cookies = cookieHeader.split(';').map(c => c.trim())
+        for (const cookie of cookies) {
+          if (cookie.startsWith('github_connect_state=') && !parsedConnectState) {
+            parsedConnectState = cookie.split('=')[1]
+          }
+          if (cookie.startsWith('github_connect_user_id=') && !parsedConnectUserId) {
+            parsedConnectUserId = cookie.split('=')[1]
+          }
+        }
+      }
+    }
     
     let userId: string
     let isNewUser = false
     
-    if (existingUser.length > 0) {
-      // User exists, update GitHub info
-      userId = existingUser[0].id
+    if (action === 'connect' && parsedConnectState && parsedConnectUserId && state === parsedConnectState) {
+      // This is a connect action - link GitHub to existing account
+      console.log('Connecting GitHub account to existing user:', parsedConnectUserId)
+      userId = parsedConnectUserId
+      
+      // Verify user exists
+      const existingUser = await db.select().from(users).where(eq(users.id, userId)).limit(1)
+      if (existingUser.length === 0) {
+        return c.redirect(`${frontendUrl}/settings?error=user_not_found`)
+      }
+      
+      // Check if GitHub account is already connected to another user
+      const existingGitHubUser = await db.select().from(users).where(eq(users.githubId, githubUser.id.toString())).limit(1)
+      if (existingGitHubUser.length > 0 && existingGitHubUser[0].id !== userId) {
+        return c.redirect(`${frontendUrl}/settings?error=github_already_connected`)
+      }
+      
+      // Link GitHub account to existing user
       await db.update(users)
         .set({
-          githubUsername: githubUser.login,
-          githubAvatarUrl: githubUser.avatar_url || null,
-          githubAccessToken: accessToken, // In production, encrypt this
-          githubConnectedAt: new Date(),
-          updatedAt: new Date()
-        })
-        .where(eq(users.id, userId))
-    } else {
-      // Check if user exists with this email
-      const existingEmailUser = await db.select().from(users).where(eq(users.email, email)).limit(1)
-      
-      if (existingEmailUser.length > 0) {
-        // Link existing account to GitHub
-        userId = existingEmailUser[0].id
-        await db.update(users)
-          .set({
-            githubId: githubUser.id.toString(),
-            githubUsername: githubUser.login,
-            githubAvatarUrl: githubUser.avatar_url || null,
-            githubAccessToken: accessToken,
-            githubConnectedAt: new Date(),
-            updatedAt: new Date()
-          })
-          .where(eq(users.id, userId))
-      } else {
-        // Create new user
-        isNewUser = true
-        userId = crypto.randomUUID()
-        const username = githubUser.login || `github_${githubUser.id}`
-        
-        // Generate a random password (GitHub users won't use password auth)
-        const randomPassword = crypto.randomUUID()
-        const hashedPassword = await bcrypt.hash(randomPassword, 12)
-        
-        await db.insert(users).values({
-          id: userId,
-          email,
-          username,
-          password: hashedPassword,
-          role: 'user',
           githubId: githubUser.id.toString(),
           githubUsername: githubUser.login,
           githubAvatarUrl: githubUser.avatar_url || null,
           githubAccessToken: accessToken,
           githubConnectedAt: new Date(),
-          reputationPoints: 0,
-          integrityScore: 5.0,
-          totalRatings: 0,
-          createdAt: new Date(),
           updatedAt: new Date()
         })
+        .where(eq(users.id, userId))
+      
+      // Clear connect cookies
+      setCookie(c, 'github_connect_state', '', {
+        httpOnly: true,
+        path: '/',
+        maxAge: 0
+      })
+      setCookie(c, 'github_connect_user_id', '', {
+        httpOnly: true,
+        path: '/',
+        maxAge: 0
+      })
+      
+      // Redirect to settings with success message
+      return c.redirect(`${frontendUrl}/settings?github_connected=true`)
+    } else {
+      // Normal OAuth flow (registration/login)
+      // Check if user already exists with this GitHub ID
+      const existingUser = await db.select().from(users).where(eq(users.githubId, githubUser.id.toString())).limit(1)
+      
+      if (existingUser.length > 0) {
+        // User exists, update GitHub info
+        userId = existingUser[0].id
+        await db.update(users)
+          .set({
+            githubUsername: githubUser.login,
+            githubAvatarUrl: githubUser.avatar_url || null,
+            githubAccessToken: accessToken, // In production, encrypt this
+            githubConnectedAt: new Date(),
+            updatedAt: new Date()
+          })
+          .where(eq(users.id, userId))
+      } else {
+        // Check if user exists with this email
+        const existingEmailUser = await db.select().from(users).where(eq(users.email, email)).limit(1)
         
-        // Create virtual wallet
-        await db.insert(virtualWallets).values({
-          id: crypto.randomUUID(),
-          userId,
-          balance: 0,
-          totalDeposited: 0,
-          totalWithdrawn: 0,
-          totalEarned: 0,
-          totalSpent: 0,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        })
-        
-        // Create profile
-        await db.insert(profiles).values({
-          id: crypto.randomUUID(),
-          userId,
-          profilePicture: githubUser.avatar_url || null,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        })
+        if (existingEmailUser.length > 0) {
+          // Link existing account to GitHub
+          userId = existingEmailUser[0].id
+          await db.update(users)
+            .set({
+              githubId: githubUser.id.toString(),
+              githubUsername: githubUser.login,
+              githubAvatarUrl: githubUser.avatar_url || null,
+              githubAccessToken: accessToken,
+              githubConnectedAt: new Date(),
+              updatedAt: new Date()
+            })
+            .where(eq(users.id, userId))
+        } else {
+          // Create new user
+          isNewUser = true
+          userId = crypto.randomUUID()
+          const username = githubUser.login || `github_${githubUser.id}`
+          
+          // Generate a random password (GitHub users won't use password auth)
+          const randomPassword = crypto.randomUUID()
+          const hashedPassword = await bcrypt.hash(randomPassword, 12)
+          
+          await db.insert(users).values({
+            id: userId,
+            email,
+            username,
+            password: hashedPassword,
+            role: 'user',
+            githubId: githubUser.id.toString(),
+            githubUsername: githubUser.login,
+            githubAvatarUrl: githubUser.avatar_url || null,
+            githubAccessToken: accessToken,
+            githubConnectedAt: new Date(),
+            reputationPoints: 0,
+            integrityScore: 5.0,
+            totalRatings: 0,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          })
+          
+          // Create virtual wallet
+          await db.insert(virtualWallets).values({
+            id: crypto.randomUUID(),
+            userId,
+            balance: 0,
+            totalDeposited: 0,
+            totalWithdrawn: 0,
+            totalEarned: 0,
+            totalSpent: 0,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          })
+          
+          // Create profile
+          await db.insert(profiles).values({
+            id: crypto.randomUUID(),
+            userId,
+            profilePicture: githubUser.avatar_url || null,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          })
+        }
       }
     }
     

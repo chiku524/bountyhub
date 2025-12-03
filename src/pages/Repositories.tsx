@@ -16,14 +16,38 @@ export default function Repositories() {
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterLanguage, setFilterLanguage] = useState('')
+  const [githubConnected, setGithubConnected] = useState(false)
+  const [checkingConnection, setCheckingConnection] = useState(true)
 
   useEffect(() => {
     if (user) {
-      loadRepositories()
+      checkGitHubConnection()
     } else {
       setLoading(false)
+      setCheckingConnection(false)
     }
   }, [user])
+
+  const checkGitHubConnection = async () => {
+    try {
+      setCheckingConnection(true)
+      const response = await fetch('/api/auth/github/profile', {
+        credentials: 'include'
+      })
+      if (response.ok) {
+        setGithubConnected(true)
+        loadRepositories()
+      } else {
+        setGithubConnected(false)
+        setLoading(false)
+      }
+    } catch (error) {
+      setGithubConnected(false)
+      setLoading(false)
+    } finally {
+      setCheckingConnection(false)
+    }
+  }
 
   const loadRepositories = async () => {
     try {
@@ -39,6 +63,10 @@ export default function Repositories() {
   }
 
   const handleSync = async () => {
+    if (!githubConnected) {
+      setError('Please connect your GitHub account first')
+      return
+    }
     try {
       setSyncing(true)
       setError(null)
@@ -48,6 +76,23 @@ export default function Repositories() {
       setError(err.message || 'Failed to sync repositories')
     } finally {
       setSyncing(false)
+    }
+  }
+
+  const handleConnectGitHub = async () => {
+    try {
+      const response = await fetch('/api/auth/github/connect', {
+        method: 'POST',
+        credentials: 'include'
+      })
+      const data = await response.json()
+      if (data.redirectUrl) {
+        window.location.href = data.redirectUrl
+      } else {
+        setError('Failed to initiate GitHub connection')
+      }
+    } catch (error) {
+      setError('Failed to connect GitHub account')
     }
   }
 
@@ -143,26 +188,41 @@ export default function Repositories() {
         )}
 
         {/* Loading State */}
-        {loading ? (
+        {checkingConnection || loading ? (
           <div className="flex justify-center items-center py-12">
             <LoadingSpinner />
+          </div>
+        ) : !githubConnected ? (
+          <div className="text-center py-12">
+            <FiGithub className="w-16 h-16 text-neutral-400 dark:text-neutral-600 mx-auto mb-4" />
+            <p className="text-neutral-600 dark:text-neutral-400 text-lg mb-4">
+              Connect your GitHub account to view and sync your repositories.
+            </p>
+            <button
+              onClick={handleConnectGitHub}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
+            >
+              <FiLink className="w-5 h-5" />
+              Connect GitHub Account
+            </button>
           </div>
         ) : filteredRepositories.length === 0 ? (
           <div className="text-center py-12">
             <FiGithub className="w-16 h-16 text-neutral-400 dark:text-neutral-600 mx-auto mb-4" />
             <p className="text-neutral-600 dark:text-neutral-400 text-lg mb-4">
               {repositories.length === 0
-                ? 'No repositories found. Connect your GitHub account and sync repositories to get started.'
+                ? 'No repositories found. Sync repositories from GitHub to get started.'
                 : 'No repositories match your filters.'}
             </p>
             {repositories.length === 0 && (
-              <Link
-                to="/settings"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
+              <button
+                onClick={handleSync}
+                disabled={syncing}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <FiLink className="w-5 h-5" />
-                Connect GitHub Account
-              </Link>
+                <FiRefreshCw className={`w-5 h-5 ${syncing ? 'animate-spin' : ''}`} />
+                {syncing ? 'Syncing...' : 'Sync Repositories'}
+              </button>
             )}
           </div>
         ) : (
