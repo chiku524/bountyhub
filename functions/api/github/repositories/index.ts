@@ -134,48 +134,71 @@ app.post('/sync', async (c) => {
     const githubRepos = await githubResponse.json() as any[]
     const now = new Date()
 
+    console.log(`Syncing ${githubRepos.length} repositories for user ${userId}`)
+
     // Sync repositories
     const syncedRepos = []
     for (const repo of githubRepos) {
-      // Check if repository already exists
-      const existing = await db
-        .select()
-        .from(githubRepositories)
-        .where(eq(githubRepositories.githubRepoId, repo.id))
-        .limit(1)
+      try {
+        // Check if repository already exists for this user
+        const existing = await db
+          .select()
+          .from(githubRepositories)
+          .where(
+            eq(githubRepositories.githubRepoId, repo.id)
+          )
+          .limit(1)
 
-      const repoData: any = {
-        id: existing[0]?.id || crypto.randomUUID(),
-        ownerId: userId,
-        githubRepoId: repo.id,
-        name: repo.name,
-        fullName: repo.full_name,
-        description: repo.description || null,
-        url: repo.url,
-        htmlUrl: repo.html_url,
-        language: repo.language || null,
-        stars: repo.stargazers_count || 0,
-        forks: repo.forks_count || 0,
-        isPrivate: repo.private || false,
-        isFork: repo.fork || false,
-        defaultBranch: repo.default_branch || 'main',
-        topics: repo.topics ? JSON.stringify(repo.topics) : null,
-        lastSyncedAt: now,
-        updatedAt: now,
-      }
+        const repoData: any = {
+          ownerId: userId,
+          githubRepoId: repo.id,
+          name: repo.name,
+          fullName: repo.full_name,
+          description: repo.description || null,
+          url: repo.url,
+          htmlUrl: repo.html_url,
+          language: repo.language || null,
+          stars: repo.stargazers_count || 0,
+          forks: repo.forks_count || 0,
+          isPrivate: repo.private || false,
+          isFork: repo.fork || false,
+          defaultBranch: repo.default_branch || 'main',
+          topics: repo.topics ? JSON.stringify(repo.topics) : null,
+          lastSyncedAt: now,
+          updatedAt: now,
+        }
 
-      if (existing[0]) {
-        // Preserve original createdAt for updates
-        repoData.createdAt = existing[0].createdAt
-        await db
-          .update(githubRepositories)
-          .set(repoData)
-          .where(eq(githubRepositories.id, existing[0].id))
-        syncedRepos.push({ ...repoData, id: existing[0].id })
-      } else {
-        repoData.createdAt = now
-        const [inserted] = await db.insert(githubRepositories).values(repoData).returning()
-        syncedRepos.push(inserted)
+        if (existing[0]) {
+          // Update existing repository - only if it belongs to this user
+          if (existing[0].ownerId !== userId) {
+            console.log(`Skipping repo ${repo.full_name} - belongs to different user`)
+            continue
+          }
+          
+          const repoId = existing[0].id
+          await db
+            .update(githubRepositories)
+            .set(repoData)
+            .where(eq(githubRepositories.id, repoId))
+          
+          syncedRepos.push({ ...repoData, id: repoId, createdAt: existing[0].createdAt })
+        } else {
+          // Insert new repository
+          const repoId = crypto.randomUUID()
+          repoData.id = repoId
+          repoData.createdAt = now
+          
+          await db.insert(githubRepositories).values(repoData)
+          syncedRepos.push(repoData)
+        }
+      } catch (repoError: any) {
+        console.error(`Error syncing repo ${repo.full_name}:`, {
+          message: repoError?.message,
+          stack: repoError?.stack,
+          repo: repo.full_name
+        })
+        // Continue with other repos even if one fails
+        continue
       }
     }
 
@@ -189,11 +212,18 @@ app.post('/sync', async (c) => {
       message: error?.message,
       stack: error?.stack,
       name: error?.name,
-      error: error
+      error: error,
+      userId: userId || 'unknown'
     })
+    
+    // Return more detailed error information
+    const errorMessage = error?.message || 'Unknown error'
+    const errorDetails = error?.stack ? error.stack.substring(0, 500) : 'No stack trace'
+    
     return c.json({ 
       error: 'Failed to sync repositories',
-      details: error?.message || 'Unknown error'
+      details: errorMessage,
+      stack: errorDetails
     }, 500)
   }
 })
