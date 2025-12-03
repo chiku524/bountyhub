@@ -177,6 +177,56 @@ export default function PlatformDocs() {
                 <li>• Message types: text, emoji, and GIF support</li>
               </ul>
             </div>
+
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
+              <h3 className="text-xl font-semibold text-white mb-3">Bug Bounty Campaigns</h3>
+              <p className="text-neutral-600 dark:text-neutral-600 dark:text-gray-300 mb-4">
+                Create and manage bug bounty campaigns for open source projects. Connect GitHub repositories,
+                set reward budgets, and track security submissions with a comprehensive verification workflow.
+              </p>
+              <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
+                <li>• Create bug bounty campaigns with custom budgets and reward ranges</li>
+                <li>• Connect GitHub repositories for automated issue tracking</li>
+                <li>• Define scope, rules, and severity levels for submissions</li>
+                <li>• Multi-step verification process with status tracking</li>
+                <li>• Public and private campaign options</li>
+                <li>• Team bounty support for collaborative submissions</li>
+                <li>• Integration with GitHub Issues for seamless workflow</li>
+              </ul>
+            </div>
+
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
+              <h3 className="text-xl font-semibold text-white mb-3">GitHub Integration</h3>
+              <p className="text-neutral-600 dark:text-neutral-600 dark:text-gray-300 mb-4">
+                Seamlessly connect your GitHub account to sync repositories, track contributions,
+                and manage open source projects directly from the platform.
+              </p>
+              <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
+                <li>• OAuth-based GitHub authentication</li>
+                <li>• Automatic repository synchronization</li>
+                <li>• Track stars, forks, and repository metrics</li>
+                <li>• Link repositories to bug bounty campaigns</li>
+                <li>• Contribution tracking and analytics</li>
+                <li>• GitHub Issue integration for bug submissions</li>
+                <li>• Repository management dashboard</li>
+              </ul>
+            </div>
+
+            <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
+              <h3 className="text-xl font-semibold text-white mb-3">Progressive Web App (PWA)</h3>
+              <p className="text-neutral-600 dark:text-neutral-600 dark:text-gray-300 mb-4">
+                Install BountyHub as a desktop or mobile app for a native-like experience with offline
+                support and automatic updates.
+              </p>
+              <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
+                <li>• Installable on desktop and mobile devices</li>
+                <li>• Standalone app experience (no browser UI)</li>
+                <li>• Offline functionality with service worker caching</li>
+                <li>• Automatic updates when new versions are available</li>
+                <li>• App shortcuts for quick access to key features</li>
+                <li>• Push notification support (ready for future use)</li>
+              </ul>
+            </div>
           </div>
         </section>
 

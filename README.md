@@ -8,9 +8,12 @@ A decentralized Q&A platform where questions meet rewards. Ask questions, offer 
 - **Virtual Token Economy**: Earn and spend BBUX tokens through community participation
 - **Real-Time Global Chat**: Community-wide chat with emoji and GIF support
 - **Governance & Staking**: Participate in platform governance and earn staking rewards
+- **Bug Bounty Campaigns**: Create and manage bug bounty campaigns for open source projects
+- **GitHub Integration**: Connect GitHub repositories and track contributions
+- **Integrity Rating System**: Community-driven reputation and integrity scoring
 - **Light/Dark Mode**: Beautiful, responsive UI with theme support
 - **Mobile Responsive**: Optimized experience across all devices
-- **PWA Support**: Installable progressive web app
+- **PWA Support**: Installable progressive web app for desktop and mobile
 
 ## 📖 Documentation
 

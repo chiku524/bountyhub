@@ -463,10 +463,10 @@ export default function DeveloperGuide() {
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Backend Services</h4>
                   <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
-                    <li>• <code className="bg-neutral-700 px-1 rounded">utils/token-supply.ts</code> - Token supply calculations</li>
                     <li>• <code className="bg-neutral-700 px-1 rounded">utils/governance.ts</code> - Governance and rewards</li>
                     <li>• <code className="bg-neutral-700 px-1 rounded">api/wallet/</code> - Wallet operations</li>
                     <li>• <code className="bg-neutral-700 px-1 rounded">api/governance/</code> - Governance endpoints</li>
+                    <li>• <code className="bg-neutral-700 px-1 rounded">utils/solana.ts</code> - Solana blockchain integration</li>
                   </ul>
                 </div>
                 <div>
@@ -498,7 +498,7 @@ export default function DeveloperGuide() {
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Frontend Components</h4>
                   <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
                     <li>• Notifications.tsx - Main notification component</li>
-                    <li>• Nav.tsx - Notification bell and badge</li>
+                    <li>• TopNav.tsx - Top navigation with notification bell and badge</li>
                     <li>• useNotifications hook - State management</li>
                     <li>• Notification types and interfaces</li>
                   </ul>
