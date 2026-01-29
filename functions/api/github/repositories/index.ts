@@ -1,5 +1,4 @@
 import { Hono } from 'hono'
-import { getCookie } from 'hono/cookie'
 import { createDb } from '../../../../src/utils/db'
 import { getAuthUser } from '../../../utils/auth'
 import { githubRepositories, users, profiles } from '../../../../drizzle/schema'
@@ -7,6 +6,7 @@ import { eq, sql, desc } from 'drizzle-orm'
 
 interface Env {
   DB: any
+  NODE_ENV?: string
   GITHUB_CLIENT_ID: string
   GITHUB_CLIENT_SECRET: string
 }
