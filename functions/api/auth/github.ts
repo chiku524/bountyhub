@@ -17,78 +17,82 @@ interface Env {
 
 const app = new Hono<{ Bindings: Env }>()
 
-// Connect existing account to GitHub - must be defined before root route
+// Shared connect handler logic - returns redirectUrl or error response
+async function handleConnect(c: any) {
+  const db = createDb(c.env.DB)
+  const sessionCookie = getCookie(c, 'session')
+
+  if (!sessionCookie) {
+    console.log('No session cookie found')
+    return c.json({ error: 'Not authenticated' }, 401)
+  }
+
+  const { getUserIdFromSession } = await import('../../../src/utils/auth')
+  const userId = await getUserIdFromSession(sessionCookie, db)
+
+  if (!userId) {
+    console.log('Invalid session')
+    return c.json({ error: 'Invalid session' }, 401)
+  }
+
+  // Check if user already has GitHub connected
+  const user = await db.select().from(users).where(eq(users.id, userId)).limit(1)
+
+  if (user.length === 0) {
+    console.log('User not found:', userId)
+    return c.json({ error: 'User not found' }, 404)
+  }
+
+  if (user[0].githubId) {
+    console.log('GitHub already connected for user:', userId)
+    return c.json({ error: 'GitHub account already connected' }, 400)
+  }
+
+  // Redirect to GitHub OAuth with state indicating this is a connect action
+  const clientId = c.env.GITHUB_CLIENT_ID
+  const redirectUri = encodeURIComponent(`${c.env.GITHUB_CALLBACK_URL}?action=connect`)
+  const scope = encodeURIComponent('user:email read:user repo')
+  const state = crypto.randomUUID()
+
+  // Store state and user ID for verification
+  const cookieOptions: any = {
+    httpOnly: true,
+    secure: c.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 600,
+    path: '/'
+  }
+
+  // In production, set domain to allow cross-subdomain access
+  if (c.env.NODE_ENV === 'production') {
+    cookieOptions.domain = '.bountyhub.tech'
+  }
+
+  setCookie(c, 'github_connect_state', state, cookieOptions)
+  setCookie(c, 'github_connect_user_id', userId, cookieOptions)
+
+  const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}`
+
+  console.log('GitHub connect URL generated successfully')
+  return c.json({ redirectUrl: githubAuthUrl })
+}
+
+// Connect existing account to GitHub - POST (preferred) and GET (for proxies/redirects that strip method)
 app.post('/connect', async (c) => {
   try {
-    console.log('GitHub connect endpoint called', {
-      method: c.req.method,
-      path: c.req.path,
-      url: c.req.url
-    })
-    
-    const db = createDb(c.env.DB)
-    const sessionCookie = getCookie(c, 'session')
-    
-    if (!sessionCookie) {
-      console.log('No session cookie found')
-      return c.json({ error: 'Not authenticated' }, 401)
-    }
-    
-    const { getUserIdFromSession } = await import('../../../src/utils/auth')
-    const userId = await getUserIdFromSession(sessionCookie, db)
-    
-    if (!userId) {
-      console.log('Invalid session')
-      return c.json({ error: 'Invalid session' }, 401)
-    }
-    
-    // Check if user already has GitHub connected
-    const user = await db.select().from(users).where(eq(users.id, userId)).limit(1)
-    
-    if (user.length === 0) {
-      console.log('User not found:', userId)
-      return c.json({ error: 'User not found' }, 404)
-    }
-    
-    if (user[0].githubId) {
-      console.log('GitHub already connected for user:', userId)
-      return c.json({ error: 'GitHub account already connected' }, 400)
-    }
-    
-    // Redirect to GitHub OAuth with state indicating this is a connect action
-    const clientId = c.env.GITHUB_CLIENT_ID
-    const redirectUri = encodeURIComponent(`${c.env.GITHUB_CALLBACK_URL}?action=connect`)
-    const scope = encodeURIComponent('user:email read:user repo')
-    const state = crypto.randomUUID()
-    
-    // Store state and user ID for verification
-    const cookieOptions: any = {
-      httpOnly: true,
-      secure: c.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 600,
-      path: '/'
-    }
-    
-    // In production, set domain to allow cross-subdomain access
-    if (c.env.NODE_ENV === 'production') {
-      cookieOptions.domain = '.bountyhub.tech'
-    }
-    
-    setCookie(c, 'github_connect_state', state, cookieOptions)
-    setCookie(c, 'github_connect_user_id', userId, cookieOptions)
-    
-    const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}`
-    
-    console.log('GitHub connect URL generated successfully')
-    return c.json({ redirectUrl: githubAuthUrl })
+    console.log('GitHub connect endpoint called', { method: c.req.method, path: c.req.path, url: c.req.url })
+    return await handleConnect(c)
   } catch (error: any) {
-    console.error('GitHub connect error:', {
-      message: error?.message,
-      stack: error?.stack,
-      name: error?.name,
-      error: error
-    })
+    console.error('GitHub connect error:', { message: error?.message, stack: error?.stack, name: error?.name, error })
+    return c.json({ error: 'Failed to initiate GitHub connection', details: error?.message }, 500)
+  }
+})
+app.get('/connect', async (c) => {
+  try {
+    console.log('GitHub connect GET called', { path: c.req.path, url: c.req.url })
+    return await handleConnect(c)
+  } catch (error: any) {
+    console.error('GitHub connect GET error:', { message: error?.message, stack: error?.stack })
     return c.json({ error: 'Failed to initiate GitHub connection', details: error?.message }, 500)
   }
 })
@@ -468,41 +472,6 @@ app.get('/callback', async (c) => {
       ? 'https://bountyhub.tech' 
       : 'http://localhost:5173'
     return c.redirect(`${frontendUrl}/login?error=oauth_failed`)
-  }
-})
-
-// Get GitHub profile info
-app.get('/profile', async (c) => {
-  try {
-    const db = createDb(c.env.DB)
-    const sessionCookie = getCookie(c, 'session')
-    
-    if (!sessionCookie) {
-      return c.json({ error: 'Not authenticated' }, 401)
-    }
-    
-    const { getUserIdFromSession } = await import('../../../src/utils/auth')
-    const userId = await getUserIdFromSession(sessionCookie, db)
-    
-    if (!userId) {
-      return c.json({ error: 'Invalid session' }, 401)
-    }
-    
-    const user = await db.select().from(users).where(eq(users.id, userId)).limit(1)
-    
-    if (user.length === 0 || !user[0].githubId) {
-      return c.json({ error: 'GitHub account not connected' }, 404)
-    }
-    
-    return c.json({
-      githubId: user[0].githubId,
-      githubUsername: user[0].githubUsername,
-      githubAvatarUrl: user[0].githubAvatarUrl,
-      githubConnectedAt: user[0].githubConnectedAt
-    })
-  } catch (error) {
-    console.error('Get GitHub profile error:', error)
-    return c.json({ error: 'Failed to get GitHub profile' }, 500)
   }
 })
 

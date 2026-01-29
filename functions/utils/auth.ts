@@ -21,7 +21,7 @@ export async function getAuthUser(c: any) {
     const db = drizzle(c.env.DB)
     
     // Get session
-    const sessionResult = await db.select().from(sessions).where(eq(sessions.id, sessionId)).get()
+    const [sessionResult] = await db.select().from(sessions).where(eq(sessions.id, sessionId)).limit(1)
     if (!sessionResult) return null
 
     // Check if session is expired
@@ -31,7 +31,7 @@ export async function getAuthUser(c: any) {
     }
 
     // Get user
-    const userResult = await db.select().from(users).where(eq(users.id, sessionResult.userId)).get()
+    const [userResult] = await db.select().from(users).where(eq(users.id, sessionResult.userId)).limit(1)
     if (!userResult) return null
 
     return {

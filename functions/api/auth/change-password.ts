@@ -32,7 +32,7 @@ app.post('/', async (c) => {
     }
 
     // Get current user data
-    const user = await db.select().from(users).where(eq(users.id, authUser.id)).get()
+    const [user] = await db.select().from(users).where(eq(users.id, authUser.id)).limit(1)
     if (!user) {
       return c.json({ error: 'User not found' }, 404)
     }

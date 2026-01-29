@@ -334,7 +334,7 @@ export async function createSession(userId: string, db: Db, expiresInHours = 24)
 
 export async function getUserIdFromSession(sessionId: string, db: Db): Promise<string | null> {
   try {
-    const sessionResult = await db.select().from(sessions).where(eq(sessions.id, sessionId)).get()
+    const [sessionResult] = await db.select().from(sessions).where(eq(sessions.id, sessionId)).limit(1)
     if (!sessionResult) return null
 
     // Check if session is expired

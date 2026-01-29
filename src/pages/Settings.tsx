@@ -129,15 +129,17 @@ export default function Settings() {
   const handleGitHubConnect = async () => {
     try {
       setGithubLoading(true)
+      setError(null)
       const response = await fetch(`${config.api.baseUrl}/api/auth/github/connect`, {
         method: 'POST',
-        credentials: 'include'
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
       })
-      const data = await response.json()
+      const data = await response.json().catch(() => ({}))
       if (data.redirectUrl) {
         window.location.href = data.redirectUrl
       } else {
-        setError('Failed to initiate GitHub connection')
+        setError(data?.error || data?.details || `Failed to connect GitHub account (${response.status})`)
       }
     } catch (error) {
       setError('Failed to connect GitHub account')
