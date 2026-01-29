@@ -1,9 +1,10 @@
 import { FC, ReactNode, useMemo, useContext, createContext } from 'react';
 import { ConnectionProvider, WalletProvider, useWallet } from '@solana/wallet-adapter-react';
 import { WalletModalProvider, useWalletModal } from '@solana/wallet-adapter-react-ui';
-import { PhantomWalletAdapter, SolflareWalletAdapter } from '@solana/wallet-adapter-wallets';
+import { SolflareWalletAdapter } from '@solana/wallet-adapter-wallets';
 import '@solana/wallet-adapter-react-ui/styles.css';
 
+// Phantom is registered as a Standard Wallet by the browser; no need to add PhantomWalletAdapter
 const endpoint = import.meta.env.VITE_SOLANA_RPC_URL || 'https://api.bountyhub.tech/api/wallet/solana-proxy'
 
 interface SolanaWalletContextType {
@@ -65,7 +66,6 @@ const SolanaWalletInner: FC<{ children: ReactNode }> = ({ children }) => {
 
 export const SolanaWalletProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const wallets = useMemo(() => [
-    new PhantomWalletAdapter(),
     new SolflareWalletAdapter()
   ], []);
   return (

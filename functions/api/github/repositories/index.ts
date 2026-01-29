@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { getCookie } from 'hono/cookie'
 import { createDb } from '../../../../src/utils/db'
-import { getUserIdFromSession } from '../../../../src/utils/auth'
+import { getAuthUser } from '../../../utils/auth'
 import { githubRepositories, users, profiles } from '../../../../drizzle/schema'
 import { eq, sql, desc } from 'drizzle-orm'
 
@@ -16,17 +16,13 @@ const app = new Hono<{ Bindings: Env }>()
 // GET all repositories for authenticated user
 app.get(async (c) => {
   const db = createDb(c.env.DB)
-  
+
   try {
-    const sessionCookie = getCookie(c, 'session')
-    if (!sessionCookie) {
+    const authUser = await getAuthUser(c)
+    if (!authUser) {
       return c.json({ error: 'Not authenticated' }, 401)
     }
-
-    const userId = await getUserIdFromSession(sessionCookie, db)
-    if (!userId) {
-      return c.json({ error: 'Invalid session' }, 401)
-    }
+    const userId = authUser.id
 
     const page = parseInt(c.req.query('page') || '1', 10)
     const limit = Math.min(parseInt(c.req.query('limit') || '20', 10), 100)
@@ -80,57 +76,57 @@ app.get(async (c) => {
 app.post('/sync', async (c) => {
   const db = createDb(c.env.DB)
   let userId: string | null = null
-  
+
   try {
-    const sessionCookie = getCookie(c, 'session')
-    if (!sessionCookie) {
-      return c.json({ error: 'Not authenticated' }, 401)
+    const authUser = await getAuthUser(c)
+    if (!authUser) {
+      return c.json({ error: 'Not authenticated', phase: 'auth' }, 401)
     }
+    userId = authUser.id
 
-    userId = await getUserIdFromSession(sessionCookie, db)
-    if (!userId) {
-      return c.json({ error: 'Invalid session' }, 401)
-    }
-
-    // Get user's GitHub access token
-    const user = await db
+    // Get user's GitHub access token and full user row
+    const [user] = await db
       .select()
       .from(users)
       .where(eq(users.id, userId))
       .limit(1)
 
-    if (user.length === 0) {
+    if (!user) {
       console.error('User not found:', userId)
-      return c.json({ error: 'User not found' }, 404)
+      return c.json({ error: 'User not found', phase: 'auth' }, 404)
     }
 
-    if (!user[0]?.githubAccessToken) {
+    if (!user.githubAccessToken) {
       console.error('No GitHub access token for user:', userId, {
-        hasGithubId: !!user[0].githubId,
-        hasGithubUsername: !!user[0].githubUsername
+        hasGithubId: !!user.githubId,
+        hasGithubUsername: !!user.githubUsername
       })
-      return c.json({ error: 'GitHub account not connected. Please reconnect your GitHub account.' }, 400)
+      return c.json({
+        error: 'GitHub account not connected. Please reconnect your GitHub account from Settings.',
+        phase: 'auth',
+        requiresReconnect: true
+      }, 400)
     }
 
     console.log('Fetching repositories for user:', userId, {
-      hasToken: !!user[0].githubAccessToken,
-      tokenLength: user[0].githubAccessToken.length,
-      githubUsername: user[0].githubUsername
+      hasToken: !!user.githubAccessToken,
+      tokenLength: user.githubAccessToken.length,
+      githubUsername: user.githubUsername
     })
 
     // Fetch repositories from GitHub API
     const githubResponse = await fetch('https://api.github.com/user/repos?per_page=100&sort=updated', {
       headers: {
-        'Authorization': `Bearer ${user[0].githubAccessToken}`,
+        'Authorization': `Bearer ${user.githubAccessToken}`,
         'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'BountyHub-API'
+        'User-Agent': 'BountyHub-OAuth'
       }
     })
 
     if (!githubResponse.ok) {
       let errorText = ''
       let errorJson: any = null
-      
+
       try {
         errorText = await githubResponse.text()
         try {
@@ -141,15 +137,15 @@ app.post('/sync', async (c) => {
       } catch (e) {
         errorText = 'Failed to read error response'
       }
-      
+
       console.error('GitHub API error:', {
         status: githubResponse.status,
         statusText: githubResponse.statusText,
         error: errorText,
         errorJson,
-        hasToken: !!user[0].githubAccessToken,
-        tokenLength: user[0].githubAccessToken?.length || 0,
-        tokenPrefix: user[0].githubAccessToken?.substring(0, 10) || 'none'
+        hasToken: !!user.githubAccessToken,
+        tokenLength: user.githubAccessToken?.length || 0,
+        tokenPrefix: user.githubAccessToken?.substring(0, 10) || 'none'
       })
       
       // Provide more specific error messages
@@ -284,14 +280,15 @@ app.post('/sync', async (c) => {
       error: error,
       userId: userId || 'unknown'
     })
-    
-    // Return more detailed error information (but don't expose stack in production)
+
     const errorMessage = error?.message || 'Unknown error'
     const isProduction = c.env.NODE_ENV === 'production'
-    
-    return c.json({ 
+
+    return c.json({
       error: 'Failed to sync repositories',
       details: errorMessage,
+      phase: 'sync',
+      requiresReconnect: false,
       ...(isProduction ? {} : { stack: error?.stack?.substring(0, 500) })
     }, 500)
   }
