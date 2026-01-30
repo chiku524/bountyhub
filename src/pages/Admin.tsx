@@ -27,7 +27,7 @@ const Admin: React.FC = () => {
     try {
       const data = await api.getAdminUsers();
       setUsers(data.users);
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to fetch users');
     } finally {
       setLoading(false);
@@ -55,7 +55,7 @@ const Admin: React.FC = () => {
       );
       // Refresh stats
       fetchStats();
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to update user role');
     } finally {
       setUpdatingUser(null);

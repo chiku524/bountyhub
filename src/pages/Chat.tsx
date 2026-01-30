@@ -328,7 +328,7 @@ const Chat: React.FC = () => {
         setLastMessageId(response.message.id);
         setNewMessage('');
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to send message');
     } finally {
       setSending(false);
@@ -485,7 +485,7 @@ const Chat: React.FC = () => {
                               message.author.id === user.id 
                                 ? 'bg-indigo-600 text-white' 
                                 : 'bg-white border border-gray-200'
-                            } rounded-lg px-4 py-2 shadow-sm`}>
+                            } rounded-lg px-4 py-2 shadow-xs`}>
                               {message.author.id !== user.id && (
                                 <div className="flex items-center space-x-2 mb-1">
                                   {message.profile?.profilePicture ? (

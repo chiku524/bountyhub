@@ -177,7 +177,7 @@ export default function BugBountyCampaignCreate() {
   }
 
   return (
-    <div className="min-h-screen bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm">
+    <div className="min-h-screen bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xs">
       <PageMetadata
         title="Create Bug Bounty Campaign"
         description="Create a new bug bounty campaign"
@@ -396,7 +396,7 @@ export default function BugBountyCampaignCreate() {
                     type="checkbox"
                     checked={isPublic}
                     onChange={(e) => setIsPublic(e.target.checked)}
-                    className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
+                    className="w-4 h-4 text-indigo-600 rounded-sm focus:ring-indigo-500"
                   />
                   <span className="text-sm text-neutral-700 dark:text-neutral-300">
                     Make campaign public
@@ -408,7 +408,7 @@ export default function BugBountyCampaignCreate() {
                     type="checkbox"
                     checked={allowTeamBounties}
                     onChange={(e) => setAllowTeamBounties(e.target.checked)}
-                    className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
+                    className="w-4 h-4 text-indigo-600 rounded-sm focus:ring-indigo-500"
                   />
                   <span className="text-sm text-neutral-700 dark:text-neutral-300">
                     Allow team bounties

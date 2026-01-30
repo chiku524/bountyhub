@@ -30,10 +30,10 @@ const PostList: React.FC<{
   return (
     <ul className="divide-y divide-neutral-200 dark:divide-neutral-700">
       {posts.map((post) => (
-        <li key={post.id} className={`py-3 sm:py-4 ${post.reward && post.reward > 0 ? 'bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-500/10 dark:to-blue-500/10 border border-cyan-200 dark:border-cyan-400/30 rounded-lg' : ''}`}>
+        <li key={post.id} className={`py-3 sm:py-4 ${post.reward && post.reward > 0 ? 'bg-linear-to-r from-cyan-50 to-blue-50 dark:from-cyan-500/10 dark:to-blue-500/10 border border-cyan-200 dark:border-cyan-400/30 rounded-lg' : ''}`}>
           <div className="flex space-x-2 sm:space-x-4">
             {/* Voting */}
-            <div className="flex-shrink-0 flex items-center justify-center w-12 sm:w-16">
+            <div className="shrink-0 flex items-center justify-center w-12 sm:w-16">
               <VoteButton
                 itemId={post.id}
                 itemType="post"
@@ -52,7 +52,7 @@ const PostList: React.FC<{
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
                       <h2 className="text-base sm:text-xl font-semibold text-neutral-900 dark:text-white line-clamp-2 sm:line-clamp-1">{post.title.length > 60 ? post.title.slice(0, 60) + '...' : post.title}</h2>
                       {post.reward && post.reward > 0 && (
-                        <div className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-cyan-100 to-blue-100 dark:from-cyan-500/20 dark:to-blue-500/20 border border-cyan-300 dark:border-cyan-400/40 rounded-full w-fit">
+                        <div className="flex items-center gap-1 px-2 py-1 bg-linear-to-r from-cyan-100 to-blue-100 dark:from-cyan-500/20 dark:to-blue-500/20 border border-cyan-300 dark:border-cyan-400/40 rounded-full w-fit">
                           <span className="text-cyan-600 dark:text-cyan-300 text-xs sm:text-sm font-medium">💰</span>
                           <span className="text-cyan-700 dark:text-cyan-200 text-xs sm:text-sm font-medium">{post.reward} BBUX</span>
                         </div>
@@ -174,18 +174,21 @@ export default function Community() {
             return postDate.toDateString() === now.toDateString()
           })
           break
-        case 'week':
+        case 'week': {
           const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
           filtered = filtered.filter(post => new Date(post.createdAt) >= weekAgo)
           break
-        case 'month':
+        }
+        case 'month': {
           const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
           filtered = filtered.filter(post => new Date(post.createdAt) >= monthAgo)
           break
-        case 'year':
+        }
+        case 'year': {
           const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000)
           filtered = filtered.filter(post => new Date(post.createdAt) >= yearAgo)
           break
+        }
       }
     }
 

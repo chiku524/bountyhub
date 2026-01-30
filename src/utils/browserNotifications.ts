@@ -57,7 +57,7 @@ export class BrowserNotificationService {
     try {
       const registration = await navigator.serviceWorker.ready
       await registration.showNotification(title, defaultOptions)
-    } catch (error) {
+    } catch (_error) {
       // Fallback to regular Notification API if service worker fails
       new Notification(title, defaultOptions)
     }

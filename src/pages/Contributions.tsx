@@ -125,7 +125,7 @@ export default function Contributions() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm flex items-center justify-center">
+      <div className="min-h-screen bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xs flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-4">Please log in to view contributions</h1>
           <Link
@@ -140,7 +140,7 @@ export default function Contributions() {
   }
 
   return (
-    <div className="min-h-screen bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm">
+    <div className="min-h-screen bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xs">
       <PageMetadata
         title="My Contributions"
         description="Track your open-source contributions and rewards"

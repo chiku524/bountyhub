@@ -48,29 +48,30 @@ app.post(async (c) => {
 
     // Get the content and its author based on content type
     switch (contentType) {
-      case 'post':
+      case 'post': {
         const postResult = await db.select({ authorId: posts.authorId }).from(posts).where(eq(posts.id, contentId)).limit(1)
         if (postResult.length === 0) {
           return c.json({ error: 'Post not found' }, 404)
         }
         contentAuthorId = postResult[0].authorId
         break
-        
-      case 'answer':
+      }
+      case 'answer': {
         const answerResult = await db.select({ authorId: answers.authorId }).from(answers).where(eq(answers.id, contentId)).limit(1)
         if (answerResult.length === 0) {
           return c.json({ error: 'Answer not found' }, 404)
         }
         contentAuthorId = answerResult[0].authorId
         break
-        
-      case 'comment':
+      }
+      case 'comment': {
         const commentResult = await db.select({ authorId: comments.authorId }).from(comments).where(eq(comments.id, contentId)).limit(1)
         if (commentResult.length === 0) {
           return c.json({ error: 'Comment not found' }, 404)
         }
         contentAuthorId = commentResult[0].authorId
         break
+      }
     }
 
     // Prevent self-reporting

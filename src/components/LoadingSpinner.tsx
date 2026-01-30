@@ -24,19 +24,19 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 
 export const LoadingSkeleton: React.FC<{ className?: string }> = ({ className = '' }) => {
   return (
-    <div className={`animate-pulse bg-neutral-700 rounded ${className}`}></div>
+    <div className={`animate-pulse bg-neutral-700 rounded-sm ${className}`}></div>
   )
 }
 
 export const PostSkeleton: React.FC = () => {
   return (
     <div className="py-4 animate-pulse">
-      <div className="h-6 bg-neutral-700 rounded mb-2 w-3/4"></div>
-      <div className="h-4 bg-neutral-700 rounded mb-2 w-full"></div>
-      <div className="h-4 bg-neutral-700 rounded mb-2 w-2/3"></div>
+      <div className="h-6 bg-neutral-700 rounded-sm mb-2 w-3/4"></div>
+      <div className="h-4 bg-neutral-700 rounded-sm mb-2 w-full"></div>
+      <div className="h-4 bg-neutral-700 rounded-sm mb-2 w-2/3"></div>
       <div className="flex space-x-4 mt-2">
-        <div className="h-3 bg-neutral-700 rounded w-20"></div>
-        <div className="h-3 bg-neutral-700 rounded w-24"></div>
+        <div className="h-3 bg-neutral-700 rounded-sm w-20"></div>
+        <div className="h-3 bg-neutral-700 rounded-sm w-24"></div>
       </div>
     </div>
   )

@@ -1,7 +1,6 @@
+import { lazy, Suspense, useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
-import { useEffect } from 'react'
 import { HelmetProvider } from 'react-helmet-async'
-import { WalletProvider } from './contexts/WalletProvider'
 import { AuthProvider, useAuth } from './contexts/AuthProvider'
 import { SolanaWalletProvider } from './contexts/SolanaWalletProvider'
 import Layout from './components/Layout'
@@ -13,41 +12,54 @@ import { PageMetadata } from './components/PageMetadata'
 import { useBountyNotifications } from './hooks/useBountyNotifications'
 import ChatSidebar from './components/ChatSidebar'
 import { InstallPrompt } from './components/InstallPrompt'
-import Home from './pages/Home'
-import Login from './pages/Login'
-import Signup from './pages/Signup'
-import Profile from './pages/Profile'
-import ProfileActivity from './pages/ProfileActivity'
-import ProfilePosts from './pages/ProfilePosts'
-import ProfileBookmarks from './pages/ProfileBookmarks'
-import Community from './pages/Community'
-import Governance from './pages/Governance'
-import Admin from './pages/Admin'
-import Analytics from './pages/Analytics'
-import Wallet from './pages/Wallet'
-import Settings from './pages/Settings'
-import CreatePost from './pages/CreatePost'
-import PostDetail from './pages/PostDetail'
-import UserProfile from './pages/UserProfile'
-import UserPosts from './pages/UserPosts'
-import Transactions from './pages/Transactions'
-import RefundRequests from './pages/RefundRequests'
-import Docs from './pages/Docs'
-import Privacy from './pages/Privacy'
-import Terms from './pages/Terms'
-import PlatformDocs from './pages/docs/Platform'
-import UserGuide from './pages/docs/UserGuide'
-import DeveloperGuide from './pages/docs/DeveloperGuide'
-import ApiReference from './pages/docs/ApiReference'
-import DeploymentGuide from './pages/docs/DeploymentGuide'
-import Legal from './pages/docs/Legal'
-import RefundSystem from './pages/docs/RefundSystem'
-import BugBountyCampaigns from './pages/BugBountyCampaigns'
-import BugBountyCampaignCreate from './pages/BugBountyCampaignCreate'
-import BugBountyCampaignDetail from './pages/BugBountyCampaignDetail'
-import Repositories from './pages/Repositories'
-import Contributions from './pages/Contributions'
+import { LoadingSpinner } from './components/LoadingSpinner'
 import '@solana/wallet-adapter-react-ui/styles.css'
+
+// Eager-load critical above-the-fold route
+import Home from './pages/Home'
+
+// Lazy-load all other routes for smaller initial bundle
+const Login = lazy(() => import('./pages/Login'))
+const Signup = lazy(() => import('./pages/Signup'))
+const Profile = lazy(() => import('./pages/Profile'))
+const ProfileActivity = lazy(() => import('./pages/ProfileActivity'))
+const ProfilePosts = lazy(() => import('./pages/ProfilePosts'))
+const ProfileBookmarks = lazy(() => import('./pages/ProfileBookmarks'))
+const Community = lazy(() => import('./pages/Community'))
+const Governance = lazy(() => import('./pages/Governance'))
+const Admin = lazy(() => import('./pages/Admin'))
+const Analytics = lazy(() => import('./pages/Analytics'))
+const Wallet = lazy(() => import('./pages/Wallet'))
+const Settings = lazy(() => import('./pages/Settings'))
+const CreatePost = lazy(() => import('./pages/CreatePost'))
+const PostDetail = lazy(() => import('./pages/PostDetail'))
+const UserProfile = lazy(() => import('./pages/UserProfile'))
+const UserPosts = lazy(() => import('./pages/UserPosts'))
+const Transactions = lazy(() => import('./pages/Transactions'))
+const RefundRequests = lazy(() => import('./pages/RefundRequests'))
+const Docs = lazy(() => import('./pages/Docs'))
+const Privacy = lazy(() => import('./pages/Privacy'))
+const Terms = lazy(() => import('./pages/Terms'))
+const PlatformDocs = lazy(() => import('./pages/docs/Platform'))
+const UserGuide = lazy(() => import('./pages/docs/UserGuide'))
+const DeveloperGuide = lazy(() => import('./pages/docs/DeveloperGuide'))
+const ApiReference = lazy(() => import('./pages/docs/ApiReference'))
+const DeploymentGuide = lazy(() => import('./pages/docs/DeploymentGuide'))
+const Legal = lazy(() => import('./pages/docs/Legal'))
+const RefundSystem = lazy(() => import('./pages/docs/RefundSystem'))
+const BugBountyCampaigns = lazy(() => import('./pages/BugBountyCampaigns'))
+const BugBountyCampaignCreate = lazy(() => import('./pages/BugBountyCampaignCreate'))
+const BugBountyCampaignDetail = lazy(() => import('./pages/BugBountyCampaignDetail'))
+const Repositories = lazy(() => import('./pages/Repositories'))
+const Contributions = lazy(() => import('./pages/Contributions'))
+
+function RouteFallback() {
+  return (
+    <div className="flex min-h-[50vh] items-center justify-center">
+      <LoadingSpinner size="lg" />
+    </div>
+  )
+}
 
 function AppContent() {
   const location = useLocation()
@@ -102,9 +114,10 @@ function AppContent() {
         {/* Layout - Page content with top padding for navbar */}
         <Layout showNav={showAuthenticatedNav}>
           <PageMetadata />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
+          <Suspense fallback={<RouteFallback />}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/profile/activity" element={<ProfileActivity />} />
@@ -139,6 +152,7 @@ function AppContent() {
             <Route path="/repositories" element={<Repositories />} />
             <Route path="/contributions" element={<Contributions />} />
           </Routes>
+          </Suspense>
         </Layout>
         
         {/* Footer - Show on every page, full width below content */}
@@ -159,9 +173,7 @@ function App() {
     <HelmetProvider>
       <AuthProvider>
         <SolanaWalletProvider>
-          <WalletProvider>
-            <AppContent />
-          </WalletProvider>
+          <AppContent />
         </SolanaWalletProvider>
       </AuthProvider>
     </HelmetProvider>

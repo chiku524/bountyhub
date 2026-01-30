@@ -187,7 +187,7 @@ export default function PostDetail() {
   const renderCodeBlock = (block: any, index: number) => (
     <div key={index} className="bg-white dark:bg-neutral-900/80 rounded-lg p-4 border border-violet-300 dark:border-violet-500/30 mb-4">
       <div className="flex items-center gap-2 mb-2">
-        <span className="px-2 py-1 bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300 rounded text-sm">
+        <span className="px-2 py-1 bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300 rounded-sm text-sm">
           {block.language}
         </span>
       </div>
@@ -212,7 +212,7 @@ export default function PostDetail() {
           />
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center pointer-events-none">
             <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-              <span className="text-white text-sm bg-black bg-opacity-50 px-2 py-1 rounded">
+              <span className="text-white text-sm bg-black bg-opacity-50 px-2 py-1 rounded-sm">
                 Click to view full size
               </span>
             </div>
@@ -255,7 +255,7 @@ export default function PostDetail() {
           </Link>
         </div>
         <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-8">Post Detail</h1>
-        <div className={`card bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 p-6 ${post?.reward && post.reward > 0 ? 'border-2 border-cyan-500/60 dark:border-cyan-400/60 bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-neutral-800 dark:to-cyan-500/5' : ''}`}>
+        <div className={`card bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 p-6 ${post?.reward && post.reward > 0 ? 'border-2 border-cyan-500/60 dark:border-cyan-400/60 bg-linear-to-br from-cyan-50 to-blue-50 dark:from-neutral-800 dark:to-cyan-500/5' : ''}`}>
           {loading && (
             <div className="p-8 text-center">
               <LoadingSpinner size="lg" className="mb-4" />
@@ -277,7 +277,7 @@ export default function PostDetail() {
                   <div className="flex items-center gap-3 mb-2">
                     <h2 className="text-2xl font-semibold text-neutral-900 dark:text-white">{post.title}</h2>
                     {post.reward && post.reward > 0 && (
-                      <div className="flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-cyan-100 to-blue-100 dark:from-cyan-500/20 dark:to-blue-500/20 border border-cyan-300 dark:border-cyan-400/40 rounded-full">
+                      <div className="flex items-center gap-2 px-3 py-1 bg-linear-to-r from-cyan-100 to-blue-100 dark:from-cyan-500/20 dark:to-blue-500/20 border border-cyan-300 dark:border-cyan-400/40 rounded-full">
                         <span className="text-cyan-600 dark:text-cyan-300 text-lg">💰</span>
                         <span className="text-cyan-700 dark:text-cyan-200 font-semibold">{post.reward} BBUX Bounty</span>
                       </div>
@@ -291,7 +291,7 @@ export default function PostDetail() {
                       {post.tags.map((tagName, index) => (
                         <span
                           key={index}
-                          className="px-2 py-1 bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300 rounded text-xs font-medium border border-violet-300 dark:border-violet-500/30 whitespace-nowrap"
+                          className="px-2 py-1 bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300 rounded-sm text-xs font-medium border border-violet-300 dark:border-violet-500/30 whitespace-nowrap"
                         >
                           {tagName}
                         </span>
@@ -301,7 +301,7 @@ export default function PostDetail() {
                   <BookmarkButton postId={post.id} size="lg" />
                   {canEdit && !editing && (
                     <button
-                      className="ml-2 px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded transition-colors"
+                      className="ml-2 px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-sm transition-colors"
                       onClick={handleEditClick}
                     >
                       Edit Post
@@ -309,7 +309,7 @@ export default function PostDetail() {
                   )}
                   {canEdit && !editing && (
                     <button
-                      className="ml-2 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded transition-colors"
+                      className="ml-2 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded-sm transition-colors"
                       onClick={handleDeleteClick}
                     >
                       Delete Post
@@ -323,14 +323,14 @@ export default function PostDetail() {
                     type="text"
                     value={editTitle}
                     onChange={e => setEditTitle(e.target.value)}
-                    className="w-full p-2 rounded border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
+                    className="w-full p-2 rounded-sm border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
                     placeholder="Title"
                     disabled={editLoading}
                   />
                   <textarea
                     value={editContent}
                     onChange={e => setEditContent(e.target.value)}
-                    className="w-full p-2 rounded border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
+                    className="w-full p-2 rounded-sm border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
                     placeholder="Content"
                     rows={6}
                     disabled={editLoading}
@@ -359,7 +359,7 @@ export default function PostDetail() {
                         {editCodeBlocks.map((block, index) => (
                           <div key={index} className="bg-white dark:bg-neutral-900/80 rounded-lg p-4 border border-violet-300 dark:border-violet-500/30">
                             <div className="flex items-center justify-between mb-2">
-                              <span className="px-2 py-1 bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300 rounded text-sm">
+                              <span className="px-2 py-1 bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300 rounded-sm text-sm">
                                 {block.language}
                               </span>
                               <button
@@ -404,7 +404,7 @@ export default function PostDetail() {
                   <div className="flex gap-2 justify-end">
                     <button
                       type="button"
-                      className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded"
+                      className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-sm"
                       onClick={handleEditCancel}
                       disabled={editLoading}
                     >
@@ -412,7 +412,7 @@ export default function PostDetail() {
                     </button>
                     <button
                       type="submit"
-                      className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded"
+                      className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-sm"
                       disabled={editLoading || !editTitle.trim() || !editContent.trim()}
                     >
                       {editLoading ? 'Saving...' : 'Save Changes'}

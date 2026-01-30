@@ -108,7 +108,7 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 left-auto top-full z-50 min-w-[280px] sm:min-w-[36rem] w-full max-w-[calc(100vw-2rem)] ml-0 p-3 sm:p-4 bg-neutral-800 border border-neutral-700 rounded-lg shadow-xl">
+        <div className="absolute right-0 left-auto top-full z-50 min-w-[280px] sm:min-w-xl w-full max-w-[calc(100vw-2rem)] ml-0 p-3 sm:p-4 bg-neutral-800 border border-neutral-700 rounded-lg shadow-xl">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {/* Status Filter */}
             <div>
@@ -118,7 +118,7 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
               <select
                 value={filters.status}
                 onChange={(e) => handleFilterChange('status', e.target.value)}
-                className="w-full p-2 bg-neutral-700 border border-neutral-600 rounded text-white text-sm"
+                className="w-full p-2 bg-neutral-700 border border-neutral-600 rounded-sm text-white text-sm"
               >
                 <option value="">All Status</option>
                 <option value="open">Open</option>
@@ -135,7 +135,7 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
               <select
                 value={filters.dateRange}
                 onChange={(e) => handleFilterChange('dateRange', e.target.value)}
-                className="w-full p-2 bg-neutral-700 border border-neutral-600 rounded text-white text-sm"
+                className="w-full p-2 bg-neutral-700 border border-neutral-600 rounded-sm text-white text-sm"
               >
                 <option value="">All Time</option>
                 <option value="today">Today</option>
@@ -153,7 +153,7 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
               <select
                 value={filters.sortBy}
                 onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                className="w-full p-2 bg-neutral-700 border border-neutral-600 rounded text-white text-sm"
+                className="w-full p-2 bg-neutral-700 border border-neutral-600 rounded-sm text-white text-sm"
               >
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
@@ -173,7 +173,7 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
                   id="hasBounty"
                   checked={filters.hasBounty}
                   onChange={(e) => handleFilterChange('hasBounty', e.target.checked)}
-                  className="w-4 h-4 text-indigo-600 bg-neutral-700 border-neutral-600 rounded focus:ring-indigo-500"
+                  className="w-4 h-4 text-indigo-600 bg-neutral-700 border-neutral-600 rounded-sm focus:ring-indigo-500"
                 />
                 <label htmlFor="hasBounty" className="ml-2 text-sm text-gray-300">
                   Has Bounty

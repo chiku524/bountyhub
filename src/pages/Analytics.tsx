@@ -103,7 +103,7 @@ export default function Analytics() {
         {/* Platform Stats Grid */}
         {platformStats && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-6 shadow-sm">
+            <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-6 shadow-xs">
               <div className="flex items-center justify-between mb-4">
                 <div className="p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
                   <FiDollarSign className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
@@ -114,7 +114,7 @@ export default function Analytics() {
               <p className="text-sm text-gray-600 dark:text-gray-400">Active Bounties</p>
             </div>
 
-            <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-6 shadow-sm">
+            <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-6 shadow-xs">
               <div className="flex items-center justify-between mb-4">
                 <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
                   <FiCheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
@@ -125,7 +125,7 @@ export default function Analytics() {
               <p className="text-sm text-gray-600 dark:text-gray-400">Questions Answered</p>
             </div>
 
-            <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-6 shadow-sm">
+            <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-6 shadow-xs">
               <div className="flex items-center justify-between mb-4">
                 <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
                   <FiTrendingUp className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
@@ -136,7 +136,7 @@ export default function Analytics() {
               <p className="text-sm text-gray-600 dark:text-gray-400">Total Rewards (BBUX)</p>
             </div>
 
-            <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-6 shadow-sm">
+            <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-6 shadow-xs">
               <div className="flex items-center justify-between mb-4">
                 <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                   <FiUsers className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -152,7 +152,7 @@ export default function Analytics() {
         {/* Detailed Stats */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Posts & Answers */}
-          <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-6 shadow-sm">
+          <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-6 shadow-xs">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
               <FiMessageSquare className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               Content Statistics
@@ -180,7 +180,7 @@ export default function Analytics() {
           </div>
 
           {/* Token & Economy */}
-          <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-6 shadow-sm">
+          <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-6 shadow-xs">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
               <FiDollarSign className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               Token Economy
@@ -208,7 +208,7 @@ export default function Analytics() {
 
         {/* Admin Stats (if admin) */}
         {user?.role === 'admin' && adminStats && (
-          <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-6 shadow-sm">
+          <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-6 shadow-xs">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
               <FiActivity className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               Admin Statistics

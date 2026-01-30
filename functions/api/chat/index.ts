@@ -120,7 +120,7 @@ chat.get('/:roomId/messages', async (c) => {
     const after = c.req.query('after');
     const db = createDb(c.env.DB);
     
-    let whereConditions = [eq(chatMessages.roomId, roomId)];
+    const whereConditions = [eq(chatMessages.roomId, roomId)];
     
     // If 'after' parameter is provided, only fetch messages after that timestamp
     if (after) {
@@ -351,7 +351,7 @@ chat.post('/global-chat/join', async (c) => {
     console.log('Joining global chat for user:', userId);
 
     // Get or create global chat room
-    let globalRoom = await db
+    const globalRoom = await db
       .select()
       .from(chatRooms)
       .where(eq(chatRooms.type, 'GLOBAL'))
@@ -440,7 +440,7 @@ chat.get('/global-chat/messages', async (c) => {
     const roomId = globalRoom[0].id;
     console.log('Found global chat room:', roomId);
     
-    let whereConditions = [eq(chatMessages.roomId, roomId)];
+    const whereConditions = [eq(chatMessages.roomId, roomId)];
     
     // If 'after' parameter is provided, only fetch messages after that timestamp
     if (after) {
@@ -505,7 +505,7 @@ chat.post('/global-chat/messages', async (c) => {
     }
 
     // Get global chat room
-    let globalRoom = await db
+    const globalRoom = await db
       .select()
       .from(chatRooms)
       .where(eq(chatRooms.type, 'GLOBAL'))

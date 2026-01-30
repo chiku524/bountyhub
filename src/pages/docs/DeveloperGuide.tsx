@@ -158,11 +158,11 @@ export default function DeveloperGuide() {
             <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Local Development</h3>
               <ol className="text-neutral-600 dark:text-gray-300 space-y-2">
-                <li>1. Clone the repository: <code className="bg-neutral-700 px-2 py-1 rounded">git clone https://github.com/bountyhub/bountyhub.git</code></li>
-                <li>2. Install dependencies: <code className="bg-neutral-700 px-2 py-1 rounded">npm install</code></li>
-                <li>3. Set up environment variables: <code className="bg-neutral-700 px-2 py-1 rounded">cp .env.example .env</code></li>
-                <li>4. Start development server: <code className="bg-neutral-700 px-2 py-1 rounded">npm run dev</code></li>
-                <li>5. Start backend worker: <code className="bg-neutral-700 px-2 py-1 rounded">npm run worker:dev</code></li>
+                <li>1. Clone the repository: <code className="bg-neutral-700 px-2 py-1 rounded-sm">git clone https://github.com/bountyhub/bountyhub.git</code></li>
+                <li>2. Install dependencies: <code className="bg-neutral-700 px-2 py-1 rounded-sm">npm install</code></li>
+                <li>3. Set up environment variables: <code className="bg-neutral-700 px-2 py-1 rounded-sm">cp .env.example .env</code></li>
+                <li>4. Start development server: <code className="bg-neutral-700 px-2 py-1 rounded-sm">npm run dev</code></li>
+                <li>5. Start backend worker: <code className="bg-neutral-700 px-2 py-1 rounded-sm">npm run worker:dev</code></li>
               </ol>
             </div>
 
@@ -233,7 +233,7 @@ export default function DeveloperGuide() {
                     <li>• Layout - Main app layout</li>
                     <li>• Nav - Navigation bar</li>
                     <li>• AuthProvider - Authentication context</li>
-                    <li>• WalletProvider - Wallet connection</li>
+                    <li>• SolanaWalletProvider - Wallet connection</li>
                     <li>• LoadingSpinner - Loading states</li>
                   </ul>
                 </div>
@@ -257,7 +257,7 @@ export default function DeveloperGuide() {
               </p>
               <ul className="text-neutral-600 dark:text-gray-400 space-y-2">
                 <li>• AuthProvider - User authentication state</li>
-                <li>• WalletProvider - Solana wallet connection</li>
+                <li>• SolanaWalletProvider - Solana wallet connection</li>
                 <li>• Custom hooks for API calls</li>
                 <li>• Local state for component-specific data</li>
                 <li>• React Query for server state (planned)</li>
@@ -339,7 +339,7 @@ export default function DeveloperGuide() {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Error Response Format</h4>
-                  <pre className="bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "error": "Error message",
   "code": "ERROR_CODE",
@@ -463,19 +463,19 @@ export default function DeveloperGuide() {
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Backend Services</h4>
                   <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
-                    <li>• <code className="bg-neutral-700 px-1 rounded">utils/governance.ts</code> - Governance and rewards</li>
-                    <li>• <code className="bg-neutral-700 px-1 rounded">api/wallet/</code> - Wallet operations</li>
-                    <li>• <code className="bg-neutral-700 px-1 rounded">api/governance/</code> - Governance endpoints</li>
-                    <li>• <code className="bg-neutral-700 px-1 rounded">utils/solana.ts</code> - Solana blockchain integration</li>
+                    <li>• <code className="bg-neutral-700 px-1 rounded-sm">utils/governance.ts</code> - Governance and rewards</li>
+                    <li>• <code className="bg-neutral-700 px-1 rounded-sm">api/wallet/</code> - Wallet operations</li>
+                    <li>• <code className="bg-neutral-700 px-1 rounded-sm">api/governance/</code> - Governance endpoints</li>
+                    <li>• <code className="bg-neutral-700 px-1 rounded-sm">utils/solana.ts</code> - Solana blockchain integration</li>
                   </ul>
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Frontend Components</h4>
                   <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
-                    <li>• <code className="bg-neutral-700 px-1 rounded">pages/Wallet.tsx</code> - Wallet interface</li>
-                    <li>• <code className="bg-neutral-700 px-1 rounded">pages/Governance.tsx</code> - Governance dashboard</li>
-                    <li>• <code className="bg-neutral-700 px-1 rounded">contexts/WalletProvider.tsx</code> - Wallet state</li>
-                    <li>• <code className="bg-neutral-700 px-1 rounded">utils/api.ts</code> - API integration</li>
+                    <li>• <code className="bg-neutral-700 px-1 rounded-sm">pages/Wallet.tsx</code> - Wallet interface</li>
+                    <li>• <code className="bg-neutral-700 px-1 rounded-sm">pages/Governance.tsx</code> - Governance dashboard</li>
+                    <li>• <code className="bg-neutral-700 px-1 rounded-sm">contexts/SolanaWalletProvider.tsx</code> - Wallet state</li>
+                    <li>• <code className="bg-neutral-700 px-1 rounded-sm">utils/api.ts</code> - API integration</li>
                   </ul>
                 </div>
               </div>
@@ -959,7 +959,7 @@ export default function DeveloperGuide() {
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">POST /api/auth/signup</h4>
                   <p className="text-neutral-600 dark:text-gray-300 mb-2">Create a new user account</p>
-                  <pre className="bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "username": "string",
   "email": "string",
@@ -971,7 +971,7 @@ export default function DeveloperGuide() {
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">POST /api/auth/login</h4>
                   <p className="text-neutral-600 dark:text-gray-300 mb-2">Authenticate user and get JWT token</p>
-                  <pre className="bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "email": "string",
   "password": "string"
@@ -992,7 +992,7 @@ export default function DeveloperGuide() {
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">POST /api/posts</h4>
                   <p className="text-neutral-600 dark:text-gray-300 mb-2">Create a new post</p>
-                  <pre className="bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "title": "string",
   "content": "string",
@@ -1005,7 +1005,7 @@ export default function DeveloperGuide() {
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">POST /api/posts/{'{id}'}/vote</h4>
                   <p className="text-neutral-600 dark:text-gray-300 mb-2">Vote on a post</p>
-                  <pre className="bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "voteType": "up" | "down"
 }`}
@@ -1024,7 +1024,7 @@ export default function DeveloperGuide() {
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">POST /api/wallet/deposit</h4>
                   <p className="text-neutral-600 dark:text-gray-300 mb-2">Initiate BBUX deposit</p>
-                  <pre className="bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "amount": "number",
   "solAmount": "number"
@@ -1034,7 +1034,7 @@ export default function DeveloperGuide() {
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">POST /api/wallet/withdraw</h4>
                   <p className="text-neutral-600 dark:text-gray-300 mb-2">Withdraw BBUX tokens</p>
-                  <pre className="bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "amount": "number"
 }`}
@@ -1055,10 +1055,10 @@ export default function DeveloperGuide() {
                 bountyhub is deployed on Cloudflare Pages and Workers for optimal performance and scalability.
               </p>
               <ol className="text-neutral-600 dark:text-gray-300 space-y-2">
-                <li>1. <strong>Build:</strong> <code className="bg-neutral-700 px-2 py-1 rounded">npm run build</code></li>
-                <li>2. <strong>Deploy Frontend:</strong> <code className="bg-neutral-700 px-2 py-1 rounded">npm run deploy</code></li>
-                <li>3. <strong>Deploy Workers:</strong> <code className="bg-neutral-700 px-2 py-1 rounded">wrangler deploy</code></li>
-                <li>4. <strong>Setup Database:</strong> <code className="bg-neutral-700 px-2 py-1 rounded">wrangler d1 migrations apply</code></li>
+                <li>1. <strong>Build:</strong> <code className="bg-neutral-700 px-2 py-1 rounded-sm">npm run build</code></li>
+                <li>2. <strong>Deploy Frontend:</strong> <code className="bg-neutral-700 px-2 py-1 rounded-sm">npm run deploy</code></li>
+                <li>3. <strong>Deploy Workers:</strong> <code className="bg-neutral-700 px-2 py-1 rounded-sm">wrangler deploy</code></li>
+                <li>4. <strong>Setup Database:</strong> <code className="bg-neutral-700 px-2 py-1 rounded-sm">wrangler d1 migrations apply</code></li>
                 <li>5. <strong>Configure Environment:</strong> Set production environment variables</li>
               </ol>
             </div>
@@ -1095,13 +1095,13 @@ export default function DeveloperGuide() {
               <h3 className="text-xl font-semibold text-white mb-3">Development Workflow</h3>
               <ol className="text-neutral-600 dark:text-gray-300 space-y-2">
                 <li>1. Fork the repository</li>
-                <li>2. Create a feature branch: <code className="bg-neutral-700 px-2 py-1 rounded">git checkout -b feature/name</code></li>
+                <li>2. Create a feature branch: <code className="bg-neutral-700 px-2 py-1 rounded-sm">git checkout -b feature/name</code></li>
                 <li>3. Make your changes</li>
                 <li>4. Write tests for new functionality</li>
-                <li>5. Run linting: <code className="bg-neutral-700 px-2 py-1 rounded">npm run lint</code></li>
-                <li>6. Run tests: <code className="bg-neutral-700 px-2 py-1 rounded">npm run test</code></li>
-                <li>7. Commit your changes: <code className="bg-neutral-700 px-2 py-1 rounded">git commit -m "feat: add new feature"</code></li>
-                <li>8. Push to your fork: <code className="bg-neutral-700 px-2 py-1 rounded">git push origin feature/name</code></li>
+                <li>5. Run linting: <code className="bg-neutral-700 px-2 py-1 rounded-sm">npm run lint</code></li>
+                <li>6. Run tests: <code className="bg-neutral-700 px-2 py-1 rounded-sm">npm run test</code></li>
+                <li>7. Commit your changes: <code className="bg-neutral-700 px-2 py-1 rounded-sm">git commit -m "feat: add new feature"</code></li>
+                <li>8. Push to your fork: <code className="bg-neutral-700 px-2 py-1 rounded-sm">git push origin feature/name</code></li>
                 <li>9. Create a pull request</li>
               </ol>
             </div>

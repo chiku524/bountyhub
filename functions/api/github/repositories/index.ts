@@ -134,7 +134,7 @@ app.post('/sync', async (c) => {
         } catch {
           // Not JSON, use text as is
         }
-      } catch (e) {
+      } catch (_e) {
         errorText = 'Failed to read error response'
       }
 

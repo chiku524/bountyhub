@@ -288,7 +288,7 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
       {isOpen && (
         <div 
           ref={popupRef}
-          className="fixed w-80 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-lg z-[10000] text-neutral-900 dark:text-white"
+          className="fixed w-80 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-lg z-10000 text-neutral-900 dark:text-white"
           style={popupStyle}
         >
           {!user ? (

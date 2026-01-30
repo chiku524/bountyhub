@@ -86,7 +86,7 @@ export function InstallPrompt() {
   return (
     <div className="fixed bottom-20 md:bottom-6 left-4 right-4 md:left-auto md:right-6 z-50 max-w-sm mx-auto md:mx-0">
       <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-lg p-4 flex items-center gap-3">
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           <img src="/logo.png" alt="BountyHub" className="w-10 h-10 rounded-lg" />
         </div>
         <div className="flex-1 min-w-0">

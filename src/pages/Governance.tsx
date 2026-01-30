@@ -377,7 +377,7 @@ const Governance: React.FC = () => {
 
       {/* User's Personalized Reward Rate */}
       {userRewardRate && (
-        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/50 dark:to-purple-900/50 border border-indigo-200 dark:border-indigo-700 rounded-lg p-6 mb-8">
+        <div className="bg-linear-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/50 dark:to-purple-900/50 border border-indigo-200 dark:border-indigo-700 rounded-lg p-6 mb-8">
           <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-3">Your Personalized Reward Rate</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -474,7 +474,7 @@ const Governance: React.FC = () => {
                   value={stakeAmount}
                   onChange={(e) => setStakeAmount(e.target.value)}
                   placeholder="Amount to stake"
-                  className="flex-1 px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400"
+                  className="flex-1 px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400"
                   min="0"
                   step="0.01"
                 />
@@ -502,7 +502,7 @@ const Governance: React.FC = () => {
                   value={unstakeAmount}
                   onChange={(e) => setUnstakeAmount(e.target.value)}
                   placeholder="Amount to unstake"
-                  className="flex-1 px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400"
+                  className="flex-1 px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400"
                   min="0"
                   step="0.01"
                 />

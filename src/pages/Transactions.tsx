@@ -138,7 +138,7 @@ export default function Transactions() {
                     {tx.metadata && (
                       <div className="md:col-span-2">
                         <p className="text-neutral-500 dark:text-gray-400">Details</p>
-                        <div className="bg-neutral-100 dark:bg-neutral-700 rounded p-3 mt-1">
+                        <div className="bg-neutral-100 dark:bg-neutral-700 rounded-sm p-3 mt-1">
                           <pre className="text-neutral-800 dark:text-white text-xs whitespace-pre-wrap">
                             {JSON.stringify(JSON.parse(tx.metadata), null, 2)}
                           </pre>

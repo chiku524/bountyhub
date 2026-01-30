@@ -37,7 +37,7 @@ app.get(async (c) => {
     let postIds: string[]
     try {
       postIds = JSON.parse(decodeURIComponent(postIdsParam))
-    } catch (error) {
+    } catch (_error) {
       return c.json({ error: 'Invalid postIds format' }, 400)
     }
 

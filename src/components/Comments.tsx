@@ -129,7 +129,7 @@ export const Comments: React.FC<CommentsProps> = memo(({ postId }) => {
         </button>
 
         {/* Vote Count */}
-        <span className={`text-sm font-medium px-1 min-w-[2rem] text-center ${
+        <span className={`text-sm font-medium px-1 min-w-8 text-center ${
           totalVotes > 0 ? 'text-green-400' : 
           totalVotes < 0 ? 'text-red-400' : 
           'text-neutral-500 dark:text-gray-400'
@@ -185,7 +185,7 @@ export const Comments: React.FC<CommentsProps> = memo(({ postId }) => {
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Add a comment..."
-            className="w-full p-3 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-600 rounded-lg text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+            className="w-full p-3 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-600 rounded-lg text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 resize-none"
             rows={3}
             disabled={submitting}
           />

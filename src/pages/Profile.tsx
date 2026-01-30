@@ -346,7 +346,7 @@ export default function Profile() {
         setGithubConnected(false)
         setGithubUsername(null)
       }
-    } catch (error) {
+    } catch (_error) {
       setGithubConnected(false)
       setGithubUsername(null)
     }
@@ -508,7 +508,7 @@ export default function Profile() {
                 <label htmlFor="socialMedia" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">Social Media</label>
                 {githubConnected && (
                   <div className="mb-3 flex items-center gap-2 p-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
-                    <svg className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-green-600 dark:text-green-400 shrink-0" fill="currentColor" viewBox="0 0 24 24">
                       <path fillRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" clipRule="evenodd" />
                     </svg>
                     <span className="text-xs text-green-700 dark:text-green-300">
@@ -546,7 +546,7 @@ export default function Profile() {
                 {recentActivities.map((history) => (
                   <div key={history.id} className="flex items-center justify-between p-3 bg-neutral-100 dark:bg-neutral-700/50 rounded-lg border border-violet-500/30 dark:border-violet-500/30">
                     <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <div className="p-1.5 bg-violet-500/20 rounded-lg flex-shrink-0">
+                      <div className="p-1.5 bg-violet-500/20 rounded-lg shrink-0">
                         <FiThumbsUp className="w-3.5 h-3.5 text-violet-300" />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -556,7 +556,7 @@ export default function Profile() {
                         </p>
                       </div>
                     </div>
-                    <span className={`text-sm font-medium flex-shrink-0 ml-2 ${history.points > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    <span className={`text-sm font-medium shrink-0 ml-2 ${history.points > 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {history.points > 0 ? '+' : ''}{history.points}
                     </span>
                   </div>
@@ -575,16 +575,16 @@ export default function Profile() {
               <h2 className="text-base sm:text-lg font-semibold text-violet-600 dark:text-violet-300 mb-4">Recent Posts</h2>
               <div className="space-y-2">
                 {limitedPosts.map((post) => (
-                  <div key={post.id} className={`p-3 bg-neutral-100 dark:bg-neutral-700/50 rounded-lg border border-violet-500/30 dark:border-violet-500/30 ${post.reward && post.reward > 0 ? 'border-l-4 border-cyan-400/60 bg-gradient-to-r from-cyan-500/5 to-neutral-100 dark:to-neutral-700/50' : ''}`}>
+                  <div key={post.id} className={`p-3 bg-neutral-100 dark:bg-neutral-700/50 rounded-lg border border-violet-500/30 dark:border-violet-500/30 ${post.reward && post.reward > 0 ? 'border-l-4 border-cyan-400/60 bg-linear-to-r from-cyan-500/5 to-neutral-100 dark:to-neutral-700/50' : ''}`}>
                     <Link to={`/posts/${post.id}`} className="block hover:bg-neutral-600/50 rounded-lg p-1.5 -m-1.5 transition-colors">
                       <div className="flex items-center gap-2 mb-1">
-                        <div className="p-1.5 bg-violet-500/20 rounded-lg flex-shrink-0">
+                        <div className="p-1.5 bg-violet-500/20 rounded-lg shrink-0">
                           <FiThumbsUp className="w-3.5 h-3.5 text-violet-600 dark:text-violet-300" />
                         </div>
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           <h3 className="text-sm font-medium text-violet-600 dark:text-violet-300 truncate">{post.title}</h3>
                           {post.reward && post.reward > 0 && (
-                            <div className="flex items-center gap-1 px-1.5 py-0.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/40 rounded-full flex-shrink-0">
+                            <div className="flex items-center gap-1 px-1.5 py-0.5 bg-linear-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/40 rounded-full shrink-0">
                               <span className="text-cyan-300 text-xs">💰</span>
                               <span className="text-cyan-200 text-xs font-medium">{post.reward}</span>
                             </div>

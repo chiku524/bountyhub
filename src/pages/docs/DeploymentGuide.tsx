@@ -106,9 +106,9 @@ export default function DeploymentGuide() {
               <h3 className="text-xl font-semibold text-white mb-3">Installation</h3>
               <ol className="text-neutral-600 dark:text-gray-300 space-y-2">
                 <li>1. Install Node.js from <a href="https://nodejs.org" target="_blank" rel="noopener noreferrer" className="text-violet-400 hover:text-violet-300">nodejs.org</a></li>
-                <li>2. Install Cloudflare CLI: <code className="bg-neutral-700 px-2 py-1 rounded">npm install -g wrangler</code></li>
-                <li>3. Install Solana CLI: <code className="bg-neutral-700 px-2 py-1 rounded">sh -c "$(curl -sSfL https://release.solana.com/stable/install)"</code></li>
-                <li>4. Clone the repository: <code className="bg-neutral-700 px-2 py-1 rounded">git clone https://github.com/bountyhub/bountyhub.git</code></li>
+                <li>2. Install Cloudflare CLI: <code className="bg-neutral-700 px-2 py-1 rounded-sm">npm install -g wrangler</code></li>
+                <li>3. Install Solana CLI: <code className="bg-neutral-700 px-2 py-1 rounded-sm">sh -c "$(curl -sSfL https://release.solana.com/stable/install)"</code></li>
+                <li>4. Clone the repository: <code className="bg-neutral-700 px-2 py-1 rounded-sm">git clone https://github.com/bountyhub/bountyhub.git</code></li>
               </ol>
             </div>
           </div>
@@ -134,9 +134,9 @@ export default function DeploymentGuide() {
                 Authenticate with Cloudflare using the CLI tool.
               </p>
               <ol className="text-neutral-600 dark:text-gray-300 space-y-2">
-                <li>1. Run authentication: <code className="bg-neutral-700 px-2 py-1 rounded">wrangler login</code></li>
+                <li>1. Run authentication: <code className="bg-neutral-700 px-2 py-1 rounded-sm">wrangler login</code></li>
                 <li>2. Follow the browser prompt to authorize</li>
-                <li>3. Verify authentication: <code className="bg-neutral-700 px-2 py-1 rounded">wrangler whoami</code></li>
+                <li>3. Verify authentication: <code className="bg-neutral-700 px-2 py-1 rounded-sm">wrangler whoami</code></li>
               </ol>
             </div>
 
@@ -148,7 +148,7 @@ export default function DeploymentGuide() {
               <div className="space-y-4">
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">wrangler.toml</h4>
-                  <pre className="bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`name = "bountyhub-api"
 main = "functions/index.ts"
 compatibility_date = "2025-01-01"
@@ -164,7 +164,7 @@ database_id = "your-database-id"`}
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">package.json Scripts</h4>
-                  <pre className="bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "scripts": {
     "deploy": "wrangler deploy",
@@ -188,10 +188,10 @@ database_id = "your-database-id"`}
             <div className="bg-neutral-800 rounded-lg p-6">
               <h3 className="text-xl font-semibold text-white mb-3">D1 Database Creation</h3>
               <ol className="text-neutral-600 dark:text-gray-300 space-y-2">
-                <li>1. Create a new D1 database: <code className="bg-neutral-700 px-2 py-1 rounded">wrangler d1 create bountyhub-prod</code></li>
+                <li>1. Create a new D1 database: <code className="bg-neutral-700 px-2 py-1 rounded-sm">wrangler d1 create bountyhub-prod</code></li>
                 <li>2. Note the database ID from the output</li>
                 <li>3. Update your wrangler.toml with the database ID</li>
-                <li>4. Create development database: <code className="bg-neutral-700 px-2 py-1 rounded">wrangler d1 create bountyhub-dev</code></li>
+                <li>4. Create development database: <code className="bg-neutral-700 px-2 py-1 rounded-sm">wrangler d1 create bountyhub-dev</code></li>
               </ol>
             </div>
 
@@ -201,10 +201,10 @@ database_id = "your-database-id"`}
                 Apply database migrations to set up the schema.
               </p>
               <ol className="text-neutral-600 dark:text-gray-300 space-y-2">
-                <li>1. Generate migration: <code className="bg-neutral-700 px-2 py-1 rounded">npm run db:generate</code></li>
-                <li>2. Apply to development: <code className="bg-neutral-700 px-2 py-1 rounded">npm run db:migrate</code></li>
-                <li>3. Apply to production: <code className="bg-neutral-700 px-2 py-1 rounded">npm run db:migrate:prod</code></li>
-                <li>4. Verify schema: <code className="bg-neutral-700 px-2 py-1 rounded">wrangler d1 execute bountyhub-prod --command=".schema"</code></li>
+                <li>1. Generate migration: <code className="bg-neutral-700 px-2 py-1 rounded-sm">npm run db:generate</code></li>
+                <li>2. Apply to development: <code className="bg-neutral-700 px-2 py-1 rounded-sm">npm run db:migrate</code></li>
+                <li>3. Apply to production: <code className="bg-neutral-700 px-2 py-1 rounded-sm">npm run db:migrate:prod</code></li>
+                <li>4. Verify schema: <code className="bg-neutral-700 px-2 py-1 rounded-sm">wrangler d1 execute bountyhub-prod --command=".schema"</code></li>
               </ol>
             </div>
 
@@ -288,7 +288,7 @@ database_id = "your-database-id"`}
               <div className="space-y-4">
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Development</h4>
-                  <pre className="bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`# .env file
 JWT_SECRET=your-dev-secret-key
 SOLANA_RPC_URL=https://proud-quick-haze.solana-mainnet.quiknode.pro/6ef6dbb1b21d654b4e164546f9c925d47e24dcc1/
@@ -299,7 +299,7 @@ ENVIRONMENT=development`}
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Production</h4>
-                  <pre className="bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`# Set via wrangler
 wrangler secret put JWT_SECRET
 wrangler secret put SOLANA_RPC_URL
@@ -336,8 +336,8 @@ wrangler secret put PLATFORM_WALLET_ADDRESS
                 Deploy the React frontend to Cloudflare Pages.
               </p>
               <ol className="text-neutral-600 dark:text-gray-300 space-y-2">
-                <li>1. Build the project: <code className="bg-neutral-700 px-2 py-1 rounded">npm run build</code></li>
-                <li>2. Deploy to Pages: <code className="bg-neutral-700 px-2 py-1 rounded">npm run deploy</code></li>
+                <li>1. Build the project: <code className="bg-neutral-700 px-2 py-1 rounded-sm">npm run build</code></li>
+                <li>2. Deploy to Pages: <code className="bg-neutral-700 px-2 py-1 rounded-sm">npm run deploy</code></li>
                 <li>3. Configure custom domain in Cloudflare dashboard</li>
                 <li>4. Set up environment variables for frontend</li>
               </ol>
@@ -349,10 +349,10 @@ wrangler secret put PLATFORM_WALLET_ADDRESS
                 Deploy the API to Cloudflare Workers.
               </p>
               <ol className="text-neutral-600 dark:text-gray-300 space-y-2">
-                <li>1. Build the worker: <code className="bg-neutral-700 px-2 py-1 rounded">npm run build:worker</code></li>
-                <li>2. Deploy to Workers: <code className="bg-neutral-700 px-2 py-1 rounded">wrangler deploy</code></li>
-                <li>3. Deploy to production: <code className="bg-neutral-700 px-2 py-1 rounded">wrangler deploy --env production</code></li>
-                <li>4. Verify deployment: <code className="bg-neutral-700 px-2 py-1 rounded">wrangler tail</code></li>
+                <li>1. Build the worker: <code className="bg-neutral-700 px-2 py-1 rounded-sm">npm run build:worker</code></li>
+                <li>2. Deploy to Workers: <code className="bg-neutral-700 px-2 py-1 rounded-sm">wrangler deploy</code></li>
+                <li>3. Deploy to production: <code className="bg-neutral-700 px-2 py-1 rounded-sm">wrangler deploy --env production</code></li>
+                <li>4. Verify deployment: <code className="bg-neutral-700 px-2 py-1 rounded-sm">wrangler tail</code></li>
               </ol>
             </div>
 
@@ -362,9 +362,9 @@ wrangler secret put PLATFORM_WALLET_ADDRESS
                 Deploy database schema and initial data.
               </p>
               <ol className="text-neutral-600 dark:text-gray-300 space-y-2">
-                <li>1. Apply migrations: <code className="bg-neutral-700 px-2 py-1 rounded">wrangler d1 migrations apply bountyhub-prod</code></li>
-                <li>2. Seed initial data: <code className="bg-neutral-700 px-2 py-1 rounded">wrangler d1 execute bountyhub-prod --file=./seed.sql</code></li>
-                <li>3. Verify data: <code className="bg-neutral-700 px-2 py-1 rounded">wrangler d1 execute bountyhub-prod --command="SELECT COUNT(*) FROM users;"</code></li>
+                <li>1. Apply migrations: <code className="bg-neutral-700 px-2 py-1 rounded-sm">wrangler d1 migrations apply bountyhub-prod</code></li>
+                <li>2. Seed initial data: <code className="bg-neutral-700 px-2 py-1 rounded-sm">wrangler d1 execute bountyhub-prod --file=./seed.sql</code></li>
+                <li>3. Verify data: <code className="bg-neutral-700 px-2 py-1 rounded-sm">wrangler d1 execute bountyhub-prod --command="SELECT COUNT(*) FROM users;"</code></li>
               </ol>
             </div>
 
@@ -373,7 +373,7 @@ wrangler secret put PLATFORM_WALLET_ADDRESS
               <p className="text-neutral-600 dark:text-gray-300 mb-4">
                 Set up GitHub Actions for automated deployment.
               </p>
-              <pre className="bg-neutral-700 p-4 rounded text-sm text-neutral-600 dark:text-gray-300">
+              <pre className="bg-neutral-700 p-4 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`.github/workflows/deploy.yml
 name: Deploy to Cloudflare
 on:
@@ -422,7 +422,7 @@ jobs:
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Real-time Logs</h4>
                   <ul className="text-neutral-600 dark:text-gray-400 space-y-1">
-                    <li>• View live logs: <code className="bg-neutral-700 px-2 py-1 rounded">wrangler tail</code></li>
+                    <li>• View live logs: <code className="bg-neutral-700 px-2 py-1 rounded-sm">wrangler tail</code></li>
                     <li>• Filter by environment</li>
                     <li>• Search and analyze logs</li>
                     <li>• Set up alerts</li>
@@ -602,7 +602,7 @@ jobs:
               <div className="space-y-4">
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Worker Debugging</h4>
-                  <pre className="bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`# View real-time logs
 wrangler tail
 
@@ -618,7 +618,7 @@ wrangler analytics`}
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Database Debugging</h4>
-                  <pre className="bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`# Execute SQL query
 wrangler d1 execute bountyhub-prod --command="SELECT * FROM users LIMIT 5;"
 

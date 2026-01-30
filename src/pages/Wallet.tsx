@@ -50,7 +50,7 @@ function WalletContent() {
       setLoading(true)
       const response = await api.getWalletInfo()
       setWalletData(response)
-    } catch (error) {
+    } catch (_error) {
       setError('Failed to fetch wallet data')
     } finally {
       setLoading(false)
@@ -61,7 +61,7 @@ function WalletContent() {
     try {
       const response = await api.getRecentTransactions()
       setTransactions(response)
-    } catch (error) {
+    } catch (_error) {
       setError('Failed to fetch transactions')
     }
   }
@@ -108,7 +108,7 @@ function WalletContent() {
           } else {
             throw new Error(result.error || 'Failed to get blockhash')
           }
-        } catch (error) {
+        } catch (_error) {
           retries--
           if (retries === 0) {
             throw new Error('Unable to connect to Solana network after multiple attempts. Please try again later.')
@@ -366,11 +366,11 @@ function WalletContent() {
       <div className="p-8">
         <div className="max-w-4xl mx-auto">
           <div className="animate-pulse">
-            <div className="h-8 bg-neutral-800 rounded w-1/4 mb-8"></div>
+            <div className="h-8 bg-neutral-800 rounded-sm w-1/4 mb-8"></div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="h-32 bg-neutral-800 rounded"></div>
-              <div className="h-32 bg-neutral-800 rounded"></div>
-              <div className="h-32 bg-neutral-800 rounded"></div>
+              <div className="h-32 bg-neutral-800 rounded-sm"></div>
+              <div className="h-32 bg-neutral-800 rounded-sm"></div>
+              <div className="h-32 bg-neutral-800 rounded-sm"></div>
             </div>
           </div>
         </div>
@@ -402,11 +402,11 @@ function WalletContent() {
       <div className="p-8">
         <div className="max-w-4xl mx-auto">
           <div className="animate-pulse">
-            <div className="h-8 bg-neutral-800 rounded w-1/4 mb-8"></div>
+            <div className="h-8 bg-neutral-800 rounded-sm w-1/4 mb-8"></div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="h-32 bg-neutral-800 rounded"></div>
-              <div className="h-32 bg-neutral-800 rounded"></div>
-              <div className="h-32 bg-neutral-800 rounded"></div>
+              <div className="h-32 bg-neutral-800 rounded-sm"></div>
+              <div className="h-32 bg-neutral-800 rounded-sm"></div>
+              <div className="h-32 bg-neutral-800 rounded-sm"></div>
             </div>
           </div>
         </div>
@@ -447,7 +447,7 @@ function WalletContent() {
           )}
 
           {/* Wallet Overview Card */}
-          <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-4 sm:p-6 text-white mb-6 sm:mb-8">
+          <div className="bg-linear-to-r from-blue-500 to-purple-600 rounded-lg p-4 sm:p-6 text-white mb-6 sm:mb-8">
             <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
               <div>
                 <h2 className="text-xl sm:text-2xl font-semibold mb-2">BBUX Token Balances</h2>
@@ -487,7 +487,7 @@ function WalletContent() {
               {connected && publicKey && (
                 <div>
                   <span className="text-neutral-600 dark:text-gray-300 text-sm sm:text-base">Connected Address:</span>
-                  <p className="font-mono text-xs sm:text-sm bg-neutral-100 dark:bg-neutral-700 p-2 rounded border border-neutral-300 dark:border-neutral-600 break-all text-neutral-800 dark:text-gray-200 mt-1">
+                  <p className="font-mono text-xs sm:text-sm bg-neutral-100 dark:bg-neutral-700 p-2 rounded-sm border border-neutral-300 dark:border-neutral-600 break-all text-neutral-800 dark:text-gray-200 mt-1">
                     {publicKey}
                   </p>
                 </div>
@@ -594,7 +594,7 @@ function WalletContent() {
                         min="0.001"
                         max="1000"
                         required
-                        className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-orange-500"
                         placeholder="0.1"
                       />
                       <p className="text-sm text-neutral-500 dark:text-gray-400 mt-1">
@@ -643,7 +643,7 @@ function WalletContent() {
                         min="0.001"
                         max="1000"
                         required
-                        className="w-full px-3 py-2 border border-neutral-600 bg-neutral-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-neutral-600 bg-neutral-700 text-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                         placeholder="0.1"
                       />
                       <p className="text-sm text-gray-400 mt-1">
@@ -709,7 +709,7 @@ function WalletContent() {
                           setTimeout(() => setMessage(''), 2000)
                         }
                       }}
-                      className="px-2 py-1 bg-green-700 text-green-200 rounded text-xs hover:bg-green-600"
+                      className="px-2 py-1 bg-green-700 text-green-200 rounded-sm text-xs hover:bg-green-600"
                     >
                       Copy
                     </button>
@@ -726,7 +726,7 @@ function WalletContent() {
                       type="text"
                       name="signature"
                       required
-                      className="w-full px-3 py-2 border border-neutral-600 bg-neutral-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-neutral-600 bg-neutral-700 text-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                       placeholder="Paste the transaction signature from your wallet"
                     />
                     <p className="text-sm text-gray-400 mt-1">
@@ -793,7 +793,7 @@ function WalletContent() {
                       min="0.001"
                       max={walletData ? walletData.virtualBalance : 0}
                       required
-                      className="w-full px-3 py-2 border border-neutral-600 bg-neutral-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-neutral-600 bg-neutral-700 text-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                       placeholder="0.1"
                     />
                     <p className="text-sm text-gray-400 mt-1">
@@ -823,7 +823,7 @@ function WalletContent() {
                       value={destinationAddress}
                       onChange={(e) => setDestinationAddress(e.target.value)}
                       required
-                      className="w-full px-3 py-2 border border-neutral-600 bg-neutral-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-neutral-600 bg-neutral-700 text-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                       placeholder="Enter your Solana address"
                     />
                   </div>

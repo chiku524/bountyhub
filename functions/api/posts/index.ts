@@ -152,7 +152,7 @@ app.get(async (c) => {
           }
           
           return date.toISOString()
-        } catch (error) {
+        } catch (_error) {
           return new Date().toISOString()
         }
       }
@@ -256,7 +256,7 @@ app.post(async (c) => {
               createdAt: new Date(),
               updatedAt: new Date()
             })
-          } catch (error) {
+          } catch (_error) {
             // Continue without this code block if insertion fails
           }
         }
@@ -281,7 +281,7 @@ app.post(async (c) => {
               createdAt: new Date(),
               updatedAt: new Date()
             })
-          } catch (error) {
+          } catch (_error) {
             // Continue without this media item if insertion fails
           }
         }
@@ -399,7 +399,7 @@ app.post(async (c) => {
         }
         
         return date.toISOString()
-      } catch (error) {
+      } catch (_error) {
         return new Date().toISOString()
       }
     }
@@ -499,7 +499,7 @@ app.get('/:id', async (c) => {
         }
         
         return date.toISOString()
-      } catch (error) {
+      } catch (_error) {
         return new Date().toISOString()
       }
     }

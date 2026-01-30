@@ -1,43 +1,49 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
 import path from 'path'
+import { defineConfig, loadEnv } from 'vite'
+import react from '@vitejs/plugin-react-swc'
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [react()],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+  const defaults = {
+    VITE_API_URL: mode === 'development' ? 'http://localhost:3000' : 'https://api.bountyhub.tech',
+    VITE_GIPHY_API_KEY: '8tPzDynfDBevgXLsAaPztARWyvWzNLPK',
+    VITE_CLOUDINARY_CLOUD_NAME: 'dqobhvk07',
+    VITE_CLOUDINARY_UPLOAD_PRESET: 'bountyhub',
+  }
+  return {
+    plugins: [react()],
+    resolve: {
+      alias: { '@': path.resolve(__dirname, './src') },
     },
-  },
-  define: {
-    // Inject environment variables at build time
-    'import.meta.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://api.bountyhub.tech')),
-    'import.meta.env.VITE_GIPHY_API_KEY': JSON.stringify(process.env.VITE_GIPHY_API_KEY || '8tPzDynfDBevgXLsAaPztARWyvWzNLPK'),
-    'import.meta.env.VITE_CLOUDINARY_CLOUD_NAME': JSON.stringify(process.env.VITE_CLOUDINARY_CLOUD_NAME || 'dqobhvk07'),
-    'import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET': JSON.stringify(process.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'bountyhub'),
-  },
-  build: {
-    outDir: 'dist',
-    emptyOutDir: true,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          solana: ['@solana/web3.js', '@solana/wallet-adapter-react'],
+    define: {
+      'import.meta.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL ?? defaults.VITE_API_URL),
+      'import.meta.env.VITE_GIPHY_API_KEY': JSON.stringify(env.VITE_GIPHY_API_KEY ?? defaults.VITE_GIPHY_API_KEY),
+      'import.meta.env.VITE_CLOUDINARY_CLOUD_NAME': JSON.stringify(env.VITE_CLOUDINARY_CLOUD_NAME ?? defaults.VITE_CLOUDINARY_CLOUD_NAME),
+      'import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET': JSON.stringify(env.VITE_CLOUDINARY_UPLOAD_PRESET ?? defaults.VITE_CLOUDINARY_UPLOAD_PRESET),
+    },
+    build: {
+      outDir: 'dist',
+      emptyOutDir: true,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            vendor: ['react', 'react-dom'],
+            solana: ['@solana/web3.js', '@solana/wallet-adapter-react'],
+          },
         },
       },
     },
-  },
-  server: {
-    port: 3000,
-    host: true,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8788',
-        changeOrigin: true,
-        secure: false,
+    server: {
+      port: 3000,
+      host: true,
+      proxy: {
+        '/api': {
+          target: 'http://localhost:8788',
+          changeOrigin: true,
+          secure: false,
+        },
       },
     },
-  },
+  }
 }) 

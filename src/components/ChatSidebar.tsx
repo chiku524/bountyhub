@@ -263,7 +263,7 @@ const ChatSidebar: React.FC = () => {
           <img 
             src={gifMatch[2]} 
             alt={gifMatch[1]} 
-            className="max-w-full rounded"
+            className="max-w-full rounded-sm"
             style={{ maxHeight: '200px' }}
           />
         </div>
@@ -282,7 +282,7 @@ const ChatSidebar: React.FC = () => {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-6 right-6 z-50 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full shadow-lg p-4 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="fixed bottom-6 right-6 z-50 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full shadow-lg p-4 flex items-center justify-center focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
           aria-label="Open chat sidebar"
         >
           <FiMessageCircle className="h-6 w-6" />
@@ -308,7 +308,7 @@ const ChatSidebar: React.FC = () => {
           </div>
           <button
             onClick={() => setOpen(false)}
-            className="text-neutral-400 hover:text-white p-1 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="text-neutral-400 hover:text-white p-1 rounded-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
             aria-label="Close chat sidebar"
           >
             <FiX className="h-5 w-5" />
@@ -320,7 +320,7 @@ const ChatSidebar: React.FC = () => {
           {messages.map((msg) => (
             <div key={msg.id} className={`flex ${msg.author.id === user.id ? 'justify-end' : 'justify-start'}`}>
               <div
-                className={`rounded-lg px-3 py-2 shadow-sm break-words max-w-[85%] ${
+                className={`rounded-lg px-3 py-2 shadow-xs wrap-break-word max-w-[85%] ${
                   msg.author.id === user.id
                     ? 'bg-indigo-600 text-white'
                     : 'bg-neutral-800 text-neutral-100 border border-neutral-700'
@@ -344,7 +344,7 @@ const ChatSidebar: React.FC = () => {
                 <button
                   key={index}
                   onClick={() => addEmoji(emoji)}
-                  className="p-1 hover:bg-neutral-700 rounded text-base sm:text-lg"
+                  className="p-1 hover:bg-neutral-700 rounded-sm text-base sm:text-lg"
                 >
                   {emoji}
                 </button>
@@ -363,12 +363,12 @@ const ChatSidebar: React.FC = () => {
                 value={gifSearchTerm}
                 onChange={(e) => setGifSearchTerm(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && searchGifs(gifSearchTerm)}
-                className="flex-1 px-2 py-1 rounded bg-neutral-700 text-white border border-neutral-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                className="flex-1 px-2 py-1 rounded-sm bg-neutral-700 text-white border border-neutral-600 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-sm"
               />
               <button
                 onClick={() => searchGifs(gifSearchTerm)}
                 disabled={searchingGifs}
-                className="px-2 sm:px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-500 disabled:opacity-50 text-sm"
+                className="px-2 sm:px-3 py-1 bg-indigo-600 text-white rounded-sm hover:bg-indigo-500 disabled:opacity-50 text-sm"
               >
                 {searchingGifs ? '...' : 'Search'}
               </button>
@@ -383,7 +383,7 @@ const ChatSidebar: React.FC = () => {
                   <img
                     src={gif.images.fixed_height.url}
                     alt={gif.title}
-                    className="w-full rounded"
+                    className="w-full rounded-sm"
                   />
                 </button>
               ))}
@@ -405,7 +405,7 @@ const ChatSidebar: React.FC = () => {
                 setShowEmojiPicker(!showEmojiPicker);
                 setShowGifSearch(false);
               }}
-              className="text-neutral-400 hover:text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="text-neutral-400 hover:text-white p-2 rounded-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
             >
               <FiSmile className="h-4 w-4" />
             </button>
@@ -415,7 +415,7 @@ const ChatSidebar: React.FC = () => {
                 setShowGifSearch(!showGifSearch);
                 setShowEmojiPicker(false);
               }}
-              className="text-neutral-400 hover:text-white p-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="text-neutral-400 hover:text-white p-2 rounded-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
             >
               <FiImage className="h-4 w-4" />
             </button>
@@ -423,7 +423,7 @@ const ChatSidebar: React.FC = () => {
           <div className="flex space-x-2">
             <input
               type="text"
-              className="flex-1 px-3 py-2 rounded bg-neutral-800 text-white border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-neutral-400 text-sm"
+              className="flex-1 px-3 py-2 rounded-sm bg-neutral-800 text-white border border-neutral-700 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 placeholder-neutral-400 text-sm"
               placeholder="Type a message..."
               value={input}
               onChange={e => setInput(e.target.value)}
@@ -433,7 +433,7 @@ const ChatSidebar: React.FC = () => {
             <button
               type="submit"
               disabled={sending || !input.trim()}
-              className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-600 text-white px-3 py-2 rounded flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-600 text-white px-3 py-2 rounded-sm flex items-center justify-center focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
               aria-label="Send message"
             >
               {sending ? (

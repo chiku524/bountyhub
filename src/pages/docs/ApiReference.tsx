@@ -105,7 +105,7 @@ export default function ApiReference() {
               <div className="space-y-4">
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Request</h4>
-                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`POST /api/auth/login
 Content-Type: application/json
 
@@ -117,7 +117,7 @@ Content-Type: application/json
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Response</h4>
-                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -138,7 +138,7 @@ Content-Type: application/json
               <p className="text-neutral-600 dark:text-gray-300 mb-4">
                 Use the refresh token to get a new access token when it expires.
               </p>
-              <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+              <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`POST /api/auth/refresh
 Content-Type: application/json
 
@@ -167,7 +167,7 @@ Content-Type: application/json
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <h5 className="text-white font-semibold mb-2">Request Body</h5>
-                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "username": "string",
   "email": "string",
@@ -177,7 +177,7 @@ Content-Type: application/json
                   </div>
                   <div>
                     <h5 className="text-white font-semibold mb-2">Response</h5>
-                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "message": "User created successfully",
@@ -201,7 +201,7 @@ Content-Type: application/json
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <h5 className="text-white font-semibold mb-2">Request Body</h5>
-                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "email": "string",
   "password": "string"
@@ -210,7 +210,7 @@ Content-Type: application/json
                   </div>
                   <div>
                     <h5 className="text-white font-semibold mb-2">Response</h5>
-                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "token": "jwt_token",
@@ -251,7 +251,7 @@ Content-Type: application/json
                   </div>
                   <div>
                     <h5 className="text-white font-semibold mb-2">Response</h5>
-                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "posts": [...],
@@ -276,7 +276,7 @@ Content-Type: application/json
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <h5 className="text-white font-semibold mb-2">Request Body</h5>
-                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "title": "string",
   "content": "string",
@@ -288,7 +288,7 @@ Content-Type: application/json
                   </div>
                   <div>
                     <h5 className="text-white font-semibold mb-2">Response</h5>
-                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "post": {
@@ -321,7 +321,7 @@ Content-Type: application/json
                   </div>
                   <div>
                     <h5 className="text-white font-semibold mb-2">Response</h5>
-                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "post": {
@@ -353,7 +353,7 @@ Content-Type: application/json
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <h5 className="text-white font-semibold mb-2">Response</h5>
-                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "wallet": {
@@ -377,7 +377,7 @@ Content-Type: application/json
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <h5 className="text-white font-semibold mb-2">Request Body</h5>
-                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "amount": 100,
   "solAmount": 0.1
@@ -386,7 +386,7 @@ Content-Type: application/json
                   </div>
                   <div>
                     <h5 className="text-white font-semibold mb-2">Response</h5>
-                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "transaction": {
@@ -410,7 +410,7 @@ Content-Type: application/json
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <h5 className="text-white font-semibold mb-2">Request Body</h5>
-                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "amount": 100
 }`}
@@ -418,7 +418,7 @@ Content-Type: application/json
                   </div>
                   <div>
                     <h5 className="text-white font-semibold mb-2">Response</h5>
-                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "transaction": {
@@ -455,7 +455,7 @@ Content-Type: application/json
                   </div>
                   <div>
                     <h5 className="text-white font-semibold mb-2">Response</h5>
-                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "user": {
@@ -494,7 +494,7 @@ Content-Type: application/json
                   </div>
                   <div>
                     <h5 className="text-white font-semibold mb-2">Response</h5>
-                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "notifications": [
@@ -539,7 +539,7 @@ Content-Type: application/json
                   </div>
                   <div>
                     <h5 className="text-white font-semibold mb-2">Response</h5>
-                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "message": "Notification marked as read"
@@ -558,13 +558,13 @@ Content-Type: application/json
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <h5 className="text-white font-semibold mb-2">Request Body</h5>
-                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{}`}
                     </pre>
                   </div>
                   <div>
                     <h5 className="text-white font-semibold mb-2">Response</h5>
-                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "message": "All notifications marked as read",
@@ -588,7 +588,7 @@ Content-Type: application/json
                   </div>
                   <div>
                     <h5 className="text-white font-semibold mb-2">Response</h5>
-                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "count": 5
@@ -617,7 +617,7 @@ Content-Type: application/json
                   </div>
                   <div>
                     <h5 className="text-white font-semibold mb-2">Response</h5>
-                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "rooms": [
@@ -652,7 +652,7 @@ Content-Type: application/json
                   </div>
                   <div>
                     <h5 className="text-white font-semibold mb-2">Response</h5>
-                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "messages": [
@@ -682,7 +682,7 @@ Content-Type: application/json
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <h5 className="text-white font-semibold mb-2">Request Body</h5>
-                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "content": "string",
   "type": "text" | "gif" | "emoji",
@@ -692,7 +692,7 @@ Content-Type: application/json
                   </div>
                   <div>
                     <h5 className="text-white font-semibold mb-2">Response</h5>
-                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "message": {
@@ -720,13 +720,13 @@ Content-Type: application/json
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <h5 className="text-white font-semibold mb-2">Request Body</h5>
-                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{}`}
                     </pre>
                   </div>
                   <div>
                     <h5 className="text-white font-semibold mb-2">Response</h5>
-                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "message": "Successfully joined chat room",
@@ -759,7 +759,7 @@ Content-Type: application/json
                   </div>
                   <div>
                     <h5 className="text-white font-semibold mb-2">Response</h5>
-                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                    <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "gifs": [
@@ -818,7 +818,7 @@ Content-Type: application/json
                 </div>
                 <div>
                   <h5 className="text-white font-semibold mb-2">Response</h5>
-                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "wallet": {
@@ -854,7 +854,7 @@ Content-Type: application/json
                 </div>
                 <div>
                   <h5 className="text-white font-semibold mb-2">Response</h5>
-                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "stats": {
@@ -905,7 +905,7 @@ Content-Type: application/json
                 </div>
                 <div>
                   <h5 className="text-white font-semibold mb-2">Response</h5>
-                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "governance": {
@@ -945,7 +945,7 @@ Content-Type: application/json
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <h5 className="text-white font-semibold mb-2">Request Body</h5>
-                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "amount": 100
 }`}
@@ -953,7 +953,7 @@ Content-Type: application/json
                 </div>
                 <div>
                   <h5 className="text-white font-semibold mb-2">Response</h5>
-                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "message": "Successfully staked 100 BBUX",
@@ -974,7 +974,7 @@ Content-Type: application/json
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <h5 className="text-white font-semibold mb-2">Request Body</h5>
-                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "amount": 50
 }`}
@@ -982,7 +982,7 @@ Content-Type: application/json
                 </div>
                 <div>
                   <h5 className="text-white font-semibold mb-2">Response</h5>
-                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "message": "Successfully unstaked 50 BBUX",
@@ -1007,7 +1007,7 @@ Content-Type: application/json
                 </div>
                 <div>
                   <h5 className="text-white font-semibold mb-2">Response</h5>
-                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "rewardRates": {
@@ -1069,7 +1069,7 @@ Content-Type: application/json
                 </div>
                 <div>
                   <h5 className="text-white font-semibold mb-2">Response</h5>
-                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "refundRequests": [
@@ -1111,7 +1111,7 @@ Content-Type: application/json
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <h5 className="text-white font-semibold mb-2">Request Body</h5>
-                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "postId": "string",
   "reason": "string"
@@ -1120,7 +1120,7 @@ Content-Type: application/json
                 </div>
                 <div>
                   <h5 className="text-white font-semibold mb-2">Response</h5>
-                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "message": "Refund request created successfully",
@@ -1146,7 +1146,7 @@ Content-Type: application/json
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <h5 className="text-white font-semibold mb-2">Request Body</h5>
-                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "vote": "approve" | "reject"
 }`}
@@ -1154,7 +1154,7 @@ Content-Type: application/json
                 </div>
                 <div>
                   <h5 className="text-white font-semibold mb-2">Response</h5>
-                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": true,
   "message": "Vote recorded successfully",
@@ -1177,7 +1177,7 @@ Content-Type: application/json
           <div className="space-y-6">
             <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">User</h3>
-              <pre className="bg-neutral-100 dark:bg-neutral-700 p-4 rounded text-sm text-neutral-600 dark:text-gray-300">
+              <pre className="bg-neutral-100 dark:bg-neutral-700 p-4 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "id": "number",
   "username": "string",
@@ -1194,7 +1194,7 @@ Content-Type: application/json
 
             <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Post</h3>
-              <pre className="bg-neutral-100 dark:bg-neutral-700 p-4 rounded text-sm text-neutral-600 dark:text-gray-300">
+              <pre className="bg-neutral-100 dark:bg-neutral-700 p-4 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "id": "number",
   "userId": "number",
@@ -1216,7 +1216,7 @@ Content-Type: application/json
 
             <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Comment</h3>
-              <pre className="bg-neutral-100 dark:bg-neutral-700 p-4 rounded text-sm text-neutral-600 dark:text-gray-300">
+              <pre className="bg-neutral-100 dark:bg-neutral-700 p-4 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "id": "number",
   "userId": "number",
@@ -1232,7 +1232,7 @@ Content-Type: application/json
 
             <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Transaction</h3>
-              <pre className="bg-neutral-100 dark:bg-neutral-700 p-4 rounded text-sm text-neutral-600 dark:text-gray-300">
+              <pre className="bg-neutral-100 dark:bg-neutral-700 p-4 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "id": "string",
   "userId": "number",
@@ -1248,7 +1248,7 @@ Content-Type: application/json
 
             <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Notification</h3>
-              <pre className="bg-neutral-100 dark:bg-neutral-700 p-4 rounded text-sm text-neutral-600 dark:text-gray-300">
+              <pre className="bg-neutral-100 dark:bg-neutral-700 p-4 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "id": "string",
   "userId": "number",
@@ -1277,7 +1277,7 @@ Content-Type: application/json
               <p className="text-neutral-600 dark:text-gray-300 mb-4">
                 All error responses follow a consistent format with an error message, code, and optional details.
               </p>
-              <pre className="bg-neutral-100 dark:bg-neutral-700 p-4 rounded text-sm text-neutral-600 dark:text-gray-300">
+              <pre className="bg-neutral-100 dark:bg-neutral-700 p-4 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`{
   "success": false,
   "error": "Error message",
@@ -1363,7 +1363,7 @@ Content-Type: application/json
           <div className="space-y-6">
             <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">JavaScript/Node.js</h3>
-              <pre className="bg-neutral-100 dark:bg-neutral-700 p-4 rounded text-sm text-neutral-600 dark:text-gray-300">
+              <pre className="bg-neutral-100 dark:bg-neutral-700 p-4 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`// Authentication
 const login = async (email, password) => {
   const response = await fetch('https://api.bountyhub.tech/api/auth/login', {
@@ -1403,7 +1403,7 @@ const createPost = async (token, postData) => {
 
             <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">Python</h3>
-              <pre className="bg-neutral-100 dark:bg-neutral-700 p-4 rounded text-sm text-neutral-600 dark:text-gray-300">
+              <pre className="bg-neutral-100 dark:bg-neutral-700 p-4 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`import requests
 
 class BountyHubAPI:
@@ -1442,7 +1442,7 @@ class BountyHubAPI:
 
             <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h3 className="text-xl font-semibold text-white mb-3">cURL</h3>
-              <pre className="bg-neutral-100 dark:bg-neutral-700 p-4 rounded text-sm text-neutral-600 dark:text-gray-300">
+              <pre className="bg-neutral-100 dark:bg-neutral-700 p-4 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`# Login
 curl -X POST https://api.bountyhub.tech/api/auth/login \\
   -H "Content-Type: application/json" \\
@@ -1471,7 +1471,7 @@ curl -X POST https://api.bountyhub.tech/api/posts \\
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">JavaScript/TypeScript</h4>
-                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`npm install @bountyhub/sdk`}
                   </pre>
                   <p className="text-neutral-600 dark:text-gray-400 text-sm mt-2">
@@ -1480,7 +1480,7 @@ curl -X POST https://api.bountyhub.tech/api/posts \\
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-violet-400 mb-2">Python</h4>
-                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded text-sm text-neutral-600 dark:text-gray-300">
+                  <pre className="bg-neutral-100 dark:bg-neutral-700 p-3 rounded-sm text-sm text-neutral-600 dark:text-gray-300">
 {`pip install bountyhub-python`}
                   </pre>
                   <p className="text-neutral-600 dark:text-gray-400 text-sm mt-2">

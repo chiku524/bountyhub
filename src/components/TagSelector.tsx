@@ -163,7 +163,7 @@ export default function TagSelector({
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/20 rounded-md text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400 focus:outline-none focus:border-violet-500"
+                className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/20 rounded-md text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400 focus:outline-hidden focus:border-violet-500"
               />
             </div>
 

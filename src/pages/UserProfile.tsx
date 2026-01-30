@@ -173,7 +173,7 @@ const ProfilePictureUpload = ({ currentPicture, username, isOwnProfile }: { curr
         alert(result.error || 'Failed to upload profile picture')
         setPreview(currentPicture)
       }
-    } catch (error) {
+    } catch (_error) {
       alert('Failed to upload profile picture')
       setPreview(currentPicture)
     } finally {

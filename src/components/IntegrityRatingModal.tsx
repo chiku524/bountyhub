@@ -173,7 +173,7 @@ export default function IntegrityRatingModal({
               id="context"
               value={selectedContext}
               onChange={(e) => setSelectedContext(e.target.value)}
-              className="w-full bg-neutral-700 border border-violet-500/30 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+              className="w-full bg-neutral-700 border border-violet-500/30 rounded-lg px-3 py-2 text-white focus:outline-hidden focus:ring-2 focus:ring-violet-500"
             >
               {ratingContexts.map((ctx) => (
                 <option key={ctx.value} value={ctx.value}>
@@ -196,7 +196,7 @@ export default function IntegrityRatingModal({
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="Please provide a detailed reason for your rating..."
-              className="w-full bg-neutral-700 border border-violet-500/30 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+              className="w-full bg-neutral-700 border border-violet-500/30 rounded-lg px-3 py-2 text-white focus:outline-hidden focus:ring-2 focus:ring-violet-500 resize-none"
               rows={4}
               maxLength={500}
             />

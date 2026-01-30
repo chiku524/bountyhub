@@ -101,7 +101,7 @@ export default function ProfilePosts() {
           {posts.length > 0 ? (
             <div className="space-y-4">
               {posts.map((post) => (
-                <div key={post.id} className={`p-4 bg-neutral-100 dark:bg-neutral-700/50 rounded-lg border border-violet-500/30 dark:border-violet-500/30 hover:bg-neutral-200 dark:hover:bg-neutral-600/50 transition-colors ${post.reward && post.reward > 0 ? 'border-l-4 border-cyan-400/60 bg-gradient-to-r from-cyan-500/5 to-neutral-100 dark:to-neutral-700/50' : ''}`}>
+                <div key={post.id} className={`p-4 bg-neutral-100 dark:bg-neutral-700/50 rounded-lg border border-violet-500/30 dark:border-violet-500/30 hover:bg-neutral-200 dark:hover:bg-neutral-600/50 transition-colors ${post.reward && post.reward > 0 ? 'border-l-4 border-cyan-400/60 bg-linear-to-r from-cyan-500/5 to-neutral-100 dark:to-neutral-700/50' : ''}`}>
                   <Link to={`/posts/${post.id}`} className="block">
                     <div className="flex items-start gap-3">
                       <div className="p-2 bg-violet-100 dark:bg-violet-500/20 rounded-lg mt-1">
@@ -111,7 +111,7 @@ export default function ProfilePosts() {
                         <div className="flex items-center gap-2 mb-2">
                           <h3 className="text-lg font-semibold text-violet-600 dark:text-violet-300">{post.title}</h3>
                           {post.reward && post.reward > 0 && (
-                            <div className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/40 rounded-full">
+                            <div className="flex items-center gap-1 px-2 py-1 bg-linear-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/40 rounded-full">
                               <span className="text-cyan-600 dark:text-cyan-300 text-sm">💰</span>
                               <span className="text-cyan-700 dark:text-cyan-200 text-sm font-medium">{post.reward} BBUX</span>
                             </div>

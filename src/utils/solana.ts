@@ -42,7 +42,7 @@ export class SolanaService {
         // Type guard for import.meta.env (Vite-specific)
         const rpcUrl = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_SOLANA_RPC_URL) || 'https://api.bountyhub.tech/api/wallet/solana-proxy'
         return new Connection(rpcUrl, 'confirmed')
-      } catch (error) {
+      } catch (_error) {
         // Fallback if import.meta is not available
         const rpcUrl = 'https://api.bountyhub.tech/api/wallet/solana-proxy'
         return new Connection(rpcUrl, 'confirmed')

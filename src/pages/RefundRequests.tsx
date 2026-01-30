@@ -235,7 +235,7 @@ const RefundRequests: React.FC = () => {
                     <h4 className="font-medium text-neutral-900 dark:text-white mb-2">Votes:</h4>
                     <div className="space-y-2">
                       {votes[request.id].map((vote) => (
-                        <div key={vote.id} className="flex items-center justify-between bg-neutral-100 dark:bg-neutral-700 p-2 rounded">
+                        <div key={vote.id} className="flex items-center justify-between bg-neutral-100 dark:bg-neutral-700 p-2 rounded-sm">
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-medium text-neutral-900 dark:text-white">@{vote.voterUsername}</span>
                             <span className={`text-xs px-2 py-1 rounded ${
@@ -304,7 +304,7 @@ const RefundRequests: React.FC = () => {
                     </h4>
                     
                     {/* Anti-gaming requirements */}
-                    <div className="mb-4 p-3 bg-blue-100 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-500/30 rounded text-xs text-blue-700 dark:text-blue-300">
+                    <div className="mb-4 p-3 bg-blue-100 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-500/30 rounded-sm text-xs text-blue-700 dark:text-blue-300">
                       <p className="font-medium mb-1">Voting Requirements:</p>
                       <ul className="space-y-1 text-blue-600 dark:text-blue-200">
                         <li>• 50+ reputation points & 7+ days account age</li>
@@ -326,7 +326,7 @@ const RefundRequests: React.FC = () => {
                         required
                         minLength={20}
                         rows={3}
-                        className="w-full px-3 py-2 bg-white dark:bg-neutral-600 border border-neutral-300 dark:border-neutral-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400"
+                        className="w-full px-3 py-2 bg-white dark:bg-neutral-600 border border-neutral-300 dark:border-neutral-500 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400"
                         placeholder="Explain your vote reasoning (minimum 20 characters)..."
                       />
                       <p className="text-xs text-neutral-500 dark:text-gray-400 mt-1">

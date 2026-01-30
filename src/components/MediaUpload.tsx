@@ -130,7 +130,7 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
                     isScreenRecording: true
                   });
                 }
-              } catch (error) {
+              } catch (_error) {
                 onMediaUpload({
                   type: 'VIDEO',
                   url,
@@ -145,7 +145,7 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
                 isScreenRecording: true
               });
             };
-          } catch (error) {
+          } catch (_error) {
             onMediaUpload({
               type: 'VIDEO',
               url,
@@ -356,7 +356,7 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
                 <FiX className="w-4 h-4" />
               </button>
               {media.isScreenRecording && (
-                <span className="absolute bottom-2 left-2 px-2 py-1 bg-black/50 text-white text-sm rounded">
+                <span className="absolute bottom-2 left-2 px-2 py-1 bg-black/50 text-white text-sm rounded-sm">
                   Screen Recording
                 </span>
               )}

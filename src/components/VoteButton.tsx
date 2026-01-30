@@ -95,7 +95,7 @@ export const VoteButton: React.FC<VoteButtonProps> = ({
         </svg>
       </button>
 
-      <span className="text-sm font-medium text-gray-300 min-w-[2rem] text-center">
+      <span className="text-sm font-medium text-gray-300 min-w-8 text-center">
         {votes}
       </span>
 

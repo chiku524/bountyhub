@@ -95,13 +95,13 @@ export function TopNav() {
   }
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/70 dark:bg-neutral-800/70 backdrop-blur-sm border-b border-neutral-200/50 dark:border-neutral-700/50 shadow-sm">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/70 dark:bg-neutral-800/70 backdrop-blur-xs border-b border-neutral-200/50 dark:border-neutral-700/50 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 flex-shrink-0">
+          <Link to="/" className="flex items-center space-x-2 shrink-0">
             <img src={logo} alt="bountyhub logo" className="w-8 h-8 object-contain" />
-            <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent hidden sm:block">
+            <span className="text-xl font-bold bg-linear-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent hidden sm:block">
               bountyhub
             </span>
           </Link>
@@ -258,7 +258,7 @@ export function TopNav() {
           </div>
 
           {/* Right Side Actions */}
-          <div className="hidden md:flex items-center space-x-2 flex-shrink-0">
+          <div className="hidden md:flex items-center space-x-2 shrink-0">
             {/* Wallet */}
             <WalletButton />
 

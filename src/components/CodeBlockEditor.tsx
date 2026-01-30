@@ -83,7 +83,7 @@ export const CodeBlockEditor: React.FC<CodeBlockEditorProps> = ({ onAdd, onCance
           <select
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
-            className="w-full p-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-lg text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full p-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-lg text-neutral-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
           >
             {LANGUAGE_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -102,7 +102,7 @@ export const CodeBlockEditor: React.FC<CodeBlockEditorProps> = ({ onAdd, onCance
             value={code}
             onChange={(e) => setCode(e.target.value)}
             placeholder="Enter your code here..."
-            className="w-full p-3 bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-600 rounded-lg text-neutral-900 dark:text-gray-300 placeholder-neutral-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm resize-none"
+            className="w-full p-3 bg-neutral-50 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-600 rounded-lg text-neutral-900 dark:text-gray-300 placeholder-neutral-400 dark:placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 font-mono text-sm resize-none"
             rows={8}
             required
           />
@@ -117,7 +117,7 @@ export const CodeBlockEditor: React.FC<CodeBlockEditorProps> = ({ onAdd, onCance
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Brief description of what this code does..."
-            className="w-full p-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-lg text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+            className="w-full p-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-lg text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 resize-none"
             rows={2}
           />
         </div>

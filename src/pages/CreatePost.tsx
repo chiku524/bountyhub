@@ -192,7 +192,7 @@ export default function CreatePost() {
                 {codeBlocks.map((block, index) => (
                   <div key={index} className="bg-neutral-900/80 rounded-lg p-3 sm:p-4 border border-violet-500/30">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded text-xs sm:text-sm">
+                      <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded-sm text-xs sm:text-sm">
                         {block.language}
                       </span>
                       <button
@@ -226,7 +226,7 @@ export default function CreatePost() {
               </div>
             </h3>
             
-            <div className="bg-gradient-to-br from-neutral-800/60 to-neutral-900/60 border border-violet-500/20 rounded-xl p-4 sm:p-6 backdrop-blur-sm">
+            <div className="bg-linear-to-br from-neutral-800/60 to-neutral-900/60 border border-violet-500/20 rounded-xl p-4 sm:p-6 backdrop-blur-xs">
               {/* Bounty Toggle */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                 <div className="flex items-center gap-3">
@@ -319,7 +319,7 @@ export default function CreatePost() {
                   </div>
 
                   {/* Summary Card */}
-                  <div className="bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/30 rounded-lg p-3 sm:p-4">
+                  <div className="bg-linear-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/30 rounded-lg p-3 sm:p-4">
                     <h4 className="text-violet-300 font-medium mb-2 text-sm sm:text-base">Bounty Summary</h4>
                     <div className="space-y-2 text-xs sm:text-sm">
                       <div className="flex justify-between">
@@ -355,7 +355,7 @@ export default function CreatePost() {
               {!hasBounty && (
                 <div className="bg-neutral-700/20 rounded-lg p-3 sm:p-4 border border-neutral-600/30">
                   <div className="flex items-start gap-3">
-                    <FiInfo className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
+                    <FiInfo className="w-5 h-5 text-gray-400 mt-0.5 shrink-0" />
                     <div>
                       <h4 className="text-gray-300 font-medium mb-1 text-sm sm:text-base">No Bounty Selected</h4>
                       <p className="text-gray-400 text-xs sm:text-sm">

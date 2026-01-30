@@ -76,7 +76,7 @@ export default function BugBountyCampaigns() {
   }
 
   return (
-    <div className="min-h-screen bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm">
+    <div className="min-h-screen bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xs">
       <PageMetadata
         title="Bug Bounty Campaigns"
         description="Discover and participate in bug bounty campaigns"

@@ -303,7 +303,7 @@ async function getTransactionDetailsWithConnection(connection: Connection, signa
                   usedInstructionData = true
                 }
               }
-            } catch {}
+            } catch { /* ignore parse errors, fallback to balance change */ }
           }
           
           // Fallback to balance change ONLY if instruction data is missing or invalid

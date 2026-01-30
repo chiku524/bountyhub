@@ -109,7 +109,7 @@ app.get('/', async (c) => {
         }
         
         return date.toISOString()
-      } catch (error) {
+      } catch (_error) {
         return new Date().toISOString()
       }
     }
@@ -190,7 +190,7 @@ app.get('/transactions', async (c) => {
         }
         
         return date.toISOString()
-      } catch (error) {
+      } catch (_error) {
         return new Date().toISOString()
       }
     }
@@ -270,7 +270,7 @@ app.get('/transactions/all', async (c) => {
         }
         
         return date.toISOString()
-      } catch (error) {
+      } catch (_error) {
         return new Date().toISOString()
       }
     }

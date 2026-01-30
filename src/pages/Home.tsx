@@ -79,13 +79,13 @@ export default function Home() {
         keywords="bounty, cryptocurrency, solana, blockchain, rewards, questions, answers, BBUX, decentralized, knowledge sharing"
       />
       <HomeNav onScrollTo={scrollToSection} />
-      <div className="min-h-screen bg-gradient-to-br from-neutral-50/50 via-white/50 to-neutral-50/50 dark:from-neutral-900/50 dark:via-neutral-800/50 dark:to-neutral-900/50 backdrop-blur-sm text-neutral-900 dark:text-white transition-colors duration-200 pt-16">
+      <div className="min-h-screen bg-linear-to-br from-neutral-50/50 via-white/50 to-neutral-50/50 dark:from-neutral-900/50 dark:via-neutral-800/50 dark:to-neutral-900/50 backdrop-blur-xs text-neutral-900 dark:text-white transition-colors duration-200 pt-16">
         {/* Hero Section */}
         <section id="hero" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
           <div className="text-center">
             <h1 className="text-5xl md:text-7xl font-bold mb-6">
               Welcome to{' '}
-              <span className="bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
                 bountyhub
               </span>
             </h1>
@@ -140,7 +140,7 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 mb-16">
-            <div className="card bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 shadow-sm hover:shadow-lg transition-shadow">
+            <div className="card bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 shadow-xs hover:shadow-lg transition-shadow">
               <div className="text-center">
                 <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <FiZap className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
@@ -152,7 +152,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="card bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 shadow-sm hover:shadow-lg transition-shadow">
+            <div className="card bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 shadow-xs hover:shadow-lg transition-shadow">
               <div className="text-center">
                 <div className="w-16 h-16 bg-green-100 dark:bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <FiDollarSign className="w-8 h-8 text-green-600 dark:text-green-400" />
@@ -164,7 +164,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="card bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 shadow-sm hover:shadow-lg transition-shadow">
+            <div className="card bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 shadow-xs hover:shadow-lg transition-shadow">
               <div className="text-center">
                 <div className="w-16 h-16 bg-purple-100 dark:bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <FiTrendingUp className="w-8 h-8 text-purple-600 dark:text-purple-400" />
@@ -176,7 +176,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="card bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 shadow-sm hover:shadow-lg transition-shadow">
+            <div className="card bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 shadow-xs hover:shadow-lg transition-shadow">
               <div className="text-center">
                 <div className="w-16 h-16 bg-blue-100 dark:bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <FiUsers className="w-8 h-8 text-blue-600 dark:text-blue-400" />
@@ -188,7 +188,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="card bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 shadow-sm hover:shadow-lg transition-shadow">
+            <div className="card bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 shadow-xs hover:shadow-lg transition-shadow">
               <div className="text-center">
                 <div className="w-16 h-16 bg-yellow-100 dark:bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <FiAward className="w-8 h-8 text-yellow-600 dark:text-yellow-400" />
@@ -200,7 +200,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="card bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 shadow-sm hover:shadow-lg transition-shadow">
+            <div className="card bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 shadow-xs hover:shadow-lg transition-shadow">
               <div className="text-center">
                 <div className="w-16 h-16 bg-red-100 dark:bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <FiShield className="w-8 h-8 text-red-600 dark:text-red-400" />
@@ -268,7 +268,7 @@ export default function Home() {
             <div className="text-center">
               <div className="text-3xl md:text-4xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">
                 {loading ? (
-                  <div className="animate-pulse bg-indigo-100 dark:bg-indigo-400/20 h-8 w-16 mx-auto rounded"></div>
+                  <div className="animate-pulse bg-indigo-100 dark:bg-indigo-400/20 h-8 w-16 mx-auto rounded-sm"></div>
                 ) : (
                   formatNumber(stats?.activeBounties || 0)
                 )}
@@ -278,7 +278,7 @@ export default function Home() {
             <div className="text-center">
               <div className="text-3xl md:text-4xl font-bold text-green-600 dark:text-green-400 mb-2">
                 {loading ? (
-                  <div className="animate-pulse bg-green-100 dark:bg-green-400/20 h-8 w-16 mx-auto rounded"></div>
+                  <div className="animate-pulse bg-green-100 dark:bg-green-400/20 h-8 w-16 mx-auto rounded-sm"></div>
                 ) : (
                   formatNumber(stats?.questionsAnswered || 0)
                 )}
@@ -288,7 +288,7 @@ export default function Home() {
             <div className="text-center">
               <div className="text-3xl md:text-4xl font-bold text-purple-600 dark:text-purple-400 mb-2">
                 {loading ? (
-                  <div className="animate-pulse bg-purple-100 dark:bg-purple-400/20 h-8 w-16 mx-auto rounded"></div>
+                  <div className="animate-pulse bg-purple-100 dark:bg-purple-400/20 h-8 w-16 mx-auto rounded-sm"></div>
                 ) : (
                   formatCurrency(stats?.totalRewards || '0.00')
                 )}
@@ -298,7 +298,7 @@ export default function Home() {
             <div className="text-center">
               <div className="text-3xl md:text-4xl font-bold text-yellow-600 dark:text-yellow-400 mb-2">
                 {loading ? (
-                  <div className="animate-pulse bg-yellow-100 dark:bg-yellow-400/20 h-8 w-16 mx-auto rounded"></div>
+                  <div className="animate-pulse bg-yellow-100 dark:bg-yellow-400/20 h-8 w-16 mx-auto rounded-sm"></div>
                 ) : (
                   formatNumber(stats?.communityMembers || 0)
                 )}
@@ -310,7 +310,7 @@ export default function Home() {
 
         {/* CTA Section */}
         <section id="cta" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="bg-white/80 dark:bg-neutral-800/80 backdrop-blur-sm rounded-2xl p-12 text-center border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_20px_rgba(139,92,246,0.2)] dark:shadow-[0_0_20px_rgba(139,92,246,0.3)]">
+          <div className="bg-white/80 dark:bg-neutral-800/80 backdrop-blur-xs rounded-2xl p-12 text-center border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_20px_rgba(139,92,246,0.2)] dark:shadow-[0_0_20px_rgba(139,92,246,0.3)]">
             <h2 className="text-4xl font-bold mb-4 text-neutral-900 dark:text-white">Ready to Get Started?</h2>
             <p className="text-xl mb-8 text-neutral-600 dark:text-neutral-300 max-w-2xl mx-auto">
               Join the decentralized bounty platform and start earning rewards today
