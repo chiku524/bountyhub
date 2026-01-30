@@ -1,0 +1,7 @@
+# Commit and push after updates
+
+After making code changes to this project, **commit and push to GitHub** unless the user explicitly asks not to.
+
+- Stage only relevant files (do not add crash dumps, `.stackdump`, or other generated junk).
+- Use a clear, conventional commit message (e.g. `fix:`, `feat:`, `chore:`).
+- Run `git push` after committing.

@@ -46,4 +46,8 @@ coverage/
 .Spotlight-V100
 .Trashes
 ehthumbs.db
-Thumbs.db 
+Thumbs.db
+
+# Crash / dump files
+*.stackdump
+bash.exe.stackdump

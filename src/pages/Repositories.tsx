@@ -19,6 +19,7 @@ export default function Repositories() {
   const [filterLanguage, setFilterLanguage] = useState('')
   const [githubConnected, setGithubConnected] = useState(false)
   const [checkingConnection, setCheckingConnection] = useState(true)
+  const [syncRequiresReconnect, setSyncRequiresReconnect] = useState(false)
   const isMountedRef = useRef(true)
 
   // Use auth user's githubUsername for initial state so GitHub appears connected on first paint
@@ -99,6 +100,7 @@ export default function Repositories() {
     try {
       setSyncing(true)
       setError(null)
+      setSyncRequiresReconnect(false)
       const response = await api.syncGitHubRepositories()
       setRepositories(response.repositories)
     } catch (err: any) {
@@ -122,19 +124,14 @@ export default function Repositories() {
         errorMessage = err
       }
       
-      // If error indicates reconnection is needed, provide helpful message
       if (err?.errorData?.requiresReconnect) {
+        setSyncRequiresReconnect(true)
         errorMessage = `${errorMessage}\n\nPlease disconnect and reconnect your GitHub account from Settings to grant repository access permissions.`
-      }
-      if (err?.errorData?.details) {
+      } else if (err?.errorData?.details && !errorMessage.includes(err.errorData.details)) {
         errorMessage = `${errorMessage} (${err.errorData.details})`
       }
-      
-      console.error('Sync error:', {
-        message: err?.message,
-        errorData: err?.errorData,
-        error: err
-      })
+
+      console.error('Sync error:', { message: err?.message, errorData: err?.errorData, error: err })
       setError(errorMessage)
     } finally {
       setSyncing(false)
@@ -248,6 +245,14 @@ export default function Repositories() {
         {error && (
           <div className="mb-6">
             <ErrorMessage message={error} />
+            {syncRequiresReconnect && (
+              <Link
+                to="/settings?tab=account"
+                className="mt-2 inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium"
+              >
+                Open Settings to reconnect GitHub →
+              </Link>
+            )}
           </div>
         )}
 

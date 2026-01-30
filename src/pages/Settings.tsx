@@ -34,7 +34,7 @@ interface PasswordData {
 }
 
 export default function Settings() {
-  const { user: authUser, loading: authLoading } = useAuth()
+  const { user: authUser, loading: authLoading, refreshUser } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
@@ -74,6 +74,14 @@ export default function Settings() {
   const [githubUsername, setGithubUsername] = useState<string | null>(null)
   const [githubLoading, setGithubLoading] = useState(false)
 
+  // Sync active tab with URL so /settings?tab=account opens Account tab
+  useEffect(() => {
+    const tabParam = searchParams.get('tab')
+    if (tabParam && ['profile', 'social', 'account', 'security'].includes(tabParam)) {
+      setActiveTab(tabParam as 'profile' | 'social' | 'account' | 'security')
+    }
+  }, [searchParams])
+
   // Derive initial GitHub state from auth user (from /api/auth/me) so it's correct on first paint after navigation
   useEffect(() => {
     if (authUser) {
@@ -94,7 +102,7 @@ export default function Settings() {
     if (githubConnectedParam === 'true') {
       setSuccess('GitHub account connected successfully')
       setTimeout(() => setSuccess(null), 5000)
-      loadGitHubStatus()
+      refreshUser().then(() => loadGitHubStatus())
       searchParams.delete('github_connected')
       setSearchParams(searchParams, { replace: true })
     }

@@ -9,6 +9,8 @@ interface AuthContextType {
   signup: (email: string, password: string, username: string) => Promise<{ success: boolean; error?: string }>
   logout: () => Promise<void>
   updateUser: (userData: Partial<User>) => void
+  /** Refetch current user from API (e.g. after connecting GitHub). */
+  refreshUser: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -101,6 +103,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
+  const refreshUser = async () => {
+    try {
+      const userData = await api.getCurrentUser()
+      setUser(userData ?? null)
+    } catch {
+      setUser(null)
+    }
+  }
+
   const value: AuthContextType = {
     user,
     loading,
@@ -108,6 +119,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signup,
     logout,
     updateUser,
+    refreshUser,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
