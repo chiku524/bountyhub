@@ -180,10 +180,11 @@ app.post('/sync', async (c) => {
         }, 403)
       }
       
-      return c.json({ 
+      return c.json({
         error: `Failed to fetch repositories from GitHub: ${githubResponse.statusText}`,
         details: errorJson?.message || errorText,
-        status: githubResponse.status
+        githubStatus: githubResponse.status,
+        requiresReconnect: githubResponse.status === 401 || githubResponse.status === 403
       }, 500)
     }
 

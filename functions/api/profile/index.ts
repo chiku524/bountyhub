@@ -48,6 +48,8 @@ app.get(async (c) => {
         totalRatings: users.totalRatings,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
+        githubUsername: users.githubUsername,
+        githubId: users.githubId,
       })
       .from(users)
       .where(eq(users.id, userId))

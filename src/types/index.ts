@@ -10,6 +10,9 @@ export interface User {
   totalRatings?: number
   createdAt: string
   updatedAt: string
+  /** Set when GitHub account is connected (from /api/auth/me) */
+  githubUsername?: string
+  githubId?: string
   profile?: {
     firstName: string | null
     lastName: string | null

@@ -35,14 +35,16 @@ app.get('/', async (c) => {
     }
 
     const user = userResult[0]
-    
+
     return c.json({
       id: user.id,
       username: user.username,
       email: user.email,
       role: user.role,
       createdAt: user.createdAt,
-      updatedAt: user.updatedAt
+      updatedAt: user.updatedAt,
+      githubUsername: user.githubUsername ?? undefined,
+      githubId: user.githubId ?? undefined
     })
   } catch (error) {
     console.error('Error fetching user:', error)

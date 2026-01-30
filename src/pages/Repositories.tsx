@@ -21,9 +21,16 @@ export default function Repositories() {
   const [checkingConnection, setCheckingConnection] = useState(true)
   const isMountedRef = useRef(true)
 
+  // Use auth user's githubUsername for initial state so GitHub appears connected on first paint
+  useEffect(() => {
+    if (user?.githubUsername) {
+      setGithubConnected(true)
+    }
+  }, [user?.githubUsername])
+
   useEffect(() => {
     isMountedRef.current = true
-    
+
     if (user) {
       checkGitHubConnection().catch(err => {
         if (isMountedRef.current) {
@@ -36,7 +43,7 @@ export default function Repositories() {
         setCheckingConnection(false)
       }
     }
-    
+
     return () => {
       isMountedRef.current = false
     }
@@ -118,6 +125,9 @@ export default function Repositories() {
       // If error indicates reconnection is needed, provide helpful message
       if (err?.errorData?.requiresReconnect) {
         errorMessage = `${errorMessage}\n\nPlease disconnect and reconnect your GitHub account from Settings to grant repository access permissions.`
+      }
+      if (err?.errorData?.details) {
+        errorMessage = `${errorMessage} (${err.errorData.details})`
       }
       
       console.error('Sync error:', {

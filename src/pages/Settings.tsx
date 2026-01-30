@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { api } from '../utils/api'
 import { config } from '../utils/config'
+import { useAuth } from '../contexts/AuthProvider'
 import type { User } from '../types'
 import { FiUser, FiLink, FiMail, FiLock, FiSave, FiCheck } from 'react-icons/fi'
 
@@ -33,6 +34,7 @@ interface PasswordData {
 }
 
 export default function Settings() {
+  const { user: authUser, loading: authLoading } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
@@ -72,24 +74,31 @@ export default function Settings() {
   const [githubUsername, setGithubUsername] = useState<string | null>(null)
   const [githubLoading, setGithubLoading] = useState(false)
 
+  // Derive initial GitHub state from auth user (from /api/auth/me) so it's correct on first paint after navigation
   useEffect(() => {
+    if (authUser) {
+      setGithubConnected(!!authUser.githubUsername)
+      setGithubUsername(authUser.githubUsername ?? null)
+    } else if (!authLoading) {
+      setLoading(false)
+    }
+  }, [authUser, authLoading])
+
+  useEffect(() => {
+    if (!authUser) return
     loadUserData()
-    loadGitHubStatus()
-    
-    // Check for GitHub connection status from query params
-    const githubConnected = searchParams.get('github_connected')
+
+    const githubConnectedParam = searchParams.get('github_connected')
     const githubError = searchParams.get('error')
-    
-    if (githubConnected === 'true') {
+
+    if (githubConnectedParam === 'true') {
       setSuccess('GitHub account connected successfully')
       setTimeout(() => setSuccess(null), 5000)
-      // Reload GitHub status to update UI
       loadGitHubStatus()
-      // Clear the query parameter
       searchParams.delete('github_connected')
       setSearchParams(searchParams, { replace: true })
     }
-    
+
     if (githubError) {
       let errorMessage = 'Failed to connect GitHub account'
       if (githubError === 'github_already_connected') {
@@ -101,11 +110,10 @@ export default function Settings() {
       }
       setError(errorMessage)
       setTimeout(() => setError(null), 5000)
-      // Clear the query parameter
       searchParams.delete('error')
       setSearchParams(searchParams, { replace: true })
     }
-  }, [searchParams, setSearchParams])
+  }, [authUser, searchParams, setSearchParams])
 
   const loadGitHubStatus = async () => {
     try {
