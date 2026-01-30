@@ -180,11 +180,13 @@ app.post('/sync', async (c) => {
         }, 403)
       }
       
+      // BountyHub requests scope 'user:email read:user repo' — token may be old or revoked
       return c.json({
         error: `Failed to fetch repositories from GitHub: ${githubResponse.statusText}`,
         details: errorJson?.message || errorText,
         githubStatus: githubResponse.status,
-        requiresReconnect: githubResponse.status === 401 || githubResponse.status === 403
+        requiresReconnect: true,
+        hint: 'BountyHub has permission to view repositories. If you connected GitHub before this was added, or the token was revoked, disconnect and reconnect in Settings.'
       }, 500)
     }
 

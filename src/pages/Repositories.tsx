@@ -126,7 +126,9 @@ export default function Repositories() {
       
       if (err?.errorData?.requiresReconnect) {
         setSyncRequiresReconnect(true)
-        errorMessage = `${errorMessage}\n\nPlease disconnect and reconnect your GitHub account from Settings to grant repository access permissions.`
+        errorMessage = err?.errorData?.hint
+          ? `${errorMessage}\n\n${err.errorData.hint}`
+          : `${errorMessage}\n\nPlease disconnect and reconnect your GitHub account from Settings to grant repository access permissions.`
       } else if (err?.errorData?.details && !errorMessage.includes(err.errorData.details)) {
         errorMessage = `${errorMessage} (${err.errorData.details})`
       }
@@ -265,7 +267,7 @@ export default function Repositories() {
           <div className="text-center py-12">
             <FiGithub className="w-16 h-16 text-neutral-400 dark:text-neutral-600 mx-auto mb-4" />
             <p className="text-neutral-600 dark:text-neutral-400 text-lg mb-4">
-              Connect your GitHub account to view and sync your repositories.
+              Connect your GitHub account to view and sync your repositories. BountyHub requests permission to list your repos when you connect.
             </p>
             <button
               onClick={handleConnectGitHub}

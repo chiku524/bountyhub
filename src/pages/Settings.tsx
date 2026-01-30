@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { api } from '../utils/api'
 import { config } from '../utils/config'
@@ -73,6 +73,7 @@ export default function Settings() {
   const [githubConnected, setGithubConnected] = useState(false)
   const [githubUsername, setGithubUsername] = useState<string | null>(null)
   const [githubLoading, setGithubLoading] = useState(false)
+  const githubStatusFetchedRef = useRef(false)
 
   // Sync active tab with URL so /settings?tab=account opens Account tab
   useEffect(() => {
@@ -82,13 +83,21 @@ export default function Settings() {
     }
   }, [searchParams])
 
-  // Derive initial GitHub state from auth user (from /api/auth/me) so it's correct on first paint after navigation
+  // Derive GitHub state from auth user; if me didn't return githubUsername (e.g. old API), fetch profile once
   useEffect(() => {
     if (authUser) {
       setGithubConnected(!!authUser.githubUsername)
       setGithubUsername(authUser.githubUsername ?? null)
-    } else if (!authLoading) {
-      setLoading(false)
+      // Fallback: when /api/auth/me doesn't include githubUsername yet, fetch profile once so UI shows connected
+      if (!authUser.githubUsername && !githubStatusFetchedRef.current) {
+        githubStatusFetchedRef.current = true
+        loadGitHubStatus()
+      }
+    } else {
+      githubStatusFetchedRef.current = false
+      if (!authLoading) {
+        setLoading(false)
+      }
     }
   }, [authUser, authLoading])
 
