@@ -114,36 +114,23 @@ export default function Repositories() {
       const response = await api.syncGitHubRepositories()
       setRepositories(response.repositories)
     } catch (err: any) {
-      // Extract error message safely
-      let errorMessage = 'Failed to sync repositories'
-      
-      if (err?.message) {
-        errorMessage = err.message
-        // Add details if available
-        if (err?.errorData?.details) {
-          errorMessage = `${errorMessage}: ${err.errorData.details}`
-        } else if (err?.errorData?.error && err.errorData.error !== errorMessage) {
-          errorMessage = `${errorMessage}: ${err.errorData.error}`
-        }
-      } else if (err?.errorData?.error) {
-        errorMessage = err.errorData.error
-        if (err.errorData.details) {
-          errorMessage = `${errorMessage}: ${err.errorData.details}`
-        }
-      } else if (typeof err === 'string') {
-        errorMessage = err
-      }
-      
-      if (err?.errorData?.requiresReconnect) {
-        setSyncRequiresReconnect(true)
-        errorMessage = err?.errorData?.hint
-          ? `${errorMessage}\n\n${err.errorData.hint}`
-          : `${errorMessage}\n\nPlease disconnect and reconnect your GitHub account from Settings to grant repository access permissions.`
-      } else if (err?.errorData?.details && !errorMessage.includes(err.errorData.details)) {
-        errorMessage = `${errorMessage} (${err.errorData.details})`
+      // Extract error message: prefer details from API (includes GitHub status/message)
+      const data = err?.errorData || {}
+      let errorMessage = data.details && data.details.trim()
+        ? data.details
+        : (err?.message || data.error || 'Failed to sync repositories')
+      if (data.details && data.error && !String(errorMessage).includes(data.error)) {
+        errorMessage = `${data.error}: ${data.details}`
       }
 
-      console.error('Sync error:', { message: err?.message, errorData: err?.errorData, error: err })
+      if (data.requiresReconnect) {
+        setSyncRequiresReconnect(true)
+        errorMessage = data.hint
+          ? `${errorMessage}\n\n${data.hint}`
+          : `${errorMessage}\n\nPlease disconnect and reconnect your GitHub account from Settings to grant repository access permissions.`
+      }
+
+      console.error('Sync error:', { message: err?.message, errorData: data, error: err })
       setError(errorMessage)
     } finally {
       setSyncing(false)

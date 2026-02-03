@@ -114,15 +114,27 @@ app.post('/sync', async (c) => {
       githubUsername: user.githubUsername
     })
 
-    // Fetch repositories from GitHub API (use recommended Accept and API version headers)
-    const githubResponse = await fetch('https://api.github.com/user/repos?per_page=100&sort=updated', {
-      headers: {
-        'Authorization': `Bearer ${user.githubAccessToken}`,
-        'Accept': 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28',
-        'User-Agent': 'BountyHub-OAuth'
-      }
-    })
+    let githubResponse: Response
+    try {
+      // Fetch repositories from GitHub API (use recommended Accept and API version headers)
+      githubResponse = await fetch('https://api.github.com/user/repos?per_page=100&sort=updated', {
+        headers: {
+          'Authorization': `Bearer ${user.githubAccessToken}`,
+          'Accept': 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28',
+          'User-Agent': 'BountyHub-OAuth'
+        }
+      })
+    } catch (fetchError: any) {
+      console.error('GitHub fetch failed (network/runtime):', fetchError?.message || fetchError)
+      return c.json({
+        error: 'Failed to fetch repositories from GitHub',
+        details: fetchError?.message || 'Network or runtime error contacting GitHub. Try again.',
+        phase: 'fetch',
+        requiresReconnect: false,
+        hint: 'If this keeps happening, try disconnecting and reconnecting GitHub in Settings.'
+      }, 500)
+    }
 
     if (!githubResponse.ok) {
       let errorText = ''
@@ -139,7 +151,7 @@ app.post('/sync', async (c) => {
         errorText = 'Failed to read error response'
       }
 
-      const details = errorJson?.message || errorJson?.error || errorText
+      const details = (errorJson?.message || errorJson?.error || errorText || githubResponse.statusText || 'Unknown').toString()
 
       console.error('GitHub API error:', {
         status: githubResponse.status,
@@ -191,13 +203,13 @@ app.post('/sync', async (c) => {
         }, 404)
       }
 
-      // Other GitHub errors (5xx, etc.) — surface the actual message so users can see it
+      // Other GitHub errors (5xx, 422, etc.) — always include details and status so client can show them
       return c.json({
-        error: `Failed to fetch repositories from GitHub: ${githubResponse.statusText}`,
-        details,
+        error: 'Failed to fetch repositories from GitHub',
+        details: `GitHub returned ${githubResponse.status} ${githubResponse.statusText}. ${details}`,
         githubStatus: githubResponse.status,
         requiresReconnect: true,
-        hint: 'If this persists, disconnect and reconnect your GitHub account in Settings.'
+        hint: 'Disconnect and reconnect your GitHub account in Settings to refresh your token.'
       }, 500)
     }
 
@@ -206,9 +218,10 @@ app.post('/sync', async (c) => {
       githubRepos = await githubResponse.json() as any[]
     } catch (parseError: any) {
       console.error('Error parsing GitHub response:', parseError)
-      return c.json({ 
+      return c.json({
         error: 'Failed to parse GitHub API response',
-        details: parseError?.message || 'Invalid JSON response from GitHub'
+        details: parseError?.message || 'Invalid JSON response from GitHub',
+        phase: 'parse'
       }, 500)
     }
     const now = new Date()
