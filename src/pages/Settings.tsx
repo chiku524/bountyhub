@@ -140,14 +140,18 @@ export default function Settings() {
       if (response.ok) {
         const data = await response.json()
         setGithubConnected(true)
-        setGithubUsername(data.githubUsername)
-      } else {
+        setGithubUsername(data.githubUsername ?? null)
+      } else if (response.status === 404) {
+        // Only set disconnected on definitive "not connected"; avoid overwriting on 5xx/network
         setGithubConnected(false)
         setGithubUsername(null)
       }
     } catch (_error) {
-      setGithubConnected(false)
-      setGithubUsername(null)
+      // On network error, keep existing state from auth user so nav from landing doesn't flash disconnected
+      if (!authUser?.githubUsername) {
+        setGithubConnected(false)
+        setGithubUsername(null)
+      }
     }
   }
 

@@ -114,11 +114,12 @@ app.post('/sync', async (c) => {
       githubUsername: user.githubUsername
     })
 
-    // Fetch repositories from GitHub API
+    // Fetch repositories from GitHub API (use recommended Accept and API version headers)
     const githubResponse = await fetch('https://api.github.com/user/repos?per_page=100&sort=updated', {
       headers: {
         'Authorization': `Bearer ${user.githubAccessToken}`,
-        'Accept': 'application/vnd.github.v3+json',
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
         'User-Agent': 'BountyHub-OAuth'
       }
     })
@@ -138,6 +139,8 @@ app.post('/sync', async (c) => {
         errorText = 'Failed to read error response'
       }
 
+      const details = errorJson?.message || errorJson?.error || errorText
+
       console.error('GitHub API error:', {
         status: githubResponse.status,
         statusText: githubResponse.statusText,
@@ -147,46 +150,54 @@ app.post('/sync', async (c) => {
         tokenLength: user.githubAccessToken?.length || 0,
         tokenPrefix: user.githubAccessToken?.substring(0, 10) || 'none'
       })
-      
+
       // Provide more specific error messages
       if (githubResponse.status === 401) {
-        return c.json({ 
+        return c.json({
           error: 'GitHub access token is invalid or expired. Please reconnect your GitHub account.',
-          details: errorJson?.message || errorText,
+          details,
           requiresReconnect: true
         }, 401)
       } else if (githubResponse.status === 403) {
         // Check if it's a permissions issue (likely missing repo scope)
-        const isPermissionsError = errorText.includes('permission') || 
-                                   errorText.includes('scope') || 
+        const isPermissionsError = errorText.includes('permission') ||
+                                   errorText.includes('scope') ||
                                    errorText.includes('insufficient') ||
                                    (errorJson?.message && (
                                      errorJson.message.includes('permission') ||
                                      errorJson.message.includes('scope') ||
                                      errorJson.message.includes('insufficient')
                                    ))
-        
+
         if (isPermissionsError) {
-          return c.json({ 
+          return c.json({
             error: 'GitHub token does not have repository access permissions. Please disconnect and reconnect your GitHub account to grant repository access.',
-            details: errorJson?.message || errorText,
+            details,
             requiresReconnect: true
           }, 403)
         }
-        
-        return c.json({ 
+
+        return c.json({
           error: 'GitHub API rate limit exceeded or insufficient permissions.',
-          details: errorJson?.message || errorText
+          details
         }, 403)
+      } else if (githubResponse.status === 404) {
+        // Token may be invalid or resource not found
+        return c.json({
+          error: 'GitHub could not find your repositories. Please disconnect and reconnect your GitHub account.',
+          details,
+          requiresReconnect: true,
+          hint: 'Disconnect and reconnect GitHub in Settings to refresh your token.'
+        }, 404)
       }
-      
-      // BountyHub requests scope 'user:email read:user repo' — token may be old or revoked
+
+      // Other GitHub errors (5xx, etc.) — surface the actual message so users can see it
       return c.json({
         error: `Failed to fetch repositories from GitHub: ${githubResponse.statusText}`,
-        details: errorJson?.message || errorText,
+        details,
         githubStatus: githubResponse.status,
         requiresReconnect: true,
-        hint: 'BountyHub has permission to view repositories. If you connected GitHub before this was added, or the token was revoked, disconnect and reconnect in Settings.'
+        hint: 'If this persists, disconnect and reconnect your GitHub account in Settings.'
       }, 500)
     }
 

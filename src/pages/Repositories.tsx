@@ -52,25 +52,35 @@ export default function Repositories() {
 
   const checkGitHubConnection = async () => {
     if (!isMountedRef.current) return
-    
+
     try {
       setCheckingConnection(true)
       const response = await fetch(`${config.api.baseUrl}/api/auth/github/profile`, {
         credentials: 'include'
       })
       if (!isMountedRef.current) return
-      
+
       if (response.ok) {
         setGithubConnected(true)
         await loadRepositories()
       } else {
-        setGithubConnected(false)
+        // Only set disconnected when we get a definitive "not connected" (404).
+        // On network/5xx errors, keep trusting user?.githubUsername from auth so
+        // client-side navigation doesn't briefly show "not connected" until refresh.
+        if (response.status === 404) {
+          setGithubConnected(false)
+        }
         setLoading(false)
       }
     } catch (error) {
       if (!isMountedRef.current) return
       console.error('Error checking GitHub connection:', error)
-      setGithubConnected(false)
+      // On network error, don't overwrite: auth context may already have githubUsername
+      if (user?.githubUsername) {
+        setGithubConnected(true)
+      } else {
+        setGithubConnected(false)
+      }
       setLoading(false)
     } finally {
       if (isMountedRef.current) {
