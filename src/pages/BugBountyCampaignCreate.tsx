@@ -21,6 +21,8 @@ export default function BugBountyCampaignCreate() {
   // Form state: pre-select repository from query (e.g. from repo detail page)
   const repoIdFromUrl = searchParams.get('repositoryId') || ''
   const [repositoryId, setRepositoryId] = useState(repoIdFromUrl)
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
   const [status, setStatus] = useState<'DRAFT' | 'ACTIVE'>('DRAFT')
   const [totalBudget, setTotalBudget] = useState('')
   const [minReward, setMinReward] = useState('')

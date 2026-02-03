@@ -312,7 +312,7 @@ export default function Repositories() {
           <>
             {/* Repositories Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredRepositories.map((repo) => (
+              {paginatedRepositories.map((repo) => (
                 <div
                   key={repo.id}
                   className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6 hover:shadow-lg transition-all duration-200 hover:border-indigo-500 dark:hover:border-indigo-400"
