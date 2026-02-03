@@ -7,7 +7,10 @@ import { LoadingSpinner } from '../components/LoadingSpinner'
 import { ErrorMessage } from '../components/ErrorMessage'
 import { PageMetadata } from '../components/PageMetadata'
 import { FiGithub, FiRefreshCw, FiStar, FiGitBranch, FiCode, FiExternalLink, FiLink } from 'react-icons/fi'
+import { Pagination } from '../components/Pagination'
 import type { GitHubRepository } from '../types'
+
+const REPOS_PER_PAGE = 12
 
 export default function Repositories() {
   const { user } = useAuth()
@@ -20,6 +23,7 @@ export default function Repositories() {
   const [githubConnected, setGithubConnected] = useState(false)
   const [checkingConnection, setCheckingConnection] = useState(true)
   const [syncRequiresReconnect, setSyncRequiresReconnect] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
   const isMountedRef = useRef(true)
 
   // Use auth user's githubUsername for initial state so GitHub appears connected on first paint
@@ -164,7 +168,18 @@ export default function Repositories() {
     return matchesSearch && matchesLanguage
   })
 
+  const totalPages = Math.max(1, Math.ceil(filteredRepositories.length / REPOS_PER_PAGE))
+  const paginatedRepositories = filteredRepositories.slice(
+    (currentPage - 1) * REPOS_PER_PAGE,
+    currentPage * REPOS_PER_PAGE
+  )
+
   const languages = Array.from(new Set(repositories.map(repo => repo.language).filter(Boolean))) as string[]
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, filterLanguage])
 
   if (!user) {
     return (
@@ -383,6 +398,15 @@ export default function Repositories() {
                 </div>
               ))}
             </div>
+            {totalPages > 1 && (
+              <div className="mt-8 flex justify-center">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            )}
           </>
         )}
       </div>

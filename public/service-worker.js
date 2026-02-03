@@ -55,6 +55,17 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
+  // Navigation requests (SPA): always serve index.html so client-side routes never get 404/503 from server
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      caches.match('/index.html')
+        .then((cached) => cached || fetch('/index.html'))
+        .then((response) => response || new Response('', { status: 503, statusText: 'Service Unavailable' }))
+        .catch(() => caches.match('/index.html') || new Response('', { status: 503, statusText: 'Service Unavailable' }))
+    )
+    return
+  }
+
   // API requests - network only
   if (event.request.url.includes('/api/')) {
     event.respondWith(

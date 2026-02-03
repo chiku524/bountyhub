@@ -72,6 +72,49 @@ app.get(async (c) => {
   }
 })
 
+// GET single repository by id (must be before /sync to avoid matching "sync" as id)
+app.get('/:id', async (c) => {
+  const db = createDb(c.env.DB)
+  const repoId = c.req.param('id')
+  if (!repoId || repoId === 'sync') {
+    return c.json({ error: 'Not found' }, 404)
+  }
+  try {
+    const authUser = await getAuthUser(c)
+    if (!authUser) {
+      return c.json({ error: 'Not authenticated' }, 401)
+    }
+    const result = await db
+      .select({
+        repository: githubRepositories,
+        owner: {
+          id: users.id,
+          username: users.username,
+          avatarUrl: profiles.profilePicture,
+        }
+      })
+      .from(githubRepositories)
+      .leftJoin(users, eq(githubRepositories.ownerId, users.id))
+      .leftJoin(profiles, eq(users.id, profiles.userId))
+      .where(eq(githubRepositories.id, repoId))
+      .limit(1)
+    if (result.length === 0) {
+      return c.json({ error: 'Repository not found' }, 404)
+    }
+    const item = result[0]
+    if (item.repository.ownerId !== authUser.id) {
+      return c.json({ error: 'Repository not found' }, 404)
+    }
+    return c.json({
+      ...item.repository,
+      owner: item.owner,
+    })
+  } catch (error) {
+    console.error('Error fetching repository:', error)
+    return c.json({ error: 'Failed to fetch repository' }, 500)
+  }
+})
+
 // POST sync repositories from GitHub
 app.post('/sync', async (c) => {
   const db = createDb(c.env.DB)

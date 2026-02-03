@@ -407,6 +407,10 @@ export class ApiClient {
     return this.request('/api/github/repositories')
   }
 
+  async getGitHubRepository(id: string): Promise<GitHubRepository> {
+    return this.request(`/api/github/repositories/${id}`)
+  }
+
   async syncGitHubRepositories(): Promise<{ repositories: GitHubRepository[]; message: string }> {
     return this.request('/api/github/repositories/sync', {
       method: 'POST',

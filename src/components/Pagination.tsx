@@ -33,15 +33,14 @@ export const Pagination: React.FC<PaginationProps> = ({
   if (totalPages <= 1) return null
 
   return (
-    <div className={`flex items-center justify-center space-x-2 ${className}`}>
+    <div className={`flex items-center justify-center gap-2 flex-wrap ${className}`}>
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="px-3 py-2 text-sm font-medium text-gray-400 bg-neutral-800 border border-neutral-600 rounded-lg hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-3 py-2 text-sm font-medium text-neutral-600 dark:text-neutral-400 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-600 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Previous
       </button>
-      
       {getPageNumbers().map((page) => (
         <button
           key={page}
@@ -49,17 +48,16 @@ export const Pagination: React.FC<PaginationProps> = ({
           className={`px-3 py-2 text-sm font-medium rounded-lg border ${
             page === currentPage
               ? 'bg-indigo-600 text-white border-indigo-600'
-              : 'text-gray-400 bg-neutral-800 border-neutral-600 hover:bg-neutral-700'
+              : 'text-neutral-700 dark:text-neutral-400 bg-white dark:bg-neutral-800 border-neutral-300 dark:border-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-700'
           }`}
         >
           {page}
         </button>
       ))}
-      
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="px-3 py-2 text-sm font-medium text-gray-400 bg-neutral-800 border border-neutral-600 rounded-lg hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-3 py-2 text-sm font-medium text-neutral-600 dark:text-neutral-400 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-600 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Next
       </button>
