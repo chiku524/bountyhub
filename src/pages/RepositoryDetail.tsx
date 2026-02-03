@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthProvider'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { ErrorMessage } from '../components/ErrorMessage'
 import { PageMetadata } from '../components/PageMetadata'
-import { FiGithub, FiStar, FiGitBranch, FiExternalLink, FiArrowLeft } from 'react-icons/fi'
+import { FiGithub, FiStar, FiGitBranch, FiExternalLink, FiArrowLeft, FiDollarSign } from 'react-icons/fi'
 import type { GitHubRepository } from '../types'
 
 export default function RepositoryDetail() {
@@ -165,10 +165,19 @@ export default function RepositoryDetail() {
             </div>
           )}
 
-          <div className="pt-4 border-t border-neutral-200 dark:border-neutral-700 text-sm text-neutral-500 dark:text-neutral-400">
-            {repo.lastSyncedAt && (
-              <span>Last synced: {new Date(repo.lastSyncedAt).toLocaleString()}</span>
-            )}
+          <div className="pt-4 border-t border-neutral-200 dark:border-neutral-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="text-sm text-neutral-500 dark:text-neutral-400">
+              {repo.lastSyncedAt && (
+                <span>Last synced: {new Date(repo.lastSyncedAt).toLocaleString()}</span>
+              )}
+            </div>
+            <Link
+              to={`/bug-bounty/campaigns/create?repositoryId=${encodeURIComponent(repo.id)}`}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors shrink-0"
+            >
+              <FiDollarSign className="w-4 h-4" />
+              Create Bug Bounty Campaign
+            </Link>
           </div>
         </div>
       </div>

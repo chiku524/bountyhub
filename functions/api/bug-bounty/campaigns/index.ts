@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { getCookie } from 'hono/cookie'
 import { createDb } from '../../../../src/utils/db'
 import { getUserIdFromSession } from '../../../../src/utils/auth'
-import { bugBountyCampaigns, githubRepositories, users, profiles } from '../../../../drizzle/schema'
+import { bugBountyCampaigns, bugSubmissions, githubRepositories, users, profiles } from '../../../../drizzle/schema'
 import { eq, sql, desc, and } from 'drizzle-orm'
 
 interface Env {
@@ -73,13 +73,13 @@ app.get(async (c) => {
           .limit(limit)
           .offset(offset)
 
-    // Count submissions for each campaign
+    // Count submissions for each campaign (from bugSubmissions table)
     const campaignsWithStats = await Promise.all(
       campaigns.map(async (item) => {
         const submissionsResult = await db
           .select({ count: sql<number>`count(*)` })
-          .from(bugBountyCampaigns)
-          .where(eq(bugBountyCampaigns.id, item.campaign.id))
+          .from(bugSubmissions)
+          .where(eq(bugSubmissions.campaignId, item.campaign.id))
         
         return {
           ...item.campaign,
@@ -134,11 +134,11 @@ app.get('/:id', async (c) => {
 
     const item = result[0]
     
-    // Get submissions count
+    // Get submissions count (count from bugSubmissions, not campaigns)
     const submissionsResult = await db
       .select({ count: sql<number>`count(*)` })
-      .from(bugBountyCampaigns)
-      .where(eq(bugBountyCampaigns.id, campaignId))
+      .from(bugSubmissions)
+      .where(eq(bugSubmissions.campaignId, campaignId))
 
     return c.json({
       ...item.campaign,

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { api } from '../utils/api'
 import { useAuth } from '../contexts/AuthProvider'
 import { LoadingSpinner } from '../components/LoadingSpinner'
@@ -12,15 +12,15 @@ import type { GitHubRepository } from '../types'
 export default function BugBountyCampaignCreate() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [repositories, setRepositories] = useState<GitHubRepository[]>([])
   const [loadingRepos, setLoadingRepos] = useState(false)
 
-  // Form state
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [repositoryId, setRepositoryId] = useState('')
+  // Form state: pre-select repository from query (e.g. from repo detail page)
+  const repoIdFromUrl = searchParams.get('repositoryId') || ''
+  const [repositoryId, setRepositoryId] = useState(repoIdFromUrl)
   const [status, setStatus] = useState<'DRAFT' | 'ACTIVE'>('DRAFT')
   const [totalBudget, setTotalBudget] = useState('')
   const [minReward, setMinReward] = useState('')
@@ -40,6 +40,13 @@ export default function BugBountyCampaignCreate() {
     }
     loadRepositories()
   }, [user, navigate])
+
+  // When repos load and URL has repositoryId, pre-select that repo
+  useEffect(() => {
+    if (repoIdFromUrl && repositories.length > 0 && repositories.some((r) => r.id === repoIdFromUrl)) {
+      setRepositoryId(repoIdFromUrl)
+    }
+  }, [repoIdFromUrl, repositories])
 
   const loadRepositories = async () => {
     try {

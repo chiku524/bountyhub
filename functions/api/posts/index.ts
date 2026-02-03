@@ -240,17 +240,17 @@ app.post(async (c) => {
       await db.insert(postTags).values(tagRelations)
     }
 
-    // Add code blocks if provided
+    // Add code blocks if provided (frontend sends .code, some clients may send .content)
     if (codeBlocksData && codeBlocksData.length > 0) {
       for (let index = 0; index < codeBlocksData.length; index++) {
         const block = codeBlocksData[index]
-        
-        if (block.content && block.language) {
+        const codeContent = block.code ?? block.content
+        if (codeContent && block.language) {
           try {
             await db.insert(codeBlocks).values({
               id: crypto.randomUUID(),
               language: block.language,
-              code: block.content,
+              code: codeContent,
               description: block.description || null,
               postId,
               createdAt: new Date(),

@@ -50,6 +50,7 @@ const RefundSystem = lazy(() => import('./pages/docs/RefundSystem'))
 const BugBountyCampaigns = lazy(() => import('./pages/BugBountyCampaigns'))
 const BugBountyCampaignCreate = lazy(() => import('./pages/BugBountyCampaignCreate'))
 const BugBountyCampaignDetail = lazy(() => import('./pages/BugBountyCampaignDetail'))
+const BugBountySubmit = lazy(() => import('./pages/BugBountySubmit'))
 const Repositories = lazy(() => import('./pages/Repositories'))
 const RepositoryDetail = lazy(() => import('./pages/RepositoryDetail'))
 const Contributions = lazy(() => import('./pages/Contributions'))
@@ -150,6 +151,7 @@ function AppContent() {
             <Route path="/bug-bounty/campaigns" element={<BugBountyCampaigns />} />
             <Route path="/bug-bounty/campaigns/create" element={<BugBountyCampaignCreate />} />
             <Route path="/bug-bounty/campaigns/:id" element={<BugBountyCampaignDetail />} />
+            <Route path="/bug-bounty/campaigns/:id/submit" element={<BugBountySubmit />} />
             <Route path="/repositories" element={<Repositories />} />
             <Route path="/repositories/:id" element={<RepositoryDetail />} />
             <Route path="/contributions" element={<Contributions />} />
