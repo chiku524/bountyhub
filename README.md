@@ -17,11 +17,9 @@ A decentralized Q&A platform where questions meet rewards. Ask questions, offer 
 
 ## 📖 Documentation
 
-- [Deployment Guide](./DEPLOYMENT.md) - Complete deployment instructions
-- [Platform Documentation](/docs/platform) - Platform overview and features
-- [User Guide](/docs/user-guide) - Step-by-step user guide
-- [Developer Guide](/docs/developer-guide) - Technical documentation
-- [API Reference](/docs/api-reference) - API endpoints and examples
+- [Deployment Guide](./docs/deployment.md) – Cloudflare Pages & Workers, DNS, troubleshooting
+- [Tech Stack](./docs/tech-stack.md) – Current stack and optional upgrades
+- **In-app docs** (when running the app): [Platform](/docs/platform), [User Guide](/docs/user-guide), [Developer Guide](/docs/developer-guide), [API Reference](/docs/api-reference)
 
 ## 🛠️ Tech Stack
 
@@ -35,7 +33,7 @@ A decentralized Q&A platform where questions meet rewards. Ask questions, offer 
 
 This project uses **auto-deployment from GitHub** for Cloudflare Pages and **manual deployment** for Cloudflare Workers.
 
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for complete deployment instructions.
+See [docs/deployment.md](./docs/deployment.md) for complete deployment instructions.
 
 ## 📝 Quick Start
 
