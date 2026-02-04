@@ -63,10 +63,9 @@ function AppContent() {
   const { user, loading } = useAuth()
   const isHomePage = location.pathname === '/'
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup'
-  const isDocsPage = location.pathname.startsWith('/docs')
-  const isLegalPage = isDocsPage || location.pathname === '/privacy' || location.pathname === '/terms'
+  const isLegalPage = location.pathname === '/privacy' || location.pathname === '/terms'
   
-  // Determine which navbar to show
+  // Determine which navbar to show (show nav on /docs when logged in; hide only on home, login/signup, privacy, terms)
   const isPublicPage = isHomePage || isAuthPage || isLegalPage
   const showAuthenticatedNav = Boolean(user) && !isPublicPage && !loading
   

@@ -69,22 +69,22 @@ export default function DocsSingle() {
         Skip to main content
       </a>
 
-      <div className="flex flex-col lg:flex-row h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)]">
-        {/* Left sidebar: Table of Contents */}
+      <div className="flex flex-col lg:flex-row flex-1 min-h-0 w-full max-w-full overflow-hidden">
+        {/* Left sidebar: Table of Contents - centered like micropaywall */}
         <aside
-          className="shrink-0 w-full lg:w-64 lg:min-h-0 border-b lg:border-b-0 lg:border-r border-neutral-200 dark:border-neutral-700 bg-white/80 dark:bg-neutral-800/80 backdrop-blur-sm"
+          className="shrink-0 w-full lg:w-56 lg:min-w-0 border-b lg:border-b-0 lg:border-r border-neutral-200 dark:border-neutral-700 bg-white/90 dark:bg-neutral-800/90 backdrop-blur-sm flex lg:justify-center"
           aria-label="Table of contents"
         >
-          <div className="sticky top-16 lg:top-16 z-10 bg-white/95 dark:bg-neutral-800/95 lg:bg-white/80 dark:lg:bg-neutral-800/80 backdrop-blur-sm py-4 px-4 lg:pl-6 lg:pr-4">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-3 px-2">
+          <div className="sticky top-16 lg:top-16 z-10 w-full lg:max-w-[14rem] py-4 px-4 lg:px-3">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-3 text-center lg:text-center">
               Table of Contents
             </h2>
-            <nav className="flex flex-row lg:flex-col gap-0 lg:gap-0 overflow-x-auto lg:overflow-x-visible scrollbar-thin pb-2 lg:pb-0">
+            <nav className="flex flex-row lg:flex-col gap-0.5 overflow-x-auto lg:overflow-x-visible scrollbar-thin pb-2 lg:pb-0 lg:overflow-y-hidden overscroll-x-contain">
               {SECTION_IDS.map((id) => (
                 <a
                   key={id}
                   href={`#${id}`}
-                  className={`shrink-0 lg:shrink px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`shrink-0 lg:shrink-0 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-center lg:text-center ${
                     sectionId === id
                       ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300'
                       : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 hover:text-neutral-900 dark:hover:text-white'
@@ -97,13 +97,13 @@ export default function DocsSingle() {
           </div>
         </aside>
 
-        {/* Right: scrollable content for selected section only */}
+        {/* Right: single scrollable area for selected section only */}
         <main
           id="main-content"
-          className="flex-1 min-h-0 overflow-y-auto focus:outline-none"
+          className="flex-1 min-w-0 min-h-0 overflow-y-auto overflow-x-hidden focus:outline-none"
           tabIndex={-1}
         >
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 pb-20">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 pb-20 break-words">
             {sectionId === 'overview' && (
               <>
                 <h1 className={sectionTitle}>Overview</h1>
