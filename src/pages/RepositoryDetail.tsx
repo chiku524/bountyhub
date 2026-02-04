@@ -61,10 +61,16 @@ export default function RepositoryDetail() {
   }
 
   if (error || !repo) {
+    const is404 = error?.toLowerCase().includes('not found') || error?.toLowerCase().includes('404')
     return (
       <div className="min-h-screen bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xs">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <ErrorMessage message={error || 'Repository not found'} />
+          {is404 && (
+            <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+              This repository may have been removed from your list, or the link may be outdated. Try opening Repositories and syncing again.
+            </p>
+          )}
           <Link
             to="/repositories"
             className="mt-4 inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 font-medium"

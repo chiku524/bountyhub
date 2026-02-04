@@ -5,6 +5,9 @@ import { config } from '../utils/config'
 import { useAuth } from '../contexts/AuthProvider'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { ErrorMessage } from '../components/ErrorMessage'
+import { PageContainer } from '../components/PageContainer'
+import { PageHeader } from '../components/PageHeader'
+import { EmptyState } from '../components/EmptyState'
 import { PageMetadata } from '../components/PageMetadata'
 import { FiGithub, FiRefreshCw, FiStar, FiGitBranch, FiCode, FiExternalLink, FiLink } from 'react-icons/fi'
 import { Pagination } from '../components/Pagination'
@@ -198,24 +201,16 @@ export default function Repositories() {
   }
 
   return (
-    <div className="min-h-screen bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xs">
+    <>
       <PageMetadata
         title="GitHub Repositories"
         description="Manage and view your connected GitHub repositories"
       />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <div>
-              <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">
-                GitHub Repositories
-              </h1>
-              <p className="text-neutral-600 dark:text-neutral-400">
-                Manage your connected GitHub repositories and track contributions
-              </p>
-            </div>
+      <PageContainer>
+        <PageHeader
+          title="GitHub Repositories"
+          description="Manage your connected GitHub repositories and track contributions"
+          actions={
             <button
               onClick={handleSync}
               disabled={syncing}
@@ -224,9 +219,10 @@ export default function Repositories() {
               <FiRefreshCw className={`w-5 h-5 ${syncing ? 'animate-spin' : ''}`} />
               {syncing ? 'Syncing...' : 'Sync Repositories'}
             </button>
-          </div>
+          }
+        />
 
-          {/* Filters */}
+        {/* Filters */}
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 relative">
               <input
@@ -252,7 +248,6 @@ export default function Repositories() {
                 ))}
               </select>
             )}
-          </div>
         </div>
 
         {/* Error Message */}
@@ -276,38 +271,42 @@ export default function Repositories() {
             <LoadingSpinner />
           </div>
         ) : !githubConnected ? (
-          <div className="text-center py-12">
-            <FiGithub className="w-16 h-16 text-neutral-400 dark:text-neutral-600 mx-auto mb-4" />
-            <p className="text-neutral-600 dark:text-neutral-400 text-lg mb-4">
-              Connect your GitHub account to view and sync your repositories. BountyHub requests permission to list your repos when you connect.
-            </p>
-            <button
-              onClick={handleConnectGitHub}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
-            >
-              <FiLink className="w-5 h-5" />
-              Connect GitHub Account
-            </button>
-          </div>
-        ) : filteredRepositories.length === 0 ? (
-          <div className="text-center py-12">
-            <FiGithub className="w-16 h-16 text-neutral-400 dark:text-neutral-600 mx-auto mb-4" />
-            <p className="text-neutral-600 dark:text-neutral-400 text-lg mb-4">
-              {repositories.length === 0
-                ? 'No repositories found. Sync repositories from GitHub to get started.'
-                : 'No repositories match your filters.'}
-            </p>
-            {repositories.length === 0 && (
+          <EmptyState
+            icon={<FiGithub className="w-16 h-16 mx-auto" />}
+            title="Connect GitHub"
+            description="Connect your GitHub account to view and sync your repositories. BountyHub requests permission to list your repos when you connect."
+            action={
               <button
-                onClick={handleSync}
-                disabled={syncing}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleConnectGitHub}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
               >
-                <FiRefreshCw className={`w-5 h-5 ${syncing ? 'animate-spin' : ''}`} />
-                {syncing ? 'Syncing...' : 'Sync Repositories'}
+                <FiLink className="w-5 h-5" />
+                Connect GitHub Account
               </button>
-            )}
-          </div>
+            }
+          />
+        ) : filteredRepositories.length === 0 ? (
+          <EmptyState
+            icon={<FiGithub className="w-16 h-16 mx-auto" />}
+            title={repositories.length === 0 ? 'No repositories yet' : 'No matches'}
+            description={
+              repositories.length === 0
+                ? 'Sync repositories from GitHub to get started.'
+                : 'No repositories match your filters.'
+            }
+            action={
+              repositories.length === 0 ? (
+                <button
+                  onClick={handleSync}
+                  disabled={syncing}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <FiRefreshCw className={`w-5 h-5 ${syncing ? 'animate-spin' : ''}`} />
+                  {syncing ? 'Syncing...' : 'Sync Repositories'}
+                </button>
+              ) : undefined
+            }
+          />
         ) : (
           <>
             {/* Repositories Grid */}
@@ -409,8 +408,8 @@ export default function Repositories() {
             )}
           </>
         )}
-      </div>
-    </div>
+      </PageContainer>
+    </>
   )
 }
 

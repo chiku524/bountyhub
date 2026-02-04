@@ -22,7 +22,7 @@ export default function Layout({ children, showNav = true }: LayoutProps) {
   
   return (
     <div className={`flex-1 flex flex-col ${needsTopPadding ? 'pt-16' : ''} pb-16 md:pb-0`}>
-      <main className="flex-1 overflow-y-auto">
+      <main id="main-content" className="flex-1 overflow-y-auto" tabIndex={-1}>
         {children}
       </main>
     </div>

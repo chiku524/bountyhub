@@ -55,11 +55,15 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // Navigation requests (SPA): always serve index.html so client-side routes never get 404/503 from server
+  // Navigation requests (SPA): always serve index.html so client-side routes never get 404/503 from server.
+  // Use redirect: 'follow' so we never respond with a redirect (avoids "redirected response was used for request whose redirect mode is not follow").
   if (event.request.mode === 'navigate') {
     event.respondWith(
       caches.match('/index.html')
-        .then((cached) => cached || fetch('/index.html'))
+        .then((cached) => {
+          if (cached) return cached
+          return fetch(new Request('/index.html', { redirect: 'follow' }))
+        })
         .then((response) => response || new Response('', { status: 503, statusText: 'Service Unavailable' }))
         .catch(() => caches.match('/index.html') || new Response('', { status: 503, statusText: 'Service Unavailable' }))
     )

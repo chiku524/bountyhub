@@ -8,6 +8,10 @@ import { config } from '../utils/config'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthProvider'
 import { PageMetadata } from '../components/PageMetadata'
+import { PageContainer } from '../components/PageContainer'
+import { PageHeader } from '../components/PageHeader'
+import { LoadingSpinner } from '../components/LoadingSpinner'
+import { ErrorMessage } from '../components/ErrorMessage'
 
 function WalletContent() {
   const { user, loading: authLoading } = useAuth()
@@ -363,81 +367,58 @@ function WalletContent() {
 
   if (authLoading) {
     return (
-      <div className="p-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="animate-pulse">
-            <div className="h-8 bg-neutral-800 rounded-sm w-1/4 mb-8"></div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="h-32 bg-neutral-800 rounded-sm"></div>
-              <div className="h-32 bg-neutral-800 rounded-sm"></div>
-              <div className="h-32 bg-neutral-800 rounded-sm"></div>
-            </div>
-          </div>
+      <PageContainer maxWidth="narrow">
+        <div className="flex flex-col items-center justify-center min-h-[50vh]">
+          <LoadingSpinner size="lg" />
+          <p className="mt-4 text-neutral-600 dark:text-neutral-400">Loading wallet...</p>
         </div>
-      </div>
+      </PageContainer>
     )
   }
 
   if (!user) {
     return (
-      <div className="p-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-4">Wallet Access Required</h1>
-            <p className="text-neutral-500 dark:text-gray-400 mb-6">Please log in to access your wallet.</p>
-            <Link
-              to="/login"
-              className="inline-block bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
-            >
-              Go to Login
-            </Link>
-          </div>
+      <PageContainer maxWidth="narrow">
+        <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
+          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">Wallet Access Required</h1>
+          <p className="text-neutral-500 dark:text-neutral-400 mb-6">Please log in to access your wallet.</p>
+          <Link
+            to="/login"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition-colors"
+          >
+            Go to Login
+          </Link>
         </div>
-      </div>
+      </PageContainer>
     )
   }
 
   if (loading) {
     return (
-      <div className="p-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="animate-pulse">
-            <div className="h-8 bg-neutral-800 rounded-sm w-1/4 mb-8"></div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="h-32 bg-neutral-800 rounded-sm"></div>
-              <div className="h-32 bg-neutral-800 rounded-sm"></div>
-              <div className="h-32 bg-neutral-800 rounded-sm"></div>
-            </div>
-          </div>
+      <PageContainer maxWidth="narrow">
+        <div className="flex flex-col items-center justify-center min-h-[50vh]">
+          <LoadingSpinner size="lg" />
+          <p className="mt-4 text-neutral-600 dark:text-neutral-400">Loading wallet...</p>
         </div>
-      </div>
+      </PageContainer>
     )
   }
 
   return (
     <>
-      <PageMetadata 
+      <PageMetadata
         title="Wallet - bountyhub"
         description="Manage your BBUX tokens, view transaction history, and handle deposits and withdrawals on the bountyhub platform. Secure cryptocurrency wallet management."
         keywords="wallet, BBUX, tokens, transactions, cryptocurrency, solana, deposits, withdrawals, balance"
       />
-      <div className="p-4 sm:p-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-white mb-2">My Wallet</h1>
-            <p className="text-sm sm:text-base text-neutral-600 dark:text-gray-300">Manage your virtual BBUX balance and transactions</p>
-          </div>
+      <PageContainer maxWidth="narrow">
+        <PageHeader
+          title="My Wallet"
+          description="Manage your virtual BBUX balance and transactions"
+        />
 
-          {error && (
-            <div className="bg-red-900 border border-red-700 text-red-200 rounded-lg p-3 sm:p-4 mb-6">
-              <p className="text-red-200 text-sm sm:text-base">{error}</p>
-              <button
-                onClick={fetchWalletData}
-                className="mt-2 text-red-300 hover:text-red-100 underline text-sm"
-              >
-                Try again
-              </button>
-            </div>
+        {error && (
+          <ErrorMessage message={error} onRetry={fetchWalletData} className="mb-6" />
           )}
 
           {message && (
@@ -926,8 +907,7 @@ function WalletContent() {
               </div>
             )}
           </div>
-        </div>
-      </div>
+      </PageContainer>
     </>
   )
 }

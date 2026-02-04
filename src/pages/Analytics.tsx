@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthProvider'
 import { api } from '../utils/api'
+import { PageContainer } from '../components/PageContainer'
+import { PageHeader } from '../components/PageHeader'
+import { LoadingSpinner } from '../components/LoadingSpinner'
+import { ErrorMessage } from '../components/ErrorMessage'
 import { FiTrendingUp, FiUsers, FiDollarSign, FiMessageSquare, FiCheckCircle, FiActivity } from 'react-icons/fi'
 
 interface PlatformStats {
@@ -56,49 +60,46 @@ export default function Analytics() {
 
   if (loading && !platformStats) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto"></div>
-          <p className="mt-4 text-neutral-600 dark:text-gray-400">Loading analytics...</p>
+      <PageContainer>
+        <div className="flex flex-col items-center justify-center min-h-[50vh]">
+          <LoadingSpinner size="lg" />
+          <p className="mt-4 text-neutral-600 dark:text-neutral-400">Loading analytics...</p>
         </div>
-      </div>
+      </PageContainer>
     )
   }
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-400 p-4 rounded-lg">
-          {error}
-        </div>
-      </div>
+      <PageContainer>
+        <ErrorMessage message={error} onRetry={fetchStats} />
+      </PageContainer>
     )
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Analytics Dashboard</h1>
-            <p className="text-gray-600 dark:text-gray-400">Platform statistics and insights</p>
-          </div>
+    <PageContainer>
+      <PageHeader
+        title="Analytics Dashboard"
+        description="Platform statistics and insights"
+        actions={
           <div className="flex gap-2">
             {['today', 'week', 'month', 'all'].map((period) => (
-              <button
-                key={period}
-                onClick={() => setSelectedPeriod(period as typeof selectedPeriod)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  selectedPeriod === period
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-300 dark:hover:bg-neutral-700'
-                }`}
-              >
-                {period.charAt(0).toUpperCase() + period.slice(1)}
-              </button>
-            ))}
+            <button
+              key={period}
+              onClick={() => setSelectedPeriod(period as typeof selectedPeriod)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                selectedPeriod === period
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-300 dark:hover:bg-neutral-700'
+              }`}
+            >
+              {period.charAt(0).toUpperCase() + period.slice(1)}
+            </button>
+          ))}
           </div>
-        </div>
+        }
+      />
 
         {/* Platform Stats Grid */}
         {platformStats && (
@@ -233,7 +234,7 @@ export default function Analytics() {
             </div>
           </div>
         )}
-    </div>
+    </PageContainer>
   )
 }
 

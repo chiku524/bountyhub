@@ -1,7 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthProvider';
-import { api } from '../utils/api';
-import type { User } from '../types';
+import React, { useState, useEffect } from 'react'
+import { useAuth } from '../contexts/AuthProvider'
+import { api } from '../utils/api'
+import { PageContainer } from '../components/PageContainer'
+import { PageHeader } from '../components/PageHeader'
+import { LoadingSpinner } from '../components/LoadingSpinner'
+import { ErrorMessage } from '../components/ErrorMessage'
+import type { User } from '../types'
 
 interface AdminStats {
   totalUsers: number;
@@ -77,48 +81,36 @@ const Admin: React.FC = () => {
 
   if (!user || user.role !== 'admin') {
     return (
-      <div className="min-h-screen bg-white dark:bg-gray-900 text-neutral-900 dark:text-white transition-colors duration-200">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
-            <p className="text-neutral-500 dark:text-gray-400">You need admin privileges to access this page.</p>
-          </div>
+      <PageContainer>
+        <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
+          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">Access Denied</h1>
+          <p className="text-neutral-500 dark:text-neutral-400">You need admin privileges to access this page.</p>
         </div>
-      </div>
-    );
+      </PageContainer>
+    )
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-gray-900 text-neutral-900 dark:text-white transition-colors duration-200">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-            <p className="mt-4">Loading admin panel...</p>
-          </div>
+      <PageContainer>
+        <div className="flex flex-col items-center justify-center min-h-[50vh]">
+          <LoadingSpinner size="lg" />
+          <p className="mt-4 text-neutral-600 dark:text-neutral-400">Loading admin panel...</p>
         </div>
-      </div>
-    );
+      </PageContainer>
+    )
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">Admin Panel</h1>
-          <p className="text-neutral-600 dark:text-gray-400">Manage users and platform settings</p>
-        </div>
+    <PageContainer>
+      <PageHeader
+        title="Admin Panel"
+        description="Manage users and platform settings"
+      />
 
-        {error && (
-          <div className="bg-red-50 dark:bg-red-600 border border-red-200 dark:border-red-700 text-red-700 dark:text-white p-4 rounded-lg mb-6">
-            {error}
-            <button 
-              onClick={() => setError(null)}
-              className="float-right font-bold"
-            >
-              ×
-            </button>
-          </div>
-        )}
+      {error && (
+        <ErrorMessage message={error} onRetry={fetchUsers} className="mb-6" />
+      )}
 
         {/* Stats Section */}
         {stats && (
@@ -217,8 +209,8 @@ const Admin: React.FC = () => {
             </table>
           </div>
         </div>
-    </div>
-  );
-};
+</PageContainer>
+  )
+}
 
 export default Admin; 

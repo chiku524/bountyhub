@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { api } from '../utils/api'
 import { SearchBar } from '../components/SearchBar'
 import { Pagination } from '../components/Pagination'
+import { PageContainer } from '../components/PageContainer'
+import { PageHeader } from '../components/PageHeader'
 import { LoadingSpinner, PostSkeleton } from '../components/LoadingSpinner'
 import { ErrorMessage } from '../components/ErrorMessage'
 import { AdvancedFilters } from '../components/AdvancedFilters'
@@ -277,21 +279,23 @@ export default function Community() {
         description="Browse active bounties, ask questions, and find opportunities to earn cryptocurrency rewards in the bountyhub community. Join thousands of users earning BBUX tokens."
         keywords="community, bounties, questions, cryptocurrency, rewards, BBUX, active bounties, earn crypto"
       />
-      <div className="p-4 sm:p-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-white">Community</h1>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
-              <AdvancedFilters 
+      <PageContainer>
+        <PageHeader
+          title="Community"
+          description="Browse bounties, ask questions, and earn rewards"
+          actions={
+            <>
+              <AdvancedFilters
                 filters={filters}
                 onFiltersChange={handleFiltersChange}
               />
-              <ExportButton 
+              <ExportButton
                 data={filteredPosts}
                 filename="community-posts"
               />
-            </div>
-          </div>
+            </>
+          }
+        />
           
           {/* Search Bar */}
           <div className="mb-6">
@@ -379,8 +383,7 @@ export default function Community() {
               </>
             )}
           </div>
-        </div>
-      </div>
+      </PageContainer>
     </>
   )
 } 

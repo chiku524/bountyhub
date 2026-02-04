@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react'
 import { api } from '../utils/api'
 import { TransactionLog } from '../types'
+import { PageContainer } from '../components/PageContainer'
+import { PageHeader } from '../components/PageHeader'
 import { LoadingSpinner } from '../components/LoadingSpinner'
+import { ErrorMessage } from '../components/ErrorMessage'
 import { Pagination } from '../components/Pagination'
 
 export default function Transactions() {
@@ -70,31 +73,24 @@ export default function Transactions() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-center items-center h-64">
-          <LoadingSpinner />
+      <PageContainer>
+        <div className="flex justify-center items-center min-h-[50vh]">
+          <LoadingSpinner size="lg" />
         </div>
-      </div>
+      </PageContainer>
     )
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">Transaction History</h1>
-            <p className="text-neutral-600 dark:text-gray-400">
-              View all your wallet transactions and their current status
-            </p>
-          </div>
+    <PageContainer maxWidth="narrow">
+      <PageHeader
+        title="Transaction History"
+        description="View all your wallet transactions and their current status"
+      />
 
-          {/* Error Message */}
-          {error && (
-            <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-200 rounded-lg p-4 mb-6">
-              {error}
-            </div>
-          )}
+      {error && (
+        <ErrorMessage message={error} onRetry={fetchTransactions} className="mb-6" />
+      )}
 
           {/* Transactions List */}
           {transactions.length === 0 ? (
@@ -170,7 +166,6 @@ export default function Transactions() {
               </div>
             </div>
           )}
-        </div>
-    </div>
+    </PageContainer>
   )
 } 

@@ -5,6 +5,9 @@ import { config } from '../utils/config'
 import { useAuth } from '../contexts/AuthProvider'
 import type { User } from '../types'
 import { FiUser, FiLink, FiMail, FiLock, FiSave, FiCheck } from 'react-icons/fi'
+import { PageContainer } from '../components/PageContainer'
+import { PageHeader } from '../components/PageHeader'
+import { LoadingSpinner } from '../components/LoadingSpinner'
 
 interface ProfileData {
   firstName: string
@@ -347,17 +350,13 @@ export default function Settings() {
 
   if (loading) {
     return (
-      <div className="p-8">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-8">Settings</h1>
-          <div className="card bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 p-6">
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-500"></div>
-              <span className="ml-3 text-neutral-600 dark:text-gray-300">Loading settings...</span>
-            </div>
-          </div>
+      <PageContainer maxWidth="narrow">
+        <PageHeader title="Settings" />
+        <div className="flex flex-col items-center justify-center min-h-[40vh]">
+          <LoadingSpinner size="lg" />
+          <p className="mt-4 text-neutral-600 dark:text-neutral-400">Loading settings...</p>
         </div>
-      </div>
+      </PageContainer>
     )
   }
 
@@ -369,10 +368,8 @@ export default function Settings() {
   ]
 
   return (
-    <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
-        <div className="mb-6 flex justify-between items-center mt-16">
-          <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-white">Settings</h1>
-        </div>
+    <PageContainer maxWidth="narrow">
+      <PageHeader title="Settings" description="Manage your profile, account, and security" />
 
         {/* Success Notice */}
         {success && (
@@ -802,6 +799,6 @@ export default function Settings() {
             </form>
           </div>
         </div>
-    </div>
+    </PageContainer>
   )
 } 

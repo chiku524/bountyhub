@@ -106,6 +106,15 @@ function AppContent() {
       
       {/* Light/Dark mode container - Always flex-col */}
       <div className="relative z-10 min-h-screen w-full bg-white/10 dark:bg-neutral-900/10 transition-colors duration-200 flex flex-col">
+        {/* Skip to main content - visible on focus for keyboard/screen reader users */}
+        {showAuthenticatedNav && (
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-indigo-600 focus:text-white focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-neutral-900"
+          >
+            Skip to main content
+          </a>
+        )}
         {/* Dynamic Navbar - Top navbar for authenticated pages */}
         {isHomePage ? (
           <HomeNav onScrollTo={scrollToSection} />
