@@ -1,6 +1,6 @@
 // Service Worker for BountyHub PWA
-const CACHE_NAME = 'bountyhub-v1.0.0'
-const RUNTIME_CACHE = 'bountyhub-runtime-v1.0.0'
+const CACHE_NAME = 'bountyhub-v1.0.1'
+const RUNTIME_CACHE = 'bountyhub-runtime-v1.0.1'
 
 // Assets to cache on install
 const PRECACHE_ASSETS = [
@@ -55,17 +55,20 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // Navigation requests (SPA): always serve index.html so client-side routes never get 404/503 from server.
-  // Use redirect: 'follow' so we never respond with a redirect (avoids "redirected response was used for request whose redirect mode is not follow").
+  // Navigation requests (SPA): network-first so refresh after deploy gets fresh index.html and correct chunk URLs.
+  // Cache fallback only when offline to avoid serving stale HTML that references deleted assets (ERR_FAILED on refresh).
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      caches.match('/index.html')
-        .then((cached) => {
-          if (cached) return cached
-          return fetch(new Request('/index.html', { redirect: 'follow' }))
+      fetch(event.request)
+        .then((response) => {
+          if (response && response.ok && response.type === 'basic') {
+            const clone = response.clone()
+            caches.open(CACHE_NAME).then((cache) => cache.put('/index.html', clone))
+          }
+          return response
         })
+        .catch(() => caches.match('/index.html'))
         .then((response) => response || new Response('', { status: 503, statusText: 'Service Unavailable' }))
-        .catch(() => caches.match('/index.html') || new Response('', { status: 503, statusText: 'Service Unavailable' }))
     )
     return
   }

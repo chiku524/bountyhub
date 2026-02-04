@@ -102,6 +102,11 @@ Deploy Workers when API code, migrations, or config change. Use **Cloudflare Sec
 - **Workers**: `wrangler login`, check `wrangler.workers.toml` and D1 bindings; use `wrangler tail` for logs.
 - **CORS**: Ensure `functions/index.ts` allows your frontend origin and `VITE_API_URL` is correct.
 
+### Cache and refreshes
+
+- **"Site can’t be reached" / ERR_FAILED on normal refresh**: The service worker used to serve cached `index.html` first, so after a new deploy the page could still load old HTML that referenced removed JS chunks. The SW is now **network-first** for navigations (cache only when offline), so a normal refresh gets fresh HTML. Existing users get the update on next load; hard refresh (Ctrl+Shift+R) was a workaround until then.
+- **Cloudflare cache**: If you see stale content after deploy and the above doesn’t help, purge the Pages cache in Cloudflare Dashboard → Pages → your project → **Deployments** → ⋮ on latest → **Purge cache**, or purge everything in **Caching** → **Configuration** → **Purge Everything**.
+
 ---
 
 ## Summary
