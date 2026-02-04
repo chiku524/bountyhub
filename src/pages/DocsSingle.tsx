@@ -69,18 +69,20 @@ export default function DocsSingle() {
         Skip to main content
       </a>
 
-      {/* Padded container: gap from navbar/footer; TOC left, section content centered */}
-      <div className="flex-1 min-h-0 w-full max-w-full overflow-hidden flex flex-col lg:flex-row p-4 sm:p-5 lg:p-6 gap-0">
-        {/* Left spacer: centers the [TOC + content] block on the page */}
-        <div className="hidden lg:block lg:flex-1 lg:min-w-0 shrink-0" aria-hidden />
+      {/* Padding: gap from navbar/footer */}
+      <div className="flex-1 min-h-0 w-full max-w-full overflow-hidden flex flex-col p-4 sm:p-5 lg:p-6">
+        {/* Single scrollable container: TOC + section content inside; only this box scrolls internally */}
+        <div className="flex-1 min-h-0 overflow-hidden flex flex-col lg:flex-row rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800/95 shadow-sm">
+          {/* Left spacer: centers the [TOC + content] block */}
+          <div className="hidden lg:block lg:flex-1 lg:min-w-0 shrink-0" aria-hidden />
 
-        {/* Table of Contents - left of content; scrollable with hidden scrollbar */}
-        <aside
-          className="shrink-0 w-full lg:w-52 min-h-0 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white/95 dark:bg-neutral-800/95 flex flex-col overflow-y-auto overflow-x-hidden scrollbar-hide lg:overflow-y-auto lg:overflow-x-hidden"
-          aria-label="Table of contents"
-        >
+          {/* Table of Contents - scrollable within container */}
+          <aside
+            className="shrink-0 w-full lg:w-52 min-h-0 flex flex-col overflow-y-auto overflow-x-hidden scrollbar-hide border-b lg:border-b-0 lg:border-r border-neutral-200 dark:border-neutral-700"
+            aria-label="Table of contents"
+          >
           <div className="w-full lg:max-w-52 px-3 py-4 lg:py-4 mx-auto transition-opacity duration-300 ease-out">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-3 text-center sticky top-0 bg-white/95 dark:bg-neutral-800/95 py-1 z-10">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-3 text-center sticky top-0 bg-white dark:bg-neutral-800/95 py-1 z-10">
               Table of Contents
             </h2>
             <nav className="flex flex-row lg:flex-col gap-0.5 overflow-x-auto lg:overflow-x-visible overflow-y-visible scrollbar-hide pb-2 lg:pb-0 overscroll-x-contain">
@@ -101,13 +103,13 @@ export default function DocsSingle() {
           </div>
         </aside>
 
-        {/* Section content - horizontally centered in middle of page; scrollable with hidden scrollbar */}
-        <main
-          id="main-content"
-          className="flex-1 min-w-0 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide focus:outline-none scroll-smooth lg:flex lg:items-center lg:justify-center lg:self-stretch"
-          tabIndex={-1}
-          style={{ scrollBehavior: 'smooth' }}
-        >
+          {/* Section content - scrollable within container; centered in middle */}
+          <main
+            id="main-content"
+            className="flex-1 min-w-0 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide focus:outline-none scroll-smooth lg:flex lg:items-center lg:justify-center lg:self-stretch"
+            tabIndex={-1}
+            style={{ scrollBehavior: 'smooth' }}
+          >
           <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-10 py-6 pb-20 break-words transition-opacity duration-300 ease-out">
             {sectionId === 'overview' && (
               <>
@@ -363,8 +365,9 @@ export default function DocsSingle() {
             </div>
           </main>
 
-        {/* Right spacer: equal weight so content column stays truly centered */}
-        <div className="hidden lg:block lg:flex-1 lg:min-w-0 shrink-0" aria-hidden />
+          {/* Right spacer: equal weight so content column stays truly centered */}
+          <div className="hidden lg:block lg:flex-1 lg:min-w-0 shrink-0" aria-hidden />
+        </div>
       </div>
     </div>
   )
