@@ -25,7 +25,8 @@ export default function TagSelector({
   availableTags, 
   error,
   required = true,
-  disableClickOutside = false
+  disableClickOutside = false,
+  hideHelpText = false
 }: TagSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');

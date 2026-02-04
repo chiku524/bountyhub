@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from 'react'
-import { Routes, Route, useLocation } from 'react-router-dom'
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
 import { AuthProvider, useAuth } from './contexts/AuthProvider'
 import { SolanaWalletProvider } from './contexts/SolanaWalletProvider'
@@ -39,16 +39,9 @@ const UserProfile = lazy(() => import('./pages/UserProfile'))
 const UserPosts = lazy(() => import('./pages/UserPosts'))
 const Transactions = lazy(() => import('./pages/Transactions'))
 const RefundRequests = lazy(() => import('./pages/RefundRequests'))
-const Docs = lazy(() => import('./pages/Docs'))
+const DocsSingle = lazy(() => import('./pages/DocsSingle'))
 const Privacy = lazy(() => import('./pages/Privacy'))
 const Terms = lazy(() => import('./pages/Terms'))
-const PlatformDocs = lazy(() => import('./pages/docs/Platform'))
-const UserGuide = lazy(() => import('./pages/docs/UserGuide'))
-const DeveloperGuide = lazy(() => import('./pages/docs/DeveloperGuide'))
-const ApiReference = lazy(() => import('./pages/docs/ApiReference'))
-const DeploymentGuide = lazy(() => import('./pages/docs/DeploymentGuide'))
-const Legal = lazy(() => import('./pages/docs/Legal'))
-const RefundSystem = lazy(() => import('./pages/docs/RefundSystem'))
 const BugBountyCampaigns = lazy(() => import('./pages/BugBountyCampaigns'))
 const BugBountyCampaignCreate = lazy(() => import('./pages/BugBountyCampaignCreate'))
 const BugBountyCampaignDetail = lazy(() => import('./pages/BugBountyCampaignDetail'))
@@ -149,14 +142,14 @@ function AppContent() {
             <Route path="/:username" element={<UserProfile />} />
             <Route path="/transactions" element={<Transactions />} />
             <Route path="/refund-requests" element={<RefundRequests />} />
-            <Route path="/docs" element={<Docs />} />
-            <Route path="/docs/platform" element={<PlatformDocs />} />
-            <Route path="/docs/user-guide" element={<UserGuide />} />
-            <Route path="/docs/developer-guide" element={<DeveloperGuide />} />
-            <Route path="/docs/api-reference" element={<ApiReference />} />
-            <Route path="/docs/deployment-guide" element={<DeploymentGuide />} />
-            <Route path="/docs/legal" element={<Legal />} />
-            <Route path="/docs/refund-system" element={<RefundSystem />} />
+            <Route path="/docs" element={<DocsSingle />} />
+            <Route path="/docs/platform" element={<Navigate to="/docs#platform-features" replace />} />
+            <Route path="/docs/user-guide" element={<Navigate to="/docs#user-guide" replace />} />
+            <Route path="/docs/developer-guide" element={<Navigate to="/docs#developer-guide" replace />} />
+            <Route path="/docs/api-reference" element={<Navigate to="/docs#api-reference" replace />} />
+            <Route path="/docs/deployment-guide" element={<Navigate to="/docs#deployment" replace />} />
+            <Route path="/docs/legal" element={<Navigate to="/docs#legal" replace />} />
+            <Route path="/docs/refund-system" element={<Navigate to="/docs#refund-system" replace />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/admin" element={<Admin />} />

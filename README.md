@@ -19,7 +19,7 @@ A decentralized Q&A platform where questions meet rewards. Ask questions, offer 
 
 - [Deployment Guide](./docs/deployment.md) – Cloudflare Pages & Workers, DNS, troubleshooting
 - [Tech Stack](./docs/tech-stack.md) – Current stack and optional upgrades
-- **In-app docs** (when running the app): [Platform](/docs/platform), [User Guide](/docs/user-guide), [Developer Guide](/docs/developer-guide), [API Reference](/docs/api-reference)
+- **In-app docs** (when running the app): [Documentation](/docs) — single page with table of contents (Overview, Platform Features, User Guide, UX & Interface, Developer Guide, API Reference, Deployment, Legal, Refund System)
 
 ## 🛠️ Tech Stack
 
