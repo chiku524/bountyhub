@@ -8,6 +8,7 @@ import { PageHeader } from '../components/PageHeader'
 import { LoadingSpinner, PostSkeleton } from '../components/LoadingSpinner'
 import { ErrorMessage } from '../components/ErrorMessage'
 import { AdvancedFilters } from '../components/AdvancedFilters'
+import { EmptyState } from '../components/EmptyState'
 import { ExportButton } from '../components/ExportButton'
 import { VoteButton } from '../components/VoteButton'
 import { BookmarkButton } from '../components/BookmarkButton'
@@ -270,7 +271,11 @@ export default function Community() {
   }, [])
 
   if (loading) return <LoadingSpinner />
-  if (error) return <ErrorMessage message={error} />
+  if (error) return (
+    <PageContainer>
+      <ErrorMessage message={error} onRetry={fetchPosts} />
+    </PageContainer>
+  )
 
   return (
     <>
@@ -303,6 +308,7 @@ export default function Community() {
               onSearch={handleSearch}
               placeholder="Search posts by title, content, or author..."
               className="w-full max-w-md"
+              debounceMs={300}
             />
           </div>
 
@@ -337,34 +343,32 @@ export default function Community() {
             )}
             
             {!loading && !error && paginatedPosts.length === 0 && (
-              <div className="p-4 sm:p-8 text-center">
-                <div className="text-neutral-500 dark:text-gray-400 mb-4">
-                  {searchQuery || Object.values(filters).some(f => f !== '' && f !== false) ? (
-                    <>
-                      <p className="text-base sm:text-lg mb-2">No posts found matching your criteria</p>
-                      <p className="text-sm sm:text-base">Try adjusting your search terms or filters</p>
-                    </>
-                  ) : (
-                    <p className="text-base sm:text-lg">No posts found</p>
-                  )}
-                </div>
-                {(searchQuery || Object.values(filters).some(f => f !== '' && f !== false)) && (
-                  <button
-                    onClick={() => {
-                      setSearchQuery('')
-                      setFilters({
-                        status: '',
-                        dateRange: '',
-                        sortBy: 'newest',
-                        hasBounty: false,
-                        selectedTags: []
-                      })
-                    }}
-                    className="text-indigo-400 hover:text-indigo-300"
-                  >
-                    Clear all filters
-                  </button>
-                )}
+              <div className="p-4 sm:p-8">
+                <EmptyState
+                  icon="🔍"
+                  title={searchQuery || Object.values(filters).some(f => f !== '' && f !== false) ? 'No posts match your criteria' : 'No posts yet'}
+                  description={searchQuery || Object.values(filters).some(f => f !== '' && f !== false) ? 'Try different search terms or clear filters to see all posts.' : 'Be the first to create a bounty or check back later.'}
+                  action={
+                    (searchQuery || Object.values(filters).some(f => f !== '' && f !== false)) ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSearchQuery('')
+                          setFilters({
+                            status: '',
+                            dateRange: '',
+                            sortBy: 'newest',
+                            hasBounty: false,
+                            selectedTags: []
+                          })
+                        }}
+                        className="btn-secondary"
+                      >
+                        Clear all filters
+                      </button>
+                    ) : undefined
+                  }
+                />
               </div>
             )}
             

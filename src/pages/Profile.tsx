@@ -5,6 +5,7 @@ import { FaGithub, FaTwitter, FaLinkedin, FaInstagram, FaFacebook, FaYoutube, Fa
 import { api } from '../utils/api'
 import { config } from '../utils/config'
 import { useAuth } from '../contexts/AuthProvider'
+import { useToast } from '../contexts/ToastContext'
 import type { User, Post, Bookmark, ReputationHistory } from '../types'
 
 interface ProfileData {
@@ -121,6 +122,7 @@ const ProfilePictureUpload = ({ currentPicture, username, onPictureUpdate }: { c
   const [preview, setPreview] = useState<string | null>(currentPicture)
   const [isUploading, setIsUploading] = useState(false)
   const [imageError, setImageError] = useState(false)
+  const toast = useToast()
 
   const handleImageError = () => {
     setImageError(true)
@@ -137,13 +139,13 @@ const ProfilePictureUpload = ({ currentPicture, username, onPictureUpdate }: { c
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      alert('Please upload an image file')
+      toast.error('Please upload an image file')
       return
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('File size must be less than 5MB')
+      toast.error('File size must be less than 5MB')
       return
     }
 
@@ -162,15 +164,15 @@ const ProfilePictureUpload = ({ currentPicture, username, onPictureUpdate }: { c
 
       if (result.success) {
         setPreview(result.profilePicture || null)
-        // Update the parent component's user state
         onPictureUpdate(result.profilePicture)
+        toast.success('Profile picture updated')
       } else {
-        alert('Failed to upload profile picture')
+        toast.error('Failed to upload profile picture')
         setPreview(currentPicture)
       }
     } catch (error) {
       console.error('Upload error:', error)
-      alert(error instanceof Error ? error.message : 'Failed to upload profile picture')
+      toast.error(error instanceof Error ? error.message : 'Failed to upload profile picture')
       setPreview(currentPicture)
     } finally {
       setIsUploading(false)

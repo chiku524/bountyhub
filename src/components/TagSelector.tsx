@@ -15,6 +15,8 @@ interface TagSelectorProps {
   error?: string;
   required?: boolean;
   disableClickOutside?: boolean;
+  /** Hide the "Tags help categorize..." help text (e.g. in compact filter panels) */
+  hideHelpText?: boolean;
 }
 
 export default function TagSelector({ 
@@ -233,10 +235,12 @@ export default function TagSelector({
       )}
 
       {/* Help Text */}
-      <p className="text-xs text-neutral-500 dark:text-gray-400">
-        Tags help categorize your post and make it easier for others to find. 
-        Select tags that best describe your content.
-      </p>
+      {!hideHelpText && (
+        <p className="text-xs text-neutral-500 dark:text-gray-400">
+          Tags help categorize your post and make it easier for others to find.
+          Select tags that best describe your content.
+        </p>
+      )}
     </div>
   );
 } 

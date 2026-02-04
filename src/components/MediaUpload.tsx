@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { FiUpload, FiVideo, FiX } from 'react-icons/fi';
+import { useToast } from '../contexts/ToastContext';
 
 interface MediaUploadProps {
   onMediaUpload: (media: { type: string; url: string; thumbnailUrl?: string; isScreenRecording: boolean }) => void;
@@ -46,6 +47,7 @@ async function uploadToCloudinary(file: File | Blob, resourceType: 'image' | 'vi
 export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: MediaUploadProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const toast = useToast();
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -153,7 +155,7 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
             });
           }
         } catch (error) {
-          alert(error instanceof Error ? error.message : 'Failed to upload screen recording');
+          toast.error(error instanceof Error ? error.message : 'Failed to upload screen recording');
         } finally {
           setIsUploading(false);
           cleanupRecording();
@@ -167,10 +169,10 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
       mediaRecorder.start();
       setIsRecording(true);
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Failed to start screen recording');
+      toast.error(error instanceof Error ? error.message : 'Failed to start screen recording');
       cleanupRecording();
     }
-  }, [onMediaUpload, cleanupRecording]);
+  }, [onMediaUpload, cleanupRecording, toast]);
 
   const stopScreenRecording = useCallback(() => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
@@ -279,7 +281,7 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
     } catch (error) {
       console.error('File upload error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to upload file';
-      alert(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {

@@ -110,6 +110,15 @@ export function TopNav() {
 
           {/* Desktop Navigation - Center: fewer items, more breathing room */}
           <div className="hidden md:flex items-center gap-1 flex-1 justify-center max-w-2xl">
+            {user && (
+              <Link
+                to="/posts/create"
+                className="px-3 py-2 rounded-lg text-sm font-medium bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white flex items-center gap-2"
+              >
+                <FiAward className="w-4 h-4 shrink-0" />
+                <span>Create Bounty</span>
+              </Link>
+            )}
             <Link
               to="/community"
               className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
@@ -374,6 +383,15 @@ export function TopNav() {
               </button>
             </div>
             <div className="space-y-0.5">
+              {user && (
+                <Link
+                  to="/posts/create"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-3 py-2.5 rounded-lg text-base font-medium bg-indigo-600 text-white hover:bg-indigo-700"
+                >
+                  Create Bounty
+                </Link>
+              )}
               <Link
                 to="/community"
                 onClick={() => setMobileMenuOpen(false)}

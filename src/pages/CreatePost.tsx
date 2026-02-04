@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../utils/api'
 import { useAuth } from '../contexts/AuthProvider'
+import { useToast } from '../contexts/ToastContext'
 import TagSelector from '../components/TagSelector'
 import { CodeBlockEditor } from '../components/CodeBlockEditor'
 import { MediaUpload } from '../components/MediaUpload'
@@ -21,6 +22,7 @@ const TOKEN_SYMBOL = 'BBUX'
 export default function CreatePost() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const toast = useToast()
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [loading, setLoading] = useState(false)
@@ -113,7 +115,9 @@ export default function CreatePost() {
         setError('Failed to create post')
       }
     } catch (err: any) {
-      setError(err.message)
+      const msg = err?.message ?? 'Failed to create post'
+      setError(msg)
+      toast.error(msg)
     } finally {
       setLoading(false)
     }

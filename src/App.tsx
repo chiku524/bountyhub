@@ -3,7 +3,9 @@ import { Routes, Route, useLocation } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
 import { AuthProvider, useAuth } from './contexts/AuthProvider'
 import { SolanaWalletProvider } from './contexts/SolanaWalletProvider'
+import { ToastProvider } from './contexts/ToastContext'
 import Layout from './components/Layout'
+import { ScrollToTop } from './components/ScrollToTop'
 import { AnimatedBackground } from './components/AnimatedBackground'
 import { TopNav } from './components/TopNav'
 import { HomeNav } from './components/HomeNav'
@@ -124,6 +126,7 @@ function AppContent() {
         
         {/* Layout - Page content with top padding for navbar */}
         <Layout showNav={showAuthenticatedNav}>
+          <ScrollToTop />
           <PageMetadata />
           <Suspense fallback={<RouteFallback />}>
             <Routes>
@@ -186,7 +189,9 @@ function App() {
     <HelmetProvider>
       <AuthProvider>
         <SolanaWalletProvider>
-          <AppContent />
+          <ToastProvider>
+            <AppContent />
+          </ToastProvider>
         </SolanaWalletProvider>
       </AuthProvider>
     </HelmetProvider>

@@ -1,6 +1,7 @@
 import { ReactNode } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthProvider'
+import { BackToTop } from './BackToTop'
 
 interface LayoutProps {
   children: ReactNode
@@ -25,6 +26,7 @@ export default function Layout({ children, showNav = true }: LayoutProps) {
       <main id="main-content" className="flex-1 overflow-y-auto" tabIndex={-1}>
         {children}
       </main>
+      <BackToTop />
     </div>
   )
 } 

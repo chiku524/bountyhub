@@ -1,27 +1,46 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 
 interface SearchBarProps {
   onSearch: (query: string) => void
   placeholder?: string
   className?: string
+  /** Debounce onSearch by this many ms. If 0 or omitted, search runs on every keystroke. */
+  debounceMs?: number
 }
 
 export const SearchBar: React.FC<SearchBarProps> = ({ 
   onSearch, 
   placeholder = "Search posts...",
-  className = ''
+  className = '',
+  debounceMs = 0
 }) => {
   const [query, setQuery] = useState('')
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
+  }, [])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+      debounceRef.current = null
+    }
     onSearch(query)
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setQuery(value)
-    onSearch(value) // Real-time search
+    if (debounceMs > 0) {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+      debounceRef.current = setTimeout(() => onSearch(value), debounceMs)
+    } else {
+      onSearch(value)
+    }
   }
 
   return (

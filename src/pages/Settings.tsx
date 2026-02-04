@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { api } from '../utils/api'
 import { config } from '../utils/config'
 import { useAuth } from '../contexts/AuthProvider'
+import { useToast } from '../contexts/ToastContext'
 import type { User } from '../types'
 import { FiUser, FiLink, FiMail, FiLock, FiSave, FiCheck } from 'react-icons/fi'
 import { PageContainer } from '../components/PageContainer'
@@ -38,6 +39,7 @@ interface PasswordData {
 
 export default function Settings() {
   const { user: authUser, loading: authLoading, refreshUser } = useAuth()
+  const toast = useToast()
   const [searchParams, setSearchParams] = useSearchParams()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
@@ -113,6 +115,7 @@ export default function Settings() {
 
     if (githubConnectedParam === 'true') {
       setSuccess('GitHub account connected successfully')
+      toast.success('GitHub account connected successfully')
       setTimeout(() => setSuccess(null), 5000)
       refreshUser().then(() => loadGitHubStatus())
       searchParams.delete('github_connected')
@@ -211,6 +214,7 @@ export default function Settings() {
         setGithubConnected(false)
         setGithubUsername(null)
         setSuccess('GitHub account disconnected successfully')
+        toast.success('GitHub account disconnected successfully')
         setTimeout(() => setSuccess(null), 3000)
       } else {
         setError(data.error || 'Failed to disconnect GitHub account')
@@ -282,6 +286,7 @@ export default function Settings() {
       })
       
       setSuccess('Profile changes saved successfully!')
+      toast.success('Profile changes saved successfully!')
       setTimeout(() => setSuccess(null), 3000)
     } catch (err: any) {
       setError(err.message || 'Failed to update profile')
@@ -317,6 +322,7 @@ export default function Settings() {
       
       if (result.success) {
         setSuccess('Password changed successfully!')
+        toast.success('Password changed successfully!')
         // Clear password fields
         setPasswordData({
           currentPassword: '',

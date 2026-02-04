@@ -126,117 +126,116 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
 
       {isOpen && (
         <div
-          className="absolute top-full z-50 mt-2 w-[min(22rem,calc(100vw-1.5rem))] max-h-[min(85vh,32rem)] overflow-y-auto rounded-xl border border-neutral-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 p-4 shadow-lg right-0 left-auto sm:right-0 sm:left-auto"
+          className="absolute top-full z-50 mt-2 w-[min(26rem,calc(100vw-2rem))] max-h-[min(90vh,36rem)] overflow-y-auto rounded-2xl border border-neutral-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 shadow-xl right-0 left-auto sm:right-0 sm:left-auto"
           role="dialog"
           aria-label="Filter options"
         >
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {/* Status Filter */}
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                Status
-              </label>
-              <select
-                value={filters.status}
-                onChange={(e) => handleFilterChange('status', e.target.value)}
-                className="input w-full text-sm"
-              >
-                <option value="">All Status</option>
-                <option value="open">Open</option>
-                <option value="claimed">Claimed</option>
-                <option value="closed">Closed</option>
-              </select>
-            </div>
-
-            {/* Date Range Filter */}
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                Date Range
-              </label>
-              <select
-                value={filters.dateRange}
-                onChange={(e) => handleFilterChange('dateRange', e.target.value)}
-                className="input w-full text-sm"
-              >
-                <option value="">All Time</option>
-                <option value="today">Today</option>
-                <option value="week">This Week</option>
-                <option value="month">This Month</option>
-                <option value="year">This Year</option>
-              </select>
-            </div>
-
-            {/* Sort By Filter */}
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                Sort By
-              </label>
-              <select
-                value={filters.sortBy}
-                onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                className="input w-full text-sm"
-              >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="mostVoted">Most Voted</option>
-                <option value="mostCommented">Most Commented</option>
-              </select>
-            </div>
-
-            {/* Bounty Filter */}
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                Bounty
-              </label>
-              <div className="flex items-center gap-2 pt-2">
-                <input
-                  type="checkbox"
-                  id="hasBounty"
-                  checked={filters.hasBounty}
-                  onChange={(e) => handleFilterChange('hasBounty', e.target.checked)}
-                  className="h-4 w-4 rounded border-neutral-300 text-indigo-600 focus:ring-indigo-500 dark:border-neutral-600 dark:bg-neutral-700"
-                />
-                <label htmlFor="hasBounty" className="text-sm text-neutral-600 dark:text-neutral-400">
-                  Has Bounty
-                </label>
+          <div className="p-5 sm:p-6 space-y-6">
+            {/* Quick filters: single column for comfortable dropdown space */}
+            <div className="space-y-4">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+                Quick filters
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                    Status
+                  </label>
+                  <select
+                    value={filters.status}
+                    onChange={(e) => handleFilterChange('status', e.target.value)}
+                    className="input w-full text-sm py-2.5 min-h-11"
+                  >
+                    <option value="">All Status</option>
+                    <option value="open">Open</option>
+                    <option value="claimed">Claimed</option>
+                    <option value="closed">Closed</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                    Date Range
+                  </label>
+                  <select
+                    value={filters.dateRange}
+                    onChange={(e) => handleFilterChange('dateRange', e.target.value)}
+                    className="input w-full text-sm py-2.5 min-h-11"
+                  >
+                    <option value="">All Time</option>
+                    <option value="today">Today</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                    <option value="year">This Year</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                    Sort By
+                  </label>
+                  <select
+                    value={filters.sortBy}
+                    onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+                    className="input w-full text-sm py-2.5 min-h-11"
+                  >
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="mostVoted">Most Voted</option>
+                    <option value="mostCommented">Most Commented</option>
+                  </select>
+                </div>
+                <div className="space-y-2 flex flex-col justify-end">
+                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                    Bounty
+                  </label>
+                  <label className="flex items-center gap-3 py-2.5 cursor-pointer rounded-lg hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors -ml-1 pl-1">
+                    <input
+                      type="checkbox"
+                      id="hasBounty"
+                      checked={filters.hasBounty}
+                      onChange={(e) => handleFilterChange('hasBounty', e.target.checked)}
+                      className="h-4 w-4 rounded border-neutral-300 text-indigo-600 focus:ring-indigo-500 dark:border-neutral-600 dark:bg-neutral-700"
+                    />
+                    <span className="text-sm text-neutral-600 dark:text-neutral-400">Has Bounty only</span>
+                  </label>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Tags Filter */}
-          <div className="mt-4">
-            <label className="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Tags</label>
-            {loadingTags ? (
-              <p className="text-sm text-neutral-500 dark:text-neutral-400">Loading tags...</p>
-            ) : (
-              <TagSelector
-                selectedTags={availableTags
-                  .filter(tag => filters.selectedTags.includes(tag.name))
-                  .map(tag => tag.id)
-                }
-                onTagsChange={handleTagsChange}
-                availableTags={availableTags}
-                required={false}
-                disableClickOutside={true}
-              />
-            )}
-          </div>
+            {/* Tags: no duplicate label — TagSelector shows its own "Tags" header */}
+            <div className="pt-4 border-t border-neutral-100 dark:border-neutral-700">
+              {loadingTags ? (
+                <p className="text-sm text-neutral-500 dark:text-neutral-400 py-2">Loading tags...</p>
+              ) : (
+                <TagSelector
+                  selectedTags={availableTags
+                    .filter(tag => filters.selectedTags.includes(tag.name))
+                    .map(tag => tag.id)
+                  }
+                  onTagsChange={handleTagsChange}
+                  availableTags={availableTags}
+                  required={false}
+                  disableClickOutside={true}
+                  hideHelpText
+                />
+              )}
+            </div>
 
-          {/* Clear Filters Button */}
-          <div className="mt-4 flex justify-end border-t border-neutral-200 dark:border-neutral-600 pt-3">
-            <button
-              type="button"
-              onClick={() => onFiltersChange({
-                status: '',
-                dateRange: '',
-                sortBy: 'newest',
-                hasBounty: false,
-                selectedTags: []
-              })}
-              className="text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-            >
-              Clear all
-            </button>
+            {/* Clear Filters */}
+            <div className="flex justify-end pt-2">
+              <button
+                type="button"
+                onClick={() => onFiltersChange({
+                  status: '',
+                  dateRange: '',
+                  sortBy: 'newest',
+                  hasBounty: false,
+                  selectedTags: []
+                })}
+                className="text-sm font-medium px-4 py-2 rounded-lg text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 hover:text-neutral-900 dark:hover:text-white transition-colors"
+              >
+                Clear all filters
+              </button>
+            </div>
           </div>
         </div>
       )}
