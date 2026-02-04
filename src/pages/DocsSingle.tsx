@@ -69,41 +69,47 @@ export default function DocsSingle() {
         Skip to main content
       </a>
 
-      <div className="flex flex-col lg:flex-row flex-1 min-h-0 w-full max-w-full overflow-hidden">
-        {/* Left sidebar: Table of Contents - centered like micropaywall */}
-        <aside
-          className="shrink-0 w-full lg:w-56 lg:min-w-0 border-b lg:border-b-0 lg:border-r border-neutral-200 dark:border-neutral-700 bg-white/90 dark:bg-neutral-800/90 backdrop-blur-sm flex lg:justify-center"
-          aria-label="Table of contents"
-        >
-          <div className="sticky top-16 lg:top-16 z-10 w-full lg:max-w-[14rem] py-4 px-4 lg:px-3">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-3 text-center lg:text-center">
-              Table of Contents
-            </h2>
-            <nav className="flex flex-row lg:flex-col gap-0.5 overflow-x-auto lg:overflow-x-visible scrollbar-thin pb-2 lg:pb-0 lg:overflow-y-hidden overscroll-x-contain">
-              {SECTION_IDS.map((id) => (
-                <a
-                  key={id}
-                  href={`#${id}`}
-                  className={`shrink-0 lg:shrink-0 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-center lg:text-center ${
-                    sectionId === id
-                      ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300'
-                      : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 hover:text-neutral-900 dark:hover:text-white'
-                  }`}
-                >
-                  {SECTION_LABELS[id]}
-                </a>
-              ))}
-            </nav>
-          </div>
-        </aside>
+      {/* Fixed-height container: fills viewport below navbar, nothing scrolls except section content */}
+      <div className="h-[calc(100vh-4rem)] min-h-0 w-full max-w-full overflow-hidden flex flex-col lg:flex-row">
+        {/* Left spacer: centers the docs block on large screens */}
+        <div className="hidden lg:block lg:flex-1 lg:min-w-0" aria-hidden />
 
-        {/* Right: single scrollable area for selected section only */}
-        <main
-          id="main-content"
-          className="flex-1 min-w-0 min-h-0 overflow-y-auto overflow-x-hidden focus:outline-none"
-          tabIndex={-1}
-        >
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 pb-20 break-words">
+        {/* Docs block: TOC (left of center) + section content (center) */}
+        <div className="flex-1 flex flex-col lg:flex-row min-w-0 min-h-0 lg:max-w-6xl">
+          {/* Table of Contents - slightly left of center */}
+          <aside
+            className="shrink-0 w-full lg:w-52 border-b lg:border-b-0 lg:border-r border-neutral-200 dark:border-neutral-700 bg-white/95 dark:bg-neutral-800/95 flex lg:justify-center py-4 lg:py-6"
+            aria-label="Table of contents"
+          >
+            <div className="w-full lg:max-w-[13rem] px-4 lg:px-2">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-3 text-center">
+                Table of Contents
+              </h2>
+              <nav className="flex flex-row lg:flex-col gap-0.5 overflow-x-auto lg:overflow-x-visible scrollbar-thin pb-2 lg:pb-0 overscroll-x-contain">
+                {SECTION_IDS.map((id) => (
+                  <a
+                    key={id}
+                    href={`#${id}`}
+                    className={`shrink-0 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-center ${
+                      sectionId === id
+                        ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300'
+                        : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 hover:text-neutral-900 dark:hover:text-white'
+                    }`}
+                  >
+                    {SECTION_LABELS[id]}
+                  </a>
+                ))}
+              </nav>
+            </div>
+          </aside>
+
+          {/* Section content - center of viewport, only this area scrolls */}
+          <main
+            id="main-content"
+            className="flex-1 min-w-0 min-h-0 overflow-y-auto overflow-x-hidden focus:outline-none"
+            tabIndex={-1}
+          >
+            <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 pb-20 break-words">
             {sectionId === 'overview' && (
               <>
                 <h1 className={sectionTitle}>Overview</h1>
@@ -355,8 +361,12 @@ export default function DocsSingle() {
                 </div>
               </>
             )}
-          </div>
-        </main>
+            </div>
+          </main>
+        </div>
+
+        {/* Right spacer: centers the docs block on large screens */}
+        <div className="hidden lg:block lg:flex-1 lg:min-w-0" aria-hidden />
       </div>
     </>
   )
