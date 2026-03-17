@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { createDb } from '../../src/utils/db'
 import { posts, bounties, users, answers, virtualWallets } from '../../drizzle/schema'
 import { eq } from 'drizzle-orm'
-import { getCached, setCached } from '../../utils/kv'
+import { getCached, setCached } from '../utils/kv'
 
 const STATS_CACHE_KEY = 'stats'
 const STATS_TTL = 300 // 5 minutes

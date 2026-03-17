@@ -5,7 +5,7 @@ import { users } from '../../../drizzle/schema'
 import { eq } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
 import { createSession } from '../../../src/utils/auth'
-import { checkRateLimit } from '../../../utils/kv'
+import { checkRateLimit } from '../../utils/kv'
 
 interface Env {
   DB: D1Database

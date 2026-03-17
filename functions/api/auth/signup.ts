@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { setCookie } from 'hono/cookie'
 import { register, createSession } from '../../../src/utils/auth'
 import { createDb } from '../../../src/utils/db'
-import { checkRateLimit } from '../../../utils/kv'
+import { checkRateLimit } from '../../utils/kv'
 
 interface Env {
   NODE_ENV: string
