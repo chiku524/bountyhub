@@ -1,3 +1,5 @@
+import { logoUrl } from './logoUrl'
+
 // Browser Notification Service
 export class BrowserNotificationService {
   private permission: NotificationPermission = 'default'
@@ -46,9 +48,10 @@ export class BrowserNotificationService {
       return
     }
 
+    const fullLogoUrl = typeof window !== 'undefined' ? `${window.location.origin}${logoUrl}` : logoUrl
     const defaultOptions: NotificationOptions = {
-      icon: '/logo.svg',
-      badge: '/logo.svg',
+      icon: fullLogoUrl,
+      badge: fullLogoUrl,
       tag: 'bountyhub-notification',
       requireInteraction: false,
       ...options

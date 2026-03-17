@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { FaDiscord, FaTwitter } from 'react-icons/fa'
+import { logoUrl } from '../utils/logoUrl'
 
 export function Footer() {
   return (
@@ -8,7 +9,7 @@ export function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center space-x-4">
             <Link to="/" className="flex items-center gap-2 text-neutral-700 dark:text-neutral-300 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors font-semibold" aria-label="bountyhub home">
-              <img src="/logo.svg" alt="" className="w-6 h-6 object-contain" aria-hidden />
+              <img src={logoUrl} alt="" className="w-6 h-6 object-contain" aria-hidden />
               bountyhub
             </Link>
             <span className="text-neutral-400 dark:text-neutral-500" aria-hidden>|</span>

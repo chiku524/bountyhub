@@ -11,7 +11,7 @@ import { useWalletModal } from '@solana/wallet-adapter-react-ui'
 import { Notifications } from './Notifications'
 import { ThemeToggle } from './ThemeToggle'
 import type { NotificationsRef } from './Notifications'
-import logo from '/logo.svg'
+import { logoUrl } from '../utils/logoUrl'
 
 function WalletButton() {
   const { wallet, connected, disconnect } = useWallet()
@@ -100,7 +100,7 @@ export function TopNav() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 shrink-0" aria-label="bountyhub home">
-            <img src={logo} alt="" className="w-8 h-8 object-contain" aria-hidden />
+            <img src={logoUrl} alt="" className="w-8 h-8 object-contain" aria-hidden />
             <span className="text-xl font-bold bg-linear-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent hidden sm:block">
               bountyhub
             </span>

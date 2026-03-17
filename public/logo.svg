@@ -1,28 +1,26 @@
 <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <defs>
-    <linearGradient id="bh-icon-shade" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="bh-bg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#4F46E5"/>
       <stop offset="100%" stop-color="#7C3AED"/>
     </linearGradient>
-    <linearGradient id="bh-coin" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FBBF24"/>
-      <stop offset="100%" stop-color="#D97706"/>
+    <linearGradient id="bh-accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#A5B4FC"/>
+      <stop offset="100%" stop-color="#C4B5FD"/>
     </linearGradient>
   </defs>
-  <!-- Rounded square / badge -->
-  <rect width="64" height="64" rx="14" fill="url(#bh-icon-shade)"/>
-  <!-- Stylized bounty chest / reward -->
-  <g transform="translate(32, 32)">
-    <!-- Chest body -->
-    <path d="M-14 2h28v14a4 4 0 01-4 4H-10a4 4 0 01-4-4V2z" fill="url(#bh-coin)" stroke="#B45309" stroke-width="1.2" stroke-linejoin="round"/>
-    <!-- Lid -->
-    <path d="M-16 -4h32v6H-16z" rx="2" fill="url(#bh-coin)" stroke="#B45309" stroke-width="1.2"/>
-    <!-- Lock -->
-    <circle cx="0" cy="1" r="3" fill="#B45309"/>
-    <rect x="-1" y="1" width="2" height="4" fill="#B45309" rx="0.5"/>
-    <!-- Coins -->
-    <circle cx="-8" cy="14" r="4" fill="url(#bh-coin)" stroke="#B45309" stroke-width="0.8"/>
-    <circle cx="2" cy="16" r="3" fill="url(#bh-coin)" stroke="#B45309" stroke-width="0.8"/>
-    <circle cx="10" cy="12" r="3.5" fill="url(#bh-coin)" stroke="#B45309" stroke-width="0.8"/>
-  </g>
+  <!-- Rounded square background -->
+  <rect width="64" height="64" rx="14" fill="url(#bh-bg)"/>
+  <!-- Hub ring (platform / gathering point) -->
+  <circle cx="32" cy="30" r="11" fill="none" stroke="url(#bh-accent)" stroke-width="2" opacity="0.9"/>
+  <!-- Three nodes: developers / community around the hub -->
+  <circle cx="18" cy="22" r="5" fill="white" opacity="0.95"/>
+  <circle cx="46" cy="22" r="5" fill="white" opacity="0.95"/>
+  <circle cx="32" cy="48" r="5" fill="white" opacity="0.95"/>
+  <!-- Connection lines: collaboration network -->
+  <path d="M24.5 27 L20 24" stroke="white" stroke-width="1.4" opacity="0.85" stroke-linecap="round"/>
+  <path d="M39.5 27 L44 24" stroke="white" stroke-width="1.4" opacity="0.85" stroke-linecap="round"/>
+  <path d="M32 37 L32 43" stroke="white" stroke-width="1.4" opacity="0.85" stroke-linecap="round"/>
+  <!-- Center: bounty / reward / answer (focus of the hub) -->
+  <circle cx="32" cy="30" r="5" fill="white" opacity="0.95"/>
 </svg>
