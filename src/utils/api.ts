@@ -227,7 +227,7 @@ export class ApiClient {
   async uploadProfilePicture(file: File): Promise<{ success: boolean; message: string; profilePicture: string }> {
     const formData = new FormData()
     formData.append('profilePicture', file)
-    
+
     const url = `${config.api.baseUrl}/api/profile/picture`
     const response = await fetch(url, {
       method: 'POST',
@@ -241,6 +241,34 @@ export class ApiClient {
     }
 
     return response.json()
+  }
+
+  /**
+   * Upload a file to R2 via the API (when MEDIA_BUCKET is bound). Use for post media or profile.
+   * Returns the public URL to the uploaded file. Falls back to Cloudinary on the client if API returns 503.
+   */
+  async uploadMedia(file: File | Blob, type: 'profile' | 'post' = 'post'): Promise<{ url: string; key: string }> {
+    const formData = new FormData()
+    const blob = file instanceof Blob ? file : file
+    const name = file instanceof File ? file.name : 'upload'
+    formData.append('file', blob, name)
+    formData.append('type', type)
+
+    const url = `${config.api.baseUrl}/api/media/upload`
+    const response = await fetch(url, {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+    })
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Upload failed' }))
+      throw new Error(error.error || `HTTP ${response.status}`)
+    }
+
+    const data = await response.json()
+    if (!data.url || !data.key) throw new Error('Invalid upload response')
+    return { url: data.url, key: data.key }
   }
 
   // User profiles

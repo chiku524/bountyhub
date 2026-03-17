@@ -13,8 +13,8 @@ import { Footer } from './components/Footer'
 import { PageMetadata } from './components/PageMetadata'
 import { useBountyNotifications } from './hooks/useBountyNotifications'
 import ChatSidebar from './components/ChatSidebar'
-import { InstallPrompt } from './components/InstallPrompt'
 import { LoadingSpinner } from './components/LoadingSpinner'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import '@solana/wallet-adapter-react-ui/styles.css'
 
 // Eager-load critical above-the-fold route
@@ -49,6 +49,8 @@ const BugBountySubmit = lazy(() => import('./pages/BugBountySubmit'))
 const Repositories = lazy(() => import('./pages/Repositories'))
 const RepositoryDetail = lazy(() => import('./pages/RepositoryDetail'))
 const Contributions = lazy(() => import('./pages/Contributions'))
+const Download = lazy(() => import('./pages/Download'))
+const NotFound = lazy(() => import('./pages/NotFound'))
 
 function RouteFallback() {
   return (
@@ -64,10 +66,12 @@ function AppContent() {
   const isHomePage = location.pathname === '/'
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup'
   const isLegalPage = location.pathname === '/privacy' || location.pathname === '/terms'
+  const isDownloadPage = location.pathname === '/download'
   
-  // Determine which navbar to show (show nav on /docs when logged in; hide only on home, login/signup, privacy, terms)
+  // Determine which navbar to show: HomeNav on home or download (when not logged in); TopNav when logged in on app pages
   const isPublicPage = isHomePage || isAuthPage || isLegalPage
   const showAuthenticatedNav = Boolean(user) && !isPublicPage && !loading
+  const showHomeNav = isHomePage || (isDownloadPage && !user && !loading)
   
   // Handle OAuth redirect - wait for auth to load before showing authenticated layout
   useEffect(() => {
@@ -94,7 +98,7 @@ function AppContent() {
   }
   
   return (
-    <>
+    <ErrorBoundary>
       {/* Animated Background - Canvas only, no children */}
       <AnimatedBackground />
       
@@ -109,8 +113,8 @@ function AppContent() {
             Skip to main content
           </a>
         )}
-        {/* Dynamic Navbar - Top navbar for authenticated pages */}
-        {isHomePage ? (
+        {/* Dynamic Navbar - HomeNav on landing/download; TopNav for authenticated app pages */}
+        {showHomeNav ? (
           <HomeNav onScrollTo={scrollToSection} />
         ) : showAuthenticatedNav ? (
           <TopNav />
@@ -140,6 +144,8 @@ function AppContent() {
                   <Route path="/posts/:postId" element={<PostDetail />} />
                   <Route path="/users/:username" element={<UserProfile />} />
                   <Route path="/users/:username/posts" element={<UserPosts />} />
+                  <Route path="/download" element={<Download />} />
+                  <Route path="/downloads" element={<Navigate to="/download" replace />} />
                   <Route path="/:username" element={<UserProfile />} />
                   <Route path="/transactions" element={<Transactions />} />
                   <Route path="/refund-requests" element={<RefundRequests />} />
@@ -161,6 +167,7 @@ function AppContent() {
                   <Route path="/repositories" element={<Repositories />} />
                   <Route path="/repositories/:id" element={<RepositoryDetail />} />
                   <Route path="/contributions" element={<Contributions />} />
+                  <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
             )
@@ -178,10 +185,8 @@ function AppContent() {
         {/* Chat Sidebar - Only for authenticated pages */}
         {!isPublicPage && <ChatSidebar />}
         
-        {/* PWA Install Prompt */}
-        <InstallPrompt />
       </div>
-    </>
+    </ErrorBoundary>
   )
 }
 

@@ -24,7 +24,7 @@ export function PageMetadata({
   const finalTitle = formatPageTitle(title || pageMetadata.title)
   const finalDescription = description || pageMetadata.description
   const finalKeywords = keywords || pageMetadata.keywords
-  const finalOgImage = ogImage || pageMetadata.ogImage || 'https://bountyhub.tech/logo.png'
+  const finalOgImage = ogImage || pageMetadata.ogImage || 'https://bountyhub.tech/og-image.svg'
   const finalOgType = ogType || pageMetadata.ogType || 'website'
   
   const canonicalUrl = `https://bountyhub.tech${location.pathname}`
@@ -44,7 +44,11 @@ export function PageMetadata({
       <meta property="og:title" content={finalTitle} />
       <meta property="og:description" content={finalDescription} />
       <meta property="og:image" content={finalOgImage} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta property="og:image:alt" content={finalTitle} />
       <meta property="og:site_name" content="bountyhub" />
+      <meta property="og:locale" content="en_US" />
       
       {/* Twitter */}
       <meta property="twitter:card" content="summary_large_image" />
@@ -52,6 +56,7 @@ export function PageMetadata({
       <meta property="twitter:title" content={finalTitle} />
       <meta property="twitter:description" content={finalDescription} />
       <meta property="twitter:image" content={finalOgImage} />
+      <meta property="twitter:image:alt" content={finalTitle} />
       <meta property="twitter:site" content="@bountyhub_tech" />
     </Helmet>
   )

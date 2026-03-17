@@ -10,6 +10,7 @@ export default defineConfig(({ mode }) => {
     VITE_GIPHY_API_KEY: '8tPzDynfDBevgXLsAaPztARWyvWzNLPK',
     VITE_CLOUDINARY_CLOUD_NAME: 'dqobhvk07',
     VITE_CLOUDINARY_UPLOAD_PRESET: 'bountyhub',
+    VITE_GITHUB_RELEASES_URL: '',
   }
   return {
     plugins: [react()],
@@ -21,6 +22,7 @@ export default defineConfig(({ mode }) => {
       'import.meta.env.VITE_GIPHY_API_KEY': JSON.stringify(env.VITE_GIPHY_API_KEY ?? defaults.VITE_GIPHY_API_KEY),
       'import.meta.env.VITE_CLOUDINARY_CLOUD_NAME': JSON.stringify(env.VITE_CLOUDINARY_CLOUD_NAME ?? defaults.VITE_CLOUDINARY_CLOUD_NAME),
       'import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET': JSON.stringify(env.VITE_CLOUDINARY_UPLOAD_PRESET ?? defaults.VITE_CLOUDINARY_UPLOAD_PRESET),
+      'import.meta.env.VITE_GITHUB_RELEASES_URL': JSON.stringify(env.VITE_GITHUB_RELEASES_URL ?? defaults.VITE_GITHUB_RELEASES_URL),
     },
     build: {
       outDir: 'dist',

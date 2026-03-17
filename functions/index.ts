@@ -1,3 +1,4 @@
+/// <reference types="@cloudflare/workers-types" />
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
@@ -23,9 +24,14 @@ import cleanupRoutes from './api/cleanup-pending-transactions'
 import bugBountyRoutes from './api/bug-bounty'
 import githubRoutes from './api/github'
 import contributionsRoutes from './api/contributions'
+import mediaRoutes from './api/media'
 
 interface Env {
-  DB: any
+  DB: D1Database
+  /** R2 bucket for media (profile pictures, post attachments). Optional until migration from Cloudinary. */
+  MEDIA_BUCKET?: R2Bucket
+  /** KV namespace for cache / rate limits / feature flags. Optional. */
+  CACHE?: KVNamespace
   NODE_ENV: string
   SESSION_SECRET: string
   SOLANA_RPC_URL: string
@@ -39,8 +45,6 @@ interface Env {
   HTML2PDF_API_KEY: string
   VITE_CLOUDINARY_CLOUD_NAME: string
   VITE_CLOUDINARY_UPLOAD_PRESET: string
-  DATABASE_URL: string
-  MONGODB_URI: string
   GITHUB_CLIENT_ID: string
   GITHUB_CLIENT_SECRET: string
   GITHUB_CALLBACK_URL: string
@@ -580,6 +584,7 @@ app.route('/api/cleanup', cleanupRoutes)
 app.route('/api/bug-bounty', bugBountyRoutes)
 app.route('/api/github', githubRoutes)
 app.route('/api/contributions', contributionsRoutes)
+app.route('/api/media', mediaRoutes)
 
 // 404 handler
 app.notFound((c) => {

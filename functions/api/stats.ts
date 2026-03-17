@@ -2,19 +2,31 @@ import { Hono } from 'hono'
 import { createDb } from '../../src/utils/db'
 import { posts, bounties, users, answers, virtualWallets } from '../../drizzle/schema'
 import { eq } from 'drizzle-orm'
+import { getCached, setCached } from '../../utils/kv'
+
+const STATS_CACHE_KEY = 'stats'
+const STATS_TTL = 300 // 5 minutes
 
 interface Env {
-  DB: any
-  CACHE?: Cache // Cloudflare Cache API
+  DB: D1Database
+  CACHE?: KVNamespace
 }
 
 const app = new Hono<{ Bindings: Env }>()
 
 app.get(async (c) => {
+  if (c.env.CACHE) {
+    const cached = await getCached<Record<string, unknown>>(c.env.CACHE, STATS_CACHE_KEY)
+    if (cached) {
+      return c.json(cached, 200, {
+        'Cache-Control': 'public, max-age=300',
+        'X-Cache': 'HIT',
+      })
+    }
+  }
+
   const db = createDb(c.env.DB)
-  
-  // Cache for 5 minutes (300 seconds)
-  // Use Cloudflare's cache API headers for edge caching
+
   try {
     // Get active bounties (posts with bounties that are ACTIVE)
     const activeBountiesResult = await db.select().from(bounties).where(eq(bounties.status, 'ACTIVE'))
@@ -55,14 +67,16 @@ app.get(async (c) => {
       communityMembers,
       totalPosts,
       totalAnswers,
-      totalBBUX: totalBBUX.toFixed(2)
+      totalBBUX: totalBBUX.toFixed(2),
     }
 
-    // Set cache headers for Cloudflare edge caching (5 minutes)
+    if (c.env.CACHE) {
+      await setCached(c.env.CACHE, STATS_CACHE_KEY, stats, STATS_TTL)
+    }
+
     return c.json(stats, 200, {
       'Cache-Control': 'public, max-age=300, s-maxage=300',
-      'CDN-Cache-Control': 'public, max-age=300',
-      'Vary': 'Accept'
+      'X-Cache': 'MISS',
     })
   } catch (error) {
     console.error('Error fetching platform stats:', error)

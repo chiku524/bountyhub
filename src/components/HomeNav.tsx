@@ -31,7 +31,8 @@ export function HomeNav({ onScrollTo }: HomeNavProps) {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
+            <Link to="/" className="flex items-center space-x-2" aria-label="bountyhub home">
+              <img src="/logo.svg" alt="" className="w-8 h-8 object-contain" aria-hidden />
               <span className="text-2xl font-bold bg-linear-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
                 bountyhub
               </span>
@@ -70,6 +71,12 @@ export function HomeNav({ onScrollTo }: HomeNavProps) {
             >
               Get Started
             </button>
+            <Link
+              to="/download"
+              className="text-neutral-700 dark:text-neutral-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium"
+            >
+              Download
+            </Link>
           </div>
 
           {/* Right Side Actions */}

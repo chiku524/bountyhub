@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { FiUpload, FiVideo, FiX } from 'react-icons/fi';
 import { useToast } from '../contexts/ToastContext';
+import { api } from '../utils/api';
 
 interface MediaUploadProps {
   onMediaUpload: (media: { type: string; url: string; thumbnailUrl?: string; isScreenRecording: boolean }) => void;
@@ -15,6 +16,20 @@ interface CloudinaryUploadResult {
   width?: number;
   height?: number;
   duration?: number;
+}
+
+const R2_MAX_SIZE = 10 * 1024 * 1024; // 10MB - match API limit
+
+/** Try R2 via API first; returns URL or null to fall back to Cloudinary. */
+async function tryUploadToR2(file: File | Blob, type: 'profile' | 'post'): Promise<string | null> {
+  if (file.size > R2_MAX_SIZE) return null;
+  try {
+    const f = file instanceof File ? file : new File([file], 'upload', { type: file.type });
+    const { url } = await api.uploadMedia(f, type);
+    return url;
+  } catch {
+    return null;
+  }
 }
 
 // Helper to upload a file/blob to Cloudinary
@@ -98,12 +113,17 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
         const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
         setIsUploading(true);
         try {
-          // Cloudinary config from env
-          const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'bountyhub';
-          const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dqobhvk07';
-          if (!uploadPreset || !cloudName) throw new Error('Cloudinary config missing');
-          const uploadResult = await uploadToCloudinary(blob, 'video', uploadPreset, cloudName, 'bountyhub/posts');
-          const url = uploadResult.secure_url;
+          let url: string;
+          const r2Url = await tryUploadToR2(blob, 'post');
+          if (r2Url) {
+            url = r2Url;
+          } else {
+            const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'bountyhub';
+            const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dqobhvk07';
+            if (!uploadPreset || !cloudName) throw new Error('Cloudinary config missing');
+            const uploadResult = await uploadToCloudinary(blob, 'video', uploadPreset, cloudName, 'bountyhub/posts');
+            url = uploadResult.secure_url;
+          }
           // Generate thumbnail as before
           try {
             const video = document.createElement('video');
@@ -195,23 +215,23 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
         throw new Error('Please upload a video or image file');
       }
 
-      // Cloudinary can handle much larger files, so we'll use generous limits
-      const maxSize = isVideo ? 100 * 1024 * 1024 : 50 * 1024 * 1024; // 100MB for videos, 50MB for images
+      const maxSize = isVideo ? 100 * 1024 * 1024 : 50 * 1024 * 1024; // 100MB videos, 50MB images
       if (file.size > maxSize) {
         throw new Error(`File size must be less than ${isVideo ? '100MB' : '50MB'}`);
       }
 
-      // Cloudinary config from env
-      const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'bountyhub';
-      const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dqobhvk07';
-      
-      if (!uploadPreset || !cloudName) throw new Error('Cloudinary config missing');
-
-      // Upload to Cloudinary
-      const resourceType = isVideo ? 'video' : 'image';
-      const folder = 'bountyhub/posts';
-      const uploadResult = await uploadToCloudinary(file, resourceType, uploadPreset, cloudName, folder);
-      const url = uploadResult.secure_url;
+      let url: string;
+      const r2Url = await tryUploadToR2(file, 'post');
+      if (r2Url) {
+        url = r2Url;
+      } else {
+        const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'bountyhub';
+        const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dqobhvk07';
+        if (!uploadPreset || !cloudName) throw new Error('Cloudinary config missing');
+        const resourceType = isVideo ? 'video' : 'image';
+        const uploadResult = await uploadToCloudinary(file, resourceType, uploadPreset, cloudName, 'bountyhub/posts');
+        url = uploadResult.secure_url;
+      }
 
       if (isVideo) {
         // Generate thumbnail as before
@@ -293,7 +313,7 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
   return (
     <div className="space-y-4">
       <div className="text-sm text-gray-400 mb-2">
-        <p>📁 File size limits: Images (50MB), Videos (100MB) - Powered by Cloudinary</p>
+        <p>📁 File size limits: Images (50MB), Videos (100MB). Small files (≤10MB) use R2; larger use Cloudinary.</p>
       </div>
       <div className="flex gap-4">
         <button

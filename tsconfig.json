@@ -24,11 +24,9 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    },
-
-    /* Node.js compatibility */
-    "types": ["node"]
+    }
   },
-  "include": ["src", "functions"],
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "functions"],
   "references": [{ "path": "./tsconfig.node.json" }]
 } 

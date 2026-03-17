@@ -1,0 +1,33 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#312e81"/>
+      <stop offset="100%" stop-color="#4c1d95"/>
+    </linearGradient>
+    <linearGradient id="icon-shade" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+    <linearGradient id="coin" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <!-- Logo icon (centered left third) -->
+  <g transform="translate(280, 195)">
+    <rect width="240" height="240" rx="52" fill="url(#icon-shade)"/>
+    <g transform="translate(120, 120)">
+      <path d="M-52 7h104v52a16 16 0 01-16 16h-72a16 16 0 01-16-16V7z" fill="url(#coin)" stroke="#B45309" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M-58 -15h116v24H-58z" rx="8" fill="url(#coin)" stroke="#B45309" stroke-width="4"/>
+      <circle cx="0" cy="4" r="12" fill="#B45309"/>
+      <rect x="-4" y="4" width="8" height="16" fill="#B45309" rx="2"/>
+      <circle cx="-32" cy="56" r="16" fill="url(#coin)" stroke="#B45309" stroke-width="3"/>
+      <circle cx="8" cy="64" r="12" fill="url(#coin)" stroke="#B45309" stroke-width="3"/>
+      <circle cx="40" cy="48" r="14" fill="url(#coin)" stroke="#B45309" stroke-width="3"/>
+    </g>
+  </g>
+  <!-- Text: bountyhub -->
+  <text x="580" y="320" fill="white" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="700">bountyhub</text>
+  <text x="580" y="400" fill="rgba(255,255,255,0.85)" font-family="system-ui, -apple-system, sans-serif" font-size="28">Decentralized Bounty Platform · Solana</text>
+</svg>

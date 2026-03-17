@@ -14,6 +14,16 @@ database_name = "bountyhub-db"
 database_id = "062c1240-4857-4cb9-bb0c-e6880b1c48b6"
 migrations_dir = "drizzle/migrations"
 
+# R2 object storage (create with: wrangler r2 bucket create bountyhub-media --config wrangler.workers.toml)
+[[r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "bountyhub-media"
+
+# KV for cache / rate limits / feature flags
+[[kv_namespaces]]
+binding = "CACHE"
+id = "912fc2937534477cbfc53bdbfb9b4b99"
+
 [vars]
 NODE_ENV = "production"
 SESSION_SECRET = "mysupersecretpassword"

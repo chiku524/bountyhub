@@ -11,8 +11,7 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": false,
-    "outDir": "../dist/functions",
+    "noEmit": true,
     "types": ["@cloudflare/workers-types"]
   },
   "include": ["./**/*.ts"],

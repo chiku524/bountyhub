@@ -3,17 +3,7 @@
 
 echo "🔍 Running pre-commit checks..."
 
-# Run TypeScript type checking
-echo "📝 Checking TypeScript types..."
-npm run build:api 2>&1 | grep -E "(error TS|Failed)" && exit 1 || true
-
-# Run frontend type checking
-echo "📝 Checking frontend TypeScript..."
-npx tsc --noEmit 2>&1 | grep -E "(error TS|Found [0-9]+ error)" && exit 1 || true
-
-# Run linter
 echo "🔍 Running linter..."
-npm run lint 2>&1 | grep -E "(error|✖)" && exit 1 || true
+npm run lint 2>&1 | grep -qE "(error|✖)" && exit 1 || true
 
-echo "✅ All pre-commit checks passed!"
-
+echo "✅ Pre-commit passed (lint). Run 'npm run typecheck:all' before push or rely on CI."

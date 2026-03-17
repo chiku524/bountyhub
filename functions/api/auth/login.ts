@@ -5,16 +5,27 @@ import { users } from '../../../drizzle/schema'
 import { eq } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
 import { createSession } from '../../../src/utils/auth'
+import { checkRateLimit } from '../../../utils/kv'
 
 interface Env {
-  DB: any
+  DB: D1Database
   NODE_ENV: string
+  CACHE?: KVNamespace
 }
 
 const app = new Hono<{ Bindings: Env }>()
 
+const LOGIN_RATE_LIMIT = 10
+const LOGIN_RATE_WINDOW = 60
+
 app.post('/', async (c) => {
   try {
+    const ip = c.req.header('cf-connecting-ip') ?? c.req.header('x-forwarded-for') ?? 'unknown'
+    const { allowed } = await checkRateLimit(c.env.CACHE, `login:${ip}`, LOGIN_RATE_LIMIT, LOGIN_RATE_WINDOW)
+    if (!allowed) {
+      return c.json({ error: 'Too many login attempts. Try again later.' }, 429)
+    }
+
     const { email, password } = await c.req.json()
     
     if (!email || !password) {

@@ -2,7 +2,7 @@
 export const config = {
   // API Configuration
   api: {
-    baseUrl: import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:8788' : 'https://bountyhub-api.nico-chikuji.workers.dev'),
+    baseUrl: import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:8788' : 'https://api.bountyhub.tech'),
     timeout: 10000,
   },
   

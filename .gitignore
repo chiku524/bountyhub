@@ -10,6 +10,9 @@ node_modules/
 build/
 dist/
 
+# Tauri / Rust
+src-tauri/target/
+
 # Local database files
 *.db
 *.db-shm

@@ -166,8 +166,8 @@ export default function DocsSingle() {
                     <p className={body}>OAuth GitHub connection. Sync repositories, track contributions, link repos to bug bounty campaigns.</p>
                   </div>
                   <div className={card}>
-                    <h2 className={subsectionTitle}>Progressive Web App (PWA)</h2>
-                    <p className={body}>Install on desktop or mobile. Offline support, standalone app experience, automatic updates.</p>
+                    <h2 className={subsectionTitle}>Desktop App</h2>
+                    <p className={body}>Download the native desktop app for Windows, macOS, or Linux from the <a href="/download" className="text-indigo-600 dark:text-indigo-400 hover:underline">Download page</a>. Built with Tauri for a lightweight, fast experience; always connected to bountyhub.tech.</p>
                   </div>
                 </div>
               </>

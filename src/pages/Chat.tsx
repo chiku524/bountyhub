@@ -241,7 +241,7 @@ const Chat: React.FC = () => {
                   if ('Notification' in window && Notification.permission === 'granted') {
                     new Notification(`New message in ${currentRoom.name}`, {
                       body: `${latestMessage.author.username}: ${latestMessage.content}`,
-                      icon: '/favicon.ico'
+                      icon: '/favicon.svg'
                     });
                   }
                 }

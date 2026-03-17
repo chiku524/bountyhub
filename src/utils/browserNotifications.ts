@@ -47,18 +47,24 @@ export class BrowserNotificationService {
     }
 
     const defaultOptions: NotificationOptions = {
-      icon: '/logo.png',
-      badge: '/logo.png',
+      icon: '/logo.svg',
+      badge: '/logo.svg',
       tag: 'bountyhub-notification',
       requireInteraction: false,
       ...options
     }
 
     try {
-      const registration = await navigator.serviceWorker.ready
-      await registration.showNotification(title, defaultOptions)
+      // Use Service Worker registration if available (e.g. when SW was previously registered)
+      if ('serviceWorker' in navigator) {
+        const registration = await navigator.serviceWorker.getRegistration()
+        if (registration) {
+          await registration.showNotification(title, defaultOptions)
+          return
+        }
+      }
+      new Notification(title, defaultOptions)
     } catch (_error) {
-      // Fallback to regular Notification API if service worker fails
       new Notification(title, defaultOptions)
     }
   }

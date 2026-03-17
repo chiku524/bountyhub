@@ -1,0 +1,6 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Sitemap (update base URL if you use a different domain)
+Sitemap: https://bountyhub.tech/sitemap.xml

@@ -13,13 +13,12 @@ A decentralized Q&A platform where questions meet rewards. Ask questions, offer 
 - **Integrity Rating System**: Community-driven reputation and integrity scoring
 - **Light/Dark Mode**: Beautiful, responsive UI with theme support
 - **Mobile Responsive**: Optimized experience across all devices
-- **PWA Support**: Installable progressive web app for desktop and mobile
+- **Desktop App**: Native app for Windows, macOS, and Linux — [Download](https://bountyhub.tech/download) (Tauri)
 
 ## 📖 Documentation
 
-- [Deployment Guide](./docs/deployment.md) – Cloudflare Pages & Workers, DNS, troubleshooting
-- [Tech Stack](./docs/tech-stack.md) – Current stack and optional upgrades
-- **In-app docs** (when running the app): [Documentation](/docs) — single page with table of contents (Overview, Platform Features, User Guide, UX & Interface, Developer Guide, API Reference, Deployment, Legal, Refund System)
+- [Project docs](./docs/README.md) – Deployment (Cloudflare Pages & Workers, DNS, troubleshooting) and tech stack
+- **In-app docs**: [Documentation](/docs) – single page with table of contents (Overview, Platform Features, User Guide, Developer Guide, API Reference, Deployment, Legal, Refund System)
 
 ## 🛠️ Tech Stack
 
@@ -33,7 +32,7 @@ A decentralized Q&A platform where questions meet rewards. Ask questions, offer 
 
 This project uses **auto-deployment from GitHub** for Cloudflare Pages and **manual deployment** for Cloudflare Workers.
 
-See [docs/deployment.md](./docs/deployment.md) for complete deployment instructions.
+See [docs/README.md](./docs/README.md#deployment-guide) for complete deployment instructions.
 
 ## 📝 Quick Start
 

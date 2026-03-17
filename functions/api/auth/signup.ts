@@ -2,15 +2,26 @@ import { Hono } from 'hono'
 import { setCookie } from 'hono/cookie'
 import { register, createSession } from '../../../src/utils/auth'
 import { createDb } from '../../../src/utils/db'
+import { checkRateLimit } from '../../../utils/kv'
 
 interface Env {
   NODE_ENV: string
-  DB: any
+  DB: D1Database
+  CACHE?: KVNamespace
 }
 
 const app = new Hono<{ Bindings: Env }>()
 
-app.post(async (c) => {
+const SIGNUP_RATE_LIMIT = 5
+const SIGNUP_RATE_WINDOW = 300 // 5 minutes
+
+app.post('/', async (c) => {
+  const ip = c.req.header('cf-connecting-ip') ?? c.req.header('x-forwarded-for') ?? 'unknown'
+  const { allowed } = await checkRateLimit(c.env.CACHE, `signup:${ip}`, SIGNUP_RATE_LIMIT, SIGNUP_RATE_WINDOW)
+  if (!allowed) {
+    return c.json({ error: 'Too many signup attempts. Try again later.' }, 429)
+  }
+
   const { email, password, username } = await c.req.json()
   
   // Create database instance

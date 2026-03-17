@@ -10,7 +10,7 @@ export const DEFAULT_METADATA: PageMetadata = {
   title: 'bountyhub - Decentralized Bounty Platform',
   description: 'The decentralized bounty platform where questions meet rewards. Ask questions, offer bounties, and earn cryptocurrency rewards on Solana.',
   keywords: 'bounty, cryptocurrency, solana, blockchain, rewards, questions, answers, BBUX, decentralized',
-  ogImage: 'https://bountyhub.tech/logo.png',
+  ogImage: 'https://bountyhub.tech/og-image.svg',
   ogType: 'website'
 }
 
@@ -81,47 +81,18 @@ export const PAGE_METADATA: Record<string, PageMetadata> = {
     keywords: 'governance, voting, proposals, decentralized, bountyhub, community'
   },
 
-  // Documentation
+  // Download desktop app
+  '/download': {
+    title: 'Download Desktop App - bountyhub',
+    description: 'Download BountyHub for Windows, macOS, or Linux. Native desktop app built with Tauri — lightweight and always connected to bountyhub.tech.',
+    keywords: 'download, desktop app, Windows, macOS, Linux, Tauri, bountyhub'
+  },
+
+  // Documentation (single /docs page with hash sections)
   '/docs': {
     title: 'Documentation - bountyhub',
     description: 'Comprehensive documentation for the bountyhub platform. Learn how to use the platform, integrate with APIs, and understand the ecosystem.',
     keywords: 'documentation, API, integration, bountyhub, developer guide, user guide'
-  },
-
-  '/docs/platform': {
-    title: 'Platform Documentation - bountyhub',
-    description: 'Learn about the bountyhub platform architecture, features, and how the decentralized bounty system works.',
-    keywords: 'platform, architecture, features, bounty system, bountyhub'
-  },
-
-  '/docs/user-guide': {
-    title: 'User Guide - bountyhub',
-    description: 'Complete user guide for bountyhub. Learn how to create bounties, answer questions, and earn cryptocurrency rewards.',
-    keywords: 'user guide, tutorial, how to, bountyhub, bounties, rewards'
-  },
-
-  '/docs/developer-guide': {
-    title: 'Developer Guide - bountyhub',
-    description: 'Technical documentation for developers. Learn how to integrate with bountyhub APIs and build on the platform.',
-    keywords: 'developer guide, API, integration, technical, bountyhub'
-  },
-
-  '/docs/api-reference': {
-    title: 'API Reference - bountyhub',
-    description: 'Complete API reference for the bountyhub platform. Endpoints, authentication, and integration examples.',
-    keywords: 'API reference, endpoints, authentication, integration, bountyhub'
-  },
-
-  '/docs/deployment-guide': {
-    title: 'Deployment Guide - bountyhub',
-    description: 'Step-by-step deployment guide for bountyhub. Learn how to deploy the platform to production environments.',
-    keywords: 'deployment, production, setup, bountyhub, infrastructure'
-  },
-
-  '/docs/refund-system': {
-    title: 'Refund System - bountyhub',
-    description: 'Learn about bountyhub\'s refund system. Understand how bounties can be refunded and the refund process.',
-    keywords: 'refund system, bounty refunds, process, bountyhub'
   },
 
   // Legal pages

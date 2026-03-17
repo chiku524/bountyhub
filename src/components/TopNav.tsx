@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { 
   FiCreditCard, FiLogOut, FiUsers, FiDollarSign, FiSettings, 
   FiCheckSquare, FiRefreshCw, FiBarChart2, FiShield, FiGithub, 
-  FiAward, FiChevronDown, FiMenu, FiX
+  FiAward, FiChevronDown, FiMenu, FiX, FiDownload
 } from 'react-icons/fi'
 import { useAuth } from '../contexts/AuthProvider'
 import { useWallet } from '@solana/wallet-adapter-react'
@@ -101,8 +101,8 @@ export function TopNav() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 shrink-0">
-            <img src={logo} alt="bountyhub logo" className="w-8 h-8 object-contain" />
+          <Link to="/" className="flex items-center space-x-2 shrink-0" aria-label="bountyhub home">
+            <img src={logo} alt="" className="w-8 h-8 object-contain" aria-hidden />
             <span className="text-xl font-bold bg-linear-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent hidden sm:block">
               bountyhub
             </span>
@@ -129,6 +129,17 @@ export function TopNav() {
             >
               <FiUsers className="w-4 h-4 shrink-0" />
               <span>Community</span>
+            </Link>
+            <Link
+              to="/download"
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                isActive('/download')
+                  ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
+                  : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5'
+              }`}
+            >
+              <FiDownload className="w-4 h-4 shrink-0" />
+              <span>Download</span>
             </Link>
 
             {/* Governance Dropdown (includes Analytics) */}
@@ -392,6 +403,13 @@ export function TopNav() {
                   Create Bounty
                 </Link>
               )}
+              <Link
+                to="/download"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2.5 rounded-lg text-base font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5"
+              >
+                Download
+              </Link>
               <Link
                 to="/community"
                 onClick={() => setMobileMenuOpen(false)}

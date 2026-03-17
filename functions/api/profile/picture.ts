@@ -6,8 +6,9 @@ import { profiles } from '../../../drizzle/schema'
 import { eq } from 'drizzle-orm'
 
 interface Env {
-  DB: any
+  DB: D1Database
   NODE_ENV: string
+  MEDIA_BUCKET?: R2Bucket
   CLOUDINARY_CLOUD_NAME: string
   CLOUDINARY_API_KEY: string
   CLOUDINARY_API_SECRET: string
@@ -75,15 +76,29 @@ app.post(async (c) => {
       return c.json({ error: 'File size must be less than 10MB' }, 400)
     }
 
-    // Upload to Cloudinary
-    const cloudName = c.env.CLOUDINARY_CLOUD_NAME
-    const uploadPreset = c.env.CLOUDINARY_UPLOAD_PRESET
-    
-    if (!cloudName || !uploadPreset) {
-      return c.json({ error: 'Cloudinary configuration missing' }, 500)
-    }
+    let profilePictureUrl: string
 
-    const uploadResult = await uploadToCloudinary(file, cloudName, uploadPreset)
+    // Prefer R2 when MEDIA_BUCKET is bound
+    if (c.env.MEDIA_BUCKET) {
+      const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+      const safeExt = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext) ? ext : 'jpg'
+      const key = `profile/${userId}/${crypto.randomUUID()}.${safeExt}`
+      const arrayBuffer = await file.arrayBuffer()
+      await c.env.MEDIA_BUCKET.put(key, arrayBuffer, {
+        httpMetadata: { contentType: file.type },
+        customMetadata: { userId },
+      })
+      const baseUrl = c.req.url.replace(/\/api\/profile\/picture.*$/, '')
+      profilePictureUrl = `${baseUrl}/api/media/${key}`
+    } else {
+      const cloudName = c.env.CLOUDINARY_CLOUD_NAME
+      const uploadPreset = c.env.CLOUDINARY_UPLOAD_PRESET
+      if (!cloudName || !uploadPreset) {
+        return c.json({ error: 'Media storage not configured' }, 500)
+      }
+      const uploadResult = await uploadToCloudinary(file, cloudName, uploadPreset)
+      profilePictureUrl = uploadResult.secure_url
+    }
 
     // Check if profile exists
     const existingProfile = await db
@@ -93,29 +108,27 @@ app.post(async (c) => {
       .limit(1)
 
     if (existingProfile.length > 0) {
-      // Update existing profile with new picture
       await db
         .update(profiles)
         .set({
-          profilePicture: uploadResult.secure_url,
+          profilePicture: profilePictureUrl,
           updatedAt: new Date(),
         })
         .where(eq(profiles.userId, userId))
     } else {
-      // Create new profile with picture
       await db.insert(profiles).values({
         id: crypto.randomUUID(),
         userId: userId,
-        profilePicture: uploadResult.secure_url,
+        profilePicture: profilePictureUrl,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
     }
 
-    return c.json({ 
-      success: true, 
+    return c.json({
+      success: true,
       message: 'Profile picture uploaded successfully',
-      profilePicture: uploadResult.secure_url
+      profilePicture: profilePictureUrl,
     })
   } catch (error) {
     console.error('Error uploading profile picture:', error)
