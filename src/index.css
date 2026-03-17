@@ -96,6 +96,11 @@
   }
 }
 
+/* Scroll-animated elements: start invisible until animation runs (prevents flicker) */
+[data-animate]:not([class*="animate-"]) {
+  opacity: 0;
+}
+
 /* Landing page animations */
 @keyframes fade-in-up {
   from {

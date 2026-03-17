@@ -18,14 +18,15 @@ function useScrollAnimations() {
           const el = entry.target as HTMLElement
           const name = el.getAttribute('data-animate')
           const delay = el.getAttribute('data-animate-delay')
-          if (name) {
+          if (!name) continue
+          observer.unobserve(el)
+          requestAnimationFrame(() => {
             el.classList.add(`animate-${name}`)
             if (delay) el.style.animationDelay = `${delay}ms`
-          }
-          observer.unobserve(el)
+          })
         }
       },
-      { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+      { threshold: 0.08, rootMargin: '0px 0px -60px 0px' }
     )
     els.forEach((el) => observer.observe(el))
     return () => observer.disconnect()
@@ -115,7 +116,7 @@ export default function Home() {
       <HomeNav onScrollTo={scrollToSection} />
       <div className="min-h-screen bg-linear-to-br from-neutral-50/50 via-white/50 to-neutral-50/50 dark:from-neutral-900/50 dark:via-neutral-800/50 dark:to-neutral-900/50 backdrop-blur-xs text-neutral-900 dark:text-white transition-colors duration-200 pt-16">
         {/* Hero Section */}
-        <section id="hero" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
+        <section id="hero" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 border-b border-neutral-200/70 dark:border-neutral-700/50">
           <div className="text-center">
             <h1
               className={`text-5xl md:text-7xl font-bold mb-6 transition-opacity duration-300 ${
@@ -180,7 +181,7 @@ export default function Home() {
         </section>
 
         {/* Features Section */}
-        <section id="features" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <section id="features" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-b border-neutral-200/70 dark:border-neutral-700/50 transition-colors duration-200 hover:bg-neutral-50/30 dark:hover:bg-neutral-800/20">
           <div className="text-center mb-16" data-animate="fade-in-up">
             <h2 className="text-4xl font-bold mb-4">Platform Features</h2>
             <p className="text-xl text-neutral-600 dark:text-gray-300 max-w-2xl mx-auto">
@@ -264,7 +265,7 @@ export default function Home() {
         </section>
 
         {/* How It Works Section */}
-        <section id="how-it-works" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 bg-white/50 dark:bg-neutral-800/30">
+        <section id="how-it-works" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 bg-white/50 dark:bg-neutral-800/30 border-y border-neutral-200/70 dark:border-neutral-700/50 transition-colors duration-200 hover:bg-white/70 dark:hover:bg-neutral-800/40">
           <div className="text-center mb-16" data-animate="fade-in-up">
             <h2 className="text-4xl font-bold mb-4">How It Works</h2>
             <p className="text-xl text-neutral-600 dark:text-gray-300 max-w-2xl mx-auto">
@@ -273,8 +274,8 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center" data-animate="fade-in-up" data-animate-delay="0">
-              <div className="w-20 h-20 bg-indigo-100 dark:bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl font-bold text-indigo-600 dark:text-indigo-400">
+            <div className="text-center rounded-2xl border border-transparent dark:border-transparent p-6 transition-all duration-300 hover:border-indigo-200 dark:hover:border-indigo-500/30 hover:bg-white/60 dark:hover:bg-neutral-700/30 hover:shadow-md" data-animate="fade-in-up" data-animate-delay="0">
+              <div className="w-20 h-20 bg-indigo-100 dark:bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl font-bold text-indigo-600 dark:text-indigo-400 transition-transform duration-300">
                 1
               </div>
               <h3 className="text-xl font-semibold mb-4">Sign Up</h3>
@@ -283,7 +284,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="text-center" data-animate="fade-in-up" data-animate-delay="80">
+            <div className="text-center rounded-2xl border border-transparent p-6 transition-all duration-300 hover:border-green-200 dark:hover:border-green-500/30 hover:bg-white/60 dark:hover:bg-neutral-700/30 hover:shadow-md" data-animate="fade-in-up" data-animate-delay="80">
               <div className="w-20 h-20 bg-green-100 dark:bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl font-bold text-green-600 dark:text-green-400">
                 2
               </div>
@@ -293,7 +294,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="text-center" data-animate="fade-in-up" data-animate-delay="160">
+            <div className="text-center rounded-2xl border border-transparent p-6 transition-all duration-300 hover:border-purple-200 dark:hover:border-purple-500/30 hover:bg-white/60 dark:hover:bg-neutral-700/30 hover:shadow-md" data-animate="fade-in-up" data-animate-delay="160">
               <div className="w-20 h-20 bg-purple-100 dark:bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl font-bold text-purple-600 dark:text-purple-400">
                 3
               </div>
@@ -306,7 +307,7 @@ export default function Home() {
         </section>
 
         {/* Stats Section */}
-        <section id="stats" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <section id="stats" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-b border-neutral-200/70 dark:border-neutral-700/50 transition-colors duration-200 hover:bg-neutral-50/30 dark:hover:bg-neutral-800/20">
           <div className="text-center mb-16" data-animate="fade-in-up">
             <h2 className="text-4xl font-bold mb-4">Platform Statistics</h2>
             <p className="text-xl text-neutral-600 dark:text-gray-300 max-w-2xl mx-auto">
@@ -314,7 +315,7 @@ export default function Home() {
             </p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="text-center" data-animate="scale-in" data-animate-delay="0">
+            <div className="text-center rounded-xl py-6 px-4 border border-transparent transition-all duration-300 hover:border-indigo-200/80 dark:hover:border-indigo-500/30 hover:bg-white/50 dark:hover:bg-neutral-700/30 hover:shadow-md" data-animate="scale-in" data-animate-delay="0">
               <div className="text-3xl md:text-4xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">
                 {loading ? (
                   <div className="animate-pulse bg-indigo-100 dark:bg-indigo-400/20 h-8 w-16 mx-auto rounded-sm"></div>
@@ -324,7 +325,7 @@ export default function Home() {
               </div>
               <div className="text-neutral-600 dark:text-gray-400">Active Bounties</div>
             </div>
-            <div className="text-center" data-animate="scale-in" data-animate-delay="60">
+            <div className="text-center rounded-xl py-6 px-4 border border-transparent transition-all duration-300 hover:border-green-200/80 dark:hover:border-green-500/30 hover:bg-white/50 dark:hover:bg-neutral-700/30 hover:shadow-md" data-animate="scale-in" data-animate-delay="60">
               <div className="text-3xl md:text-4xl font-bold text-green-600 dark:text-green-400 mb-2">
                 {loading ? (
                   <div className="animate-pulse bg-green-100 dark:bg-green-400/20 h-8 w-16 mx-auto rounded-sm"></div>
@@ -334,7 +335,7 @@ export default function Home() {
               </div>
               <div className="text-neutral-600 dark:text-gray-400">Questions Answered</div>
             </div>
-            <div className="text-center" data-animate="scale-in" data-animate-delay="120">
+            <div className="text-center rounded-xl py-6 px-4 border border-transparent transition-all duration-300 hover:border-purple-200/80 dark:hover:border-purple-500/30 hover:bg-white/50 dark:hover:bg-neutral-700/30 hover:shadow-md" data-animate="scale-in" data-animate-delay="120">
               <div className="text-3xl md:text-4xl font-bold text-purple-600 dark:text-purple-400 mb-2">
                 {loading ? (
                   <div className="animate-pulse bg-purple-100 dark:bg-purple-400/20 h-8 w-16 mx-auto rounded-sm"></div>
@@ -344,7 +345,7 @@ export default function Home() {
               </div>
               <div className="text-neutral-600 dark:text-gray-400">Total Rewards</div>
             </div>
-            <div className="text-center" data-animate="scale-in" data-animate-delay="180">
+            <div className="text-center rounded-xl py-6 px-4 border border-transparent transition-all duration-300 hover:border-yellow-200/80 dark:hover:border-yellow-500/30 hover:bg-white/50 dark:hover:bg-neutral-700/30 hover:shadow-md" data-animate="scale-in" data-animate-delay="180">
               <div className="text-3xl md:text-4xl font-bold text-yellow-600 dark:text-yellow-400 mb-2">
                 {loading ? (
                   <div className="animate-pulse bg-yellow-100 dark:bg-yellow-400/20 h-8 w-16 mx-auto rounded-sm"></div>
@@ -359,7 +360,7 @@ export default function Home() {
 
         {/* CTA Section */}
         <section id="cta" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="bg-white/80 dark:bg-neutral-800/80 backdrop-blur-xs rounded-2xl p-12 text-center border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_20px_rgba(139,92,246,0.2)] dark:shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-transform duration-300 hover:scale-[1.01]" data-animate="scale-in">
+          <div className="bg-white/80 dark:bg-neutral-800/80 backdrop-blur-xs rounded-2xl p-12 text-center border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_20px_rgba(139,92,246,0.2)] dark:shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-all duration-300 hover:scale-[1.01] hover:border-violet-500/70 hover:shadow-[0_0_28px_rgba(139,92,246,0.25)] dark:hover:shadow-[0_0_28px_rgba(139,92,246,0.35)]" data-animate="scale-in">
             <h2 className="text-4xl font-bold mb-4 text-neutral-900 dark:text-white">Ready to Get Started?</h2>
             <p className="text-xl mb-8 text-neutral-600 dark:text-neutral-300 max-w-2xl mx-auto">
               Join the decentralized bounty platform and start earning rewards today
