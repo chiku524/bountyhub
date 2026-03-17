@@ -4,17 +4,18 @@ import { createHash } from 'crypto'
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 
-function getLogoVersion(): string {
+function getFileVersion(relativePath: string): string {
   try {
-    const logoPath = path.resolve(__dirname, 'public/logo.svg')
-    const content = readFileSync(logoPath, 'utf-8')
+    const filePath = path.resolve(__dirname, relativePath)
+    const content = readFileSync(filePath, 'utf-8')
     return createHash('sha256').update(content).digest('hex').slice(0, 12)
   } catch {
     return String(Date.now())
   }
 }
 
-const logoVersion = getLogoVersion()
+const logoVersion = getFileVersion('public/logo.svg')
+const faviconVersion = getFileVersion('public/favicon.svg')
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -32,7 +33,9 @@ export default defineConfig(({ mode }) => {
       {
         name: 'logo-cache-bust-html',
         transformIndexHtml(html) {
-          return html.replace(/%VITE_LOGO_VERSION%/g, logoVersion)
+          return html
+            .replace(/%VITE_LOGO_VERSION%/g, logoVersion)
+            .replace(/__FAVICON_VERSION__/g, faviconVersion)
         },
       },
     ],
