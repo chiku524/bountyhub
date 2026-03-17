@@ -123,7 +123,9 @@ const Chat: React.FC = () => {
           };
           setRooms([tempGlobalRoom]);
           setCurrentRoom(tempGlobalRoom);
-        } catch (_) {}
+        } catch {
+          // Fallback failed; leave error state as is
+        }
       }
     };
 
@@ -420,7 +422,9 @@ const Chat: React.FC = () => {
     try {
       const res = await api.request<{ success: boolean; tasks: TeamTask[] }>(`/api/teams/${selectedTeam.id}/tasks`);
       if (res.success && res.tasks) setTeamTasks(res.tasks);
-    } catch (_) {}
+    } catch {
+      // Ignore fetch errors for task refresh
+    }
   }, [selectedTeam?.id]);
 
   const addTask = async (e: React.FormEvent) => {
@@ -448,7 +452,9 @@ const Chat: React.FC = () => {
         body: JSON.stringify({ status }),
       });
       if (res.success && res.task) setTeamTasks((prev) => prev.map((t) => (t.id === task.id ? res.task : t)));
-    } catch (_) {}
+    } catch {
+      // Ignore patch errors; UI state unchanged
+    }
   };
 
   if (!user) {
@@ -538,8 +544,10 @@ const Chat: React.FC = () => {
             <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-xl p-6 w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Create team</h3>
               <form onSubmit={handleCreateTeam}>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+                <label htmlFor="create-team-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
                 <input
+                  id="create-team-name"
+                  name="teamName"
                   type="text"
                   value={newTeamName}
                   onChange={(e) => setNewTeamName(e.target.value)}
@@ -547,8 +555,10 @@ const Chat: React.FC = () => {
                   className="w-full px-3 py-2 border border-gray-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-gray-900 dark:text-white mb-3"
                   required
                 />
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description (optional)</label>
+                <label htmlFor="create-team-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description (optional)</label>
                 <textarea
+                  id="create-team-description"
+                  name="teamDescription"
                   value={newTeamDesc}
                   onChange={(e) => setNewTeamDesc(e.target.value)}
                   placeholder="Short description"
@@ -619,6 +629,8 @@ const Chat: React.FC = () => {
                   <div className="max-w-2xl mx-auto">
                     <form onSubmit={addTask} className="flex gap-2 mb-4">
                       <input
+                        id="hub-new-task-title"
+                        name="newTaskTitle"
                         type="text"
                         value={newTaskTitle}
                         onChange={(e) => setNewTaskTitle(e.target.value)}
@@ -741,12 +753,15 @@ const Chat: React.FC = () => {
                   <form onSubmit={sendMessage} className="flex space-x-2">
                     <div className="flex-1 relative">
                       <input
+                        id="hub-chat-message"
+                        name="chatMessage"
                         type="text"
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         placeholder="Type your message..."
                         className="w-full px-4 py-2 border border-gray-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                         disabled={sending}
+                        autoComplete="off"
                       />
                       <div className="absolute right-2 top-2 flex space-x-1">
                         <button type="button" className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">

@@ -228,12 +228,15 @@ export function PostChatRoom({ postId }: PostChatRoomProps) {
         {user ? (
           <form onSubmit={sendMessage} className="p-3 border-t border-neutral-200 dark:border-neutral-700 flex gap-2">
             <input
+              id="post-chat-message"
+              name="postChatMessage"
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Message..."
               className="flex-1 px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               disabled={sending}
+              autoComplete="off"
             />
             <button
               type="submit"

@@ -368,12 +368,15 @@ const ChatSidebar: React.FC = () => {
           <div className="p-3 border-t border-neutral-800 bg-neutral-800">
             <div className="flex space-x-2 mb-2">
               <input
+                id="chat-sidebar-gif-search"
+                name="gifSearch"
                 type="text"
                 placeholder="Search GIFs..."
                 value={gifSearchTerm}
                 onChange={(e) => setGifSearchTerm(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && searchGifs(gifSearchTerm)}
                 className="flex-1 px-2 py-1 rounded-sm bg-neutral-700 text-white border border-neutral-600 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-sm"
+                autoComplete="off"
               />
               <button
                 onClick={() => searchGifs(gifSearchTerm)}
@@ -432,6 +435,8 @@ const ChatSidebar: React.FC = () => {
           </div>
           <div className="flex space-x-2">
             <input
+              id="chat-sidebar-message"
+              name="globalChatMessage"
               type="text"
               className="flex-1 px-3 py-2 rounded-sm bg-neutral-800 text-white border border-neutral-700 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 placeholder-neutral-400 text-sm"
               placeholder="Type a message..."
