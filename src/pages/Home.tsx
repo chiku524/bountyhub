@@ -6,6 +6,32 @@ import { PageMetadata } from '../components/PageMetadata'
 import { HomeNav } from '../components/HomeNav'
 import { FiUsers, FiDollarSign, FiAward, FiZap, FiShield, FiTrendingUp } from 'react-icons/fi'
 
+/** Run scroll-triggered animations when elements with data-animate enter view. */
+function useScrollAnimations() {
+  useEffect(() => {
+    const els = document.querySelectorAll<HTMLElement>('[data-animate]')
+    if (!els.length) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue
+          const el = entry.target as HTMLElement
+          const name = el.getAttribute('data-animate')
+          const delay = el.getAttribute('data-animate-delay')
+          if (name) {
+            el.classList.add(`animate-${name}`)
+            if (delay) el.style.animationDelay = `${delay}ms`
+          }
+          observer.unobserve(el)
+        }
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+    )
+    els.forEach((el) => observer.observe(el))
+    return () => observer.disconnect()
+  }, [])
+}
+
 interface PlatformStats {
   activeBounties: number
   questionsAnswered: number
@@ -20,6 +46,14 @@ export default function Home() {
   const { user } = useAuth()
   const [stats, setStats] = useState<PlatformStats | null>(null)
   const [loading, setLoading] = useState(true)
+  const [heroMounted, setHeroMounted] = useState(false)
+
+  useScrollAnimations()
+
+  useEffect(() => {
+    const t = requestAnimationFrame(() => setHeroMounted(true))
+    return () => cancelAnimationFrame(t)
+  }, [])
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -83,18 +117,33 @@ export default function Home() {
         {/* Hero Section */}
         <section id="hero" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
           <div className="text-center">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6">
+            <h1
+              className={`text-5xl md:text-7xl font-bold mb-6 transition-opacity duration-300 ${
+                heroMounted ? 'animate-fade-in-up' : 'opacity-0'
+              }`}
+              style={heroMounted ? { animationDelay: '0ms' } : undefined}
+            >
               Welcome to{' '}
               <span className="bg-linear-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
                 bountyhub
               </span>
             </h1>
-            <p className="text-xl text-neutral-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
-              The decentralized bounty platform where questions meet rewards. 
+            <p
+              className={`text-xl text-neutral-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto transition-opacity duration-300 ${
+                heroMounted ? 'animate-fade-in-up' : 'opacity-0'
+              }`}
+              style={heroMounted ? { animationDelay: '120ms' } : undefined}
+            >
+              The decentralized bounty platform where questions meet rewards.
               Ask questions, offer bounties, and earn rewards in cryptocurrency.
             </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+
+            <div
+              className={`flex flex-col sm:flex-row gap-4 justify-center transition-opacity duration-300 ${
+                heroMounted ? 'animate-fade-in-up' : 'opacity-0'
+              }`}
+              style={heroMounted ? { animationDelay: '240ms' } : undefined}
+            >
               {user ? (
                 <>
                   <Link
@@ -132,7 +181,7 @@ export default function Home() {
 
         {/* Features Section */}
         <section id="features" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16" data-animate="fade-in-up">
             <h2 className="text-4xl font-bold mb-4">Platform Features</h2>
             <p className="text-xl text-neutral-600 dark:text-gray-300 max-w-2xl mx-auto">
               Everything you need to participate in the decentralized bounty ecosystem
@@ -140,7 +189,7 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 mb-16">
-            <div className="card bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 shadow-xs hover:shadow-lg transition-shadow">
+            <div className="card bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 shadow-xs hover:shadow-lg transition-shadow duration-300 hover:-translate-y-0.5" data-animate="scale-in" data-animate-delay="0">
               <div className="text-center">
                 <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <FiZap className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
@@ -152,7 +201,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="card bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 shadow-xs hover:shadow-lg transition-shadow">
+            <div className="card bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 shadow-xs hover:shadow-lg transition-shadow duration-300 hover:-translate-y-0.5" data-animate="scale-in" data-animate-delay="50">
               <div className="text-center">
                 <div className="w-16 h-16 bg-green-100 dark:bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <FiDollarSign className="w-8 h-8 text-green-600 dark:text-green-400" />
@@ -164,7 +213,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="card bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 shadow-xs hover:shadow-lg transition-shadow">
+            <div className="card bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 shadow-xs hover:shadow-lg transition-shadow duration-300 hover:-translate-y-0.5" data-animate="scale-in" data-animate-delay="100">
               <div className="text-center">
                 <div className="w-16 h-16 bg-purple-100 dark:bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <FiTrendingUp className="w-8 h-8 text-purple-600 dark:text-purple-400" />
@@ -176,7 +225,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="card bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 shadow-xs hover:shadow-lg transition-shadow">
+            <div className="card bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 shadow-xs hover:shadow-lg transition-shadow duration-300 hover:-translate-y-0.5" data-animate="scale-in" data-animate-delay="150">
               <div className="text-center">
                 <div className="w-16 h-16 bg-blue-100 dark:bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <FiUsers className="w-8 h-8 text-blue-600 dark:text-blue-400" />
@@ -188,7 +237,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="card bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 shadow-xs hover:shadow-lg transition-shadow">
+            <div className="card bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 shadow-xs hover:shadow-lg transition-shadow duration-300 hover:-translate-y-0.5" data-animate="scale-in" data-animate-delay="200">
               <div className="text-center">
                 <div className="w-16 h-16 bg-yellow-100 dark:bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <FiAward className="w-8 h-8 text-yellow-600 dark:text-yellow-400" />
@@ -200,7 +249,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="card bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 shadow-xs hover:shadow-lg transition-shadow">
+            <div className="card bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 shadow-xs hover:shadow-lg transition-shadow duration-300 hover:-translate-y-0.5" data-animate="scale-in" data-animate-delay="250">
               <div className="text-center">
                 <div className="w-16 h-16 bg-red-100 dark:bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <FiShield className="w-8 h-8 text-red-600 dark:text-red-400" />
@@ -216,7 +265,7 @@ export default function Home() {
 
         {/* How It Works Section */}
         <section id="how-it-works" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 bg-white/50 dark:bg-neutral-800/30">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16" data-animate="fade-in-up">
             <h2 className="text-4xl font-bold mb-4">How It Works</h2>
             <p className="text-xl text-neutral-600 dark:text-gray-300 max-w-2xl mx-auto">
               Get started in three simple steps
@@ -224,7 +273,7 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center">
+            <div className="text-center" data-animate="fade-in-up" data-animate-delay="0">
               <div className="w-20 h-20 bg-indigo-100 dark:bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl font-bold text-indigo-600 dark:text-indigo-400">
                 1
               </div>
@@ -234,7 +283,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="text-center">
+            <div className="text-center" data-animate="fade-in-up" data-animate-delay="80">
               <div className="w-20 h-20 bg-green-100 dark:bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl font-bold text-green-600 dark:text-green-400">
                 2
               </div>
@@ -244,7 +293,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="text-center">
+            <div className="text-center" data-animate="fade-in-up" data-animate-delay="160">
               <div className="w-20 h-20 bg-purple-100 dark:bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl font-bold text-purple-600 dark:text-purple-400">
                 3
               </div>
@@ -258,14 +307,14 @@ export default function Home() {
 
         {/* Stats Section */}
         <section id="stats" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16" data-animate="fade-in-up">
             <h2 className="text-4xl font-bold mb-4">Platform Statistics</h2>
             <p className="text-xl text-neutral-600 dark:text-gray-300 max-w-2xl mx-auto">
               Join thousands of users already participating in the bounty ecosystem
             </p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="text-center">
+            <div className="text-center" data-animate="scale-in" data-animate-delay="0">
               <div className="text-3xl md:text-4xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">
                 {loading ? (
                   <div className="animate-pulse bg-indigo-100 dark:bg-indigo-400/20 h-8 w-16 mx-auto rounded-sm"></div>
@@ -275,7 +324,7 @@ export default function Home() {
               </div>
               <div className="text-neutral-600 dark:text-gray-400">Active Bounties</div>
             </div>
-            <div className="text-center">
+            <div className="text-center" data-animate="scale-in" data-animate-delay="60">
               <div className="text-3xl md:text-4xl font-bold text-green-600 dark:text-green-400 mb-2">
                 {loading ? (
                   <div className="animate-pulse bg-green-100 dark:bg-green-400/20 h-8 w-16 mx-auto rounded-sm"></div>
@@ -285,7 +334,7 @@ export default function Home() {
               </div>
               <div className="text-neutral-600 dark:text-gray-400">Questions Answered</div>
             </div>
-            <div className="text-center">
+            <div className="text-center" data-animate="scale-in" data-animate-delay="120">
               <div className="text-3xl md:text-4xl font-bold text-purple-600 dark:text-purple-400 mb-2">
                 {loading ? (
                   <div className="animate-pulse bg-purple-100 dark:bg-purple-400/20 h-8 w-16 mx-auto rounded-sm"></div>
@@ -295,7 +344,7 @@ export default function Home() {
               </div>
               <div className="text-neutral-600 dark:text-gray-400">Total Rewards</div>
             </div>
-            <div className="text-center">
+            <div className="text-center" data-animate="scale-in" data-animate-delay="180">
               <div className="text-3xl md:text-4xl font-bold text-yellow-600 dark:text-yellow-400 mb-2">
                 {loading ? (
                   <div className="animate-pulse bg-yellow-100 dark:bg-yellow-400/20 h-8 w-16 mx-auto rounded-sm"></div>
@@ -310,7 +359,7 @@ export default function Home() {
 
         {/* CTA Section */}
         <section id="cta" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="bg-white/80 dark:bg-neutral-800/80 backdrop-blur-xs rounded-2xl p-12 text-center border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_20px_rgba(139,92,246,0.2)] dark:shadow-[0_0_20px_rgba(139,92,246,0.3)]">
+          <div className="bg-white/80 dark:bg-neutral-800/80 backdrop-blur-xs rounded-2xl p-12 text-center border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_20px_rgba(139,92,246,0.2)] dark:shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-transform duration-300 hover:scale-[1.01]" data-animate="scale-in">
             <h2 className="text-4xl font-bold mb-4 text-neutral-900 dark:text-white">Ready to Get Started?</h2>
             <p className="text-xl mb-8 text-neutral-600 dark:text-neutral-300 max-w-2xl mx-auto">
               Join the decentralized bounty platform and start earning rewards today
