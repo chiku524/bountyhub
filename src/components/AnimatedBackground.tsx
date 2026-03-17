@@ -20,9 +20,9 @@ export function AnimatedBackground() {
     resizeCanvas()
     window.addEventListener('resize', resizeCanvas)
 
-    // Engineering / innovation: subtle blueprint-style grid
+    // Engineering / innovation: blueprint-style grid (visible but not overwhelming)
     const gridSpacing = 48
-    const gridOpacity = theme === 'light' ? 0.06 : 0.08
+    const gridOpacity = theme === 'light' ? 0.12 : 0.14
 
     // Particles as "team" nodes — some larger (leadership hubs), most smaller (team)
     interface Particle {
@@ -85,8 +85,8 @@ export function AnimatedBackground() {
       }
       ctx.globalAlpha = 1
 
-      // Innovation / automation: flowing horizontal "data" lines (subtle)
-      ctx.globalAlpha = theme === 'light' ? 0.04 : 0.06
+      // Innovation / automation: flowing horizontal "data" lines
+      ctx.globalAlpha = theme === 'light' ? 0.09 : 0.12
       ctx.strokeStyle = theme === 'light' ? '#06B6D4' : '#22d3ee'
       ctx.lineWidth = 1
       for (let row = 0; row < 5; row++) {
@@ -179,10 +179,12 @@ export function AnimatedBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none"
+      className="fixed inset-0 pointer-events-none w-full h-full"
       style={{
         zIndex: 0,
-        opacity: theme === 'light' ? 0.92 : 0.75,
+        width: '100vw',
+        height: '100vh',
+        opacity: theme === 'light' ? 0.95 : 0.85,
         transition: 'opacity 0.3s ease-in-out',
       }}
     />

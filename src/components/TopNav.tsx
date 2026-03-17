@@ -58,8 +58,7 @@ export function TopNav() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const [governanceOpen, setGovernanceOpen] = useState(false)
-  const [openSourceOpen, setOpenSourceOpen] = useState(false)
+  const [exploreOpen, setExploreOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [mobileAccountOpen, setMobileAccountOpen] = useState(false)
@@ -71,16 +70,15 @@ export function TopNav() {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement
       if (!target.closest('.nav-dropdown') && !target.closest('.nav-dropdown-trigger')) {
-        setGovernanceOpen(false)
-        setOpenSourceOpen(false)
+        setExploreOpen(false)
         setProfileOpen(false)
       }
     }
-    if (governanceOpen || openSourceOpen || profileOpen) {
+    if (exploreOpen || profileOpen) {
       document.addEventListener('mousedown', handleClickOutside)
       return () => document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [governanceOpen, openSourceOpen, profileOpen])
+  }, [exploreOpen, profileOpen])
 
   // Fetch unread count from Notifications component
   const handleNotificationsUpdate = (count: number) => {
@@ -108,8 +106,8 @@ export function TopNav() {
             </span>
           </Link>
 
-          {/* Desktop Navigation - Center: fewer items, more breathing room */}
-          <div className="hidden md:flex items-center gap-1 flex-1 justify-center max-w-2xl">
+          {/* Desktop Navigation - Center: Create Bounty + single Explore dropdown */}
+          <div className="hidden md:flex items-center gap-1 flex-1 justify-center max-w-xl">
             {user && (
               <Link
                 to="/posts/create"
@@ -119,51 +117,45 @@ export function TopNav() {
                 <span>Create Bounty</span>
               </Link>
             )}
-            <Link
-              to="/community"
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
-                isActive('/community')
-                  ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
-                  : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5'
-              }`}
-            >
-              <FiUsers className="w-4 h-4 shrink-0" />
-              <span>Community</span>
-            </Link>
-            <Link
-              to="/download"
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
-                isActive('/download')
-                  ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
-                  : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5'
-              }`}
-            >
-              <FiDownload className="w-4 h-4 shrink-0" />
-              <span>Download</span>
-            </Link>
-
-            {/* Governance Dropdown (includes Analytics) */}
+            {/* Explore: Community, Download, Governance, Open Source */}
             <div className="relative nav-dropdown">
               <button
                 type="button"
-                onClick={() => { setGovernanceOpen(!governanceOpen); setOpenSourceOpen(false) }}
+                onClick={() => setExploreOpen(!exploreOpen)}
                 className={`nav-dropdown-trigger px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
-                  isActive('/governance') || isActive('/refund-requests') || isActive('/analytics')
+                  isActive('/community') || isActive('/download') || isActive('/governance') || isActive('/refund-requests') || isActive('/analytics') || isActive('/bug-bounty') || isActive('/repositories') || isActive('/contributions')
                     ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
                     : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5'
                 }`}
-                aria-expanded={governanceOpen}
+                aria-expanded={exploreOpen}
                 aria-haspopup="true"
               >
-                <FiCheckSquare className="w-4 h-4 shrink-0" />
-                <span>Governance</span>
-                <FiChevronDown className={`w-3.5 h-3.5 transition-transform shrink-0 ${governanceOpen ? 'rotate-180' : ''}`} />
+                <FiUsers className="w-4 h-4 shrink-0" />
+                <span>Explore</span>
+                <FiChevronDown className={`w-3.5 h-3.5 transition-transform shrink-0 ${exploreOpen ? 'rotate-180' : ''}`} />
               </button>
-              {governanceOpen && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 w-52 bg-white dark:bg-neutral-800 rounded-xl shadow-lg border border-neutral-200 dark:border-neutral-700 py-1.5 z-50">
+              {exploreOpen && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 w-56 bg-white dark:bg-neutral-800 rounded-xl shadow-lg border border-neutral-200 dark:border-neutral-700 py-1.5 z-50">
+                  <Link
+                    to="/community"
+                    onClick={() => setExploreOpen(false)}
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
+                  >
+                    <FiUsers className="w-4 h-4 shrink-0 text-neutral-500" />
+                    <span>Community</span>
+                  </Link>
+                  <Link
+                    to="/download"
+                    onClick={() => setExploreOpen(false)}
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
+                  >
+                    <FiDownload className="w-4 h-4 shrink-0 text-neutral-500" />
+                    <span>Download</span>
+                  </Link>
+                  <div className="my-1 border-t border-neutral-200 dark:border-neutral-600" />
                   <Link
                     to="/governance"
-                    onClick={() => setGovernanceOpen(false)}
+                    onClick={() => setExploreOpen(false)}
                     className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
                   >
                     <FiCheckSquare className="w-4 h-4 shrink-0 text-neutral-500" />
@@ -171,7 +163,7 @@ export function TopNav() {
                   </Link>
                   <Link
                     to="/refund-requests"
-                    onClick={() => setGovernanceOpen(false)}
+                    onClick={() => setExploreOpen(false)}
                     className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
                   >
                     <FiRefreshCw className="w-4 h-4 shrink-0 text-neutral-500" />
@@ -179,38 +171,16 @@ export function TopNav() {
                   </Link>
                   <Link
                     to="/analytics"
-                    onClick={() => setGovernanceOpen(false)}
+                    onClick={() => setExploreOpen(false)}
                     className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
                   >
                     <FiBarChart2 className="w-4 h-4 shrink-0 text-neutral-500" />
                     <span>Analytics</span>
                   </Link>
-                </div>
-              )}
-            </div>
-
-            {/* Open Source Dropdown */}
-            <div className="relative nav-dropdown">
-              <button
-                type="button"
-                onClick={() => { setOpenSourceOpen(!openSourceOpen); setGovernanceOpen(false) }}
-                className={`nav-dropdown-trigger px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
-                  isActive('/bug-bounty') || isActive('/repositories') || isActive('/contributions')
-                    ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
-                    : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5'
-                }`}
-                aria-expanded={openSourceOpen}
-                aria-haspopup="true"
-              >
-                <FiGithub className="w-4 h-4 shrink-0" />
-                <span>Open Source</span>
-                <FiChevronDown className={`w-3.5 h-3.5 transition-transform shrink-0 ${openSourceOpen ? 'rotate-180' : ''}`} />
-              </button>
-              {openSourceOpen && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 w-52 bg-white dark:bg-neutral-800 rounded-xl shadow-lg border border-neutral-200 dark:border-neutral-700 py-1.5 z-50">
+                  <div className="my-1 border-t border-neutral-200 dark:border-neutral-600" />
                   <Link
                     to="/bug-bounty/campaigns"
-                    onClick={() => setOpenSourceOpen(false)}
+                    onClick={() => setExploreOpen(false)}
                     className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
                   >
                     <FiShield className="w-4 h-4 shrink-0 text-neutral-500" />
@@ -218,7 +188,7 @@ export function TopNav() {
                   </Link>
                   <Link
                     to="/repositories"
-                    onClick={() => setOpenSourceOpen(false)}
+                    onClick={() => setExploreOpen(false)}
                     className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
                   >
                     <FiGithub className="w-4 h-4 shrink-0 text-neutral-500" />
@@ -226,7 +196,7 @@ export function TopNav() {
                   </Link>
                   <Link
                     to="/contributions"
-                    onClick={() => setOpenSourceOpen(false)}
+                    onClick={() => setExploreOpen(false)}
                     className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
                   >
                     <FiAward className="w-4 h-4 shrink-0 text-neutral-500" />
@@ -403,83 +373,69 @@ export function TopNav() {
                   Create Bounty
                 </Link>
               )}
-              <Link
-                to="/download"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block px-3 py-2.5 rounded-lg text-base font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5"
-              >
-                Download
-              </Link>
-              <Link
-                to="/community"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block px-3 py-2.5 rounded-lg text-base font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5"
-              >
-                Community
-              </Link>
               <div>
                 <button
                   type="button"
-                  onClick={() => { setGovernanceOpen(!governanceOpen); setOpenSourceOpen(false) }}
+                  onClick={() => setExploreOpen(!exploreOpen)}
                   className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-base font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5"
                 >
-                  <span>Governance</span>
-                  <FiChevronDown className={`w-4 h-4 transition-transform ${governanceOpen ? 'rotate-180' : ''}`} />
+                  <span>Explore</span>
+                  <FiChevronDown className={`w-4 h-4 transition-transform ${exploreOpen ? 'rotate-180' : ''}`} />
                 </button>
-                {governanceOpen && (
+                {exploreOpen && (
                   <div className="pl-4 mt-0.5 space-y-0.5">
                     <Link
+                      to="/community"
+                      onClick={() => { setMobileMenuOpen(false); setExploreOpen(false) }}
+                      className="block px-3 py-2 rounded-lg text-sm text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5"
+                    >
+                      Community
+                    </Link>
+                    <Link
+                      to="/download"
+                      onClick={() => { setMobileMenuOpen(false); setExploreOpen(false) }}
+                      className="block px-3 py-2 rounded-lg text-sm text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5"
+                    >
+                      Download
+                    </Link>
+                    <Link
                       to="/governance"
-                      onClick={() => { setMobileMenuOpen(false); setGovernanceOpen(false) }}
+                      onClick={() => { setMobileMenuOpen(false); setExploreOpen(false) }}
                       className="block px-3 py-2 rounded-lg text-sm text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5"
                     >
                       Governance
                     </Link>
                     <Link
                       to="/refund-requests"
-                      onClick={() => { setMobileMenuOpen(false); setGovernanceOpen(false) }}
+                      onClick={() => { setMobileMenuOpen(false); setExploreOpen(false) }}
                       className="block px-3 py-2 rounded-lg text-sm text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5"
                     >
                       Refund Requests
                     </Link>
                     <Link
                       to="/analytics"
-                      onClick={() => { setMobileMenuOpen(false); setGovernanceOpen(false) }}
+                      onClick={() => { setMobileMenuOpen(false); setExploreOpen(false) }}
                       className="block px-3 py-2 rounded-lg text-sm text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5"
                     >
                       Analytics
                     </Link>
-                  </div>
-                )}
-              </div>
-              <div>
-                <button
-                  type="button"
-                  onClick={() => { setOpenSourceOpen(!openSourceOpen); setGovernanceOpen(false) }}
-                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-base font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5"
-                >
-                  <span>Open Source</span>
-                  <FiChevronDown className={`w-4 h-4 transition-transform ${openSourceOpen ? 'rotate-180' : ''}`} />
-                </button>
-                {openSourceOpen && (
-                  <div className="pl-4 mt-0.5 space-y-0.5">
                     <Link
                       to="/bug-bounty/campaigns"
-                      onClick={() => { setMobileMenuOpen(false); setOpenSourceOpen(false) }}
+                      onClick={() => { setMobileMenuOpen(false); setExploreOpen(false) }}
                       className="block px-3 py-2 rounded-lg text-sm text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5"
                     >
                       Bug Bounty
                     </Link>
                     <Link
                       to="/repositories"
-                      onClick={() => { setMobileMenuOpen(false); setOpenSourceOpen(false) }}
+                      onClick={() => { setMobileMenuOpen(false); setExploreOpen(false) }}
                       className="block px-3 py-2 rounded-lg text-sm text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5"
                     >
                       Repositories
                     </Link>
                     <Link
                       to="/contributions"
-                      onClick={() => { setMobileMenuOpen(false); setOpenSourceOpen(false) }}
+                      onClick={() => { setMobileMenuOpen(false); setExploreOpen(false) }}
                       className="block px-3 py-2 rounded-lg text-sm text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5"
                     >
                       Contributions

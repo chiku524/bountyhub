@@ -103,7 +103,7 @@ function AppContent() {
       <AnimatedBackground />
       
       {/* Light/Dark mode container - Always flex-col */}
-      <div className="relative z-10 min-h-screen w-full bg-white/10 dark:bg-neutral-900/10 transition-colors duration-200 flex flex-col">
+      <div className="relative z-10 min-h-screen w-full bg-white/5 dark:bg-neutral-900/5 transition-colors duration-200 flex flex-col">
         {/* Skip to main content - visible on focus for keyboard/screen reader users */}
         {showAuthenticatedNav && (
           <a
