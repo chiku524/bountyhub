@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
     VITE_GIPHY_API_KEY: '8tPzDynfDBevgXLsAaPztARWyvWzNLPK',
     VITE_CLOUDINARY_CLOUD_NAME: 'dqobhvk07',
     VITE_CLOUDINARY_UPLOAD_PRESET: 'bountyhub',
-    VITE_GITHUB_RELEASES_URL: '',
+    VITE_GITHUB_RELEASES_URL: 'https://github.com/chiku524/bountyhub/releases/latest',
   }
   return {
     plugins: [react()],

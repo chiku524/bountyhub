@@ -68,10 +68,10 @@ function AppContent() {
   const isLegalPage = location.pathname === '/privacy' || location.pathname === '/terms'
   const isDownloadPage = location.pathname === '/download'
   
-  // Determine which navbar to show: HomeNav on home or download (when not logged in); TopNav when logged in on app pages
-  const isPublicPage = isHomePage || isAuthPage || isLegalPage
+  // Determine which navbar to show: HomeNav on home and download (always unauthenticated style); TopNav when logged in on app pages
+  const isPublicPage = isHomePage || isAuthPage || isLegalPage || isDownloadPage
   const showAuthenticatedNav = Boolean(user) && !isPublicPage && !loading
-  const showHomeNav = isHomePage || (isDownloadPage && !user && !loading)
+  const showHomeNav = isHomePage || isDownloadPage
   
   // Handle OAuth redirect - wait for auth to load before showing authenticated layout
   useEffect(() => {
