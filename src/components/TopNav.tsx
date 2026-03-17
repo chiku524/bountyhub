@@ -101,7 +101,7 @@ export function TopNav() {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 shrink-0" aria-label="bountyhub home">
             <img src={logoUrl} alt="" className="w-8 h-8 object-contain" aria-hidden />
-            <span className="text-xl font-bold bg-linear-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent hidden sm:block">
+            <span className="text-xl font-bold bg-linear-to-r from-cyan-400 to-violet-400 dark:from-cyan-400 dark:to-violet-400 bg-clip-text text-transparent hidden sm:block">
               bountyhub
             </span>
           </Link>

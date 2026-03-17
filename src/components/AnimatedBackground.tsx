@@ -42,8 +42,8 @@ export function AnimatedBackground() {
     const hubCount = 5
 
     const colors = theme === 'light'
-      ? ['#4F46E5', '#6366f1', '#7C3AED', '#06B6D4', '#0EA5E9']
-      : ['#6366f1', '#818cf8', '#a78bfa', '#22d3ee', '#38bdf8']
+      ? ['#312e81', '#1e1b4b', '#22d3ee', '#a78bfa', '#67e8f9']
+      : ['#312e81', '#22d3ee', '#a78bfa', '#67e8f9', '#c4b5fd']
 
     for (let i = 0; i < particleCount; i++) {
       const isHub = i < hubCount
@@ -68,7 +68,7 @@ export function AnimatedBackground() {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
       // Engineering: blueprint grid
-      ctx.strokeStyle = theme === 'light' ? '#4F46E5' : '#818cf8'
+      ctx.strokeStyle = theme === 'light' ? '#312e81' : '#67e8f9'
       ctx.lineWidth = 0.5
       ctx.globalAlpha = gridOpacity + Math.sin(time * 0.5) * 0.02
       for (let x = 0; x <= canvas.width + gridSpacing; x += gridSpacing) {
@@ -87,7 +87,7 @@ export function AnimatedBackground() {
 
       // Innovation / automation: flowing horizontal "data" lines
       ctx.globalAlpha = theme === 'light' ? 0.09 : 0.12
-      ctx.strokeStyle = theme === 'light' ? '#06B6D4' : '#22d3ee'
+      ctx.strokeStyle = theme === 'light' ? '#22d3ee' : '#67e8f9'
       ctx.lineWidth = 1
       for (let row = 0; row < 5; row++) {
         const y = (canvas.height * (0.15 + row * 0.2)) + Math.sin(time + row) * 20

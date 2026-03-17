@@ -34,7 +34,7 @@ export function HomeNav({ onScrollTo }: HomeNavProps) {
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2" aria-label="bountyhub home">
               <img src={logoUrl} alt="" className="w-8 h-8 object-contain" aria-hidden />
-              <span className="text-2xl font-bold bg-linear-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
+              <span className="text-2xl font-bold bg-linear-to-r from-cyan-400 to-violet-400 dark:from-cyan-400 dark:to-violet-400 bg-clip-text text-transparent">
                 bountyhub
               </span>
             </Link>

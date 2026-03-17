@@ -3,16 +3,16 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-primary-50: #eff6ff;
-  --color-primary-100: #dbeafe;
-  --color-primary-200: #bfdbfe;
-  --color-primary-300: #93c5fd;
-  --color-primary-400: #60a5fa;
-  --color-primary-500: #3b82f6;
-  --color-primary-600: #2563eb;
-  --color-primary-700: #1d4ed8;
-  --color-primary-800: #1e40af;
-  --color-primary-900: #1e3a8a;
+  --color-primary-50: #e0e7ff;
+  --color-primary-100: #c7d2fe;
+  --color-primary-200: #a5b4fc;
+  --color-primary-300: #818cf8;
+  --color-primary-400: #22d3ee;
+  --color-primary-500: #a78bfa;
+  --color-primary-600: #312e81;
+  --color-primary-700: #1e1b4b;
+  --color-primary-800: #1e1b4b;
+  --color-primary-900: #1e1b4b;
 
   --color-secondary-50: #f8fafc;
   --color-secondary-100: #f1f5f9;
@@ -24,6 +24,41 @@
   --color-secondary-700: #334155;
   --color-secondary-800: #1e293b;
   --color-secondary-900: #0f172a;
+
+  /* Brand palette aligned with logo: dark base + neon cyan/purple */
+  --color-brand-dark: #1e1b4b;
+  --color-brand-base: #312e81;
+  --color-brand-cyan: #22d3ee;
+  --color-brand-cyan-light: #67e8f9;
+  --color-brand-purple: #a78bfa;
+  --color-brand-purple-light: #c4b5fd;
+  --color-brand-light: #e0e7ff;
+
+  /* Override indigo to match logo (darker base + accents) */
+  --color-indigo-50: #e0e7ff;
+  --color-indigo-100: #c7d2fe;
+  --color-indigo-200: #a5b4fc;
+  --color-indigo-300: #67e8f9;
+  --color-indigo-400: #22d3ee;
+  --color-indigo-500: #a78bfa;
+  --color-indigo-600: #312e81;
+  --color-indigo-700: #1e1b4b;
+  --color-indigo-800: #1e1b4b;
+  --color-indigo-900: #312e81;
+  --color-indigo-950: #1e1b4b;
+
+  /* Override violet to match logo purple accent */
+  --color-violet-50: #f5f3ff;
+  --color-violet-100: #ede9fe;
+  --color-violet-200: #ddd6fe;
+  --color-violet-300: #c4b5fd;
+  --color-violet-400: #a78bfa;
+  --color-violet-500: #8b5cf6;
+  --color-violet-600: #7c3aed;
+  --color-violet-700: #6d28d9;
+  --color-violet-800: #5b21b6;
+  --color-violet-900: #4c1d95;
+  --color-violet-950: #2e1065;
 
   --font-sans: Inter, system-ui, sans-serif;
 }

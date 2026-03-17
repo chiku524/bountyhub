@@ -125,7 +125,7 @@ export default function Home() {
               style={heroMounted ? { animationDelay: '0ms' } : undefined}
             >
               Welcome to{' '}
-              <span className="bg-linear-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-cyan-400 to-violet-400 dark:from-cyan-400 dark:to-violet-400 bg-clip-text text-transparent">
                 bountyhub
               </span>
             </h1>
@@ -360,7 +360,7 @@ export default function Home() {
 
         {/* CTA Section */}
         <section id="cta" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="bg-white/80 dark:bg-neutral-800/80 backdrop-blur-xs rounded-2xl p-12 text-center border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_20px_rgba(139,92,246,0.2)] dark:shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-all duration-300 hover:scale-[1.01] hover:border-violet-500/70 hover:shadow-[0_0_28px_rgba(139,92,246,0.25)] dark:hover:shadow-[0_0_28px_rgba(139,92,246,0.35)]" data-animate="scale-in">
+          <div className="bg-white/80 dark:bg-neutral-800/80 backdrop-blur-xs rounded-2xl p-12 text-center border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_20px_rgba(34,211,238,0.15)] dark:shadow-[0_0_20px_rgba(34,211,238,0.2)] transition-all duration-300 hover:scale-[1.01] hover:border-cyan-400/50 hover:shadow-[0_0_28px_rgba(34,211,238,0.2)] dark:hover:shadow-[0_0_28px_rgba(34,211,238,0.25)]" data-animate="scale-in">
             <h2 className="text-4xl font-bold mb-4 text-neutral-900 dark:text-white">Ready to Get Started?</h2>
             <p className="text-xl mb-8 text-neutral-600 dark:text-neutral-300 max-w-2xl mx-auto">
               Join the decentralized bounty platform and start earning rewards today
