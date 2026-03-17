@@ -4,7 +4,8 @@ import { api } from '../utils/api';
 import Layout from '../components/Layout';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
-import { FiSend, FiSmile, FiPaperclip, FiUsers, FiMessageSquare } from 'react-icons/fi';
+import { FiSend, FiSmile, FiPaperclip, FiUsers, FiMessageSquare, FiPlusCircle, FiCheckSquare, FiList } from 'react-icons/fi';
+import type { Team, TeamTask } from '../types';
 
 interface Message {
   id: string;
@@ -37,11 +38,23 @@ interface ChatRoom {
   participantCount?: number;
 }
 
+type ViewMode = 'global' | 'team';
+
 const Chat: React.FC = () => {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [rooms, setRooms] = useState<ChatRoom[]>([]);
   const [currentRoom, setCurrentRoom] = useState<ChatRoom | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>('global');
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
+  const [teamTasks, setTeamTasks] = useState<TeamTask[]>([]);
+  const [createTeamOpen, setCreateTeamOpen] = useState(false);
+  const [newTeamName, setNewTeamName] = useState('');
+  const [newTeamDesc, setNewTeamDesc] = useState('');
+  const [createTeamLoading, setCreateTeamLoading] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [hubTab, setHubTab] = useState<'chat' | 'tasks'>('chat');
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -73,24 +86,17 @@ const Chat: React.FC = () => {
     };
   }, []);
 
-  // Fetch chat rooms
+  // Fetch chat rooms and teams
   useEffect(() => {
     const fetchRooms = async () => {
       try {
         const response = await api.request<{ success: boolean; rooms: ChatRoom[] }>('/api/chat');
         if (response.success) {
           setRooms(response.rooms);
-          // Set global chat as default room
           let globalRoom = response.rooms.find((room: ChatRoom) => room.type === 'GLOBAL');
-          
-          // If no global room exists, create one by joining it
           if (!globalRoom) {
-            console.log('No global chat room found, creating one...');
             try {
-              await api.request<{ success: boolean }>('/api/chat/global-chat/join', {
-                method: 'POST'
-              });
-              // Fetch rooms again to get the newly created global room
+              await api.request<{ success: boolean }>('/api/chat/global-chat/join', { method: 'POST' });
               const refreshResponse = await api.request<{ success: boolean; rooms: ChatRoom[] }>('/api/chat');
               if (refreshResponse.success) {
                 setRooms(refreshResponse.rooms);
@@ -100,22 +106,13 @@ const Chat: React.FC = () => {
               console.error('Failed to create global chat room:', err);
             }
           }
-          
-          if (globalRoom) {
-            setCurrentRoom(globalRoom);
-          }
+          if (globalRoom) setCurrentRoom(globalRoom);
         }
       } catch (err) {
         console.error('Failed to load chat rooms:', err);
         setError('Failed to load chat rooms');
-        
-        // Fallback: try to create a global chat room even if room fetch failed
         try {
-          console.log('Attempting fallback global chat room creation...');
-          await api.request<{ success: boolean }>('/api/chat/global-chat/join', {
-            method: 'POST'
-          });
-          // Create a temporary global room object
+          await api.request<{ success: boolean }>('/api/chat/global-chat/join', { method: 'POST' });
           const tempGlobalRoom: ChatRoom = {
             id: 'temp-global',
             name: 'Global Chat',
@@ -126,13 +123,21 @@ const Chat: React.FC = () => {
           };
           setRooms([tempGlobalRoom]);
           setCurrentRoom(tempGlobalRoom);
-        } catch (fallbackErr) {
-          console.error('Fallback global chat room creation failed:', fallbackErr);
-        }
+        } catch (_) {}
+      }
+    };
+
+    const fetchTeams = async () => {
+      try {
+        const res = await api.request<{ success: boolean; teams: Team[] }>('/api/teams');
+        if (res.success && res.teams) setTeams(res.teams);
+      } catch (err) {
+        console.error('Failed to load teams:', err);
       }
     };
 
     fetchRooms();
+    fetchTeams();
   }, []);
 
   // Fetch messages for current room
@@ -347,14 +352,103 @@ const Chat: React.FC = () => {
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
+    if (date.toDateString() === today.toDateString()) return 'Today';
+    if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
+    return date.toLocaleDateString();
+  };
 
-    if (date.toDateString() === today.toDateString()) {
-      return 'Today';
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return 'Yesterday';
-    } else {
-      return date.toLocaleDateString();
+  const selectGlobal = () => {
+    setViewMode('global');
+    setSelectedTeam(null);
+    setTeamTasks([]);
+    const globalRoom = rooms.find((r) => r.type === 'GLOBAL');
+    if (globalRoom) {
+      setCurrentRoom(globalRoom);
+      setIsJoined(false);
+      setLastMessageId(null);
     }
+  };
+
+  const selectTeam = async (team: Team) => {
+    setViewMode('team');
+    setSelectedTeam(team);
+    setHubTab('chat');
+    try {
+      if (!team.isMember && team.isPublic) {
+        await api.request<{ success: boolean }>(`/api/teams/${team.id}/join`, { method: 'POST' });
+        setTeams((prev) => prev.map((t) => (t.id === team.id ? { ...t, isMember: true, role: 'MEMBER' as const } : t)));
+      }
+      const res = await api.request<{ success: boolean; team: Team; members: unknown[]; room: ChatRoom | null; tasks: TeamTask[] }>(`/api/teams/${team.id}`);
+      if (res.success) {
+        setTeamTasks(res.tasks || []);
+        if (res.room) {
+          setCurrentRoom({ ...res.room, type: 'GROUP' });
+          setIsJoined(false);
+          setLastMessageId(null);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load team:', err);
+    }
+  };
+
+  const handleCreateTeam = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTeamName.trim() || createTeamLoading) return;
+    setCreateTeamLoading(true);
+    try {
+      const res = await api.request<{ success: boolean; team: Team; roomId: string }>('/api/teams', {
+        method: 'POST',
+        body: JSON.stringify({ name: newTeamName.trim(), description: newTeamDesc.trim() || undefined, isPublic: true }),
+      });
+      if (res.success && res.team) {
+        setTeams((prev) => [{ ...res.team, isMember: true, role: 'ADMIN' }, ...prev]);
+        setCreateTeamOpen(false);
+        setNewTeamName('');
+        setNewTeamDesc('');
+        selectTeam(res.team);
+      }
+    } catch (err) {
+      console.error('Create team failed:', err);
+    } finally {
+      setCreateTeamLoading(false);
+    }
+  };
+
+  const refreshTeamTasks = useCallback(async () => {
+    if (!selectedTeam) return;
+    try {
+      const res = await api.request<{ success: boolean; tasks: TeamTask[] }>(`/api/teams/${selectedTeam.id}/tasks`);
+      if (res.success && res.tasks) setTeamTasks(res.tasks);
+    } catch (_) {}
+  }, [selectedTeam?.id]);
+
+  const addTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedTeam || !newTaskTitle.trim()) return;
+    try {
+      const res = await api.request<{ success: boolean; task: TeamTask }>(`/api/teams/${selectedTeam.id}/tasks`, {
+        method: 'POST',
+        body: JSON.stringify({ title: newTaskTitle.trim(), status: 'TODO' }),
+      });
+      if (res.success && res.task) {
+        setTeamTasks((prev) => [...prev, res.task]);
+        setNewTaskTitle('');
+      }
+    } catch (err) {
+      console.error('Add task failed:', err);
+    }
+  };
+
+  const updateTaskStatus = async (task: TeamTask, status: 'TODO' | 'IN_PROGRESS' | 'DONE') => {
+    if (!selectedTeam) return;
+    try {
+      const res = await api.request<{ success: boolean; task: TeamTask }>(`/api/teams/${selectedTeam.id}/tasks/${task.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      });
+      if (res.success && res.task) setTeamTasks((prev) => prev.map((t) => (t.id === task.id ? res.task : t)));
+    } catch (_) {}
   };
 
   if (!user) {
@@ -379,84 +473,196 @@ const Chat: React.FC = () => {
 
   return (
     <Layout>
-      <div className="flex h-screen bg-gray-50">
-        {/* Sidebar */}
-        <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
-          <div className="p-4 border-b border-gray-200">
-            <h1 className="text-xl font-semibold text-gray-900">Chat Rooms</h1>
+      <div className="flex h-screen bg-gray-50 dark:bg-neutral-900">
+        {/* Sidebar: Hub (Global + Teams) */}
+        <div className="w-80 bg-white dark:bg-neutral-800 border-r border-gray-200 dark:border-neutral-700 flex flex-col">
+          <div className="p-4 border-b border-gray-200 dark:border-neutral-700">
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Chat Hub</h1>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Global chat & teams</p>
           </div>
-          
           <div className="flex-1 overflow-y-auto">
-            {rooms.map((room) => (
+            <div className="p-2">
               <div
-                key={room.id}
-                onClick={() => {
-                  setCurrentRoom(room);
-                  setIsJoined(false);
-                  setLastMessageId(null);
-                  setIsPolling(false);
-                }}
-                className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
-                  currentRoom?.id === room.id ? 'bg-indigo-50 border-indigo-200' : ''
+                onClick={selectGlobal}
+                className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                  viewMode === 'global' ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-200' : 'hover:bg-gray-100 dark:hover:bg-neutral-700 text-gray-900 dark:text-white'
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium text-gray-900">{room.name}</h3>
-                    {room.description && (
-                      <p className="text-sm text-gray-500 mt-1">{room.description}</p>
-                    )}
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <FiUsers className="h-4 w-4 text-gray-400" />
-                    <span className="text-xs text-gray-500">
-                      {room.participantCount || 0}
-                    </span>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <FiMessageSquare className="h-5 w-5" />
+                  <span className="font-medium">Global Chat</span>
                 </div>
               </div>
-            ))}
+            </div>
+            <div className="px-2 pt-4 pb-2">
+              <div className="flex items-center justify-between px-2 mb-2">
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Teams</span>
+                <button
+                  type="button"
+                  onClick={() => setCreateTeamOpen(true)}
+                  className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 hover:underline text-sm"
+                >
+                  <FiPlusCircle className="h-4 w-4" /> Create
+                </button>
+              </div>
+              {teams.length === 0 ? (
+                <p className="text-xs text-gray-500 dark:text-gray-400 px-2">No teams yet. Create one to chat and add tasks.</p>
+              ) : (
+                teams.map((team) => (
+                  <div
+                    key={team.id}
+                    onClick={() => selectTeam(team)}
+                    className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                      viewMode === 'team' && selectedTeam?.id === team.id
+                        ? 'bg-indigo-100 dark:bg-indigo-900/30'
+                        : 'hover:bg-gray-100 dark:hover:bg-neutral-700'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-gray-900 dark:text-white truncate">{team.name}</span>
+                      {team.isMember && <FiUsers className="h-4 w-4 text-gray-400 flex-shrink-0" />}
+                    </div>
+                    {!team.isMember && team.isPublic && (
+                      <span className="text-xs text-gray-500 dark:text-gray-400">Public · click to join</span>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Chat Area */}
-        <div className="flex-1 flex flex-col">
-          {currentRoom ? (
+        {/* Create Team Modal */}
+        {createTeamOpen && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => !createTeamLoading && setCreateTeamOpen(false)}>
+            <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-xl p-6 w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Create team</h3>
+              <form onSubmit={handleCreateTeam}>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+                <input
+                  type="text"
+                  value={newTeamName}
+                  onChange={(e) => setNewTeamName(e.target.value)}
+                  placeholder="Team name"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-gray-900 dark:text-white mb-3"
+                  required
+                />
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description (optional)</label>
+                <textarea
+                  value={newTeamDesc}
+                  onChange={(e) => setNewTeamDesc(e.target.value)}
+                  placeholder="Short description"
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-gray-900 dark:text-white mb-4"
+                />
+                <div className="flex gap-2 justify-end">
+                  <button type="button" onClick={() => setCreateTeamOpen(false)} disabled={createTeamLoading} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700 rounded-lg">
+                    Cancel
+                  </button>
+                  <button type="submit" disabled={createTeamLoading || !newTeamName.trim()} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50">
+                    {createTeamLoading ? 'Creating...' : 'Create'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Chat / Team Area */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {currentRoom || (viewMode === 'team' && selectedTeam) ? (
             <>
-              {/* Chat Header */}
-              <div className="bg-white border-b border-gray-200 p-4">
-                <div className="flex items-center justify-between">
+              {/* Header: room name + team tabs when team selected */}
+              <div className="bg-white dark:bg-neutral-800 border-b border-gray-200 dark:border-neutral-700 p-4">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center space-x-2">
-                    <h2 className="text-lg font-semibold text-gray-900">{currentRoom.name}</h2>
-                    {isJoined && (
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      {viewMode === 'team' && selectedTeam ? selectedTeam.name : currentRoom?.name}
+                    </h2>
+                    {currentRoom && isJoined && (
                       <div className="flex items-center space-x-1">
                         {isPageVisible ? (
-                          <>
-                            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                            <span className="text-xs text-green-600">Live</span>
-                          </>
+                          <><div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" /><span className="text-xs text-green-600">Live</span></>
                         ) : (
-                          <>
-                            <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                            <span className="text-xs text-yellow-600">Paused</span>
-                          </>
+                          <><div className="w-2 h-2 bg-yellow-500 rounded-full" /><span className="text-xs text-yellow-600">Paused</span></>
                         )}
                       </div>
                     )}
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <FiUsers className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-gray-500">
-                      {currentRoom.participantCount || 0} participants
-                    </span>
-                  </div>
+                  {viewMode === 'team' && selectedTeam && (
+                    <div className="flex rounded-lg border border-gray-200 dark:border-neutral-600 p-0.5">
+                      <button
+                        type="button"
+                        onClick={() => setHubTab('chat')}
+                        className={`px-3 py-1.5 rounded text-sm font-medium flex items-center gap-1.5 ${hubTab === 'chat' ? 'bg-indigo-600 text-white' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-neutral-700'}`}
+                      >
+                        <FiMessageSquare className="h-4 w-4" /> Chat
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setHubTab('tasks'); refreshTeamTasks(); }}
+                        className={`px-3 py-1.5 rounded text-sm font-medium flex items-center gap-1.5 ${hubTab === 'tasks' ? 'bg-indigo-600 text-white' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-neutral-700'}`}
+                      >
+                        <FiList className="h-4 w-4" /> Tasks
+                      </button>
+                    </div>
+                  )}
                 </div>
-                {currentRoom.description && (
-                  <p className="text-sm text-gray-500 mt-1">{currentRoom.description}</p>
+                {currentRoom?.description && viewMode !== 'team' && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{currentRoom.description}</p>
                 )}
               </div>
 
-              {/* Messages */}
+              {/* Content: Chat messages OR Team tasks */}
+              {viewMode === 'team' && hubTab === 'tasks' ? (
+                <div className="flex-1 overflow-y-auto p-4">
+                  <div className="max-w-2xl mx-auto">
+                    <form onSubmit={addTask} className="flex gap-2 mb-4">
+                      <input
+                        type="text"
+                        value={newTaskTitle}
+                        onChange={(e) => setNewTaskTitle(e.target.value)}
+                        placeholder="New task..."
+                        className="flex-1 px-3 py-2 border border-gray-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-gray-900 dark:text-white"
+                      />
+                      <button type="submit" disabled={!newTaskTitle.trim()} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-2">
+                        <FiPlusCircle className="h-4 w-4" /> Add
+                      </button>
+                    </form>
+                    <ul className="space-y-2">
+                      {teamTasks.length === 0 ? (
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">No tasks yet. Add one above.</p>
+                      ) : (
+                        teamTasks.map((task) => (
+                          <li
+                            key={task.id}
+                            className="flex items-center gap-3 p-3 rounded-lg bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700"
+                          >
+                            <button
+                              type="button"
+                              onClick={() => updateTaskStatus(task, task.status === 'DONE' ? 'TODO' : 'DONE')}
+                              className="flex-shrink-0 text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400"
+                              title={task.status === 'DONE' ? 'Mark not done' : 'Mark done'}
+                            >
+                              <FiCheckSquare className={`h-5 w-5 ${task.status === 'DONE' ? 'text-green-500' : ''}`} />
+                            </button>
+                            <div className="flex-1 min-w-0">
+                              <span className={`font-medium text-gray-900 dark:text-white ${task.status === 'DONE' ? 'line-through opacity-70' : ''}`}>
+                                {task.title}
+                              </span>
+                              {task.description && (
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{task.description}</p>
+                              )}
+                            </div>
+                            <span className="text-xs text-gray-500 dark:text-gray-400 capitalize">{task.status.replace('_', ' ')}</span>
+                          </li>
+                        ))
+                      )}
+                    </ul>
+                  </div>
+                </div>
+              ) : (
+                <>
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {loading ? (
                   <div className="flex items-center justify-center h-full">
@@ -529,47 +735,41 @@ const Chat: React.FC = () => {
                 )}
               </div>
 
-              {/* Message Input */}
-              <div className="bg-white border-t border-gray-200 p-4">
-                <form onSubmit={sendMessage} className="flex space-x-2">
-                  <div className="flex-1 relative">
-                    <input
-                      type="text"
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      placeholder="Type your message..."
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      disabled={sending}
-                    />
-                    <div className="absolute right-2 top-2 flex space-x-1">
-                      <button
-                        type="button"
-                        className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
-                      >
-                        <FiSmile className="h-4 w-4" />
-                      </button>
-                      <button
-                        type="button"
-                        className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
-                      >
-                        <FiPaperclip className="h-4 w-4" />
-                      </button>
+              {/* Message Input (only when showing chat) */}
+              {(!(viewMode === 'team' && hubTab === 'tasks')) && (
+                <div className="bg-white dark:bg-neutral-800 border-t border-gray-200 dark:border-neutral-700 p-4">
+                  <form onSubmit={sendMessage} className="flex space-x-2">
+                    <div className="flex-1 relative">
+                      <input
+                        type="text"
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        placeholder="Type your message..."
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        disabled={sending}
+                      />
+                      <div className="absolute right-2 top-2 flex space-x-1">
+                        <button type="button" className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                          <FiSmile className="h-4 w-4" />
+                        </button>
+                        <button type="button" className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                          <FiPaperclip className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={!newMessage.trim() || sending}
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {sending ? (
-                      <LoadingSpinner size="sm" />
-                    ) : (
-                      <FiSend className="h-4 w-4" />
-                    )}
-                  </button>
-                </form>
-              </div>
-            </>
+                    <button
+                      type="submit"
+                      disabled={!newMessage.trim() || sending}
+                      className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {sending ? <LoadingSpinner size="sm" /> : <FiSend className="h-4 w-4" />}
+                    </button>
+                  </form>
+                </div>
+              )}
+                </>
+              )}
+              </>
           ) : (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">

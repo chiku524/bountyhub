@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import { api } from '../utils/api'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { ErrorMessage } from '../components/ErrorMessage'
-import { Comments } from '../components/Comments'
+import { PostChatRoom } from '../components/PostChatRoom'
 import { Answers } from '../components/Answers'
 import { BookmarkButton } from '../components/BookmarkButton'
 import { CodeBlockEditor } from '../components/CodeBlockEditor'
@@ -474,11 +474,9 @@ export default function PostDetail() {
           </div>
         )}
 
-        {/* Comments Section */}
+        {/* Post Chat Room (replaces comments; history saved, active while post is open) */}
         {!loading && !error && post && postId && (
-          <div className="mt-8">
-            <Comments postId={postId} />
-          </div>
+          <PostChatRoom postId={postId} postTitle={post.title} />
         )}
 
         {/* Delete Confirmation Modal */}

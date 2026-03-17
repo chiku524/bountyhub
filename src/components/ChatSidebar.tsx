@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../contexts/AuthProvider';
 import { ApiClient } from '../utils/api';
 import { config } from '../utils/config';
-import { FiSend, FiMessageSquare, FiX, FiMessageCircle, FiSmile, FiImage } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
+import { FiSend, FiMessageSquare, FiX, FiMessageCircle, FiSmile, FiImage, FiGrid } from 'react-icons/fi';
 
 // Simple emoji data
 const EMOJIS = [
@@ -299,20 +300,29 @@ const ChatSidebar: React.FC = () => {
           <div className="flex items-center space-x-2">
             <FiMessageSquare className="h-5 w-5 text-indigo-400" />
             <span className="font-semibold text-white text-sm sm:text-base">Global Chat</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/chat"
+              className="p-1.5 rounded text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
+              title="Open Chat Hub (teams & tasks)"
+            >
+              <FiGrid className="h-4 w-4" />
+            </Link>
             {isPolling && (
               <div className="flex items-center space-x-1">
-                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-indigo-400"></div>
+                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-indigo-400" />
                 <span className="text-xs text-neutral-400">Live</span>
               </div>
             )}
+            <button
+              onClick={() => setOpen(false)}
+              className="text-neutral-400 hover:text-white p-1 rounded-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
+              aria-label="Close chat sidebar"
+            >
+              <FiX className="h-5 w-5" />
+            </button>
           </div>
-          <button
-            onClick={() => setOpen(false)}
-            className="text-neutral-400 hover:text-white p-1 rounded-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
-            aria-label="Close chat sidebar"
-          >
-            <FiX className="h-5 w-5" />
-          </button>
         </div>
 
         {/* Messages */}

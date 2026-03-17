@@ -279,6 +279,45 @@ export interface BugSubmissionVerification {
   updatedAt: string
 }
 
+// Hub: Team and Team Task types
+export interface Team {
+  id: string
+  name: string
+  description?: string | null
+  createdBy: string
+  isPublic: boolean
+  createdAt: string
+  updatedAt: string
+  isMember?: boolean
+  role?: 'MEMBER' | 'ADMIN' | null
+  roomId?: string
+  members?: TeamMember[]
+  room?: { id: string; name: string } | null
+  tasks?: TeamTask[]
+}
+
+export interface TeamMember {
+  userId: string
+  role: string
+  joinedAt: string
+  username?: string
+  profilePicture?: string | null
+}
+
+export interface TeamTask {
+  id: string
+  teamId: string
+  title: string
+  description?: string | null
+  status: 'TODO' | 'IN_PROGRESS' | 'DONE'
+  createdBy: string
+  assignedTo?: string | null
+  dueAt?: string | null
+  position: number
+  createdAt: string
+  updatedAt: string
+}
+
 // GitHub Repository types
 export interface GitHubRepository {
   id: string

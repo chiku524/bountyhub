@@ -456,14 +456,51 @@ export const governanceVotes = sqliteTable('governance_votes', {
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-// Chat rooms table
+// Chat rooms table (GLOBAL, PRIVATE, GROUP, or POST for per-post chat)
 export const chatRooms = sqliteTable('chat_rooms', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
   description: text('description'),
-  type: text('type', { enum: ['GLOBAL', 'PRIVATE', 'GROUP'] }).notNull().default('GLOBAL'),
+  type: text('type', { enum: ['GLOBAL', 'PRIVATE', 'GROUP', 'POST'] }).notNull().default('GLOBAL'),
   createdBy: text('created_by').references(() => users.id, { onDelete: 'set null' }),
+  postId: text('post_id').references(() => posts.id, { onDelete: 'cascade' }),
+  teamId: text('team_id').references(() => teams.id, { onDelete: 'cascade' }),
   isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Teams table (hub: groups users create and join)
+export const teams = sqliteTable('teams', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  description: text('description'),
+  createdBy: text('created_by').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  isPublic: integer('is_public', { mode: 'boolean' }).notNull().default(true),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Team members table
+export const teamMembers = sqliteTable('team_members', {
+  id: text('id').primaryKey(),
+  teamId: text('team_id').notNull().references(() => teams.id, { onDelete: 'cascade' }),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  role: text('role', { enum: ['MEMBER', 'ADMIN'] }).notNull().default('MEMBER'),
+  joinedAt: integer('joined_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Team tasks table (todo/task list per team)
+export const teamTasks = sqliteTable('team_tasks', {
+  id: text('id').primaryKey(),
+  teamId: text('team_id').notNull().references(() => teams.id, { onDelete: 'cascade' }),
+  title: text('title').notNull(),
+  description: text('description'),
+  status: text('status', { enum: ['TODO', 'IN_PROGRESS', 'DONE'] }).notNull().default('TODO'),
+  createdBy: text('created_by').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  assignedTo: text('assigned_to').references(() => users.id, { onDelete: 'set null' }),
+  dueAt: integer('due_at', { mode: 'timestamp' }),
+  position: integer('position').notNull().default(0),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
 });
@@ -707,6 +744,9 @@ export const schema = {
   chatRoomParticipants,
   chatMessageReactions,
   chatMessageReads,
+  teams,
+  teamMembers,
+  teamTasks,
   bugBountyCampaigns,
   bugSubmissions,
   bugSubmissionVerifications,

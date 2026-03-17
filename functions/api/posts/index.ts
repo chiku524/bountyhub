@@ -13,6 +13,7 @@ import commentVoteRoute from './[id]/comments/[commentId]/vote'
 import answersRoute from './[id]/answers'
 import answerVoteRoute from './[id]/answers/[answerId]/vote'
 import answerAcceptRoute from './[id]/answers/[answerId]/accept'
+import postChatRoute from './[id]/chat'
 
 interface Env {
   DB: any
@@ -650,11 +651,12 @@ app.put('/:id', async (c) => {
 
 // Mount subroutes
 app.route('/:id/comments', commentsRoute)
-app.route('/:id/vote', voteRoute)
-app.route('/:id/comments/:commentId/vote', commentVoteRoute)
-app.route('/:id/answers', answersRoute)
-app.route('/:id/answers/:answerId/vote', answerVoteRoute)
-app.route('/:id/answers/:answerId/accept', answerAcceptRoute)
+  app.route('/:id/vote', voteRoute)
+  app.route('/:id/comments/:commentId/vote', commentVoteRoute)
+  app.route('/:id/answers', answersRoute)
+  app.route('/:id/answers/:answerId/vote', answerVoteRoute)
+  app.route('/:id/answers/:answerId/accept', answerAcceptRoute)
+  app.route('/:id/chat', postChatRoute)
 
 // DELETE post by ID
 app.delete('/:id', async (c) => {

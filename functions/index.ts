@@ -20,6 +20,7 @@ import refundVoteRoutes from './api/refund/vote'
 import governanceRoutes from './api/governance'
 import adminRoutes from './api/admin'
 import chatRoutes from './api/chat'
+import teamsRoutes from './api/teams'
 import cleanupRoutes from './api/cleanup-pending-transactions'
 import bugBountyRoutes from './api/bug-bounty'
 import githubRoutes from './api/github'
@@ -580,6 +581,7 @@ app.route('/api/refund', refundVoteRoutes)
 app.route('/api/governance', governanceRoutes)
 app.route('/api/admin', adminRoutes)
 app.route('/api/chat', chatRoutes)
+app.route('/api/teams', teamsRoutes)
 app.route('/api/cleanup', cleanupRoutes)
 app.route('/api/bug-bounty', bugBountyRoutes)
 app.route('/api/github', githubRoutes)
