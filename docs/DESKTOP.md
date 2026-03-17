@@ -4,6 +4,25 @@ The same BountyHub web app runs as a **desktop application** using [Tauri](https
 
 **Production:** The desktop app talks to `https://api.bountyhub.tech` when built for production. Official installers are built by GitHub Actions when you [publish a Release](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository); set `VITE_GITHUB_RELEASES_URL` (e.g. `https://github.com/your-org/bountyhub/releases/latest`) in your site env so the [Download](/download) page links to the latest release.
 
+### Auto-updates
+
+The app checks for updates on startup and can install them automatically (Tauri’s built-in updater).
+
+To enable signed updates (required for the updater to install new versions):
+
+1. **Generate a key pair** (once):  
+   `npm run tauri signer generate -- -w .tauri/bountyhub.key`  
+   This creates `.tauri/bountyhub.key` (private) and `.tauri/bountyhub.key.pub` (public).
+
+2. **Set the public key** in `src-tauri/tauri.conf.json`:  
+   Replace the `tauri.updater.pubkey` value with the **entire contents** of `.tauri/bountyhub.key.pub`.
+
+3. **Add GitHub Secrets** for CI (so release builds are signed):  
+   - `TAURI_PRIVATE_KEY`: full contents of `.tauri/bountyhub.key` (or a path your runner can read).  
+   - `TAURI_KEY_PASSWORD`: (optional) password if you used one when generating the key.
+
+4. **Bump version before each release**: update `version` in `src-tauri/tauri.conf.json` and `package.json` to match the release tag (e.g. `1.0.0` for tag `v1.0.0`). Then create the release; the workflow will build installers, sign them, and publish `latest.json` so the running app can find and install the update.
+
 ## Prerequisites
 
 - **Node.js 20+** (already used for the web app)

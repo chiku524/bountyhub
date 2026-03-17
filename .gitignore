@@ -12,6 +12,7 @@ dist/
 
 # Tauri / Rust
 src-tauri/target/
+.tauri/
 
 # Local database files
 *.db
@@ -54,3 +55,6 @@ Thumbs.db
 # Crash / dump files
 *.stackdump
 bash.exe.stackdump
+
+# Windows shell artifact
+nul
