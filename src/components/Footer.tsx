@@ -55,7 +55,7 @@ export function Footer() {
 
         <div className="mt-4 pt-4 border-t border-neutral-200 dark:border-neutral-700">
           <p className="text-neutral-500 dark:text-neutral-500 text-sm text-center">
-            © 2025 bountyhub. All rights reserved.
+            © {new Date().getFullYear()} bountyhub. All rights reserved.
           </p>
         </div>
       </div>
