@@ -7,6 +7,9 @@ node_modules/
 .env.production
 .dev.vars
 
+# Patched wry crate (created by scripts/patch-wry-linux.sh)
+patches/wry/
+
 # Build outputs
 build/
 dist/

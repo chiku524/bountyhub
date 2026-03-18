@@ -1,7 +1,7 @@
 {
   "name": "bountyhub",
   "private": true,
-  "version": "1.1.4",
+  "version": "1.1.5",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -28,7 +28,7 @@
     "db:studio": "drizzle-kit studio",
     "tauri": "tauri",
     "desktop": "tauri dev",
-    "desktop:build": "tauri build",
+    "desktop:build": "node scripts/patch-wry-linux.js && tauri build",
     "desktop:icons": "node scripts/generate-desktop-icons.js"
   },
   "dependencies": {

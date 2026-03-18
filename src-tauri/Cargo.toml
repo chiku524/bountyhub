@@ -18,3 +18,8 @@ serde_json = "1"
 [features]
 default = ["custom-protocol"]
 custom-protocol = ["tauri/custom-protocol"]
+
+# Linux: wry 0.24.11 needs webkit2gtk::SettingsExt in scope. CI downloads wry,
+# patches it (adds use webkit2gtk::SettingsExt), and this patch uses the result.
+[patch.crates-io]
+wry = { path = "../patches/wry" }
