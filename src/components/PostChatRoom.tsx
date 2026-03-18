@@ -3,7 +3,8 @@ import { useAuth } from '../contexts/AuthProvider';
 import { config } from '../utils/config';
 import { LoadingSpinner } from './LoadingSpinner';
 import { ProfilePicture } from './ProfilePicture';
-import { FiMessageCircle, FiSend } from 'react-icons/fi';
+import { FiMessageCircle, FiSend, FiChevronDown } from 'react-icons/fi';
+import { useChatWebSocket, type ChatWsMessagePayload } from '../hooks/useChatWebSocket';
 
 interface PostChatMessage {
   id: string;
@@ -31,7 +32,9 @@ export function PostChatRoom({ postId }: PostChatRoomProps) {
   const [sending, setSending] = useState(false);
   const [lastMessageTimestamp, setLastMessageTimestamp] = useState<string | null>(null);
   const [isPageVisible, setIsPageVisible] = useState(true);
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleVisibility = () => setIsPageVisible(!document.hidden);
@@ -41,11 +44,29 @@ export function PostChatRoom({ postId }: PostChatRoomProps) {
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    setShowScrollToBottom(false);
+  }, []);
+
+  const checkAtBottom = useCallback(() => {
+    const el = messagesContainerRef.current;
+    if (!el) return;
+    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
+    setShowScrollToBottom(!atBottom);
   }, []);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, scrollToBottom]);
+    checkAtBottom();
+  }, [messages, checkAtBottom]);
+
+  const handleWsMessage = useCallback((message: ChatWsMessagePayload) => {
+    setMessages((prev) => {
+      if (prev.some((m) => m.id === message.id)) return prev;
+      return [...prev, { ...message, messageType: message.messageType ?? 'TEXT' }];
+    });
+    if (message.createdAt) setLastMessageTimestamp(message.createdAt);
+  }, []);
+
+  const { connected: wsConnected } = useChatWebSocket(room?.id ?? null, handleWsMessage);
 
   const fetchRoom = useCallback(async () => {
     try {
@@ -113,10 +134,10 @@ export function PostChatRoom({ postId }: PostChatRoomProps) {
   }, [postId, fetchRoom, fetchMessages]);
 
   useEffect(() => {
-    if (!room || !user || !isPageVisible) return;
+    if (!room || !user || !isPageVisible || wsConnected) return;
     const interval = setInterval(() => fetchMessages(lastMessageTimestamp || undefined), POLL_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, [room, user, lastMessageTimestamp, fetchMessages, isPageVisible]);
+  }, [room, user, lastMessageTimestamp, fetchMessages, isPageVisible, wsConnected]);
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,6 +163,7 @@ export function PostChatRoom({ postId }: PostChatRoomProps) {
       if (data.success && data.message) {
         setMessages((prev) => [...prev, data.message]);
         setLastMessageTimestamp(data.message.createdAt);
+        setTimeout(() => scrollToBottom(), 0);
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to send message');
@@ -184,7 +206,11 @@ export function PostChatRoom({ postId }: PostChatRoomProps) {
       )}
 
       <div className="rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800/50 overflow-hidden flex flex-col max-h-[420px]">
-        <div className="flex-1 overflow-y-auto p-3 space-y-2 min-h-[200px] max-h-[320px]">
+        <div
+          ref={messagesContainerRef}
+          className="flex-1 overflow-y-auto p-3 space-y-2 min-h-[200px] max-h-[320px] relative"
+          onScroll={checkAtBottom}
+        >
           {messages.length === 0 && !loading ? (
             <p className="text-neutral-500 dark:text-gray-400 text-center py-6 text-sm">
               No messages yet. Be the first to chat about this post.
@@ -230,6 +256,16 @@ export function PostChatRoom({ postId }: PostChatRoomProps) {
             ))
           )}
           <div ref={messagesEndRef} />
+          {showScrollToBottom && (
+            <button
+              type="button"
+              onClick={scrollToBottom}
+              className="absolute bottom-3 right-3 p-2 rounded-full bg-indigo-600 text-white shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              aria-label="Scroll to bottom"
+            >
+              <FiChevronDown className="h-4 w-4" />
+            </button>
+          )}
         </div>
 
         {user ? (

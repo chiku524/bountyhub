@@ -10,7 +10,7 @@ export const DEFAULT_METADATA: PageMetadata = {
   title: 'bountyhub - Decentralized Bounty Platform',
   description: 'The decentralized bounty platform where questions meet rewards. Ask questions, offer bounties, and earn cryptocurrency rewards on Solana.',
   keywords: 'bounty, cryptocurrency, solana, blockchain, rewards, questions, answers, BBUX, decentralized',
-  ogImage: 'https://bountyhub.tech/og-image.svg',
+  ogImage: 'https://bountyhub.tech/og-image.jpg',
   ogType: 'website'
 }
 

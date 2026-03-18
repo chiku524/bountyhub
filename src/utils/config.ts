@@ -45,4 +45,12 @@ export const getApiUrl = (endpoint: string): string => {
   }
   
   return `${baseUrl}${cleanEndpoint}`
+}
+
+/** WebSocket base URL for chat (same host as API, ws/wss scheme). */
+export function getChatWsUrl(): string {
+  const base = config.api.baseUrl
+  if (base.startsWith('https://')) return base.replace('https://', 'wss://')
+  if (base.startsWith('http://')) return base.replace('http://', 'ws://')
+  return `wss://${base}`
 } 

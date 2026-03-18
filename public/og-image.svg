@@ -4,10 +4,6 @@
       <stop offset="0%" stop-color="#1e1b4b"/>
       <stop offset="100%" stop-color="#312e81"/>
     </linearGradient>
-    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#22d3ee"/>
-      <stop offset="100%" stop-color="#a78bfa"/>
-    </linearGradient>
     <linearGradient id="logo-bg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#1e1b4b"/>
       <stop offset="100%" stop-color="#312e81"/>
@@ -29,6 +25,6 @@
     <path d="M32 37 L32 43" stroke="#67e8f9" stroke-width="1.4" opacity="0.9" stroke-linecap="round"/>
     <circle cx="32" cy="30" r="5" fill="#e0e7ff" opacity="0.95"/>
   </g>
-  <text x="780" y="340" fill="white" font-family="system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="72" font-weight="700">bountyhub</text>
-  <text x="780" y="410" fill="rgba(255,255,255,0.9)" font-family="system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="28">Decentralized Bounty Platform · Solana</text>
+  <text x="780" y="340" fill="white" font-family="system-ui, sans-serif" font-size="72" font-weight="700">bountyhub</text>
+  <text x="780" y="410" fill="rgba(255,255,255,0.9)" font-family="system-ui, sans-serif" font-size="28">Decentralized Bounty Platform - Solana</text>
 </svg>

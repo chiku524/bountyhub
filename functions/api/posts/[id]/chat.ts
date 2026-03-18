@@ -5,9 +5,11 @@ import { chatMessages, chatRoomParticipants, users, profiles, posts } from '../.
 import { getCookie } from 'hono/cookie';
 import { createDb } from '../../../../src/utils/db';
 import { getUserIdFromSession } from '../../../../src/utils/auth';
+import { broadcastMessageToRoom } from '../../chat';
 
 interface Env {
   DB: D1Database;
+  CHAT_ROOM_DO?: DurableObjectNamespace;
 }
 
 type AppContext = Context<{ Bindings: Env }>;
@@ -259,6 +261,7 @@ export async function postPostChatMessage(c: AppContext, postId: string) {
       .where(eq(chatMessages.id, messageId))
       .limit(1);
 
+    await broadcastMessageToRoom(c.env, roomId, message[0]);
     return c.json({ success: true, message: message[0] });
   } catch (error) {
     console.error('Error sending post chat message:', error);

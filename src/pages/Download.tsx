@@ -36,7 +36,7 @@ function getRepoFromReleasesUrl(url: string): string | null {
 }
 
 /** Pick the best direct-download URL for each platform from GitHub release assets. */
-function getDownloadUrls(assets: { name: string; browser_download_url: string }[]): Record<Platform, string | null> {
+function getDownloadUrls(assets: { name: string; browser_download_url: string }[]): Record<NonNullable<Platform>, string | null> {
   const lower = (name: string) => name.toLowerCase()
   const windows =
     assets.find((a) => lower(a.name).endsWith('.msi')) ??
@@ -53,7 +53,7 @@ function getDownloadUrls(assets: { name: string; browser_download_url: string }[
 export default function Download() {
   const hasReleases = Boolean(GITHUB_RELEASES_URL)
   const [platform, setPlatform] = useState<Platform>(null)
-  const [downloadUrls, setDownloadUrls] = useState<Record<Platform, string | null>>({
+  const [downloadUrls, setDownloadUrls] = useState<Record<NonNullable<Platform>, string | null>>({
     windows: null,
     macos: null,
     linux: null,

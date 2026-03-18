@@ -4,8 +4,9 @@ import { api } from '../utils/api';
 import Layout from '../components/Layout';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
-import { FiSend, FiSmile, FiPaperclip, FiUsers, FiMessageSquare, FiPlusCircle, FiCheckSquare, FiList } from 'react-icons/fi';
+import { FiSend, FiSmile, FiPaperclip, FiUsers, FiMessageSquare, FiPlusCircle, FiCheckSquare, FiList, FiChevronDown } from 'react-icons/fi';
 import type { Team, TeamTask } from '../types';
+import { useChatWebSocket, type ChatWsMessagePayload } from '../hooks/useChatWebSocket';
 
 interface Message {
   id: string;
@@ -67,19 +68,50 @@ const Chat: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const [isJoined, setIsJoined] = useState(false);
   const [lastMessageId, setLastMessageId] = useState<string | null>(null);
-  const [isPolling, setIsPolling] = useState(false);
+  const [, setIsPolling] = useState(false);
   const [isPageVisible, setIsPageVisible] = useState(true);
+  const messagesRef = useRef<Message[]>([]);
+  const lastMessageIdRef = useRef<string | null>(null);
+  const pollingInFlightRef = useRef(false);
+  messagesRef.current = messages;
+  lastMessageIdRef.current = lastMessageId;
 
-  // Auto-scroll to bottom when new messages arrive
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+    setShowScrollToBottom(false);
+  }, []);
+
+  const checkAtBottom = useCallback(() => {
+    const el = messagesContainerRef.current;
+    if (!el) return;
+    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
+    setShowScrollToBottom(!atBottom);
+  }, []);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    checkAtBottom();
+  }, [messages, checkAtBottom]);
+
+  const handleWsMessage = useCallback((message: ChatWsMessagePayload) => {
+    setMessages(prev => {
+      if (prev.some(m => m.id === message.id)) return prev;
+      return [...prev, {
+        ...message,
+        messageType: (message.messageType as Message['messageType']) ?? 'TEXT',
+        isEdited: false,
+      } as Message];
+    });
+    setLastMessageId(message.id);
+  }, []);
+
+  const { connected: wsConnected } = useChatWebSocket(
+    currentRoom && isJoined && (viewMode !== 'team' || hubTab === 'chat') ? currentRoom.id : null,
+    handleWsMessage
+  );
 
   // Handle page visibility changes
   useEffect(() => {
@@ -189,103 +221,64 @@ const Chat: React.FC = () => {
     fetchMessages();
   }, [currentRoom]);
 
-  // Real-time polling for new messages
+  // Real-time polling for new messages when WebSocket is not connected
   useEffect(() => {
-    console.log('Polling effect triggered:', { 
-      currentRoom: currentRoom?.id, 
-      isJoined, 
-      isPolling, 
-      isPageVisible,
-      lastMessageId,
-      messagesCount: messages.length 
-    });
-    
-    if (!currentRoom || !isJoined || isPolling || !isPageVisible) {
-      console.log('Polling skipped:', { 
-        noCurrentRoom: !currentRoom, 
-        notJoined: !isJoined, 
-        isPolling, 
-        notVisible: !isPageVisible 
-      });
-      return;
-    }
+    if (!currentRoom || !isJoined || !isPageVisible || wsConnected) return;
 
-    console.log('Starting polling for room:', currentRoom.id);
     const pollInterval = setInterval(async () => {
+      const room = currentRoom;
+      const currentLastId = lastMessageIdRef.current;
+      const currentMessages = messagesRef.current;
+      if (!room || pollingInFlightRef.current) return;
+
       try {
+        pollingInFlightRef.current = true;
         setIsPolling(true);
-        console.log(`[${new Date().toLocaleTimeString()}] Polling for new messages...`);
-        
-        // Only fetch messages after the last message timestamp to reduce data transfer
-        const lastMessageTimestamp = messages.length > 0 ? messages[messages.length - 1].createdAt : '';
-        
-        // Use the appropriate endpoint based on room type
-        const baseUrl = currentRoom.type === 'GLOBAL' 
+        const lastMessageTimestamp = currentMessages.length > 0 ? currentMessages[currentMessages.length - 1].createdAt : '';
+        const baseUrl = room.type === 'GLOBAL'
           ? '/api/chat/global-chat/messages'
-          : `/api/chat/${currentRoom.id}/messages`;
-          
-        const url = lastMessageTimestamp 
+          : `/api/chat/${room.id}/messages`;
+        const url = lastMessageTimestamp
           ? `${baseUrl}?after=${encodeURIComponent(lastMessageTimestamp)}`
           : baseUrl;
-        
+
         const response = await api.request<{ success: boolean; messages: Message[] }>(url);
-        
+
         if (response.success && response.messages.length > 0) {
-          // Check if there are new messages
           const lastMessage = response.messages[response.messages.length - 1];
-          if (lastMessageId && lastMessage.id !== lastMessageId) {
-            console.log(`[${new Date().toLocaleTimeString()}] New messages detected:`, { 
-              lastKnownId: lastMessageId, 
-              newLastId: lastMessage.id 
-            });
-            // Find the index of the last known message
-            const lastKnownIndex = response.messages.findIndex(msg => msg.id === lastMessageId);
+          if (currentLastId && lastMessage.id !== currentLastId) {
+            const lastKnownIndex = response.messages.findIndex(msg => msg.id === currentLastId);
             if (lastKnownIndex !== -1) {
-              // Get only the new messages
               const newMessages = response.messages.slice(lastKnownIndex + 1);
-              console.log(`[${new Date().toLocaleTimeString()}] Adding new messages:`, newMessages.length);
               setMessages(prev => [...prev, ...newMessages]);
               setLastMessageId(lastMessage.id);
-              
-              // Show notification if page is not visible
-              if (!isPageVisible && newMessages.length > 0) {
+              if (document.hidden && newMessages.length > 0) {
                 const latestMessage = newMessages[newMessages.length - 1];
-                if (latestMessage.author.id !== user?.id) {
-                  // Show browser notification
-                  if ('Notification' in window && Notification.permission === 'granted') {
-                    new Notification(`New message in ${currentRoom.name}`, {
-                      body: `${latestMessage.author.username}: ${latestMessage.content}`,
-                      icon: '/favicon.svg'
-                    });
-                  }
+                if (user && latestMessage.author.id !== user.id && 'Notification' in window && Notification.permission === 'granted') {
+                  new Notification(`New message in ${room.name}`, {
+                    body: `${latestMessage.author.username}: ${latestMessage.content}`,
+                    icon: '/favicon.svg'
+                  });
                 }
               }
             } else {
-              // If we can't find the last message, refresh all messages
-              console.log(`[${new Date().toLocaleTimeString()}] Last message not found, refreshing all messages`);
               setMessages(response.messages);
               setLastMessageId(lastMessage.id);
             }
-          } else if (!lastMessageId) {
-            // First time loading, set the last message ID
-            console.log(`[${new Date().toLocaleTimeString()}] Setting initial last message ID:`, lastMessage.id);
+          } else if (!currentLastId) {
             setLastMessageId(lastMessage.id);
           }
-        } else {
-          console.log(`[${new Date().toLocaleTimeString()}] No new messages found`);
         }
-      } catch (err) {
-        console.error(`[${new Date().toLocaleTimeString()}] Error polling for new messages:`, err);
+      } catch (_err) {
+        // Poll errors are non-fatal; ignore or log in dev
       } finally {
+        pollingInFlightRef.current = false;
         setIsPolling(false);
       }
-    }, 3000); // Poll every 3 seconds
+    }, 5000);
 
-    return () => {
-      console.log('Clearing polling interval for room:', currentRoom.id);
-      clearInterval(pollInterval);
-    };
-  }, [currentRoom, isJoined, lastMessageId, isPolling, messages, isPageVisible, user?.id]);
+    return () => clearInterval(pollInterval);
+  }, [currentRoom, isJoined, isPageVisible, user?.id, wsConnected]);
 
   // Join room when user is authenticated
   useEffect(() => {
@@ -341,13 +334,14 @@ const Chat: React.FC = () => {
         setMessages(prev => [...prev, response.message]);
         setLastMessageId(response.message.id);
         setNewMessage('');
+        setTimeout(() => scrollToBottom(), 0);
       }
     } catch (_err) {
       setError('Failed to send message');
     } finally {
       setSending(false);
     }
-  }, [currentRoom, newMessage, sending]);
+  }, [currentRoom, newMessage, sending, scrollToBottom]);
 
   const formatTime = (timestamp: string) => {
     return new Date(timestamp).toLocaleTimeString([], { 
@@ -828,7 +822,11 @@ const Chat: React.FC = () => {
                 </div>
               ) : (
                 <>
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              <div
+                ref={messagesContainerRef}
+                className="flex-1 overflow-y-auto p-4 space-y-4 relative"
+                onScroll={checkAtBottom}
+              >
                 {loading ? (
                   <div className="flex items-center justify-center h-full">
                     <LoadingSpinner />
@@ -897,6 +895,16 @@ const Chat: React.FC = () => {
                     })}
                     <div ref={messagesEndRef} />
                   </>
+                )}
+                {showScrollToBottom && (
+                  <button
+                    type="button"
+                    onClick={scrollToBottom}
+                    className="absolute bottom-4 right-4 p-2 rounded-full bg-indigo-600 text-white shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    aria-label="Scroll to bottom"
+                  >
+                    <FiChevronDown className="h-4 w-4" />
+                  </button>
                 )}
               </div>
 

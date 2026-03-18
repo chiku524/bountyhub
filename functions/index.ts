@@ -1,5 +1,6 @@
 /// <reference types="@cloudflare/workers-types" />
 import { Hono } from 'hono'
+export { ChatRoomDO } from './durable-objects/ChatRoomDO'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 import { prettyJSON } from 'hono/pretty-json'
@@ -29,6 +30,8 @@ import mediaRoutes from './api/media'
 
 interface Env {
   DB: D1Database
+  /** Durable Object namespace for chat room WebSockets */
+  CHAT_ROOM_DO: DurableObjectNamespace
   /** R2 bucket for media (profile pictures, post attachments). Optional until migration from Cloudinary. */
   MEDIA_BUCKET?: R2Bucket
   /** KV namespace for cache / rate limits / feature flags. Optional. */

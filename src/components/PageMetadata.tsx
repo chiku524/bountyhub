@@ -24,7 +24,7 @@ export function PageMetadata({
   const finalTitle = formatPageTitle(title || pageMetadata.title)
   const finalDescription = description || pageMetadata.description
   const finalKeywords = keywords || pageMetadata.keywords
-  const finalOgImage = ogImage || pageMetadata.ogImage || 'https://bountyhub.tech/og-image.svg'
+  const finalOgImage = ogImage || pageMetadata.ogImage || 'https://bountyhub.tech/og-image.jpg'
   const finalOgType = ogType || pageMetadata.ogType || 'website'
   
   const canonicalUrl = `https://bountyhub.tech${location.pathname}`

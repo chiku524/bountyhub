@@ -3,8 +3,9 @@ import { useAuth } from '../contexts/AuthProvider';
 import { ApiClient } from '../utils/api';
 import { config } from '../utils/config';
 import { Link } from 'react-router-dom';
-import { FiSend, FiMessageSquare, FiX, FiMessageCircle, FiSmile, FiImage, FiGrid, FiUsers, FiChevronLeft, FiPlusCircle } from 'react-icons/fi';
+import { FiSend, FiMessageSquare, FiX, FiMessageCircle, FiSmile, FiImage, FiGrid, FiUsers, FiChevronLeft, FiChevronDown, FiPlusCircle } from 'react-icons/fi';
 import type { Team } from '../types';
+import { useChatWebSocket } from '../hooks/useChatWebSocket';
 
 // Simple emoji data
 const EMOJIS = [
@@ -50,7 +51,7 @@ interface ChatRoomOption {
 }
 
 type HubView = 'list' | 'chat';
-type ChatTarget = { type: 'global'; name: string } | { type: 'room'; id: string; name: string } | { type: 'team'; roomId: string; name: string };
+type ChatTarget = { type: 'global'; roomId: string; name: string } | { type: 'room'; id: string; name: string } | { type: 'team'; roomId: string; name: string };
 
 const ChatSidebar: React.FC = () => {
   const { user } = useAuth();
@@ -70,8 +71,26 @@ const ChatSidebar: React.FC = () => {
   const [lastMessageTimestamp, setLastMessageTimestamp] = useState<string | null>(null);
   const [isPolling, setIsPolling] = useState(false);
   const [loadingChat, setLoadingChat] = useState(false);
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const api = new ApiClient();
+
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    setShowScrollToBottom(false);
+  }, []);
+
+  const checkAtBottom = useCallback(() => {
+    const el = messagesContainerRef.current;
+    if (!el) return;
+    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
+    setShowScrollToBottom(!atBottom);
+  }, []);
+
+  useEffect(() => {
+    checkAtBottom();
+  }, [messages, checkAtBottom]);
 
   const GIPHY_API_KEY = config.giphy.apiKey;
 
@@ -81,8 +100,28 @@ const ChatSidebar: React.FC = () => {
       : `/api/chat/${chatTarget.type === 'room' ? chatTarget.id : chatTarget.roomId}/messages`
     : '';
 
+  const chatRoomId = chatTarget
+    ? chatTarget.type === 'global'
+      ? chatTarget.roomId
+      : chatTarget.type === 'room'
+        ? chatTarget.id
+        : chatTarget.roomId
+    : null;
+
+  const handleWsMessage = useCallback((message: { id: string; content: string; createdAt?: string; author: { id: string; username: string; role: string }; [key: string]: unknown }) => {
+    setMessages(prev => {
+      if (prev.some(m => m.id === message.id)) return prev;
+      return [...prev, message as Message];
+    });
+    if (message.createdAt) setLastMessageTimestamp(message.createdAt);
+  }, []);
+
+  const { connected: wsConnected } = useChatWebSocket(chatTarget && hubView === 'chat' ? chatRoomId : null, handleWsMessage);
+
+  const pollingRef = useRef(false);
   const fetchNewMessages = useCallback(async () => {
-    if (!messagesUrl || isPolling) return;
+    if (!messagesUrl || pollingRef.current) return;
+    pollingRef.current = true;
     setIsPolling(true);
     try {
       const url = lastMessageTimestamp ? `${messagesUrl}?limit=30&after=${encodeURIComponent(lastMessageTimestamp)}` : `${messagesUrl}?limit=30`;
@@ -99,16 +138,18 @@ const ChatSidebar: React.FC = () => {
     } catch (err) {
       console.error('Failed to fetch new messages:', err);
     } finally {
+      pollingRef.current = false;
       setIsPolling(false);
     }
-  }, [messagesUrl, lastMessageTimestamp, isPolling, api]);
+  }, [messagesUrl, lastMessageTimestamp, api]);
 
   useEffect(() => {
     if (!user || !open) return;
     if (hubView !== 'chat' || !chatTarget) return;
+    if (wsConnected) return;
     const pollInterval = setInterval(fetchNewMessages, 8000);
     return () => clearInterval(pollInterval);
-  }, [user, open, hubView, chatTarget, fetchNewMessages]);
+  }, [user, open, hubView, chatTarget, fetchNewMessages, wsConnected]);
 
   useEffect(() => {
     if (!open || !user) return;
@@ -127,18 +168,15 @@ const ChatSidebar: React.FC = () => {
     loadHub();
   }, [open, user]);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, open]);
-
   const selectGlobal = async () => {
     setLoadingChat(true);
-    setChatTarget({ type: 'global', name: 'Global Chat' });
     setHubView('chat');
     setMessages([]);
     setLastMessageTimestamp(null);
     try {
-      await api.request('/api/chat/global-chat/join', { method: 'POST' });
+      const joinRes = await api.request<{ success: boolean; roomId?: string }>('/api/chat/global-chat/join', { method: 'POST' });
+      const roomId = joinRes.roomId ?? '';
+      setChatTarget({ type: 'global', roomId, name: 'Global Chat' });
       const res = await api.request<{ success: boolean; messages: Message[] }>('/api/chat/global-chat/messages?limit=30');
       if (res.success) {
         setMessages(res.messages);
@@ -230,6 +268,7 @@ const ChatSidebar: React.FC = () => {
       if (response.success) {
         setMessages(prev => [...prev, response.message]);
         if (response.message.createdAt) setLastMessageTimestamp(response.message.createdAt);
+        setTimeout(() => scrollToBottom(), 0);
       }
     } catch (error) {
       console.error('Failed to send message:', error);
@@ -480,7 +519,11 @@ const ChatSidebar: React.FC = () => {
         ) : (
         <>
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-neutral-900">
+        <div
+          ref={messagesContainerRef}
+          className="flex-1 overflow-y-auto p-3 space-y-2 bg-neutral-900 scrollbar-hide relative"
+          onScroll={checkAtBottom}
+        >
           {messages.map((msg) => (
             <div key={msg.id} className={`flex ${msg.author.id === user.id ? 'justify-end' : 'justify-start'}`}>
               <div
@@ -498,6 +541,16 @@ const ChatSidebar: React.FC = () => {
             </div>
           ))}
           <div ref={messagesEndRef} />
+          {showScrollToBottom && (
+            <button
+              type="button"
+              onClick={scrollToBottom}
+              className="absolute bottom-3 right-3 p-2 rounded-full bg-indigo-600 text-white shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              aria-label="Scroll to bottom"
+            >
+              <FiChevronDown className="h-4 w-4" />
+            </button>
+          )}
         </div>
 
         {/* Emoji Picker */}

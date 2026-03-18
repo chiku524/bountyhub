@@ -24,6 +24,15 @@ bucket_name = "bountyhub-media"
 binding = "CACHE"
 preview_id = "27bafcd35c634a5facf96d6fc8b70be0"
 
+# Durable Object for chat WebSockets (same as production)
+[[durable_objects.bindings]]
+name = "CHAT_ROOM_DO"
+class_name = "ChatRoomDO"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["ChatRoomDO"]
+
 # Development environment variables
 [vars]
 NODE_ENV = "development"

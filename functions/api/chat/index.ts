@@ -7,9 +7,33 @@ import { getUserIdFromSession } from '../../../src/utils/auth';
 
 interface Env {
   DB: any;
+  CHAT_ROOM_DO?: DurableObjectNamespace;
+}
+
+/** Notify all WebSocket clients in a room that a new message was posted. */
+export async function broadcastMessageToRoom(env: Env, roomId: string, message: unknown): Promise<void> {
+  if (!env.CHAT_ROOM_DO) return;
+  const id = env.CHAT_ROOM_DO.idFromName(roomId);
+  const stub = env.CHAT_ROOM_DO.get(id);
+  await stub.fetch(new Request('http://do/broadcast', { method: 'POST', body: JSON.stringify({ message }) }));
 }
 
 const chat = new Hono<{ Bindings: Env }>();
+
+// WebSocket upgrade: forward to the room's Durable Object
+chat.get('/ws', async (c) => {
+  if (c.req.header('Upgrade') !== 'websocket') {
+    return c.json({ error: 'Expected WebSocket upgrade' }, 426);
+  }
+  const roomId = c.req.query('roomId');
+  if (!roomId) return c.json({ error: 'roomId required' }, 400);
+  if (!c.env.CHAT_ROOM_DO) {
+    return c.json({ error: 'WebSocket not available' }, 503);
+  }
+  const id = c.env.CHAT_ROOM_DO.idFromName(roomId);
+  const stub = c.env.CHAT_ROOM_DO.get(id);
+  return stub.fetch(c.req.raw);
+});
 
 // Get chat rooms for hub: global, rooms user is in, and public rooms (exclude per-post rooms)
 // Select without isPublic so this works before/after migration 0019
@@ -118,7 +142,7 @@ chat.post('/global-chat/join', async (c) => {
           .set({ isActive: true, lastReadAt: new Date() })
           .where(eq(chatRoomParticipants.id, existingParticipant[0].id));
       }
-      return c.json({ success: true, message: 'Already a participant' });
+      return c.json({ success: true, message: 'Already a participant', roomId });
     }
 
     await db.insert(chatRoomParticipants).values({
@@ -129,7 +153,7 @@ chat.post('/global-chat/join', async (c) => {
       isActive: true,
     });
 
-    return c.json({ success: true, message: 'Joined global chat successfully' });
+    return c.json({ success: true, message: 'Joined global chat successfully', roomId });
   } catch (error) {
     console.error('Error joining global chat:', error);
     return c.json({ success: false, error: 'Failed to join global chat' }, 500);
@@ -295,6 +319,7 @@ chat.post('/global-chat/messages', async (c) => {
       .where(eq(chatMessages.id, messageId))
       .limit(1);
 
+    await broadcastMessageToRoom(c.env, roomId, message);
     return c.json({ success: true, message: message });
   } catch (error) {
     console.error('Error sending global chat message:', error);
@@ -517,6 +542,7 @@ chat.post('/:roomId/messages', async (c) => {
       .where(eq(chatMessages.id, messageId))
       .limit(1);
 
+    await broadcastMessageToRoom(c.env, roomId, message[0]);
     return c.json({ success: true, message: message[0] });
   } catch (error) {
     console.error('Error sending message:', error);

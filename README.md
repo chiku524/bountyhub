@@ -50,6 +50,25 @@ npm run build
 npm run deploy:workers
 ```
 
+## 🎨 Brand & social assets
+
+Raster brand images (PNG/JPG) are generated from SVGs in `public/`. After changing any of these source files, re-run:
+
+```bash
+node scripts/generate-brand-images.js
+```
+
+**Source SVGs:** `public/logo.svg`, `public/og-image.svg`, `public/social-banner.svg`, `public/social-square.svg`
+
+**Generated files in `public/`:**
+
+| Asset | Use |
+|-------|-----|
+| `logo-192.png`, `logo-512.png`, `logo-1024.png`, `logo-1024.jpg` | PWA icons, app icons, general logo |
+| `og-image.png`, `og-image.jpg` | Open Graph / Twitter cards (1200×630); used in meta tags |
+| `social-banner.png`, `social-banner.jpg` (1500×500) | Twitter/X header, LinkedIn banner, YouTube banner |
+| `social-square.png`, `social-square.jpg` (1080×1080) | Profile images, square posts (Instagram, etc.) |
+
 ## 📄 License
 
 Private project - All rights reserved 

@@ -216,4 +216,13 @@
   [tabindex="0"]:focus-visible {
     @apply outline-2 outline-offset-2 outline-indigo-500;
   }
+
+  /* Hide scrollbar while keeping scroll behavior */
+  .scrollbar-hide {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 } 

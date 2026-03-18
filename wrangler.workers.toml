@@ -24,6 +24,15 @@ bucket_name = "bountyhub-media"
 binding = "CACHE"
 id = "912fc2937534477cbfc53bdbfb9b4b99"
 
+# Durable Object for chat room WebSockets (one DO instance per room)
+[[durable_objects.bindings]]
+name = "CHAT_ROOM_DO"
+class_name = "ChatRoomDO"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["ChatRoomDO"]
+
 [vars]
 NODE_ENV = "production"
 SESSION_SECRET = "mysupersecretpassword"
