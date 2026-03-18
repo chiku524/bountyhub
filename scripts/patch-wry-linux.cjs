@@ -3,6 +3,7 @@
  * Create patches/wry with wry 0.24.11 source + one-line fix for Linux:
  * add "use webkit2gtk::SettingsExt;" so the trait is in scope.
  * Run before desktop build so [patch.crates-io] in src-tauri/Cargo.toml can resolve.
+ * (.cjs for CommonJS under package.json "type": "module")
  */
 const fs = require('fs');
 const path = require('path');

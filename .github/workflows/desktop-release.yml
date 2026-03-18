@@ -97,7 +97,7 @@ jobs:
           VITE_API_URL: https://api.bountyhub.tech
 
       - name: Patch wry for Linux (webkit2gtk SettingsExt)
-        run: node scripts/patch-wry-linux.js
+        run: node scripts/patch-wry-linux.cjs
 
       - name: Build Tauri app (with updater signing if TAURI_PRIVATE_KEY is set)
         run: npm run desktop:build
