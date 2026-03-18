@@ -118,24 +118,25 @@ export default function Download() {
                   const Icon = platformIcons[p]
                   const isPrimary = platform === p
                   const directUrl = downloadUrls[p]
-                  const href = directUrl || GITHUB_RELEASES_URL
-                  const isDirectDownload = Boolean(directUrl)
-                  const ariaLabel = isDirectDownload
+                  const hasUrl = Boolean(directUrl)
+                  const ariaLabel = hasUrl
                     ? `Download BountyHub for ${platformLabels[p]}`
-                    : `Open GitHub release page for ${platformLabels[p]}`
-                  return (
+                    : releasesFetched
+                      ? `Download for ${platformLabels[p]} (not available yet)`
+                      : `Loading download for ${platformLabels[p]}`
+                  const buttonClass = `inline-flex flex-col items-center gap-2 px-6 py-4 rounded-xl font-semibold shadow-lg transition-all min-w-[140px] ${
+                    isPrimary
+                      ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-500/25 ring-2 ring-indigo-400 ring-offset-2 ring-offset-white dark:ring-offset-neutral-900'
+                      : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-800 dark:text-neutral-200 hover:bg-neutral-300 dark:hover:bg-neutral-600'
+                  } ${!hasUrl ? 'opacity-75 pointer-events-none' : ''}`
+                  return hasUrl ? (
                     <a
                       key={p}
-                      href={href}
-                      target={isDirectDownload ? undefined : '_blank'}
-                      rel={isDirectDownload ? undefined : 'noopener noreferrer'}
-                      download={isDirectDownload ? true : undefined}
+                      href={directUrl!}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       aria-label={ariaLabel}
-                      className={`inline-flex flex-col items-center gap-2 px-6 py-4 rounded-xl font-semibold shadow-lg transition-all min-w-[140px] ${
-                        isPrimary
-                          ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-500/25 ring-2 ring-indigo-400 ring-offset-2 ring-offset-white dark:ring-offset-neutral-900'
-                          : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-800 dark:text-neutral-200 hover:bg-neutral-300 dark:hover:bg-neutral-600'
-                      }`}
+                      className={buttonClass}
                     >
                       <Icon className="w-7 h-7" />
                       <span>{platformLabels[p]}</span>
@@ -144,12 +145,32 @@ export default function Download() {
                       )}
                       <FiDownload className={`w-5 h-5 ${isPrimary ? 'opacity-90' : 'opacity-70'}`} />
                     </a>
+                  ) : (
+                    <span
+                      key={p}
+                      aria-label={ariaLabel}
+                      className={buttonClass}
+                    >
+                      <Icon className="w-7 h-7" />
+                      <span>{platformLabels[p]}</span>
+                      {isPrimary && (
+                        <span className="text-xs opacity-90 font-normal">Recommended for you</span>
+                      )}
+                      <FiDownload className={`w-5 h-5 ${isPrimary ? 'opacity-90' : 'opacity-70'}`} />
+                    </span>
                   )
                 })}
               </div>
+              {releasesFetched && !(downloadUrls.windows || downloadUrls.macos || downloadUrls.linux) && (
+                <p className="mt-3 text-sm text-neutral-500 dark:text-neutral-400">
+                  <a href={GITHUB_RELEASES_URL} target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-400 hover:underline">
+                    Get installers from GitHub Releases
+                  </a>
+                </p>
+              )}
               {releasesFetched && (downloadUrls.windows || downloadUrls.macos || downloadUrls.linux) && (
                 <p className="mt-3 text-sm text-neutral-500 dark:text-neutral-400">
-                  Click a button to download the installer; it will start automatically.
+                  Click a button to download the installer; it will open in a new tab and download automatically.
                 </p>
               )}
             </>
