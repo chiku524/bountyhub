@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthProvider';
 import { ApiClient } from '../utils/api';
 import { config } from '../utils/config';
 import { Link } from 'react-router-dom';
-import { FiSend, FiMessageSquare, FiX, FiMessageCircle, FiSmile, FiImage, FiGrid } from 'react-icons/fi';
+import { FiSend, FiMessageSquare, FiX, FiMessageCircle, FiSmile, FiImage, FiGrid, FiUsers, FiChevronLeft, FiPlusCircle } from 'react-icons/fi';
+import type { Team } from '../types';
 
 // Simple emoji data
 const EMOJIS = [
@@ -40,11 +41,26 @@ interface GifResult {
   };
 }
 
+interface ChatRoomOption {
+  id: string;
+  name: string;
+  type: 'GLOBAL' | 'PRIVATE' | 'GROUP';
+  isPublic?: boolean;
+  isParticipant?: boolean;
+}
+
+type HubView = 'list' | 'chat';
+type ChatTarget = { type: 'global'; name: string } | { type: 'room'; id: string; name: string } | { type: 'team'; roomId: string; name: string };
+
 const ChatSidebar: React.FC = () => {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [open, setOpen] = useState(false);
+  const [hubView, setHubView] = useState<HubView>('list');
+  const [chatTarget, setChatTarget] = useState<ChatTarget | null>(null);
+  const [rooms, setRooms] = useState<ChatRoomOption[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showGifSearch, setShowGifSearch] = useState(false);
   const [gifSearchTerm, setGifSearchTerm] = useState('');
@@ -53,112 +69,167 @@ const ChatSidebar: React.FC = () => {
   const [sending, setSending] = useState(false);
   const [lastMessageTimestamp, setLastMessageTimestamp] = useState<string | null>(null);
   const [isPolling, setIsPolling] = useState(false);
+  const [loadingChat, setLoadingChat] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const api = new ApiClient();
 
-  // Use GIPHY API key from config
   const GIPHY_API_KEY = config.giphy.apiKey;
 
-  // Function to fetch new messages
-  const fetchNewMessages = async () => {
-    if (isPolling) return; // Prevent concurrent requests
-    
+  const messagesUrl = chatTarget
+    ? chatTarget.type === 'global'
+      ? '/api/chat/global-chat/messages'
+      : `/api/chat/${chatTarget.type === 'room' ? chatTarget.id : chatTarget.roomId}/messages`
+    : '';
+
+  const fetchNewMessages = useCallback(async () => {
+    if (!messagesUrl || isPolling) return;
     setIsPolling(true);
     try {
-      const res = await api.request<{ success: boolean; messages: Message[] }>(
-        `/api/chat/global-chat/messages?limit=30${lastMessageTimestamp ? `&after=${lastMessageTimestamp}` : ''}`
-      );
+      const url = lastMessageTimestamp ? `${messagesUrl}?limit=30&after=${encodeURIComponent(lastMessageTimestamp)}` : `${messagesUrl}?limit=30`;
+      const res = await api.request<{ success: boolean; messages: Message[] }>(url);
       if (res.success && res.messages.length > 0) {
         setMessages(prev => {
-          // Filter out duplicates and add new messages
           const existingIds = new Set(prev.map(msg => msg.id));
           const newMessages = res.messages.filter(msg => !existingIds.has(msg.id));
           return [...prev, ...newMessages];
         });
-        
-        // Update last message timestamp
-        const latestMessage = res.messages[res.messages.length - 1];
-        if (latestMessage.createdAt) {
-          setLastMessageTimestamp(latestMessage.createdAt);
-        }
+        const latest = res.messages[res.messages.length - 1];
+        if (latest.createdAt) setLastMessageTimestamp(latest.createdAt);
       }
-    } catch (error) {
-      console.error('Failed to fetch new messages:', error);
+    } catch (err) {
+      console.error('Failed to fetch new messages:', err);
     } finally {
       setIsPolling(false);
     }
-  };
+  }, [messagesUrl, lastMessageTimestamp, isPolling, api]);
 
-  useEffect(() => {
-    // Fetch initial messages and join global chat room
-    const initializeChat = async () => {
-      try {
-        // Join global chat room
-        await api.request('/api/chat/global-chat/join', {
-          method: 'POST'
-        });
-        
-        // Load recent messages
-        const res = await api.request<{ success: boolean; messages: Message[] }>('/api/chat/global-chat/messages?limit=30');
-        if (res.success) {
-          setMessages(res.messages);
-          
-          // Set initial timestamp for polling
-          if (res.messages.length > 0) {
-            const latestMessage = res.messages[res.messages.length - 1];
-            if (latestMessage.createdAt) {
-              setLastMessageTimestamp(latestMessage.createdAt);
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Failed to initialize chat:', error);
-      }
-    };
-
-    if (user) {
-      initializeChat();
-    }
-  }, [user]);
-
-  // Set up polling for new messages when chat is open
   useEffect(() => {
     if (!user || !open) return;
-
-    // Poll for new messages every 2 seconds when chat is open
-    const pollInterval = setInterval(fetchNewMessages, 2000);
-
+    if (hubView !== 'chat' || !chatTarget) return;
+    const pollInterval = setInterval(fetchNewMessages, 8000);
     return () => clearInterval(pollInterval);
-  }, [user, open, lastMessageTimestamp]);
+  }, [user, open, hubView, chatTarget, fetchNewMessages]);
+
+  useEffect(() => {
+    if (!open || !user) return;
+    const loadHub = async () => {
+      try {
+        const [chatRes, teamsRes] = await Promise.all([
+          api.request<{ success: boolean; rooms: ChatRoomOption[] }>('/api/chat'),
+          api.request<{ success: boolean; teams: Team[] }>('/api/teams'),
+        ]);
+        if (chatRes.success && chatRes.rooms) setRooms(chatRes.rooms);
+        if (teamsRes.success && teamsRes.teams) setTeams(teamsRes.teams);
+      } catch (err) {
+        console.error('Failed to load hub:', err);
+      }
+    };
+    loadHub();
+  }, [open, user]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, open]);
 
+  const selectGlobal = async () => {
+    setLoadingChat(true);
+    setChatTarget({ type: 'global', name: 'Global Chat' });
+    setHubView('chat');
+    setMessages([]);
+    setLastMessageTimestamp(null);
+    try {
+      await api.request('/api/chat/global-chat/join', { method: 'POST' });
+      const res = await api.request<{ success: boolean; messages: Message[] }>('/api/chat/global-chat/messages?limit=30');
+      if (res.success) {
+        setMessages(res.messages);
+        if (res.messages.length > 0 && res.messages[res.messages.length - 1].createdAt)
+          setLastMessageTimestamp(res.messages[res.messages.length - 1].createdAt ?? null);
+      }
+    } catch (err) {
+      console.error('Failed to load global chat:', err);
+    } finally {
+      setLoadingChat(false);
+    }
+  };
+
+  const selectRoom = async (room: ChatRoomOption) => {
+    setLoadingChat(true);
+    setChatTarget({ type: 'room', id: room.id, name: room.name });
+    setHubView('chat');
+    setMessages([]);
+    setLastMessageTimestamp(null);
+    try {
+      if (!room.isParticipant) {
+        await api.request(`/api/chat/${room.id}/join`, { method: 'POST' });
+      }
+      const res = await api.request<{ success: boolean; messages: Message[] }>(`/api/chat/${room.id}/messages?limit=30`);
+      if (res.success) {
+        setMessages(res.messages);
+        if (res.messages.length > 0 && res.messages[res.messages.length - 1].createdAt)
+          setLastMessageTimestamp(res.messages[res.messages.length - 1].createdAt ?? null);
+      }
+    } catch (err) {
+      console.error('Failed to load room:', err);
+    } finally {
+      setLoadingChat(false);
+    }
+  };
+
+  const selectTeam = async (team: Team) => {
+    setLoadingChat(true);
+    setHubView('chat');
+    setMessages([]);
+    setLastMessageTimestamp(null);
+    try {
+      if (!team.isMember && team.isPublic) {
+        await api.request(`/api/teams/${team.id}/join`, { method: 'POST' });
+        setTeams(prev => prev.map(t => (t.id === team.id ? { ...t, isMember: true, role: 'MEMBER' as const } : t)));
+      }
+      const res = await api.request<{ success: boolean; room?: { id: string; name: string }; tasks?: unknown[] }>(`/api/teams/${team.id}`);
+      if (res.success && res.room) {
+        setChatTarget({ type: 'team', roomId: res.room.id, name: team.name });
+        await api.request(`/api/chat/${res.room.id}/join`, { method: 'POST' });
+        const msgRes = await api.request<{ success: boolean; messages: Message[] }>(`/api/chat/${res.room.id}/messages?limit=30`);
+        if (msgRes.success) {
+          setMessages(msgRes.messages);
+          if (msgRes.messages.length > 0 && msgRes.messages[msgRes.messages.length - 1].createdAt)
+            setLastMessageTimestamp(msgRes.messages[msgRes.messages.length - 1].createdAt ?? null);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load team chat:', err);
+    } finally {
+      setLoadingChat(false);
+    }
+  };
+
+  const backToList = () => {
+    setHubView('list');
+    setChatTarget(null);
+    setMessages([]);
+    setLastMessageTimestamp(null);
+  };
+
+  const postMessageUrl = chatTarget
+    ? chatTarget.type === 'global'
+      ? '/api/chat/global-chat/messages'
+      : `/api/chat/${chatTarget.type === 'room' ? chatTarget.id : chatTarget.roomId}/messages`
+    : '';
+
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !input.trim() || sending) return;
-
+    if (!user || !input.trim() || sending || !postMessageUrl) return;
     const messageContent = input.trim();
     setInput('');
     setSending(true);
-
     try {
-      const response = await api.request<{ success: boolean; message: Message }>('/api/chat/global-chat/messages', {
+      const response = await api.request<{ success: boolean; message: Message }>(postMessageUrl, {
         method: 'POST',
-        body: JSON.stringify({
-          content: messageContent,
-          messageType: 'TEXT'
-        })
+        body: JSON.stringify({ content: messageContent, messageType: 'TEXT' }),
       });
-      
       if (response.success) {
         setMessages(prev => [...prev, response.message]);
-        
-        // Update last message timestamp for polling
-        if (response.message.createdAt) {
-          setLastMessageTimestamp(response.message.createdAt);
-        }
+        if (response.message.createdAt) setLastMessageTimestamp(response.message.createdAt);
       }
     } catch (error) {
       console.error('Failed to send message:', error);
@@ -223,27 +294,17 @@ const ChatSidebar: React.FC = () => {
   };
 
   const sendGif = async (gif: GifResult) => {
-    if (!user || sending) return;
-
+    if (!user || sending || !postMessageUrl) return;
     setSending(true);
     try {
       const gifContent = `[GIF: ${gif.title}](${gif.images.fixed_height.url})`;
-      const response = await api.request<{ success: boolean; message: Message }>('/api/chat/global-chat/messages', {
+      const response = await api.request<{ success: boolean; message: Message }>(postMessageUrl, {
         method: 'POST',
-        body: JSON.stringify({
-          content: gifContent,
-          messageType: 'TEXT'
-        })
+        body: JSON.stringify({ content: gifContent, messageType: 'TEXT' }),
       });
-      
       if (response.success) {
         setMessages(prev => [...prev, response.message]);
-        
-        // Update last message timestamp for polling
-        if (response.message.createdAt) {
-          setLastMessageTimestamp(response.message.createdAt);
-        }
-        
+        if (response.message.createdAt) setLastMessageTimestamp(response.message.createdAt);
         setShowGifSearch(false);
         setGifSearchTerm('');
       }
@@ -297,24 +358,38 @@ const ChatSidebar: React.FC = () => {
       >
         {/* Header */}
         <div className="flex items-center justify-between p-3 border-b border-neutral-800 bg-neutral-900 flex-shrink-0">
-          <div className="flex items-center space-x-2">
-            <FiMessageSquare className="h-5 w-5 text-indigo-400" />
-            <span className="font-semibold text-white text-sm sm:text-base">Global Chat</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link
-              to="/chat"
-              className="flex items-center gap-1.5 px-2 py-1.5 rounded text-neutral-300 hover:text-white hover:bg-neutral-800 transition-colors text-xs font-medium"
-              title="Open Team Hub — create teams, chat, and task lists"
-            >
-              <FiGrid className="h-4 w-4" />
-              <span className="hidden sm:inline">Team Hub</span>
-            </Link>
-            {isPolling && (
-              <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-2 min-w-0">
+            {hubView === 'chat' ? (
+              <button
+                type="button"
+                onClick={backToList}
+                className="flex-shrink-0 text-neutral-400 hover:text-white p-1 rounded"
+                aria-label="Back to list"
+              >
+                <FiChevronLeft className="h-5 w-5" />
+              </button>
+            ) : null}
+            <FiMessageSquare className="h-5 w-5 text-indigo-400 flex-shrink-0" />
+            <span className="font-semibold text-white text-sm sm:text-base truncate">
+              {hubView === 'chat' && chatTarget ? chatTarget.name : 'Team Hub'}
+            </span>
+            {hubView === 'chat' && isPolling && (
+              <div className="flex items-center space-x-1 flex-shrink-0">
                 <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-indigo-400" />
                 <span className="text-xs text-neutral-400">Live</span>
               </div>
+            )}
+          </div>
+          <div className="flex items-center gap-1 flex-shrink-0">
+            {hubView === 'list' && (
+              <Link
+                to="/chat"
+                className="flex items-center gap-1.5 px-2 py-1.5 rounded text-neutral-300 hover:text-white hover:bg-neutral-800 transition-colors text-xs font-medium"
+                title="Full page — create teams, rooms, task lists"
+              >
+                <FiGrid className="h-4 w-4" />
+                <span className="hidden sm:inline">Full hub</span>
+              </Link>
             )}
             <button
               onClick={() => setOpen(false)}
@@ -326,6 +401,84 @@ const ChatSidebar: React.FC = () => {
           </div>
         </div>
 
+        {hubView === 'list' ? (
+          <div className="flex-1 overflow-y-auto p-3 space-y-4">
+            <p className="text-xs text-neutral-400">Choose a chat or open the full hub to create teams and rooms.</p>
+            <div>
+              <button
+                type="button"
+                onClick={selectGlobal}
+                disabled={loadingChat}
+                className="w-full flex items-center gap-2 p-3 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-left text-white transition-colors disabled:opacity-50"
+              >
+                <FiMessageSquare className="h-5 w-5 text-indigo-400 flex-shrink-0" />
+                <span className="font-medium">Global Chat</span>
+              </button>
+            </div>
+            <div>
+              <div className="flex items-center justify-between px-1 mb-1">
+                <span className="text-xs font-medium text-neutral-400">Rooms</span>
+                <Link to="/chat" className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+                  <FiPlusCircle className="h-3 w-3" /> Create
+                </Link>
+              </div>
+              {(rooms.filter((r) => r.type === 'PRIVATE') as ChatRoomOption[]).length === 0 ? (
+                <p className="text-xs text-neutral-500 px-1">No rooms yet. Create one in the full hub.</p>
+              ) : (
+                <div className="space-y-0.5">
+                  {rooms.filter((r) => r.type === 'PRIVATE').map((room) => (
+                    <button
+                      key={room.id}
+                      type="button"
+                      onClick={() => selectRoom(room)}
+                      disabled={loadingChat}
+                      className="w-full flex items-center justify-between gap-2 p-2.5 rounded-lg hover:bg-neutral-800 text-left text-white text-sm disabled:opacity-50"
+                    >
+                      <span className="truncate">{room.name}</span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded flex-shrink-0 ${room.isPublic ? 'bg-green-900/50 text-green-300' : 'bg-neutral-700 text-neutral-400'}`}>
+                        {room.isPublic ? 'Public' : 'Private'}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div>
+              <div className="flex items-center justify-between px-1 mb-1">
+                <span className="text-xs font-medium text-neutral-400">Teams</span>
+                <Link to="/chat" className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+                  <FiPlusCircle className="h-3 w-3" /> Create
+                </Link>
+              </div>
+              {teams.length === 0 ? (
+                <p className="text-xs text-neutral-500 px-1">No teams yet. Create one in the full hub.</p>
+              ) : (
+                <div className="space-y-0.5">
+                  {teams.map((team) => (
+                    <button
+                      key={team.id}
+                      type="button"
+                      onClick={() => selectTeam(team)}
+                      disabled={loadingChat}
+                      className="w-full flex items-center gap-2 p-2.5 rounded-lg hover:bg-neutral-800 text-left text-white text-sm disabled:opacity-50"
+                    >
+                      <FiUsers className="h-4 w-4 text-neutral-500 flex-shrink-0" />
+                      <span className="truncate">{team.name}</span>
+                      {team.isMember && <span className="text-[10px] text-neutral-500 flex-shrink-0">In</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <>
+        {loadingChat ? (
+          <div className="flex-1 flex items-center justify-center p-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-400" />
+          </div>
+        ) : (
+        <>
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-neutral-900">
           {messages.map((msg) => (
@@ -460,6 +613,10 @@ const ChatSidebar: React.FC = () => {
             </button>
           </div>
         </form>
+        </>
+        ) }
+          </>
+        )}
       </div>
     </>
   );

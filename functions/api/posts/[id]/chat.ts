@@ -1,29 +1,55 @@
 import { Hono } from 'hono';
 import type { Context } from 'hono';
 import { eq, desc, and, sql } from 'drizzle-orm';
-import { chatRooms, chatMessages, chatRoomParticipants, users, profiles, posts } from '../../../../drizzle/schema';
+import { chatMessages, chatRoomParticipants, users, profiles, posts } from '../../../../drizzle/schema';
 import { getCookie } from 'hono/cookie';
 import { createDb } from '../../../../src/utils/db';
 import { getUserIdFromSession } from '../../../../src/utils/auth';
 
 interface Env {
-  DB: any;
+  DB: D1Database;
 }
 
 type AppContext = Context<{ Bindings: Env }>;
 
-const chatRoomCols = {
-  id: chatRooms.id,
-  name: chatRooms.name,
-  description: chatRooms.description,
-  type: chatRooms.type,
-  createdBy: chatRooms.createdBy,
-  postId: chatRooms.postId,
-  teamId: chatRooms.teamId,
-  isActive: chatRooms.isActive,
-  createdAt: chatRooms.createdAt,
-  updatedAt: chatRooms.updatedAt,
-};
+/** Use raw D1 for chat_rooms so we never depend on is_public column (works before/after migration). */
+async function getOrCreatePostRoom(d1: D1Database, postId: string, postTitle: string): Promise<{ id: string; name: string; description: string | null; type: string; postId: string | null; isActive: number; createdAt: number; updatedAt: number } | null> {
+  const row = await d1.prepare(
+    'SELECT id, name, description, type, post_id, is_active, created_at, updated_at FROM chat_rooms WHERE post_id = ? AND type = ?'
+  ).bind(postId, 'POST').first<{ id: string; name: string; description: string | null; type: string; post_id: string | null; is_active: number; created_at: number; updated_at: number }>();
+  if (row) {
+    return {
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      type: row.type,
+      postId: row.post_id,
+      isActive: row.is_active,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    };
+  }
+  const roomId = crypto.randomUUID();
+  const name = `Post: ${postTitle}`;
+  const description = `Chat for post ${postId}`;
+  await d1.prepare(
+    'INSERT INTO chat_rooms (id, name, description, type, post_id, is_active) VALUES (?, ?, ?, ?, ?, 1)'
+  ).bind(roomId, name, description, 'POST', postId).run();
+  const created = await d1.prepare(
+    'SELECT id, name, description, type, post_id, is_active, created_at, updated_at FROM chat_rooms WHERE id = ?'
+  ).bind(roomId).first<{ id: string; name: string; description: string | null; type: string; post_id: string | null; is_active: number; created_at: number; updated_at: number }>();
+  if (!created) return null;
+  return {
+    id: created.id,
+    name: created.name,
+    description: created.description,
+    type: created.type,
+    postId: created.post_id,
+    isActive: created.is_active,
+    createdAt: created.created_at,
+    updatedAt: created.updated_at,
+  };
+}
 
 /** Get or create post chat room and join. Call with postId from c.req.param('id'). */
 export async function getPostChatRoom(c: AppContext, postId: string) {
@@ -35,26 +61,12 @@ export async function getPostChatRoom(c: AppContext, postId: string) {
       return c.json({ success: false, error: 'Post not found' }, 404);
     }
 
-    let room = await db
-      .select(chatRoomCols)
-      .from(chatRooms)
-      .where(and(eq(chatRooms.postId, postId), eq(chatRooms.type, 'POST')))
-      .limit(1);
-
-    if (!room.length) {
-      const roomId = crypto.randomUUID();
-      await db.insert(chatRooms).values({
-        id: roomId,
-        name: `Post: ${postRow[0].title}`,
-        description: `Chat for post ${postId}`,
-        type: 'POST',
-        postId,
-        isActive: true,
-      });
-      room = await db.select(chatRoomCols).from(chatRooms).where(eq(chatRooms.id, roomId)).limit(1);
+    const room = await getOrCreatePostRoom(c.env.DB, postId, postRow[0].title);
+    if (!room) {
+      return c.json({ success: false, error: 'Failed to get or create room' }, 500);
     }
 
-    const roomId = room[0].id;
+    const roomId = room.id;
     const sessionCookie = getCookie(c, 'session');
     let joined = false;
     if (sessionCookie) {
@@ -90,13 +102,13 @@ export async function getPostChatRoom(c: AppContext, postId: string) {
     return c.json({
       success: true,
       room: {
-        id: room[0].id,
-        name: room[0].name,
-        description: room[0].description,
-        type: room[0].type,
-        postId: room[0].postId,
-        isActive: room[0].isActive,
-        createdAt: room[0].createdAt,
+        id: room.id,
+        name: room.name,
+        description: room.description,
+        type: room.type,
+        postId: room.postId,
+        isActive: room.isActive === 1,
+        createdAt: new Date(room.createdAt * 1000).toISOString(),
       },
       joined,
     });
@@ -113,17 +125,12 @@ export async function getPostChatMessages(c: AppContext, postId: string) {
     const after = c.req.query('after');
     const db = createDb(c.env.DB);
 
-    const room = await db
-      .select(chatRoomCols)
-      .from(chatRooms)
-      .where(and(eq(chatRooms.postId, postId), eq(chatRooms.type, 'POST')))
-      .limit(1);
-
-    if (!room.length) {
+    const room = await getOrCreatePostRoom(c.env.DB, postId, '');
+    if (!room) {
       return c.json({ success: true, messages: [] });
     }
 
-    const whereConditions = [eq(chatMessages.roomId, room[0].id)];
+    const whereConditions = [eq(chatMessages.roomId, room.id)];
     if (after) {
       whereConditions.push(sql`${chatMessages.createdAt} > ${after}`);
     }
@@ -182,26 +189,12 @@ export async function postPostChatMessage(c: AppContext, postId: string) {
       return c.json({ success: false, error: 'Post not found' }, 404);
     }
 
-    let room = await db
-      .select(chatRoomCols)
-      .from(chatRooms)
-      .where(and(eq(chatRooms.postId, postId), eq(chatRooms.type, 'POST')))
-      .limit(1);
-
-    if (!room.length) {
-      const roomId = crypto.randomUUID();
-      await db.insert(chatRooms).values({
-        id: roomId,
-        name: `Post: ${postRow[0].title}`,
-        description: `Chat for post ${postId}`,
-        type: 'POST',
-        postId,
-        isActive: true,
-      });
-      room = await db.select(chatRoomCols).from(chatRooms).where(eq(chatRooms.id, roomId)).limit(1);
+    const room = await getOrCreatePostRoom(c.env.DB, postId, postRow[0].title);
+    if (!room) {
+      return c.json({ success: false, error: 'Failed to get or create room' }, 500);
     }
 
-    const roomId = room[0].id;
+    const roomId = room.id;
     const body = await c.req.json().catch(() => ({}));
     const content = body?.content;
     const messageType = body?.messageType ?? 'TEXT';
