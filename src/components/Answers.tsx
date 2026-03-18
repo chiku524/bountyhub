@@ -219,6 +219,8 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
       {user && (
         <form onSubmit={handleSubmitAnswer} className="mb-6">
           <textarea
+            id="answer-content"
+            name="answerContent"
             value={newAnswer}
             onChange={(e) => setNewAnswer(e.target.value)}
             placeholder="Write your answer..."

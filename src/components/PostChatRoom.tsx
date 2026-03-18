@@ -30,7 +30,14 @@ export function PostChatRoom({ postId }: PostChatRoomProps) {
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [lastMessageTimestamp, setLastMessageTimestamp] = useState<string | null>(null);
+  const [isPageVisible, setIsPageVisible] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleVisibility = () => setIsPageVisible(!document.hidden);
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, []);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -106,10 +113,10 @@ export function PostChatRoom({ postId }: PostChatRoomProps) {
   }, [postId, fetchRoom, fetchMessages]);
 
   useEffect(() => {
-    if (!room || !user) return;
+    if (!room || !user || !isPageVisible) return;
     const interval = setInterval(() => fetchMessages(lastMessageTimestamp || undefined), POLL_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, [room, user, lastMessageTimestamp, fetchMessages]);
+  }, [room, user, lastMessageTimestamp, fetchMessages, isPageVisible]);
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();

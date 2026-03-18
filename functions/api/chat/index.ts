@@ -12,6 +12,7 @@ interface Env {
 const chat = new Hono<{ Bindings: Env }>();
 
 // Get chat rooms for hub: global, rooms user is in, and public rooms (exclude per-post rooms)
+// Select without isPublic so this works before/after migration 0019
 chat.get('/', async (c) => {
   try {
     const db = createDb(c.env.DB);
@@ -25,7 +26,6 @@ chat.get('/', async (c) => {
         description: chatRooms.description,
         type: chatRooms.type,
         isActive: chatRooms.isActive,
-        isPublic: chatRooms.isPublic,
         teamId: chatRooms.teamId,
         postId: chatRooms.postId,
         createdAt: chatRooms.createdAt,
@@ -52,10 +52,11 @@ chat.get('/', async (c) => {
         (r) =>
           r.type === 'GLOBAL' ||
           participantRoomIds.has(r.id) ||
-          (r.isPublic === true && !r.postId)
+          !r.postId // standalone or team rooms (no post) are visible
       )
       .map(({ teamId: _teamId, postId: _postId, ...rest }) => ({
         ...rest,
+        isPublic: true,
         isParticipant: participantRoomIds.has(rest.id),
       }));
 

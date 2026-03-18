@@ -28,6 +28,7 @@ const ProfileActivity = lazy(() => import('./pages/ProfileActivity'))
 const ProfilePosts = lazy(() => import('./pages/ProfilePosts'))
 const ProfileBookmarks = lazy(() => import('./pages/ProfileBookmarks'))
 const Community = lazy(() => import('./pages/Community'))
+const Chat = lazy(() => import('./pages/Chat'))
 const Governance = lazy(() => import('./pages/Governance'))
 const Admin = lazy(() => import('./pages/Admin'))
 const Analytics = lazy(() => import('./pages/Analytics'))
@@ -136,6 +137,7 @@ function AppContent() {
                   <Route path="/profile/posts" element={<ProfilePosts />} />
                   <Route path="/profile/bookmarks" element={<ProfileBookmarks />} />
                   <Route path="/community" element={<Community />} />
+                  <Route path="/chat" element={<Chat />} />
                   <Route path="/governance" element={<Governance />} />
                   <Route path="/analytics" element={<Analytics />} />
                   <Route path="/wallet" element={<Wallet />} />

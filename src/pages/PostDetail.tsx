@@ -320,6 +320,8 @@ export default function PostDetail() {
               {editing ? (
                 <form onSubmit={handleEditSubmit} className="mb-4 space-y-4">
                   <input
+                    id="post-edit-title"
+                    name="postEditTitle"
                     type="text"
                     value={editTitle}
                     onChange={e => setEditTitle(e.target.value)}
@@ -328,6 +330,8 @@ export default function PostDetail() {
                     disabled={editLoading}
                   />
                   <textarea
+                    id="post-edit-content"
+                    name="postEditContent"
                     value={editContent}
                     onChange={e => setEditContent(e.target.value)}
                     className="w-full p-2 rounded-sm border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
