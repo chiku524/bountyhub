@@ -63,3 +63,7 @@ VITE_API_URL = "https://api.bountyhub.tech"
 # Set via: wrangler secret put GITHUB_CLIENT_ID
 # Set via: wrangler secret put GITHUB_CLIENT_SECRET
 GITHUB_CALLBACK_URL = "https://api.bountyhub.tech/auth/callback"
+
+# Download page: repo for releases/latest (used with GITHUB_PAT)
+# Set PAT via: wrangler secret put GITHUB_PAT
+GITHUB_RELEASES_REPO = "chiku524/bountyhub"

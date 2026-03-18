@@ -1,0 +1,5 @@
+# Copy to .dev.vars and fill in. Used by wrangler dev for local API.
+# .dev.vars is gitignored; never commit real tokens.
+
+# GitHub PAT (repo scope) so /download page can fetch releases for private repos
+GITHUB_PAT=

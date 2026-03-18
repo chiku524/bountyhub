@@ -4,6 +4,8 @@ The same BountyHub web app runs as a **desktop application** using [Tauri](https
 
 **Production:** The desktop app talks to `https://api.bountyhub.tech` when built for production. Official installers are built by GitHub Actions when you [publish a Release](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository); set `VITE_GITHUB_RELEASES_URL` (e.g. `https://github.com/your-org/bountyhub/releases/latest`) in your site env so the [Download](/download) page links to the latest release.
 
+**Download page (private repo):** The Download page fetches release assets via the API at `/api/releases/latest`, which uses a GitHub PAT so private repos work. Set the PAT as a Cloudflare secret: `wrangler secret put GITHUB_PAT` (paste the token when prompted). For local dev, copy `.dev.vars.example` to `.dev.vars` and set `GITHUB_PAT=your_token`. The repo is configured in `wrangler.workers.toml` as `GITHUB_RELEASES_REPO` (default `chiku524/bountyhub`).
+
 ### Auto-updates
 
 The app checks for updates on startup and can install them automatically (Tauri’s built-in updater).

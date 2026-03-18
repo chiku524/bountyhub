@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom'
 import { FiDownload, FiMonitor } from 'react-icons/fi'
 import { SiWindows, SiApple, SiLinux } from 'react-icons/si'
 import { PageMetadata } from '../components/PageMetadata'
+import { config } from '../utils/config'
 
 const GITHUB_RELEASES_URL = import.meta.env.VITE_GITHUB_RELEASES_URL || ''
+const RELEASES_API_URL = `${config.api.baseUrl}/api/releases/latest`
 
 type Platform = 'windows' | 'macos' | 'linux' | null
 
@@ -27,12 +29,6 @@ const platformIcons = {
   windows: SiWindows,
   macos: SiApple,
   linux: SiLinux,
-}
-
-/** Parse repo owner/name from GitHub releases URL (e.g. https://github.com/owner/repo/releases/latest -> owner/repo). */
-function getRepoFromReleasesUrl(url: string): string | null {
-  const match = url.match(/github\.com\/([^/]+)\/([^/]+)\/releases/)
-  return match ? `${match[1]}/${match[2]}` : null
 }
 
 /** Pick the best direct-download URL for each platform from GitHub release assets. */
@@ -69,14 +65,13 @@ export default function Download() {
       setReleasesFetched(true)
       return
     }
-    const repo = getRepoFromReleasesUrl(GITHUB_RELEASES_URL)
-    if (!repo) {
-      setReleasesFetched(true)
-      return
-    }
     const controller = new AbortController()
-    fetch(`https://api.github.com/repos/${repo}/releases/latest`, { signal: controller.signal })
-      .then((r) => r.json())
+    // Use our API proxy (uses GITHUB_PAT server-side) so private repos work
+    fetch(RELEASES_API_URL, { signal: controller.signal })
+      .then((r) => {
+        if (!r.ok) return null
+        return r.json()
+      })
       .then((data) => {
         if (data?.assets && Array.isArray(data.assets)) {
           setDownloadUrls(getDownloadUrls(data.assets))
@@ -163,6 +158,7 @@ export default function Download() {
               </div>
               {releasesFetched && !(downloadUrls.windows || downloadUrls.macos || downloadUrls.linux) && (
                 <p className="mt-3 text-sm text-neutral-500 dark:text-neutral-400">
+                  Release info couldn’t be loaded (repo may be private or have no releases).{' '}
                   <a href={GITHUB_RELEASES_URL} target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-400 hover:underline">
                     Get installers from GitHub Releases
                   </a>

@@ -25,6 +25,7 @@ import teamsRoutes from './api/teams'
 import cleanupRoutes from './api/cleanup-pending-transactions'
 import bugBountyRoutes from './api/bug-bounty'
 import githubRoutes from './api/github'
+import releasesRoutes from './api/releases'
 import contributionsRoutes from './api/contributions'
 import mediaRoutes from './api/media'
 
@@ -52,6 +53,10 @@ interface Env {
   GITHUB_CLIENT_ID: string
   GITHUB_CLIENT_SECRET: string
   GITHUB_CALLBACK_URL: string
+  /** GitHub PAT for download page (private repo). Set via wrangler secret put GITHUB_PAT */
+  GITHUB_PAT?: string
+  /** Repo for releases e.g. chiku524/bountyhub */
+  GITHUB_RELEASES_REPO?: string
 }
 
 const app = new Hono<{ Bindings: Env }>()
@@ -588,6 +593,7 @@ app.route('/api/teams', teamsRoutes)
 app.route('/api/cleanup', cleanupRoutes)
 app.route('/api/bug-bounty', bugBountyRoutes)
 app.route('/api/github', githubRoutes)
+app.route('/api/releases', releasesRoutes)
 app.route('/api/contributions', contributionsRoutes)
 app.route('/api/media', mediaRoutes)
 
