@@ -11,10 +11,19 @@ interface Env {
 
 const chat = new Hono<{ Bindings: Env }>();
 
+// When mounted at /:id/chat, param('id') may not be set in child context; fallback to URL path.
+function getPostId(c: { req: { param: (k: string) => string | undefined; url: string } }): string | null {
+  const fromParam = c.req.param('id');
+  if (fromParam) return fromParam;
+  const pathname = new URL(c.req.url).pathname;
+  const match = pathname.match(/\/posts\/([^/]+)\/chat/);
+  return match?.[1] ?? null;
+}
+
 // Get or create post chat room and join (GET /api/posts/:id/chat)
 chat.get('/', async (c) => {
   try {
-    const postId = c.req.param('id');
+    const postId = getPostId(c);
     if (!postId) return c.json({ success: false, error: 'Post not found' }, 404);
     const db = createDb(c.env.DB);
 
@@ -97,7 +106,7 @@ chat.get('/', async (c) => {
 // Get messages for post chat (GET /api/posts/:id/chat/messages)
 chat.get('/messages', async (c) => {
   try {
-    const postId = c.req.param('id');
+    const postId = getPostId(c);
     if (!postId) return c.json({ success: false, error: 'Bad request' }, 400);
     const limit = parseInt(c.req.query('limit') || '50');
     const after = c.req.query('after');
@@ -156,7 +165,7 @@ chat.get('/messages', async (c) => {
 // Send message to post chat (POST /api/posts/:id/chat/messages)
 chat.post('/messages', async (c) => {
   try {
-    const postId = c.req.param('id');
+    const postId = getPostId(c);
     if (!postId) return c.json({ success: false, error: 'Bad request' }, 400);
     const sessionCookie = getCookie(c, 'session');
     if (!sessionCookie) {

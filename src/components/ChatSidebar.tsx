@@ -304,10 +304,11 @@ const ChatSidebar: React.FC = () => {
           <div className="flex items-center gap-2">
             <Link
               to="/chat"
-              className="p-1.5 rounded text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
-              title="Open Chat Hub (teams & tasks)"
+              className="flex items-center gap-1.5 px-2 py-1.5 rounded text-neutral-300 hover:text-white hover:bg-neutral-800 transition-colors text-xs font-medium"
+              title="Open Team Hub — create teams, chat, and task lists"
             >
               <FiGrid className="h-4 w-4" />
+              <span className="hidden sm:inline">Team Hub</span>
             </Link>
             {isPolling && (
               <div className="flex items-center space-x-1">

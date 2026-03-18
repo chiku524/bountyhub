@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { 
   FiCreditCard, FiLogOut, FiUsers, FiDollarSign, FiSettings, 
   FiCheckSquare, FiRefreshCw, FiBarChart2, FiShield, FiGithub, 
-  FiAward, FiChevronDown, FiMenu, FiX, FiDownload
+  FiAward, FiChevronDown, FiMenu, FiX, FiDownload, FiMessageCircle
 } from 'react-icons/fi'
 import { useAuth } from '../contexts/AuthProvider'
 import { useWallet } from '@solana/wallet-adapter-react'
@@ -123,7 +123,7 @@ export function TopNav() {
                 type="button"
                 onClick={() => setExploreOpen(!exploreOpen)}
                 className={`nav-dropdown-trigger px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
-                  isActive('/community') || isActive('/download') || isActive('/governance') || isActive('/refund-requests') || isActive('/analytics') || isActive('/bug-bounty') || isActive('/repositories') || isActive('/contributions')
+                  isActive('/community') || isActive('/chat') || isActive('/download') || isActive('/governance') || isActive('/refund-requests') || isActive('/analytics') || isActive('/bug-bounty') || isActive('/repositories') || isActive('/contributions')
                     ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
                     : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5'
                 }`}
@@ -143,6 +143,14 @@ export function TopNav() {
                   >
                     <FiUsers className="w-4 h-4 shrink-0 text-neutral-500" />
                     <span>Community</span>
+                  </Link>
+                  <Link
+                    to="/chat"
+                    onClick={() => setExploreOpen(false)}
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
+                  >
+                    <FiMessageCircle className="w-4 h-4 shrink-0 text-neutral-500" />
+                    <span>Team Hub</span>
                   </Link>
                   <Link
                     to="/download"
@@ -390,6 +398,13 @@ export function TopNav() {
                       className="block px-3 py-2 rounded-lg text-sm text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5"
                     >
                       Community
+                    </Link>
+                    <Link
+                      to="/chat"
+                      onClick={() => { setMobileMenuOpen(false); setExploreOpen(false) }}
+                      className="block px-3 py-2 rounded-lg text-sm text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5"
+                    >
+                      Team Hub
                     </Link>
                     <Link
                       to="/download"

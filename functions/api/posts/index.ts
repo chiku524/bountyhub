@@ -425,7 +425,10 @@ app.post(async (c) => {
   }
 })
 
-// GET single post by ID (move this after POST)
+// More specific routes first so /:id/chat is matched before /:id
+app.route('/:id/chat', postChatRoute)
+
+// GET single post by ID
 app.get('/:id', async (c) => {
   const db = createDb(c.env.DB)
   const id = c.req.param('id')
@@ -651,12 +654,11 @@ app.put('/:id', async (c) => {
 
 // Mount subroutes
 app.route('/:id/comments', commentsRoute)
-  app.route('/:id/vote', voteRoute)
-  app.route('/:id/comments/:commentId/vote', commentVoteRoute)
-  app.route('/:id/answers', answersRoute)
-  app.route('/:id/answers/:answerId/vote', answerVoteRoute)
-  app.route('/:id/answers/:answerId/accept', answerAcceptRoute)
-  app.route('/:id/chat', postChatRoute)
+app.route('/:id/vote', voteRoute)
+app.route('/:id/comments/:commentId/vote', commentVoteRoute)
+app.route('/:id/answers', answersRoute)
+app.route('/:id/answers/:answerId/vote', answerVoteRoute)
+app.route('/:id/answers/:answerId/accept', answerAcceptRoute)
 
 // DELETE post by ID
 app.delete('/:id', async (c) => {
