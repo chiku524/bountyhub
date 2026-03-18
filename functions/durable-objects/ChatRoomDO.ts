@@ -4,9 +4,8 @@
  */
 import { DurableObject } from 'cloudflare:workers';
 
-export interface Env {
-  // No bindings needed on the DO; state is in memory
-}
+/** No bindings needed on the DO; state is in memory. */
+export type Env = Record<string, never>;
 
 type Session = { ws: WebSocket };
 

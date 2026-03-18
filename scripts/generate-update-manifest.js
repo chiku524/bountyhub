@@ -56,25 +56,15 @@ async function main() {
     }
   }
 
-  // macOS: .app.tar.gz and .app.tar.gz.sig (or .dmg.app.tar.gz on some setups)
-  const macTgz = findAsset((n) => n.includes('.app.tar.gz') && !n.endsWith('.sig'))
-  const macSig = findAsset((n) => n.includes('.app.tar.gz.sig'))
-  if (macTgz && macSig) {
-    const sig = await getSigContent(macSig.name)
+  // macOS: pair each .app.tar.gz with its .app.tar.gz.sig (supports both x86_64 and aarch64)
+  const macTgzAssets = assets.filter((a) => a.name.includes('.app.tar.gz') && !a.name.endsWith('.sig'))
+  for (const macTgz of macTgzAssets) {
+    const sigAsset = assets.find((a) => a.name === `${macTgz.name}.sig`)
+    if (!sigAsset) continue
+    const sig = await getSigContent(sigAsset.name)
     if (sig) {
-      // Prefer aarch64 if we have it; otherwise use darwin-x86_64
       const key = macTgz.name.includes('aarch64') ? 'darwin-aarch64' : 'darwin-x86_64'
       platforms[key] = { signature: sig, url: `${downloadBase}/${macTgz.name}` }
-    }
-  }
-  // If we have a second macOS asset (e.g. both archs), add it
-  const macTgz2 = findAsset((n) => n.includes('.app.tar.gz') && !n.endsWith('.sig') && n !== macTgz?.name)
-  const macSig2 = findAsset((n) => n.includes('.app.tar.gz.sig') && n !== macSig?.name)
-  if (macTgz2 && macSig2) {
-    const sig = await getSigContent(macSig2.name)
-    if (sig) {
-      const key = macTgz2.name.includes('aarch64') ? 'darwin-aarch64' : 'darwin-x86_64'
-      if (!platforms[key]) platforms[key] = { signature: sig, url: `${downloadBase}/${macTgz2.name}` }
     }
   }
 
