@@ -290,13 +290,13 @@ const ChatSidebar: React.FC = () => {
         </button>
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - pt-16 so content starts below the top navbar */}
       <div
-        className={`fixed top-0 right-0 h-full z-40 transition-transform duration-300 ${open ? 'translate-x-0' : 'translate-x-full'} w-full max-w-[320px] sm:max-w-sm bg-neutral-900 border-l border-neutral-800 shadow-2xl flex flex-col`}
+        className={`fixed top-0 right-0 h-full z-40 transition-transform duration-300 ${open ? 'translate-x-0' : 'translate-x-full'} w-full max-w-[320px] sm:max-w-sm bg-neutral-900 border-l border-neutral-800 shadow-2xl flex flex-col pt-16`}
         style={{ minWidth: '280px' }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-3 border-b border-neutral-800 bg-neutral-900">
+        <div className="flex items-center justify-between p-3 border-b border-neutral-800 bg-neutral-900 flex-shrink-0">
           <div className="flex items-center space-x-2">
             <FiMessageSquare className="h-5 w-5 text-indigo-400" />
             <span className="font-semibold text-white text-sm sm:text-base">Global Chat</span>

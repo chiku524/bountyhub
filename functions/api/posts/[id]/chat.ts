@@ -12,6 +12,19 @@ interface Env {
 
 type AppContext = Context<{ Bindings: Env }>;
 
+const chatRoomCols = {
+  id: chatRooms.id,
+  name: chatRooms.name,
+  description: chatRooms.description,
+  type: chatRooms.type,
+  createdBy: chatRooms.createdBy,
+  postId: chatRooms.postId,
+  teamId: chatRooms.teamId,
+  isActive: chatRooms.isActive,
+  createdAt: chatRooms.createdAt,
+  updatedAt: chatRooms.updatedAt,
+};
+
 /** Get or create post chat room and join. Call with postId from c.req.param('id'). */
 export async function getPostChatRoom(c: AppContext, postId: string) {
   try {
@@ -23,7 +36,7 @@ export async function getPostChatRoom(c: AppContext, postId: string) {
     }
 
     let room = await db
-      .select()
+      .select(chatRoomCols)
       .from(chatRooms)
       .where(and(eq(chatRooms.postId, postId), eq(chatRooms.type, 'POST')))
       .limit(1);
@@ -38,7 +51,7 @@ export async function getPostChatRoom(c: AppContext, postId: string) {
         postId,
         isActive: true,
       });
-      room = await db.select().from(chatRooms).where(eq(chatRooms.id, roomId)).limit(1);
+      room = await db.select(chatRoomCols).from(chatRooms).where(eq(chatRooms.id, roomId)).limit(1);
     }
 
     const roomId = room[0].id;
@@ -101,7 +114,7 @@ export async function getPostChatMessages(c: AppContext, postId: string) {
     const db = createDb(c.env.DB);
 
     const room = await db
-      .select()
+      .select(chatRoomCols)
       .from(chatRooms)
       .where(and(eq(chatRooms.postId, postId), eq(chatRooms.type, 'POST')))
       .limit(1);
@@ -170,7 +183,7 @@ export async function postPostChatMessage(c: AppContext, postId: string) {
     }
 
     let room = await db
-      .select()
+      .select(chatRoomCols)
       .from(chatRooms)
       .where(and(eq(chatRooms.postId, postId), eq(chatRooms.type, 'POST')))
       .limit(1);
@@ -185,11 +198,13 @@ export async function postPostChatMessage(c: AppContext, postId: string) {
         postId,
         isActive: true,
       });
-      room = await db.select().from(chatRooms).where(eq(chatRooms.id, roomId)).limit(1);
+      room = await db.select(chatRoomCols).from(chatRooms).where(eq(chatRooms.id, roomId)).limit(1);
     }
 
     const roomId = room[0].id;
-    const { content, messageType = 'TEXT' } = await c.req.json();
+    const body = await c.req.json().catch(() => ({}));
+    const content = body?.content;
+    const messageType = body?.messageType ?? 'TEXT';
     if (!content) {
       return c.json({ success: false, error: 'Message content is required' }, 400);
     }

@@ -36,9 +36,11 @@ interface ChatRoom {
   isActive: boolean;
   createdAt: string;
   participantCount?: number;
+  isPublic?: boolean;
+  isParticipant?: boolean;
 }
 
-type ViewMode = 'global' | 'team';
+type ViewMode = 'global' | 'team' | 'room';
 
 const Chat: React.FC = () => {
   const { user } = useAuth();
@@ -53,6 +55,11 @@ const Chat: React.FC = () => {
   const [newTeamName, setNewTeamName] = useState('');
   const [newTeamDesc, setNewTeamDesc] = useState('');
   const [createTeamLoading, setCreateTeamLoading] = useState(false);
+  const [createRoomOpen, setCreateRoomOpen] = useState(false);
+  const [newRoomName, setNewRoomName] = useState('');
+  const [newRoomDesc, setNewRoomDesc] = useState('');
+  const [newRoomPublic, setNewRoomPublic] = useState(true);
+  const [createRoomLoading, setCreateRoomLoading] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [hubTab, setHubTab] = useState<'chat' | 'tasks'>('chat');
   const [newMessage, setNewMessage] = useState('');
@@ -371,6 +378,15 @@ const Chat: React.FC = () => {
     }
   };
 
+  const selectRoom = (room: ChatRoom) => {
+    setViewMode('room');
+    setSelectedTeam(null);
+    setTeamTasks([]);
+    setCurrentRoom(room);
+    setIsJoined(!!room.isParticipant);
+    setLastMessageId(null);
+  };
+
   const selectTeam = async (team: Team) => {
     setViewMode('team');
     setSelectedTeam(team);
@@ -414,6 +430,34 @@ const Chat: React.FC = () => {
       console.error('Create team failed:', err);
     } finally {
       setCreateTeamLoading(false);
+    }
+  };
+
+  const handleCreateRoom = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newRoomName.trim() || createRoomLoading) return;
+    setCreateRoomLoading(true);
+    try {
+      const res = await api.request<{ success: boolean; room: ChatRoom }>('/api/chat', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: newRoomName.trim(),
+          description: newRoomDesc.trim() || undefined,
+          isPublic: newRoomPublic,
+        }),
+      });
+      if (res.success && res.room) {
+        setRooms((prev) => [res.room as ChatRoom, ...prev]);
+        setCreateRoomOpen(false);
+        setNewRoomName('');
+        setNewRoomDesc('');
+        setNewRoomPublic(true);
+        selectRoom(res.room as ChatRoom);
+      }
+    } catch (err) {
+      console.error('Create room failed:', err);
+    } finally {
+      setCreateRoomLoading(false);
     }
   };
 
@@ -499,6 +543,47 @@ const Chat: React.FC = () => {
                   <span className="font-medium">Global Chat</span>
                 </div>
               </div>
+            </div>
+            {/* Public/private chat rooms */}
+            <div className="px-2 pt-4 pb-2">
+              <div className="flex items-center justify-between px-2 mb-2">
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Rooms</span>
+                <button
+                  type="button"
+                  onClick={() => setCreateRoomOpen(true)}
+                  className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 hover:underline text-sm"
+                >
+                  <FiPlusCircle className="h-4 w-4" /> Create
+                </button>
+              </div>
+              {(rooms.filter((r) => r.type === 'PRIVATE') as ChatRoom[]).length === 0 ? (
+                <p className="px-2 text-xs text-gray-500 dark:text-gray-400">Create a public or private room to chat with others.</p>
+              ) : (
+                (rooms.filter((r) => r.type === 'PRIVATE') as ChatRoom[]).map((room) => (
+                  <div
+                    key={room.id}
+                    onClick={() => selectRoom(room)}
+                    className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                      viewMode === 'room' && currentRoom?.id === room.id
+                        ? 'bg-indigo-100 dark:bg-indigo-900/30'
+                        : 'hover:bg-gray-100 dark:hover:bg-neutral-700'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-medium text-gray-900 dark:text-white truncate">{room.name}</span>
+                      {room.isParticipant && <FiUsers className="h-4 w-4 text-gray-400 flex-shrink-0" />}
+                    </div>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className={`text-xs px-1.5 py-0.5 rounded ${room.isPublic ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-200 text-gray-600 dark:bg-neutral-600 dark:text-neutral-300'}`}>
+                        {room.isPublic ? 'Public' : 'Private'}
+                      </span>
+                      {typeof room.participantCount === 'number' && (
+                        <span className="text-xs text-gray-500 dark:text-gray-400">{room.participantCount} in room</span>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
             <div className="px-2 pt-4 pb-2">
               <div className="flex items-center justify-between px-2 mb-2">
@@ -587,6 +672,60 @@ const Chat: React.FC = () => {
           </div>
         )}
 
+        {/* Create Room Modal (public/private chat room) */}
+        {createRoomOpen && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => !createRoomLoading && setCreateRoomOpen(false)}>
+            <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-xl p-6 w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Create chat room</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Create a public room (anyone can find and join) or a private room (invite by link).</p>
+              <form onSubmit={handleCreateRoom}>
+                <label htmlFor="create-room-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+                <input
+                  id="create-room-name"
+                  name="roomName"
+                  type="text"
+                  value={newRoomName}
+                  onChange={(e) => setNewRoomName(e.target.value)}
+                  placeholder="Room name"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-gray-900 dark:text-white mb-3"
+                  required
+                />
+                <label htmlFor="create-room-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description (optional)</label>
+                <textarea
+                  id="create-room-description"
+                  name="roomDescription"
+                  value={newRoomDesc}
+                  onChange={(e) => setNewRoomDesc(e.target.value)}
+                  placeholder="Short description"
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-gray-900 dark:text-white mb-3"
+                />
+                <div className="flex items-center gap-2 mb-4">
+                  <input
+                    id="create-room-public"
+                    name="roomPublic"
+                    type="checkbox"
+                    checked={newRoomPublic}
+                    onChange={(e) => setNewRoomPublic(e.target.checked)}
+                    className="rounded border-gray-300 dark:border-neutral-600 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <label htmlFor="create-room-public" className="text-sm text-gray-700 dark:text-gray-300">
+                    Public room (discoverable in hub; anyone can join)
+                  </label>
+                </div>
+                <div className="flex gap-2 justify-end">
+                  <button type="button" onClick={() => setCreateRoomOpen(false)} disabled={createRoomLoading} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700 rounded-lg">
+                    Cancel
+                  </button>
+                  <button type="submit" disabled={createRoomLoading || !newRoomName.trim()} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50">
+                    {createRoomLoading ? 'Creating...' : 'Create'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
         {/* Chat / Team Area */}
         <div className="flex-1 flex flex-col min-w-0">
           {currentRoom || (viewMode === 'team' && selectedTeam) ? (
@@ -598,6 +737,11 @@ const Chat: React.FC = () => {
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                       {viewMode === 'team' && selectedTeam ? selectedTeam.name : currentRoom?.name}
                     </h2>
+                    {viewMode === 'room' && currentRoom && (
+                      <span className={`text-xs px-1.5 py-0.5 rounded ${currentRoom.isPublic ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-200 text-gray-600 dark:bg-neutral-600 dark:text-neutral-300'}`}>
+                        {currentRoom.isPublic ? 'Public' : 'Private'}
+                      </span>
+                    )}
                     {currentRoom && isJoined && (
                       <div className="flex items-center space-x-1">
                         {isPageVisible ? (
@@ -800,15 +944,24 @@ const Chat: React.FC = () => {
                 <FiMessageSquare className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Team Hub</h2>
                 <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-                  Use <strong>Global Chat</strong> to talk to everyone, or <strong>Create a team</strong> to get a private room and shared task list.
+                  Pick <strong>Global Chat</strong>, create a <strong>Room</strong> (public or private), or create a <strong>Team</strong> for a shared chat and task list.
                 </p>
-                <button
-                  type="button"
-                  onClick={() => setCreateTeamOpen(true)}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium"
-                >
-                  Create a team
-                </button>
+                <div className="flex flex-wrap gap-2 justify-center">
+                  <button
+                    type="button"
+                    onClick={() => setCreateRoomOpen(true)}
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium"
+                  >
+                    Create a room
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCreateTeamOpen(true)}
+                    className="px-4 py-2 border border-gray-300 dark:border-neutral-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700 text-sm font-medium"
+                  >
+                    Create a team
+                  </button>
+                </div>
               </div>
             </div>
           )}

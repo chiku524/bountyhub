@@ -466,6 +466,7 @@ export const chatRooms = sqliteTable('chat_rooms', {
   postId: text('post_id').references(() => posts.id, { onDelete: 'cascade' }),
   teamId: text('team_id').references(() => teams.id, { onDelete: 'cascade' }),
   isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+  isPublic: integer('is_public', { mode: 'boolean' }).notNull().default(true),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
 });
