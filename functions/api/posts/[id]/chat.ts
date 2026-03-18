@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import type { Context } from 'hono';
 import { eq, desc, and, sql } from 'drizzle-orm';
 import { chatRooms, chatMessages, chatRoomParticipants, users, profiles, posts } from '../../../../drizzle/schema';
 import { getCookie } from 'hono/cookie';
@@ -9,22 +10,11 @@ interface Env {
   DB: any;
 }
 
-const chat = new Hono<{ Bindings: Env }>();
+type AppContext = Context<{ Bindings: Env }>;
 
-// When mounted at /:id/chat, param('id') may not be set in child context; fallback to URL path.
-function getPostId(c: { req: { param: (k: string) => string | undefined; url: string } }): string | null {
-  const fromParam = c.req.param('id');
-  if (fromParam) return fromParam;
-  const pathname = new URL(c.req.url).pathname;
-  const match = pathname.match(/\/posts\/([^/]+)\/chat/);
-  return match?.[1] ?? null;
-}
-
-// Get or create post chat room and join (GET /api/posts/:id/chat)
-chat.get('/', async (c) => {
+/** Get or create post chat room and join. Call with postId from c.req.param('id'). */
+export async function getPostChatRoom(c: AppContext, postId: string) {
   try {
-    const postId = getPostId(c);
-    if (!postId) return c.json({ success: false, error: 'Post not found' }, 404);
     const db = createDb(c.env.DB);
 
     const postRow = await db.select().from(posts).where(eq(posts.id, postId)).limit(1);
@@ -101,13 +91,11 @@ chat.get('/', async (c) => {
     console.error('Error getting post chat room:', error);
     return c.json({ success: false, error: 'Failed to get post chat room' }, 500);
   }
-});
+}
 
-// Get messages for post chat (GET /api/posts/:id/chat/messages)
-chat.get('/messages', async (c) => {
+/** Get messages for post chat. Call with postId from c.req.param('id'). */
+export async function getPostChatMessages(c: AppContext, postId: string) {
   try {
-    const postId = getPostId(c);
-    if (!postId) return c.json({ success: false, error: 'Bad request' }, 400);
     const limit = parseInt(c.req.query('limit') || '50');
     const after = c.req.query('after');
     const db = createDb(c.env.DB);
@@ -160,13 +148,11 @@ chat.get('/messages', async (c) => {
     console.error('Error fetching post chat messages:', error);
     return c.json({ success: false, error: 'Failed to fetch messages' }, 500);
   }
-});
+}
 
-// Send message to post chat (POST /api/posts/:id/chat/messages)
-chat.post('/messages', async (c) => {
+/** Send message to post chat. Call with postId from c.req.param('id'). */
+export async function postPostChatMessage(c: AppContext, postId: string) {
   try {
-    const postId = getPostId(c);
-    if (!postId) return c.json({ success: false, error: 'Bad request' }, 400);
     const sessionCookie = getCookie(c, 'session');
     if (!sessionCookie) {
       return c.json({ success: false, error: 'Unauthorized' }, 401);
@@ -270,6 +256,26 @@ chat.post('/messages', async (c) => {
     console.error('Error sending post chat message:', error);
     return c.json({ success: false, error: 'Failed to send message' }, 500);
   }
+}
+
+const chat = new Hono<{ Bindings: Env }>();
+
+chat.get('/', async (c) => {
+  const postId = c.req.param('id');
+  if (!postId) return c.json({ success: false, error: 'Post not found' }, 404);
+  return getPostChatRoom(c, postId);
+});
+
+chat.get('/messages', async (c) => {
+  const postId = c.req.param('id');
+  if (!postId) return c.json({ success: false, error: 'Bad request' }, 400);
+  return getPostChatMessages(c, postId);
+});
+
+chat.post('/messages', async (c) => {
+  const postId = c.req.param('id');
+  if (!postId) return c.json({ success: false, error: 'Bad request' }, 400);
+  return postPostChatMessage(c, postId);
 });
 
 export default chat;

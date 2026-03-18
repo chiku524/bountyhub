@@ -13,7 +13,7 @@ import commentVoteRoute from './[id]/comments/[commentId]/vote'
 import answersRoute from './[id]/answers'
 import answerVoteRoute from './[id]/answers/[answerId]/vote'
 import answerAcceptRoute from './[id]/answers/[answerId]/accept'
-import postChatRoute from './[id]/chat'
+import { getPostChatRoom, getPostChatMessages, postPostChatMessage } from './[id]/chat'
 
 interface Env {
   DB: any
@@ -425,8 +425,22 @@ app.post(async (c) => {
   }
 })
 
-// More specific routes first so /:id/chat is matched before /:id
-app.route('/:id/chat', postChatRoute)
+// Post chat: register explicitly so :id is always available (avoids 404 when mounted subApp loses param)
+app.get('/:id/chat', async (c) => {
+  const postId = c.req.param('id')
+  if (!postId) return c.json({ success: false, error: 'Missing post id' }, 400)
+  return getPostChatRoom(c, postId)
+})
+app.get('/:id/chat/messages', async (c) => {
+  const postId = c.req.param('id')
+  if (!postId) return c.json({ success: false, error: 'Missing post id' }, 400)
+  return getPostChatMessages(c, postId)
+})
+app.post('/:id/chat/messages', async (c) => {
+  const postId = c.req.param('id')
+  if (!postId) return c.json({ success: false, error: 'Missing post id' }, 400)
+  return postPostChatMessage(c, postId)
+})
 
 // GET single post by ID
 app.get('/:id', async (c) => {
