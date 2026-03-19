@@ -69,7 +69,7 @@ const ChatSidebar: React.FC = () => {
   const [searchingGifs, setSearchingGifs] = useState(false);
   const [sending, setSending] = useState(false);
   const [lastMessageTimestamp, setLastMessageTimestamp] = useState<string | null>(null);
-  const [isPolling, setIsPolling] = useState(false);
+  const [_isPolling, setIsPolling] = useState(false);
   const [loadingChat, setLoadingChat] = useState(false);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);

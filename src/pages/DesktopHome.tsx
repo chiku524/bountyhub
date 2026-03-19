@@ -70,7 +70,9 @@ export default function DesktopHome() {
     if (phase === 'portal' && isDesktopApp()) {
       try {
         window.localStorage.setItem(DESKTOP_INTRO_SEEN_KEY, '1')
-      } catch (_) {}
+      } catch {
+        // localStorage may be disabled or full; ignore
+      }
     }
   }, [phase])
 

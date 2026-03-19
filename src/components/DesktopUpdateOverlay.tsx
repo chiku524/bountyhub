@@ -14,12 +14,10 @@ const UPDATE_WINDOW_HEIGHT = 240
 
 export function DesktopUpdateOverlay() {
   const ctx = useDesktopUpdate()
-  if (!ctx) return null
-  const { phase, errorMessage, setPhase, retryUpdate } = ctx
 
   // Resize the actual Tauri window to a small mini-window while update is in progress
   useEffect(() => {
-    if (phase === 'idle' || phase === 'error' || !isDesktopApp()) return
+    if (!ctx || ctx.phase === 'idle' || ctx.phase === 'error' || !isDesktopApp()) return
 
     let cancelled = false
     async function shrinkWindow() {
@@ -33,8 +31,10 @@ export function DesktopUpdateOverlay() {
     }
     shrinkWindow()
     return () => { cancelled = true }
-  }, [phase])
+  }, [ctx?.phase])
 
+  if (!ctx) return null
+  const { phase, errorMessage, setPhase, retryUpdate } = ctx
   if (phase === 'idle') return null
 
   if (phase === 'error') {
