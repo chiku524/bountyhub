@@ -3,6 +3,7 @@ import { useDesktopUpdate } from '../contexts/DesktopUpdateContext'
 import { isDesktopApp } from '../utils/desktop'
 
 const messages: Record<string, string> = {
+  checking: 'Checking for updates…',
   downloading: 'Downloading update…',
   installing: 'Installing update…',
   restarting: 'Update complete. Restarting the app…',
@@ -21,7 +22,7 @@ const FULL_WINDOW_HEIGHT = 800
 export function DesktopUpdateOverlay() {
   const ctx = useDesktopUpdate()
 
-  // Resize and center the Tauri window: small for download/install, larger for error
+  // Resize and center the Tauri window: small for checking/download/install, larger for error
   useEffect(() => {
     if (!ctx || ctx.phase === 'idle' || !isDesktopApp()) return
 
@@ -123,7 +124,9 @@ export function DesktopUpdateOverlay() {
           {messages[phase] ?? 'Preparing update…'}
         </p>
         <p className="text-center text-xs text-neutral-500">
-          The app will restart automatically when the update is complete.
+          {phase === 'checking'
+            ? 'This may take a moment.'
+            : 'The app will restart automatically when the update is complete.'}
         </p>
       </div>
     </div>

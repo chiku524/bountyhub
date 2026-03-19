@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { FiAward } from 'react-icons/fi'
 import { useAuth } from '../contexts/AuthProvider'
 import { PageMetadata } from '../components/PageMetadata'
@@ -8,24 +8,31 @@ import { isDesktopApp } from '../utils/desktop'
 const INTRO_DURATION_MS = 2400
 const TRANSFORM_DURATION_MS = 650
 const PORTAL_APPEAR_MS = 400
+const WELCOME_BACK_MS = 400
 const DESKTOP_INTRO_SEEN_KEY = 'desktop-intro-seen'
 
-/** Actual window size during intro (single small window; large enough for logo + wordmark + tagline) */
-const INTRO_WINDOW_WIDTH = 320
-const INTRO_WINDOW_HEIGHT = 360
+function getIntroSeen(): boolean {
+  if (typeof window === 'undefined' || !isDesktopApp()) return false
+  if (import.meta.env.DEV) return false
+  return !!window.localStorage.getItem(DESKTOP_INTRO_SEEN_KEY)
+}
+
+/** Actual window size during intro (single small window; large enough for logo + wordmark + tagline + safe area) */
+const INTRO_WINDOW_WIDTH = 360
+const INTRO_WINDOW_HEIGHT = 400
 const FULL_WINDOW_WIDTH = 1200
 const FULL_WINDOW_HEIGHT = 800
 
 export default function DesktopHome() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [phase, setPhase] = useState<'intro' | 'transform' | 'portal'>(() => {
     if (typeof window === 'undefined' || !isDesktopApp()) return 'intro'
+    if (import.meta.env.DEV) return 'intro'
     return window.localStorage.getItem(DESKTOP_INTRO_SEEN_KEY) ? 'portal' : 'intro'
   })
-  const [portalVisible, setPortalVisible] = useState(() => {
-    if (typeof window === 'undefined' || !isDesktopApp()) return false
-    return !!window.localStorage.getItem(DESKTOP_INTRO_SEEN_KEY)
-  })
+  const [portalVisible, setPortalVisible] = useState(false)
+  const [showWelcomeBack, setShowWelcomeBack] = useState(false)
 
   // Center window as soon as desktop home loads (handles initial position before phase effect)
   useEffect(() => {
@@ -37,10 +44,12 @@ export default function DesktopHome() {
     return () => { cancelled = true }
   }, [])
 
-  // Resize and center the actual Tauri window: small during intro/transform, full when portal
+  // Resize and center the actual Tauri window: small during intro/transform, full when portal.
+  // Portal (login/register) is only shown after the window has expanded so the small window only ever shows intro or update overlay.
   useEffect(() => {
     if (!isDesktopApp()) return
 
+    let cancelled = false
     async function setWindowSizeAndCenter(width: number, height: number) {
       try {
         const { getCurrentWindow } = await import('@tauri-apps/api/window')
@@ -54,9 +63,8 @@ export default function DesktopHome() {
 
     if (phase === 'intro' || phase === 'transform') {
       setWindowSizeAndCenter(INTRO_WINDOW_WIDTH, INTRO_WINDOW_HEIGHT)
-    } else if (phase === 'portal') {
-      setWindowSizeAndCenter(FULL_WINDOW_WIDTH, FULL_WINDOW_HEIGHT)
     }
+    return () => { cancelled = true }
   }, [phase])
 
   useEffect(() => {
@@ -71,10 +79,34 @@ export default function DesktopHome() {
     return () => clearTimeout(t)
   }, [phase])
 
+
+  // When portal phase and user is logged in: brief "Welcome back" then navigate to app home
   useEffect(() => {
-    if (phase !== 'portal') return
-    const t = setTimeout(() => setPortalVisible(true), 80)
+    if (phase !== 'portal' || !user) return
+    setShowWelcomeBack(true)
+    const t = setTimeout(() => {
+      navigate('/community', { replace: true })
+    }, WELCOME_BACK_MS)
     return () => clearTimeout(t)
+  }, [phase, user, navigate])
+
+  // When portal: expand window and reveal sign-in portal only if user is not logged in
+  useEffect(() => {
+    if (!isDesktopApp() || phase !== 'portal') return
+    let cancelled = false
+    async function expand() {
+      try {
+        const { getCurrentWindow } = await import('@tauri-apps/api/window')
+        const win = getCurrentWindow()
+        await win.setSize({ type: 'Logical', width: FULL_WINDOW_WIDTH, height: FULL_WINDOW_HEIGHT })
+        await win.center()
+        if (!cancelled) setPortalVisible(true)
+      } catch (e) {
+        if (import.meta.env.DEV) console.debug('[DesktopHome] expand', e)
+      }
+    }
+    expand()
+    return () => { cancelled = true }
   }, [phase])
 
   // Mark intro as seen only after portal has been visible so next launch can skip intro
@@ -90,7 +122,8 @@ export default function DesktopHome() {
     return () => clearTimeout(t)
   }, [phase])
 
-  if (user) {
+  // Logged-in + intro already seen: skip straight to app home
+  if (user && getIntroSeen()) {
     return <Navigate to="/community" replace />
   }
 
@@ -102,9 +135,22 @@ export default function DesktopHome() {
       />
       {/* Single full-viewport background; the actual window is small then full (no inner fake window) */}
       <div className="fixed inset-0 z-20 flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-indigo-950/98 via-neutral-950 to-violet-950/80">
-        {/* Intro: logo + wordmark + tagline */}
+        {/* Welcome back: brief message when logged-in user transitions to app home */}
+        {showWelcomeBack && (
+          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-gradient-to-br from-indigo-950/98 via-neutral-950 to-violet-950/80 animate-fade-in">
+            <div className="flex flex-col items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-violet-500 shadow-lg">
+                <FiAward className="h-6 w-6 text-white" aria-hidden />
+              </div>
+              <p className="text-lg font-medium bg-gradient-to-r from-cyan-200 via-violet-200 to-cyan-200 bg-clip-text text-transparent">
+                Welcome back
+              </p>
+            </div>
+          </div>
+        )}
+        {/* Intro: logo + wordmark + tagline (padding so content fits in small window) */}
         <div
-          className={`flex flex-col items-center justify-center transition-all duration-500 ${
+          className={`flex flex-col items-center justify-center p-6 transition-all duration-500 ${
             phase === 'intro'
               ? 'opacity-100 scale-100'
               : 'opacity-0 pointer-events-none scale-95 absolute'

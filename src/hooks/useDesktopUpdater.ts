@@ -2,8 +2,8 @@ import { useEffect } from 'react'
 import { isDesktopApp } from '../utils/desktop'
 import type { DesktopUpdatePhase } from '../contexts/DesktopUpdateContext'
 
-/** Check for update this long after app opens (let the UI settle, then run once) */
-const CHECK_ON_LOAD_DELAY_MS = 1000
+/** Brief delay before running update check so the "Checking for updates" overlay can render */
+const CHECK_ON_LOAD_DELAY_MS = 400
 /** Re-check periodically while the app is open */
 const CHECK_INTERVAL_MS = 30 * 60 * 1000 // 30 minutes
 const RESTART_DELAY_MS = 1800
@@ -27,10 +27,14 @@ export function useDesktopUpdater(updateContext: UpdaterContext) {
 
     async function checkAndInstall() {
       try {
+        setPhase('checking')
         const { checkUpdate, installUpdate, onUpdaterEvent } = await import('@tauri-apps/api/updater')
         const { relaunch } = await import('@tauri-apps/api/process')
         const update = await checkUpdate()
-        if (!update?.shouldUpdate) return
+        if (!update?.shouldUpdate) {
+          setPhase('idle')
+          return
+        }
 
         setPhase('downloading')
         const unlisten = await onUpdaterEvent(({ status }) => {
@@ -49,6 +53,7 @@ export function useDesktopUpdater(updateContext: UpdaterContext) {
         const isReleaseJsonError = /release\s*json|valid\s*release|could\s*not\s*fetch/i.test(message)
         if (isReleaseJsonError) {
           console.info('[BountyHub updater] No update endpoint or release:', message)
+          setPhase('idle')
           return
         }
         setPhase('error', message)
@@ -58,7 +63,7 @@ export function useDesktopUpdater(updateContext: UpdaterContext) {
 
     registerRetry(checkAndInstall)
 
-    // Run update check once after app load, then periodically
+    // Run update check shortly after mount (overlay already showing "Checking for updates"), then periodically
     const onLoadTimer = setTimeout(checkAndInstall, CHECK_ON_LOAD_DELAY_MS)
     const interval = setInterval(checkAndInstall, CHECK_INTERVAL_MS)
     return () => {

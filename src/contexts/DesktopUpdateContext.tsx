@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, useRef, type ReactNode } from 'react'
+import { isDesktopApp } from '../utils/desktop'
 
-export type DesktopUpdatePhase = 'idle' | 'downloading' | 'installing' | 'restarting' | 'error'
+export type DesktopUpdatePhase = 'idle' | 'checking' | 'downloading' | 'installing' | 'restarting' | 'error'
 
 type ContextValue = {
   phase: DesktopUpdatePhase
@@ -13,7 +14,9 @@ type ContextValue = {
 const DesktopUpdateContext = createContext<ContextValue | null>(null)
 
 export function DesktopUpdateProvider({ children }: { children: ReactNode }) {
-  const [phase, setPhaseState] = useState<DesktopUpdatePhase>('idle')
+  const [phase, setPhaseState] = useState<DesktopUpdatePhase>(() =>
+    isDesktopApp() ? 'checking' : 'idle'
+  )
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const retryRef = useRef<(() => void) | null>(null)
   const setPhase = useCallback((p: DesktopUpdatePhase, errMsg?: string | null) => {

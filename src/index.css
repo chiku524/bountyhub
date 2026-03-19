@@ -240,4 +240,38 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* Desktop app: native-window feel — single content area, app-style scrollbars and radii */
+[data-desktop="true"] {
+  --desktop-radius: 12px;
+  --desktop-input-radius: 8px;
+}
+
+/* Desktop: native-feel scrollbars */
+[data-desktop="true"] .scrollbar-thin,
+[data-desktop="true"] .overflow-y-auto,
+[data-desktop="true"] .overflow-auto {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(100 116 139 / 0.6) transparent;
+}
+
+[data-desktop="true"] .scrollbar-thin::-webkit-scrollbar,
+[data-desktop="true"] .overflow-y-auto::-webkit-scrollbar,
+[data-desktop="true"] .overflow-auto::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+[data-desktop="true"] .scrollbar-thin::-webkit-scrollbar-thumb,
+[data-desktop="true"] .overflow-y-auto::-webkit-scrollbar-thumb,
+[data-desktop="true"] .overflow-auto::-webkit-scrollbar-thumb {
+  background: rgb(100 116 139 / 0.5);
+  border-radius: 4px;
+}
+
+[data-desktop="true"] .scrollbar-thin::-webkit-scrollbar-thumb:hover,
+[data-desktop="true"] .overflow-y-auto::-webkit-scrollbar-thumb:hover,
+[data-desktop="true"] .overflow-auto::-webkit-scrollbar-thumb:hover {
+  background: rgb(100 116 139 / 0.7);
 } 

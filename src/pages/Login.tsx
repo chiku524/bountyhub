@@ -1,7 +1,9 @@
 import { useState, useRef } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { FiArrowLeft } from 'react-icons/fi'
 import { useAuth } from '../contexts/AuthProvider'
 import { config } from '../utils/config'
+import { isDesktopApp } from '../utils/desktop'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -14,6 +16,7 @@ export default function Login() {
   const redirectTo = searchParams.get('redirectTo') || '/profile'
   const emailRef = useRef(null)
   const passwordRef = useRef(null)
+  const isDesktop = isDesktopApp()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -35,21 +38,36 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white/50 dark:bg-neutral-900/50 backdrop-blur-xs text-neutral-900 dark:text-white transition-colors duration-200 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-neutral-900 dark:text-white">
-            Sign in to your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-neutral-500 dark:text-gray-400">
-            Or{' '}
-            <Link to="/signup" className="font-medium text-violet-400 hover:text-violet-300">
-              create a new account
-            </Link>
-          </p>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-xs -space-y-px">
+    <div className={`min-h-screen flex items-center justify-center text-neutral-900 dark:text-white transition-colors duration-200 py-12 px-4 sm:px-6 lg:px-8 ${
+      isDesktop
+        ? 'bg-gradient-to-br from-indigo-950/98 via-neutral-950 to-violet-950/80'
+        : 'bg-white/50 dark:bg-neutral-900/50 backdrop-blur-xs'
+    }`}>
+      <div className={`w-full space-y-6 ${isDesktop ? 'max-w-[380px]' : 'max-w-md'}`}>
+        {isDesktop && (
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-sm text-neutral-400 hover:text-cyan-300 transition-colors"
+          >
+            <FiArrowLeft className="w-4 h-4" />
+            Back
+          </Link>
+        )}
+        <div className={isDesktop ? 'rounded-2xl border border-cyan-500/20 dark:border-violet-500/30 bg-neutral-900/95 px-8 py-10 shadow-2xl backdrop-blur-sm' : ''}>
+          <div className={isDesktop ? 'space-y-6' : 'space-y-8'}>
+            <div>
+              <h2 className={`text-center font-extrabold text-neutral-900 dark:text-white ${isDesktop ? 'text-2xl' : 'mt-6 text-3xl'}`}>
+                Sign in to your account
+              </h2>
+              <p className="mt-2 text-center text-sm text-neutral-500 dark:text-gray-400">
+                Or{' '}
+                <Link to="/signup" className="font-medium text-violet-400 hover:text-violet-300">
+                  create a new account
+                </Link>
+              </p>
+            </div>
+        <form className={isDesktop ? 'mt-6 space-y-5' : 'mt-8 space-y-6'} onSubmit={handleSubmit}>
+          <div className={isDesktop ? 'space-y-3' : 'rounded-md shadow-xs -space-y-px'}>
             <div>
               <label htmlFor="email" className="sr-only">
                 Email address
@@ -63,7 +81,9 @@ export default function Login() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-neutral-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400 rounded-t-md focus:outline-hidden focus:ring-violet-500 focus:border-violet-500 focus:z-10 sm:text-sm"
+                className={`appearance-none relative block w-full px-3 py-2 border border-neutral-300 dark:border-gray-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent sm:text-sm ${
+                  isDesktop ? 'rounded-lg' : 'rounded-none rounded-t-md focus:ring-violet-500 focus:border-violet-500 focus:z-10'
+                }`}
                 placeholder="Email address"
                 aria-invalid={!!error}
                 aria-describedby="email-error"
@@ -82,7 +102,9 @@ export default function Login() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-neutral-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400 rounded-b-md focus:outline-hidden focus:ring-violet-500 focus:border-violet-500 focus:z-10 sm:text-sm"
+                className={`appearance-none relative block w-full px-3 py-2 border border-neutral-300 dark:border-gray-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent sm:text-sm ${
+                  isDesktop ? 'rounded-lg' : 'rounded-none rounded-b-md focus:ring-violet-500 focus:border-violet-500 focus:z-10'
+                }`}
                 placeholder="Password"
                 aria-invalid={!!error}
                 aria-describedby="password-error"
@@ -102,7 +124,11 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-violet-600 hover:bg-violet-700 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              className={`group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                isDesktop
+                  ? 'rounded-xl bg-indigo-600 hover:bg-indigo-500 focus:ring-cyan-400 focus:ring-offset-neutral-900'
+                  : 'rounded-md bg-violet-600 hover:bg-violet-700 focus:ring-violet-500 focus:ring-offset-2'
+              }`}
             >
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
@@ -124,7 +150,9 @@ export default function Login() {
             <div className="mt-6">
               <a
                 href={`${config.api.baseUrl}/api/auth/github`}
-                className="w-full flex items-center justify-center gap-3 px-4 py-2 border border-neutral-300 dark:border-gray-600 rounded-md bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
+                className={`w-full flex items-center justify-center gap-3 px-4 py-2 border bg-white/10 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-white/20 dark:hover:bg-neutral-700 transition-colors ${
+                  isDesktop ? 'border-cyan-500/30 dark:border-violet-500/30 rounded-xl' : 'border-neutral-300 dark:border-gray-600 rounded-md'
+                }`}
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path fillRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" clipRule="evenodd" />
@@ -145,6 +173,8 @@ export default function Login() {
             </div>
           </div>
         </form>
+          </div>
+        </div>
       </div>
     </div>
   )
