@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "BountyHub",
-    "version": "1.1.8"
+    "version": "1.1.9"
   },
   "tauri": {
     "allowlist": {
@@ -38,6 +38,10 @@
       "windows": { "certificateThumbprint": null, "digestAlgorithm": "sha256", "timestampUrl": "" }
     },
     "security": { "csp": null },
+    "systemTray": {
+      "iconPath": "icons/icon.png",
+      "iconAsTemplate": true
+    },
     "updater": {
       "active": true,
       "endpoints": ["https://github.com/chiku524/bountyhub/releases/latest/download/latest.json"],
@@ -46,6 +50,7 @@
     },
     "windows": [
       {
+        "label": "main",
         "fullscreen": false,
         "height": 800,
         "resizable": true,
