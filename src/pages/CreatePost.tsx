@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../utils/api'
 import { useAuth } from '../contexts/AuthProvider'
+import { isDesktopApp } from '../utils/desktop'
 import { useToast } from '../contexts/ToastContext'
 import TagSelector from '../components/TagSelector'
 import { CodeBlockEditor } from '../components/CodeBlockEditor'
@@ -123,14 +124,15 @@ export default function CreatePost() {
     }
   }
 
+  const isDesktop = isDesktopApp()
   return (
     <div className="p-4 sm:p-8">
-      <div className="max-w-4xl mx-auto">
+      <div className={`mx-auto ${isDesktop ? 'max-w-5xl' : 'max-w-4xl'}`}>
         <div className="mb-6 flex justify-between items-center mt-16">
           <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-white">Create New Post</h1>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto">
+        <form onSubmit={handleSubmit} className={`space-y-6 mx-auto ${isDesktop ? 'max-w-5xl' : 'max-w-4xl'}`}>
           <div>
             <TagSelector
               selectedTags={selectedTags}

@@ -115,8 +115,8 @@ function AppContent() {
       {/* Animated Background - Canvas only, no children */}
       <AnimatedBackground />
       
-      {/* Light/Dark mode container - Always flex-col */}
-      <div className="relative z-10 min-h-screen w-full bg-white/5 dark:bg-neutral-900/5 transition-colors duration-200 flex flex-col">
+      {/* Light/Dark mode container - Always flex-col; data-desktop for app-like styling */}
+      <div className="relative z-10 min-h-screen w-full bg-white/5 dark:bg-neutral-900/5 transition-colors duration-200 flex flex-col" data-desktop={isDesktop ? 'true' : undefined}>
         {/* Skip to main content - visible on focus for keyboard/screen reader users */}
         {showAuthenticatedNav && (
           <a

@@ -2,6 +2,7 @@ import { useParams } from 'react-router-dom'
 import { useEffect, useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../utils/api'
+import { isDesktopApp } from '../utils/desktop'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { ErrorMessage } from '../components/ErrorMessage'
 import { PostChatRoom } from '../components/PostChatRoom'
@@ -246,9 +247,10 @@ export default function PostDetail() {
     </div>
   )
 
+  const isDesktop = isDesktopApp()
   return (
     <div className="p-8 min-h-screen">
-      <div className="max-w-7xl mx-auto">
+      <div className={`mx-auto ${isDesktop ? 'max-w-6xl' : 'max-w-7xl'}`}>
         <div className="mb-4">
           <Link to="/community" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300">
             ← Back to Community

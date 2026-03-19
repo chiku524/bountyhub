@@ -12,6 +12,7 @@ import { Notifications } from './Notifications'
 import { ThemeToggle } from './ThemeToggle'
 import type { NotificationsRef } from './Notifications'
 import { logoUrl } from '../utils/logoUrl'
+import { isDesktopApp } from '../utils/desktop'
 
 function WalletButton() {
   const { wallet, connected, disconnect } = useWallet()
@@ -94,12 +95,20 @@ export function TopNav() {
     return location.pathname === path || location.pathname.startsWith(path + '/')
   }
 
+  const isDesktop = isDesktopApp()
+  const navHeightClass = isDesktop ? 'h-14' : 'h-16'
+
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/70 dark:bg-neutral-800/70 backdrop-blur-xs border-b border-neutral-200/50 dark:border-neutral-700/50 shadow-xs">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 shrink-0" aria-label="bountyhub home">
+    <nav className={`fixed top-0 left-0 right-0 z-50 bg-white/70 dark:bg-neutral-800/70 backdrop-blur-xs border-b border-neutral-200/50 dark:border-neutral-700/50 shadow-xs ${isDesktop ? 'supports-[(-webkit-app-region:drag)]:bg-white/90 dark:supports-[(-webkit-app-region:drag)]:bg-neutral-800/90' : ''}`}>
+      <div className={`mx-auto px-4 sm:px-6 lg:px-8 ${isDesktop ? 'max-w-6xl' : 'max-w-7xl'}`}>
+        <div className={`flex items-center justify-between ${navHeightClass}`}>
+          {/* Logo + app name: draggable region on desktop for window move */}
+          <Link
+            to="/"
+            className="flex items-center space-x-2 shrink-0"
+            aria-label="bountyhub home"
+            {...(isDesktop ? { 'data-tauri-drag-region': true } : {})}
+          >
             <img src={logoUrl} alt="" className="w-8 h-8 object-contain" aria-hidden />
             <span className="text-xl font-bold bg-linear-to-r from-cyan-400 to-violet-400 dark:from-cyan-400 dark:to-violet-400 bg-clip-text text-transparent hidden sm:block">
               bountyhub

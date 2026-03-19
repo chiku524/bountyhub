@@ -7,14 +7,13 @@
   },
   "package": {
     "productName": "BountyHub",
-    "version": "1.1.7"
+    "version": "1.1.8"
   },
   "tauri": {
     "allowlist": {
       "all": false,
       "shell": { "all": false, "open": true },
       "window": { "all": false, "close": true, "hide": true, "show": true, "maximize": true, "minimize": true, "unmaximize": true, "unminimize": true, "startDragging": true },
-      "updater": true,
       "process": { "all": false, "relaunch": true, "exit": true }
     },
     "bundle": {

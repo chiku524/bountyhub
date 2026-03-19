@@ -1,11 +1,13 @@
 import { Link } from 'react-router-dom'
 import { FaDiscord, FaTwitter } from 'react-icons/fa'
 import { logoUrl } from '../utils/logoUrl'
+import { isDesktopApp } from '../utils/desktop'
 
 export function Footer() {
+  const isDesktop = isDesktopApp()
   return (
-    <footer className="bg-white/70 dark:bg-neutral-800/70 backdrop-blur-xs border-t border-neutral-200/50 dark:border-neutral-700/50 py-6 transition-colors duration-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <footer className={`bg-white/70 dark:bg-neutral-800/70 backdrop-blur-xs border-t border-neutral-200/50 dark:border-neutral-700/50 transition-colors duration-200 ${isDesktop ? 'py-4' : 'py-6'}`}>
+      <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${isDesktop ? 'max-w-6xl' : ''}`}>
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center space-x-4">
             <Link to="/" className="flex items-center gap-2 text-neutral-700 dark:text-neutral-300 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors font-semibold" aria-label="bountyhub home">
@@ -54,8 +56,8 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-4 pt-4 border-t border-neutral-200 dark:border-neutral-700">
-          <p className="text-neutral-500 dark:text-neutral-500 text-sm text-center">
+        <div className={`border-t border-neutral-200 dark:border-neutral-700 ${isDesktop ? 'mt-3 pt-3' : 'mt-4 pt-4'}`}>
+          <p className={`text-neutral-500 dark:text-neutral-500 text-center ${isDesktop ? 'text-xs' : 'text-sm'}`}>
             © {new Date().getFullYear()} bountyhub. All rights reserved.
           </p>
         </div>

@@ -2,6 +2,7 @@ import { ReactNode } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthProvider'
 import { BackToTop } from './BackToTop'
+import { isDesktopApp } from '../utils/desktop'
 
 interface LayoutProps {
   children: ReactNode
@@ -11,6 +12,7 @@ interface LayoutProps {
 export default function Layout({ children, showNav = true }: LayoutProps) {
   const location = useLocation()
   const { user } = useAuth()
+  const isDesktop = isDesktopApp()
   const isHomePage = location.pathname === '/'
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup'
   const isLegalPage = location.pathname === '/privacy' || location.pathname === '/terms'
@@ -20,6 +22,7 @@ export default function Layout({ children, showNav = true }: LayoutProps) {
   // Determine if we need top padding for authenticated nav (top navbar)
   const showAuthenticatedNav = Boolean(user) && !isPublicPage
   const needsTopPadding = showAuthenticatedNav && showNav
+  const topPaddingClass = needsTopPadding ? (isDesktop ? 'pt-14' : 'pt-16') : ''
 
   const mainClasses = [
     'flex-1 min-h-0',
@@ -27,7 +30,7 @@ export default function Layout({ children, showNav = true }: LayoutProps) {
   ].join(' ')
 
   return (
-    <div className={`flex-1 flex flex-col ${needsTopPadding ? 'pt-16' : ''} pb-16 md:pb-0`}>
+    <div className={`flex-1 flex flex-col ${topPaddingClass} pb-16 md:pb-0`}>
       <main id="main-content" className={mainClasses} tabIndex={-1}>
         {children}
       </main>
