@@ -1,0 +1,44 @@
+<svg width="1500" height="500" viewBox="0 0 1500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="100%" stop-color="#312e81"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+    <linearGradient id="logo-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="100%" stop-color="#312e81"/>
+    </linearGradient>
+    <linearGradient id="logo-accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+  </defs>
+  <rect width="1500" height="500" fill="url(#bg)"/>
+  <!-- Hub logo (left) -->
+  <g transform="translate(120, 125) scale(3.9)">
+    <rect width="64" height="64" rx="14" fill="url(#logo-bg)"/>
+    <circle cx="32" cy="30" r="11" fill="none" stroke="url(#logo-accent)" stroke-width="2" opacity="0.95"/>
+    <circle cx="18" cy="22" r="5" fill="#22d3ee" opacity="0.95"/>
+    <circle cx="46" cy="22" r="5" fill="#a78bfa" opacity="0.95"/>
+    <circle cx="32" cy="48" r="5" fill="#22d3ee" opacity="0.95"/>
+    <path d="M24.5 27 L20 24" stroke="#67e8f9" stroke-width="1.4" opacity="0.9" stroke-linecap="round"/>
+    <path d="M39.5 27 L44 24" stroke="#c4b5fd" stroke-width="1.4" opacity="0.9" stroke-linecap="round"/>
+    <path d="M32 37 L32 43" stroke="#67e8f9" stroke-width="1.4" opacity="0.9" stroke-linecap="round"/>
+    <circle cx="32" cy="30" r="5" fill="#e0e7ff" opacity="0.95"/>
+  </g>
+  <!-- Title + tagline -->
+  <text x="420" y="220" fill="white" font-family="system-ui, -apple-system, sans-serif" font-size="56" font-weight="700">bountyhub</text>
+  <text x="420" y="280" fill="rgba(255,255,255,0.9)" font-family="system-ui, -apple-system, sans-serif" font-size="22">Decentralized Bounty Platform � Solana</text>
+  <text x="420" y="340" fill="#22d3ee" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="600">Ask � Answer � Earn</text>
+  <!-- Use-case pills -->
+  <rect x="420" y="370" width="140" height="36" rx="18" fill="rgba(34,211,238,0.2)" stroke="#22d3ee" stroke-width="1.5"/>
+  <text x="490" y="394" fill="#67e8f9" font-family="system-ui, sans-serif" font-size="16" font-weight="500" text-anchor="middle">Q&amp;A Bounties</text>
+  <rect x="580" y="370" width="160" height="36" rx="18" fill="rgba(167,139,250,0.2)" stroke="#a78bfa" stroke-width="1.5"/>
+  <text x="660" y="394" fill="#c4b5fd" font-family="system-ui, sans-serif" font-size="16" font-weight="500" text-anchor="middle">Bug Bounties</text>
+  <rect x="760" y="370" width="120" height="36" rx="18" fill="rgba(34,211,238,0.2)" stroke="#22d3ee" stroke-width="1.5"/>
+  <text x="820" y="394" fill="#67e8f9" font-family="system-ui, sans-serif" font-size="16" font-weight="500" text-anchor="middle">Developer Hub</text>
+</svg>

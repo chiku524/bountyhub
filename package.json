@@ -11,7 +11,7 @@
     "dev:setup": "./scripts/dev-setup.sh",
     "dev:setup:win": "scripts\\dev-setup.bat",
     "prebuild": "node -e \"require('os').platform()==='linux'&&require('child_process').execSync('npm install --no-save @rollup/rollup-linux-x64-gnu',{stdio:'inherit'})\" || true",
-    "build": "vite build",
+    "build": "node scripts/generate-brand-images.js && vite build",
     "typecheck": "tsc --noEmit",
     "typecheck:api": "tsc --noEmit --project functions/tsconfig.json",
     "typecheck:all": "npm run build && npm run typecheck:api",

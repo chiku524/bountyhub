@@ -61,6 +61,7 @@ Deploy when API code, migrations, or config change. Use **Cloudflare Secrets** f
 - **Workers**: `wrangler login`, check `wrangler.workers.toml` and D1 bindings; use `wrangler tail` for logs.
 - **CORS**: Ensure `functions/index.ts` allows your frontend origin and `VITE_API_URL` is correct.
 - **Cache / “Site can’t be reached”**: The service worker is network-first for navigations. Normal refresh gets fresh HTML. If needed, purge Pages cache in Dashboard → Deployments → Purge cache or Caching → Purge Everything.
+- **Social share image (og:image) not showing**: The build runs `scripts/generate-brand-images.js` so `og-image.jpg` is in `dist/` and deployed. After deploying, use [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/) or [Twitter Card Validator](https://cards-dev.twitter.com/validator) and use "Scrape Again" to refresh cached previews.
 
 **Summary**: Frontend (Pages) auto-deploys on push to `main`; backend (Workers) manual deploy when API/config changes; migrations applied separately via wrangler; use Cloudflare Secrets, not repo commits.
 

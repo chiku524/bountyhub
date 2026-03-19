@@ -50,6 +50,22 @@ npm run build
 npm run deploy:workers
 ```
 
+## 🖥️ Desktop app (local)
+
+To run the desktop app locally before releasing a new version:
+
+```bash
+npm run desktop
+```
+
+This starts Tauri in dev mode: the app opens in a native window and hot-reloads on code changes. Use it to test the intro animation, update overlay, and full app flow.
+
+To build installers for distribution:
+
+```bash
+npm run desktop:build
+```
+
 ## 🎨 Brand & social assets
 
 Raster brand images (PNG/JPG) are generated from SVGs in `public/`. After changing any of these source files, re-run:
