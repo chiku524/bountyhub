@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthProvider'
+import { useEscapeKey } from '../hooks/useEscapeKey'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { ErrorMessage } from '../components/ErrorMessage'
 
@@ -39,6 +40,8 @@ const RefundRequests: React.FC = () => {
   const [voteReason, setVoteReason] = useState('')
   const [voting, setVoting] = useState(false)
   const [votes, setVotes] = useState<{ [key: string]: Vote[] }>({})
+
+  useEscapeKey(selectedRequest !== null, () => setSelectedRequest(null))
 
   useEffect(() => {
     if (user) {

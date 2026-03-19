@@ -13,11 +13,13 @@ const UPDATE_WINDOW_WIDTH = 280
 const UPDATE_WINDOW_HEIGHT = 240
 
 export function DesktopUpdateOverlay() {
-  const { phase } = useDesktopUpdate()
+  const ctx = useDesktopUpdate()
+  if (!ctx) return null
+  const { phase, errorMessage, setPhase, retryUpdate } = ctx
 
   // Resize the actual Tauri window to a small mini-window while update is in progress
   useEffect(() => {
-    if (phase === 'idle' || !isDesktopApp()) return
+    if (phase === 'idle' || phase === 'error' || !isDesktopApp()) return
 
     let cancelled = false
     async function shrinkWindow() {
@@ -34,6 +36,38 @@ export function DesktopUpdateOverlay() {
   }, [phase])
 
   if (phase === 'idle') return null
+
+  if (phase === 'error') {
+    return (
+      <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gradient-to-br from-indigo-950/98 via-neutral-950 to-violet-950/90 backdrop-blur-sm">
+        <div className="flex flex-col items-center gap-4 px-6 max-w-sm">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-500/20">
+            <svg className="h-6 w-6 text-red-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <p className="text-center text-sm font-medium text-white">Update failed</p>
+          <p className="text-center text-xs text-neutral-400">{errorMessage ?? 'Something went wrong.'}</p>
+          <div className="flex gap-3 mt-2">
+            <button
+              type="button"
+              onClick={() => setPhase('idle')}
+              className="px-4 py-2 rounded-lg bg-neutral-700 hover:bg-neutral-600 text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            >
+              Continue
+            </button>
+            <button
+              type="button"
+              onClick={() => retryUpdate()}
+              className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gradient-to-br from-indigo-950/98 via-neutral-950 to-violet-950/90 backdrop-blur-sm">

@@ -8,14 +8,21 @@ const CHECK_ON_LOAD_DELAY_MS = 1500
 const CHECK_INTERVAL_MS = 30 * 60 * 1000 // 30 minutes
 const RESTART_DELAY_MS = 1800
 
+type UpdaterContext = {
+  setPhase: (p: DesktopUpdatePhase, errorMessage?: string | null) => void
+  registerRetry: (fn: () => void) => void
+} | null
+
 /**
  * In the desktop app: on open, checks for updates; if a newer version is available,
  * triggers auto-update (download → install → restart). Also re-checks every 30 minutes.
+ * On failure, sets phase to 'error' so the overlay can show Retry/Continue.
  * Requires GitHub Release to have latest.json (and signed .sig assets) — set TAURI_PRIVATE_KEY in CI.
  */
-export function useDesktopUpdater(setUpdatePhase: ((p: DesktopUpdatePhase) => void) | undefined) {
+export function useDesktopUpdater(updateContext: UpdaterContext) {
   useEffect(() => {
-    if (!isDesktopApp()) return
+    if (!isDesktopApp() || !updateContext) return
+    const { setPhase, registerRetry } = updateContext
 
     async function checkAndInstall() {
       try {
@@ -24,23 +31,25 @@ export function useDesktopUpdater(setUpdatePhase: ((p: DesktopUpdatePhase) => vo
         const update = await checkUpdate()
         if (!update?.shouldUpdate) return
 
-        setUpdatePhase?.('downloading')
+        setPhase('downloading')
         const unlisten = await onUpdaterEvent(({ status }) => {
-          if (status.status === 'DONE') setUpdatePhase?.('restarting')
-          else if (status.status === 'PENDING') setUpdatePhase?.('installing')
+          if (status.status === 'DONE') setPhase('restarting')
+          else if (status.status === 'PENDING') setPhase('installing')
         })
 
         await installUpdate()
         unlisten()
-        setUpdatePhase?.('restarting')
+        setPhase('restarting')
         await new Promise((r) => setTimeout(r, RESTART_DELAY_MS))
         await relaunch()
       } catch (err) {
-        setUpdatePhase?.('idle')
-        // Log in all envs so users can see why update didn't run (e.g. 404 on latest.json, no TAURI_PRIVATE_KEY in CI)
-        console.warn('[BountyHub updater]', err instanceof Error ? err.message : err)
+        const message = err instanceof Error ? err.message : String(err)
+        setPhase('error', message)
+        console.warn('[BountyHub updater]', message)
       }
     }
+
+    registerRetry(checkAndInstall)
 
     // Check on app open, then periodically
     const onLoadTimer = setTimeout(checkAndInstall, CHECK_ON_LOAD_DELAY_MS)
@@ -49,5 +58,5 @@ export function useDesktopUpdater(setUpdatePhase: ((p: DesktopUpdatePhase) => vo
       clearTimeout(onLoadTimer)
       clearInterval(interval)
     }
-  }, [setUpdatePhase])
+  }, [updateContext])
 }

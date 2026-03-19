@@ -1,19 +1,37 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, useRef, type ReactNode } from 'react'
 
-export type DesktopUpdatePhase = 'idle' | 'downloading' | 'installing' | 'restarting'
+export type DesktopUpdatePhase = 'idle' | 'downloading' | 'installing' | 'restarting' | 'error'
 
 type ContextValue = {
   phase: DesktopUpdatePhase
-  setPhase: (p: DesktopUpdatePhase) => void
+  errorMessage: string | null
+  setPhase: (p: DesktopUpdatePhase, errorMessage?: string | null) => void
+  registerRetry: (fn: () => void) => void
+  retryUpdate: () => void
 }
 
 const DesktopUpdateContext = createContext<ContextValue | null>(null)
 
 export function DesktopUpdateProvider({ children }: { children: ReactNode }) {
-  const [phase, setPhase] = useState<DesktopUpdatePhase>('idle')
+  const [phase, setPhaseState] = useState<DesktopUpdatePhase>('idle')
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const retryRef = useRef<(() => void) | null>(null)
+  const setPhase = useCallback((p: DesktopUpdatePhase, errMsg?: string | null) => {
+    setPhaseState(p)
+    setErrorMessage(p === 'error' ? (errMsg ?? 'Update failed') : null)
+  }, [])
+  const registerRetry = useCallback((fn: () => void) => {
+    retryRef.current = fn
+  }, [])
+  const retryUpdate = useCallback(() => {
+    retryRef.current?.()
+  }, [])
   const value: ContextValue = {
     phase,
-    setPhase: useCallback((p: DesktopUpdatePhase) => setPhase(p), []),
+    errorMessage,
+    setPhase,
+    registerRetry,
+    retryUpdate,
   }
   return (
     <DesktopUpdateContext.Provider value={value}>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
+import { useEscapeKey } from '../hooks/useEscapeKey'
 import { useWalletModal } from '@solana/wallet-adapter-react-ui'
 import { api } from '../utils/api'
 import type { WalletInfo, TransactionLog } from '../types'
@@ -33,6 +34,11 @@ function WalletContent() {
   const [destinationAddress, setDestinationAddress] = useState('')
   const [actionLoading, setActionLoading] = useState(false)
   const [message, setMessage] = useState('')
+
+  useEscapeKey(showDepositModal, () => setShowDepositModal(false))
+  useEscapeKey(showWithdrawModal, () => setShowWithdrawModal(false))
+  useEscapeKey(showDepositConfirmation, () => setShowDepositConfirmation(false))
+  useEscapeKey(withdrawResult !== null, () => setWithdrawResult(null))
 
   const publicKey = wallet?.adapter?.publicKey?.toString() || null
 

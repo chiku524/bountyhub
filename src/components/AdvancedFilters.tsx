@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useEscapeKey } from '../hooks/useEscapeKey'
 import { api } from '../utils/api'
 import TagSelector from './TagSelector'
 
@@ -39,6 +40,8 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
       fetchTags()
     }
   }, [isOpen])
+
+  useEscapeKey(isOpen, () => setIsOpen(false))
 
   // Handle click outside to close dropdown
   useEffect(() => {

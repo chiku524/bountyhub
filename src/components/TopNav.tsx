@@ -66,6 +66,9 @@ export function TopNav() {
   const notificationsRef = useRef<NotificationsRef>(null)
   const [unreadCount, setUnreadCount] = useState(0)
 
+  const exploreMenuRef = useRef<HTMLDivElement>(null)
+  const profileMenuRef = useRef<HTMLDivElement>(null)
+
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -80,6 +83,38 @@ export function TopNav() {
       return () => document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [exploreOpen, profileOpen])
+
+  // Escape to close dropdowns; Alt+E toggles Explore (desktop)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setExploreOpen(false)
+        setProfileOpen(false)
+        setMobileMenuOpen(false)
+        setMobileAccountOpen(false)
+      }
+      if (e.altKey && e.key === 'e') {
+        e.preventDefault()
+        setExploreOpen((open) => !open)
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  // Focus first focusable item when Explore or Profile dropdown opens
+  useEffect(() => {
+    if (exploreOpen && exploreMenuRef.current) {
+      const first = exploreMenuRef.current.querySelector<HTMLElement>('a')
+      first?.focus()
+    }
+  }, [exploreOpen])
+  useEffect(() => {
+    if (profileOpen && profileMenuRef.current) {
+      const first = profileMenuRef.current.querySelector<HTMLElement>('a, button')
+      first?.focus()
+    }
+  }, [profileOpen])
 
   // Fetch unread count from Notifications component
   const handleNotificationsUpdate = (count: number) => {
@@ -144,7 +179,7 @@ export function TopNav() {
                 <FiChevronDown className={`w-3.5 h-3.5 transition-transform shrink-0 ${exploreOpen ? 'rotate-180' : ''}`} />
               </button>
               {exploreOpen && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 w-56 bg-white dark:bg-neutral-800 rounded-xl shadow-lg border border-neutral-200 dark:border-neutral-700 py-1.5 z-50">
+                <div ref={exploreMenuRef} className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 w-56 bg-white dark:bg-neutral-800 rounded-xl shadow-lg border border-neutral-200 dark:border-neutral-700 py-1.5 z-50" role="menu">
                   <Link
                     to="/community"
                     onClick={() => setExploreOpen(false)}
@@ -293,7 +328,7 @@ export function TopNav() {
                   <FiChevronDown className={`w-4 h-4 shrink-0 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {profileOpen && (
-                  <div className="absolute top-full right-0 mt-1.5 w-56 bg-white dark:bg-neutral-800 rounded-xl shadow-lg border border-neutral-200 dark:border-neutral-700 py-1.5 z-50">
+                  <div ref={profileMenuRef} className="absolute top-full right-0 mt-1.5 w-56 bg-white dark:bg-neutral-800 rounded-xl shadow-lg border border-neutral-200 dark:border-neutral-700 py-1.5 z-50" role="menu">
                     <Link
                       to="/profile"
                       onClick={() => setProfileOpen(false)}

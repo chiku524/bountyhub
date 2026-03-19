@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useEscapeKey } from '../hooks/useEscapeKey'
 import { api } from '../utils/api'
 import { useAuth } from '../contexts/AuthProvider'
 import { LoadingSpinner } from '../components/LoadingSpinner'
@@ -18,6 +19,8 @@ export default function BugBountyCampaignDetail() {
   const [error, setError] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
+  useEscapeKey(showDeleteConfirm, () => setShowDeleteConfirm(false))
 
   useEffect(() => {
     if (id) {

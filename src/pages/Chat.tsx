@@ -7,6 +7,7 @@ import { ErrorMessage } from '../components/ErrorMessage';
 import { FiSend, FiSmile, FiPaperclip, FiUsers, FiMessageSquare, FiPlusCircle, FiCheckSquare, FiList, FiChevronDown } from 'react-icons/fi';
 import type { Team, TeamTask } from '../types';
 import { useChatWebSocket, type ChatWsMessagePayload } from '../hooks/useChatWebSocket';
+import { useEscapeKey } from '../hooks/useEscapeKey';
 
 interface Message {
   id: string;
@@ -499,6 +500,9 @@ const Chat: React.FC = () => {
     }
   };
 
+  useEscapeKey(createTeamOpen, () => { if (!createTeamLoading) setCreateTeamOpen(false); });
+  useEscapeKey(createRoomOpen, () => { if (!createRoomLoading) setCreateRoomOpen(false); });
+
   if (!user) {
     return (
       <Layout>
@@ -832,8 +836,21 @@ const Chat: React.FC = () => {
                 onScroll={checkAtBottom}
               >
                 {loading ? (
-                  <div className="flex items-center justify-center h-full">
-                    <LoadingSpinner />
+                  <div className="space-y-4 animate-pulse">
+                    <div className="flex justify-start">
+                      <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-neutral-600 flex-shrink-0" />
+                      <div className="ml-2 h-12 w-64 bg-gray-200 dark:bg-neutral-600 rounded-lg rounded-tl-none" />
+                    </div>
+                    <div className="flex justify-end">
+                      <div className="h-12 w-48 bg-indigo-200 dark:bg-indigo-900/40 rounded-lg rounded-tr-none" />
+                    </div>
+                    <div className="flex justify-start">
+                      <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-neutral-600 flex-shrink-0" />
+                      <div className="ml-2 h-10 w-72 bg-gray-200 dark:bg-neutral-600 rounded-lg rounded-tl-none" />
+                    </div>
+                    <div className="flex justify-center">
+                      <LoadingSpinner size="sm" />
+                    </div>
                   </div>
                 ) : error ? (
                   <ErrorMessage message={error} />

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { FiStar, FiX } from 'react-icons/fi'
 import { config } from '../utils/config'
+import { useEscapeKey } from '../hooks/useEscapeKey'
 
 interface IntegrityRatingModalProps {
   isOpen: boolean
@@ -62,6 +63,8 @@ export default function IntegrityRatingModal({
   const [selectedContext, setSelectedContext] = useState(context)
   const [reason, setReason] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEscapeKey(isOpen, onClose)
 
   if (!isOpen) return null
 

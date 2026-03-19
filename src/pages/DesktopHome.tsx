@@ -8,6 +8,7 @@ import { isDesktopApp } from '../utils/desktop'
 const INTRO_DURATION_MS = 2400
 const TRANSFORM_DURATION_MS = 650
 const PORTAL_APPEAR_MS = 400
+const DESKTOP_INTRO_SEEN_KEY = 'desktop-intro-seen'
 
 /** Actual window size during intro (single small window, not an inner fake window) */
 const INTRO_WINDOW_WIDTH = 200
@@ -17,8 +18,14 @@ const FULL_WINDOW_HEIGHT = 800
 
 export default function DesktopHome() {
   const { user } = useAuth()
-  const [phase, setPhase] = useState<'intro' | 'transform' | 'portal'>('intro')
-  const [portalVisible, setPortalVisible] = useState(false)
+  const [phase, setPhase] = useState<'intro' | 'transform' | 'portal'>(() => {
+    if (typeof window === 'undefined' || !isDesktopApp()) return 'intro'
+    return window.localStorage.getItem(DESKTOP_INTRO_SEEN_KEY) ? 'portal' : 'intro'
+  })
+  const [portalVisible, setPortalVisible] = useState(() => {
+    if (typeof window === 'undefined' || !isDesktopApp()) return false
+    return !!window.localStorage.getItem(DESKTOP_INTRO_SEEN_KEY)
+  })
 
   // Resize the actual Tauri window: small during intro/transform, full when portal
   useEffect(() => {
@@ -42,9 +49,10 @@ export default function DesktopHome() {
   }, [phase])
 
   useEffect(() => {
+    if (phase !== 'intro') return
     const t = setTimeout(() => setPhase('transform'), INTRO_DURATION_MS)
     return () => clearTimeout(t)
-  }, [])
+  }, [phase])
 
   useEffect(() => {
     if (phase !== 'transform') return
@@ -56,6 +64,14 @@ export default function DesktopHome() {
     if (phase !== 'portal') return
     const t = setTimeout(() => setPortalVisible(true), 80)
     return () => clearTimeout(t)
+  }, [phase])
+
+  useEffect(() => {
+    if (phase === 'portal' && isDesktopApp()) {
+      try {
+        window.localStorage.setItem(DESKTOP_INTRO_SEEN_KEY, '1')
+      } catch (_) {}
+    }
   }, [phase])
 
   if (user) {

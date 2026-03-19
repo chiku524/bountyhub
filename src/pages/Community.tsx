@@ -270,7 +270,6 @@ export default function Community() {
     )
   }, [])
 
-  if (loading) return <LoadingSpinner />
   if (error) return (
     <PageContainer>
       <ErrorMessage message={error} onRetry={fetchPosts} />
@@ -289,16 +288,18 @@ export default function Community() {
           title="Community"
           description="Browse bounties, ask questions, and earn rewards"
           actions={
-            <>
-              <AdvancedFilters
-                filters={filters}
-                onFiltersChange={handleFiltersChange}
-              />
-              <ExportButton
-                data={filteredPosts}
-                filename="community-posts"
-              />
-            </>
+            !loading ? (
+              <>
+                <AdvancedFilters
+                  filters={filters}
+                  onFiltersChange={handleFiltersChange}
+                />
+                <ExportButton
+                  data={filteredPosts}
+                  filename="community-posts"
+                />
+              </>
+            ) : undefined
           }
         />
           
@@ -322,14 +323,18 @@ export default function Community() {
 
           <div className="card bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700">
             {loading && (
-              <div className="p-4 sm:p-8">
-                <LoadingSpinner size="lg" className="mb-4" />
-                <p className="text-neutral-600 dark:text-gray-300 text-center">Loading posts...</p>
-                <div className="mt-6 space-y-4">
-                  {[...Array(3)].map((_, i) => (
-                    <PostSkeleton key={i} />
-                  ))}
+              <div className="p-4 sm:p-6">
+                <div className="flex items-center gap-2 mb-4 text-neutral-500 dark:text-neutral-400 text-sm">
+                  <LoadingSpinner size="sm" />
+                  <span>Loading posts…</span>
                 </div>
+                <ul className="divide-y divide-neutral-200 dark:divide-neutral-700">
+                  {[...Array(5)].map((_, i) => (
+                    <li key={i} className="py-3 sm:py-4">
+                      <PostSkeleton />
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
             

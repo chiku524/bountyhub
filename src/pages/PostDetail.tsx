@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom'
 import { useEffect, useState, useMemo } from 'react'
+import { useEscapeKey } from '../hooks/useEscapeKey'
 import { Link } from 'react-router-dom'
 import { api } from '../utils/api'
 import { isDesktopApp } from '../utils/desktop'
@@ -32,6 +33,8 @@ export default function PostDetail() {
   const [availableTags, setAvailableTags] = useState<Array<{ id: string; name: string; color: string; description: string | null }>>([])
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
+  useEscapeKey(showDeleteConfirm, () => setShowDeleteConfirm(false))
 
   // Memoize formatted dates to prevent them from changing on re-renders
   const formattedCreatedAt = useMemo(() => {
@@ -259,9 +262,21 @@ export default function PostDetail() {
         <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-8">Post Detail</h1>
         <div className={`card bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 p-6 ${post?.reward && post.reward > 0 ? 'border-2 border-cyan-500/60 dark:border-cyan-400/60 bg-linear-to-br from-cyan-50 to-blue-50 dark:from-neutral-800 dark:to-cyan-500/5' : ''}`}>
           {loading && (
-            <div className="p-8 text-center">
-              <LoadingSpinner size="lg" className="mb-4" />
-              <p className="text-neutral-600 dark:text-gray-300">Loading post...</p>
+            <div className="animate-pulse space-y-4 p-2">
+              <div className="h-8 bg-neutral-200 dark:bg-neutral-600 rounded w-3/4 max-w-md" />
+              <div className="flex gap-2 flex-wrap">
+                <div className="h-6 w-16 bg-neutral-200 dark:bg-neutral-600 rounded" />
+                <div className="h-6 w-20 bg-neutral-200 dark:bg-neutral-600 rounded" />
+                <div className="h-6 w-14 bg-neutral-200 dark:bg-neutral-600 rounded" />
+              </div>
+              <div className="space-y-2 pt-4">
+                <div className="h-3 bg-neutral-200 dark:bg-neutral-600 rounded w-full" />
+                <div className="h-3 bg-neutral-200 dark:bg-neutral-600 rounded w-full" />
+                <div className="h-3 bg-neutral-200 dark:bg-neutral-600 rounded w-5/6" />
+              </div>
+              <div className="flex justify-center pt-6">
+                <LoadingSpinner size="sm" />
+              </div>
             </div>
           )}
           

@@ -99,7 +99,7 @@ function AppContent() {
   useBountyNotifications()
   const desktopUpdate = useDesktopUpdate()
   // Desktop: check for updates on a schedule; show overlay during install, then relaunch
-  useDesktopUpdater(desktopUpdate?.setPhase)
+  useDesktopUpdater(desktopUpdate ? { setPhase: desktopUpdate.setPhase, registerRetry: desktopUpdate.registerRetry } : null)
 
   // Desktop: when in main app (not intro, not update overlay), use full frameless window
   const isMainApp = isDesktop && (location.pathname !== '/' || Boolean(user)) && (desktopUpdate?.phase === 'idle' || !desktopUpdate?.phase)
@@ -123,7 +123,7 @@ function AppContent() {
       {/* Light/Dark mode container - Always flex-col; data-desktop for app-like styling */}
       <div className="relative z-10 min-h-screen w-full bg-white/5 dark:bg-neutral-900/5 transition-colors duration-200 flex flex-col" data-desktop={isDesktop ? 'true' : undefined}>
         {/* Skip to main content - visible on focus for keyboard/screen reader users */}
-        {showAuthenticatedNav && (
+        {(showAuthenticatedNav || showHomeNav) && (
           <a
             href="#main-content"
             className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-indigo-600 focus:text-white focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-neutral-900"

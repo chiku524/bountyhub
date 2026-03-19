@@ -74,7 +74,15 @@ const ChatSidebar: React.FC = () => {
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const messageInputRef = useRef<HTMLInputElement>(null);
   const api = new ApiClient();
+
+  // Focus message input when sidebar is open in chat view (so user can type immediately)
+  useEffect(() => {
+    if (!open || hubView !== 'chat' || loadingChat) return;
+    const t = setTimeout(() => messageInputRef.current?.focus(), 100);
+    return () => clearTimeout(t);
+  }, [open, hubView, loadingChat]);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -412,10 +420,10 @@ const ChatSidebar: React.FC = () => {
             <span className="font-semibold text-white text-sm sm:text-base truncate">
               {hubView === 'chat' && chatTarget ? chatTarget.name : 'Team Hub'}
             </span>
-            {hubView === 'chat' && isPolling && (
-              <div className="flex items-center space-x-1 flex-shrink-0">
-                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-indigo-400" />
-                <span className="text-xs text-neutral-400">Live</span>
+            {hubView === 'chat' && chatTarget && (
+              <div className="flex items-center space-x-1 flex-shrink-0" title={wsConnected ? 'Connected' : 'Connecting…'}>
+                <div className={`rounded-full h-2 w-2 flex-shrink-0 ${wsConnected ? 'bg-green-500' : 'animate-pulse bg-amber-500'}`} />
+                <span className="text-xs text-neutral-400">{wsConnected ? 'Connected' : 'Connecting…'}</span>
               </div>
             )}
           </div>
@@ -642,6 +650,7 @@ const ChatSidebar: React.FC = () => {
           </div>
           <div className="flex space-x-2">
             <input
+              ref={messageInputRef}
               id="chat-sidebar-message"
               name="globalChatMessage"
               type="text"
@@ -651,6 +660,7 @@ const ChatSidebar: React.FC = () => {
               onChange={e => setInput(e.target.value)}
               autoComplete="off"
               disabled={sending}
+              aria-label="Message"
             />
             <button
               type="submit"
