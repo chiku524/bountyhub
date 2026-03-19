@@ -2,12 +2,15 @@ import { useEffect } from 'react'
 import { isDesktopApp } from '../utils/desktop'
 import type { DesktopUpdatePhase } from '../contexts/DesktopUpdateContext'
 
+/** Check for update this long after app opens (let the UI settle first) */
+const CHECK_ON_LOAD_DELAY_MS = 1500
+/** Then re-check periodically while the app is open */
 const CHECK_INTERVAL_MS = 30 * 60 * 1000 // 30 minutes
 const RESTART_DELAY_MS = 1800
 
 /**
- * In the desktop app, checks for updates periodically. When an update is available,
- * shows the update overlay (downloading → installing → restarting), then relaunches.
+ * In the desktop app: on open, checks for updates; if a newer version is available,
+ * triggers auto-update (download → install → restart). Also re-checks every 30 minutes.
  */
 export function useDesktopUpdater(setUpdatePhase: ((p: DesktopUpdatePhase) => void) | undefined) {
   useEffect(() => {
@@ -39,10 +42,11 @@ export function useDesktopUpdater(setUpdatePhase: ((p: DesktopUpdatePhase) => vo
       }
     }
 
-    const initial = setTimeout(checkAndInstall, 3000)
+    // Check on app open, then periodically
+    const onLoadTimer = setTimeout(checkAndInstall, CHECK_ON_LOAD_DELAY_MS)
     const interval = setInterval(checkAndInstall, CHECK_INTERVAL_MS)
     return () => {
-      clearTimeout(initial)
+      clearTimeout(onLoadTimer)
       clearInterval(interval)
     }
   }, [setUpdatePhase])

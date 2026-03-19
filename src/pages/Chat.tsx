@@ -43,6 +43,17 @@ interface ChatRoom {
 
 type ViewMode = 'global' | 'team' | 'room';
 
+function normalizeMessage(m: Message): Message {
+  const author = m.author && typeof m.author === 'object'
+    ? { id: String(m.author.id), username: String((m.author as { username?: string }).username ?? 'Unknown'), role: String((m.author as { role?: string }).role ?? '') }
+    : { id: '', username: 'Unknown', role: '' };
+  return {
+    ...m,
+    author,
+    profile: m.profile && typeof m.profile === 'object' ? m.profile : undefined,
+  };
+}
+
 const Chat: React.FC = () => {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -188,25 +199,19 @@ const Chat: React.FC = () => {
     const fetchMessages = async () => {
       try {
         setLoading(true);
-        console.log('Fetching messages for room:', currentRoom.id, 'type:', currentRoom.type);
-        
         // Use the appropriate endpoint based on room type
         const messagesUrl = currentRoom.type === 'GLOBAL' 
           ? '/api/chat/global-chat/messages'
           : `/api/chat/${currentRoom.id}/messages`;
           
         const response = await api.request<{ success: boolean; messages: Message[] }>(messagesUrl);
-        console.log('Initial messages response:', { 
-          success: response.success, 
-          messageCount: response.messages?.length || 0 
-        });
-        
+
         if (response.success) {
-          setMessages(response.messages);
-          // Set the last message ID for polling
-          if (response.messages.length > 0) {
-            const lastId = response.messages[response.messages.length - 1].id;
-            console.log('Setting initial last message ID:', lastId);
+          const list = Array.isArray(response.messages) ? response.messages : [];
+          const normalized = list.map(normalizeMessage);
+          setMessages(normalized);
+          if (normalized.length > 0) {
+            const lastId = normalized[normalized.length - 1].id;
             setLastMessageId(lastId);
           }
         }
@@ -244,25 +249,27 @@ const Chat: React.FC = () => {
 
         const response = await api.request<{ success: boolean; messages: Message[] }>(url);
 
-        if (response.success && response.messages.length > 0) {
-          const lastMessage = response.messages[response.messages.length - 1];
+        const list = Array.isArray(response.messages) ? response.messages : [];
+        if (response.success && list.length > 0) {
+          const normalizedList = list.map(normalizeMessage);
+          const lastMessage = normalizedList[normalizedList.length - 1];
           if (currentLastId && lastMessage.id !== currentLastId) {
-            const lastKnownIndex = response.messages.findIndex(msg => msg.id === currentLastId);
+            const lastKnownIndex = normalizedList.findIndex(msg => msg.id === currentLastId);
             if (lastKnownIndex !== -1) {
-              const newMessages = response.messages.slice(lastKnownIndex + 1);
+              const newMessages = normalizedList.slice(lastKnownIndex + 1);
               setMessages(prev => [...prev, ...newMessages]);
               setLastMessageId(lastMessage.id);
-              if (document.hidden && newMessages.length > 0) {
-                const latestMessage = newMessages[newMessages.length - 1];
-                if (user && latestMessage.author.id !== user.id && 'Notification' in window && Notification.permission === 'granted') {
+              if (document.hidden && newMessages.length > 0 && user) {
+                const latest = newMessages[newMessages.length - 1];
+                if (latest.author?.id !== user.id && 'Notification' in window && Notification.permission === 'granted') {
                   new Notification(`New message in ${room.name}`, {
-                    body: `${latestMessage.author.username}: ${latestMessage.content}`,
+                    body: `${latest.author?.username ?? 'Someone'}: ${latest.content}`,
                     icon: '/favicon.svg'
                   });
                 }
               }
             } else {
-              setMessages(response.messages);
+              setMessages(normalizedList);
               setLastMessageId(lastMessage.id);
             }
           } else if (!currentLastId) {
@@ -285,8 +292,6 @@ const Chat: React.FC = () => {
     if (user && currentRoom && !isJoined) {
       const joinRoom = async () => {
         try {
-          console.log('Attempting to join room:', currentRoom.id, 'type:', currentRoom.type);
-          
           // Use the appropriate endpoint based on room type
           const joinUrl = currentRoom.type === 'GLOBAL' 
             ? '/api/chat/global-chat/join'
@@ -295,7 +300,6 @@ const Chat: React.FC = () => {
           await api.request<{ success: boolean }>(joinUrl, {
             method: 'POST'
           });
-          console.log('Successfully joined room:', currentRoom.id);
           setIsJoined(true);
           
           // Request notification permission if not already granted
@@ -330,8 +334,8 @@ const Chat: React.FC = () => {
         })
       });
 
-      if (response.success) {
-        setMessages(prev => [...prev, response.message]);
+      if (response.success && response.message) {
+        setMessages(prev => [...prev, normalizeMessage(response.message)]);
         setLastMessageId(response.message.id);
         setNewMessage('');
         setTimeout(() => scrollToBottom(), 0);
@@ -836,56 +840,56 @@ const Chat: React.FC = () => {
                 ) : (
                   <>
                     {messages.map((message, index) => {
-                      const showDate = index === 0 || 
+                      const author = message.author ?? { id: '', username: 'Unknown', role: '' }
+                      const isOwn = user && author.id === user.id
+                      const showDate = index === 0 ||
                         formatDate(message.createdAt) !== formatDate(messages[index - 1]?.createdAt);
-                      
+
                       return (
                         <div key={message.id}>
                           {showDate && (
                             <div className="flex justify-center my-4">
-                              <span className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">
+                              <span className="bg-gray-100 dark:bg-neutral-700 text-gray-600 dark:text-neutral-300 text-xs px-3 py-1 rounded-full">
                                 {formatDate(message.createdAt)}
                               </span>
                             </div>
                           )}
-                          
-                          <div className={`flex ${message.author.id === user.id ? 'justify-end' : 'justify-start'}`}>
+
+                          <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
                             <div className={`max-w-xs lg:max-w-md ${
-                              message.author.id === user.id 
-                                ? 'bg-indigo-600 text-white' 
-                                : 'bg-white border border-gray-200'
+                              isOwn
+                                ? 'bg-indigo-600 text-white'
+                                : 'bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-600'
                             } rounded-lg px-4 py-2 shadow-xs`}>
-                              {message.author.id !== user.id && (
+                              {!isOwn && (
                                 <div className="flex items-center space-x-2 mb-1">
                                   {message.profile?.profilePicture ? (
                                     <img
                                       src={message.profile.profilePicture}
-                                      alt={message.author.username}
+                                      alt={author.username}
                                       className="w-6 h-6 rounded-full"
                                     />
                                   ) : (
-                                    <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
-                                      <span className="text-xs text-gray-600">
-                                        {message.author.username.charAt(0).toUpperCase()}
+                                    <div className="w-6 h-6 bg-gray-300 dark:bg-neutral-600 rounded-full flex items-center justify-center">
+                                      <span className="text-xs text-gray-600 dark:text-neutral-300">
+                                        {(author.username || '?').charAt(0).toUpperCase()}
                                       </span>
                                     </div>
                                   )}
-                                  <span className="text-xs font-medium text-gray-600">
-                                    {message.author.username}
+                                  <span className="text-xs font-medium text-gray-600 dark:text-neutral-300">
+                                    {author.username}
                                   </span>
                                 </div>
                               )}
-                              
-                              <div className="text-sm">
+
+                              <div className="text-sm text-neutral-900 dark:text-neutral-100">
                                 {message.content}
                                 {message.isEdited && (
                                   <span className="text-xs opacity-70 ml-2">(edited)</span>
                                 )}
                               </div>
-                              
-                              <div className={`text-xs mt-1 ${
-                                message.author.id === user.id ? 'text-indigo-200' : 'text-gray-400'
-                              }`}>
+
+                              <div className={`text-xs mt-1 ${isOwn ? 'text-indigo-200' : 'text-gray-400 dark:text-neutral-400'}`}>
                                 {formatTime(message.createdAt)}
                               </div>
                             </div>
