@@ -79,8 +79,7 @@ async function main() {
   }
 
   if (Object.keys(platforms).length === 0) {
-    console.error('No signed update bundles found. Ensure TAURI_PRIVATE_KEY is set in CI so build produces .sig files.')
-    process.exit(1)
+    console.warn('No signed update bundles found. Writing latest.json with empty platforms so endpoint does not 404. Set TAURI_PRIVATE_KEY in CI to enable auto-updates.')
   }
 
   const manifest = {

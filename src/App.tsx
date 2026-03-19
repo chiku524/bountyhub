@@ -15,6 +15,7 @@ import { Footer } from './components/Footer'
 import { PageMetadata } from './components/PageMetadata'
 import { useBountyNotifications } from './hooks/useBountyNotifications'
 import { useDesktopUpdater } from './hooks/useDesktopUpdater'
+import { useDesktopWindowSize } from './hooks/useDesktopWindowSize'
 import ChatSidebar from './components/ChatSidebar'
 import { LoadingSpinner } from './components/LoadingSpinner'
 import { ErrorBoundary } from './components/ErrorBoundary'
@@ -99,6 +100,10 @@ function AppContent() {
   const desktopUpdate = useDesktopUpdate()
   // Desktop: check for updates on a schedule; show overlay during install, then relaunch
   useDesktopUpdater(desktopUpdate?.setPhase)
+
+  // Desktop: when in main app (not intro, not update overlay), use full frameless window
+  const isMainApp = isDesktop && (location.pathname !== '/' || Boolean(user)) && (desktopUpdate?.phase === 'idle' || !desktopUpdate?.phase)
+  useDesktopWindowSize(isMainApp)
   
   // Scroll to section handler for HomeNav
   const scrollToSection = (sectionId: string) => {

@@ -11,6 +11,7 @@ const RESTART_DELAY_MS = 1800
 /**
  * In the desktop app: on open, checks for updates; if a newer version is available,
  * triggers auto-update (download → install → restart). Also re-checks every 30 minutes.
+ * Requires GitHub Release to have latest.json (and signed .sig assets) — set TAURI_PRIVATE_KEY in CI.
  */
 export function useDesktopUpdater(setUpdatePhase: ((p: DesktopUpdatePhase) => void) | undefined) {
   useEffect(() => {
@@ -36,9 +37,8 @@ export function useDesktopUpdater(setUpdatePhase: ((p: DesktopUpdatePhase) => vo
         await relaunch()
       } catch (err) {
         setUpdatePhase?.('idle')
-        if (import.meta.env.DEV) {
-          console.debug('[updater]', err)
-        }
+        // Log in all envs so users can see why update didn't run (e.g. 404 on latest.json, no TAURI_PRIVATE_KEY in CI)
+        console.warn('[BountyHub updater]', err instanceof Error ? err.message : err)
       }
     }
 

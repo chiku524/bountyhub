@@ -5,7 +5,8 @@
 # The workflow creates the Release for that tag, builds on all 3 OS, then generates latest.json
 # so the desktop app can auto-update on all platforms.
 #
-# Required secret for signing updates: TAURI_PRIVATE_KEY = contents of private key
+# Required for auto-updates: set GitHub secret TAURI_PRIVATE_KEY (minisign private key used to sign installers).
+# Without it, .sig files are not produced and latest.json will have empty platforms (no auto-update).
 # Optional: TAURI_KEY_PASSWORD if the key has a password.
 #
 # Set VITE_GITHUB_RELEASES_URL in repo or env so /download page links work.

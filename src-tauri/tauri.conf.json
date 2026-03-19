@@ -7,13 +7,13 @@
   },
   "package": {
     "productName": "BountyHub",
-    "version": "1.1.10"
+    "version": "1.1.11"
   },
   "tauri": {
     "allowlist": {
       "all": false,
       "shell": { "all": false, "open": true },
-      "window": { "all": false, "close": true, "hide": true, "show": true, "maximize": true, "minimize": true, "unmaximize": true, "unminimize": true, "startDragging": true, "setSize": true, "setPosition": true },
+      "window": { "all": false, "close": true, "hide": true, "show": true, "maximize": true, "minimize": true, "unmaximize": true, "unminimize": true, "startDragging": true, "setSize": true, "setPosition": true, "setMinSize": true },
       "process": { "all": false, "relaunch": true, "exit": true }
     },
     "bundle": {
@@ -52,12 +52,13 @@
       {
         "label": "main",
         "fullscreen": false,
-        "height": 800,
+        "decorations": false,
+        "width": 200,
+        "height": 220,
+        "minWidth": 200,
+        "minHeight": 220,
         "resizable": true,
-        "title": "BountyHub",
-        "width": 1200,
-        "minWidth": 800,
-        "minHeight": 600
+        "title": "BountyHub"
       }
     ]
   }
