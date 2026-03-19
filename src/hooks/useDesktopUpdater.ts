@@ -2,9 +2,9 @@ import { useEffect } from 'react'
 import { isDesktopApp } from '../utils/desktop'
 import type { DesktopUpdatePhase } from '../contexts/DesktopUpdateContext'
 
-/** Check for update this long after app opens (let the UI settle first) */
-const CHECK_ON_LOAD_DELAY_MS = 1500
-/** Then re-check periodically while the app is open */
+/** Check for update this long after app opens (let the UI settle, then run once) */
+const CHECK_ON_LOAD_DELAY_MS = 1000
+/** Re-check periodically while the app is open */
 const CHECK_INTERVAL_MS = 30 * 60 * 1000 // 30 minutes
 const RESTART_DELAY_MS = 1800
 
@@ -14,8 +14,9 @@ type UpdaterContext = {
 } | null
 
 /**
- * In the desktop app: on open, checks for updates; if a newer version is available,
- * triggers auto-update (download → install → restart). Also re-checks every 30 minutes.
+ * In the desktop app: on every launch, checks for updates after a short delay (initial load).
+ * If a newer version is available, triggers auto-update (download → install → restart).
+ * Also re-checks every 30 minutes while the app is open.
  * On failure, sets phase to 'error' so the overlay can show Retry/Continue.
  * Requires GitHub Release to have latest.json (and signed .sig assets) — set TAURI_PRIVATE_KEY in CI.
  */
@@ -57,7 +58,7 @@ export function useDesktopUpdater(updateContext: UpdaterContext) {
 
     registerRetry(checkAndInstall)
 
-    // Check on app open, then periodically
+    // Run update check once after app load, then periodically
     const onLoadTimer = setTimeout(checkAndInstall, CHECK_ON_LOAD_DELAY_MS)
     const interval = setInterval(checkAndInstall, CHECK_INTERVAL_MS)
     return () => {

@@ -10,9 +10,9 @@ const TRANSFORM_DURATION_MS = 650
 const PORTAL_APPEAR_MS = 400
 const DESKTOP_INTRO_SEEN_KEY = 'desktop-intro-seen'
 
-/** Actual window size during intro (single small window, not an inner fake window) */
-const INTRO_WINDOW_WIDTH = 200
-const INTRO_WINDOW_HEIGHT = 220
+/** Actual window size during intro (single small window; large enough for logo + wordmark + tagline) */
+const INTRO_WINDOW_WIDTH = 320
+const INTRO_WINDOW_HEIGHT = 360
 const FULL_WINDOW_WIDTH = 1200
 const FULL_WINDOW_HEIGHT = 800
 
@@ -27,24 +27,35 @@ export default function DesktopHome() {
     return !!window.localStorage.getItem(DESKTOP_INTRO_SEEN_KEY)
   })
 
-  // Resize the actual Tauri window: small during intro/transform, full when portal
+  // Center window as soon as desktop home loads (handles initial position before phase effect)
+  useEffect(() => {
+    if (!isDesktopApp()) return
+    let cancelled = false
+    import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
+      if (!cancelled) getCurrentWindow().center()
+    }).catch((e) => { if (import.meta.env.DEV) console.debug('[DesktopHome] initial center', e) })
+    return () => { cancelled = true }
+  }, [])
+
+  // Resize and center the actual Tauri window: small during intro/transform, full when portal
   useEffect(() => {
     if (!isDesktopApp()) return
 
-    async function setWindowSize(width: number, height: number) {
+    async function setWindowSizeAndCenter(width: number, height: number) {
       try {
         const { getCurrentWindow } = await import('@tauri-apps/api/window')
         const win = getCurrentWindow()
         await win.setSize({ type: 'Logical', width, height })
+        await win.center()
       } catch (e) {
-        if (import.meta.env.DEV) console.debug('[DesktopHome] setWindowSize', e)
+        if (import.meta.env.DEV) console.debug('[DesktopHome] setSize/center', e)
       }
     }
 
     if (phase === 'intro' || phase === 'transform') {
-      setWindowSize(INTRO_WINDOW_WIDTH, INTRO_WINDOW_HEIGHT)
+      setWindowSizeAndCenter(INTRO_WINDOW_WIDTH, INTRO_WINDOW_HEIGHT)
     } else if (phase === 'portal') {
-      setWindowSize(FULL_WINDOW_WIDTH, FULL_WINDOW_HEIGHT)
+      setWindowSizeAndCenter(FULL_WINDOW_WIDTH, FULL_WINDOW_HEIGHT)
     }
   }, [phase])
 
@@ -66,14 +77,17 @@ export default function DesktopHome() {
     return () => clearTimeout(t)
   }, [phase])
 
+  // Mark intro as seen only after portal has been visible so next launch can skip intro
   useEffect(() => {
-    if (phase === 'portal' && isDesktopApp()) {
+    if (phase !== 'portal' || !isDesktopApp()) return
+    const t = setTimeout(() => {
       try {
         window.localStorage.setItem(DESKTOP_INTRO_SEEN_KEY, '1')
       } catch {
         // localStorage may be disabled or full; ignore
       }
-    }
+    }, 800)
+    return () => clearTimeout(t)
   }, [phase])
 
   if (user) {

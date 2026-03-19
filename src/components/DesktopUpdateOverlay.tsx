@@ -8,12 +8,12 @@ const messages: Record<string, string> = {
   restarting: 'Update complete. Restarting the app…',
 }
 
-/** Actual window size for the update mini-window (real OS window, not inner fake) */
-const UPDATE_WINDOW_WIDTH = 280
-const UPDATE_WINDOW_HEIGHT = 240
+/** Window size for the update progress (downloading/installing/restarting) — fit spinner + message + subtitle */
+const UPDATE_WINDOW_WIDTH = 400
+const UPDATE_WINDOW_HEIGHT = 320
 /** Window size for the error overlay (readable, then user can Continue to full) */
-const ERROR_WINDOW_WIDTH = 420
-const ERROR_WINDOW_HEIGHT = 320
+const ERROR_WINDOW_WIDTH = 460
+const ERROR_WINDOW_HEIGHT = 380
 /** Full app size when dismissing overlay (match useDesktopWindowSize) */
 const FULL_WINDOW_WIDTH = 1200
 const FULL_WINDOW_HEIGHT = 800
@@ -51,16 +51,16 @@ export function DesktopUpdateOverlay() {
 
   if (phase === 'error') {
     return (
-      <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gradient-to-br from-indigo-950/98 via-neutral-950 to-violet-950/90 backdrop-blur-sm">
-        <div className="flex flex-col items-center gap-4 px-6 max-w-sm">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-500/20">
+      <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gradient-to-br from-indigo-950/98 via-neutral-950 to-violet-950/90 backdrop-blur-sm p-6 animate-fade-in">
+        <div className="flex flex-col items-center gap-4 px-6 max-w-md w-full">
+          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-red-500/20">
             <svg className="h-6 w-6 text-red-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
           <p className="text-center text-sm font-medium text-white">Update failed</p>
-          <p className="text-center text-xs text-neutral-400">{errorMessage ?? 'Something went wrong.'}</p>
-          <div className="flex gap-3 mt-2">
+          <p className="text-center text-xs text-neutral-400 break-words max-w-full">{errorMessage ?? 'Something went wrong.'}</p>
+          <div className="flex gap-3 mt-2 flex-shrink-0">
             <button
               type="button"
               onClick={async () => {
@@ -94,11 +94,11 @@ export function DesktopUpdateOverlay() {
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gradient-to-br from-indigo-950/98 via-neutral-950 to-violet-950/90 backdrop-blur-sm">
-      <div className="flex flex-col items-center gap-4 px-6">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/20">
+    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gradient-to-br from-indigo-950/98 via-neutral-950 to-violet-950/90 backdrop-blur-sm p-6 animate-fade-in">
+      <div className="flex flex-col items-center gap-5 px-6 max-w-sm">
+        <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl bg-indigo-500/20">
           <svg
-            className="h-6 w-6 animate-spin text-indigo-400"
+            className="h-7 w-7 animate-spin text-indigo-400"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -119,7 +119,7 @@ export function DesktopUpdateOverlay() {
             />
           </svg>
         </div>
-        <p className="text-center text-sm font-medium text-white">
+        <p className="text-center text-base font-medium text-white">
           {messages[phase] ?? 'Preparing update…'}
         </p>
         <p className="text-center text-xs text-neutral-500">

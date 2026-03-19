@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "BountyHub",
-    "version": "1.1.13"
+    "version": "1.1.14"
   },
   "tauri": {
     "allowlist": {
@@ -53,10 +53,10 @@
         "label": "main",
         "fullscreen": false,
         "decorations": false,
-        "width": 200,
-        "height": 220,
-        "minWidth": 200,
-        "minHeight": 220,
+        "width": 320,
+        "height": 360,
+        "minWidth": 280,
+        "minHeight": 320,
         "resizable": true,
         "title": "BountyHub"
       }
