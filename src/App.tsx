@@ -4,6 +4,8 @@ import { HelmetProvider } from 'react-helmet-async'
 import { AuthProvider, useAuth } from './contexts/AuthProvider'
 import { SolanaWalletProvider } from './contexts/SolanaWalletProvider'
 import { ToastProvider } from './contexts/ToastContext'
+import { DesktopUpdateProvider, useDesktopUpdate } from './contexts/DesktopUpdateContext'
+import { DesktopUpdateOverlay } from './components/DesktopUpdateOverlay'
 import Layout from './components/Layout'
 import { ScrollToTop } from './components/ScrollToTop'
 import { AnimatedBackground } from './components/AnimatedBackground'
@@ -12,6 +14,7 @@ import { HomeNav } from './components/HomeNav'
 import { Footer } from './components/Footer'
 import { PageMetadata } from './components/PageMetadata'
 import { useBountyNotifications } from './hooks/useBountyNotifications'
+import { useDesktopUpdater } from './hooks/useDesktopUpdater'
 import ChatSidebar from './components/ChatSidebar'
 import { LoadingSpinner } from './components/LoadingSpinner'
 import { ErrorBoundary } from './components/ErrorBoundary'
@@ -19,6 +22,8 @@ import '@solana/wallet-adapter-react-ui/styles.css'
 
 // Eager-load critical above-the-fold route
 import Home from './pages/Home'
+import DesktopHome from './pages/DesktopHome'
+import { isDesktopApp } from './utils/desktop'
 
 // Lazy-load all other routes for smaller initial bundle
 const Login = lazy(() => import('./pages/Login'))
@@ -68,11 +73,13 @@ function AppContent() {
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup'
   const isLegalPage = location.pathname === '/privacy' || location.pathname === '/terms'
   const isDownloadPage = location.pathname === '/download'
-  
-  // Determine which navbar to show: HomeNav on home and download (always unauthenticated style); TopNav when logged in on app pages
+  const isDesktop = isDesktopApp()
+  const isDesktopRoot = isDesktop && isHomePage
+
+  // Determine which navbar to show: HomeNav on home and download (web only; desktop has its own portal)
   const isPublicPage = isHomePage || isAuthPage || isLegalPage || isDownloadPage
   const showAuthenticatedNav = Boolean(user) && !isPublicPage && !loading
-  const showHomeNav = isHomePage || isDownloadPage
+  const showHomeNav = (isHomePage || isDownloadPage) && !isDesktop
   
   // Handle OAuth redirect - wait for auth to load before showing authenticated layout
   useEffect(() => {
@@ -89,6 +96,9 @@ function AppContent() {
   
   // Enable bounty notifications polling
   useBountyNotifications()
+  const desktopUpdate = useDesktopUpdate()
+  // Desktop: check for updates on a schedule; show overlay during install, then relaunch
+  useDesktopUpdater(desktopUpdate?.setPhase)
   
   // Scroll to section handler for HomeNav
   const scrollToSection = (sectionId: string) => {
@@ -100,6 +110,8 @@ function AppContent() {
   
   return (
     <ErrorBoundary>
+      {/* Desktop: update status mini-app when installing */}
+      {isDesktop && desktopUpdate?.phase !== 'idle' && <DesktopUpdateOverlay />}
       {/* Animated Background - Canvas only, no children */}
       <AnimatedBackground />
       
@@ -129,7 +141,7 @@ function AppContent() {
             const routes = (
               <Suspense fallback={<RouteFallback />}>
                 <Routes>
-                  <Route path="/" element={<Home />} />
+                  <Route path="/" element={isDesktop ? <DesktopHome /> : <Home />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
                   <Route path="/profile" element={<Profile />} />
@@ -181,8 +193,8 @@ function AppContent() {
           })()}
         </Layout>
         
-        {/* Footer - Show on every page, full width below content */}
-        <Footer />
+        {/* Footer - Show on every page except desktop home (portal is full-screen) */}
+        {!isDesktopRoot && <Footer />}
         
         {/* Chat Sidebar - Only for authenticated pages */}
         {!isPublicPage && <ChatSidebar />}
@@ -198,7 +210,9 @@ function App() {
       <AuthProvider>
         <SolanaWalletProvider>
           <ToastProvider>
-            <AppContent />
+            <DesktopUpdateProvider>
+              <AppContent />
+            </DesktopUpdateProvider>
           </ToastProvider>
         </SolanaWalletProvider>
       </AuthProvider>
