@@ -11,25 +11,37 @@ const messages: Record<string, string> = {
 /** Actual window size for the update mini-window (real OS window, not inner fake) */
 const UPDATE_WINDOW_WIDTH = 280
 const UPDATE_WINDOW_HEIGHT = 240
+/** Window size for the error overlay (readable, then user can Continue to full) */
+const ERROR_WINDOW_WIDTH = 420
+const ERROR_WINDOW_HEIGHT = 320
+/** Full app size when dismissing overlay (match useDesktopWindowSize) */
+const FULL_WINDOW_WIDTH = 1200
+const FULL_WINDOW_HEIGHT = 800
 
 export function DesktopUpdateOverlay() {
   const ctx = useDesktopUpdate()
 
-  // Resize the actual Tauri window to a small mini-window while update is in progress
+  // Resize and center the Tauri window: small for download/install, larger for error
   useEffect(() => {
-    if (!ctx || ctx.phase === 'idle' || ctx.phase === 'error' || !isDesktopApp()) return
+    if (!ctx || ctx.phase === 'idle' || !isDesktopApp()) return
 
     let cancelled = false
-    async function shrinkWindow() {
+    async function resizeAndCenter() {
       try {
         const { getCurrentWindow } = await import('@tauri-apps/api/window')
         const win = getCurrentWindow()
-        if (!cancelled) await win.setSize({ type: 'Logical', width: UPDATE_WINDOW_WIDTH, height: UPDATE_WINDOW_HEIGHT })
+        if (cancelled) return
+        if (ctx.phase === 'error') {
+          await win.setSize({ type: 'Logical', width: ERROR_WINDOW_WIDTH, height: ERROR_WINDOW_HEIGHT })
+        } else {
+          await win.setSize({ type: 'Logical', width: UPDATE_WINDOW_WIDTH, height: UPDATE_WINDOW_HEIGHT })
+        }
+        if (!cancelled) await win.center()
       } catch (e) {
-        if (import.meta.env.DEV) console.debug('[DesktopUpdateOverlay] setSize', e)
+        if (import.meta.env.DEV) console.debug('[DesktopUpdateOverlay] resize/center', e)
       }
     }
-    shrinkWindow()
+    resizeAndCenter()
     return () => { cancelled = true }
   }, [ctx?.phase])
 
@@ -51,7 +63,19 @@ export function DesktopUpdateOverlay() {
           <div className="flex gap-3 mt-2">
             <button
               type="button"
-              onClick={() => setPhase('idle')}
+              onClick={async () => {
+                if (isDesktopApp()) {
+                  try {
+                    const { getCurrentWindow } = await import('@tauri-apps/api/window')
+                    const win = getCurrentWindow()
+                    await win.setSize({ type: 'Logical', width: FULL_WINDOW_WIDTH, height: FULL_WINDOW_HEIGHT })
+                    await win.center()
+                  } catch (e) {
+                    if (import.meta.env.DEV) console.debug('[DesktopUpdateOverlay] expand on Continue', e)
+                  }
+                }
+                setPhase('idle')
+              }}
               className="px-4 py-2 rounded-lg bg-neutral-700 hover:bg-neutral-600 text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400"
             >
               Continue
