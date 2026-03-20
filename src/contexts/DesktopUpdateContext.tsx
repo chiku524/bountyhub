@@ -14,9 +14,8 @@ type ContextValue = {
 const DesktopUpdateContext = createContext<ContextValue | null>(null)
 
 export function DesktopUpdateProvider({ children }: { children: ReactNode }) {
-  const [phase, setPhaseState] = useState<DesktopUpdatePhase>(() =>
-    isDesktopApp() ? 'checking' : 'idle'
-  )
+  // Start idle so the app (intro) shows immediately; update check runs in background (vibeminer-style).
+  const [phase, setPhaseState] = useState<DesktopUpdatePhase>(() => 'idle')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const retryRef = useRef<(() => void) | null>(null)
   const setPhase = useCallback((p: DesktopUpdatePhase, errMsg?: string | null) => {

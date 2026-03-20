@@ -39,7 +39,7 @@ export function useDesktopUpdater(updateContext: UpdaterContext) {
       if (isRunningRef.current) return
       isRunningRef.current = true
       try {
-        setPhase('checking')
+        // Run check in background; only set phase when we actually download/install (vibeminer-style).
         const { checkUpdate, installUpdate, onUpdaterEvent } = await import('@tauri-apps/api/updater')
         const { relaunch } = await import('@tauri-apps/api/process')
         const update = await checkUpdate()

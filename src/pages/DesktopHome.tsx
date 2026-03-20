@@ -138,7 +138,7 @@ export default function DesktopHome() {
         {/* Welcome back: brief message when logged-in user transitions to app home */}
         {showWelcomeBack && (
           <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-gradient-to-br from-indigo-950/98 via-neutral-950 to-violet-950/80 animate-fade-in">
-            <div className="flex flex-col items-center gap-3">
+            <div className="flex flex-col items-center gap-3 animate-intro-slide-in">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-violet-500 shadow-lg">
                 <FiAward className="h-6 w-6 text-white" aria-hidden />
               </div>
@@ -148,7 +148,7 @@ export default function DesktopHome() {
             </div>
           </div>
         )}
-        {/* Intro: logo + wordmark + tagline (padding so content fits in small window) */}
+        {/* Intro: logo + wordmark + tagline — vibeminer-style opacity + translateY entrance */}
         <div
           className={`flex flex-col items-center justify-center p-6 transition-all duration-500 ${
             phase === 'intro'
@@ -158,10 +158,7 @@ export default function DesktopHome() {
           aria-hidden={phase !== 'intro'}
         >
           <div
-            className="flex flex-col items-center gap-2"
-            style={{
-              animation: phase === 'intro' ? 'desktop-intro 1.4s ease-out both' : 'none',
-            }}
+            className={`flex flex-col items-center gap-2 ${phase === 'intro' ? 'animate-intro-slide-in' : ''}`}
           >
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-violet-500 shadow-lg shadow-cyan-500/30 ring-1 ring-white/20">
               <FiAward className="h-6 w-6 text-white" aria-hidden />
@@ -175,7 +172,7 @@ export default function DesktopHome() {
           </div>
         </div>
 
-        {/* Portal: sign in / register (after window expands) */}
+        {/* Portal: sign in / register — vibeminer-style entrance after window expands */}
         <div
           className={`flex flex-col items-center justify-center transition-all duration-500 ${
             portalVisible ? 'opacity-100' : 'opacity-0'
@@ -183,9 +180,8 @@ export default function DesktopHome() {
         >
           <div
             className={`flex flex-col items-center gap-8 rounded-2xl border border-cyan-500/20 dark:border-violet-500/30 bg-neutral-900/95 px-10 py-12 shadow-2xl backdrop-blur-sm ${
-              portalVisible ? 'animate-scale-in' : 'opacity-0'
+              portalVisible ? 'animate-intro-slide-in-delay' : 'opacity-0'
             }`}
-            style={{ animationDuration: `${PORTAL_APPEAR_MS}ms` }}
           >
             <div className="flex flex-col items-center gap-2">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-violet-500 shadow-lg shadow-cyan-500/20">

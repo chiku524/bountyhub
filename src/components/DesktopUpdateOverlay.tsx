@@ -1,13 +1,7 @@
 import { useEffect } from 'react'
+import { FiAward } from 'react-icons/fi'
 import { useDesktopUpdate } from '../contexts/DesktopUpdateContext'
 import { isDesktopApp } from '../utils/desktop'
-
-const messages: Record<string, string> = {
-  checking: 'Checking for updates…',
-  downloading: 'Downloading update…',
-  installing: 'Installing update…',
-  restarting: 'Update complete. Restarting the app…',
-}
 
 /** Window size for the update progress (downloading/installing/restarting) — fit spinner + message + subtitle */
 const UPDATE_WINDOW_WIDTH = 400
@@ -94,40 +88,34 @@ export function DesktopUpdateOverlay() {
     )
   }
 
+  // Vibeminer-style: backdrop, card with icon area, app name, spinner, single label
+  const label = phase === 'checking'
+    ? 'Checking for updates…'
+    : phase === 'downloading'
+      ? 'Downloading update…'
+      : phase === 'installing' || phase === 'restarting'
+        ? 'Installing… The app will be restarting in a moment.'
+        : 'Preparing update…'
+
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gradient-to-br from-indigo-950/98 via-neutral-950 to-violet-950/90 backdrop-blur-sm p-6 animate-fade-in">
-      <div className="flex flex-col items-center gap-5 px-6 max-w-sm">
-        <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl bg-indigo-500/20">
-          <svg
-            className="h-7 w-7 animate-spin text-indigo-400"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            aria-hidden
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            />
-          </svg>
+    <div
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-neutral-950/95 backdrop-blur-sm animate-fade-in"
+      aria-live="polite"
+      aria-busy="true"
+    >
+      <div className="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-neutral-900/90 px-10 py-8 shadow-xl">
+        <div
+          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500/25 to-violet-500/20 text-2xl"
+          aria-hidden
+        >
+          <FiAward className="h-7 w-7 text-cyan-400/90" aria-hidden />
         </div>
-        <p className="text-center text-base font-medium text-white">
-          {messages[phase] ?? 'Preparing update…'}
-        </p>
-        <p className="text-center text-xs text-neutral-500">
-          {phase === 'checking'
-            ? 'This may take a moment.'
-            : 'The app will restart automatically when the update is complete.'}
-        </p>
+        <p className="mt-4 font-semibold text-lg text-white">BountyHub</p>
+        <div
+          className="mt-4 h-8 w-8 shrink-0 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin"
+          aria-hidden
+        />
+        <p className="mt-4 text-sm text-neutral-400">{label}</p>
       </div>
     </div>
   )
