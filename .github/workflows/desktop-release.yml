@@ -63,6 +63,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set version from tag (align installer filename with release)
+        run: node scripts/set-version-from-tag.cjs ${{ github.ref_name }}
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:

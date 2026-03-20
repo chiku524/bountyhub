@@ -12,7 +12,7 @@
 
 ## Releasing a new version
 
-1. Bump version in `package.json` and `src-tauri/tauri.conf.json` (e.g. `1.1.0`).
+1. Bump version in `package.json` and `src-tauri/tauri.conf.json` (e.g. `1.1.0`) so local builds and the repo stay in sync. The **GitHub Actions workflow** overwrites both with the tag (e.g. `v1.1.0` → `1.1.0`) before building, so the installer filename always matches the release (e.g. `BountyHub_1.1.0_x64-setup.exe`).
 2. Commit, then create and push the tag:
    ```bash
    git tag -a v1.1.0 -m "Release v1.1.0"
