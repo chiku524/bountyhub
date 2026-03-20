@@ -19,13 +19,21 @@ type UpdaterContext = {
  * Also re-checks every 30 minutes while the app is open.
  * On failure, sets phase to 'error' so the overlay can show Retry/Continue.
  * Requires GitHub Release to have latest.json (and signed .sig assets) — set TAURI_PRIVATE_KEY in CI.
+ *
+ * Note: The effect must depend only on stable callbacks (setPhase, registerRetry), not on the
+ * updateContext object reference. Otherwise phase changes (e.g. idle) cause re-renders, a new
+ * object is passed in, the effect re-runs and schedules another initial check, causing a loop.
  */
 export function useDesktopUpdater(updateContext: UpdaterContext) {
   const isRunningRef = useRef(false)
+  // Depend on stable callbacks only — not on `updateContext` object identity. App passes a fresh
+  // `{ setPhase, registerRetry }` every render; using that in the effect deps re-ran cleanup + a new
+  // 400ms timer after every phase change (e.g. idle), causing "checking" to loop forever.
+  const setPhase = updateContext?.setPhase
+  const registerRetry = updateContext?.registerRetry
 
   useEffect(() => {
-    if (!isDesktopApp() || !updateContext) return
-    const { setPhase, registerRetry } = updateContext
+    if (!isDesktopApp() || !setPhase || !registerRetry) return
 
     async function checkAndInstall() {
       if (isRunningRef.current) return
@@ -76,5 +84,5 @@ export function useDesktopUpdater(updateContext: UpdaterContext) {
       clearTimeout(onLoadTimer)
       clearInterval(interval)
     }
-  }, [updateContext])
+  }, [setPhase, registerRetry])
 }
