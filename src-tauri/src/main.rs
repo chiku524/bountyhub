@@ -16,10 +16,10 @@ fn get_window_state(window: tauri::Window) -> Result<serde_json::Value, String> 
     let scale = window.scale_factor().unwrap_or(1.0);
     let inner = window
         .inner_size()
-        .ok_or_else(|| "inner_size".to_string())?;
+        .map_err(|e| e.to_string())?;
     let pos = window
         .outer_position()
-        .ok_or_else(|| "outer_position".to_string())?;
+        .map_err(|e| e.to_string())?;
     let width = (inner.width as f64 / scale).round() as u32;
     let height = (inner.height as f64 / scale).round() as u32;
     let x = (pos.x as f64 / scale).round() as i32;
@@ -103,7 +103,8 @@ fn main() {
 
     tauri::Builder::default()
         .menu(app_menu)
-        .on_menu_event(|app, event| {
+        .on_menu_event(|event| {
+            let app = event.window().app_handle();
             match event.menu_item_id() {
                 "quit" => {
                     std::process::exit(0);
