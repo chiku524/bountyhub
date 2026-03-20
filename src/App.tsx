@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from 'react'
+import { lazy, Suspense, useEffect, useMemo } from 'react'
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
 import { AuthProvider, useAuth } from './contexts/AuthProvider'
@@ -67,6 +67,15 @@ function RouteFallback() {
     <div className="flex min-h-[50vh] items-center justify-center">
       <LoadingSpinner size="lg" />
     </div>
+  )
+}
+
+/** Stable element for "/" so DesktopHome doesn't remount when parent re-renders (e.g. update phase). */
+function RootHomeElement() {
+  const isDesktop = isDesktopApp()
+  return useMemo(
+    () => (isDesktop ? <DesktopHome /> : <Home />),
+    [isDesktop]
   )
 }
 
@@ -153,7 +162,7 @@ function AppContent() {
             const routes = (
               <Suspense fallback={<RouteFallback />}>
                 <Routes>
-                  <Route path="/" element={isDesktop ? <DesktopHome /> : <Home />} />
+                  <Route path="/" element={<RootHomeElement />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
                   <Route path="/profile" element={<Profile />} />

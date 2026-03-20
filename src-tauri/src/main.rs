@@ -102,6 +102,13 @@ fn main() {
     let app_menu = build_app_menu();
 
     tauri::Builder::default()
+        .setup(|app| {
+            // Center the main window on first show so the app doesn't appear off-screen.
+            if let Some(w) = app.get_window(WINDOW_LABEL_MAIN) {
+                let _ = w.center();
+            }
+            Ok(())
+        })
         .menu(app_menu)
         .on_menu_event(|event| {
             let app = event.window().app_handle();

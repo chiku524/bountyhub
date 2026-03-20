@@ -90,7 +90,7 @@ export default function DesktopHome() {
     return () => clearTimeout(t)
   }, [phase, user, navigate])
 
-  // When portal: expand window and reveal sign-in portal only if user is not logged in
+  // When portal: expand window and reveal sign-in portal. Always show portal even if resize/center fails.
   useEffect(() => {
     if (!isDesktopApp() || phase !== 'portal') return
     let cancelled = false
@@ -100,10 +100,10 @@ export default function DesktopHome() {
         const win = getCurrentWindow()
         await win.setSize({ type: 'Logical', width: FULL_WINDOW_WIDTH, height: FULL_WINDOW_HEIGHT })
         await win.center()
-        if (!cancelled) setPortalVisible(true)
       } catch (e) {
         if (import.meta.env.DEV) console.debug('[DesktopHome] expand', e)
       }
+      if (!cancelled) setPortalVisible(true)
     }
     expand()
     return () => { cancelled = true }
