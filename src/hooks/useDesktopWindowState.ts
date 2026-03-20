@@ -10,7 +10,7 @@ import {
 const SAVE_INTERVAL_MS = 3000
 const FULL_WIDTH = 1200
 const FULL_HEIGHT = 800
-const MIN_WIDTH = 800
+const MIN_WIDTH = 900
 const MIN_HEIGHT = 600
 
 /**

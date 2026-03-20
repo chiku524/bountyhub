@@ -1,0 +1,122 @@
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import {
+  FiAward,
+  FiUsers,
+  FiCreditCard,
+  FiSettings,
+  FiLogOut,
+  FiShield,
+  FiEdit3,
+  FiUser,
+} from 'react-icons/fi'
+import { useAuth } from '../contexts/AuthProvider'
+import { isDesktopApp } from '../utils/desktop'
+
+const SIDEBAR_WIDTH = 240
+
+function DesktopSidebar() {
+  const { user, loading, logout } = useAuth()
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  function navLink(
+    href: string,
+    label: string,
+    Icon: React.ComponentType<{ className?: string }>,
+    active?: boolean
+  ) {
+    return (
+      <Link
+        to={href}
+        className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
+          active ? 'bg-white/10 text-white' : 'text-neutral-400 hover:bg-white/5 hover:text-white'
+        }`}
+      >
+        <Icon className="h-5 w-5 shrink-0" />
+        <span>{label}</span>
+      </Link>
+    )
+  }
+
+  async function handleSignOut() {
+    await logout()
+    navigate('/')
+  }
+
+  return (
+    <aside
+      className="fixed left-0 top-0 z-40 flex h-screen w-[240px] flex-col border-r border-white/5 bg-neutral-900/98 backdrop-blur-md"
+      style={{ width: SIDEBAR_WIDTH }}
+    >
+      <div className="flex h-14 shrink-0 items-center gap-2 border-b border-white/5 px-4">
+        <Link
+          to="/community"
+          className="flex items-center gap-2 font-semibold tracking-tight text-white transition hover:text-white"
+        >
+          <FiAward className="h-5 w-5 shrink-0 text-cyan-400" aria-hidden />
+          <span>BountyHub</span>
+        </Link>
+        <span className="rounded bg-white/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-neutral-400">
+          App
+        </span>
+      </div>
+      <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 py-4">
+        <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
+          Main
+        </p>
+        {navLink('/community', 'Community', FiUsers, location.pathname === '/community')}
+        {navLink('/wallet', 'Wallet', FiCreditCard, location.pathname === '/wallet')}
+        {navLink('/posts/create', 'Create post', FiEdit3, location.pathname === '/posts/create')}
+        {navLink('/profile', 'Profile', FiUser, location.pathname.startsWith('/profile'))}
+        <p className="mb-1 mt-4 px-3 text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
+          Settings
+        </p>
+        {navLink('/settings', 'Settings', FiSettings, location.pathname.startsWith('/settings'))}
+        {!loading && user?.role === 'admin' && (
+          <Link
+            to="/admin"
+            className="mt-2 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-amber-400/90 transition hover:bg-amber-500/10 hover:text-amber-300"
+          >
+            <FiShield className="h-5 w-5 shrink-0" />
+            <span>Admin</span>
+          </Link>
+        )}
+      </nav>
+      <div className="shrink-0 border-t border-white/5 p-3">
+        {!loading && user ? (
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-neutral-500 transition hover:bg-white/5 hover:text-neutral-300"
+          >
+            <FiLogOut className="h-5 w-5 shrink-0" />
+            <span>Sign out</span>
+          </button>
+        ) : (
+          <Link
+            to="/login"
+            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-cyan-400 transition hover:bg-cyan-500/10"
+          >
+            <span>Sign in</span>
+          </Link>
+        )}
+      </div>
+    </aside>
+  )
+}
+
+function DesktopShellInner({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex min-h-screen bg-neutral-950">
+      <DesktopSidebar />
+      <main className="min-h-screen flex-1 overflow-auto" style={{ marginLeft: SIDEBAR_WIDTH }}>
+        {children}
+      </main>
+    </div>
+  )
+}
+
+export function DesktopShell({ children }: { children: React.ReactNode }) {
+  if (!isDesktopApp()) return <>{children}</>
+  return <DesktopShellInner>{children}</DesktopShellInner>
+}
