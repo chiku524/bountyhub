@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { isDesktopApp } from '../utils/desktop'
 import type { DesktopUpdatePhase } from '../contexts/DesktopUpdateContext'
 
@@ -21,11 +21,15 @@ type UpdaterContext = {
  * Requires GitHub Release to have latest.json (and signed .sig assets) — set TAURI_PRIVATE_KEY in CI.
  */
 export function useDesktopUpdater(updateContext: UpdaterContext) {
+  const isRunningRef = useRef(false)
+
   useEffect(() => {
     if (!isDesktopApp() || !updateContext) return
     const { setPhase, registerRetry } = updateContext
 
     async function checkAndInstall() {
+      if (isRunningRef.current) return
+      isRunningRef.current = true
       try {
         setPhase('checking')
         const { checkUpdate, installUpdate, onUpdaterEvent } = await import('@tauri-apps/api/updater')
@@ -58,6 +62,8 @@ export function useDesktopUpdater(updateContext: UpdaterContext) {
         }
         setPhase('error', message)
         console.warn('[BountyHub updater]', message)
+      } finally {
+        isRunningRef.current = false
       }
     }
 

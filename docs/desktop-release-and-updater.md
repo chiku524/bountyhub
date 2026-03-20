@@ -31,7 +31,7 @@ The desktop app uses Tauri’s built-in updater:
 
 - **Config:** `src-tauri/tauri.conf.json` → `tauri.updater`
 - **Endpoint:** `https://github.com/chiku524/bountyhub/releases/latest/download/latest.json`
-- **Behaviour:** The app fetches that URL; if the `version` in the JSON is greater than the installed version, it offers to download and install the update for the current platform (`windows-x86_64`, `darwin-x86_64`, `darwin-aarch64`, or `linux-x86_64`).
+- **Behaviour:** The app fetches that URL; if the `version` in the JSON is greater than the installed version, it offers to download and install the update for the current platform (`windows-x86_64`, `darwin-x86_64`, `darwin-aarch64`, or `linux-x86_64`). On Windows, the installer runs in **quiet** mode (no separate installer window); only the in-app frameless overlay shows progress. If the app is installed to a location requiring admin (e.g. `C:\Program Files`), switch `tauri.updater.windows.installMode` to `"passive"` so the installer can request elevation.
 
 So **Windows, macOS (Intel and Apple Silicon), and Linux** all get auto-updates as long as:
 
