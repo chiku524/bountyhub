@@ -1,14 +1,12 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use single_instance::SingleInstance;
-use tauri::{
-    CustomMenuItem, Manager, Menu, Submenu, SystemTray, SystemTrayEvent, SystemTrayMenu,
-    SystemTrayMenuItem,
-};
+use tauri::{CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem};
 use tauri::LogicalPosition;
 use tauri::LogicalSize;
 
 const WINDOW_LABEL_MAIN: &str = "main";
+const WINDOW_LABEL_SPLASH: &str = "splashscreen";
 
 /// Returns current window logical size and position for persistence.
 #[tauri::command]
@@ -56,31 +54,17 @@ fn get_app_version(app: tauri::AppHandle) -> String {
     app.package_info().version.to_string()
 }
 
-fn build_app_menu() -> Menu {
-    let quit = CustomMenuItem::new("quit".to_string(), "Quit");
-    let file = Submenu::new(
-        "File",
-        Menu::new()
-            .add_item(quit),
-    );
-    let preferences = CustomMenuItem::new("preferences".to_string(), "Preferences…");
-    let edit = Submenu::new(
-        "Edit",
-        Menu::new()
-            .add_item(preferences),
-    );
-    let about = CustomMenuItem::new("about".to_string(), "About BountyHub");
-    let check_updates = CustomMenuItem::new("check_updates".to_string(), "Check for Updates");
-    let help = Submenu::new(
-        "Help",
-        Menu::new()
-            .add_item(about)
-            .add_item(check_updates),
-    );
-    Menu::new()
-        .add_submenu(file)
-        .add_submenu(edit)
-        .add_submenu(help)
+/// Closes the frameless splash window and shows the main app window.
+#[tauri::command]
+fn close_splash_and_show_main(app: tauri::AppHandle) -> Result<(), String> {
+    if let Some(splash) = app.get_window(WINDOW_LABEL_SPLASH) {
+        splash.close().map_err(|e| e.to_string())?;
+    }
+    if let Some(main_win) = app.get_window(WINDOW_LABEL_MAIN) {
+        main_win.show().map_err(|e| e.to_string())?;
+        main_win.set_focus().map_err(|e| e.to_string())?;
+    }
+    Ok(())
 }
 
 fn main() {
@@ -92,43 +76,28 @@ fn main() {
     let _guard = instance; // keep the lock for the process lifetime
 
     let open = CustomMenuItem::new("open".to_string(), "Open BountyHub");
+    let about = CustomMenuItem::new("about".to_string(), "About BountyHub");
+    let check_updates = CustomMenuItem::new("check_updates".to_string(), "Check for Updates");
     let quit = CustomMenuItem::new("quit".to_string(), "Quit");
     let tray_menu = SystemTrayMenu::new()
         .add_item(open)
         .add_native_item(SystemTrayMenuItem::Separator)
+        .add_item(about)
+        .add_item(check_updates)
+        .add_native_item(SystemTrayMenuItem::Separator)
         .add_item(quit);
 
     let system_tray = SystemTray::new().with_menu(tray_menu);
-    let app_menu = build_app_menu();
 
     tauri::Builder::default()
         .setup(|app| {
-            // Center the main window on first show so the app doesn't appear off-screen.
             if let Some(w) = app.get_window(WINDOW_LABEL_MAIN) {
                 let _ = w.center();
             }
             Ok(())
         })
-        .menu(app_menu)
-        .on_menu_event(|event| {
-            let app = event.window().app_handle();
-            match event.menu_item_id() {
-                "quit" => {
-                    std::process::exit(0);
-                }
-                "preferences" => {
-                    let _ = app.emit_all("menu-preferences", ());
-                }
-                "about" => {
-                    let _ = app.emit_all("menu-about", ());
-                }
-                "check_updates" => {
-                    let _ = app.emit_all("menu-check-updates", ());
-                }
-                _ => {}
-            }
-        })
         .invoke_handler(tauri::generate_handler![
+            close_splash_and_show_main,
             get_window_state,
             set_window_state,
             get_app_version,
@@ -148,6 +117,12 @@ fn main() {
                         let _ = w.set_focus();
                     }
                 }
+                "about" => {
+                    let _ = app.emit_all("menu-about", ());
+                }
+                "check_updates" => {
+                    let _ = app.emit_all("menu-check-updates", ());
+                }
                 "quit" => {
                     std::process::exit(0);
                 }
@@ -157,8 +132,10 @@ fn main() {
         })
         .on_window_event(|event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event.event() {
-                event.window().hide().ok();
-                api.prevent_close();
+                if event.window().label() == WINDOW_LABEL_MAIN {
+                    event.window().hide().ok();
+                    api.prevent_close();
+                }
             }
         })
         .run(tauri::generate_context!())

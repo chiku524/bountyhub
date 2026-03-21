@@ -28,6 +28,7 @@ import '@solana/wallet-adapter-react-ui/styles.css'
 import Home from './pages/Home'
 import { DesktopShell } from './components/DesktopShell'
 import { DesktopHomeGate } from './components/DesktopHomeGate'
+import { DesktopLaunch } from './components/DesktopLaunch'
 import { isDesktopApp } from './utils/desktop'
 
 // Lazy-load all other routes for smaller initial bundle
@@ -89,7 +90,10 @@ function AppContent() {
   const isDownloadPage = location.pathname === '/download'
   const isDesktop = isDesktopApp()
   const isLoginOrSignupOrRoot =
-    location.pathname === '/' || location.pathname === '/login' || location.pathname === '/signup'
+    location.pathname === '/' ||
+    location.pathname === '/login' ||
+    location.pathname === '/signup' ||
+    location.pathname === '/launch'
   const showDesktopShell = isDesktop && !isLoginOrSignupOrRoot
 
   // Determine which navbar to show: HomeNav on home and download (web only; desktop has its own portal)
@@ -113,8 +117,13 @@ function AppContent() {
   // Enable bounty notifications polling
   useBountyNotifications()
   const desktopUpdate = useDesktopUpdate()
-  // Desktop: check for updates on a schedule; show overlay during install, then relaunch
-  useDesktopUpdater(desktopUpdate ? { setPhase: desktopUpdate.setPhase, registerRetry: desktopUpdate.registerRetry } : null)
+  // Desktop: check for updates on a schedule (skip on splash "/" — splash handles its own check)
+  const skipUpdaterOnSplash = isDesktop && location.pathname === '/'
+  useDesktopUpdater(
+    desktopUpdate && !skipUpdaterOnSplash
+      ? { setPhase: desktopUpdate.setPhase, registerRetry: desktopUpdate.registerRetry }
+      : null,
+  )
 
   // Desktop: when in main app, restore/save window state and set min size
   const isMainApp = isDesktop && (location.pathname !== '/' || Boolean(user)) && (desktopUpdate?.phase === 'idle' || !desktopUpdate?.phase)
@@ -169,6 +178,7 @@ function AppContent() {
                   <Suspense fallback={<RouteFallback />}>
                     <Routes>
                           <Route path="/" element={<RootHomeElement />} />
+                      <Route path="/launch" element={<DesktopLaunch />} />
                       <Route path="/login" element={<Login />} />
                       <Route path="/signup" element={<Signup />} />
                       <Route path="/profile" element={<Profile />} />
@@ -229,6 +239,7 @@ function AppContent() {
                   <Suspense fallback={<RouteFallback />}>
                     <Routes>
                       <Route path="/" element={<RootHomeElement />} />
+                      <Route path="/launch" element={<DesktopLaunch />} />
                       <Route path="/login" element={<Login />} />
                       <Route path="/signup" element={<Signup />} />
                       <Route path="/profile" element={<Profile />} />
@@ -289,6 +300,7 @@ function AppContent() {
                 <Suspense fallback={<RouteFallback />}>
                   <Routes>
                     <Route path="/" element={<RootHomeElement />} />
+                    <Route path="/launch" element={<DesktopLaunch />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/signup" element={<Signup />} />
                     <Route path="/profile" element={<Profile />} />

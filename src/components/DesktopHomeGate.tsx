@@ -1,38 +1,100 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FiAward } from 'react-icons/fi'
 import { useAuth } from '../contexts/AuthProvider'
+import { useDesktopUpdate } from '../contexts/DesktopUpdateContext'
 import { isDesktopApp } from '../utils/desktop'
 
-/** Intro duration before transitioning to loading (VibeMiner-style: brief branded moment then load). */
-const INTRO_DURATION_MS = 2400
+const INTRO_DURATION_MS = 1800
+const DESKTOP_INITIAL_PATH_KEY = 'desktop_initial_path'
 
 /**
- * Desktop app on "/": intro animation (logo + wordmark + tagline) then smooth transition
- * to loading spinner, then redirect to /login or /community. Mimics VibeMiner flow
- * (MinimalShell → DesktopHomeGate) with a clear intro moment.
+ * Frameless splash intro: logo + wordmark + tagline, then update check, then
+ * close splash and show main window (dice.express / VibeMiner style).
  */
 export function DesktopHomeGate() {
   const navigate = useNavigate()
   const { user, loading } = useAuth()
+  const desktopUpdate = useDesktopUpdate()
   const [phase, setPhase] = useState<'intro' | 'loading'>('intro')
+  const [introDone, setIntroDone] = useState(false)
+  const cancelledRef = useRef(false)
 
-  // After intro duration, transition to loading phase
   useEffect(() => {
-    const t = setTimeout(() => setPhase('loading'), INTRO_DURATION_MS)
+    if (!isDesktopApp()) {
+      setIntroDone(true)
+      return
+    }
+    const t = setTimeout(() => {
+      setPhase('loading')
+      setIntroDone(true)
+    }, INTRO_DURATION_MS)
     return () => clearTimeout(t)
   }, [])
 
-  // When in loading phase and auth is ready, redirect
   useEffect(() => {
-    if (!isDesktopApp() || phase !== 'loading') return
-    if (loading) return
-    if (!user) {
-      navigate('/login', { replace: true })
-      return
+    if (!introDone || !isDesktopApp()) return
+
+    cancelledRef.current = false
+
+    const getInitialPath = () => {
+      if (!loading && user) return '/community'
+      return '/login'
     }
-    navigate('/community', { replace: true })
-  }, [phase, loading, user, navigate])
+
+    const run = async () => {
+      try {
+        const { checkUpdate, installUpdate, onUpdaterEvent } = await import('@tauri-apps/api/updater')
+        const { relaunch } = await import('@tauri-apps/api/process')
+        const { invoke } = await import('@tauri-apps/api/tauri')
+
+        desktopUpdate?.setPhase('checking')
+        const update = await checkUpdate()
+        if (cancelledRef.current) return
+
+        if (update?.shouldUpdate) {
+          desktopUpdate?.setPhase('downloading')
+          const unlisten = await onUpdaterEvent(({ status }) => {
+            if (status.status === 'DONE') desktopUpdate?.setPhase('restarting')
+            else if (status.status === 'PENDING') desktopUpdate?.setPhase('installing')
+          })
+          await installUpdate()
+          unlisten()
+          desktopUpdate?.setPhase('restarting')
+          await new Promise((r) => setTimeout(r, 1800))
+          await relaunch()
+          return
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err)
+        const isReleaseError = /release\s*json|valid\s*release|could\s*not\s*fetch/i.test(msg)
+        if (isReleaseError) {
+          desktopUpdate?.setPhase('idle')
+        } else {
+          desktopUpdate?.setPhase('error', msg)
+          return
+        }
+      }
+
+      if (cancelledRef.current) return
+
+      const path = getInitialPath()
+      try {
+        localStorage.setItem(DESKTOP_INITIAL_PATH_KEY, path)
+      } catch (_) {}
+      await invoke('close_splash_and_show_main').catch(() => {})
+    }
+
+    run()
+    return () => { cancelledRef.current = true }
+  }, [introDone, loading, user, desktopUpdate?.setPhase])
+
+  if (!isDesktopApp()) {
+    if (phase === 'loading' && !loading) {
+      if (!user) navigate('/login', { replace: true })
+      else navigate('/community', { replace: true })
+    }
+  }
 
   return (
     <main className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-indigo-950/98 via-neutral-950 to-violet-950/80">
