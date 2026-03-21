@@ -46,7 +46,7 @@ function DesktopSidebar() {
 
   async function handleSignOut() {
     await logout()
-    navigate('/')
+    navigate('/login', { replace: true })
   }
 
   return (
@@ -102,14 +102,19 @@ function DesktopSidebar() {
       </nav>
       <div className="shrink-0 border-t border-white/5 p-3">
         {!loading && user ? (
-          <button
-            type="button"
-            onClick={handleSignOut}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-neutral-500 transition hover:bg-white/5 hover:text-neutral-300"
-          >
-            <FiLogOut className="h-5 w-5 shrink-0" />
-            <span>Sign out</span>
-          </button>
+          <div className="space-y-2">
+            <p className="truncate px-3 text-xs text-neutral-500" title={user.email ?? user.username}>
+              {user.username || user.email}
+            </p>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-red-400/90 transition hover:bg-red-500/10 hover:text-red-300"
+            >
+              <FiLogOut className="h-5 w-5 shrink-0" aria-hidden />
+              <span>Log out</span>
+            </button>
+          </div>
         ) : (
           <Link
             to="/login"

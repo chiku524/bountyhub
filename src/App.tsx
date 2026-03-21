@@ -363,7 +363,7 @@ function AppContent() {
         {/* Chat Sidebar - Only for authenticated pages */}
         {!isPublicPage && <ChatSidebar />}
 
-        {/* Desktop: About dialog (from Help → About BountyHub) */}
+        {/* Desktop: About dialog (from tray → About BountyHub) */}
         {isDesktop && (
           <DesktopAboutDialog open={aboutOpen} onClose={() => setAboutOpen(false)} />
         )}

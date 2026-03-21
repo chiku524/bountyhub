@@ -10,7 +10,7 @@ const DEVTOOLS_SHORTCUT = 'CommandOrControl+Shift+I'
  * Registers global keyboard shortcuts for the desktop app:
  * - Cmd/Ctrl+Q: Quit
  * - Cmd/Ctrl+,: Open Settings (Desktop app tab)
- * - Cmd/Ctrl+Shift+I (dev only): Toggle developer tools
+ * - Cmd/Ctrl+Shift+I (dev only): Toggle developer tools (invokes Rust open_devtools)
  */
 export function useDesktopShortcuts() {
   const navigate = useNavigate()

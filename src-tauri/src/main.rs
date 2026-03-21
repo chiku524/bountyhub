@@ -5,10 +5,7 @@ use std::net::{TcpListener, TcpStream};
 use std::sync::mpsc;
 use std::thread;
 use std::time::Duration;
-use tauri::{
-    CustomMenuItem, Manager, Menu, MenuItem, Submenu, SystemTray, SystemTrayEvent, SystemTrayMenu,
-    SystemTrayMenuItem,
-};
+use tauri::{CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem};
 use tauri::LogicalPosition;
 use tauri::LogicalSize;
 
@@ -113,49 +110,6 @@ fn ping_running_instance() {
     }
 }
 
-fn build_window_menu() -> Menu {
-    let file_about = CustomMenuItem::new("file_about", "About BountyHub");
-    let prefs = CustomMenuItem::new("prefs", "Preferences…").accelerator("CmdOrControl+,");
-    let quit = CustomMenuItem::new("quit_menu", "Quit").accelerator("CmdOrControl+Q");
-    let reload = CustomMenuItem::new("reload_win", "Reload").accelerator("CmdOrControl+R");
-    let about = CustomMenuItem::new("about_menu", "About BountyHub");
-    let check_updates = CustomMenuItem::new("check_updates_menu", "Check for Updates…");
-
-    let file = Submenu::new(
-        "File",
-        Menu::new()
-            .add_item(file_about)
-            .add_native_item(MenuItem::Separator)
-            .add_item(prefs)
-            .add_native_item(MenuItem::Separator)
-            .add_item(quit),
-    );
-    #[cfg(debug_assertions)]
-    let view = Submenu::new(
-        "View",
-        Menu::new()
-            .add_item(reload)
-            .add_item(
-                CustomMenuItem::new("dev_tools", "Toggle Developer Tools")
-                    .accelerator("CmdOrControl+Shift+I"),
-            ),
-    );
-    #[cfg(not(debug_assertions))]
-    let view = Submenu::new("View", Menu::new().add_item(reload));
-    let help = Submenu::new(
-        "Help",
-        Menu::new()
-            .add_item(about)
-            .add_native_item(MenuItem::Separator)
-            .add_item(check_updates),
-    );
-
-    Menu::new()
-        .add_submenu(file)
-        .add_submenu(view)
-        .add_submenu(help)
-}
-
 fn main() {
     let listener = match TcpListener::bind(("127.0.0.1", INSTANCE_PORT)) {
         Ok(l) => l,
@@ -183,22 +137,28 @@ fn main() {
     });
 
     let open = CustomMenuItem::new("open".to_string(), "Open BountyHub");
+    let settings = CustomMenuItem::new("settings".to_string(), "Settings…");
+    let reload_tray = CustomMenuItem::new("reload_tray".to_string(), "Reload");
     let about = CustomMenuItem::new("about".to_string(), "About BountyHub");
     let check_updates = CustomMenuItem::new("check_updates".to_string(), "Check for Updates");
+    let sign_out = CustomMenuItem::new("sign_out".to_string(), "Log out");
     let quit = CustomMenuItem::new("quit".to_string(), "Quit");
     let tray_menu = SystemTrayMenu::new()
         .add_item(open)
         .add_native_item(SystemTrayMenuItem::Separator)
+        .add_item(settings)
+        .add_item(reload_tray)
+        .add_native_item(SystemTrayMenuItem::Separator)
         .add_item(about)
         .add_item(check_updates)
+        .add_native_item(SystemTrayMenuItem::Separator)
+        .add_item(sign_out)
         .add_native_item(SystemTrayMenuItem::Separator)
         .add_item(quit);
 
     let system_tray = SystemTray::new().with_menu(tray_menu);
-    let window_menu = build_window_menu();
 
     tauri::Builder::default()
-        .menu(window_menu)
         .setup(move |app| {
             if let Some(w) = app.get_window(WINDOW_LABEL_MAIN) {
                 let _ = w.center();
@@ -214,33 +174,6 @@ fn main() {
             });
 
             Ok(())
-        })
-        .on_menu_event(|event| {
-            let app = event.window().app_handle();
-            match event.menu_item_id() {
-                "about_menu" | "file_about" => {
-                    let _ = app.emit_all("menu-about", ());
-                }
-                "prefs" => {
-                    let _ = app.emit_all("menu-preferences", ());
-                }
-                "check_updates_menu" => {
-                    let _ = app.emit_all("menu-check-updates", ());
-                }
-                "reload_win" => {
-                    let _ = app.emit_all("menu-reload", ());
-                }
-                "dev_tools" => {
-                    #[cfg(debug_assertions)]
-                    {
-                        let _ = event.window().open_devtools();
-                    }
-                }
-                "quit_menu" => {
-                    std::process::exit(0);
-                }
-                _ => {}
-            }
         })
         .invoke_handler(tauri::generate_handler![
             close_splash_and_show_main,
@@ -259,11 +192,20 @@ fn main() {
                 "open" => {
                     focus_bountyhub_windows(&app);
                 }
+                "settings" => {
+                    let _ = app.emit_all("menu-preferences", ());
+                }
+                "reload_tray" => {
+                    let _ = app.emit_all("menu-reload", ());
+                }
                 "about" => {
                     let _ = app.emit_all("menu-about", ());
                 }
                 "check_updates" => {
                     let _ = app.emit_all("menu-check-updates", ());
+                }
+                "sign_out" => {
+                    let _ = app.emit_all("menu-logout", ());
                 }
                 "quit" => {
                     std::process::exit(0);
