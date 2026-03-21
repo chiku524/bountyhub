@@ -9,7 +9,6 @@ import {
   FiEdit3,
   FiUser,
   FiMessageCircle,
-  FiDownload,
   FiCheckSquare,
   FiRefreshCw,
   FiBarChart2,
@@ -79,7 +78,6 @@ function DesktopSidebar() {
         <p className="mb-1 mt-4 px-3 text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
           Explore
         </p>
-        {navLink('/download', 'Download', FiDownload, location.pathname === '/download')}
         {navLink('/governance', 'Governance', FiCheckSquare, location.pathname === '/governance')}
         {navLink('/refund-requests', 'Refund requests', FiRefreshCw, location.pathname === '/refund-requests')}
         {navLink('/analytics', 'Analytics', FiBarChart2, location.pathname === '/analytics')}
