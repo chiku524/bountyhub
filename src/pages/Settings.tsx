@@ -1,14 +1,18 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { api } from '../utils/api'
 import { config } from '../utils/config'
 import { useAuth } from '../contexts/AuthProvider'
 import { useToast } from '../contexts/ToastContext'
 import type { User } from '../types'
-import { FiUser, FiLink, FiMail, FiLock, FiSave, FiCheck } from 'react-icons/fi'
+import { FiUser, FiLink, FiMail, FiLock, FiSave, FiCheck, FiMonitor } from 'react-icons/fi'
 import { PageContainer } from '../components/PageContainer'
 import { PageHeader } from '../components/PageHeader'
 import { LoadingSpinner } from '../components/LoadingSpinner'
+import { isDesktopApp } from '../utils/desktop'
+import { useDesktopUpdate } from '../contexts/DesktopUpdateContext'
+
+type SettingsTab = 'profile' | 'social' | 'account' | 'security' | 'desktop'
 
 interface ProfileData {
   firstName: string
@@ -40,13 +44,16 @@ interface PasswordData {
 export default function Settings() {
   const { user: authUser, loading: authLoading, refreshUser } = useAuth()
   const toast = useToast()
+  const desktopUpdate = useDesktopUpdate()
+  const isDesktop = isDesktopApp()
   const [searchParams, setSearchParams] = useSearchParams()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<'profile' | 'social' | 'account' | 'security'>('profile')
+  const [activeTab, setActiveTab] = useState<SettingsTab>('profile')
+  const [nativeAppVersion, setNativeAppVersion] = useState('')
   
   const [profileData, setProfileData] = useState<ProfileData>({
     firstName: '',
@@ -83,10 +90,29 @@ export default function Settings() {
   // Sync active tab with URL so /settings?tab=account opens Account tab
   useEffect(() => {
     const tabParam = searchParams.get('tab')
-    if (tabParam && ['profile', 'social', 'account', 'security'].includes(tabParam)) {
-      setActiveTab(tabParam as 'profile' | 'social' | 'account' | 'security')
+    const allowed: SettingsTab[] = isDesktopApp()
+      ? ['profile', 'social', 'account', 'security', 'desktop']
+      : ['profile', 'social', 'account', 'security']
+    if (tabParam && allowed.includes(tabParam as SettingsTab)) {
+      setActiveTab(tabParam as SettingsTab)
     }
   }, [searchParams])
+
+  useEffect(() => {
+    if (!isDesktop || activeTab !== 'desktop') return
+    let cancelled = false
+    import('@tauri-apps/api/tauri')
+      .then(({ invoke }) => invoke<string>('get_app_version'))
+      .then((v) => {
+        if (!cancelled) setNativeAppVersion(v)
+      })
+      .catch(() => {
+        if (!cancelled) setNativeAppVersion('')
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [activeTab, isDesktop])
 
   // Derive GitHub state from auth user; if me didn't return githubUsername (e.g. old API), fetch profile once
   useEffect(() => {
@@ -267,7 +293,11 @@ export default function Settings() {
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
+    if (activeTab === 'desktop') {
+      return
+    }
+
     // If we're on the security tab, handle password change
     if (activeTab === 'security') {
       await handlePasswordChange()
@@ -354,6 +384,38 @@ export default function Settings() {
     }))
   }
 
+  const tabs = useMemo(() => {
+    const base: { id: SettingsTab; label: string; icon: typeof FiUser }[] = [
+      { id: 'profile', label: 'Profile', icon: FiUser },
+      { id: 'social', label: 'Social Links', icon: FiLink },
+      { id: 'account', label: 'Account', icon: FiMail },
+      { id: 'security', label: 'Security', icon: FiLock },
+    ]
+    if (isDesktop) {
+      base.push({ id: 'desktop', label: 'Desktop app', icon: FiMonitor })
+    }
+    return base
+  }, [isDesktop])
+
+  const selectTab = (tabId: SettingsTab) => {
+    setActiveTab(tabId)
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        next.set('tab', tabId)
+        return next
+      },
+      { replace: true },
+    )
+  }
+
+  const handleDesktopCheckUpdates = () => {
+    desktopUpdate?.setPhase('checking')
+    desktopUpdate?.retryUpdate()
+  }
+
+  const releasesUrl = import.meta.env.VITE_GITHUB_RELEASES_URL ?? 'https://github.com/chiku524/bountyhub/releases/latest'
+
   if (loading) {
     return (
       <PageContainer maxWidth="narrow">
@@ -365,13 +427,6 @@ export default function Settings() {
       </PageContainer>
     )
   }
-
-  const tabs = [
-    { id: 'profile', label: 'Profile', icon: FiUser },
-    { id: 'social', label: 'Social Links', icon: FiLink },
-    { id: 'account', label: 'Account', icon: FiMail },
-    { id: 'security', label: 'Security', icon: FiLock },
-  ]
 
   return (
     <PageContainer maxWidth="narrow">
@@ -397,7 +452,8 @@ export default function Settings() {
             {tabs.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                type="button"
+                onClick={() => selectTab(tab.id)}
                 className={`flex items-center gap-2 px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium transition-colors ${
                   activeTab === tab.id
                     ? 'text-violet-600 dark:text-violet-400 border-b-2 border-violet-600 dark:border-violet-400'
@@ -743,6 +799,46 @@ export default function Settings() {
                 </div>
               )}
 
+              {activeTab === 'desktop' && isDesktop && (
+                <div className="space-y-6">
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                    The desktop app checks for updates periodically while it is open. You can also check manually from the
+                    tray menu, the menu bar, or here.
+                  </p>
+                  <dl className="space-y-4 text-sm">
+                    <div>
+                      <dt className="font-medium text-violet-600 dark:text-violet-300">Native app version</dt>
+                      <dd className="mt-1 text-neutral-800 dark:text-neutral-200 tabular-nums">
+                        {nativeAppVersion || '—'}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium text-violet-600 dark:text-violet-300">Bundled UI build</dt>
+                      <dd className="mt-1 text-neutral-800 dark:text-neutral-200 tabular-nums">
+                        {import.meta.env.VITE_APP_VERSION || import.meta.env.MODE}
+                      </dd>
+                    </div>
+                  </dl>
+                  <div className="flex flex-wrap gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={handleDesktopCheckUpdates}
+                      className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-violet-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
+                    >
+                      Check for updates
+                    </button>
+                    <a
+                      href={releasesUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center rounded-lg border border-violet-500/40 px-4 py-2 text-sm font-medium text-violet-700 transition hover:bg-violet-500/10 dark:text-violet-300 dark:hover:bg-violet-500/15"
+                    >
+                      Release notes
+                    </a>
+                  </div>
+                </div>
+              )}
+
               {activeTab === 'security' && (
                 <div className="space-y-6">
                   <div>
@@ -787,21 +883,22 @@ export default function Settings() {
                 </div>
               )}
 
-              <div className="flex justify-end pt-6 border-t border-violet-500/30">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="flex items-center gap-2 px-6 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <FiSave className="w-5 h-5" />
-                  {saving 
-                    ? 'Saving...' 
-                    : activeTab === 'security' 
-                      ? 'Change Password' 
-                      : 'Save Changes'
-                  }
-                </button>
-              </div>
+              {activeTab !== 'desktop' && (
+                <div className="flex justify-end pt-6 border-t border-violet-500/30">
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="flex items-center gap-2 px-6 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <FiSave className="w-5 h-5" />
+                    {saving
+                      ? 'Saving...'
+                      : activeTab === 'security'
+                        ? 'Change Password'
+                        : 'Save Changes'}
+                  </button>
+                </div>
+              )}
             </form>
           </div>
         </div>

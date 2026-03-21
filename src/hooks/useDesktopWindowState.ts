@@ -33,9 +33,9 @@ export function useDesktopWindowState(isMainApp: boolean) {
 
     async function init() {
       try {
-        const { getCurrentWindow } = await import('@tauri-apps/api/window')
+        const { getCurrent } = await import('@tauri-apps/api/window')
         const { invoke } = await import('@tauri-apps/api/tauri')
-        const win = getCurrentWindow()
+        const win = getCurrent()
         const w = win as unknown as { setMinSize?: (size: { type: string; width: number; height: number }) => Promise<void> }
 
         if (saved) {

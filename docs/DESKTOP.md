@@ -50,9 +50,16 @@ To enable signed updates (required for the updater to install new versions):
 
 The first `npm run desktop` or `npm run desktop:build` will compile the Rust side (may take a few minutes).
 
+## Single instance & window menu
+
+- **Second launch:** If BountyHub is already running, starting it again does not open a duplicate — the existing app is brought to the foreground (localhost `127.0.0.1:45287`). The tray icon and **File / View / Help** menus remain available; **View → Reload** is a full page reload if the UI gets stuck. **File → About BountyHub** and **Help → About** both open the in-app About dialog.
+- **Preferences:** **File → Preferences…** and **Cmd/Ctrl+,** open **Settings** on the **Desktop app** tab (`/settings?tab=desktop`).
+- **Developer tools (debug builds only):** **View → Toggle Developer Tools** and **Cmd/Ctrl+Shift+I** (when running `npm run desktop` / Vite dev) open the WebView inspector. These are omitted from release installers.
+- **Settings:** In the desktop app, **Settings → Desktop app** shows the native and bundled UI versions, a **Check for updates** action, and a link to release notes.
+
 ## How it works
 
-- **Development:** Tauri opens a window that loads `http://localhost:3000` (your Vite dev server). Start the API separately with `npm run dev:api` if you need the backend.
+- **Development:** Tauri opens a window that loads the Vite dev URL from `src-tauri/tauri.conf.json` (default `http://localhost:5173`). Start the API separately with `npm run dev:api` if you need the backend.
 - **Production build:** Runs `npm run build`, then bundles the `dist/` output into a native executable and installer. The app talks to your deployed API (`https://api.bountyhub.tech`) by default.
 
 ## Why Tauri instead of Electron?

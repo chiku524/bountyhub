@@ -22,7 +22,8 @@ export const config = {
   // App Configuration
   app: {
     name: 'BountyHub',
-    version: '1.0.0',
+    /** Bundled web app version (from package.json at build time). */
+    version: import.meta.env.VITE_APP_VERSION || import.meta.env.MODE,
     environment: import.meta.env.MODE,
   },
   

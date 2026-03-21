@@ -4,11 +4,13 @@ import { isDesktopApp } from '../utils/desktop'
 
 const QUIT_SHORTCUT = 'CommandOrControl+Q'
 const PREFS_SHORTCUT = 'CommandOrControl+,'
+const DEVTOOLS_SHORTCUT = 'CommandOrControl+Shift+I'
 
 /**
  * Registers global keyboard shortcuts for the desktop app:
  * - Cmd/Ctrl+Q: Quit
- * - Cmd/Ctrl+,: Open Preferences (Settings)
+ * - Cmd/Ctrl+,: Open Settings (Desktop app tab)
+ * - Cmd/Ctrl+Shift+I (dev only): Toggle developer tools
  */
 export function useDesktopShortcuts() {
   const navigate = useNavigate()
@@ -23,7 +25,12 @@ export function useDesktopShortcuts() {
         register(QUIT_SHORTCUT, () => {
           import('@tauri-apps/api/process').then(({ exit }) => exit(0))
         }).catch(() => {})
-        register(PREFS_SHORTCUT, () => navigate('/settings')).catch(() => {})
+        register(PREFS_SHORTCUT, () => navigate('/settings?tab=desktop')).catch(() => {})
+        if (import.meta.env.DEV) {
+          register(DEVTOOLS_SHORTCUT, () => {
+            import('@tauri-apps/api/tauri').then(({ invoke }) => invoke('open_devtools').catch(() => {}))
+          }).catch(() => {})
+        }
       })
       .catch((e) => import.meta.env.DEV && console.debug('[useDesktopShortcuts]', e))
 
@@ -32,6 +39,9 @@ export function useDesktopShortcuts() {
       if (unreg) {
         unreg(QUIT_SHORTCUT).catch(() => {})
         unreg(PREFS_SHORTCUT).catch(() => {})
+        if (import.meta.env.DEV) {
+          unreg(DEVTOOLS_SHORTCUT).catch(() => {})
+        }
       }
     }
   }, [navigate])

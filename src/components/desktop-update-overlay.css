@@ -1,0 +1,217 @@
+/* Full-screen update overlay — dice.express-style card + spinner */
+.desktop-update-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99998;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: desktopUpdateOverlayFadeIn 0.3s ease-out;
+}
+
+@keyframes desktopUpdateOverlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.desktop-update-overlay__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(
+    135deg,
+    rgba(12, 16, 28, 0.95) 0%,
+    rgba(8, 12, 22, 0.98) 100%
+  );
+  padding: 2.5rem 2.5rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.desktop-update-overlay__symbol {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.25) 0%,
+    rgba(20, 184, 166, 0.2) 100%
+  );
+  border-radius: 1rem;
+  animation: desktopUpdateSymbolFadeIn 0.5s ease-out;
+}
+
+.desktop-update-overlay__symbol img {
+  width: 56px;
+  height: 56px;
+  display: block;
+}
+
+@keyframes desktopUpdateSymbolFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.desktop-update-overlay__name {
+  margin-top: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, #8b5cf6, #14b8a6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: desktopUpdateNameFadeIn 0.4s ease-out 0.1s both;
+}
+
+@keyframes desktopUpdateNameFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.desktop-update-overlay__spinner {
+  width: 28px;
+  height: 28px;
+  margin-top: 1rem;
+  border: 2px solid #8b5cf6;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: desktopUpdateSpinner 0.8s linear infinite;
+}
+
+@keyframes desktopUpdateSpinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.desktop-update-overlay__message {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  max-width: 280px;
+  animation: desktopUpdateMessageFadeIn 0.4s ease-out 0.2s both;
+}
+
+@keyframes desktopUpdateMessageFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Error state uses same shell */
+.desktop-update-overlay__card--error {
+  max-width: 360px;
+  padding: 2rem 1.75rem;
+}
+
+.desktop-update-overlay__error-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.desktop-update-overlay__error-title {
+  margin-top: 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.desktop-update-overlay__error-detail {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.45);
+  word-break: break-word;
+  text-align: center;
+}
+
+.desktop-update-overlay__actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.desktop-update-overlay__btn {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.desktop-update-overlay__btn--secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.desktop-update-overlay__btn--secondary:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.desktop-update-overlay__btn--primary {
+  background: linear-gradient(90deg, #7c3aed, #0d9488);
+  color: #fff;
+}
+
+.desktop-update-overlay__btn--primary:hover {
+  filter: brightness(1.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desktop-update-overlay {
+    animation: none;
+  }
+
+  .desktop-update-overlay__symbol,
+  .desktop-update-overlay__name,
+  .desktop-update-overlay__message {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .desktop-update-overlay__spinner {
+    animation: none;
+    border-color: rgba(139, 92, 246, 0.5);
+    border-top-color: transparent;
+  }
+}

@@ -243,6 +243,20 @@
   animation: intro-slide-in 0.35s ease-out 0.1s both;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 @layer base {
   html {
     font-family: 'Inter', system-ui, sans-serif;
@@ -262,6 +276,11 @@
   a:focus-visible,
   button:focus-visible,
   [tabindex="0"]:focus-visible {
+    @apply outline-2 outline-offset-2 outline-indigo-500;
+  }
+
+  /* Skip-to-content target: tabIndex={-1} so show ring when focused programmatically */
+  #main-content:focus-visible {
     @apply outline-2 outline-offset-2 outline-indigo-500;
   }
 

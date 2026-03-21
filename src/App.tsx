@@ -121,7 +121,11 @@ function AppContent() {
   const skipUpdaterOnSplash = isDesktop && location.pathname === '/'
   useDesktopUpdater(
     desktopUpdate && !skipUpdaterOnSplash
-      ? { setPhase: desktopUpdate.setPhase, registerRetry: desktopUpdate.registerRetry }
+      ? {
+          setPhase: desktopUpdate.setPhase,
+          setPendingUpdateVersion: desktopUpdate.setPendingUpdateVersion,
+          registerRetry: desktopUpdate.registerRetry,
+        }
       : null,
   )
 

@@ -20,8 +20,8 @@ export function useDesktopWindowSize(
     let cancelled = false
     async function expandToFull() {
       try {
-        const { getCurrentWindow } = await import('@tauri-apps/api/window')
-        const win = getCurrentWindow()
+        const { getCurrent } = await import('@tauri-apps/api/window')
+        const win = getCurrent()
         if (cancelled) return
         await win.setSize({ type: 'Logical', width: FULL_WIDTH, height: FULL_HEIGHT })
         const w = win as unknown as { setMinSize?: (size: { type: string; width: number; height: number }) => Promise<void> }

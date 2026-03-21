@@ -26,8 +26,16 @@ export function useDesktopMenuEvents() {
     import('@tauri-apps/api/event')
       .then((event) => {
         event.listen('menu-about', () => setAboutOpen(true)).then((u) => unlistensRef.current.push(u))
-        event.listen('menu-preferences', () => navigate('/settings')).then((u) => unlistensRef.current.push(u))
+        event.listen('menu-preferences', () => navigate('/settings?tab=desktop')).then((u) => unlistensRef.current.push(u))
         event.listen('menu-check-updates', () => handleCheckUpdates()).then((u) => unlistensRef.current.push(u))
+        event.listen('menu-reload', () => window.location.reload()).then((u) => unlistensRef.current.push(u))
+        event
+          .listen('instance-focus', () => {
+            import('@tauri-apps/api/tauri')
+              .then(({ invoke }) => invoke('focus_bountyhub'))
+              .catch(() => {})
+          })
+          .then((u) => unlistensRef.current.push(u))
       })
       .catch((e) => import.meta.env.DEV && console.debug('[useDesktopMenuEvents]', e))
     return () => unlistensRef.current.forEach((fn) => fn())

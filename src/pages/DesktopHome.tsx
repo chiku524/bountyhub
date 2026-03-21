@@ -7,7 +7,6 @@ import { isDesktopApp } from '../utils/desktop'
 
 const INTRO_DURATION_MS = 2400
 const TRANSFORM_DURATION_MS = 650
-const PORTAL_APPEAR_MS = 400
 const WELCOME_BACK_MS = 400
 const DESKTOP_INTRO_SEEN_KEY = 'desktop-intro-seen'
 
@@ -38,8 +37,8 @@ export default function DesktopHome() {
   useEffect(() => {
     if (!isDesktopApp()) return
     let cancelled = false
-    import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
-      if (!cancelled) getCurrentWindow().center()
+    import('@tauri-apps/api/window').then(({ getCurrent }) => {
+      if (!cancelled) getCurrent().center()
     }).catch((e) => { if (import.meta.env.DEV) console.debug('[DesktopHome] initial center', e) })
     return () => { cancelled = true }
   }, [])
@@ -52,9 +51,11 @@ export default function DesktopHome() {
     let cancelled = false
     async function setWindowSizeAndCenter(width: number, height: number) {
       try {
-        const { getCurrentWindow } = await import('@tauri-apps/api/window')
-        const win = getCurrentWindow()
+        const { getCurrent } = await import('@tauri-apps/api/window')
+        if (cancelled) return
+        const win = getCurrent()
         await win.setSize({ type: 'Logical', width, height })
+        if (cancelled) return
         await win.center()
       } catch (e) {
         if (import.meta.env.DEV) console.debug('[DesktopHome] setSize/center', e)
@@ -62,7 +63,7 @@ export default function DesktopHome() {
     }
 
     if (phase === 'intro' || phase === 'transform') {
-      setWindowSizeAndCenter(INTRO_WINDOW_WIDTH, INTRO_WINDOW_HEIGHT)
+      void setWindowSizeAndCenter(INTRO_WINDOW_WIDTH, INTRO_WINDOW_HEIGHT)
     }
     return () => { cancelled = true }
   }, [phase])
@@ -96,8 +97,8 @@ export default function DesktopHome() {
     let cancelled = false
     async function expand() {
       try {
-        const { getCurrentWindow } = await import('@tauri-apps/api/window')
-        const win = getCurrentWindow()
+        const { getCurrent } = await import('@tauri-apps/api/window')
+        const win = getCurrent()
         await win.setSize({ type: 'Logical', width: FULL_WINDOW_WIDTH, height: FULL_WINDOW_HEIGHT })
         await win.center()
       } catch (e) {
