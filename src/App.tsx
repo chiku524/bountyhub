@@ -88,6 +88,9 @@ function AppContent() {
   const isLegalPage = location.pathname === '/privacy' || location.pathname === '/terms'
   const isDownloadPage = location.pathname === '/download'
   const isDesktop = isDesktopApp()
+  const isLoginOrSignupOrRoot =
+    location.pathname === '/' || location.pathname === '/login' || location.pathname === '/signup'
+  const showDesktopShell = isDesktop && !isLoginOrSignupOrRoot
 
   // Determine which navbar to show: HomeNav on home and download (web only; desktop has its own portal)
   const isPublicPage = isHomePage || isAuthPage || isLegalPage || isDownloadPage
@@ -154,8 +157,9 @@ function AppContent() {
           <TopNav />
         ) : null)}
         
-        {/* Layout - desktop uses VibeMiner-style shell (240px sidebar + main) */}
+        {/* Layout - desktop: shell (sidebar) on app pages; no sidebar on /, /login, /signup */}
         {isDesktop ? (
+          showDesktopShell ? (
           <DesktopShell>
             <Layout showNav={false}>
               <ScrollToTop />
@@ -216,6 +220,66 @@ function AppContent() {
               })()}
             </Layout>
           </DesktopShell>
+          ) : (
+            <Layout showNav={false}>
+              <ScrollToTop />
+              <PageMetadata />
+              {(() => {
+                const routes = (
+                  <Suspense fallback={<RouteFallback />}>
+                    <Routes>
+                      <Route path="/" element={<RootHomeElement />} />
+                      <Route path="/login" element={<Login />} />
+                      <Route path="/signup" element={<Signup />} />
+                      <Route path="/profile" element={<Profile />} />
+                      <Route path="/profile/activity" element={<ProfileActivity />} />
+                      <Route path="/profile/posts" element={<ProfilePosts />} />
+                      <Route path="/profile/bookmarks" element={<ProfileBookmarks />} />
+                      <Route path="/community" element={<Community />} />
+                      <Route path="/chat" element={<Chat />} />
+                      <Route path="/governance" element={<Governance />} />
+                      <Route path="/analytics" element={<Analytics />} />
+                      <Route path="/wallet" element={<Wallet />} />
+                      <Route path="/settings" element={<Settings />} />
+                      <Route path="/posts/create" element={<CreatePost />} />
+                      <Route path="/posts/:postId" element={<PostDetail />} />
+                      <Route path="/users/:username" element={<UserProfile />} />
+                      <Route path="/users/:username/posts" element={<UserPosts />} />
+                      <Route path="/download" element={<Download />} />
+                      <Route path="/downloads" element={<Navigate to="/download" replace />} />
+                      <Route path="/:username" element={<UserProfile />} />
+                      <Route path="/transactions" element={<Transactions />} />
+                      <Route path="/refund-requests" element={<RefundRequests />} />
+                      <Route path="/docs" element={<DocsSingle />} />
+                      <Route path="/docs/platform" element={<Navigate to="/docs#platform-features" replace />} />
+                      <Route path="/docs/user-guide" element={<Navigate to="/docs#user-guide" replace />} />
+                      <Route path="/docs/developer-guide" element={<Navigate to="/docs#developer-guide" replace />} />
+                      <Route path="/docs/api-reference" element={<Navigate to="/docs#api-reference" replace />} />
+                      <Route path="/docs/deployment-guide" element={<Navigate to="/docs#deployment" replace />} />
+                      <Route path="/docs/legal" element={<Navigate to="/docs#legal" replace />} />
+                      <Route path="/docs/refund-system" element={<Navigate to="/docs#refund-system" replace />} />
+                      <Route path="/privacy" element={<Privacy />} />
+                      <Route path="/terms" element={<Terms />} />
+                      <Route path="/admin" element={<Admin />} />
+                      <Route path="/bug-bounty/campaigns" element={<BugBountyCampaigns />} />
+                      <Route path="/bug-bounty/campaigns/create" element={<BugBountyCampaignCreate />} />
+                      <Route path="/bug-bounty/campaigns/:id" element={<BugBountyCampaignDetail />} />
+                      <Route path="/bug-bounty/campaigns/:id/submit" element={<BugBountySubmit />} />
+                      <Route path="/repositories" element={<Repositories />} />
+                      <Route path="/repositories/:id" element={<RepositoryDetail />} />
+                      <Route path="/contributions" element={<Contributions />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </Suspense>
+                )
+                return location.pathname === '/docs' ? (
+                  <div className="flex-1 min-h-0 min-w-0 flex flex-col overflow-hidden">
+                    {routes}
+                  </div>
+                ) : routes
+              })()}
+            </Layout>
+          )
         ) : (
           <Layout showNav={showAuthenticatedNav}>
             <ScrollToTop />

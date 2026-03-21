@@ -8,6 +8,13 @@ import {
   FiShield,
   FiEdit3,
   FiUser,
+  FiMessageCircle,
+  FiDownload,
+  FiCheckSquare,
+  FiRefreshCw,
+  FiBarChart2,
+  FiGithub,
+  FiFileText,
 } from 'react-icons/fi'
 import { useAuth } from '../contexts/AuthProvider'
 import { isDesktopApp } from '../utils/desktop'
@@ -60,14 +67,27 @@ function DesktopSidebar() {
           App
         </span>
       </div>
-      <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 py-4">
+      <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto scrollbar-hide px-3 py-4">
         <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
           Main
         </p>
         {navLink('/community', 'Community', FiUsers, location.pathname === '/community')}
-        {navLink('/wallet', 'Wallet', FiCreditCard, location.pathname === '/wallet')}
+        {navLink('/chat', 'Team Hub', FiMessageCircle, location.pathname === '/chat')}
         {navLink('/posts/create', 'Create post', FiEdit3, location.pathname === '/posts/create')}
         {navLink('/profile', 'Profile', FiUser, location.pathname.startsWith('/profile'))}
+        {navLink('/wallet', 'Wallet', FiCreditCard, location.pathname === '/wallet')}
+        <p className="mb-1 mt-4 px-3 text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
+          Explore
+        </p>
+        {navLink('/download', 'Download', FiDownload, location.pathname === '/download')}
+        {navLink('/governance', 'Governance', FiCheckSquare, location.pathname === '/governance')}
+        {navLink('/refund-requests', 'Refund requests', FiRefreshCw, location.pathname === '/refund-requests')}
+        {navLink('/analytics', 'Analytics', FiBarChart2, location.pathname === '/analytics')}
+        {navLink('/bug-bounty/campaigns', 'Bug bounty', FiShield, location.pathname.startsWith('/bug-bounty'))}
+        {navLink('/repositories', 'Repositories', FiGithub, location.pathname.startsWith('/repositories'))}
+        {navLink('/contributions', 'Contributions', FiAward, location.pathname === '/contributions')}
+        {navLink('/docs', 'Docs', FiFileText, location.pathname.startsWith('/docs'))}
+        {navLink('/transactions', 'Transactions', FiCreditCard, location.pathname === '/transactions')}
         <p className="mb-1 mt-4 px-3 text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
           Settings
         </p>
@@ -109,7 +129,7 @@ function DesktopShellInner({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen bg-neutral-950">
       <DesktopSidebar />
-      <main className="min-h-screen flex-1 overflow-auto" style={{ marginLeft: SIDEBAR_WIDTH }}>
+      <main className="min-h-screen flex-1 overflow-auto scrollbar-hide" style={{ marginLeft: SIDEBAR_WIDTH }}>
         {children}
       </main>
     </div>

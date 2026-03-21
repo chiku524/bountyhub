@@ -131,6 +131,19 @@
   }
 }
 
+/* Desktop app: hide scrollbars everywhere while keeping content scrollable */
+[data-desktop='true'] .overflow-auto::-webkit-scrollbar,
+[data-desktop='true'] .overflow-y-auto::-webkit-scrollbar,
+[data-desktop='true'] .overflow-x-auto::-webkit-scrollbar {
+  display: none;
+}
+[data-desktop='true'] .overflow-auto,
+[data-desktop='true'] .overflow-y-auto,
+[data-desktop='true'] .overflow-x-auto {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
 /* Scroll-animated elements: start invisible until animation runs (prevents flicker) */
 [data-animate]:not([class*="animate-"]) {
   opacity: 0;
