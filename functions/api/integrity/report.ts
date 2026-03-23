@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { getCookie } from 'hono/cookie'
 import { createDb } from '../../../src/utils/db'
 import { getUserIdFromSession } from '../../../src/utils/auth'
-import { posts, answers, comments, users } from '../../../drizzle/schema'
+import { posts, answers, comments } from '../../../drizzle/schema'
 import { eq } from 'drizzle-orm'
 import { updateReputation } from '../../../src/utils/reputation'
 
@@ -78,20 +78,6 @@ app.post(async (c) => {
     if (contentAuthorId === userId) {
       return c.json({ error: 'Cannot report your own content' }, 400)
     }
-
-    // Get reporter username
-    const reporter = await db.select({ username: users.username }).from(users).where(eq(users.id, userId)).limit(1)
-    const reporterUsername = reporter[0]?.username || 'Unknown'
-
-    // Log the report (you might want to create a reports table for this)
-    console.log(`Content reported by ${reporterUsername}:`, {
-      contentType,
-      contentId,
-      reason,
-      description,
-      reporterId: userId,
-      contentAuthorId
-    })
 
     // Deduct reputation from the content author
     if (contentAuthorId) {

@@ -23,7 +23,6 @@ async function handleConnect(c: any) {
   const sessionCookie = getCookie(c, 'session')
 
   if (!sessionCookie) {
-    console.log('No session cookie found')
     return c.json({ error: 'Not authenticated' }, 401)
   }
 
@@ -31,7 +30,6 @@ async function handleConnect(c: any) {
   const userId = await getUserIdFromSession(sessionCookie, db)
 
   if (!userId) {
-    console.log('Invalid session')
     return c.json({ error: 'Invalid session' }, 401)
   }
 
@@ -39,12 +37,10 @@ async function handleConnect(c: any) {
   const user = await db.select().from(users).where(eq(users.id, userId)).limit(1)
 
   if (user.length === 0) {
-    console.log('User not found:', userId)
     return c.json({ error: 'User not found' }, 404)
   }
 
   if (user[0].githubId) {
-    console.log('GitHub already connected for user:', userId)
     return c.json({ error: 'GitHub account already connected' }, 400)
   }
 
@@ -73,14 +69,12 @@ async function handleConnect(c: any) {
 
   const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}`
 
-  console.log('GitHub connect URL generated successfully')
   return c.json({ redirectUrl: githubAuthUrl })
 }
 
 // Connect existing account to GitHub - POST (preferred) and GET (for proxies/redirects that strip method)
 app.post('/connect', async (c) => {
   try {
-    console.log('GitHub connect endpoint called', { method: c.req.method, path: c.req.path, url: c.req.url })
     return await handleConnect(c)
   } catch (error: any) {
     console.error('GitHub connect error:', { message: error?.message, stack: error?.stack, name: error?.name, error })
@@ -89,7 +83,6 @@ app.post('/connect', async (c) => {
 })
 app.get('/connect', async (c) => {
   try {
-    console.log('GitHub connect GET called', { path: c.req.path, url: c.req.url })
     return await handleConnect(c)
   } catch (error: any) {
     console.error('GitHub connect GET error:', { message: error?.message, stack: error?.stack })
@@ -149,8 +142,7 @@ app.post('/disconnect', async (c) => {
           updatedAt: new Date()
         })
         .where(eq(users.id, userId))
-      
-      console.log('GitHub account disconnected successfully for user:', userId)
+
       return c.json({ success: true, message: 'GitHub account disconnected successfully' })
     } catch (dbError: any) {
       console.error('Database error during disconnect:', {
@@ -238,15 +230,7 @@ app.get('/', async (c) => {
   }
   
   setCookie(c, 'github_oauth_state', state, cookieOptions)
-  
-  console.log('Setting state cookie:', {
-    state: state.substring(0, 10) + '...',
-    domain: cookieOptions.domain,
-    sameSite: cookieOptions.sameSite,
-    secure: cookieOptions.secure,
-    path: cookieOptions.path
-  })
-  
+
   const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}`
   
   return c.redirect(githubAuthUrl)

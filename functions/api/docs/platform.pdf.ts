@@ -2,11 +2,6 @@ import { PDFService } from '../../../src/utils/pdf';
 
 export async function onRequest(context: any) {
   try {
-    console.log('Platform PDF: Starting PDF generation');
-    console.log('Platform PDF: Environment variables:', {
-      HTML2PDF_API_KEY: context.env.HTML2PDF_API_KEY ? 'Present' : 'Missing'
-    });
-
     const platformContent = `
       <div class="section">
         <h2>Platform Overview</h2>
@@ -45,7 +40,6 @@ export async function onRequest(context: any) {
       </div>
     `;
 
-    console.log('Platform PDF: Calling PDFService.createSimplePDF');
     const pdfBuffer = await PDFService.createSimplePDF(
       "Platform Documentation - bountyhub",
       platformContent,
@@ -61,8 +55,6 @@ export async function onRequest(context: any) {
       context.env.HTML2PDF_API_KEY
     );
 
-    console.log('Platform PDF: PDF generated successfully, buffer size:', pdfBuffer.length);
-
     return new Response(pdfBuffer, {
       headers: {
         "Content-Type": "application/pdf",
@@ -70,13 +62,11 @@ export async function onRequest(context: any) {
       },
     });
   } catch (error) {
-    console.error("Platform PDF: Error generating PDF:", error);
-    console.error("Platform PDF: Error stack:", error instanceof Error ? error.stack : 'No stack trace');
-    return new Response(JSON.stringify({ 
-      error: "Failed to generate PDF", 
+    console.error('Platform PDF: Error generating PDF:', error)
+    return new Response(JSON.stringify({
+      error: 'Failed to generate PDF',
       details: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined
-    }), { 
+    }), {
       status: 500,
       headers: { "Content-Type": "application/json" }
     });

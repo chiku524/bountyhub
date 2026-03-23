@@ -20,8 +20,6 @@ app.get(async (c) => {
   }
 
   try {
-    console.log(`Using custom RPC endpoint: ${rpcUrl}`)
-    
     const response = await fetch(rpcUrl, {
       method: 'POST',
       headers: {
@@ -49,7 +47,6 @@ app.get(async (c) => {
       throw new Error('Invalid response format: no blockhash found')
     }
 
-    console.log(`Successfully got blockhash from custom RPC: ${blockhash}`)
     return c.json({ 
       success: true, 
       blockhash,

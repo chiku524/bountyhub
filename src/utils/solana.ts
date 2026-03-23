@@ -69,57 +69,36 @@ export class SolanaService {
       
       // Check if we're in a backend environment with env parameter
       if (env && env.SOLANA_WALLET_PRIVATE_KEY) {
-        console.log('Loading platform wallet from backend environment variables')
         privateKeyString = env.SOLANA_WALLET_PRIVATE_KEY
       } else if (typeof import.meta !== 'undefined' && (import.meta as any).env) {
-        // Frontend environment - type guard for Vite-specific import.meta.env
-        console.log('Loading platform wallet from frontend environment variables')
         privateKeyString = (import.meta as any).env?.VITE_PLATFORM_PRIVATE_KEY
       }
-      
-      console.log('Private key string available:', !!privateKeyString)
-      console.log('Private key string length:', privateKeyString?.length)
-      console.log('Private key string preview:', privateKeyString?.substring(0, 20) + '...')
-      
+
       if (!privateKeyString) {
         throw new Error('Platform private key not configured')
       }
 
-      console.log('Decoding private key...')
-      // The private key is stored in base64 format, not base58
       let privateKeyBytes: Uint8Array
-      
-      // Use Buffer in Node.js/Cloudflare Workers environment, atob in browser
+
       if (typeof Buffer !== 'undefined') {
-        // Node.js/Cloudflare Workers environment
         privateKeyBytes = new Uint8Array(Buffer.from(privateKeyString, 'base64'))
-        console.log('Decoded using Buffer, length:', privateKeyBytes.length)
       } else {
-        // Browser environment
         const decodedPrivateKey = atob(privateKeyString)
         privateKeyBytes = new Uint8Array(decodedPrivateKey.length)
         for (let i = 0; i < decodedPrivateKey.length; i++) {
           privateKeyBytes[i] = decodedPrivateKey.charCodeAt(i)
         }
-        console.log('Decoded using atob, length:', privateKeyBytes.length)
       }
-      
-      console.log('Private key bytes length:', privateKeyBytes.length)
-      console.log('Expected length for Solana keypair: 64 bytes')
-      
+
       if (privateKeyBytes.length !== 64) {
         throw new Error(`Invalid private key length: ${privateKeyBytes.length} bytes (expected 64)`)
       }
-      
-      console.log('Private key decoded, creating keypair...')
+
       try {
         platformKeypair = Keypair.fromSecretKey(privateKeyBytes)
-        console.log('Platform wallet loaded successfully')
-        console.log('Platform wallet public key:', platformKeypair.publicKey.toString())
         return platformKeypair
       } catch (keypairError) {
         console.error('Keypair creation failed:', keypairError)
-        console.error('Private key bytes (first 10):', Array.from(privateKeyBytes.slice(0, 10)))
         throw new Error(`Failed to create keypair: ${keypairError}`)
       }
     } catch (error) {
@@ -166,10 +145,8 @@ export class SolanaService {
       return Number(tokenAccount.amount) / Math.pow(10, 9) // BBUX has 9 decimals
     } catch (error: any) {
       // Handle specific error cases
-      if (error.message?.includes('TokenAccountNotFoundError') || 
+      if (error.message?.includes('TokenAccountNotFoundError') ||
           error.message?.includes('Account does not exist')) {
-        // User doesn't have a BBUX token account yet - this is normal for new users
-        console.log(`User ${userAddress} doesn't have a BBUX token account yet`)
         return 0
       }
       
@@ -336,8 +313,6 @@ export class SolanaService {
     env?: any
   ): Promise<{ success: boolean; signature?: string; error?: string }> {
     try {
-      console.log(`Attempting to send ${amount} SOL to ${userAddress}`)
-      
       if (!this.isValidSolanaAddress(userAddress)) {
         return { success: false, error: 'Invalid user address' }
       }
@@ -345,8 +320,6 @@ export class SolanaService {
       const platformKeypair = await this.loadPlatformWallet(env)
       const userPublicKey = new PublicKey(userAddress)
       const platformPublicKey = platformKeypair.publicKey
-
-      console.log(`Platform wallet address: ${platformPublicKey.toString()}`)
 
       // Create connection based on environment
       let connection: Connection
@@ -361,16 +334,12 @@ export class SolanaService {
       // Check platform wallet balance
       const platformBalance = await connection.getBalance(platformPublicKey)
       const platformBalanceInSol = platformBalance / LAMPORTS_PER_SOL
-      console.log(`Platform wallet balance: ${platformBalanceInSol} SOL`)
-      
+
       if (platformBalanceInSol < amount) {
         return { success: false, error: `Insufficient platform wallet balance. Available: ${platformBalanceInSol} SOL, Required: ${amount} SOL` }
       }
 
-      // Get fresh blockhash
-      console.log('Getting fresh blockhash...')
       const { blockhash } = await connection.getLatestBlockhash('finalized')
-      console.log(`Fresh blockhash: ${blockhash}`)
 
       // Create transfer transaction
       const transaction = new Transaction().add(
@@ -385,12 +354,7 @@ export class SolanaService {
       transaction.recentBlockhash = blockhash
       transaction.feePayer = platformPublicKey
 
-      console.log('Transaction created, signing...')
-
-      // Sign the transaction
       transaction.sign(platformKeypair)
-
-      console.log('Transaction signed, sending...')
 
       // Send the transaction (don't wait for confirmation)
       const signature = await connection.sendRawTransaction(transaction.serialize(), {
@@ -398,10 +362,6 @@ export class SolanaService {
         preflightCommitment: 'confirmed'
       })
 
-      console.log(`Transaction sent! Signature: ${signature}`)
-
-      // Wait for confirmation with timeout
-      console.log('Waiting for confirmation...')
       try {
         const confirmation = await connection.confirmTransaction(signature, 'confirmed')
         
@@ -410,7 +370,6 @@ export class SolanaService {
           return { success: false, error: `Transaction failed: ${confirmation.value.err}` }
         }
 
-        console.log(`Transaction confirmed! Signature: ${signature}`)
         return { success: true, signature }
       } catch (confirmationError: any) {
         console.warn('Confirmation timed out or failed, waiting 5 seconds before checking transaction status directly...', confirmationError.message)
@@ -425,7 +384,6 @@ export class SolanaService {
           })
           
           if (!transaction) {
-            console.log('Transaction not found, may still be processing...')
             return { success: false, error: 'Transaction not found - may still be processing' }
           }
 
@@ -434,7 +392,6 @@ export class SolanaService {
             return { success: false, error: `Transaction failed: ${transaction.meta.err}` }
           }
 
-          console.log(`Transaction verified as successful! Signature: ${signature}`)
           return { success: true, signature }
         } catch (verificationError: any) {
           console.error('Failed to verify transaction:', verificationError)
@@ -453,26 +410,18 @@ export class SolanaService {
    */
   static async verifyTransaction(signature: string): Promise<{ success: boolean; error?: string }> {
     try {
-      console.log(`Verifying transaction: ${signature}`)
-      
       const transaction = await this.getConnection().getTransaction(signature, {
         commitment: 'confirmed'
       })
-      
+
       if (!transaction) {
-        console.log('Transaction not found for signature:', signature)
         return { success: false, error: 'Transaction not found' }
       }
 
-      console.log('Transaction found, checking for errors...')
-
-      // Verify transaction is confirmed
       if (transaction.meta?.err) {
-        console.log('Transaction has errors:', transaction.meta.err)
         return { success: false, error: 'Transaction failed' }
       }
 
-      console.log('Transaction verified as successful!')
       return { success: true }
     } catch (error: any) {
       console.error('Error verifying transaction:', error)
@@ -521,39 +470,21 @@ export class SolanaService {
   }
 
   /**
-   * Generate a new Solana wallet address
-   * This is used during user registration
-   */
-  // static generateWalletAddress(): string {
-  //   const keypair = Keypair.generate()
-  //   return keypair.publicKey.toString()
-  // }
-
-  /**
    * Get transaction details including sender and receiver addresses
    */
   static async getTransactionDetails(signature: string): Promise<{ success: boolean; fromAddress?: string; toAddress?: string; amount?: number; error?: string }> {
     try {
-      console.log('Getting transaction details for signature:', signature)
-      
       const transaction = await this.getConnection().getTransaction(signature, {
         commitment: 'confirmed'
       })
-      
+
       if (!transaction) {
-        console.log('Transaction not found for signature:', signature)
         return { success: false, error: 'Transaction not found' }
       }
 
-      console.log('Transaction found, checking for errors...')
-
-      // Check if transaction failed
       if (transaction.meta?.err) {
-        console.log('Transaction has errors:', transaction.meta.err)
         return { success: false, error: 'Transaction failed' }
       }
-
-      console.log('Transaction is successful, extracting details...')
 
       // Extract transfer details from SystemProgram transfer instruction
       const instructions = transaction.transaction.message.instructions
@@ -575,8 +506,6 @@ export class SolanaService {
               }
             }
             
-            console.log(`Transaction details: from ${fromAddress} to ${toAddress}, amount: ${amount} SOL`)
-            
             return { 
               success: true, 
               fromAddress, 
@@ -587,7 +516,6 @@ export class SolanaService {
         }
       }
 
-      console.log('No SystemProgram transfer instruction found')
       return { success: false, error: 'No transfer instruction found' }
     } catch (error: any) {
       console.error('Error getting transaction details:', error)
@@ -600,34 +528,19 @@ export class SolanaService {
    */
   static async testPlatformWallet(env?: any): Promise<{ success: boolean; error?: string; balance?: number; address?: string }> {
     try {
-      console.log('Testing platform wallet...')
-      console.log('Environment variables available:', {
-        hasEnv: !!env,
-        hasRpcUrl: !!(env && env.SOLANA_RPC_URL),
-        hasPrivateKey: !!(env && env.SOLANA_WALLET_PRIVATE_KEY)
-      })
-      
       const keypair = await this.loadPlatformWallet(env)
       const address = keypair.publicKey.toString()
-      console.log(`Platform wallet address: ${address}`)
-      
-      // Create connection based on environment
+
       let connection: Connection
       if (env && env.SOLANA_RPC_URL) {
-        // Backend environment
-        console.log(`Creating connection with RPC URL: ${env.SOLANA_RPC_URL}`)
         connection = new Connection(env.SOLANA_RPC_URL, 'confirmed')
       } else {
-        // Frontend environment
-        console.log('Creating connection for frontend environment')
         connection = this.getConnection()
       }
-      
-      console.log('Getting platform wallet balance...')
+
       const balance = await connection.getBalance(keypair.publicKey)
       const balanceInSol = balance / LAMPORTS_PER_SOL
-      console.log(`Platform wallet balance: ${balanceInSol} SOL`)
-      
+
       return { 
         success: true, 
         balance: balanceInSol, 

@@ -174,8 +174,10 @@ function WalletContent() {
         }
         
         const signature = sendResult.signature
-        console.log('Transaction sent with signature:', signature)
-        
+        if (import.meta.env.DEV) {
+          console.debug('[Wallet] deposit tx', signature)
+        }
+
         setMessage('Confirming deposit with platform...')
         
         // Confirm the deposit with the backend using the real signature

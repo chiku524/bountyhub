@@ -157,20 +157,6 @@ app.all('/auth/callback', async (c) => {
       }
     }
     
-    // Log all cookies for debugging
-    const allCookies = c.req.header('Cookie')
-    console.log('Callback received:', {
-      code: code ? `${code.substring(0, 10)}...` : 'missing',
-      state: state || 'missing',
-      action: action || 'none',
-      stateCookieName,
-      storedState: storedState || 'missing',
-      stateLength: state?.length || 0,
-      storedStateLength: storedState?.length || 0,
-      allCookies: allCookies || 'no cookies',
-      cookieHeader: allCookies
-    })
-    
     const frontendUrl = c.env.NODE_ENV === 'production' 
       ? 'https://bountyhub.tech' 
       : 'http://localhost:5173'
@@ -193,7 +179,6 @@ app.all('/auth/callback', async (c) => {
       // If cookie is missing but state is present, validate it's a valid UUID format
       // This provides basic protection while handling cookie issues
       if (state && state.length === 36 && state.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
-        console.log('State cookie missing but state parameter is valid UUID, proceeding...')
         // Continue with the flow - state parameter provides some CSRF protection
       } else {
         console.error('Invalid state parameter format:', state)
@@ -211,9 +196,7 @@ app.all('/auth/callback', async (c) => {
       })
       return c.redirect(`${frontendUrl}/login?error=invalid_state`)
     }
-    
-    console.log('State verified, exchanging code for token...')
-    
+
     // Construct redirect URI - include action parameter if present
     let redirectUri = c.env.GITHUB_CALLBACK_URL
     if (action === 'connect') {
@@ -257,8 +240,7 @@ app.all('/auth/callback', async (c) => {
     }
     
     const accessToken = tokenData.access_token
-    console.log('Access token obtained, fetching user info from GitHub...')
-    
+
     // Get user info from GitHub
     const userResponse = await fetch('https://api.github.com/user', {
       headers: {
@@ -267,20 +249,13 @@ app.all('/auth/callback', async (c) => {
         'User-Agent': 'BountyHub-OAuth'
       }
     })
-    
-    console.log('GitHub API response:', {
-      status: userResponse.status,
-      statusText: userResponse.statusText,
-      ok: userResponse.ok
-    })
-    
+
     if (!userResponse.ok) {
       const errorText = await userResponse.text()
       console.error('GitHub API error:', {
         status: userResponse.status,
         statusText: userResponse.statusText,
         error: errorText,
-        accessToken: accessToken ? `${accessToken.substring(0, 10)}...` : 'missing'
       })
       return c.redirect(`${frontendUrl}/login?error=github_api_failed`)
     }
@@ -292,18 +267,10 @@ app.all('/auth/callback', async (c) => {
       avatar_url?: string
       name?: string
     }
-    
-    console.log('GitHub user data:', {
-      id: githubUser.id,
-      login: githubUser.login,
-      hasEmail: !!githubUser.email,
-      email: githubUser.email || 'not provided'
-    })
-    
+
     // Get user email if not public
     let email = githubUser.email
     if (!email) {
-      console.log('Email not in user profile, fetching from /user/emails endpoint...')
       const emailsResponse = await fetch('https://api.github.com/user/emails', {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -311,20 +278,10 @@ app.all('/auth/callback', async (c) => {
           'User-Agent': 'BountyHub-OAuth'
         }
       })
-      
-      console.log('Emails API response:', {
-        status: emailsResponse.status,
-        statusText: emailsResponse.statusText,
-        ok: emailsResponse.ok
-      })
-      
+
       if (emailsResponse.ok) {
         const emails = await emailsResponse.json() as Array<{ email: string; primary: boolean; verified: boolean }>
-        console.log('Emails received:', {
-          count: emails.length,
-          emails: emails.map(e => ({ email: e.email, primary: e.primary, verified: e.verified }))
-        })
-        
+
         // Try to find primary verified email first
         const primaryEmail = emails.find((e: { email: string; primary: boolean; verified: boolean }) => e.primary && e.verified)
         // Then try any verified email
@@ -345,11 +302,8 @@ app.all('/auth/callback', async (c) => {
     if (!email) {
       // GitHub provides noreply emails for users who don't share their email
       email = `${githubUser.id}+${githubUser.login}@users.noreply.github.com`
-      console.log('No email found, using GitHub noreply email:', email)
     }
-    
-    console.log('Final email to use:', email)
-    
+
     // Check if this is a "connect" action (linking existing account)
     const connectState = getCookie(c, 'github_connect_state')
     const connectUserId = getCookie(c, 'github_connect_user_id')
@@ -401,8 +355,6 @@ app.all('/auth/callback', async (c) => {
         return c.redirect(`${frontendUrl}/settings?error=connect_failed`)
       }
       
-      // This is a connect action - link GitHub to existing account
-      console.log('Connecting GitHub account to existing user:', parsedConnectUserId)
       userId = parsedConnectUserId
       
       // Verify user exists
@@ -441,8 +393,7 @@ app.all('/auth/callback', async (c) => {
       
       setCookie(c, 'github_connect_state', '', cookieOptions)
       setCookie(c, 'github_connect_user_id', '', cookieOptions)
-      
-      console.log('GitHub account connected successfully for user:', userId)
+
       // Redirect to settings with success message
       return c.redirect(`${frontendUrl}/settings?github_connected=true`)
     } else {

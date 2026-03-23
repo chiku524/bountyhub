@@ -151,12 +151,6 @@ app.post('/sync', async (c) => {
       }, 400)
     }
 
-    console.log('Fetching repositories for user:', userId, {
-      hasToken: !!user.githubAccessToken,
-      tokenLength: user.githubAccessToken.length,
-      githubUsername: user.githubUsername
-    })
-
     let githubResponse: Response
     try {
       // Fetch repositories from GitHub API (use recommended Accept and API version headers)
@@ -201,9 +195,6 @@ app.post('/sync', async (c) => {
         statusText: githubResponse.statusText,
         error: errorText,
         errorJson,
-        hasToken: !!user.githubAccessToken,
-        tokenLength: user.githubAccessToken?.length || 0,
-        tokenPrefix: user.githubAccessToken?.substring(0, 10) || 'none'
       })
 
       // Provide more specific error messages
@@ -269,8 +260,6 @@ app.post('/sync', async (c) => {
     }
     const now = new Date()
 
-    console.log(`Syncing ${githubRepos.length} repositories for user ${userId}`)
-
     // Sync repositories
     const syncedRepos = []
     for (const repo of githubRepos) {
@@ -306,7 +295,6 @@ app.post('/sync', async (c) => {
         if (existing[0]) {
           // Update existing repository - only if it belongs to this user
           if (existing[0].ownerId !== userId) {
-            console.log(`Skipping repo ${repo.full_name} - belongs to different user`)
             continue
           }
           

@@ -16,7 +16,6 @@ app.get(async (c) => {
   const sessionId = getCookie(c, 'session')
   
   if (!sessionId) {
-    console.log('No session cookie found')
     return c.json({ error: 'Unauthorized' }, 401)
   }
 
@@ -26,19 +25,14 @@ app.get(async (c) => {
     const userId = await getUserIdFromSession(sessionId, db)
     
     if (!userId) {
-      console.log('Invalid session, no user ID found')
       return c.json({ error: 'Unauthorized' }, 401)
     }
-
-    console.log('Fetching notifications for user:', userId)
 
     // Get user's notifications ordered by creation date (newest first)
     const userNotifications = await db.select().from(notifications)
       .where(eq(notifications.userId, userId))
       .orderBy(desc(notifications.createdAt))
       .limit(50) // Limit to last 50 notifications
-
-    console.log('Found notifications:', userNotifications.length)
 
     // Transform the data to match frontend expectations
     const transformedNotifications = userNotifications.map(notification => ({
@@ -68,7 +62,6 @@ app.get('/unread-count', async (c) => {
   const sessionId = getCookie(c, 'session')
   
   if (!sessionId) {
-    console.log('No session cookie found for unread count')
     return c.json({ error: 'Unauthorized' }, 401)
   }
 
@@ -78,11 +71,8 @@ app.get('/unread-count', async (c) => {
     const userId = await getUserIdFromSession(sessionId, db)
     
     if (!userId) {
-      console.log('Invalid session for unread count, no user ID found')
       return c.json({ error: 'Unauthorized' }, 401)
     }
-
-    console.log('Fetching unread count for user:', userId)
 
     // Count unread notifications
     const unreadCount = await db.select({ count: notifications.id })
@@ -91,8 +81,6 @@ app.get('/unread-count', async (c) => {
         eq(notifications.userId, userId),
         eq(notifications.read, false)
       ))
-
-    console.log('Unread count:', unreadCount.length)
 
     return c.json({ unreadCount: unreadCount.length })
   } catch (error) {

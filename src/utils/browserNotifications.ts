@@ -11,7 +11,6 @@ export class BrowserNotificationService {
 
   async checkPermission(): Promise<NotificationPermission> {
     if (!('Notification' in window)) {
-      console.log('Browser does not support notifications')
       return 'denied'
     }
 

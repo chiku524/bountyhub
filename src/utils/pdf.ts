@@ -69,9 +69,6 @@ export class PDFService {
     options: PDFOptions = {},
     apiKey?: string
   ): Promise<Uint8Array> {
-    console.log('PDF Service: Creating simple PDF with title:', title);
-    console.log('PDF Service: Content length:', content.length, 'characters');
-    
     const htmlContent = `
       <!DOCTYPE html>
       <html>

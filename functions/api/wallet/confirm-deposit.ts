@@ -44,7 +44,6 @@ app.post(async (c) => {
       .limit(1)
     
     if (existingTransaction.length > 0) {
-      console.log('Transaction signature already used:', signature)
       return c.json({ error: 'This transaction signature has already been used for another deposit' }, 400)
     }
 
@@ -81,7 +80,6 @@ app.post(async (c) => {
       
       // Verify transaction was sent to the correct platform address
       if (txData.toAddress !== platformAddress) {
-        console.log(`Transaction sent to wrong address. Expected: ${platformAddress}, Got: ${txData.toAddress}`)
         return c.json({ error: 'Transaction was not sent to the correct platform address' }, 400)
       }
 
@@ -94,13 +92,11 @@ app.post(async (c) => {
       
       // Validate amount is reasonable (max 100 SOL per deposit)
       if (bbuxAmount > 100) {
-        console.log('Transaction amount too large:', bbuxAmount, 'SOL')
         return c.json({ error: 'Transaction amount is too large. Maximum deposit is 100 SOL.' }, 400)
       }
       
       // Validate amount is not suspiciously small (min 0.001 SOL)
       if (bbuxAmount < 0.001) {
-        console.log('Transaction amount too small:', bbuxAmount, 'SOL')
         return c.json({ error: 'Transaction amount is too small. Minimum deposit is 0.001 SOL.' }, 400)
       }
 

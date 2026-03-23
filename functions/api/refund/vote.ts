@@ -30,9 +30,6 @@ app.post(async (c) => {
     // 4. Update the refund request vote count
     // 5. Award reputation points and tokens
 
-    console.log(`Vote recorded: ${vote ? 'Approve' : 'Reject'} for refund request ${refundRequestId}`)
-    console.log(`Reason: ${reason}`)
-
     return c.json({ 
       success: true, 
       message: `Vote recorded successfully. You will receive governance rewards when the voting period ends.`,

@@ -5,7 +5,19 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import globals from 'globals'
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', 'drizzle/migrations', '*.config.js', '*.config.ts', 'public', 'scripts/**'] },
+  {
+    ignores: [
+      'dist',
+      'node_modules',
+      'drizzle/migrations',
+      '*.config.js',
+      '*.config.ts',
+      'public',
+      'scripts/**',
+      'src-tauri/target/**',
+      'patches/**',
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
