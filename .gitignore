@@ -7,8 +7,11 @@ node_modules/
 .env.production
 .dev.vars
 
-# Patched wry crate (created by scripts/patch-wry-linux.sh)
+# Patched wry crate (created by scripts/patch-wry-linux.cjs)
 patches/wry/
+
+# Wrangler / Miniflare local state (D1, etc.)
+.wrangler/
 
 # Build outputs
 build/

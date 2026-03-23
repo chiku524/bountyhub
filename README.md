@@ -66,6 +66,8 @@ To build installers for distribution:
 npm run desktop:build
 ```
 
+Releases, GitHub Actions, signing, and the in-app updater are documented in [docs/DESKTOP.md](./docs/DESKTOP.md).
+
 ## 🎨 Brand & social assets
 
 Raster brand images (PNG/JPG) are generated from SVGs in `public/`. After changing any of these source files, re-run:

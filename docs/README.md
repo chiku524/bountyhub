@@ -102,7 +102,7 @@ D1 is already your primary database. R2 and KV are wired in wrangler with placeh
 - **Drizzle + D1** – Single data layer, sessions in D1
 - **Tailwind v4** – `@import 'tailwindcss'`, `@theme`, dark mode via class
 - **Lazy loading** – Non-critical routes use `React.lazy()` and `<Suspense>`
-- **Desktop app** – Tauri build; [Download](/download) page; see [DESKTOP.md](./DESKTOP.md)
+- **Desktop app** – Tauri build; [Download](/download) page; full guide (releases, updater, CI): [DESKTOP.md](./DESKTOP.md)
 
 ### Adding R2 and KV
 
@@ -133,3 +133,68 @@ If you don’t need R2 yet, comment out the `[[r2_buckets]]` block in both wrang
 - **React 19** – Upgrade when ready; test wallet adapters and deps
 - **Secrets** – Move sensitive values from `wrangler.workers.toml` to Cloudflare Secrets and document in deployment section above
 - **R2 migration** – Replace Cloudinary with R2 for media to keep everything on Cloudflare
+
+---
+
+## Maintenance scripts
+
+### D1 migration 0016 (“duplicate column name: github_id”)
+
+If the remote D1 already had GitHub columns (e.g. from a partial apply), mark 0016 as applied so later migrations can run:
+
+```bash
+npx wrangler d1 execute bountyhub-db --remote --config wrangler.workers.toml --file=scripts/mark-migration-0016-applied.sql
+```
+
+Then:
+
+```bash
+npx wrangler d1 migrations apply bountyhub-db --config wrangler.workers.toml --remote
+```
+
+### Linux desktop build: patched `wry` crate
+
+`npm run desktop:build` runs `scripts/patch-wry-linux.cjs` first. That script creates `patches/wry/` (gitignored) from wry 0.24.11 and applies a one-line fix: `use webkit2gtk::SettingsExt;` so Linux builds compile. It uses Node `fetch` and the `tar` package only—no system `curl`/`tar`, so behavior matches on Windows, macOS, and Linux.
+
+To run only the patch step: `node scripts/patch-wry-linux.cjs`
+
+---
+
+## Chat: real-time strategy (polling vs push)
+
+### Current polling assessment
+
+**What’s already good**
+
+- **Incremental fetch**: Chat UIs use `?after=<timestamp>` so only new messages are requested.
+- **Visibility-aware**: Some views pause polling when the tab is hidden.
+- **Deduplication**: New messages merge by ID.
+
+**Efficiency issues**
+
+1. **Chat page** – Polling `useEffect` depending on `messages` / `lastMessageId` recreates the interval on every new message; prefer refs and a stable interval.
+2. **ChatSidebar** – Avoid `isPolling` in dependency arrays that reset the interval every tick.
+3. **Intervals** – Sidebar vs full chat vs post room may use different cadences (e.g. 8s / 3s / 2.5s); consider unifying or backoff when idle.
+4. **Logging** – Guard chat polling logs with `import.meta.env.DEV` in production.
+
+### Options for real-time updates
+
+| Approach | Latency | Server load | Complexity | Best for |
+|----------|---------|-------------|------------|----------|
+| Short polling (current) | 2.5–8s | Higher | Low | MVP, low concurrency |
+| Long polling | Near real-time | Medium | Medium | No WebSockets |
+| SSE | Near real-time | Lower | Medium | One-way server → client |
+| WebSockets | Instant | Lower (at scale) | Higher | Full duplex chat |
+
+Industry standard for chat is **WebSockets** (or a managed equivalent), with REST for history and metadata.
+
+### On Cloudflare
+
+- **WebSockets + Durable Objects** – One DO per room; Worker forwards `wss` to the DO; broadcast after D1 write.
+- **SSE** – Possible with streaming Workers; still need a way to wake the stream when new rows exist.
+- **Long polling** – Harder on stateless Workers without a notifier.
+
+### Recommendation
+
+- **Short term**: Fix interval churn with refs, reduce logs, optional backoff when no new messages.
+- **Long term**: **WebSockets + Durable Objects** for true real-time, REST for history and sends.
