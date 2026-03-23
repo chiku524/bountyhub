@@ -340,14 +340,12 @@ app.post('/sync', async (c) => {
     })
 
     const errorMessage = error?.message || 'Unknown error'
-    const isProduction = c.env.NODE_ENV === 'production'
 
     return c.json({
       error: 'Failed to sync repositories',
       details: errorMessage,
       phase: 'sync',
       requiresReconnect: false,
-      ...(isProduction ? {} : { stack: error?.stack?.substring(0, 500) })
     }, 500)
   }
 })

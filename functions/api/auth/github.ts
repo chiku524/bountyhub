@@ -77,7 +77,7 @@ app.post('/connect', async (c) => {
   try {
     return await handleConnect(c)
   } catch (error: any) {
-    console.error('GitHub connect error:', { message: error?.message, stack: error?.stack, name: error?.name, error })
+    console.error('GitHub connect error:', { message: error?.message, stack: error?.stack, name: error?.name })
     return c.json({ error: 'Failed to initiate GitHub connection', details: error?.message }, 500)
   }
 })
@@ -160,7 +160,6 @@ app.post('/disconnect', async (c) => {
       message: error?.message,
       stack: error?.stack,
       name: error?.name,
-      error: error
     })
     return c.json({ 
       error: 'Failed to disconnect GitHub account',

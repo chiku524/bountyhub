@@ -63,7 +63,9 @@ export function useDesktopUpdater(updateContext: UpdaterContext) {
         // Don't block the app when there's no release JSON (updater not configured or no release yet)
         const isReleaseJsonError = /release\s*json|valid\s*release|could\s*not\s*fetch/i.test(message)
         if (isReleaseJsonError) {
-          console.info('[BountyHub updater] No update endpoint or release:', message)
+          if (import.meta.env.DEV) {
+            console.debug('[BountyHub updater] No update endpoint or release:', message)
+          }
           setPhaseFn('idle')
           return
         }
