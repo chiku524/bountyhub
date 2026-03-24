@@ -26,7 +26,6 @@ export function useDesktopUpdater(updateContext: UpdaterContext) {
   const setPhase = updateContext?.setPhase
   const setPendingUpdateVersion = updateContext?.setPendingUpdateVersion
   const registerRetry = updateContext?.registerRetry
-  // Depend on stable callbacks only — not on `updateContext` object identity (App builds a new object each render).
   useEffect(() => {
     if (!isDesktopApp() || !setPhase || !setPendingUpdateVersion || !registerRetry) return
     const setPhaseFn = setPhase
@@ -37,30 +36,23 @@ export function useDesktopUpdater(updateContext: UpdaterContext) {
       if (isRunningRef.current) return
       isRunningRef.current = true
       try {
-        const { checkUpdate, installUpdate, onUpdaterEvent } = await import('@tauri-apps/api/updater')
-        const { relaunch } = await import('@tauri-apps/api/process')
-        const update = await checkUpdate()
-        if (!update?.shouldUpdate) {
+        const { check } = await import('@tauri-apps/plugin-updater')
+        const { relaunch } = await import('@tauri-apps/plugin-process')
+        const update = await check()
+        if (!update) {
           setPhaseFn('idle')
           return
         }
 
-        const manifest = update.manifest as { version?: string } | undefined
-        const version = typeof manifest?.version === 'string' ? manifest.version : null
-        setPendingFn(version)
+        setPendingFn(update.version)
         setPhaseFn('downloading')
-        const unlisten = await onUpdaterEvent(({ status }) => {
-          if (status === 'DONE') setPhaseFn('restarting')
-          else if (status === 'PENDING') setPhaseFn('installing')
+        await update.downloadAndInstall((ev) => {
+          if (ev.event === 'Finished') setPhaseFn('installing')
         })
-
-        await installUpdate()
-        unlisten()
-        setPhaseFn('installing')
+        setPhaseFn('restarting')
         await relaunch()
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err)
-        // Don't block the app when there's no release JSON (updater not configured or no release yet)
         const isReleaseJsonError = /release\s*json|valid\s*release|could\s*not\s*fetch/i.test(message)
         if (isReleaseJsonError) {
           if (import.meta.env.DEV) {

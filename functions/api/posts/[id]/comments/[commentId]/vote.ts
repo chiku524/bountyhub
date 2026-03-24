@@ -1,5 +1,4 @@
 import { Hono } from 'hono'
-import { getCookie } from 'hono/cookie'
 import { createDb } from '../../../../../../src/utils/db'
 import { getUserIdFromSession } from '../../../../../../src/utils/auth'
 import { comments, votes } from '../../../../../../drizzle/schema'
@@ -21,7 +20,7 @@ app.post(async (c) => {
     return c.json({ error: 'Missing post id or comment id' }, 400)
   }
   
-  const sessionCookie = getCookie(c, 'session')
+  const sessionCookie = c.get('sessionId')
   if (!sessionCookie) {
     return c.json({ error: 'Not authenticated' }, 401)
   }

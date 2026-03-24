@@ -2,7 +2,6 @@ import { Hono } from 'hono';
 import type { Context } from 'hono';
 import { eq, desc, and, sql } from 'drizzle-orm';
 import { chatMessages, chatRoomParticipants, users, profiles, posts } from '../../../../drizzle/schema';
-import { getCookie } from 'hono/cookie';
 import { createDb } from '../../../../src/utils/db';
 import { getUserIdFromSession } from '../../../../src/utils/auth';
 import { broadcastMessageToRoom } from '../../chat';
@@ -69,7 +68,7 @@ export async function getPostChatRoom(c: AppContext, postId: string) {
     }
 
     const roomId = room.id;
-    const sessionCookie = getCookie(c, 'session');
+    const sessionCookie = c.get('sessionId');
     let joined = false;
     if (sessionCookie) {
       const userId = await getUserIdFromSession(sessionCookie, db);
@@ -175,7 +174,7 @@ export async function getPostChatMessages(c: AppContext, postId: string) {
 /** Send message to post chat. Call with postId from c.req.param('id'). */
 export async function postPostChatMessage(c: AppContext, postId: string) {
   try {
-    const sessionCookie = getCookie(c, 'session');
+    const sessionCookie = c.get('sessionId');
     if (!sessionCookie) {
       return c.json({ success: false, error: 'Unauthorized' }, 401);
     }

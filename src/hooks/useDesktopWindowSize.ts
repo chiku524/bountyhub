@@ -20,14 +20,12 @@ export function useDesktopWindowSize(
     let cancelled = false
     async function expandToFull() {
       try {
-        const { getCurrent } = await import('@tauri-apps/api/window')
-        const win = getCurrent()
+        const { getCurrentWebviewWindow } = await import('@tauri-apps/api/webviewWindow')
+        const { LogicalSize } = await import('@tauri-apps/api/dpi')
+        const win = getCurrentWebviewWindow()
         if (cancelled) return
-        await win.setSize({ type: 'Logical', width: FULL_WIDTH, height: FULL_HEIGHT })
-        const w = win as unknown as { setMinSize?: (size: { type: string; width: number; height: number }) => Promise<void> }
-        if (typeof w.setMinSize === 'function') {
-          await w.setMinSize({ type: 'Logical', width: MIN_WIDTH, height: MIN_HEIGHT })
-        }
+        await win.setSize(new LogicalSize(FULL_WIDTH, FULL_HEIGHT))
+        await win.setMinSize(new LogicalSize(MIN_WIDTH, MIN_HEIGHT))
       } catch (e) {
         if (import.meta.env.DEV) console.debug('[useDesktopWindowSize]', e)
       }

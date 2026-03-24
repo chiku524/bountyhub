@@ -1,5 +1,7 @@
 import type { LoginForm, SignupForm, PostForm, User, Post, WalletInfo, CodeBlock, Media, TransactionLog, BugBountyCampaign, BugSubmission, GitHubRepository } from '../types'
 import { config } from './config'
+import { isDesktopApp } from './desktop'
+import { getDesktopSessionId } from './authSession'
 
 interface Tag {
   id: string;
@@ -23,13 +25,21 @@ export class ApiClient {
   public async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${config.api.baseUrl}${endpoint}`
     
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(options.headers as Record<string, string> | undefined),
+    }
+    if (isDesktopApp()) {
+      const sid = getDesktopSessionId()
+      if (sid && !headers.Authorization) {
+        headers.Authorization = `Bearer ${sid}`
+      }
+    }
+
     const response = await fetch(url, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-      credentials: 'include', // Include cookies for authentication
       ...options,
+      headers,
+      credentials: 'include', // Include cookies for authentication (web + desktop when cookies work)
     })
 
     if (!response.ok) {
@@ -51,13 +61,20 @@ export class ApiClient {
       ? 'https://bountyhub-api.nico-chikuji.workers.dev' 
       : config.api.baseUrl
     const url = `${baseUrl}${endpoint}`
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(options.headers as Record<string, string> | undefined),
+    }
+    if (isDesktopApp()) {
+      const sid = getDesktopSessionId()
+      if (sid && !headers.Authorization) {
+        headers.Authorization = `Bearer ${sid}`
+      }
+    }
     const response = await fetch(url, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-      credentials: 'include',
       ...options,
+      headers,
+      credentials: 'include',
     })
 
     if (!response.ok) {
@@ -69,14 +86,14 @@ export class ApiClient {
   }
 
   // Authentication
-  async login(data: LoginForm): Promise<{ user: User }> {
+  async login(data: LoginForm): Promise<{ user: User; sessionId?: string }> {
     return this.request('/api/auth/login', {
       method: 'POST',
       body: JSON.stringify(data),
     })
   }
 
-  async signup(data: SignupForm): Promise<{ user: User }> {
+  async signup(data: SignupForm): Promise<{ user: User; sessionId?: string }> {
     return this.request('/api/auth/signup', {
       method: 'POST',
       body: JSON.stringify(data),

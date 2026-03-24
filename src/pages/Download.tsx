@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { FiDownload, FiMonitor } from 'react-icons/fi'
-import { SiWindows, SiApple, SiLinux } from 'react-icons/si'
+import { FaWindows } from 'react-icons/fa'
+import { SiApple, SiLinux } from 'react-icons/si'
 import { PageMetadata } from '../components/PageMetadata'
 import { config } from '../utils/config'
 
@@ -26,7 +27,7 @@ const platformLabels: Record<NonNullable<Platform>, string> = {
 }
 
 const platformIcons = {
-  windows: SiWindows,
+  windows: FaWindows,
   macos: SiApple,
   linux: SiLinux,
 }
@@ -48,21 +49,17 @@ function getDownloadUrls(assets: { name: string; browser_download_url: string }[
 
 export default function Download() {
   const hasReleases = Boolean(GITHUB_RELEASES_URL)
-  const [platform, setPlatform] = useState<Platform>(null)
+  const [platform] = useState<Platform>(() => detectPlatform())
   const [downloadUrls, setDownloadUrls] = useState<Record<NonNullable<Platform>, string | null>>({
     windows: null,
     macos: null,
     linux: null,
   })
-  const [releasesFetched, setReleasesFetched] = useState(false)
+  const skipReleaseFetch = !GITHUB_RELEASES_URL
+  const [releasesFetched, setReleasesFetched] = useState(skipReleaseFetch)
 
   useEffect(() => {
-    setPlatform(detectPlatform())
-  }, [])
-
-  useEffect(() => {
-    if (!GITHUB_RELEASES_URL) {
-      setReleasesFetched(true)
+    if (skipReleaseFetch) {
       return
     }
     const controller = new AbortController()
@@ -80,7 +77,7 @@ export default function Download() {
       .catch(() => {})
       .finally(() => setReleasesFetched(true))
     return () => controller.abort()
-  }, [])
+  }, [skipReleaseFetch])
 
   return (
     <div className="min-h-screen">

@@ -1,5 +1,4 @@
 import { Hono } from 'hono'
-import { getCookie } from 'hono/cookie'
 import { createDb } from '../../../../src/utils/db'
 import { getUserIdFromSession } from '../../../../src/utils/auth'
 import { comments, users, votes, posts, profiles } from '../../../../drizzle/schema'
@@ -43,7 +42,7 @@ app.get(async (c) => {
     .where(eq(comments.postId, postId))
 
     // Get current user's votes if authenticated
-    const sessionCookie = getCookie(c, 'session')
+    const sessionCookie = c.get('sessionId')
     let userVotes: Record<string, number> = {}
     
     if (sessionCookie) {
@@ -85,7 +84,7 @@ app.get(async (c) => {
 
 // Create a new comment
 app.post(async (c) => {
-  const sessionId = getCookie(c, 'session')
+  const sessionId = c.get('sessionId')
   
   if (!sessionId) {
     return c.json({ error: 'Unauthorized' }, 401)

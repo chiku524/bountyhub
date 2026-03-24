@@ -1,5 +1,4 @@
 import { Hono } from 'hono'
-import { getCookie } from 'hono/cookie'
 import { createDb } from '../../../src/utils/db'
 import { virtualWallets, transactionLogs, sessions } from '../../../drizzle/schema'
 import { eq, desc, and } from 'drizzle-orm'
@@ -49,7 +48,7 @@ app.route('/solana-proxy', solanaProxyRoutes)
 
 // Get wallet info
 app.get('/', async (c) => {
-  const sessionId = getCookie(c, 'session')
+  const sessionId = c.get('sessionId')
   
   if (!sessionId) {
     return c.json({ error: 'Unauthorized' }, 401)
@@ -133,7 +132,7 @@ app.get('/', async (c) => {
 
 // Get recent transactions (last 5 for dashboard)
 app.get('/transactions', async (c) => {
-  const sessionId = getCookie(c, 'session')
+  const sessionId = c.get('sessionId')
   
   if (!sessionId) {
     return c.json({ error: 'Unauthorized' }, 401)
@@ -211,7 +210,7 @@ app.get('/transactions', async (c) => {
 
 // Get all transactions with pagination
 app.get('/transactions/all', async (c) => {
-  const sessionId = getCookie(c, 'session')
+  const sessionId = c.get('sessionId')
   
   if (!sessionId) {
     return c.json({ error: 'Unauthorized' }, 401)
@@ -303,7 +302,7 @@ app.get('/transactions/all', async (c) => {
 })
 
 app.post('/action', async (c) => {
-  const sessionId = getCookie(c, 'session')
+  const sessionId = c.get('sessionId')
   
   if (!sessionId) {
     return c.json({ error: 'Unauthorized' }, 401)

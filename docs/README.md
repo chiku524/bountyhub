@@ -152,11 +152,9 @@ Then:
 npx wrangler d1 migrations apply bountyhub-db --config wrangler.workers.toml --remote
 ```
 
-### Linux desktop build: patched `wry` crate
+### Linux desktop build (Tauri 2)
 
-`npm run desktop:build` runs `scripts/patch-wry-linux.cjs` first. That script creates `patches/wry/` (gitignored) from wry 0.24.11 and applies a one-line fix: `use webkit2gtk::SettingsExt;` so Linux builds compile. It uses Node `fetch` and the `tar` package only—no system `curl`/`tar`, so behavior matches on Windows, macOS, and Linux.
-
-To run only the patch step: `node scripts/patch-wry-linux.cjs`
+`npm run desktop:build` runs `tauri build` (see `package.json`). Tauri 2’s dependency stack no longer needs the old Linux `wry` patch script; use a current Rust toolchain and the versions pinned in `src-tauri/Cargo.toml`.
 
 ---
 

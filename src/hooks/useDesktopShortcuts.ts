@@ -14,21 +14,25 @@ const DEVTOOLS_SHORTCUT = 'CommandOrControl+Shift+I'
  */
 export function useDesktopShortcuts() {
   const navigate = useNavigate()
-  const unregRef = useRef<((id: string) => Promise<void>) | null>(null)
+  const unregRef = useRef<((s: string | string[]) => Promise<void>) | null>(null)
 
   useEffect(() => {
     if (!isDesktopApp()) return
 
-    import('@tauri-apps/api/globalShortcut')
+    import('@tauri-apps/plugin-global-shortcut')
       .then(({ register, unregister }) => {
         unregRef.current = unregister
-        register(QUIT_SHORTCUT, () => {
-          import('@tauri-apps/api/process').then(({ exit }) => exit(0))
+        register(QUIT_SHORTCUT, (e) => {
+          if (e.state === 'Pressed') void import('@tauri-apps/plugin-process').then(({ exit }) => exit(0))
         }).catch(() => {})
-        register(PREFS_SHORTCUT, () => navigate('/settings?tab=desktop')).catch(() => {})
+        register(PREFS_SHORTCUT, (e) => {
+          if (e.state === 'Pressed') navigate('/settings?tab=desktop')
+        }).catch(() => {})
         if (import.meta.env.DEV) {
-          register(DEVTOOLS_SHORTCUT, () => {
-            import('@tauri-apps/api/tauri').then(({ invoke }) => invoke('open_devtools').catch(() => {}))
+          register(DEVTOOLS_SHORTCUT, (e) => {
+            if (e.state === 'Pressed') {
+              void import('@tauri-apps/api/core').then(({ invoke }) => invoke('open_devtools').catch(() => {}))
+            }
           }).catch(() => {})
         }
       })

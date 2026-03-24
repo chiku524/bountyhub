@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs'
 import { eq } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/d1'
-import { getCookie } from 'hono/cookie'
+import { getRequestSessionId } from './requestSession'
 import { users, sessions } from '../../drizzle/schema'
 
 export async function hashPassword(password: string): Promise<string> {
@@ -15,7 +15,7 @@ export async function verifyPassword(password: string, hashedPassword: string): 
 
 export async function getAuthUser(c: any) {
   try {
-    const sessionId = getCookie(c, 'session')
+    const sessionId = getRequestSessionId(c)
     if (!sessionId) return null
 
     const db = drizzle(c.env.DB)

@@ -25,14 +25,17 @@ export function useChatWebSocket(
   roomId: string | null,
   onMessage: (message: ChatWsMessagePayload) => void
 ): { connected: boolean } {
-  const [connected, setConnected] = useState(false);
+  const [socketConnected, setSocketConnected] = useState(false);
+  const connected = roomId ? socketConnected : false;
   const wsRef = useRef<WebSocket | null>(null);
   const onMessageRef = useRef(onMessage);
-  onMessageRef.current = onMessage;
+
+  useEffect(() => {
+    onMessageRef.current = onMessage;
+  }, [onMessage]);
 
   useEffect(() => {
     if (!roomId) {
-      setConnected(false);
       return;
     }
 
@@ -41,9 +44,9 @@ export function useChatWebSocket(
     const ws = new WebSocket(path);
     wsRef.current = ws;
 
-    ws.onopen = () => setConnected(true);
-    ws.onclose = () => setConnected(false);
-    ws.onerror = () => setConnected(false);
+    ws.onopen = () => setSocketConnected(true);
+    ws.onclose = () => setSocketConnected(false);
+    ws.onerror = () => setSocketConnected(false);
     ws.onmessage = (event: MessageEvent) => {
       try {
         const data = JSON.parse(event.data as string) as ChatWsMessage;
@@ -58,7 +61,7 @@ export function useChatWebSocket(
     return () => {
       ws.close();
       wsRef.current = null;
-      setConnected(false);
+      setSocketConnected(false);
     };
   }, [roomId]);
 

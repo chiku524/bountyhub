@@ -4,6 +4,7 @@ import { FiAward } from 'react-icons/fi'
 import { useAuth } from '../contexts/AuthProvider'
 import { PageMetadata } from '../components/PageMetadata'
 import { isDesktopApp } from '../utils/desktop'
+import '../components/desktop-splash.css'
 
 const INTRO_DURATION_MS = 2400
 const TRANSFORM_DURATION_MS = 650
@@ -37,8 +38,8 @@ export default function DesktopHome() {
   useEffect(() => {
     if (!isDesktopApp()) return
     let cancelled = false
-    import('@tauri-apps/api/window').then(({ getCurrent }) => {
-      if (!cancelled) getCurrent().center()
+    import('@tauri-apps/api/webviewWindow').then(({ getCurrentWebviewWindow }) => {
+      if (!cancelled) getCurrentWebviewWindow().center()
     }).catch((e) => { if (import.meta.env.DEV) console.debug('[DesktopHome] initial center', e) })
     return () => { cancelled = true }
   }, [])
@@ -51,10 +52,11 @@ export default function DesktopHome() {
     let cancelled = false
     async function setWindowSizeAndCenter(width: number, height: number) {
       try {
-        const { getCurrent } = await import('@tauri-apps/api/window')
+        const { getCurrentWebviewWindow } = await import('@tauri-apps/api/webviewWindow')
+        const { LogicalSize } = await import('@tauri-apps/api/dpi')
         if (cancelled) return
-        const win = getCurrent()
-        await win.setSize({ type: 'Logical', width, height })
+        const win = getCurrentWebviewWindow()
+        await win.setSize(new LogicalSize(width, height))
         if (cancelled) return
         await win.center()
       } catch (e) {
@@ -97,9 +99,10 @@ export default function DesktopHome() {
     let cancelled = false
     async function expand() {
       try {
-        const { getCurrent } = await import('@tauri-apps/api/window')
-        const win = getCurrent()
-        await win.setSize({ type: 'Logical', width: FULL_WINDOW_WIDTH, height: FULL_WINDOW_HEIGHT })
+        const { getCurrentWebviewWindow } = await import('@tauri-apps/api/webviewWindow')
+        const { LogicalSize } = await import('@tauri-apps/api/dpi')
+        const win = getCurrentWebviewWindow()
+        await win.setSize(new LogicalSize(FULL_WINDOW_WIDTH, FULL_WINDOW_HEIGHT))
         await win.center()
       } catch (e) {
         if (import.meta.env.DEV) console.debug('[DesktopHome] expand', e)
@@ -135,7 +138,8 @@ export default function DesktopHome() {
         description="Sign in or create an account to use BountyHub on desktop."
       />
       {/* Single full-viewport background; the actual window is small then full (no inner fake window) */}
-      <div className="fixed inset-0 z-20 flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-indigo-950/98 via-neutral-950 to-violet-950/80">
+      <div className="fixed inset-0 z-20 relative flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-indigo-950/98 via-neutral-950 to-violet-950/80">
+        <div className="desktop-splash__animated-bg" aria-hidden />
         {/* Welcome back: brief message when logged-in user transitions to app home */}
         {showWelcomeBack && (
           <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-gradient-to-br from-indigo-950/98 via-neutral-950 to-violet-950/80 animate-fade-in">
@@ -151,7 +155,7 @@ export default function DesktopHome() {
         )}
         {/* Intro: logo + wordmark + tagline — vibeminer-style opacity + translateY entrance */}
         <div
-          className={`flex flex-col items-center justify-center p-6 transition-all duration-500 ${
+          className={`relative z-10 flex flex-col items-center justify-center p-6 transition-all duration-500 ${
             phase === 'intro'
               ? 'opacity-100 scale-100'
               : 'opacity-0 pointer-events-none scale-95 absolute'
@@ -175,7 +179,7 @@ export default function DesktopHome() {
 
         {/* Portal: sign in / register — vibeminer-style entrance after window expands */}
         <div
-          className={`flex flex-col items-center justify-center transition-all duration-500 ${
+          className={`relative z-10 flex flex-col items-center justify-center transition-all duration-500 ${
             portalVisible ? 'opacity-100' : 'opacity-0'
           }`}
         >

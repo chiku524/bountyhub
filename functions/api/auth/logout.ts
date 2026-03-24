@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { getCookie, deleteCookie, setCookie } from 'hono/cookie'
+import { deleteCookie, setCookie } from 'hono/cookie'
 import { deleteSession } from '../../../src/utils/auth'
 import { createDb } from '../../../src/utils/db'
 
@@ -11,7 +11,7 @@ interface Env {
 const app = new Hono<{ Bindings: Env }>()
 
 app.post(async (c) => {
-  const sessionId = getCookie(c, 'session')
+  const sessionId = c.get('sessionId')
   
   if (sessionId) {
     // Delete the session from the database

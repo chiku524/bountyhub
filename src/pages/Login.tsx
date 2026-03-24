@@ -22,10 +22,12 @@ export default function Login() {
     e.preventDefault()
     setError('')
     setLoading(true)
+    let navigated = false
 
     try {
       const result = await login(email, password)
       if (result.success) {
+        navigated = true
         navigate(redirectTo)
       } else {
         setError(result.error || 'Login failed')
@@ -33,7 +35,7 @@ export default function Login() {
     } catch (_err) {
       setError('An unexpected error occurred')
     } finally {
-      setLoading(false)
+      if (!navigated) setLoading(false)
     }
   }
 
@@ -66,7 +68,11 @@ export default function Login() {
                 </Link>
               </p>
             </div>
-        <form className={isDesktop ? 'mt-6 space-y-5' : 'mt-8 space-y-6'} onSubmit={handleSubmit}>
+        <form
+          className={isDesktop ? 'mt-6 space-y-5' : 'mt-8 space-y-6'}
+          onSubmit={handleSubmit}
+          aria-busy={loading}
+        >
           <div className={isDesktop ? 'space-y-3' : 'rounded-md shadow-xs -space-y-px'}>
             <div>
               <label htmlFor="email" className="sr-only">
@@ -81,7 +87,8 @@ export default function Login() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={`appearance-none relative block w-full px-3 py-2 border border-neutral-300 dark:border-gray-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent sm:text-sm ${
+                disabled={loading}
+                className={`appearance-none relative block w-full px-3 py-2 border border-neutral-300 dark:border-gray-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent sm:text-sm disabled:opacity-60 disabled:cursor-wait ${
                   isDesktop ? 'rounded-lg' : 'rounded-none rounded-t-md focus:ring-violet-500 focus:border-violet-500 focus:z-10'
                 }`}
                 placeholder="Email address"
@@ -102,7 +109,8 @@ export default function Login() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className={`appearance-none relative block w-full px-3 py-2 border border-neutral-300 dark:border-gray-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent sm:text-sm ${
+                disabled={loading}
+                className={`appearance-none relative block w-full px-3 py-2 border border-neutral-300 dark:border-gray-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent sm:text-sm disabled:opacity-60 disabled:cursor-wait ${
                   isDesktop ? 'rounded-lg' : 'rounded-none rounded-b-md focus:ring-violet-500 focus:border-violet-500 focus:z-10'
                 }`}
                 placeholder="Password"
@@ -124,14 +132,25 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className={`group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+              className={`group relative w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 border border-transparent text-sm font-medium text-white disabled:opacity-90 disabled:cursor-wait transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                 isDesktop
                   ? 'rounded-xl bg-indigo-600 hover:bg-indigo-500 focus:ring-cyan-400 focus:ring-offset-neutral-900'
                   : 'rounded-md bg-violet-600 hover:bg-violet-700 focus:ring-violet-500 focus:ring-offset-2'
               }`}
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading && (
+                <span
+                  className="inline-block size-4 shrink-0 animate-spin rounded-full border-2 border-white/35 border-t-white"
+                  aria-hidden
+                />
+              )}
+              <span>{loading ? 'Signing in…' : 'Sign in'}</span>
             </button>
+            {loading && (
+              <p className="mt-2 text-center text-xs text-neutral-500 dark:text-neutral-400" aria-live="polite">
+                Verifying your credentials…
+              </p>
+            )}
           </div>
 
           {/* GitHub OAuth */}

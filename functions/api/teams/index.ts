@@ -9,7 +9,6 @@ import {
   users,
   profiles,
 } from '../../../drizzle/schema';
-import { getCookie } from 'hono/cookie';
 import { createDb } from '../../../src/utils/db';
 import { getUserIdFromSession } from '../../../src/utils/auth';
 
@@ -20,7 +19,7 @@ interface Env {
 const app = new Hono<{ Bindings: Env }>();
 
 async function requireAuth(c: any, db: any): Promise<string | null> {
-  const sessionCookie = getCookie(c, 'session');
+  const sessionCookie = c.get('sessionId');
   if (!sessionCookie) return null;
   return getUserIdFromSession(sessionCookie, db);
 }

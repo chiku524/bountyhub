@@ -15,7 +15,7 @@ export function DesktopAboutDialog({ open, onClose }: DesktopAboutDialogProps) {
 
   useEffect(() => {
     if (!open || !isDesktopApp()) return
-    import('@tauri-apps/api/tauri')
+    import('@tauri-apps/api/core')
       .then(({ invoke }) => invoke<string>('get_app_version'))
       .then(setVersion)
       .catch(() => setVersion(''))

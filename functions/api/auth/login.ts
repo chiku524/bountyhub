@@ -75,7 +75,8 @@ app.post('/', async (c) => {
     
     setCookie(c, 'session', sessionId, cookieOptions)
 
-    return c.json({ 
+    return c.json({
+      sessionId,
       user: {
         id: user.id,
         username: user.username,

@@ -2,7 +2,6 @@ import { Hono } from 'hono';
 import { drizzle } from 'drizzle-orm/d1';
 import { users } from '../../../drizzle/schema';
 import { eq } from 'drizzle-orm';
-import { getCookie } from 'hono/cookie';
 import { getUserIdFromSession } from '../../../src/utils/auth';
 
 interface Env {
@@ -18,7 +17,7 @@ function createDb(d1: any) {
 
 // Middleware to check if user is admin
 async function requireAdmin(c: any) {
-  const sessionCookie = getCookie(c, 'session');
+  const sessionCookie = c.get('sessionId');
   if (!sessionCookie) {
     return c.json({ error: 'Not authenticated' }, 401);
   }

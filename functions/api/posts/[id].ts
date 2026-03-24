@@ -1,5 +1,4 @@
 import { Hono } from 'hono'
-import { getCookie } from 'hono/cookie'
 import { createDb } from '../../../src/utils/db'
 import { posts, postTags, codeBlocks, media, tags } from '../../../drizzle/schema'
 import { eq } from 'drizzle-orm'
@@ -44,7 +43,7 @@ app.put(async (c) => {
   const db = createDb(c.env.DB)
   const id = c.req.param('id')
   if (!id) return c.json({ error: 'Missing post id' }, 400)
-  const sessionCookie = getCookie(c, 'session')
+  const sessionCookie = c.get('sessionId')
   if (!sessionCookie) return c.json({ error: 'Not authenticated' }, 401)
   const userId = await getUserIdFromSession(sessionCookie, db)
   if (!userId) return c.json({ error: 'Invalid session' }, 401)

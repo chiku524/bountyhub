@@ -55,7 +55,7 @@ export async function onRequest(context: any) {
       context.env.HTML2PDF_API_KEY
     );
 
-    return new Response(pdfBuffer, {
+    return new Response(pdfBuffer as unknown as BodyInit, {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": "attachment; filename=platform-documentation.pdf",

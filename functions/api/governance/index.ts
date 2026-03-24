@@ -1,5 +1,4 @@
 import { Hono } from 'hono'
-import { getCookie } from 'hono/cookie'
 import { createDb } from '../../../src/utils/db'
 import { getUserIdFromSession } from '../../../src/utils/auth'
 import { GovernanceService } from '../../../src/utils/governance'
@@ -11,7 +10,7 @@ interface Env {
 const app = new Hono<{ Bindings: Env }>()
 
 app.get(async (c) => {
-  const sessionId = getCookie(c, 'session')
+  const sessionId = c.get('sessionId')
   
   if (!sessionId) {
     return c.json({ error: 'Unauthorized' }, 401)
@@ -69,7 +68,7 @@ app.get(async (c) => {
 })
 
 app.post(async (c) => {
-  const sessionId = getCookie(c, 'session')
+  const sessionId = c.get('sessionId')
   
   if (!sessionId) {
     return c.json({ error: 'Unauthorized' }, 401)

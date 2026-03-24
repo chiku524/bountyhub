@@ -1,6 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { api } from '../utils/api'
 import type { User } from '../types'
+import { isDesktopApp } from '../utils/desktop'
+import {
+  clearDesktopSession,
+  getDesktopSessionId,
+  getDesktopUserSnapshot,
+  persistDesktopSession,
+} from '../utils/authSession'
 
 interface AuthContextType {
   user: User | null
@@ -31,9 +38,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Check if user is logged in on mount
+  // Check if user is logged in on mount; desktop: hydrate from snapshot for instant UI then verify
   useEffect(() => {
-    checkAuthStatus()
+    if (isDesktopApp()) {
+      const snap = getDesktopUserSnapshot()
+      const sid = getDesktopSessionId()
+      if (snap && sid) {
+        setUser(snap)
+        setLoading(false)
+      }
+    }
+    void checkAuthStatus()
   }, [])
 
   // Check for OAuth success parameter and refresh after auth loads
@@ -52,11 +67,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const userData = await api.getCurrentUser()
       if (userData) {
         setUser(userData)
+        if (isDesktopApp()) {
+          const sid = getDesktopSessionId()
+          if (sid) persistDesktopSession(sid, userData)
+        }
       } else {
         setUser(null)
+        clearDesktopSession()
       }
     } catch (_error) {
       setUser(null)
+      clearDesktopSession()
     } finally {
       setLoading(false)
     }
@@ -66,6 +87,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const result = await api.login({ email, password })
       setUser(result.user)
+      if (isDesktopApp() && result.sessionId) {
+        persistDesktopSession(result.sessionId, result.user)
+      }
       return { success: true }
     } catch (error) {
       return { success: false, error: error instanceof Error ? error.message : 'Login failed' }
@@ -76,12 +100,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const result = await api.signup({ email, password, username })
       setUser(result.user)
-      
-      // Add a small delay to ensure the session cookie is set before checking auth status
-      setTimeout(() => {
-        checkAuthStatus()
-      }, 100)
-      
+      if (isDesktopApp() && result.sessionId) {
+        persistDesktopSession(result.sessionId, result.user)
+      }
+      void checkAuthStatus()
       return { success: true }
     } catch (error) {
       return { success: false, error: error instanceof Error ? error.message : 'Signup failed' }
@@ -92,8 +114,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       await api.logout()
       setUser(null)
+      clearDesktopSession()
     } catch (error) {
       console.error('Logout failed:', error)
+      clearDesktopSession()
+      setUser(null)
     }
   }
 
@@ -107,8 +132,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const userData = await api.getCurrentUser()
       setUser(userData ?? null)
+      if (userData && isDesktopApp()) {
+        const sid = getDesktopSessionId()
+        if (sid) persistDesktopSession(sid, userData)
+      }
+      if (!userData) clearDesktopSession()
     } catch {
       setUser(null)
+      clearDesktopSession()
     }
   }
 

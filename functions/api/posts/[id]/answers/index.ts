@@ -1,5 +1,4 @@
 import { Hono } from 'hono'
-import { getCookie } from 'hono/cookie'
 import { createDb } from '../../../../../src/utils/db'
 import { getUserIdFromSession } from '../../../../../src/utils/auth'
 import { answers, users, votes, posts, answerCodeBlocks, profiles } from '../../../../../drizzle/schema'
@@ -65,7 +64,7 @@ app.get(async (c) => {
     )
 
     // Get current user's votes if authenticated
-    const sessionCookie = getCookie(c, 'session')
+    const sessionCookie = c.get('sessionId')
     let userVotes: Record<string, number> = {}
     
     if (sessionCookie) {
@@ -107,7 +106,7 @@ app.get(async (c) => {
 
 // Create a new answer
 app.post(async (c) => {
-  const sessionCookie = getCookie(c, 'session')
+  const sessionCookie = c.get('sessionId')
   
   if (!sessionCookie) {
     return c.json({ error: 'Not authenticated' }, 401)

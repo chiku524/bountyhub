@@ -10,15 +10,14 @@ import type { GitHubRepository } from '../types'
 
 export default function RepositoryDetail() {
   const { id } = useParams<{ id: string }>()
+  const idOk = Boolean(id?.trim())
   const { user } = useAuth()
   const [repo, setRepo] = useState<GitHubRepository | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!id) {
-      setError('Invalid repository')
-      setLoading(false)
+    if (!idOk || !id) {
       return
     }
     let cancelled = false
@@ -34,7 +33,7 @@ export default function RepositoryDetail() {
         if (!cancelled) setLoading(false)
       })
     return () => { cancelled = true }
-  }, [id])
+  }, [id, idOk])
 
   if (!user) {
     return (
@@ -46,6 +45,23 @@ export default function RepositoryDetail() {
             className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
           >
             Login
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  if (!idOk) {
+    return (
+      <div className="min-h-screen bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xs">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <ErrorMessage message="Invalid repository" />
+          <Link
+            to="/repositories"
+            className="mt-4 inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 font-medium"
+          >
+            <FiArrowLeft className="w-4 h-4" />
+            Back to Repositories
           </Link>
         </div>
       </div>

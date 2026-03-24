@@ -5,9 +5,9 @@ use std::net::{TcpListener, TcpStream};
 use std::sync::mpsc;
 use std::thread;
 use std::time::Duration;
-use tauri::{CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem};
-use tauri::LogicalPosition;
-use tauri::LogicalSize;
+use tauri::menu::{MenuBuilder, MenuItem};
+use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
+use tauri::{include_image, Emitter, LogicalPosition, LogicalSize, Manager, WebviewWindow};
 
 const WINDOW_LABEL_MAIN: &str = "main";
 const WINDOW_LABEL_SPLASH: &str = "splashscreen";
@@ -16,7 +16,7 @@ const INSTANCE_PORT: u16 = 45287;
 
 /// Returns current window logical size and position for persistence.
 #[tauri::command]
-fn get_window_state(window: tauri::Window) -> Result<serde_json::Value, String> {
+fn get_window_state(window: WebviewWindow) -> Result<serde_json::Value, String> {
     let scale = window.scale_factor().unwrap_or(1.0);
     let inner = window.inner_size().map_err(|e| e.to_string())?;
     let pos = window.outer_position().map_err(|e| e.to_string())?;
@@ -35,7 +35,7 @@ fn get_window_state(window: tauri::Window) -> Result<serde_json::Value, String> 
 /// Restores window to the given logical size and position.
 #[tauri::command]
 fn set_window_state(
-    window: tauri::Window,
+    window: WebviewWindow,
     width: u32,
     height: u32,
     x: i32,
@@ -65,9 +65,11 @@ fn focus_bountyhub(app: tauri::AppHandle) -> Result<(), String> {
 
 /// Opens WebView developer tools (debug builds only; no-op in release).
 #[tauri::command]
-fn open_devtools(window: tauri::Window) -> Result<(), String> {
+fn open_devtools(window: WebviewWindow) -> Result<(), String> {
     #[cfg(debug_assertions)]
-    window.open_devtools();
+    {
+        window.open_devtools();
+    }
     #[cfg(not(debug_assertions))]
     drop(window);
     Ok(())
@@ -76,10 +78,10 @@ fn open_devtools(window: tauri::Window) -> Result<(), String> {
 /// Closes the frameless splash window and shows the main app window.
 #[tauri::command]
 fn close_splash_and_show_main(app: tauri::AppHandle) -> Result<(), String> {
-    if let Some(splash) = app.get_window(WINDOW_LABEL_SPLASH) {
+    if let Some(splash) = app.get_webview_window(WINDOW_LABEL_SPLASH) {
         splash.close().map_err(|e| e.to_string())?;
     }
-    if let Some(main_win) = app.get_window(WINDOW_LABEL_MAIN) {
+    if let Some(main_win) = app.get_webview_window(WINDOW_LABEL_MAIN) {
         main_win.show().map_err(|e| e.to_string())?;
         main_win.set_focus().map_err(|e| e.to_string())?;
     }
@@ -87,12 +89,12 @@ fn close_splash_and_show_main(app: tauri::AppHandle) -> Result<(), String> {
 }
 
 fn focus_bountyhub_windows(app: &tauri::AppHandle) {
-    if let Some(w) = app.get_window(WINDOW_LABEL_SPLASH) {
+    if let Some(w) = app.get_webview_window(WINDOW_LABEL_SPLASH) {
         let _ = w.show();
         let _ = w.set_focus();
         return;
     }
-    if let Some(w) = app.get_window(WINDOW_LABEL_MAIN) {
+    if let Some(w) = app.get_webview_window(WINDOW_LABEL_MAIN) {
         let _ = w.unminimize();
         let _ = w.show();
         let _ = w.set_focus();
@@ -122,45 +124,25 @@ fn main() {
 
     let (tx_ipc, rx_ipc) = mpsc::channel::<()>();
 
-    thread::spawn(move || {
-        loop {
-            match listener.accept() {
-                Ok((_stream, _)) => {
-                    let _ = tx_ipc.send(());
-                }
-                Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
-                    thread::sleep(Duration::from_millis(120));
-                }
-                Err(_) => thread::sleep(Duration::from_millis(200)),
+    thread::spawn(move || loop {
+        match listener.accept() {
+            Ok((_stream, _)) => {
+                let _ = tx_ipc.send(());
             }
+            Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                thread::sleep(Duration::from_millis(120));
+            }
+            Err(_) => thread::sleep(Duration::from_millis(200)),
         }
     });
 
-    let open = CustomMenuItem::new("open".to_string(), "Open BountyHub");
-    let settings = CustomMenuItem::new("settings".to_string(), "Settings…");
-    let reload_tray = CustomMenuItem::new("reload_tray".to_string(), "Reload");
-    let about = CustomMenuItem::new("about".to_string(), "About BountyHub");
-    let check_updates = CustomMenuItem::new("check_updates".to_string(), "Check for Updates");
-    let sign_out = CustomMenuItem::new("sign_out".to_string(), "Log out");
-    let quit = CustomMenuItem::new("quit".to_string(), "Quit");
-    let tray_menu = SystemTrayMenu::new()
-        .add_item(open)
-        .add_native_item(SystemTrayMenuItem::Separator)
-        .add_item(settings)
-        .add_item(reload_tray)
-        .add_native_item(SystemTrayMenuItem::Separator)
-        .add_item(about)
-        .add_item(check_updates)
-        .add_native_item(SystemTrayMenuItem::Separator)
-        .add_item(sign_out)
-        .add_native_item(SystemTrayMenuItem::Separator)
-        .add_item(quit);
-
-    let system_tray = SystemTray::new().with_menu(tray_menu);
-
     tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
+        .plugin(tauri_plugin_shell::init())
         .setup(move |app| {
-            if let Some(w) = app.get_window(WINDOW_LABEL_MAIN) {
+            if let Some(w) = app.get_webview_window(WINDOW_LABEL_MAIN) {
                 let _ = w.center();
             }
 
@@ -169,9 +151,98 @@ fn main() {
             thread::spawn(move || {
                 while rx.recv().is_ok() {
                     let h = handle.clone();
-                    let _ = h.emit_all("instance-focus", true);
+                    let _ = h.emit("instance-focus", true);
                 }
             });
+
+            let tray_menu = MenuBuilder::new(app)
+                .item(&MenuItem::with_id(
+                    app,
+                    "open",
+                    "Open BountyHub",
+                    true,
+                    None::<&str>,
+                )?)
+                .separator()
+                .item(&MenuItem::with_id(
+                    app,
+                    "settings",
+                    "Settings…",
+                    true,
+                    None::<&str>,
+                )?)
+                .item(&MenuItem::with_id(
+                    app,
+                    "reload_tray",
+                    "Reload",
+                    true,
+                    None::<&str>,
+                )?)
+                .separator()
+                .item(&MenuItem::with_id(
+                    app,
+                    "about",
+                    "About BountyHub",
+                    true,
+                    None::<&str>,
+                )?)
+                .item(&MenuItem::with_id(
+                    app,
+                    "check_updates",
+                    "Check for Updates",
+                    true,
+                    None::<&str>,
+                )?)
+                .separator()
+                .item(&MenuItem::with_id(
+                    app,
+                    "sign_out",
+                    "Log out",
+                    true,
+                    None::<&str>,
+                )?)
+                .separator()
+                .item(&MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?)
+                .build()?;
+
+            let _tray = TrayIconBuilder::with_id("bountyhub-tray")
+                .icon_as_template(true)
+                .icon(include_image!("icons/icon.png"))
+                .menu(&tray_menu)
+                .show_menu_on_left_click(false)
+                .on_menu_event(move |app, event| match event.id.as_ref() {
+                    "open" => focus_bountyhub_windows(&app),
+                    "settings" => {
+                        let _ = app.emit("menu-preferences", ());
+                    }
+                    "reload_tray" => {
+                        let _ = app.emit("menu-reload", ());
+                    }
+                    "about" => {
+                        let _ = app.emit("menu-about", ());
+                    }
+                    "check_updates" => {
+                        let _ = app.emit("menu-check-updates", ());
+                    }
+                    "sign_out" => {
+                        let _ = app.emit("menu-logout", ());
+                    }
+                    "quit" => {
+                        app.exit(0);
+                    }
+                    _ => {}
+                })
+                .on_tray_icon_event(|tray, event| {
+                    if let TrayIconEvent::Click {
+                        button: MouseButton::Left,
+                        button_state: MouseButtonState::Up,
+                        ..
+                    } = event
+                    {
+                        focus_bountyhub_windows(tray.app_handle());
+                    }
+                })
+                .build(app)?;
 
             Ok(())
         })
@@ -183,41 +254,10 @@ fn main() {
             get_app_version,
             open_devtools,
         ])
-        .system_tray(system_tray)
-        .on_system_tray_event(|app, event| match event {
-            SystemTrayEvent::LeftClick { .. } => {
-                focus_bountyhub_windows(&app);
-            }
-            SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
-                "open" => {
-                    focus_bountyhub_windows(&app);
-                }
-                "settings" => {
-                    let _ = app.emit_all("menu-preferences", ());
-                }
-                "reload_tray" => {
-                    let _ = app.emit_all("menu-reload", ());
-                }
-                "about" => {
-                    let _ = app.emit_all("menu-about", ());
-                }
-                "check_updates" => {
-                    let _ = app.emit_all("menu-check-updates", ());
-                }
-                "sign_out" => {
-                    let _ = app.emit_all("menu-logout", ());
-                }
-                "quit" => {
-                    std::process::exit(0);
-                }
-                _ => {}
-            },
-            _ => {}
-        })
-        .on_window_event(|event| {
-            if let tauri::WindowEvent::CloseRequested { api, .. } = event.event() {
-                if event.window().label() == WINDOW_LABEL_MAIN {
-                    event.window().hide().ok();
+        .on_window_event(|window, event| {
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                if window.label() == WINDOW_LABEL_MAIN {
+                    let _ = window.hide();
                     api.prevent_close();
                 }
             }

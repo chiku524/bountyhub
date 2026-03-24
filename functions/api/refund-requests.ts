@@ -1,5 +1,4 @@
 import { Hono } from 'hono'
-import { getCookie } from 'hono/cookie'
 import { createDb } from '../../src/utils/db'
 import { getUserIdFromSession } from '../../src/utils/auth'
 import { refundRequests, refundRequestVotes, bounties, posts, users } from '../../drizzle/schema'
@@ -13,7 +12,7 @@ const app = new Hono<{ Bindings: Env }>()
 
 // Get all refund requests
 app.get(async (c) => {
-  const sessionId = getCookie(c, 'session')
+  const sessionId = c.get('sessionId')
   
   if (!sessionId) {
     return c.json({ error: 'Unauthorized' }, 401)
@@ -59,7 +58,7 @@ app.get(async (c) => {
 
 // Vote on a refund request
 app.post('/:id/vote', async (c) => {
-  const sessionId = getCookie(c, 'session')
+  const sessionId = c.get('sessionId')
   
   if (!sessionId) {
     return c.json({ error: 'Unauthorized' }, 401)
@@ -169,7 +168,7 @@ app.post('/:id/vote', async (c) => {
 
 // Get votes for a specific refund request
 app.get('/:id/votes', async (c) => {
-  const sessionId = getCookie(c, 'session')
+  const sessionId = c.get('sessionId')
   
   if (!sessionId) {
     return c.json({ error: 'Unauthorized' }, 401)

@@ -1,5 +1,4 @@
 import { Hono } from 'hono'
-import { getCookie } from 'hono/cookie'
 import { createDb } from '../../../src/utils/db'
 import { getUserIdFromSession } from '../../../src/utils/auth'
 import { users, profiles, posts, bookmarks, reputationHistory } from '../../../drizzle/schema'
@@ -21,7 +20,7 @@ const app = new Hono<{ Bindings: Env }>()
 app.route('/picture', pictureRoutes)
 
 app.get(async (c) => {
-  const sessionId = getCookie(c, 'session')
+  const sessionId = c.get('sessionId')
   
   if (!sessionId) {
     return c.json({ error: 'Unauthorized' }, 401)
@@ -152,7 +151,7 @@ app.get(async (c) => {
 })
 
 app.post(async (c) => {
-  const sessionId = getCookie(c, 'session')
+  const sessionId = c.get('sessionId')
   
   if (!sessionId) {
     return c.json({ error: 'Unauthorized' }, 401)

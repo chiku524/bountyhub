@@ -13,7 +13,7 @@ The same BountyHub web app runs as a **desktop application** using [Tauri](https
 - **Platform:**
   - **Windows:** [WebView2](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) (usually already installed with Edge)
   - **macOS:** Xcode Command Line Tools (`xcode-select --install`)
-  - **Linux:** `webkit2gtk`, `libayatana-appindicator3`, and build tools (see [Tauri prerequisites](https://tauri.app/v1/guides/getting-started/prerequisites))
+  - **Linux:** `webkit2gtk`, `libayatana-appindicator3`, and build tools (see [Tauri 2 prerequisites](https://tauri.app/start/prerequisites/))
 
 ## Commands
 

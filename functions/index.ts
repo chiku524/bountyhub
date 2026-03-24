@@ -2,6 +2,7 @@
 import { Hono } from 'hono'
 export { ChatRoomDO } from './durable-objects/ChatRoomDO'
 import { cors } from 'hono/cors'
+import { getRequestSessionId } from './utils/requestSession'
 import { logger } from 'hono/logger'
 import { prettyJSON } from 'hono/pretty-json'
 
@@ -68,7 +69,11 @@ const corsMiddleware = cors({
     'https://www.bountyhub.tech',
     'http://localhost:5173',
     'http://localhost:3000',
-    'http://localhost:3001'
+    'http://localhost:3001',
+    // Tauri desktop (production bundle)
+    'https://tauri.localhost',
+    'http://tauri.localhost',
+    'tauri://localhost',
   ],
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
@@ -78,6 +83,10 @@ const corsMiddleware = cors({
 
 // Middleware
 app.use('*', corsMiddleware)
+app.use('*', async (c, next) => {
+  c.set('sessionId', getRequestSessionId(c))
+  await next()
+})
 app.use('*', logger())
 app.use('*', prettyJSON())
 

@@ -1,7 +1,6 @@
 import { Hono } from 'hono';
 import { eq, desc, and, sql, ne, count } from 'drizzle-orm';
 import { chatRooms, chatMessages, chatRoomParticipants, users, profiles } from '../../../drizzle/schema';
-import { getCookie } from 'hono/cookie';
 import { createDb } from '../../../src/utils/db';
 import { getUserIdFromSession } from '../../../src/utils/auth';
 
@@ -40,7 +39,7 @@ chat.get('/ws', async (c) => {
 chat.get('/', async (c) => {
   try {
     const db = createDb(c.env.DB);
-    const sessionCookie = getCookie(c, 'session');
+    const sessionCookie = c.get('sessionId');
     const userId = sessionCookie ? await getUserIdFromSession(sessionCookie, db) : null;
 
     const allRooms = await db
@@ -94,7 +93,7 @@ chat.get('/', async (c) => {
 // Global chat room specific endpoints (must be before /:roomId routes)
 chat.post('/global-chat/join', async (c) => {
   try {
-    const sessionCookie = getCookie(c, 'session');
+    const sessionCookie = c.get('sessionId');
     if (!sessionCookie) {
       return c.json({ success: false, error: 'Unauthorized' }, 401);
     }
@@ -221,7 +220,7 @@ chat.get('/global-chat/messages', async (c) => {
 
 chat.post('/global-chat/messages', async (c) => {
   try {
-    const sessionCookie = getCookie(c, 'session');
+    const sessionCookie = c.get('sessionId');
     if (!sessionCookie) {
       return c.json({ success: false, error: 'Unauthorized' }, 401);
     }
@@ -353,7 +352,7 @@ chat.get('/:roomId', async (c) => {
 // Create new chat room (standalone public/private community room)
 chat.post('/', async (c) => {
   try {
-    const sessionCookie = getCookie(c, 'session');
+    const sessionCookie = c.get('sessionId');
     if (!sessionCookie) {
       return c.json({ success: false, error: 'Unauthorized' }, 401);
     }
@@ -465,7 +464,7 @@ chat.get('/:roomId/messages', async (c) => {
 // Send message to chat room
 chat.post('/:roomId/messages', async (c) => {
   try {
-    const sessionCookie = getCookie(c, 'session');
+    const sessionCookie = c.get('sessionId');
     if (!sessionCookie) {
       return c.json({ success: false, error: 'Unauthorized' }, 401);
     }
@@ -553,7 +552,7 @@ chat.post('/:roomId/messages', async (c) => {
 // Join chat room
 chat.post('/:roomId/join', async (c) => {
   try {
-    const sessionCookie = getCookie(c, 'session');
+    const sessionCookie = c.get('sessionId');
     if (!sessionCookie) {
       return c.json({ success: false, error: 'Unauthorized' }, 401);
     }
@@ -606,7 +605,7 @@ chat.post('/:roomId/join', async (c) => {
 // Leave chat room
 chat.post('/:roomId/leave', async (c) => {
   try {
-    const sessionCookie = getCookie(c, 'session');
+    const sessionCookie = c.get('sessionId');
     if (!sessionCookie) {
       return c.json({ success: false, error: 'Unauthorized' }, 401);
     }

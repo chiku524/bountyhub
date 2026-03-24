@@ -101,7 +101,7 @@ export default function Settings() {
   useEffect(() => {
     if (!isDesktop || activeTab !== 'desktop') return
     let cancelled = false
-    import('@tauri-apps/api/tauri')
+    import('@tauri-apps/api/core')
       .then(({ invoke }) => invoke<string>('get_app_version'))
       .then((v) => {
         if (!cancelled) setNativeAppVersion(v)

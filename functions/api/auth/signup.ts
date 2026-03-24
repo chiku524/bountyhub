@@ -53,8 +53,8 @@ app.post('/', async (c) => {
     }
     
     setCookie(c, 'session', sessionId, cookieOptions)
-    
-    return c.json({ user: result.user })
+
+    return c.json({ sessionId, user: result.user })
   }
   
   return c.json({ error: result.error || 'Signup failed' }, 400)

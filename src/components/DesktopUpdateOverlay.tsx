@@ -31,9 +31,10 @@ export function DesktopUpdateOverlay() {
               onClick={async () => {
                 if (isDesktopApp()) {
                   try {
-                    const { getCurrent } = await import('@tauri-apps/api/window')
-                    const win = getCurrent()
-                    await win.setSize({ type: 'Logical', width: FULL_WINDOW_WIDTH, height: FULL_WINDOW_HEIGHT })
+                    const { getCurrentWebviewWindow } = await import('@tauri-apps/api/webviewWindow')
+                    const { LogicalSize } = await import('@tauri-apps/api/dpi')
+                    const win = getCurrentWebviewWindow()
+                    await win.setSize(new LogicalSize(FULL_WINDOW_WIDTH, FULL_WINDOW_HEIGHT))
                     await win.center()
                   } catch (e) {
                     if (import.meta.env.DEV) console.debug('[DesktopUpdateOverlay] expand on Continue', e)

@@ -1,5 +1,4 @@
 import { Hono } from 'hono'
-import { getCookie } from 'hono/cookie'
 import { createDb } from '../../../src/utils/db'
 import { getUserIdFromSession } from '../../../src/utils/auth'
 
@@ -18,7 +17,7 @@ app.post(async (c) => {
     return c.json({ error: 'Media storage not configured' }, 503)
   }
 
-  const sessionId = getCookie(c, 'session')
+  const sessionId = c.get('sessionId')
   if (!sessionId) return c.json({ error: 'Unauthorized' }, 401)
 
   const db = createDb(c.env.DB)

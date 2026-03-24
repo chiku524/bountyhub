@@ -44,7 +44,7 @@ export function useDesktopMenuEvents() {
           .then((u) => unlistensRef.current.push(u))
         event
           .listen('instance-focus', () => {
-            import('@tauri-apps/api/tauri')
+            import('@tauri-apps/api/core')
               .then(({ invoke }) => invoke('focus_bountyhub'))
               .catch(() => {})
           })

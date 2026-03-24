@@ -33,10 +33,10 @@ export function useDesktopWindowState(isMainApp: boolean) {
 
     async function init() {
       try {
-        const { getCurrent } = await import('@tauri-apps/api/window')
-        const { invoke } = await import('@tauri-apps/api/tauri')
-        const win = getCurrent()
-        const w = win as unknown as { setMinSize?: (size: { type: string; width: number; height: number }) => Promise<void> }
+        const { getCurrentWebviewWindow } = await import('@tauri-apps/api/webviewWindow')
+        const { LogicalSize } = await import('@tauri-apps/api/dpi')
+        const { invoke } = await import('@tauri-apps/api/core')
+        const win = getCurrentWebviewWindow()
 
         if (saved) {
           await invoke('set_window_state', {
@@ -46,11 +46,11 @@ export function useDesktopWindowState(isMainApp: boolean) {
             y: saved.y,
           })
         } else {
-          await win.setSize({ type: 'Logical', width: FULL_WIDTH, height: FULL_HEIGHT })
+          await win.setSize(new LogicalSize(FULL_WIDTH, FULL_HEIGHT))
           await win.center()
         }
-        if (!cancelled && typeof w?.setMinSize === 'function') {
-          await w.setMinSize({ type: 'Logical', width: MIN_WIDTH, height: MIN_HEIGHT })
+        if (!cancelled) {
+          await win.setMinSize(new LogicalSize(MIN_WIDTH, MIN_HEIGHT))
         }
       } catch (e) {
         if (import.meta.env.DEV) console.debug('[useDesktopWindowState] init', e)
@@ -65,7 +65,7 @@ export function useDesktopWindowState(isMainApp: boolean) {
     if (!isDesktopApp() || !isMainApp) return
 
     const interval = setInterval(() => {
-      import('@tauri-apps/api/tauri')
+      import('@tauri-apps/api/core')
         .then(({ invoke }) => invoke<DesktopWindowState>('get_window_state'))
         .then((state) => saveWindowStateToStorage(state))
         .catch((e) => {

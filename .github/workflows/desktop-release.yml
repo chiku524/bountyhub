@@ -6,12 +6,12 @@
 # so the desktop app can auto-update on all platforms.
 #
 # Build time: First run ~15–18 min (Windows), ~10 min (Linux), ~4–5 min (macOS). Later runs faster
-# with rust-cache + sccache. Linux: wry patch output is cached to skip download. Frontend is built
-# once inside `tauri build` (beforeBuildCommand); do not add a separate npm run build.
+# with rust-cache + sccache. Frontend is built once inside `tauri build` (beforeBuildCommand);
+# do not add a separate npm run build.
 #
-# Required for auto-updates: set GitHub secret TAURI_PRIVATE_KEY (minisign private key used to sign installers).
-# Without it, .sig files are not produced and latest.json will have empty platforms (no auto-update).
-# Optional: TAURI_KEY_PASSWORD if the key has a password.
+# Required for auto-updates: GitHub secrets TAURI_PRIVATE_KEY + TAURI_KEY_PASSWORD (minisign private key
+# and optional password). The workflow exports both legacy names and Tauri 2 names (TAURI_SIGNING_*).
+# Without the private key, .sig files are not produced and latest.json will have empty platforms.
 #
 # Set VITE_GITHUB_RELEASES_URL in repo or env so /download page links work.
 
@@ -84,13 +84,6 @@ jobs:
           workspaces: 'src-tauri -> target'
           cache-on-failure: true
 
-      - name: Cache wry patch (Linux only; skip re-download when script unchanged)
-        if: matrix.os_name == 'linux'
-        uses: actions/cache@v4
-        with:
-          path: patches/wry
-          key: wry-patch-${{ hashFiles('scripts/patch-wry-linux.cjs') }}
-
       - name: Install Linux dependencies
         if: matrix.os_name == 'linux'
         run: |
@@ -110,9 +103,6 @@ jobs:
       - name: Generate desktop icons
         run: npm run desktop:icons
 
-      - name: Patch wry for Linux (webkit2gtk SettingsExt)
-        run: node scripts/patch-wry-linux.cjs
-
       # Single frontend build: beforeBuildCommand (npm run build) runs inside tauri build; avoid building twice.
       - name: Build Tauri app (with updater signing if TAURI_PRIVATE_KEY is set)
         run: npm run desktop:build
@@ -122,6 +112,8 @@ jobs:
           SCCACHE_GHA_ENABLED: "true"
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
 
       - name: Upload Windows artifacts
         if: matrix.os_name == 'windows'

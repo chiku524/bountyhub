@@ -20,7 +20,7 @@ const app = new Hono<{ Bindings: Env }>()
 // Shared connect handler logic - returns redirectUrl or error response
 async function handleConnect(c: any) {
   const db = createDb(c.env.DB)
-  const sessionCookie = getCookie(c, 'session')
+  const sessionCookie = c.get('sessionId')
 
   if (!sessionCookie) {
     return c.json({ error: 'Not authenticated' }, 401)
@@ -94,7 +94,7 @@ app.get('/connect', async (c) => {
 app.post('/disconnect', async (c) => {
   try {
     const db = createDb(c.env.DB)
-    const sessionCookie = getCookie(c, 'session')
+    const sessionCookie = c.get('sessionId')
     
     if (!sessionCookie) {
       return c.json({ error: 'Not authenticated' }, 401)
@@ -172,7 +172,7 @@ app.post('/disconnect', async (c) => {
 app.get('/profile', async (c) => {
   try {
     const db = createDb(c.env.DB)
-    const sessionCookie = getCookie(c, 'session')
+    const sessionCookie = c.get('sessionId')
     
     if (!sessionCookie) {
       return c.json({ error: 'Not authenticated' }, 401)

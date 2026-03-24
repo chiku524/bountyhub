@@ -1,5 +1,4 @@
 import { Hono } from 'hono'
-import { getCookie } from 'hono/cookie'
 
 interface Env {
   DB: any
@@ -8,7 +7,7 @@ interface Env {
 const app = new Hono<{ Bindings: Env }>()
 
 app.post(async (c) => {
-  const sessionId = getCookie(c, 'session')
+  const sessionId = c.get('sessionId')
   
   if (!sessionId) {
     return c.json({ error: 'Unauthorized' }, 401)

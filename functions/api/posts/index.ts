@@ -1,5 +1,4 @@
 import { Hono } from 'hono'
-import { getCookie } from 'hono/cookie'
 import { createDb } from '../../../src/utils/db'
 import { getUserIdFromSession } from '../../../src/utils/auth'
 import { posts, postTags, bounties, media, codeBlocks, users, votes, tags, profiles, virtualWallets } from '../../../drizzle/schema'
@@ -23,7 +22,7 @@ const app = new Hono<{ Bindings: Env }>()
 
 // GET all posts with pagination
 app.get(async (c) => {
-  const sessionId = getCookie(c, 'session')
+  const sessionId = c.get('sessionId')
   const db = createDb(c.env.DB)
   
   try {
@@ -200,7 +199,7 @@ app.post(async (c) => {
     const { title, content, selectedTags, codeBlocks: codeBlocksData, media: mediaData, hasBounty, bountyAmount, bountyDuration } = body
     
     // Get user ID from session
-    const sessionCookie = getCookie(c, 'session')
+    const sessionCookie = c.get('sessionId')
     if (!sessionCookie) {
       return c.json({ error: 'Not authenticated' }, 401)
     }
@@ -547,7 +546,7 @@ app.put('/:id', async (c) => {
     const db = createDb(c.env.DB)
     const id = c.req.param('id')
     if (!id) return c.json({ error: 'Missing post id' }, 400)
-    const sessionCookie = getCookie(c, 'session')
+    const sessionCookie = c.get('sessionId')
     if (!sessionCookie) return c.json({ error: 'Not authenticated' }, 401)
     const userId = await getUserIdFromSession(sessionCookie, db)
     if (!userId) return c.json({ error: 'Invalid session' }, 401)
@@ -681,7 +680,7 @@ app.delete('/:id', async (c) => {
     const id = c.req.param('id')
     if (!id) return c.json({ error: 'Missing post id' }, 400)
     
-    const sessionCookie = getCookie(c, 'session')
+    const sessionCookie = c.get('sessionId')
     if (!sessionCookie) return c.json({ error: 'Not authenticated' }, 401)
     
     const userId = await getUserIdFromSession(sessionCookie, db)

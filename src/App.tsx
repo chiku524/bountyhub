@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo } from 'react'
-import { Routes, Route, useLocation, Navigate } from 'react-router-dom'
+import { Routes, Route, useLocation, Navigate, useParams } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
 import { AuthProvider, useAuth } from './contexts/AuthProvider'
 import { SolanaWalletProvider } from './contexts/SolanaWalletProvider'
@@ -72,6 +72,11 @@ function RouteFallback() {
   )
 }
 
+function RepositoryDetailRoute() {
+  const { id } = useParams<{ id: string }>()
+  return <RepositoryDetail key={id ?? ''} />
+}
+
 function DocsAwareRoutes() {
   const location = useLocation()
   const routes = (
@@ -116,7 +121,7 @@ function DocsAwareRoutes() {
         <Route path="/bug-bounty/campaigns/:id" element={<BugBountyCampaignDetail />} />
         <Route path="/bug-bounty/campaigns/:id/submit" element={<BugBountySubmit />} />
         <Route path="/repositories" element={<Repositories />} />
-        <Route path="/repositories/:id" element={<RepositoryDetail />} />
+        <Route path="/repositories/:id" element={<RepositoryDetailRoute />} />
         <Route path="/contributions" element={<Contributions />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

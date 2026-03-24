@@ -1,5 +1,4 @@
 import { Hono } from 'hono'
-import { getCookie } from 'hono/cookie'
 import { createDb } from '../../src/utils/db'
 import { getUserIdFromSession } from '../../src/utils/auth'
 import { notifications } from '../../drizzle/schema'
@@ -13,7 +12,7 @@ const app = new Hono<{ Bindings: Env }>()
 
 // Get user notifications
 app.get(async (c) => {
-  const sessionId = getCookie(c, 'session')
+  const sessionId = c.get('sessionId')
   
   if (!sessionId) {
     return c.json({ error: 'Unauthorized' }, 401)
@@ -59,7 +58,7 @@ app.get(async (c) => {
 
 // Get unread count only (for efficient polling)
 app.get('/unread-count', async (c) => {
-  const sessionId = getCookie(c, 'session')
+  const sessionId = c.get('sessionId')
   
   if (!sessionId) {
     return c.json({ error: 'Unauthorized' }, 401)
@@ -91,7 +90,7 @@ app.get('/unread-count', async (c) => {
 
 // Mark notification as read
 app.post('/:id/read', async (c) => {
-  const sessionId = getCookie(c, 'session')
+  const sessionId = c.get('sessionId')
   
   if (!sessionId) {
     return c.json({ error: 'Unauthorized' }, 401)
@@ -128,7 +127,7 @@ app.post('/:id/read', async (c) => {
 
 // Mark all notifications as read
 app.post('/read-all', async (c) => {
-  const sessionId = getCookie(c, 'session')
+  const sessionId = c.get('sessionId')
   
   if (!sessionId) {
     return c.json({ error: 'Unauthorized' }, 401)
@@ -160,7 +159,7 @@ app.post('/read-all', async (c) => {
 
 // Delete notification
 app.delete('/:id', async (c) => {
-  const sessionId = getCookie(c, 'session')
+  const sessionId = c.get('sessionId')
   
   if (!sessionId) {
     return c.json({ error: 'Unauthorized' }, 401)

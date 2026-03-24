@@ -1,5 +1,4 @@
 import { Hono } from 'hono'
-import { getCookie } from 'hono/cookie'
 import { getUserIdFromSession } from '../../../src/utils/auth'
 import { createDb } from '../../../src/utils/db'
 import { eq } from 'drizzle-orm'
@@ -13,7 +12,7 @@ interface Env {
 const app = new Hono<{ Bindings: Env }>()
 
 app.get('/', async (c) => {
-  const sessionId = getCookie(c, 'session')
+  const sessionId = c.get('sessionId')
   
   if (!sessionId) {
     return c.json({ error: 'Unauthorized' }, 401)

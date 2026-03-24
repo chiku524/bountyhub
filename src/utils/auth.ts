@@ -312,7 +312,8 @@ function getReputationLevel(points: number): string {
 }
 
 // Session management helpers
-export async function createSession(userId: string, db: Db, expiresInHours = 24): Promise<string> {
+/** Default 30 days — keep aligned with session cookie maxAge in auth routes. */
+export async function createSession(userId: string, db: Db, expiresInHours = 720): Promise<string> {
   try {
     const sessionId = crypto.randomUUID()
     const now = new Date()

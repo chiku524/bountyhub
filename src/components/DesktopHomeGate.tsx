@@ -37,24 +37,19 @@ export function DesktopHomeGate() {
 
     const run = async () => {
       try {
-        const { checkUpdate, installUpdate, onUpdaterEvent } = await import('@tauri-apps/api/updater')
-        const { relaunch } = await import('@tauri-apps/api/process')
+        const { check } = await import('@tauri-apps/plugin-updater')
+        const { relaunch } = await import('@tauri-apps/plugin-process')
 
-        const update = await checkUpdate()
+        const update = await check()
         if (updateCancelledRef.current) return
 
-        if (update?.shouldUpdate) {
-          const manifest = update.manifest as { version?: string } | undefined
-          const version = typeof manifest?.version === 'string' ? manifest.version : null
-          setPendingUpdateVersion?.(version)
+        if (update) {
+          setPendingUpdateVersion?.(update.version)
           setPhase?.('downloading')
-          const unlisten = await onUpdaterEvent(({ status }) => {
-            if (status === 'DONE') setPhase?.('restarting')
-            else if (status === 'PENDING') setPhase?.('installing')
+          await update.downloadAndInstall((ev) => {
+            if (ev.event === 'Finished') setPhase?.('installing')
           })
-          await installUpdate()
-          unlisten()
-          setPhase?.('installing')
+          setPhase?.('restarting')
           await relaunch()
           return
         }
@@ -85,7 +80,7 @@ export function DesktopHomeGate() {
 
     void (async () => {
       try {
-        const { invoke } = await import('@tauri-apps/api/tauri')
+        const { invoke } = await import('@tauri-apps/api/core')
         await invoke('close_splash_and_show_main')
       } catch {
         void 0
@@ -97,6 +92,7 @@ export function DesktopHomeGate() {
 
   return (
     <main className="desktop-splash" aria-busy={!postUpdate}>
+      <div className="desktop-splash__animated-bg" aria-hidden />
       <div className="desktop-splash__content">
         <div className="desktop-splash__symbol" aria-hidden>
           <img src="/logo.svg" alt="" width={72} height={72} />

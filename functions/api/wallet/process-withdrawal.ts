@@ -1,5 +1,4 @@
 import { Hono } from 'hono'
-import { getCookie } from 'hono/cookie'
 import { createDb } from '../../../src/utils/db'
 import { getUserIdFromSession } from '../../../src/utils/auth'
 import { transactionLogs, virtualWallets } from '../../../drizzle/schema'
@@ -26,7 +25,7 @@ app.post('/', async (c) => {
     }
 
     // Get authenticated user
-    const sessionCookie = getCookie(c, 'session')
+    const sessionCookie = c.get('sessionId')
     if (!sessionCookie) {
       return c.json({ error: 'Not authenticated' }, 401)
     }
