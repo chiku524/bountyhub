@@ -42,7 +42,7 @@
   },
   "productName": "BountyHub",
   "mainBinaryName": "BountyHub",
-  "version": "1.1.28",
+  "version": "1.1.29",
   "identifier": "tech.bountyhub.desktop",
   "plugins": {
     "updater": {
