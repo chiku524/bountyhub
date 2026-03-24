@@ -32,7 +32,8 @@ fs.writeFileSync(packagePath, JSON.stringify(pkg, null, 2) + '\n');
 console.log('Set package.json version to', version);
 
 const tauriConf = JSON.parse(fs.readFileSync(tauriConfPath, 'utf8'));
-if (!tauriConf.package) tauriConf.package = {};
-tauriConf.package.version = version;
+// Tauri 2: top-level `version` only (no `package` — that was v1 and breaks schema validation).
+tauriConf.version = version;
+delete tauriConf.package;
 fs.writeFileSync(tauriConfPath, JSON.stringify(tauriConf, null, 2) + '\n');
-console.log('Set tauri.conf.json package.version to', version);
+console.log('Set tauri.conf.json version to', version);
