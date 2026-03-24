@@ -92,7 +92,6 @@ export function DesktopHomeGate() {
 
   return (
     <main className="desktop-splash" aria-busy={!postUpdate}>
-      <div className="desktop-splash__animated-bg" aria-hidden />
       <div className="desktop-splash__content">
         <div className="desktop-splash__symbol" aria-hidden>
           <img src="/logo.svg" alt="" width={72} height={72} />

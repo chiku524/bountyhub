@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { Routes, Route, useLocation, Navigate, useParams } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
 import { AuthProvider, useAuth } from './contexts/AuthProvider'
@@ -134,13 +134,9 @@ function DocsAwareRoutes() {
   )
 }
 
-/** Root "/" route: desktop uses gate (VibeMiner-style), web uses landing. */
+/** Root "/" route: desktop uses splash gate (dice.express / VibeMiner-style), web uses marketing landing. */
 function RootHomeElement() {
-  const isDesktop = isDesktopApp()
-  return useMemo(
-    () => (isDesktop ? <DesktopHomeGate /> : <Home />),
-    [isDesktop]
-  )
+  return isDesktopApp() ? <DesktopHomeGate /> : <Home />
 }
 
 function AppContent() {
@@ -207,12 +203,19 @@ function AppContent() {
     }
   }
   
+  const hideCanvasOnDesktopSplash =
+    isDesktop &&
+    (location.pathname === '/' ||
+      location.pathname === '/login' ||
+      location.pathname === '/signup' ||
+      location.pathname === '/launch')
+
   return (
     <ErrorBoundary>
       {/* Desktop: update status mini-app when installing */}
       {isDesktop && desktopUpdate?.phase !== 'idle' && <DesktopUpdateOverlay />}
-      {/* Animated Background - Canvas only, no children */}
-      <AnimatedBackground />
+      {/* Web + desktop main app: canvas. Hidden on splash/auth/launch (dice.express–style flat intro). */}
+      {!hideCanvasOnDesktopSplash && <AnimatedBackground />}
       
       {/* Light/Dark mode container - Always flex-col; data-desktop for app-like styling */}
       <div className="relative z-10 min-h-screen w-full bg-white/5 dark:bg-neutral-900/5 transition-colors duration-200 flex flex-col" data-desktop={isDesktop ? 'true' : undefined}>

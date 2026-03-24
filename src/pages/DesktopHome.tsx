@@ -138,11 +138,10 @@ export default function DesktopHome() {
         description="Sign in or create an account to use BountyHub on desktop."
       />
       {/* Single full-viewport background; the actual window is small then full (no inner fake window) */}
-      <div className="fixed inset-0 z-20 relative flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-indigo-950/98 via-neutral-950 to-violet-950/80">
-        <div className="desktop-splash__animated-bg" aria-hidden />
+      <div className="desktop-intro-canvas flex flex-col items-center justify-center">
         {/* Welcome back: brief message when logged-in user transitions to app home */}
         {showWelcomeBack && (
-          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-gradient-to-br from-indigo-950/98 via-neutral-950 to-violet-950/80 animate-fade-in">
+          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#0a0a0f]/95 animate-fade-in">
             <div className="flex flex-col items-center gap-3 animate-intro-slide-in">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-violet-500 shadow-lg">
                 <FiAward className="h-6 w-6 text-white" aria-hidden />

@@ -42,7 +42,7 @@
   },
   "productName": "BountyHub",
   "mainBinaryName": "BountyHub",
-  "version": "1.1.29",
+  "version": "1.1.30",
   "identifier": "tech.bountyhub.desktop",
   "plugins": {
     "updater": {
@@ -56,6 +56,7 @@
     }
   },
   "app": {
+    "withGlobalTauri": true,
     "windows": [
       {
         "label": "main",
