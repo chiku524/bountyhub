@@ -1,23 +1,50 @@
 import React from 'react'
 
-interface LoadingSpinnerProps {
+const ORBIT_DEG = [0, 120, 240] as const
+
+export interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg'
   className?: string
+  variant?: 'default' | 'inverse'
+  /** Use inside buttons or inline with text */
+  inline?: boolean
+  /** Screen reader text; use false when a parent already exposes busy state */
+  label?: string | false
 }
 
-export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ 
-  size = 'md', 
-  className = '' 
+export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
+  size = 'md',
+  className = '',
+  variant = 'default',
+  inline = false,
+  label = 'Loading',
 }) => {
-  const sizeClasses = {
-    sm: 'w-4 h-4',
-    md: 'w-8 h-8',
-    lg: 'w-12 h-12'
-  }
+  const sizeClass =
+    size === 'sm' ? 'bounty-hub-spinner--sm' : size === 'lg' ? 'bounty-hub-spinner--lg' : 'bounty-hub-spinner--md'
+  const variantClass = variant === 'inverse' ? 'bounty-hub-spinner--inverse' : ''
 
   return (
-    <div className={`flex justify-center items-center ${className}`}>
-      <div className={`${sizeClasses[size]} animate-spin rounded-full border-2 border-neutral-200 dark:border-neutral-600 border-t-indigo-500 dark:border-t-indigo-400`}></div>
+    <div
+      className={`${inline ? 'inline-flex' : 'flex'} items-center justify-center ${className}`}
+      role={label === false ? undefined : 'status'}
+      aria-live={label === false ? undefined : 'polite'}
+    >
+      {label !== false ? <span className="sr-only">{label}</span> : null}
+      <span className={`bounty-hub-spinner ${sizeClass} ${variantClass}`} aria-hidden>
+        <span className="bounty-hub-spinner__track" />
+        <span className="bounty-hub-spinner__orbit">
+          {ORBIT_DEG.map((deg) => (
+            <span
+              key={deg}
+              className="bounty-hub-spinner__dot"
+              style={{ transform: `rotate(${deg}deg) translateY(calc(-1 * var(--bounty-orbit-r)))` }}
+            />
+          ))}
+        </span>
+        <span className="bounty-hub-spinner__coin">
+          <span className="bounty-hub-spinner__coin-glare" />
+        </span>
+      </span>
     </div>
   )
 }
@@ -40,4 +67,4 @@ export const PostSkeleton: React.FC = () => {
       </div>
     </div>
   )
-} 
+}

@@ -4,6 +4,7 @@ import { FiArrowLeft } from 'react-icons/fi'
 import { useAuth } from '../contexts/AuthProvider'
 import { config } from '../utils/config'
 import { isDesktopApp } from '../utils/desktop'
+import { LoadingSpinner } from '../components/LoadingSpinner'
 
 export default function Signup() {
   const [email, setEmail] = useState('')
@@ -160,10 +161,7 @@ export default function Signup() {
                 }`}
               >
                 {loading && (
-                  <span
-                    className="inline-block size-4 shrink-0 animate-spin rounded-full border-2 border-white/35 border-t-white"
-                    aria-hidden
-                  />
+                  <LoadingSpinner size="sm" variant="inverse" inline label={false} className="shrink-0" />
                 )}
                 <span>{loading ? 'Creating account…' : 'Create account'}</span>
               </button>

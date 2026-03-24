@@ -7,6 +7,7 @@ import { config } from '../utils/config'
 import { useAuth } from '../contexts/AuthProvider'
 import { useToast } from '../contexts/ToastContext'
 import type { User, Post, Bookmark, ReputationHistory } from '../types'
+import { LoadingSpinner } from '../components/LoadingSpinner'
 
 interface ProfileData {
   firstName: string | null
@@ -208,7 +209,7 @@ const ProfilePictureUpload = ({ currentPicture, username, onPictureUpdate }: { c
       />
       {isUploading && (
         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+          <LoadingSpinner size="md" variant="inverse" />
         </div>
       )}
     </div>
@@ -408,7 +409,7 @@ export default function Profile() {
           </div>
           <div className="bg-white/80 dark:bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)] dark:shadow-[0_0_15px_rgba(139,92,246,0.3)]">
             <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-500"></div>
+              <LoadingSpinner size="md" />
               <span className="ml-3 text-neutral-600 dark:text-gray-300">Loading profile...</span>
             </div>
           </div>

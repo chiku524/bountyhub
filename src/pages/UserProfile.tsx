@@ -6,6 +6,7 @@ import type { User, Post } from '../types'
 import { FiThumbsUp, FiEdit2, FiCamera, FiStar, FiShield } from 'react-icons/fi'
 import { FaGithub, FaTwitter, FaLinkedin, FaInstagram, FaFacebook, FaYoutube, FaTiktok, FaDiscord, FaReddit, FaMedium, FaStackOverflow, FaDev } from 'react-icons/fa'
 import IntegrityRatingModal from '../components/IntegrityRatingModal'
+import { LoadingSpinner } from '../components/LoadingSpinner'
 
 const DEFAULT_PROFILE_PICTURE = 'https://api.dicebear.com/7.x/initials/svg?seed='
 
@@ -401,7 +402,7 @@ export default function UserProfile() {
           </div>
           <div className="bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
             <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-500"></div>
+              <LoadingSpinner size="md" />
               <span className="ml-3 text-gray-300">Loading profile...</span>
             </div>
           </div>

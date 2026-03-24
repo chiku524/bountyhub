@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { FiSend, FiMessageSquare, FiX, FiMessageCircle, FiSmile, FiImage, FiGrid, FiUsers, FiChevronLeft, FiChevronDown, FiPlusCircle } from 'react-icons/fi';
 import type { Team } from '../types';
 import { useChatWebSocket } from '../hooks/useChatWebSocket';
+import { LoadingSpinner } from './LoadingSpinner';
 
 // Simple emoji data
 const EMOJIS = [
@@ -522,7 +523,7 @@ const ChatSidebar: React.FC = () => {
           <>
         {loadingChat ? (
           <div className="flex-1 flex items-center justify-center p-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-400" />
+            <LoadingSpinner size="md" />
           </div>
         ) : (
         <>
@@ -669,7 +670,7 @@ const ChatSidebar: React.FC = () => {
               aria-label="Send message"
             >
               {sending ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <LoadingSpinner size="sm" variant="inverse" label={false} className="min-h-0" />
               ) : (
                 <FiSend />
               )}

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { api } from '../utils/api'
 import type { ReputationHistory } from '../types'
 import { FiThumbsUp, FiArrowLeft } from 'react-icons/fi'
+import { LoadingSpinner } from '../components/LoadingSpinner'
 
 function getActivityDescription(action: string): string {
   const descriptions: { [key: string]: string } = {
@@ -66,7 +67,7 @@ export default function ProfileActivity() {
           </div>
           <div className="bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
             <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-500"></div>
+              <LoadingSpinner size="md" />
               <span className="ml-3 text-gray-300">Loading activity...</span>
             </div>
           </div>

@@ -36,6 +36,11 @@ async function main() {
     const jpgName = 'logo-1024.jpg';
     await sharp(logoBuf).resize(1024, 1024).jpeg({ quality: 92 }).toFile(path.join(publicDir, jpgName));
     outputs.push(jpgName);
+    // iOS / Safari “Add to Home Screen” (recommended 180×180)
+    await sharp(logoBuf).resize(180, 180).png().toFile(path.join(publicDir, 'apple-touch-icon.png'));
+    outputs.push('apple-touch-icon.png');
+    await sharp(logoBuf).resize(32, 32).png().toFile(path.join(publicDir, 'favicon-32.png'));
+    outputs.push('favicon-32.png');
   }
 
   // OG / social share (1200x630) - read as UTF-8 buffer to avoid encoding issues

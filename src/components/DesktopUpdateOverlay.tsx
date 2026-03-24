@@ -1,5 +1,6 @@
 import { useDesktopUpdate } from '../contexts/DesktopUpdateContext'
 import { isDesktopApp } from '../utils/desktop'
+import { LoadingSpinner } from './LoadingSpinner'
 import './desktop-update-overlay.css'
 
 /** Full app window when dismissing error overlay (matches useDesktopWindowState defaults) */
@@ -74,7 +75,9 @@ export function DesktopUpdateOverlay() {
           <img src="/logo.svg" alt="" width={56} height={56} />
         </div>
         <p className="desktop-update-overlay__name">BountyHub</p>
-        <div className="desktop-update-overlay__spinner" aria-hidden />
+        <div className="desktop-update-overlay__spinner">
+          <LoadingSpinner size="md" variant="inverse" label={false} />
+        </div>
         <p className="desktop-update-overlay__message">{label}</p>
       </div>
     </div>

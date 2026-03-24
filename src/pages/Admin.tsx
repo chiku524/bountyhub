@@ -199,7 +199,7 @@ const Admin: React.FC = () => {
                       </select>
                       {updatingUser === user.id && (
                         <div className="inline-block ml-2">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                          <LoadingSpinner size="sm" label={false} className="min-h-0" />
                         </div>
                       )}
                     </td>

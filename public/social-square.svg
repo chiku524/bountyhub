@@ -16,21 +16,24 @@
       <stop offset="0%" stop-color="#22d3ee"/>
       <stop offset="100%" stop-color="#a78bfa"/>
     </linearGradient>
+    <linearGradient id="logo-gold" x1="30%" y1="0%" x2="70%" y2="100%">
+      <stop offset="0%" stop-color="#fde68a"/>
+      <stop offset="45%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
   </defs>
   <rect width="1080" height="1080" fill="url(#bg)"/>
   <!-- Centered hub logo (large) -->
   <g transform="translate(358, 280) scale(5.7)">
     <rect width="64" height="64" rx="14" fill="url(#logo-bg)"/>
-    <circle cx="32" cy="30" r="11" fill="none" stroke="url(#logo-accent)" stroke-width="2" opacity="0.95"/>
-    <circle cx="18" cy="22" r="5" fill="#22d3ee" opacity="0.95"/>
-    <circle cx="46" cy="22" r="5" fill="#a78bfa" opacity="0.95"/>
-    <circle cx="32" cy="48" r="5" fill="#22d3ee" opacity="0.95"/>
-    <path d="M24.5 27 L20 24" stroke="#67e8f9" stroke-width="1.4" opacity="0.9" stroke-linecap="round"/>
-    <path d="M39.5 27 L44 24" stroke="#c4b5fd" stroke-width="1.4" opacity="0.9" stroke-linecap="round"/>
-    <path d="M32 37 L32 43" stroke="#67e8f9" stroke-width="1.4" opacity="0.9" stroke-linecap="round"/>
-    <circle cx="32" cy="30" r="5" fill="#e0e7ff" opacity="0.95"/>
+    <path d="M 21 19 L 13 32 L 21 45" fill="none" stroke="url(#logo-accent)" stroke-width="2.35" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 43 19 L 51 32 L 43 45" fill="none" stroke="url(#logo-accent)" stroke-width="2.35" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 32 18.5 C 25.8 18.5 21.2 23.2 21.2 28.8 C 21.2 32.4 23.6 35.2 27.2 36.1 L 27.2 38.2" fill="none" stroke="#e0e7ff" stroke-width="2.35" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="32" cy="42.2" r="2.5" fill="#e0e7ff"/>
+    <circle cx="32" cy="52.5" r="5.8" fill="url(#logo-gold)"/>
+    <path d="M 32 48.8 V 56.2 M 28.8 50.8 H 35.2" stroke="#78350f" stroke-width="1" stroke-linecap="round" opacity="0.45"/>
   </g>
   <text x="540" y="720" fill="white" font-family="system-ui, -apple-system, sans-serif" font-size="64" font-weight="700" text-anchor="middle">bountyhub</text>
   <text x="540" y="800" fill="rgba(255,255,255,0.9)" font-family="system-ui, sans-serif" font-size="28" text-anchor="middle">Decentralized Bounty Platform</text>
-  <text x="540" y="870" fill="#22d3ee" font-family="system-ui, sans-serif" font-size="32" font-weight="600" text-anchor="middle">Ask � Answer � Earn � Solana</text>
+  <text x="540" y="870" fill="#22d3ee" font-family="system-ui, sans-serif" font-size="32" font-weight="600" text-anchor="middle">Ask · Answer · Earn · Solana</text>
 </svg>

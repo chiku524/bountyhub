@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { FiUpload, FiVideo, FiX } from 'react-icons/fi';
 import { useToast } from '../contexts/ToastContext';
 import { api } from '../utils/api';
+import { LoadingSpinner } from './LoadingSpinner';
 
 interface MediaUploadProps {
   onMediaUpload: (media: { type: string; url: string; thumbnailUrl?: string; isScreenRecording: boolean }) => void;
@@ -389,7 +390,7 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
 
       {(isRecording || isUploading) && (
         <div className="flex items-center gap-2 text-violet-400">
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-violet-400"></div>
+          <LoadingSpinner size="sm" label={false} className="min-h-0" />
           <span>
             {isRecording ? 'Recording...' : 'Uploading...'}
           </span>
