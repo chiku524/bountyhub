@@ -58,24 +58,28 @@ function syncSvgAssetsFromLogo(logoSvgRaw) {
   const faviconSvg = logoSvg.replace(/width="64" height="64"/, 'width="32" height="32"');
   fs.writeFileSync(faviconPath, faviconSvg, 'utf8');
 
+  // Match the outer logo <g> through its closing </g> only (logo embed contains nested <g> for filter).
+  // A naive [\s\S]*?</g> stops at the first inner </g> and corrupts the SVG on every sync.
   const templates = [
     {
       file: 'og-image.svg',
       idPrefix: 'oglx',
       includeAccent: false,
-      gRe: /<g transform="translate\(420, 100\) scale\(5\.625\)">[\s\S]*?<\/g>/,
+      gRe:
+        /<g transform="translate\(420, 100\) scale\(5\.625\)">[\s\S]*?<\/g>(?=\s*\n  <!-- Title \+ tagline centered under logo)/,
     },
     {
       file: 'social-square.svg',
       idPrefix: 'sqlx',
       includeAccent: true,
-      gRe: /<g transform="translate\(358, 280\) scale\(5\.7\)">[\s\S]*?<\/g>/,
+      gRe: /<g transform="translate\(358, 280\) scale\(5\.7\)">[\s\S]*?<\/g>(?=\s*\n  <text x="540")/,
     },
     {
       file: 'social-banner.svg',
       idPrefix: 'bnlx',
       includeAccent: true,
-      gRe: /<g transform="translate\(120, 125\) scale\(3\.9\)">[\s\S]*?<\/g>/,
+      gRe:
+        /<g transform="translate\(120, 125\) scale\(3\.9\)">[\s\S]*?<\/g>(?=\s*\n  <!-- Title \+ tagline -->\n  <text x="420")/,
     },
   ];
 
