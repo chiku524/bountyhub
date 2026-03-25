@@ -89,14 +89,14 @@ export default function Home() {
     return num.toString()
   }
 
-  const formatCurrency = (amount: string) => {
+  const formatBbux = (amount: string) => {
     const num = parseFloat(amount)
     if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + 'M SOL'
+      return (num / 1000000).toFixed(1) + 'M BBUX'
     } else if (num >= 1000) {
-      return (num / 1000).toFixed(1) + 'K SOL'
+      return (num / 1000).toFixed(1) + 'K BBUX'
     }
-    return num.toFixed(2) + ' SOL'
+    return num.toFixed(2) + ' BBUX'
   }
 
   const scrollToSection = (sectionId: string) => {
@@ -109,8 +109,8 @@ export default function Home() {
   return (
     <>
       <PageMetadata 
-        title="bountyhub — Q&A bounties & security bug bounties on Solana"
-        description="Ask questions with SOL rewards, answer to earn, and run security bug bounty campaigns tied to your GitHub repositories — all on bountyhub with Solana payouts, submissions, and reviews."
+        title="bountyhub — Q&A bounties & security bug bounties"
+        description="Ask questions with BBUX rewards, answer to earn, and run security bug bounty campaigns tied to your GitHub repositories. Bounties settle on your in-platform balance; deposit SOL to fund BBUX and withdraw SOL when you cash out."
         keywords="bounty, bug bounty, security, GitHub, cryptocurrency, Solana, blockchain, rewards, questions, answers, BBUX, decentralized, open source"
       />
       <HomeNav onScrollTo={scrollToSection} />
@@ -134,7 +134,7 @@ export default function Home() {
               style={heroMounted ? { animationDelay: '120ms' } : undefined}
             >
               Q&amp;A bounties for fast answers, plus <strong className="font-semibold text-neutral-800 dark:text-neutral-100">security bug bounty programs</strong> for the repos you care about.
-              Post rewards in SOL, review submissions, and pay researchers on-chain.
+              Post rewards in BBUX, review submissions, and credit researchers on your platform balance—deposit SOL to top up and withdraw SOL when you cash out.
             </p>
 
             <div
@@ -196,7 +196,7 @@ export default function Home() {
           <div className="text-center mb-16" data-animate="fade-in-up">
             <h2 className="text-4xl font-bold mb-4">Platform features</h2>
             <p className="text-xl text-neutral-600 dark:text-gray-300 max-w-2xl mx-auto">
-              One place for knowledge bounties, security campaigns, and on-chain payouts on Solana
+              One place for knowledge bounties, security campaigns, and BBUX rewards—with Solana for deposits and withdrawals
             </p>
           </div>
 
@@ -208,7 +208,7 @@ export default function Home() {
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Q&amp;A bounties</h3>
                 <p className="text-neutral-600 dark:text-gray-400">
-                  Post questions with SOL-backed rewards. The best answers get paid — fast iteration for teams and builders.
+                  Post questions with BBUX-backed rewards. The best answers get credited on-platform — fast iteration for teams and builders.
                 </p>
               </div>
             </div>
@@ -218,9 +218,9 @@ export default function Home() {
                 <div className="w-16 h-16 bg-amber-100 dark:bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <FiDollarSign className="w-8 h-8 text-amber-700 dark:text-amber-400" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2">SOL rewards</h3>
+                <h3 className="text-xl font-semibold mb-2">BBUX &amp; wallet</h3>
                 <p className="text-neutral-600 dark:text-gray-400">
-                  Connect a wallet, fund bounties, and receive payouts with transparent settlement on Solana.
+                  Connect a wallet to deposit SOL and receive BBUX. Bounties, tips, and payouts move on your virtual balance; withdraw SOL when you are ready.
                 </p>
               </div>
             </div>
@@ -283,7 +283,7 @@ export default function Home() {
           <div className="text-center mb-12" data-animate="fade-in-up">
             <h2 className="text-4xl font-bold mb-4">Security bug bounty programs</h2>
             <p className="text-xl text-neutral-600 dark:text-gray-300 max-w-3xl mx-auto">
-              Run structured campaigns on top of repositories you track on bountyhub. Set scope and rewards in SOL, collect vulnerability reports through a guided submission flow, and triage outcomes with your team before paying researchers.
+              Run structured campaigns on top of repositories you track on bountyhub. Set scope and rewards in BBUX, collect vulnerability reports through a guided submission flow, and triage outcomes with your team before crediting researchers on-platform.
             </p>
           </div>
 
@@ -322,9 +322,9 @@ export default function Home() {
               <div className="w-14 h-14 rounded-full bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center mb-4">
                 <FiShield className="w-7 h-7 text-amber-700 dark:text-amber-400" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">SOL rewards &amp; review</h3>
+              <h3 className="text-lg font-semibold mb-2">BBUX rewards &amp; review</h3>
               <p className="text-neutral-600 dark:text-gray-400 text-sm leading-relaxed">
-                Align payouts with Solana, track campaign status from open listings through accepted submissions, and keep a clear trail for maintainers and hunters.
+                Offer BBUX rewards, track campaign status from open listings through accepted submissions, and keep a clear trail for maintainers and hunters—without per-bounty on-chain transfers.
               </p>
             </div>
           </div>
@@ -347,7 +347,7 @@ export default function Home() {
           <div className="text-center mb-16" data-animate="fade-in-up">
             <h2 className="text-4xl font-bold mb-4">How it works</h2>
             <p className="text-xl text-neutral-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Three steps to fund knowledge, ship fixes, or hunt bugs with SOL
+              Three steps to fund knowledge, ship fixes, or hunt bugs with BBUX
             </p>
           </div>
 
@@ -358,7 +358,7 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-semibold mb-4">Sign up &amp; connect</h3>
               <p className="text-neutral-600 dark:text-gray-400">
-                Create your account and connect a Solana wallet so you can fund bounties and receive payouts.
+                Create your account and connect a Solana wallet so you can deposit SOL, hold BBUX on-platform, and withdraw SOL later.
               </p>
             </div>
 
@@ -378,7 +378,7 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-semibold mb-4">Ship, review, earn</h3>
               <p className="text-neutral-600 dark:text-gray-400">
-                Answer questions, submit vulnerability reports, or triage incoming work — then settle rewards on-chain.
+                Answer questions, submit vulnerability reports, or triage incoming work — rewards credit as BBUX instantly; cash out via Solana withdrawal when you choose.
               </p>
             </div>
           </div>
@@ -389,7 +389,7 @@ export default function Home() {
           <div className="text-center mb-16" data-animate="fade-in-up">
             <h2 className="text-4xl font-bold mb-4">Platform statistics</h2>
             <p className="text-xl text-neutral-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Live activity across Q&amp;A bounties, answers, and SOL moving through the network
+              Live activity across Q&amp;A bounties, answers, and BBUX offered across the platform
             </p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -418,10 +418,10 @@ export default function Home() {
                 {loading ? (
                   <div className="animate-pulse bg-amber-100 dark:bg-amber-400/20 h-8 w-16 mx-auto rounded-sm"></div>
                 ) : (
-                  formatCurrency(stats?.totalRewards || '0.00')
+                  formatBbux(stats?.totalRewards || '0.00')
                 )}
               </div>
-              <div className="text-neutral-600 dark:text-gray-400">Total SOL rewards</div>
+              <div className="text-neutral-600 dark:text-gray-400">BBUX in bounty pools</div>
             </div>
             <div className="text-center rounded-xl py-6 px-4 border border-transparent transition-all duration-300 hover:border-orange-200/80 dark:hover:border-orange-500/30 hover:bg-white/50 dark:hover:bg-neutral-700/30 hover:shadow-md" data-animate="scale-in" data-animate-delay="180">
               <div className="text-3xl md:text-4xl font-bold text-orange-600 dark:text-orange-400 mb-2">
@@ -441,7 +441,7 @@ export default function Home() {
           <div className="bg-white/80 dark:bg-neutral-800/80 backdrop-blur-xs rounded-2xl p-12 text-center border-2 border-amber-500/45 dark:border-amber-500/40 shadow-[0_0_24px_rgba(245,158,11,0.12)] dark:shadow-[0_0_28px_rgba(245,158,11,0.15)] transition-all duration-300 hover:scale-[1.01] hover:border-amber-400/60 hover:shadow-[0_0_32px_rgba(245,158,11,0.18)] dark:hover:shadow-[0_0_36px_rgba(251,191,36,0.18)]" data-animate="scale-in">
             <h2 className="text-4xl font-bold mb-4 text-neutral-900 dark:text-white">Ready to get started?</h2>
             <p className="text-xl mb-8 text-neutral-600 dark:text-neutral-300 max-w-2xl mx-auto">
-              Open a Q&amp;A bounty, browse active security programs, or launch your own campaign — all with Solana-backed rewards.
+              Open a Q&amp;A bounty, browse active security programs, or launch your own campaign — fund BBUX with Solana deposits and withdraw when you cash out.
             </p>
             <div className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center">
               {user ? (
