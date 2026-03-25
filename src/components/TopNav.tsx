@@ -47,7 +47,7 @@ function WalletButton() {
   return (
     <button
       onClick={handleWalletClick}
-      className="px-3 py-1.5 bg-violet-600/20 border border-violet-500/30 rounded-lg text-violet-400 text-xs font-medium transition-all duration-300 hover:bg-violet-600/30 hover:border-violet-500/50 flex items-center gap-2"
+      className="px-3 py-1.5 bg-amber-600/20 border border-amber-500/35 rounded-lg text-amber-700 dark:text-amber-400 text-xs font-medium transition-all duration-300 hover:bg-amber-600/30 hover:border-amber-500/50 flex items-center gap-2"
     >
       <FiCreditCard className="w-4 h-4" />
       <span className="hidden sm:inline">Connect Wallet</span>
@@ -145,7 +145,7 @@ export function TopNav() {
             {...(isDesktop ? { 'data-tauri-drag-region': true } : {})}
           >
             <img src={logoUrl} alt="" className="w-8 h-8 object-contain" aria-hidden />
-            <span className="text-xl font-bold bg-linear-to-r from-cyan-400 to-violet-400 dark:from-cyan-400 dark:to-violet-400 bg-clip-text text-transparent hidden sm:block">
+            <span className="text-xl font-bold text-bounty-wordmark hidden sm:block">
               bountyhub
             </span>
           </Link>
@@ -155,7 +155,7 @@ export function TopNav() {
             {user && (
               <Link
                 to="/posts/create"
-                className="px-3 py-2 rounded-lg text-sm font-medium bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white flex items-center gap-2"
+                className="btn-primary text-sm py-2 px-3 flex items-center gap-2"
               >
                 <FiAward className="w-4 h-4 shrink-0" />
                 <span>Create Bounty</span>
@@ -168,7 +168,7 @@ export function TopNav() {
                 onClick={() => setExploreOpen(!exploreOpen)}
                 className={`nav-dropdown-trigger px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
                   isActive('/community') || isActive('/chat') || isActive('/download') || isActive('/governance') || isActive('/refund-requests') || isActive('/analytics') || isActive('/bug-bounty') || isActive('/repositories') || isActive('/contributions')
-                    ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
+                    ? 'bg-amber-100 dark:bg-amber-900/25 text-amber-900 dark:text-amber-300'
                     : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5'
                 }`}
                 aria-expanded={exploreOpen}
@@ -306,7 +306,7 @@ export function TopNav() {
                   onClick={() => setProfileOpen(!profileOpen)}
                   className={`nav-dropdown-trigger flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     isActive('/profile') || isActive('/settings') || isActive('/wallet')
-                      ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
+                      ? 'bg-amber-100 dark:bg-amber-900/25 text-amber-900 dark:text-amber-300'
                       : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5'
                   }`}
                   aria-expanded={profileOpen}
@@ -320,7 +320,7 @@ export function TopNav() {
                       className="w-8 h-8 rounded-full object-cover border border-neutral-200 dark:border-neutral-600"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-amber-600 flex items-center justify-center shrink-0">
                       <span className="text-white text-sm font-bold">{user.username.charAt(0).toUpperCase()}</span>
                     </div>
                   )}
@@ -337,7 +337,7 @@ export function TopNav() {
                       {user.profilePicture ? (
                         <img src={user.profilePicture} alt="" className="w-6 h-6 rounded-full object-cover" />
                       ) : (
-                        <div className="w-6 h-6 rounded-full bg-indigo-500 flex items-center justify-center">
+                        <div className="w-6 h-6 rounded-full bg-amber-600 flex items-center justify-center">
                           <span className="text-white text-xs font-bold">{user.username.charAt(0).toUpperCase()}</span>
                         </div>
                       )}
@@ -420,7 +420,7 @@ export function TopNav() {
                 <Link
                   to="/posts/create"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block px-3 py-2.5 rounded-lg text-base font-medium bg-indigo-600 text-white hover:bg-indigo-700"
+                  className="block px-3 py-2.5 rounded-lg text-base font-medium btn-primary text-center"
                 >
                   Create Bounty
                 </Link>
@@ -524,7 +524,7 @@ export function TopNav() {
                       {user.profilePicture ? (
                         <img src={user.profilePicture} alt="" className="w-6 h-6 rounded-full object-cover" />
                       ) : (
-                        <span className="w-6 h-6 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xs font-bold">
+                        <span className="w-6 h-6 rounded-full bg-amber-600 flex items-center justify-center text-white text-xs font-bold">
                           {user.username.charAt(0).toUpperCase()}
                         </span>
                       )}

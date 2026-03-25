@@ -10,7 +10,7 @@ export function Footer() {
       <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${isDesktop ? 'max-w-6xl' : ''}`}>
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center space-x-4">
-            <Link to="/" className="flex items-center gap-2 text-neutral-700 dark:text-neutral-300 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors font-semibold" aria-label="bountyhub home">
+            <Link to="/" className="flex items-center gap-2 text-neutral-700 dark:text-neutral-300 hover:text-amber-700 dark:hover:text-amber-400 transition-colors font-semibold" aria-label="bountyhub home">
               <img src={logoUrl} alt="" className="w-6 h-6 object-contain" aria-hidden />
               bountyhub
             </Link>
@@ -40,16 +40,16 @@ export function Footer() {
               </a>
             </div>
             <nav className="flex items-center gap-6" aria-label="Footer navigation">
-              <Link to="/download" className="text-neutral-600 dark:text-neutral-400 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors text-sm">
+              <Link to="/download" className="text-neutral-600 dark:text-neutral-400 hover:text-amber-700 dark:hover:text-amber-400 transition-colors text-sm">
                 Download
               </Link>
-              <Link to="/docs" className="text-neutral-600 dark:text-neutral-400 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors text-sm">
+              <Link to="/docs" className="text-neutral-600 dark:text-neutral-400 hover:text-amber-700 dark:hover:text-amber-400 transition-colors text-sm">
                 Documentation
               </Link>
-              <Link to="/privacy" className="text-neutral-600 dark:text-neutral-400 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors text-sm">
+              <Link to="/privacy" className="text-neutral-600 dark:text-neutral-400 hover:text-amber-700 dark:hover:text-amber-400 transition-colors text-sm">
                 Privacy
               </Link>
-              <Link to="/terms" className="text-neutral-600 dark:text-neutral-400 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors text-sm">
+              <Link to="/terms" className="text-neutral-600 dark:text-neutral-400 hover:text-amber-700 dark:hover:text-amber-400 transition-colors text-sm">
                 Terms
               </Link>
             </nav>

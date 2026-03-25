@@ -3,16 +3,17 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-primary-50: #e0e7ff;
-  --color-primary-100: #c7d2fe;
-  --color-primary-200: #a5b4fc;
-  --color-primary-300: #818cf8;
-  --color-primary-400: #22d3ee;
-  --color-primary-500: #a78bfa;
-  --color-primary-600: #312e81;
-  --color-primary-700: #1e1b4b;
-  --color-primary-800: #1e1b4b;
-  --color-primary-900: #1e1b4b;
+  /* Primary scale = reward gold (logo coin) — use for CTAs via btn-primary */
+  --color-primary-50: #fffbeb;
+  --color-primary-100: #fef3c7;
+  --color-primary-200: #fde68a;
+  --color-primary-300: #fcd34d;
+  --color-primary-400: #fbbf24;
+  --color-primary-500: #f59e0b;
+  --color-primary-600: #d97706;
+  --color-primary-700: #b45309;
+  --color-primary-800: #92400e;
+  --color-primary-900: #78350f;
 
   --color-secondary-50: #f8fafc;
   --color-secondary-100: #f1f5f9;
@@ -25,29 +26,36 @@
   --color-secondary-800: #1e293b;
   --color-secondary-900: #0f172a;
 
-  /* Brand palette aligned with logo: dark base + neon cyan/purple */
-  --color-brand-dark: #1e1b4b;
-  --color-brand-base: #312e81;
-  --color-brand-cyan: #22d3ee;
-  --color-brand-cyan-light: #67e8f9;
-  --color-brand-purple: #a78bfa;
-  --color-brand-purple-light: #c4b5fd;
-  --color-brand-light: #e0e7ff;
+  /* Brand palette aligned with public/logo.svg: midnight → indigo sky, gold coin, coral/star, ruby ribbon */
+  --color-brand-midnight: #0b1020;
+  --color-brand-surface: #151b33;
+  --color-brand-indigo: #312e81;
+  --color-brand-indigo-deep: #1e1b4b;
+  --color-brand-gold: #f59e0b;
+  --color-brand-gold-light: #fde68a;
+  --color-brand-coral: #fb923c;
+  --color-brand-ruby: #e11d48;
 
-  /* Override indigo to match logo (darker base + accents) */
-  --color-indigo-50: #e0e7ff;
-  --color-indigo-100: #c7d2fe;
-  --color-indigo-200: #a5b4fc;
-  --color-indigo-300: #67e8f9;
-  --color-indigo-400: #22d3ee;
-  --color-indigo-500: #a78bfa;
-  --color-indigo-600: #312e81;
-  --color-indigo-700: #1e1b4b;
-  --color-indigo-800: #1e1b4b;
+  /* Semantic aliases for marketing / accents */
+  --color-reward-400: #fbbf24;
+  --color-reward-500: #f59e0b;
+  --color-reward-600: #d97706;
+  --color-reward-700: #b45309;
+
+  /* Coherent indigo scale (night-sky base, no cyan injection) */
+  --color-indigo-50: #eef2ff;
+  --color-indigo-100: #e0e7ff;
+  --color-indigo-200: #c7d2fe;
+  --color-indigo-300: #a5b4fc;
+  --color-indigo-400: #818cf8;
+  --color-indigo-500: #6366f1;
+  --color-indigo-600: #4f46e5;
+  --color-indigo-700: #4338ca;
+  --color-indigo-800: #3730a3;
   --color-indigo-900: #312e81;
   --color-indigo-950: #1e1b4b;
 
-  /* Override violet to match logo purple accent */
+  /* Violet: slightly inkier, less neon — pairs with indigo chrome */
   --color-violet-50: #f5f3ff;
   --color-violet-100: #ede9fe;
   --color-violet-200: #ddd6fe;
@@ -81,8 +89,19 @@
   }
 }
 
+@layer components {
+  /* Wordmark gradient: gold → coral → ruby (matches logo coin, accents, ladybug) */
+  .text-bounty-wordmark {
+    @apply bg-linear-to-r from-amber-400 via-orange-400 to-rose-600 bg-clip-text text-transparent;
+  }
+
+  .dark .text-bounty-wordmark {
+    @apply from-amber-300 via-orange-300 to-rose-400;
+  }
+}
+
 @utility btn-primary {
-  @apply bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  @apply bg-amber-600 hover:bg-amber-700 dark:bg-amber-600 dark:hover:bg-amber-500 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
 }
 
 @utility btn-secondary {
@@ -94,7 +113,7 @@
 }
 
 @utility input {
-  @apply w-full px-3 py-2 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-600 rounded-lg text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:border-transparent;
+  @apply w-full px-3 py-2 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-600 rounded-lg text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-amber-500 focus:border-transparent;
 }
 
 @utility scrollbar-thin {
@@ -281,15 +300,15 @@
 }
 
 .bounty-hub-spinner:not(.bounty-hub-spinner--inverse) {
-  --bounty-dot-fill: #a78bfa;
-  --bounty-dot-fill-mid: #22d3ee;
-  --bounty-track: rgba(139, 92, 246, 0.2);
+  --bounty-dot-fill: #f59e0b;
+  --bounty-dot-fill-mid: #6366f1;
+  --bounty-track: color-mix(in srgb, #f59e0b 22%, transparent);
 }
 
 .dark .bounty-hub-spinner:not(.bounty-hub-spinner--inverse) {
-  --bounty-dot-fill: #22d3ee;
-  --bounty-dot-fill-mid: #a78bfa;
-  --bounty-track: rgba(34, 211, 238, 0.18);
+  --bounty-dot-fill: #fbbf24;
+  --bounty-dot-fill-mid: #818cf8;
+  --bounty-track: color-mix(in srgb, #fbbf24 18%, transparent);
 }
 
 .bounty-hub-spinner__track {
@@ -395,15 +414,15 @@
 }
 
 .logo-spinner:not(.logo-spinner--inverse) {
-  --logo-spin-track: color-mix(in srgb, #8b5cf6 24%, transparent);
+  --logo-spin-track: color-mix(in srgb, #6366f1 26%, transparent);
   --logo-spin-a: #f59e0b;
-  --logo-spin-b: #22d3ee;
+  --logo-spin-b: #fb923c;
 }
 
 .dark .logo-spinner:not(.logo-spinner--inverse) {
-  --logo-spin-track: color-mix(in srgb, #22d3ee 18%, transparent);
+  --logo-spin-track: color-mix(in srgb, #818cf8 20%, transparent);
   --logo-spin-a: #fbbf24;
-  --logo-spin-b: #a78bfa;
+  --logo-spin-b: #fdba74;
 }
 
 .logo-spinner--inverse {
