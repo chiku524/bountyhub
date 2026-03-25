@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
- * Generate Tauri desktop app icons from public/logo.svg.
- * Run: npm run desktop:icons
+ * Generate Tauri desktop app icons from public/logo.svg (`tauri icon` → icon.ico, icon.icns,
+ * PNG sizes, Windows Appx assets, tray `icon.png`, etc.). Invoked by `npm run desktop:icons`
+ * and at the start of `npm run desktop:build` so installers and shortcuts always match the web logo.
  * Requires: sharp (devDependency)
  */
 import fs from 'fs';

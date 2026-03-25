@@ -20,8 +20,8 @@ The same BountyHub web app runs as a **desktop application** using [Tauri](https
 | Command | Description |
 |--------|-------------|
 | `npm run desktop` | Start the app in development (Vite dev server + Tauri window) |
-| `npm run desktop:build` | Build production installers (.exe, .dmg, .AppImage) |
-| `npm run desktop:icons` | Generate icons from `public/logo.svg` (optional; needs `sharp`) |
+| `npm run desktop:build` | Regenerate icons from `public/logo.svg`, then build production installers (.exe, .dmg, .AppImage). Needs `sharp`. |
+| `npm run desktop:icons` | Regenerate `src-tauri/icons/*` from `public/logo.svg` only (same as the first step of `desktop:build`) |
 
 ## First-time setup
 

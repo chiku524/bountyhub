@@ -205,8 +205,10 @@ fn main() {
                 .item(&MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?)
                 .build()?;
 
+            // icon.png is generated from public/logo.svg (npm run desktop:icons). Template images are for
+            // macOS menu bar; Windows/Linux tray should use the full-color app icon.
             let _tray = TrayIconBuilder::with_id("bountyhub-tray")
-                .icon_as_template(true)
+                .icon_as_template(cfg!(target_os = "macos"))
                 .icon(include_image!("icons/icon.png"))
                 .menu(&tray_menu)
                 .show_menu_on_left_click(false)

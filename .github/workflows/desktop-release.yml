@@ -100,10 +100,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Generate desktop icons
-        run: npm run desktop:icons
-
       # Single frontend build: beforeBuildCommand (npm run build) runs inside tauri build; avoid building twice.
+      # desktop:build runs generate-desktop-icons first so Windows/macOS/Linux bundle + tray use public/logo.svg.
       - name: Build Tauri app (with updater signing if TAURI_PRIVATE_KEY is set)
         run: npm run desktop:build
         env:

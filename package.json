@@ -1,7 +1,7 @@
 {
   "name": "bountyhub",
   "private": true,
-  "version": "1.1.33",
+  "version": "1.1.34",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -28,8 +28,8 @@
     "db:studio": "drizzle-kit studio",
     "tauri": "tauri",
     "desktop": "tauri dev",
-    "desktop:build": "node scripts/run-tauri-build.mjs",
-    "desktop:build:unsigned": "node scripts/run-tauri-build.mjs --no-sign",
+    "desktop:build": "node scripts/generate-desktop-icons.js && node scripts/run-tauri-build.mjs",
+    "desktop:build:unsigned": "node scripts/generate-desktop-icons.js && node scripts/run-tauri-build.mjs --no-sign",
     "desktop:icons": "node scripts/generate-desktop-icons.js"
   },
   "dependencies": {
