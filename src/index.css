@@ -369,6 +369,89 @@
   }
 }
 
+/* Logo-based loader: rotating ring + gentle logo wobble (uses /logo.svg via LogoSpinner) */
+.logo-spinner {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.logo-spinner--sm {
+  width: 22px;
+  height: 22px;
+}
+
+.logo-spinner--md {
+  width: 36px;
+  height: 36px;
+}
+
+.logo-spinner--lg {
+  width: 64px;
+  height: 64px;
+}
+
+.logo-spinner:not(.logo-spinner--inverse) {
+  --logo-spin-track: color-mix(in srgb, #8b5cf6 24%, transparent);
+  --logo-spin-a: #f59e0b;
+  --logo-spin-b: #22d3ee;
+}
+
+.dark .logo-spinner:not(.logo-spinner--inverse) {
+  --logo-spin-track: color-mix(in srgb, #22d3ee 18%, transparent);
+  --logo-spin-a: #fbbf24;
+  --logo-spin-b: #a78bfa;
+}
+
+.logo-spinner--inverse {
+  --logo-spin-track: rgba(255, 255, 255, 0.14);
+  --logo-spin-a: rgba(255, 255, 255, 0.92);
+  --logo-spin-b: rgba(255, 255, 255, 0.38);
+}
+
+.logo-spinner__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--logo-spin-track);
+  border-top-color: var(--logo-spin-a);
+  border-right-color: var(--logo-spin-b);
+  animation: logo-spinner-ring 0.88s linear infinite;
+  pointer-events: none;
+}
+
+.logo-spinner--sm .logo-spinner__ring {
+  border-width: 1.5px;
+}
+
+.logo-spinner__mark {
+  position: relative;
+  z-index: 1;
+  display: block;
+  object-fit: contain;
+  border-radius: 22%;
+  animation: logo-spinner-wobble 1.35s ease-in-out infinite;
+}
+
+@keyframes logo-spinner-ring {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes logo-spinner-wobble {
+  0%,
+  100% {
+    transform: scale(1) rotate(-5deg);
+  }
+  50% {
+    transform: scale(1.05) rotate(5deg);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -387,6 +470,16 @@
   }
 
   .bounty-hub-spinner__coin {
+    animation: none;
+  }
+
+  .logo-spinner__ring {
+    animation: none;
+    border-color: var(--logo-spin-track);
+    border-top-color: var(--logo-spin-a);
+  }
+
+  .logo-spinner__mark {
     animation: none;
   }
 }

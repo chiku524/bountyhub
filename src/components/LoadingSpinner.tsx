@@ -1,4 +1,5 @@
 import React from 'react'
+import { LogoSpinner } from './LogoSpinner'
 
 const ORBIT_DEG = [0, 120, 240] as const
 
@@ -6,6 +7,8 @@ export interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg'
   className?: string
   variant?: 'default' | 'inverse'
+  /** Orbit + coin (classic) or animated app logo + ring */
+  graphic?: 'orbit' | 'logo'
   /** Use inside buttons or inline with text */
   inline?: boolean
   /** Screen reader text; use false when a parent already exposes busy state */
@@ -16,9 +19,23 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   size = 'md',
   className = '',
   variant = 'default',
+  graphic = 'orbit',
   inline = false,
   label = 'Loading',
 }) => {
+  if (graphic === 'logo') {
+    return (
+      <div
+        className={`${inline ? 'inline-flex' : 'flex'} items-center justify-center ${className}`}
+        role={label === false ? undefined : 'status'}
+        aria-live={label === false ? undefined : 'polite'}
+      >
+        {label !== false ? <span className="sr-only">{label}</span> : null}
+        <LogoSpinner size={size} variant={variant} />
+      </div>
+    )
+  }
+
   const sizeClass =
     size === 'sm' ? 'bounty-hub-spinner--sm' : size === 'lg' ? 'bounty-hub-spinner--lg' : 'bounty-hub-spinner--md'
   const variantClass = variant === 'inverse' ? 'bounty-hub-spinner--inverse' : ''

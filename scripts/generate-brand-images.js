@@ -12,6 +12,91 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
 const publicDir = path.join(root, 'public');
 
+/** Pull defs inner HTML + body from logo.svg for embedding in marketing SVGs. */
+function parseLogoForEmbed(logoSvg) {
+  const d = logoSvg.match(/<defs>\s*([\s\S]*?)\s*<\/defs>/);
+  const b = logoSvg.match(/<\/defs>\s*([\s\S]*?)\s*<\/svg>/);
+  if (!d || !b) return null;
+  return { defs: d[1].trim(), body: b[1].trim() };
+}
+
+function prefixLogoIds(fragment, prefix) {
+  return fragment.replace(/\blx-/g, `${prefix}-`);
+}
+
+function indentBlock(text, spaces) {
+  const pad = ' '.repeat(spaces);
+  return text
+    .split('\n')
+    .map((line) => (line.trim() ? pad + line : line))
+    .join('\n');
+}
+
+function rebuildMarketingDefs(tpl, logoDefsIndented, includeAccent) {
+  const bgMatch = tpl.match(/<linearGradient id="bg"[\s\S]*?<\/linearGradient>/);
+  if (!bgMatch) return null;
+  let accent = '';
+  if (includeAccent) {
+    const a = tpl.match(/<linearGradient id="accent"[\s\S]*?<\/linearGradient>/);
+    if (a) accent = `\n    ${a[0]}`;
+  }
+  return `<defs>\n    ${bgMatch[0]}${accent}\n${logoDefsIndented}\n  </defs>`;
+}
+
+/**
+ * Keep favicon.svg and marketing SVGs aligned with public/logo.svg (single source of truth).
+ */
+function syncSvgAssetsFromLogo(logoSvgRaw) {
+  const logoSvg = logoSvgRaw.replace(/\r\n/g, '\n');
+  const parts = parseLogoForEmbed(logoSvg);
+  if (!parts) {
+    console.warn('syncSvgAssetsFromLogo: could not parse logo.svg');
+    return;
+  }
+
+  const faviconPath = path.join(publicDir, 'favicon.svg');
+  const faviconSvg = logoSvg.replace(/width="64" height="64"/, 'width="32" height="32"');
+  fs.writeFileSync(faviconPath, faviconSvg, 'utf8');
+
+  const templates = [
+    {
+      file: 'og-image.svg',
+      idPrefix: 'oglx',
+      includeAccent: false,
+      gRe: /<g transform="translate\(420, 100\) scale\(5\.625\)">[\s\S]*?<\/g>/,
+    },
+    {
+      file: 'social-square.svg',
+      idPrefix: 'sqlx',
+      includeAccent: true,
+      gRe: /<g transform="translate\(358, 280\) scale\(5\.7\)">[\s\S]*?<\/g>/,
+    },
+    {
+      file: 'social-banner.svg',
+      idPrefix: 'bnlx',
+      includeAccent: true,
+      gRe: /<g transform="translate\(120, 125\) scale\(3\.9\)">[\s\S]*?<\/g>/,
+    },
+  ];
+
+  for (const { file, idPrefix, includeAccent, gRe } of templates) {
+    const p = path.join(publicDir, file);
+    if (!fs.existsSync(p)) continue;
+    let tpl = fs.readFileSync(p, 'utf8').replace(/\r\n/g, '\n');
+    const newDefsInner = indentBlock(prefixLogoIds(parts.defs, idPrefix), 4);
+    const defsSection = rebuildMarketingDefs(tpl, newDefsInner, includeAccent);
+    if (!defsSection) continue;
+    tpl = tpl.replace(/<defs>[\s\S]*?<\/defs>/, defsSection);
+    const transformMatch = tpl.match(gRe);
+    if (!transformMatch) continue;
+    const innerTransform = transformMatch[0].match(/transform="([^"]+)"/)?.[1];
+    if (!innerTransform) continue;
+    const newG = `<g transform="${innerTransform}">\n${indentBlock(prefixLogoIds(parts.body, idPrefix), 4)}\n  </g>`;
+    tpl = tpl.replace(gRe, newG);
+    fs.writeFileSync(p, tpl, 'utf8');
+  }
+}
+
 async function main() {
   let sharp;
   try {
@@ -27,6 +112,8 @@ async function main() {
   const logoPath = path.join(publicDir, 'logo.svg');
   if (fs.existsSync(logoPath)) {
     const logoSvg = fs.readFileSync(logoPath, 'utf8').replace(/\r\n/g, '\n');
+    syncSvgAssetsFromLogo(logoSvg);
+    outputs.push('favicon.svg');
     const logoBuf = Buffer.from(logoSvg, 'utf8');
     for (const size of [192, 512, 1024]) {
       const name = `logo-${size}.png`;

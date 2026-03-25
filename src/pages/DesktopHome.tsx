@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
-import { FiAward } from 'react-icons/fi'
 import { useAuth } from '../contexts/AuthProvider'
 import { PageMetadata } from '../components/PageMetadata'
 import { isDesktopApp } from '../utils/desktop'
+import { logoUrl } from '../utils/logoUrl'
 import '../components/desktop-splash.css'
 
 const INTRO_DURATION_MS = 2400
@@ -143,8 +143,8 @@ export default function DesktopHome() {
         {showWelcomeBack && (
           <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#0a0a0f]/95 animate-fade-in">
             <div className="flex flex-col items-center gap-3 animate-intro-slide-in">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-violet-500 shadow-lg">
-                <FiAward className="h-6 w-6 text-white" aria-hidden />
+              <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-neutral-800/90 shadow-lg ring-1 ring-white/15">
+                <img src={logoUrl} alt="" className="h-full w-full object-contain p-0.5" width={48} height={48} aria-hidden />
               </div>
               <p className="text-lg font-medium bg-gradient-to-r from-cyan-200 via-violet-200 to-cyan-200 bg-clip-text text-transparent">
                 Welcome back
@@ -164,8 +164,8 @@ export default function DesktopHome() {
           <div
             className={`flex flex-col items-center gap-2 ${phase === 'intro' ? 'animate-intro-slide-in' : ''}`}
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-violet-500 shadow-lg shadow-cyan-500/30 ring-1 ring-white/20">
-              <FiAward className="h-6 w-6 text-white" aria-hidden />
+            <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-neutral-800/90 shadow-lg shadow-black/20 ring-1 ring-white/15">
+              <img src={logoUrl} alt="" className="h-full w-full object-contain p-0.5" width={48} height={48} aria-hidden />
             </div>
             <span className="bg-gradient-to-r from-cyan-300 via-violet-300 to-cyan-300 bg-clip-text text-lg font-bold tracking-tight text-transparent">
               BountyHub
@@ -188,8 +188,8 @@ export default function DesktopHome() {
             }`}
           >
             <div className="flex flex-col items-center gap-2">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-violet-500 shadow-lg shadow-cyan-500/20">
-                <FiAward className="h-6 w-6 text-white" aria-hidden />
+              <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-neutral-800/90 shadow-lg shadow-black/20 ring-1 ring-white/15">
+                <img src={logoUrl} alt="" className="h-full w-full object-contain p-0.5" width={48} height={48} aria-hidden />
               </div>
               <h2 className="text-2xl font-semibold bg-gradient-to-r from-cyan-200 via-violet-200 to-cyan-200 bg-clip-text text-transparent">
                 Welcome to BountyHub

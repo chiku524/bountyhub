@@ -67,7 +67,7 @@ const NotFound = lazy(() => import('./pages/NotFound'))
 function RouteFallback() {
   return (
     <div className="flex min-h-[50vh] items-center justify-center">
-      <LoadingSpinner size="lg" />
+      <LoadingSpinner size="lg" graphic="logo" />
     </div>
   )
 }

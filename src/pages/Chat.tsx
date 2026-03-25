@@ -8,6 +8,7 @@ import { FiSend, FiSmile, FiPaperclip, FiUsers, FiMessageSquare, FiPlusCircle, F
 import type { Team, TeamTask } from '../types';
 import { useChatWebSocket, type ChatWsMessagePayload } from '../hooks/useChatWebSocket';
 import { useEscapeKey } from '../hooks/useEscapeKey';
+import { faviconUrl } from '../utils/faviconUrl';
 
 interface Message {
   id: string;
@@ -265,7 +266,7 @@ const Chat: React.FC = () => {
                 if (latest.author?.id !== user.id && 'Notification' in window && Notification.permission === 'granted') {
                   new Notification(`New message in ${room.name}`, {
                     body: `${latest.author?.username ?? 'Someone'}: ${latest.content}`,
-                    icon: '/favicon.svg'
+                    icon: `${window.location.origin}${faviconUrl}`,
                   });
                 }
               }

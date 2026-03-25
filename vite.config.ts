@@ -52,6 +52,7 @@ export default defineConfig(({ mode }) => {
       'import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET': JSON.stringify(env.VITE_CLOUDINARY_UPLOAD_PRESET ?? defaults.VITE_CLOUDINARY_UPLOAD_PRESET),
       'import.meta.env.VITE_GITHUB_RELEASES_URL': JSON.stringify(env.VITE_GITHUB_RELEASES_URL ?? defaults.VITE_GITHUB_RELEASES_URL),
       'import.meta.env.VITE_LOGO_VERSION': JSON.stringify(logoVersion),
+      'import.meta.env.VITE_FAVICON_VERSION': JSON.stringify(faviconVersion),
       'import.meta.env.VITE_APP_VERSION': JSON.stringify(appVersion),
     },
     build: {

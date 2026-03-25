@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthProvider'
 import { isDesktopApp } from '../utils/desktop'
+import { logoUrl } from '../utils/logoUrl'
 import './desktop-launch.css'
 
 const DESKTOP_INITIAL_PATH_KEY = 'desktop_initial_path'
@@ -49,7 +50,7 @@ export function DesktopLaunch() {
       <div className="desktop-launch-screen__content">
         <div className="desktop-launch-screen__logo-wrap">
           <img
-            src="/logo.svg"
+            src={logoUrl}
             alt=""
             className="desktop-launch-screen__logo"
             width={72}

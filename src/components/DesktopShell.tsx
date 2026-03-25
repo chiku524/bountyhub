@@ -17,6 +17,7 @@ import {
 } from 'react-icons/fi'
 import { useAuth } from '../contexts/AuthProvider'
 import { isDesktopApp } from '../utils/desktop'
+import { logoUrl } from '../utils/logoUrl'
 
 const SIDEBAR_WIDTH = 240
 
@@ -59,7 +60,7 @@ function DesktopSidebar() {
           to="/community"
           className="flex items-center gap-2 font-semibold tracking-tight text-white transition hover:text-white"
         >
-          <FiAward className="h-5 w-5 shrink-0 text-cyan-400" aria-hidden />
+          <img src={logoUrl} alt="" className="h-8 w-8 shrink-0 object-contain" width={32} height={32} aria-hidden />
           <span>BountyHub</span>
         </Link>
         <span className="rounded bg-white/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-neutral-400">

@@ -7,6 +7,7 @@ interface ImportMetaEnv {
   readonly VITE_GITHUB_RELEASES_URL?: string
   readonly VITE_APP_VERSION?: string
   readonly VITE_LOGO_VERSION?: string
+  readonly VITE_FAVICON_VERSION?: string
   readonly DEV: boolean
   readonly MODE: string
 }

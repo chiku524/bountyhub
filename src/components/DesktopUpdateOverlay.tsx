@@ -1,5 +1,6 @@
 import { useDesktopUpdate } from '../contexts/DesktopUpdateContext'
 import { isDesktopApp } from '../utils/desktop'
+import { logoUrl } from '../utils/logoUrl'
 import { LoadingSpinner } from './LoadingSpinner'
 import './desktop-update-overlay.css'
 
@@ -72,11 +73,11 @@ export function DesktopUpdateOverlay() {
     <div className="desktop-update-overlay" aria-live="polite" aria-busy="true">
       <div className="desktop-update-overlay__card">
         <div className="desktop-update-overlay__symbol" aria-hidden>
-          <img src="/logo.svg" alt="" width={56} height={56} />
+          <img src={logoUrl} alt="" width={56} height={56} />
         </div>
         <p className="desktop-update-overlay__name">BountyHub</p>
         <div className="desktop-update-overlay__spinner">
-          <LoadingSpinner size="md" variant="inverse" label={false} />
+          <LoadingSpinner size="md" variant="inverse" graphic="logo" label={false} />
         </div>
         <p className="desktop-update-overlay__message">{label}</p>
       </div>

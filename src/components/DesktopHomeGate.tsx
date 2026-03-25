@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../contexts/AuthProvider'
 import { useDesktopUpdate } from '../contexts/DesktopUpdateContext'
 import { isDesktopApp } from '../utils/desktop'
+import { logoUrl } from '../utils/logoUrl'
 import './desktop-splash.css'
 
 const INTRO_DURATION_MS = 1800
@@ -94,7 +95,7 @@ export function DesktopHomeGate() {
     <main className="desktop-splash" aria-busy={!postUpdate}>
       <div className="desktop-splash__content">
         <div className="desktop-splash__symbol" aria-hidden>
-          <img src="/logo.svg" alt="" width={72} height={72} />
+          <img src={logoUrl} alt="" width={72} height={72} />
         </div>
         <h1 className="desktop-splash__name">BountyHub</h1>
         <p className="desktop-splash__tagline">Ask. Bounty. Earn.</p>

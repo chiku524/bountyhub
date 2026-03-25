@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { FiAward, FiX } from 'react-icons/fi'
+import { FiX } from 'react-icons/fi'
 import { isDesktopApp } from '../utils/desktop'
+import { logoUrl } from '../utils/logoUrl'
 
 const REPO_URL = 'https://github.com/chiku524/bountyhub'
 const DOCS_URL = 'https://bountyhub.tech/docs'
@@ -45,8 +46,8 @@ export function DesktopAboutDialog({ open, onClose }: DesktopAboutDialogProps) {
           </button>
         </div>
         <div className="flex flex-col items-center gap-4 px-5 py-6">
-          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-violet-500 shadow-lg">
-            <FiAward className="h-7 w-7 text-white" aria-hidden />
+          <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl bg-neutral-800 shadow-lg ring-1 ring-white/10">
+            <img src={logoUrl} alt="" className="h-full w-full object-contain p-1" width={56} height={56} aria-hidden />
           </div>
           <p className="text-center text-sm text-neutral-300">
             Decentralized bounty platform. Ask questions, offer bounties, earn rewards on Solana.
