@@ -77,7 +77,7 @@ const CORS_ORIGINS = [
   'https://tauri.localhost',
   'http://tauri.localhost',
   'tauri://localhost',
-] as const
+]
 
 const corsMiddleware = cors({
   origin: CORS_ORIGINS,
