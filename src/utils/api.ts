@@ -21,7 +21,33 @@ interface CreatePostData {
   bountyDuration: number;
 }
 
+function networkErrorMessage(): string {
+  const base = config.api.baseUrl
+  if (isDesktopApp()) {
+    if (import.meta.env.DEV) {
+      return `Cannot reach the API at ${base}. Start the local worker (e.g. npm run dev:api) or set VITE_API_URL, then restart the desktop app.`
+    }
+    return `Cannot reach the API at ${base}. Check your internet connection, firewall, or VPN.`
+  }
+  return `Cannot reach the server (${base}). Check your connection and try again.`
+}
+
 export class ApiClient {
+  /** Wraps fetch so desktop/web show a clear message when the API is unreachable (instead of only "Failed to fetch"). */
+  private async fetchResolved(url: string, init: RequestInit): Promise<Response> {
+    try {
+      return await fetch(url, init)
+    } catch (err) {
+      const isFailedFetch =
+        err instanceof TypeError ||
+        (err instanceof Error && /failed to fetch|networkerror|load failed/i.test(err.message))
+      if (isFailedFetch) {
+        throw new Error(networkErrorMessage())
+      }
+      throw err
+    }
+  }
+
   public async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${config.api.baseUrl}${endpoint}`
     
@@ -36,7 +62,7 @@ export class ApiClient {
       }
     }
 
-    const response = await fetch(url, {
+    const response = await this.fetchResolved(url, {
       ...options,
       headers,
       credentials: 'include', // Include cookies for authentication (web + desktop when cookies work)
@@ -71,7 +97,7 @@ export class ApiClient {
         headers.Authorization = `Bearer ${sid}`
       }
     }
-    const response = await fetch(url, {
+    const response = await this.fetchResolved(url, {
       ...options,
       headers,
       credentials: 'include',

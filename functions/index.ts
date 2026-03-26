@@ -62,19 +62,25 @@ interface Env {
 
 const app = new Hono<{ Bindings: Env }>()
 
-// CORS configuration
+// CORS configuration — include 127.0.0.1 / IPv6 localhost (Vite + Tauri dev often use these, not "localhost")
+const CORS_ORIGINS = [
+  'https://bountyhub.tech',
+  'https://www.bountyhub.tech',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://[::1]:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:3001',
+  'http://127.0.0.1:3001',
+  // Tauri desktop (production bundle)
+  'https://tauri.localhost',
+  'http://tauri.localhost',
+  'tauri://localhost',
+] as const
+
 const corsMiddleware = cors({
-  origin: [
-    'https://bountyhub.tech',
-    'https://www.bountyhub.tech',
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'http://localhost:3001',
-    // Tauri desktop (production bundle)
-    'https://tauri.localhost',
-    'http://tauri.localhost',
-    'tauri://localhost',
-  ],
+  origin: CORS_ORIGINS,
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   credentials: true,

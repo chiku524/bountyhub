@@ -70,10 +70,21 @@ export default function Login() {
               </p>
             </div>
         <form
-          className={isDesktop ? 'mt-6 space-y-5' : 'mt-8 space-y-6'}
+          className={`relative ${isDesktop ? 'mt-6 space-y-5' : 'mt-8 space-y-6'}`}
           onSubmit={handleSubmit}
           aria-busy={loading}
         >
+          {loading && (
+            <div
+              className={`absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 rounded-lg ${isDesktop ? 'bg-neutral-950/75' : 'bg-white/85 dark:bg-neutral-950/80'}`}
+              role="status"
+              aria-live="polite"
+            >
+              <LoadingSpinner graphic="logo" size="lg" variant={isDesktop ? 'inverse' : 'default'} label={false} />
+              <span className="text-sm text-neutral-600 dark:text-neutral-300">Signing in…</span>
+              <span className="sr-only">Signing in, please wait</span>
+            </div>
+          )}
           <div className={isDesktop ? 'space-y-3' : 'rounded-md shadow-xs -space-y-px'}>
             <div>
               <label htmlFor="email" className="sr-only">
@@ -139,16 +150,8 @@ export default function Login() {
                   : 'rounded-md bg-violet-600 hover:bg-violet-700 focus:ring-violet-500 focus:ring-offset-2'
               }`}
             >
-              {loading && (
-                <LoadingSpinner size="sm" variant="inverse" inline label={false} className="shrink-0" />
-              )}
               <span>{loading ? 'Signing in…' : 'Sign in'}</span>
             </button>
-            {loading && (
-              <p className="mt-2 text-center text-xs text-neutral-500 dark:text-neutral-400" aria-live="polite">
-                Verifying your credentials…
-              </p>
-            )}
           </div>
 
           {/* GitHub OAuth */}

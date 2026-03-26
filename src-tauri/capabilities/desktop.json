@@ -1,5 +1,7 @@
 {
   "identifier": "desktop-capability",
+  "description": "Dev server + bundled app: shortcuts, updater, tray-related IPC",
+  "local": true,
   "platforms": [
     "macOS",
     "windows",
