@@ -44,7 +44,7 @@
   },
   "productName": "BountyHub",
   "mainBinaryName": "BountyHub",
-  "version": "1.1.35",
+  "version": "1.1.36",
   "identifier": "tech.bountyhub.desktop",
   "plugins": {
     "updater": {
@@ -89,6 +89,11 @@
       }
     ],
     "security": {
+      "capabilities": [
+        "migrated",
+        "desktop-capability",
+        "updater-all"
+      ],
       "csp": {
         "default-src": "'self' asset:",
         "connect-src": "ipc: http://ipc.localhost https://api.bountyhub.tech wss://api.bountyhub.tech http://127.0.0.1:8788 http://localhost:8788 https://bountyhub-api.nico-chikuji.workers.dev https://api.cloudinary.com https://api.giphy.com https://api.dicebear.com https://api.html2pdf.app https://api.mainnet-beta.solana.com",

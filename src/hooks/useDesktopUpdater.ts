@@ -54,9 +54,11 @@ export function useDesktopUpdater(updateContext: UpdaterContext) {
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err)
         const isReleaseJsonError = /release\s*json|valid\s*release|could\s*not\s*fetch/i.test(message)
-        if (isReleaseJsonError) {
+        const isAclDenied =
+          /not allowed by ACL|plugin:updater\|check/i.test(message)
+        if (isReleaseJsonError || isAclDenied) {
           if (import.meta.env.DEV) {
-            console.debug('[BountyHub updater] No update endpoint or release:', message)
+            console.debug('[BountyHub updater] Skipping update UI:', message)
           }
           setPhaseFn('idle')
           return
