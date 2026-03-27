@@ -69,8 +69,8 @@ export default function DocsSingle() {
         Skip to main content
       </a>
 
-      {/* Minimal padding so container is near full viewport height/width without overlapping navbar/footer */}
-      <div className="flex min-h-0 w-full max-w-full flex-1 flex-col overflow-hidden p-2 @sm/main:p-3 @5xl/main:p-4">
+      {/* Hairline inset from the layout glass so the doc shell reads as nested, not flush. */}
+      <div className="flex min-h-0 w-full max-w-full flex-1 flex-col overflow-hidden p-0.5 @sm/main:p-1">
         {/* Full-height container: only content inside scrolls (TOC + section), not the page */}
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm @xl/main:flex-row dark:border-neutral-700 dark:bg-neutral-800/95">
           {/* Table of Contents - scrollable within container */}
@@ -78,7 +78,7 @@ export default function DocsSingle() {
             className="flex min-h-0 w-full shrink-0 flex-col overflow-y-auto overflow-x-hidden border-b border-neutral-200 scrollbar-hide @xl/main:w-48 @xl/main:border-b-0 @xl/main:border-r dark:border-neutral-700"
             aria-label="Table of contents"
           >
-          <div className="mx-auto w-full px-3 py-3 transition-opacity duration-300 ease-out @xl/main:max-w-48">
+          <div className="mx-auto w-full px-2 py-2 transition-opacity duration-300 ease-out @xl/main:max-w-48 @sm/main:px-2.5 @sm/main:py-2.5">
             <h2 className="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-3 text-center sticky top-0 bg-white dark:bg-neutral-800/95 py-1 z-10">
               Table of Contents
             </h2>
@@ -107,7 +107,7 @@ export default function DocsSingle() {
             tabIndex={-1}
             style={{ scrollBehavior: 'smooth' }}
           >
-          <div className="mx-auto w-full max-w-6xl break-words px-4 py-4 pb-16 transition-opacity duration-300 ease-out @sm/main:px-5 @5xl/main:px-8">
+          <div className="mx-auto w-full max-w-6xl break-words px-3 py-3 pb-12 transition-opacity duration-300 ease-out @sm/main:px-4 @sm/main:py-4 @5xl/main:px-6">
             {sectionId === 'overview' && (
               <>
                 <h1 className={sectionTitle}>Overview</h1>

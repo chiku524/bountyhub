@@ -18,6 +18,9 @@ export default function Layout({ children, showNav = true }: LayoutProps) {
   const isLegalPage = location.pathname === '/privacy' || location.pathname === '/terms'
   const isPublicPage = isHomePage || isAuthPage || isLegalPage
   const isDocsPage = location.pathname === '/docs'
+  const isChatPage = location.pathname === '/chat'
+  /** Full-height routes: glass panel fills the scroll region (flex) so inner layouts can scroll. */
+  const glassFillsViewport = isDocsPage || isChatPage
 
   // Determine if we need top padding for authenticated nav (top navbar)
   const showAuthenticatedNav = Boolean(user) && !isPublicPage
@@ -30,10 +33,24 @@ export default function Layout({ children, showNav = true }: LayoutProps) {
     isDocsPage ? 'overflow-hidden overflow-x-hidden' : 'overflow-y-auto overflow-x-hidden'
   ].join(' ')
 
+  const glassPanelClass = [
+    'mx-auto w-full min-w-0 rounded-xl border border-white/30 bg-white/45 shadow-sm backdrop-blur-md',
+    'dark:border-white/10 dark:bg-neutral-950/40',
+    glassFillsViewport ? 'flex min-h-0 flex-1 flex-col overflow-hidden' : ''
+  ].join(' ')
+
   return (
     <div className={`flex min-h-0 min-w-0 flex-1 flex-col ${topPaddingClass} pb-16 md:pb-0`}>
       <main id="main-content" className={mainClasses} tabIndex={-1}>
-        {children}
+        {isDocsPage ? (
+          <div className="box-border flex min-h-0 min-w-0 flex-1 flex-col px-2 py-2 @sm/main:px-2.5 @sm/main:py-2.5 @3xl/main:px-3 @3xl/main:py-3">
+            <div className={glassPanelClass}>{children}</div>
+          </div>
+        ) : (
+          <div className="box-border flex min-h-full w-full flex-1 flex-col items-stretch justify-center px-3 py-4 @sm/main:px-5 @3xl/main:px-8 @3xl/main:py-6">
+            <div className={glassPanelClass}>{children}</div>
+          </div>
+        )}
       </main>
       <BackToTop />
     </div>
