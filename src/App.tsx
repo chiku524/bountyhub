@@ -128,9 +128,9 @@ function DocsAwareRoutes() {
     </Suspense>
   )
   return location.pathname === '/docs' ? (
-    <div className="flex-1 min-h-0 min-w-0 flex flex-col overflow-hidden">{routes}</div>
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">{routes}</div>
   ) : (
-    routes
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col">{routes}</div>
   )
 }
 
@@ -218,7 +218,7 @@ function AppContent() {
       {!hideCanvasOnDesktopSplash && <AnimatedBackground />}
       
       {/* Light/Dark mode container - Always flex-col; data-desktop for app-like styling */}
-      <div className="relative z-10 min-h-screen w-full bg-white/5 dark:bg-neutral-900/5 transition-colors duration-200 flex flex-col" data-desktop={isDesktop ? 'true' : undefined}>
+      <div className="relative z-10 flex min-h-screen min-w-0 w-full flex-col bg-white/5 dark:bg-neutral-900/5 transition-colors duration-200" data-desktop={isDesktop ? 'true' : undefined}>
         {/* Skip to main content - visible on focus for keyboard/screen reader users */}
         {(showAuthenticatedNav || showHomeNav) && (
           <a

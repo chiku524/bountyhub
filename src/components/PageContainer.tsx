@@ -38,7 +38,7 @@ export function PageContainer({
 
   return (
     <div
-      className={`mx-auto w-full ${paddingX} ${paddingY} ${maxW} ${desktopChrome} ${className}`}
+      className={`mx-auto min-w-0 w-full ${paddingX} ${paddingY} ${maxW} ${desktopChrome} ${className}`}
       role="main"
     >
       {children}

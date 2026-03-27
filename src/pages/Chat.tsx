@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthProvider';
 import { api } from '../utils/api';
-import Layout from '../components/Layout';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { FiSend, FiSmile, FiPaperclip, FiUsers, FiMessageSquare, FiPlusCircle, FiCheckSquare, FiList, FiChevronDown } from 'react-icons/fi';
@@ -506,29 +506,28 @@ const Chat: React.FC = () => {
 
   if (!user) {
     return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <FiMessageSquare className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Team Hub</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">Sign in to use global chat, create teams, and manage task lists with others.</p>
-            <a
-              href="/login"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-            >
-              Sign In
-            </a>
-          </div>
+      <div className="flex min-h-[50vh] flex-1 items-center justify-center px-4 py-8">
+        <div className="text-center">
+          <FiMessageSquare className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+          <h2 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">Team Hub</h2>
+          <p className="mb-4 text-gray-600 dark:text-gray-400">
+            Sign in to use global chat, create teams, and manage task lists with others.
+          </p>
+          <Link
+            to="/login"
+            className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+          >
+            Sign In
+          </Link>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   return (
-    <Layout>
-      <div className="flex h-screen bg-gray-50 dark:bg-neutral-900">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-gray-50 dark:bg-neutral-900 md:flex-row">
         {/* Sidebar: Team Hub (Global + Teams) */}
-        <div className="w-80 bg-white dark:bg-neutral-800 border-r border-gray-200 dark:border-neutral-700 flex flex-col">
+        <div className="flex max-h-[44vh] w-full min-h-0 shrink-0 flex-col border-b border-gray-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 md:max-h-none md:h-auto md:w-72 md:max-w-[min(20rem,42%)] lg:w-80 md:border-b-0 md:border-r">
           <div className="p-4 border-b border-gray-200 dark:border-neutral-700">
             <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Team Hub</h1>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Chat together, create teams, and manage task lists</p>
@@ -730,14 +729,14 @@ const Chat: React.FC = () => {
         )}
 
         {/* Chat / Team Area */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           {currentRoom || (viewMode === 'team' && selectedTeam) ? (
             <>
               {/* Header: room name + team tabs when team selected */}
               <div className="bg-white dark:bg-neutral-800 border-b border-gray-200 dark:border-neutral-700 p-4">
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <div className="flex items-center space-x-2">
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex min-w-0 items-center space-x-2">
+                    <h2 className="truncate text-lg font-semibold text-gray-900 dark:text-white">
                       {viewMode === 'team' && selectedTeam ? selectedTeam.name : currentRoom?.name}
                     </h2>
                     {viewMode === 'room' && currentRoom && (
@@ -781,9 +780,9 @@ const Chat: React.FC = () => {
 
               {/* Content: Chat messages OR Team tasks */}
               {viewMode === 'team' && hubTab === 'tasks' ? (
-                <div className="flex-1 overflow-y-auto p-4">
-                  <div className="max-w-2xl mx-auto">
-                    <form onSubmit={addTask} className="flex gap-2 mb-4">
+                <div className="min-h-0 flex-1 overflow-y-auto p-4">
+                  <div className="mx-auto max-w-2xl">
+                    <form onSubmit={addTask} className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-stretch">
                       <input
                         id="hub-new-task-title"
                         name="newTaskTitle"
@@ -791,9 +790,9 @@ const Chat: React.FC = () => {
                         value={newTaskTitle}
                         onChange={(e) => setNewTaskTitle(e.target.value)}
                         placeholder="New task..."
-                        className="flex-1 px-3 py-2 border border-gray-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-gray-900 dark:text-white"
+                        className="min-w-0 flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
                       />
-                      <button type="submit" disabled={!newTaskTitle.trim()} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-2">
+                      <button type="submit" disabled={!newTaskTitle.trim()} className="flex shrink-0 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 disabled:opacity-50 sm:w-auto">
                         <FiPlusCircle className="h-4 w-4" /> Add
                       </button>
                     </form>
@@ -833,7 +832,7 @@ const Chat: React.FC = () => {
                 <>
               <div
                 ref={messagesContainerRef}
-                className="flex-1 overflow-y-auto p-4 space-y-4 relative"
+                className="relative min-h-0 flex-1 space-y-4 overflow-y-auto p-4"
                 onScroll={checkAtBottom}
               >
                 {loading ? (
@@ -874,7 +873,7 @@ const Chat: React.FC = () => {
                           )}
 
                           <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-xs lg:max-w-md ${
+                            <div className={`min-w-0 max-w-[min(100%,20rem)] break-words sm:max-w-xs lg:max-w-md ${
                               isOwn
                                 ? 'bg-indigo-600 text-white'
                                 : 'bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-600'
@@ -933,8 +932,8 @@ const Chat: React.FC = () => {
               {/* Message Input (only when showing chat) */}
               {(!(viewMode === 'team' && hubTab === 'tasks')) && (
                 <div className="bg-white dark:bg-neutral-800 border-t border-gray-200 dark:border-neutral-700 p-4">
-                  <form onSubmit={sendMessage} className="flex space-x-2">
-                    <div className="flex-1 relative">
+                  <form onSubmit={sendMessage} className="flex min-w-0 gap-2">
+                    <div className="relative min-w-0 flex-1">
                       <input
                         id="hub-chat-message"
                         name="chatMessage"
@@ -969,8 +968,8 @@ const Chat: React.FC = () => {
               )}
               </>
           ) : (
-            <div className="flex-1 flex items-center justify-center p-8">
-              <div className="text-center max-w-sm">
+            <div className="flex min-h-0 flex-1 items-center justify-center p-8">
+              <div className="max-w-sm text-center">
                 <FiMessageSquare className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Team Hub</h2>
                 <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
@@ -997,7 +996,6 @@ const Chat: React.FC = () => {
           )}
         </div>
       </div>
-    </Layout>
   );
 };
 

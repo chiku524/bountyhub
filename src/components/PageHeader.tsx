@@ -25,7 +25,7 @@ export function PageHeader({
     >
       <div className="min-w-0">
         <h1
-          className={`font-bold text-neutral-900 dark:text-white ${compact ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl'}`}
+          className={`break-words font-bold text-neutral-900 dark:text-white ${compact ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl'}`}
         >
           {title}
         </h1>

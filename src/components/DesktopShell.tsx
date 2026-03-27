@@ -58,10 +58,10 @@ function DesktopSidebar() {
       <div className="flex h-14 shrink-0 items-center gap-2 border-b border-white/5 px-4">
         <Link
           to="/community"
-          className="flex items-center gap-2 font-semibold tracking-tight text-white transition hover:text-white"
+          className="flex min-w-0 items-center gap-2 font-semibold tracking-tight text-white transition hover:text-white"
         >
           <img src={logoUrl} alt="" className="h-8 w-8 shrink-0 object-contain" width={32} height={32} aria-hidden />
-          <span>BountyHub</span>
+          <span className="truncate">BountyHub</span>
         </Link>
         <span className="rounded bg-white/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-neutral-400">
           App
@@ -131,9 +131,12 @@ function DesktopSidebar() {
 
 function DesktopShellInner({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen bg-neutral-950">
+    <div className="flex min-h-screen min-w-0 bg-neutral-950">
       <DesktopSidebar />
-      <main className="min-h-screen flex-1 overflow-auto scrollbar-hide" style={{ marginLeft: SIDEBAR_WIDTH }}>
+      <main
+        className="flex min-h-0 flex-1 min-w-0 flex-col overflow-hidden scrollbar-hide"
+        style={{ marginLeft: SIDEBAR_WIDTH }}
+      >
         {children}
       </main>
     </div>

@@ -32,15 +32,10 @@ function indentBlock(text, spaces) {
     .join('\n');
 }
 
-function rebuildMarketingDefs(tpl, logoDefsIndented, includeAccent) {
+function rebuildMarketingDefs(tpl, logoDefsIndented) {
   const bgMatch = tpl.match(/<linearGradient id="bg"[\s\S]*?<\/linearGradient>/);
   if (!bgMatch) return null;
-  let accent = '';
-  if (includeAccent) {
-    const a = tpl.match(/<linearGradient id="accent"[\s\S]*?<\/linearGradient>/);
-    if (a) accent = `\n    ${a[0]}`;
-  }
-  return `<defs>\n    ${bgMatch[0]}${accent}\n${logoDefsIndented}\n  </defs>`;
+  return `<defs>\n    ${bgMatch[0]}\n${logoDefsIndented}\n  </defs>`;
 }
 
 /**
@@ -64,31 +59,28 @@ function syncSvgAssetsFromLogo(logoSvgRaw) {
     {
       file: 'og-image.svg',
       idPrefix: 'oglx',
-      includeAccent: false,
       gRe:
         /<g transform="translate\(420, 100\) scale\(5\.625\)">[\s\S]*?<\/g>(?=\s*\n  <!-- Title \+ tagline centered under logo)/,
     },
     {
       file: 'social-square.svg',
       idPrefix: 'sqlx',
-      includeAccent: true,
       gRe: /<g transform="translate\(358, 280\) scale\(5\.7\)">[\s\S]*?<\/g>(?=\s*\n  <text x="540")/,
     },
     {
       file: 'social-banner.svg',
       idPrefix: 'bnlx',
-      includeAccent: true,
       gRe:
         /<g transform="translate\(120, 125\) scale\(3\.9\)">[\s\S]*?<\/g>(?=\s*\n  <!-- Title \+ tagline -->\n  <text x="420")/,
     },
   ];
 
-  for (const { file, idPrefix, includeAccent, gRe } of templates) {
+  for (const { file, idPrefix, gRe } of templates) {
     const p = path.join(publicDir, file);
     if (!fs.existsSync(p)) continue;
     let tpl = fs.readFileSync(p, 'utf8').replace(/\r\n/g, '\n');
     const newDefsInner = indentBlock(prefixLogoIds(parts.defs, idPrefix), 4);
-    const defsSection = rebuildMarketingDefs(tpl, newDefsInner, includeAccent);
+    const defsSection = rebuildMarketingDefs(tpl, newDefsInner);
     if (!defsSection) continue;
     tpl = tpl.replace(/<defs>[\s\S]*?<\/defs>/, defsSection);
     const transformMatch = tpl.match(gRe);
@@ -124,6 +116,8 @@ async function main() {
       await sharp(logoBuf).resize(size, size).png().toFile(path.join(publicDir, name));
       outputs.push(name);
     }
+    await sharp(logoBuf).resize(512, 512).png().toFile(path.join(publicDir, 'logo.png'));
+    outputs.push('logo.png');
     const jpgName = 'logo-1024.jpg';
     await sharp(logoBuf).resize(1024, 1024).jpeg({ quality: 92 }).toFile(path.join(publicDir, jpgName));
     outputs.push(jpgName);

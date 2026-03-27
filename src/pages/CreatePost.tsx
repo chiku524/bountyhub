@@ -303,7 +303,7 @@ export default function CreatePost() {
                       <FaClockIcon className="w-4 h-4 text-blue-400" />
                     </div>
                     <label htmlFor="bountyDuration" className="text-white font-medium mb-1 block text-sm sm:text-base">Bounty Duration</label>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <input
                         id="bountyDuration"
                         type="number"

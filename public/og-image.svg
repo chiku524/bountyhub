@@ -1,7 +1,8 @@
 <svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="0%" stop-color="#0b1020"/>
+      <stop offset="45%" stop-color="#151b33"/>
       <stop offset="100%" stop-color="#312e81"/>
     </linearGradient>
     <linearGradient id="oglx-bg" x1="10" y1="4" x2="54" y2="62">
@@ -150,6 +151,6 @@
       <path d="M49.85 20.05v1.15M51.15 20.05v1.15" stroke="#fde047" stroke-width="0.28" stroke-linecap="round" opacity="0.55"/>
   </g>
   <!-- Title + tagline centered under logo (logo bottom ~460) -->
-  <text x="600" y="500" fill="white" font-family="system-ui, sans-serif" font-size="68" font-weight="700" text-anchor="middle">bountyhub</text>
-  <text x="600" y="555" fill="rgba(255,255,255,0.9)" font-family="system-ui, sans-serif" font-size="26" text-anchor="middle">Decentralized Bounty Platform - Solana</text>
+  <text x="600" y="500" fill="#fffef0" font-family="system-ui, sans-serif" font-size="68" font-weight="700" text-anchor="middle">BountyHub</text>
+  <text x="600" y="555" fill="#e2e8f0" font-family="system-ui, sans-serif" font-size="26" text-anchor="middle">Decentralized Bounty Platform · Solana</text>
 </svg>

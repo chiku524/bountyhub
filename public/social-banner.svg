@@ -1,12 +1,9 @@
 <svg width="1500" height="500" viewBox="0 0 1500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="0%" stop-color="#0b1020"/>
+      <stop offset="45%" stop-color="#151b33"/>
       <stop offset="100%" stop-color="#312e81"/>
-    </linearGradient>
-    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#22d3ee"/>
-      <stop offset="100%" stop-color="#a78bfa"/>
     </linearGradient>
     <linearGradient id="bnlx-bg" x1="10" y1="4" x2="54" y2="62">
           <stop offset="0%" stop-color="#0b1020"/>
@@ -154,14 +151,14 @@
       <path d="M49.85 20.05v1.15M51.15 20.05v1.15" stroke="#fde047" stroke-width="0.28" stroke-linecap="round" opacity="0.55"/>
   </g>
   <!-- Title + tagline -->
-  <text x="420" y="220" fill="white" font-family="system-ui, -apple-system, sans-serif" font-size="56" font-weight="700">bountyhub</text>
-  <text x="420" y="280" fill="rgba(255,255,255,0.9)" font-family="system-ui, -apple-system, sans-serif" font-size="22">Decentralized Bounty Platform – Solana</text>
-  <text x="420" y="340" fill="#22d3ee" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="600">Ask · Answer · Earn</text>
-  <!-- Use-case pills -->
-  <rect x="420" y="370" width="140" height="36" rx="18" fill="rgba(34,211,238,0.2)" stroke="#22d3ee" stroke-width="1.5"/>
-  <text x="490" y="394" fill="#67e8f9" font-family="system-ui, sans-serif" font-size="16" font-weight="500" text-anchor="middle">Q&amp;A Bounties</text>
-  <rect x="580" y="370" width="160" height="36" rx="18" fill="rgba(167,139,250,0.2)" stroke="#a78bfa" stroke-width="1.5"/>
-  <text x="660" y="394" fill="#c4b5fd" font-family="system-ui, sans-serif" font-size="16" font-weight="500" text-anchor="middle">Bug Bounties</text>
-  <rect x="760" y="370" width="120" height="36" rx="18" fill="rgba(34,211,238,0.2)" stroke="#22d3ee" stroke-width="1.5"/>
-  <text x="820" y="394" fill="#67e8f9" font-family="system-ui, sans-serif" font-size="16" font-weight="500" text-anchor="middle">Developer Hub</text>
+  <text x="420" y="220" fill="#fffef0" font-family="system-ui, -apple-system, sans-serif" font-size="56" font-weight="700">BountyHub</text>
+  <text x="420" y="280" fill="#e2e8f0" font-family="system-ui, -apple-system, sans-serif" font-size="22">Decentralized Bounty Platform · Solana</text>
+  <text x="420" y="340" fill="#facc15" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="600">Ask · Answer · Earn</text>
+  <!-- Use-case pills (gold / rose / amber from logo icon) -->
+  <rect x="420" y="370" width="140" height="36" rx="18" fill="rgba(250,204,21,0.14)" stroke="#ca8a04" stroke-width="1.5"/>
+  <text x="490" y="394" fill="#fef08a" font-family="system-ui, sans-serif" font-size="16" font-weight="500" text-anchor="middle">Q&amp;A Bounties</text>
+  <rect x="580" y="370" width="160" height="36" rx="18" fill="rgba(239,68,68,0.12)" stroke="#ef4444" stroke-width="1.5"/>
+  <text x="660" y="394" fill="#fecaca" font-family="system-ui, sans-serif" font-size="16" font-weight="500" text-anchor="middle">Bug Bounties</text>
+  <rect x="760" y="370" width="120" height="36" rx="18" fill="rgba(251,191,36,0.14)" stroke="#d97706" stroke-width="1.5"/>
+  <text x="820" y="394" fill="#fde68a" font-family="system-ui, sans-serif" font-size="16" font-weight="500" text-anchor="middle">Developer Hub</text>
 </svg>

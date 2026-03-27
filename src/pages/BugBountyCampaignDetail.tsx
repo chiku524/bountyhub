@@ -235,7 +235,7 @@ export default function BugBountyCampaignDetail() {
               <h2 className="text-xl font-semibold text-neutral-900 dark:text-white mb-4">
                 Campaign Statistics
               </h2>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2">
                 <div>
                   <div className="flex items-center gap-2 text-neutral-600 dark:text-neutral-400 mb-1">
                     <FiDollarSign className="w-4 h-4" />

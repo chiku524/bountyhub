@@ -232,7 +232,7 @@ const IntegrityDisplay = ({ user }: { user: { id: string; username: string; inte
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {/* Score Display */}
         <div className="text-center">
           <div className={`text-3xl font-bold ${integrityColor}`}>
@@ -246,11 +246,11 @@ const IntegrityDisplay = ({ user }: { user: { id: string; username: string; inte
 
         {/* Rating Stars */}
         <div className="flex flex-col items-center justify-center">
-          <div className="flex items-center space-x-1 mb-2">
+          <div className="mb-2 flex max-w-full flex-wrap items-center justify-center gap-0.5">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
               <FiStar
                 key={star}
-                className={`w-4 h-4 ${
+                className={`h-4 w-4 shrink-0 ${
                   star <= integrityScore
                     ? 'text-yellow-500 dark:text-yellow-400 fill-current'
                     : 'text-neutral-400 dark:text-gray-400'

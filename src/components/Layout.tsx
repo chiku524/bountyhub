@@ -25,12 +25,12 @@ export default function Layout({ children, showNav = true }: LayoutProps) {
   const topPaddingClass = needsTopPadding ? (isDesktop ? 'pt-14' : 'pt-16') : ''
 
   const mainClasses = [
-    'flex-1 min-h-0',
-    isDocsPage ? 'flex flex-col overflow-hidden overflow-x-hidden' : 'overflow-y-auto overflow-x-hidden'
+    'flex min-h-0 min-w-0 flex-1 flex-col',
+    isDocsPage ? 'overflow-hidden overflow-x-hidden' : 'overflow-y-auto overflow-x-hidden'
   ].join(' ')
 
   return (
-    <div className={`flex-1 flex flex-col ${topPaddingClass} pb-16 md:pb-0`}>
+    <div className={`flex min-h-0 min-w-0 flex-1 flex-col ${topPaddingClass} pb-16 md:pb-0`}>
       <main id="main-content" className={mainClasses} tabIndex={-1}>
         {children}
       </main>
