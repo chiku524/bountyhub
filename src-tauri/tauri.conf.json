@@ -9,7 +9,7 @@
     "active": true,
     "category": "Productivity",
     "copyright": "",
-    "targets": "all",
+    "targets": ["nsis", "dmg", "deb", "appimage"],
     "externalBin": [],
     "icon": [
       "icons/32x32.png",
@@ -44,7 +44,7 @@
   },
   "productName": "BountyHub",
   "mainBinaryName": "BountyHub",
-  "version": "1.1.37",
+  "version": "1.1.38",
   "identifier": "tech.bountyhub.desktop",
   "plugins": {
     "updater": {
