@@ -258,7 +258,7 @@ const Governance: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="mx-auto max-w-7xl px-4 py-8 @sm/main:px-6 @5xl/main:px-8">
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
           <div>
@@ -278,7 +278,7 @@ const Governance: React.FC = () => {
 
       {/* Governance Statistics */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="mb-8 grid grid-cols-1 gap-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
           <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
             <h3 className="text-sm font-medium text-neutral-600 dark:text-gray-400">Total Staked</h3>
             <p className="text-2xl font-bold text-neutral-900 dark:text-white">{formatAmount(stats.totalStaked)} BBUX</p>
@@ -300,7 +300,7 @@ const Governance: React.FC = () => {
 
       {/* Dynamic Reward Rate & Platform Metrics */}
       {(rewardRate || platformMetrics) && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div className="mb-8 grid grid-cols-1 gap-8 @xl/main:grid-cols-2">
           {/* Dynamic Reward Rate Breakdown */}
           {rewardRate && (
             <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700">
@@ -379,7 +379,7 @@ const Governance: React.FC = () => {
       {userRewardRate && (
         <div className="bg-linear-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/50 dark:to-purple-900/50 border border-indigo-200 dark:border-indigo-700 rounded-lg p-6 mb-8">
           <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-3">Your Personalized Reward Rate</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2">
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <span className="text-neutral-700 dark:text-gray-300">Base Rate:</span>
@@ -419,7 +419,7 @@ const Governance: React.FC = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-8 @xl/main:grid-cols-2">
         {/* User Governance Stats */}
         <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700">
           <div className="px-6 py-4 border-b border-neutral-200 dark:border-neutral-700">

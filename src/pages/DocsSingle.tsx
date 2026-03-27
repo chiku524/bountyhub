@@ -70,19 +70,19 @@ export default function DocsSingle() {
       </a>
 
       {/* Minimal padding so container is near full viewport height/width without overlapping navbar/footer */}
-      <div className="flex-1 min-h-0 w-full max-w-full overflow-hidden flex flex-col p-2 sm:p-3 lg:p-4">
+      <div className="flex min-h-0 w-full max-w-full flex-1 flex-col overflow-hidden p-2 @sm/main:p-3 @5xl/main:p-4">
         {/* Full-height container: only content inside scrolls (TOC + section), not the page */}
-        <div className="flex-1 min-h-0 overflow-hidden flex flex-col lg:flex-row rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800/95 shadow-sm">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm @xl/main:flex-row dark:border-neutral-700 dark:bg-neutral-800/95">
           {/* Table of Contents - scrollable within container */}
           <aside
-            className="shrink-0 w-full lg:w-48 min-h-0 flex flex-col overflow-y-auto overflow-x-hidden scrollbar-hide border-b lg:border-b-0 lg:border-r border-neutral-200 dark:border-neutral-700"
+            className="flex min-h-0 w-full shrink-0 flex-col overflow-y-auto overflow-x-hidden border-b border-neutral-200 scrollbar-hide @xl/main:w-48 @xl/main:border-b-0 @xl/main:border-r dark:border-neutral-700"
             aria-label="Table of contents"
           >
-          <div className="w-full lg:max-w-48 px-3 py-3 lg:py-3 mx-auto transition-opacity duration-300 ease-out">
+          <div className="mx-auto w-full px-3 py-3 transition-opacity duration-300 ease-out @xl/main:max-w-48">
             <h2 className="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-3 text-center sticky top-0 bg-white dark:bg-neutral-800/95 py-1 z-10">
               Table of Contents
             </h2>
-            <nav className="flex flex-row lg:flex-col gap-0.5 overflow-x-auto lg:overflow-x-visible overflow-y-visible scrollbar-hide pb-2 lg:pb-0 overscroll-x-contain">
+            <nav className="flex flex-row gap-0.5 overflow-x-auto overflow-y-visible overscroll-x-contain pb-2 scrollbar-hide @xl/main:flex-col @xl/main:overflow-x-visible @xl/main:pb-0">
               {SECTION_IDS.map((id) => (
                 <a
                   key={id}
@@ -103,11 +103,11 @@ export default function DocsSingle() {
           {/* Section content - scrollable within container; uses most of container width */}
           <main
             id="main-content"
-            className="flex-1 min-w-0 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide focus:outline-none scroll-smooth lg:flex lg:items-center lg:justify-center lg:self-stretch"
+            className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden scroll-smooth scrollbar-hide focus:outline-none @5xl/main:flex @5xl/main:items-center @5xl/main:justify-center @5xl/main:self-stretch"
             tabIndex={-1}
             style={{ scrollBehavior: 'smooth' }}
           >
-          <div className="w-full max-w-6xl mx-auto px-4 sm:px-5 lg:px-8 py-4 pb-16 break-words transition-opacity duration-300 ease-out">
+          <div className="mx-auto w-full max-w-6xl break-words px-4 py-4 pb-16 transition-opacity duration-300 ease-out @sm/main:px-5 @5xl/main:px-8">
             {sectionId === 'overview' && (
               <>
                 <h1 className={sectionTitle}>Overview</h1>

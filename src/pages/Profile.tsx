@@ -232,7 +232,7 @@ const IntegrityDisplay = ({ user }: { user: { id: string; username: string; inte
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2">
         {/* Score Display */}
         <div className="text-center">
           <div className={`text-3xl font-bold ${integrityColor}`}>
@@ -487,7 +487,7 @@ export default function Profile() {
 
           <div className="mt-6 sm:mt-8">
             <h2 className="text-base sm:text-lg font-semibold text-violet-600 dark:text-violet-300 mb-4">Profile Information</h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 sm:gap-6">
               <div className="bg-neutral-100 dark:bg-neutral-700/50 rounded-lg p-3 sm:p-4 border border-violet-500/30 dark:border-violet-500/30">
                 <label htmlFor="bio" className="block text-sm font-medium text-violet-600 dark:text-violet-300">Bio</label>
                 <p id="bio" className="mt-1 text-sm text-neutral-600 dark:text-gray-300">{user.profile?.bio || 'No bio provided'}</p>
@@ -542,7 +542,7 @@ export default function Profile() {
             />
           </div>
 
-          <div className="mt-6 sm:mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="mt-6 grid grid-cols-1 gap-6 @xl/main:grid-cols-2 sm:mt-8">
             <div>
               <h2 className="text-base sm:text-lg font-semibold text-violet-600 dark:text-violet-300 mb-4">Recent Activity</h2>
               <div className="space-y-2">
@@ -626,7 +626,7 @@ export default function Profile() {
           <div className="mt-6 sm:mt-8">
             <h2 className="text-lg sm:text-xl font-bold text-yellow-600 dark:text-yellow-400 mb-4">Bookmarked Posts</h2>
             {limitedBookmarks.length > 0 ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2">
                 {limitedBookmarks.map((bookmark) => (
                   <div key={bookmark.id} className="bg-white dark:bg-neutral-800/80 rounded-lg p-4 border border-yellow-400/40 dark:border-yellow-400/40 transition-all duration-300 hover:bg-neutral-50 dark:hover:bg-neutral-700/80 hover:border-yellow-300/60 dark:hover:border-yellow-300/60 hover:shadow-lg hover:shadow-yellow-400/20 dark:hover:shadow-yellow-400/20 hover:scale-[1.02] group">
                     <Link to={`/posts/${bookmark.post.id}`} className="block">

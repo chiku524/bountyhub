@@ -166,7 +166,7 @@ const RefundRequests: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="mx-auto max-w-7xl px-4 py-8 @sm/main:px-6 @5xl/main:px-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">Refund Requests</h1>
         <p className="text-neutral-500 dark:text-gray-400">
@@ -176,7 +176,7 @@ const RefundRequests: React.FC = () => {
 
       <div className="bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 rounded-lg p-6 mb-6">
         <h2 className="text-lg font-semibold text-indigo-600 dark:text-indigo-400 mb-3">How it works</h2>
-        <div className="grid md:grid-cols-3 gap-4 text-sm">
+        <div className="grid grid-cols-1 gap-4 text-sm @xl/main:grid-cols-2 @3xl/main:grid-cols-3">
           <div className="bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg border border-neutral-200 dark:border-neutral-700">
             <h3 className="font-medium text-indigo-600 dark:text-indigo-400 mb-2">1. Review Requests</h3>
             <p className="text-neutral-600 dark:text-gray-300">Read the refund reason and check if the bounty has helpful answers.</p>

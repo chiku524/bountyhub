@@ -114,7 +114,7 @@ const Admin: React.FC = () => {
 
         {/* Stats Section */}
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="mb-8 grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @3xl/main:grid-cols-4">
             <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 p-6 rounded-lg">
               <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-2">Total Users</h3>
               <p className="text-3xl font-bold text-blue-600 dark:text-blue-500">{stats.totalUsers}</p>

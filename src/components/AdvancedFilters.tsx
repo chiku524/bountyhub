@@ -139,7 +139,7 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
               <h3 className="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                 Quick filters
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2">
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Status

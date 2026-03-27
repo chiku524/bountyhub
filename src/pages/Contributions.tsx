@@ -146,7 +146,7 @@ export default function Contributions() {
         description="Track your open-source contributions and rewards"
       />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mx-auto max-w-7xl px-4 py-8 @sm/main:px-6 @5xl/main:px-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">
@@ -158,7 +158,7 @@ export default function Contributions() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="mb-8 grid grid-cols-1 gap-6 @xl/main:grid-cols-2 @3xl/main:grid-cols-3">
           <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
             <div className="flex items-center gap-3 mb-2">
               <FiAward className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />

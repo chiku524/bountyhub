@@ -24,8 +24,9 @@ export default function Layout({ children, showNav = true }: LayoutProps) {
   const needsTopPadding = showAuthenticatedNav && showNav
   const topPaddingClass = needsTopPadding ? (isDesktop ? 'pt-14' : 'pt-16') : ''
 
+  // Named container: children use @sm/main:, @xl/main:, … (see Tailwind container queries).
   const mainClasses = [
-    'flex min-h-0 min-w-0 flex-1 flex-col',
+    '@container/main flex min-h-0 min-w-0 flex-1 flex-col',
     isDocsPage ? 'overflow-hidden overflow-x-hidden' : 'overflow-y-auto overflow-x-hidden'
   ].join(' ')
 

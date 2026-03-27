@@ -234,7 +234,7 @@ export default function CreatePost() {
             
             <div className="bg-linear-to-br from-neutral-800/60 to-neutral-900/60 border border-violet-500/20 rounded-xl p-4 sm:p-6 backdrop-blur-xs">
               {/* Bounty Toggle */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+              <div className="mb-6 flex flex-col gap-4 @xl/main:flex-row @xl/main:items-center @xl/main:justify-between">
                 <div className="flex items-center gap-3">
                   <div className="relative">
                     <label htmlFor="hasBounty" className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out cursor-pointer ${hasBounty ? 'bg-violet-500' : 'bg-neutral-600'}`}>
@@ -303,7 +303,7 @@ export default function CreatePost() {
                       <FaClockIcon className="w-4 h-4 text-blue-400" />
                     </div>
                     <label htmlFor="bountyDuration" className="text-white font-medium mb-1 block text-sm sm:text-base">Bounty Duration</label>
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-3 @xl/main:grid-cols-2">
                       <input
                         id="bountyDuration"
                         type="number"

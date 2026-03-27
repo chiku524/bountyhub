@@ -141,7 +141,7 @@ export default function BugBountyCampaignDetail() {
             Back to Campaigns
           </Link>
           
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div className="flex flex-col gap-4 @xl/main:flex-row @xl/main:items-start @xl/main:justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
                 <h1 className="text-3xl font-bold text-neutral-900 dark:text-white">
@@ -227,9 +227,9 @@ export default function BugBountyCampaignDetail() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 @3xl/main:grid-cols-3">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-6 @3xl/main:col-span-2">
             {/* Campaign Stats */}
             <div className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
               <h2 className="text-xl font-semibold text-neutral-900 dark:text-white mb-4">

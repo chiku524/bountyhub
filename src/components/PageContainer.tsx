@@ -30,8 +30,8 @@ export function PageContainer({
 }: PageContainerProps) {
   const isDesktop = isDesktopApp()
   const maxW = isDesktop ? desktopMaxWidthClasses[maxWidth] : maxWidthClasses[maxWidth]
-  const paddingX = isDesktop ? 'px-6 lg:px-10' : 'px-4 sm:px-6 lg:px-8'
-  const paddingY = compact ? 'py-4 sm:py-6' : 'py-6 md:py-8'
+  const paddingX = isDesktop ? 'px-4 @xl/main:px-6 @3xl/main:px-10' : 'px-4 @sm/main:px-6 @5xl/main:px-8'
+  const paddingY = compact ? 'py-4 @sm/main:py-6' : 'py-6 @3xl/main:py-8'
   const desktopChrome = isDesktop
     ? 'rounded-xl border border-neutral-200/80 dark:border-neutral-700/80 bg-white/90 dark:bg-neutral-800/90 shadow-sm'
     : ''

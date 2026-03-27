@@ -437,7 +437,7 @@ function WalletContent() {
 
           {/* Wallet Overview Card */}
           <div className="bg-linear-to-r from-blue-500 to-purple-600 rounded-lg p-4 sm:p-6 text-white mb-6 sm:mb-8">
-            <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
+            <div className="flex flex-col gap-4 @xl/main:flex-row @xl/main:items-center @xl/main:justify-between">
               <div>
                 <h2 className="text-xl sm:text-2xl font-semibold mb-2">BBUX Token Balances</h2>
                 <div className="space-y-2">
@@ -448,7 +448,7 @@ function WalletContent() {
                   </div>
                 </div>
               </div>
-              <div className="text-left lg:text-right">
+              <div className="text-left @xl/main:text-right">
                 <div className="mb-2">
                   <p className="text-blue-100 text-sm">Total Earned</p>
                   <p className="text-lg sm:text-xl font-semibold">{walletData ? walletData.totalEarned.toFixed(4) : '0.0000'} BBUX</p>

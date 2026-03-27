@@ -480,7 +480,7 @@ export default function UserProfile() {
 
           <div className="mt-8">
             <h2 className="text-lg font-semibold text-violet-300 mb-4">Profile Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 @xl/main:grid-cols-2">
               <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
                 <label htmlFor="bio" className="block text-sm font-medium text-violet-300">Bio</label>
                 <p id="bio" className="mt-1 text-sm text-gray-300">{user.profile?.bio || 'No bio provided'}</p>
@@ -527,7 +527,7 @@ export default function UserProfile() {
             />
           </div>
 
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="mt-8 grid grid-cols-1 gap-6 @xl/main:grid-cols-2">
             <div>
               <h2 className="text-lg font-semibold text-violet-300 mb-4">Recent Activity</h2>
               <div className="space-y-2">
@@ -618,7 +618,7 @@ export default function UserProfile() {
           <div className="mt-8">
             <h2 className="text-xl font-bold text-yellow-400 mb-4">Bookmarked Posts</h2>
             {bookmarks.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2">
                 {bookmarks.map((bookmark) => (
                   <div key={bookmark.id} className="bg-neutral-800/80 rounded-lg p-4 border border-yellow-400/40 transition-all duration-300 hover:bg-neutral-700/80 hover:border-yellow-300/60 hover:shadow-lg hover:shadow-yellow-400/20 hover:scale-[1.02] group">
                     <Link to={`/posts/${bookmark.post.id}`} className="block">

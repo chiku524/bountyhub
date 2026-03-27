@@ -472,7 +472,7 @@ export default function Settings() {
             <form onSubmit={handleProfileUpdate} className="space-y-4 sm:space-y-6">
               {activeTab === 'profile' && (
                 <div className="space-y-4 sm:space-y-6">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                  <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 sm:gap-6">
                     <div>
                       <label htmlFor="firstName" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
                         First Name
@@ -546,7 +546,7 @@ export default function Settings() {
               )}
 
               {activeTab === 'social' && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 sm:gap-6">
                   <div>
                     <label htmlFor="facebook" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
                       Facebook

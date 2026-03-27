@@ -85,7 +85,7 @@ export default function ProfileBookmarks() {
 
         <div className="bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
           {bookmarks.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @3xl/main:grid-cols-3">
               {bookmarks.map((bookmark) => (
                 <div key={bookmark.id} className="bg-neutral-700/50 rounded-lg p-4 border border-yellow-400/40 transition-all duration-300 hover:bg-neutral-600/50 hover:border-yellow-300/60 hover:shadow-lg hover:shadow-yellow-400/20 hover:scale-[1.02] group">
                   <Link to={`/posts/${bookmark.post.id}`} className="block">

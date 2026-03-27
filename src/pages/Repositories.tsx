@@ -223,7 +223,7 @@ export default function Repositories() {
         />
 
         {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col gap-4 @xl/main:flex-row">
             <div className="flex-1 relative">
               <input
                 type="text"
@@ -310,7 +310,7 @@ export default function Repositories() {
         ) : (
           <>
             {/* Repositories Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6 @xl/main:grid-cols-2 @3xl/main:grid-cols-3">
               {paginatedRepositories.map((repo) => (
                 <div
                   key={repo.id}

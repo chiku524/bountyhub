@@ -122,7 +122,7 @@ export default function Transactions() {
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-1 gap-4 text-sm @xl/main:grid-cols-2">
                     <div>
                       <p className="text-neutral-500 dark:text-gray-400">Date & Time</p>
                       <p className="text-neutral-900 dark:text-white">{formatDate(tx.createdAt)}</p>

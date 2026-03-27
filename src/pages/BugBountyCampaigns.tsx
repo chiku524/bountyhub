@@ -82,7 +82,7 @@ export default function BugBountyCampaigns() {
         description="Discover and participate in bug bounty campaigns"
       />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mx-auto max-w-7xl px-4 py-8 @sm/main:px-6 @5xl/main:px-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
@@ -181,7 +181,7 @@ export default function BugBountyCampaigns() {
         ) : (
           <>
             {/* Campaigns Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div className="mb-8 grid grid-cols-1 gap-6 @xl/main:grid-cols-2 @3xl/main:grid-cols-3">
               {filteredCampaigns.map((campaign) => (
                 <Link
                   key={campaign.id}

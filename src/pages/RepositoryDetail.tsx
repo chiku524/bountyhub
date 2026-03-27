@@ -117,7 +117,7 @@ export default function RepositoryDetail() {
         </Link>
 
         <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 p-6 sm:p-8">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+          <div className="mb-6 flex flex-col gap-4 @xl/main:flex-row @xl/main:items-start @xl/main:justify-between">
             <div className="flex items-start gap-3 min-w-0">
               <FiGithub className="w-10 h-10 text-neutral-500 dark:text-neutral-400 shrink-0 mt-0.5" />
               <div className="min-w-0">
@@ -187,7 +187,7 @@ export default function RepositoryDetail() {
             </div>
           )}
 
-          <div className="pt-4 border-t border-neutral-200 dark:border-neutral-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-col gap-4 border-t border-neutral-200 pt-4 @xl/main:flex-row @xl/main:items-center @xl/main:justify-between dark:border-neutral-700">
             <div className="text-sm text-neutral-500 dark:text-neutral-400">
               {repo.lastSyncedAt && (
                 <span>Last synced: {new Date(repo.lastSyncedAt).toLocaleString()}</span>

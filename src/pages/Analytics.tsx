@@ -103,7 +103,7 @@ export default function Analytics() {
 
         {/* Platform Stats Grid */}
         {platformStats && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="mb-8 grid grid-cols-1 gap-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
             <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-6 shadow-xs">
               <div className="flex items-center justify-between mb-4">
                 <div className="p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
@@ -151,7 +151,7 @@ export default function Analytics() {
         )}
 
         {/* Detailed Stats */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="mb-8 grid grid-cols-1 gap-6 @xl/main:grid-cols-2">
           {/* Posts & Answers */}
           <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-6 shadow-xs">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
@@ -214,7 +214,7 @@ export default function Analytics() {
               <FiActivity className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               Admin Statistics
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-4 @3xl/main:grid-cols-4">
               <div className="text-center p-4 bg-neutral-100 dark:bg-neutral-700 rounded-lg">
                 <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{adminStats.totalUsers}</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Total Users</p>

@@ -33,10 +33,10 @@ const PostList: React.FC<{
   return (
     <ul className="divide-y divide-neutral-200 dark:divide-neutral-700">
       {posts.map((post) => (
-        <li key={post.id} className={`py-3 sm:py-4 ${post.reward && post.reward > 0 ? 'bg-linear-to-r from-cyan-50 to-blue-50 dark:from-cyan-500/10 dark:to-blue-500/10 border border-cyan-200 dark:border-cyan-400/30 rounded-lg' : ''}`}>
-          <div className="flex space-x-2 sm:space-x-4">
+        <li key={post.id} className={`py-3 @sm/main:py-4 ${post.reward && post.reward > 0 ? 'bg-linear-to-r from-cyan-50 to-blue-50 dark:from-cyan-500/10 dark:to-blue-500/10 border border-cyan-200 dark:border-cyan-400/30 rounded-lg' : ''}`}>
+          <div className="flex space-x-2 @sm/main:space-x-4">
             {/* Voting */}
-            <div className="shrink-0 flex items-center justify-center w-12 sm:w-16">
+            <div className="flex w-12 shrink-0 items-center justify-center @sm/main:w-16">
               <VoteButton
                 itemId={post.id}
                 itemType="post"
@@ -50,19 +50,19 @@ const PostList: React.FC<{
             {/* Post Content */}
             <div className="flex-1 min-w-0">
               <Link to={`/posts/${post.id}`} className={`block hover:bg-neutral-100 dark:hover:bg-neutral-700/40 rounded-lg p-2 transition ${post.reward && post.reward > 0 ? 'hover:bg-cyan-100 dark:hover:bg-cyan-500/10' : ''}`}>
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
-                      <h2 className="text-base sm:text-xl font-semibold text-neutral-900 dark:text-white line-clamp-2 sm:line-clamp-1">{post.title.length > 60 ? post.title.slice(0, 60) + '...' : post.title}</h2>
+                <div className="flex flex-col @xl/main:flex-row @xl/main:items-center @xl/main:justify-between">
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-1 flex flex-col gap-2 @xl/main:flex-row @xl/main:items-center">
+                      <h2 className="line-clamp-2 text-base font-semibold text-neutral-900 @sm/main:line-clamp-1 @xl/main:text-xl dark:text-white">{post.title.length > 60 ? post.title.slice(0, 60) + '...' : post.title}</h2>
                       {post.reward && post.reward > 0 && (
-                        <div className="flex items-center gap-1 px-2 py-1 bg-linear-to-r from-cyan-100 to-blue-100 dark:from-cyan-500/20 dark:to-blue-500/20 border border-cyan-300 dark:border-cyan-400/40 rounded-full w-fit">
-                          <span className="text-cyan-600 dark:text-cyan-300 text-xs sm:text-sm font-medium">💰</span>
-                          <span className="text-cyan-700 dark:text-cyan-200 text-xs sm:text-sm font-medium">{post.reward} BBUX</span>
+                        <div className="flex w-fit items-center gap-1 rounded-full border border-cyan-300 bg-linear-to-r from-cyan-100 to-blue-100 px-2 py-1 dark:border-cyan-400/40 dark:from-cyan-500/20 dark:to-blue-500/20">
+                          <span className="text-xs font-medium text-cyan-600 @sm/main:text-sm dark:text-cyan-300">💰</span>
+                          <span className="text-xs font-medium text-cyan-700 @sm/main:text-sm dark:text-cyan-200">{post.reward} BBUX</span>
                         </div>
                       )}
                     </div>
-                    <p className="text-sm sm:text-base text-neutral-500 dark:text-gray-400 mt-1 line-clamp-2">{post.content.length > 120 ? post.content.slice(0, 120) + '...' : post.content}</p>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2 text-xs sm:text-sm text-neutral-400 dark:text-gray-500">
+                    <p className="mt-1 line-clamp-2 text-sm text-neutral-500 @sm/main:text-base dark:text-gray-400">{post.content.length > 120 ? post.content.slice(0, 120) + '...' : post.content}</p>
+                    <div className="mt-2 flex flex-col gap-2 text-xs text-neutral-400 @sm/main:gap-4 @xl/main:flex-row @xl/main:items-center @sm/main:text-sm dark:text-gray-500">
                       <span className="flex items-center space-x-2">
                         <ProfilePicture user={post.author} size="sm" />
                         <span>By: <Link to={`/users/${post.author?.username || post.authorId}`} className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300" onClick={(e) => e.stopPropagation()}>{post.author?.username || `User ${post.authorId}`}</Link></span>
@@ -70,7 +70,7 @@ const PostList: React.FC<{
                       <span>{new Date(post.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
-                  <div className="mt-2 lg:mt-0 flex flex-wrap items-center gap-2">
+                  <div className="mt-2 flex flex-wrap items-center gap-2 @xl/main:mt-0">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                       post.status === 'OPEN' ? 'bg-green-100 dark:bg-green-600 text-green-700 dark:text-white' :
                       post.status === 'COMPLETED' ? 'bg-yellow-100 dark:bg-yellow-600 text-yellow-700 dark:text-white' :

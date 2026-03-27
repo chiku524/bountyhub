@@ -525,9 +525,9 @@ const Chat: React.FC = () => {
   }
 
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-gray-50 dark:bg-neutral-900 md:flex-row">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-gray-50 dark:bg-neutral-900 @xl/main:flex-row">
         {/* Sidebar: Team Hub (Global + Teams) */}
-        <div className="flex max-h-[44vh] w-full min-h-0 shrink-0 flex-col border-b border-gray-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 md:max-h-none md:h-auto md:w-72 md:max-w-[min(20rem,42%)] lg:w-80 md:border-b-0 md:border-r">
+        <div className="flex max-h-[44vh] w-full min-h-0 shrink-0 flex-col border-b border-gray-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 @xl/main:max-h-none @xl/main:h-auto @xl/main:w-72 @xl/main:max-w-[min(20rem,42%)] @xl/main:border-b-0 @xl/main:border-r @2xl/main:w-80">
           <div className="p-4 border-b border-gray-200 dark:border-neutral-700">
             <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Team Hub</h1>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Chat together, create teams, and manage task lists</p>
@@ -782,7 +782,7 @@ const Chat: React.FC = () => {
               {viewMode === 'team' && hubTab === 'tasks' ? (
                 <div className="min-h-0 flex-1 overflow-y-auto p-4">
                   <div className="mx-auto max-w-2xl">
-                    <form onSubmit={addTask} className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-stretch">
+                    <form onSubmit={addTask} className="mb-4 flex flex-col gap-2 @xl/main:flex-row @xl/main:items-stretch">
                       <input
                         id="hub-new-task-title"
                         name="newTaskTitle"
@@ -792,7 +792,7 @@ const Chat: React.FC = () => {
                         placeholder="New task..."
                         className="min-w-0 flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
                       />
-                      <button type="submit" disabled={!newTaskTitle.trim()} className="flex shrink-0 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 disabled:opacity-50 sm:w-auto">
+                      <button type="submit" disabled={!newTaskTitle.trim()} className="flex w-full shrink-0 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 disabled:opacity-50 @xl/main:w-auto">
                         <FiPlusCircle className="h-4 w-4" /> Add
                       </button>
                     </form>
@@ -873,7 +873,7 @@ const Chat: React.FC = () => {
                           )}
 
                           <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`min-w-0 max-w-[min(100%,20rem)] break-words sm:max-w-xs lg:max-w-md ${
+                            <div className={`min-w-0 max-w-[min(100%,20rem)] break-words @sm/main:max-w-xs @5xl/main:max-w-md ${
                               isOwn
                                 ? 'bg-indigo-600 text-white'
                                 : 'bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-600'
