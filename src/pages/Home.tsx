@@ -3,7 +3,6 @@ import { useAuth } from '../contexts/AuthProvider'
 import { useEffect, useState } from 'react'
 import { api } from '../utils/api'
 import { PageMetadata } from '../components/PageMetadata'
-import { HomeNav } from '../components/HomeNav'
 import { FiUsers, FiDollarSign, FiAward, FiZap, FiShield, FiTrendingUp, FiGithub, FiCode } from 'react-icons/fi'
 
 /** Run scroll-triggered animations when elements with data-animate enter view. */
@@ -113,7 +112,6 @@ export default function Home() {
         description="Ask questions with BBUX rewards, answer to earn, and run security bug bounty campaigns tied to your GitHub repositories. Bounties settle on your in-platform balance; deposit SOL to fund BBUX and withdraw SOL when you cash out."
         keywords="bounty, bug bounty, security, GitHub, cryptocurrency, Solana, blockchain, rewards, questions, answers, BBUX, decentralized, open source"
       />
-      <HomeNav onScrollTo={scrollToSection} />
       <div className="min-h-screen bg-linear-to-br from-amber-50/40 via-white/80 to-indigo-50/30 dark:from-[#0b1020]/90 dark:via-neutral-900/95 dark:to-indigo-950/40 backdrop-blur-xs text-neutral-900 dark:text-white transition-colors duration-200 pt-16">
         {/* Hero Section */}
         <section id="hero" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 border-b border-neutral-200/70 dark:border-neutral-700/50">

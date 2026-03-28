@@ -19,6 +19,13 @@ export default function Layout({ children, showNav = true }: LayoutProps) {
   const isPublicPage = isHomePage || isAuthPage || isLegalPage
   const isDocsPage = location.pathname === '/docs'
   const isChatPage = location.pathname === '/chat'
+  const isLaunchPage = location.pathname === '/launch'
+  /**
+   * Desktop splash/auth/launch must not sit inside the frosted panel: backdrop-filter on an ancestor
+   * breaks `position: fixed` for `.desktop-splash` and clips the sign-in canvas.
+   */
+  const isFullBleedPage =
+    isLaunchPage || (isDesktop && (isHomePage || isAuthPage))
   /** Full-height routes: glass panel fills the scroll region (flex) so inner layouts can scroll. */
   const glassFillsViewport = isDocsPage || isChatPage
 
@@ -46,6 +53,8 @@ export default function Layout({ children, showNav = true }: LayoutProps) {
           <div className="box-border flex min-h-0 min-w-0 flex-1 flex-col px-2 py-2 @sm/main:px-2.5 @sm/main:py-2.5 @3xl/main:px-3 @3xl/main:py-3">
             <div className={glassPanelClass}>{children}</div>
           </div>
+        ) : isFullBleedPage ? (
+          <div className="box-border flex min-h-full min-w-0 w-full flex-1 flex-col">{children}</div>
         ) : (
           <div className="box-border flex min-h-full w-full flex-1 flex-col items-stretch justify-center px-3 py-4 @sm/main:px-5 @3xl/main:px-8 @3xl/main:py-6">
             <div className={glassPanelClass}>{children}</div>

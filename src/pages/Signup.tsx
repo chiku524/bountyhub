@@ -1,10 +1,10 @@
 import { useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { FiArrowLeft } from 'react-icons/fi'
 import { useAuth } from '../contexts/AuthProvider'
 import { config } from '../utils/config'
 import { isDesktopApp } from '../utils/desktop'
 import { LoadingSpinner } from '../components/LoadingSpinner'
+import '../components/desktop-splash.css'
 
 export default function Signup() {
   const [email, setEmail] = useState('')
@@ -41,22 +41,21 @@ export default function Signup() {
   }
 
   return (
-    <div className={`min-h-screen flex items-center justify-center text-neutral-900 dark:text-white transition-colors duration-200 py-12 px-4 sm:px-6 lg:px-8 ${
-      isDesktop
-        ? 'bg-gradient-to-br from-indigo-950/98 via-neutral-950 to-violet-950/80'
-        : 'bg-white/50 dark:bg-neutral-900/50 backdrop-blur-xs'
-    }`}>
-      <div className={`w-full space-y-6 ${isDesktop ? 'max-w-[380px]' : 'max-w-md space-y-8'}`}>
-        {isDesktop && (
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-sm text-neutral-400 hover:text-cyan-300 transition-colors"
-          >
-            <FiArrowLeft className="w-4 h-4" />
-            Back
-          </Link>
-        )}
-        <div className={isDesktop ? 'rounded-2xl border border-cyan-500/20 dark:border-violet-500/30 bg-neutral-900/95 px-8 py-10 shadow-2xl backdrop-blur-sm' : ''}>
+    <div
+      className={
+        isDesktop
+          ? 'desktop-intro-canvas text-neutral-900 dark:text-white'
+          : `min-h-screen flex items-center justify-center text-neutral-900 dark:text-white transition-colors duration-200 py-12 px-4 sm:px-6 lg:px-8 bg-white/50 dark:bg-neutral-900/50 backdrop-blur-xs`
+      }
+    >
+      <div className={`w-full ${isDesktop ? 'max-w-[380px] px-4' : 'max-w-md space-y-8'}`}>
+        <div
+          className={
+            isDesktop
+              ? 'animate-intro-slide-in-delay rounded-2xl border border-cyan-500/20 dark:border-violet-500/30 bg-neutral-900/95 px-8 py-10 shadow-2xl backdrop-blur-sm'
+              : ''
+          }
+        >
           <div>
             <h2 className={`text-center font-extrabold text-neutral-900 dark:text-white ${isDesktop ? 'text-2xl' : 'mt-6 text-3xl'}`}>
               Create your account
