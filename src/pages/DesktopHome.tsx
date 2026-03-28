@@ -170,8 +170,8 @@ export default function DesktopHome() {
             <span className="bg-gradient-to-r from-cyan-300 via-violet-300 to-cyan-300 bg-clip-text text-lg font-bold tracking-tight text-transparent">
               BountyHub
             </span>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400 text-center leading-tight">
-              Ask. Bounty. Earn.
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 text-center leading-tight max-w-[16rem]">
+              Build in public · Decentralized bounty platform
             </p>
           </div>
         </div>

@@ -152,5 +152,5 @@
   </g>
   <!-- Title + tagline centered under logo (logo bottom ~460) -->
   <text x="600" y="500" fill="#fffef0" font-family="system-ui, sans-serif" font-size="68" font-weight="700" text-anchor="middle">BountyHub</text>
-  <text x="600" y="555" fill="#e2e8f0" font-family="system-ui, sans-serif" font-size="26" text-anchor="middle">Decentralized Bounty Platform · Solana</text>
+  <text x="600" y="555" fill="#e2e8f0" font-family="system-ui, sans-serif" font-size="26" text-anchor="middle">Build in public · Decentralized bounty platform</text>
 </svg>

@@ -98,7 +98,9 @@ export function DesktopHomeGate() {
           <img src={logoUrl} alt="" width={72} height={72} />
         </div>
         <h1 className="desktop-splash__name">BountyHub</h1>
-        <p className="desktop-splash__tagline">Ask. Bounty. Earn.</p>
+        <p className="desktop-splash__tagline">
+          Build in public · Decentralized bounty platform
+        </p>
       </div>
     </main>
   )
