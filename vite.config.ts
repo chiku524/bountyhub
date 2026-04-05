@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const defaults = {
     VITE_API_URL: mode === 'development' ? 'http://localhost:8788' : 'https://api.bountyhub.tech',
-    VITE_GIPHY_API_KEY: '8tPzDynfDBevgXLsAaPztARWyvWzNLPK',
+    VITE_GIPHY_API_KEY: '',
     VITE_CLOUDINARY_CLOUD_NAME: 'dqobhvk07',
     VITE_CLOUDINARY_UPLOAD_PRESET: 'bountyhub',
     VITE_GITHUB_RELEASES_URL: 'https://github.com/chiku524/bountyhub/releases/latest',

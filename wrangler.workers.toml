@@ -47,8 +47,8 @@ CLOUDINARY_API_KEY = "237281724716253"
 CLOUDINARY_API_SECRET = "N7Y40ttKyduI_5un60Cfv8kGfzI"
 CLOUDINARY_UPLOAD_PRESET = "bountyhub"
 
-# GIPHY Configuration
-VITE_GIPHY_API_KEY = "8tPzDynfDBevgXLsAaPztARWyvWzNLPK"
+# GIPHY (frontend GIF search) — set VITE_GIPHY_API_KEY in Cloudflare Pages env for production builds
+VITE_GIPHY_API_KEY = ""
 
 # HTML2PDF Configuration
 HTML2PDF_API_KEY = "28q7AasnbwG213fOLEt58Cjw4FEZVxNxAoaXl0MybGEGWeM9u73X4hGltgIMBz90"

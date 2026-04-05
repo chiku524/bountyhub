@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthProvider';
 import { ApiClient } from '../utils/api';
 import { config } from '../utils/config';
+import { pickGiphyPreviewUrl, safeGifCaption, type GiphyGif } from '../utils/giphy';
 import { Link } from 'react-router-dom';
 import { FiSend, FiMessageSquare, FiX, FiMessageCircle, FiSmile, FiImage, FiGrid, FiUsers, FiChevronLeft, FiChevronDown, FiPlusCircle } from 'react-icons/fi';
 import type { Team } from '../types';
@@ -33,16 +34,6 @@ interface Message {
   };
 }
 
-interface GifResult {
-  id: string;
-  title: string;
-  images: {
-    fixed_height: {
-      url: string;
-    };
-  };
-}
-
 interface ChatRoomOption {
   id: string;
   name: string;
@@ -66,7 +57,7 @@ const ChatSidebar: React.FC = () => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showGifSearch, setShowGifSearch] = useState(false);
   const [gifSearchTerm, setGifSearchTerm] = useState('');
-  const [gifResults, setGifResults] = useState<GifResult[]>([]);
+  const [gifResults, setGifResults] = useState<GiphyGif[]>([]);
   const [searchingGifs, setSearchingGifs] = useState(false);
   const [sending, setSending] = useState(false);
   const [lastMessageTimestamp, setLastMessageTimestamp] = useState<string | null>(null);
@@ -296,56 +287,76 @@ const ChatSidebar: React.FC = () => {
     if (!query.trim()) return;
     setSearchingGifs(true);
     try {
-      // Validate API key
       if (!GIPHY_API_KEY || GIPHY_API_KEY === 'dc6zaTOxFJmzC') {
         throw new Error('Invalid or missing GIPHY API key');
       }
-      
-      // Use GIPHY API with real key
-      const response = await fetch(
-        `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(query)}&limit=20&rating=g`
-      );
-      
-      if (!response.ok) {
+
+      const url = new URL('https://api.giphy.com/v1/gifs/search');
+      url.searchParams.set('api_key', GIPHY_API_KEY);
+      url.searchParams.set('q', query.trim());
+      url.searchParams.set('limit', '24');
+      url.searchParams.set('rating', 'g');
+      url.searchParams.set('lang', 'en');
+
+      const response = await fetch(url.toString(), { method: 'GET', mode: 'cors' });
+      let payload: { data?: GiphyGif[]; meta?: { status?: number; msg?: string } } = {};
+      try {
+        payload = await response.json();
+      } catch {
         throw new Error(`GIPHY API error: ${response.status} ${response.statusText}`);
       }
-      
-      const data = await response.json();
-      
-      if (data.data && Array.isArray(data.data)) {
-        setGifResults(data.data);
-      } else {
-        setGifResults([]);
+
+      if (!response.ok) {
+        const msg =
+          (payload as { message?: string }).message ||
+          payload.meta?.msg ||
+          `${response.status} ${response.statusText}`;
+        throw new Error(msg);
       }
+
+      if (payload.meta && typeof payload.meta.status === 'number' && payload.meta.status !== 200) {
+        throw new Error(payload.meta.msg || `GIPHY error (${payload.meta.status})`);
+      }
+
+      const raw = Array.isArray(payload.data) ? payload.data : [];
+      const withUrl = raw.filter((g) => pickGiphyPreviewUrl(g));
+      setGifResults(withUrl);
     } catch (error) {
       console.error('Error searching GIFs:', error);
-      
-      // Show more specific error message
+
       if (error instanceof Error) {
         if (error.message.includes('Invalid or missing GIPHY API key')) {
-          alert('GIPHY API key not configured. Please check your environment variables.');
-        } else if (error.message.includes('429')) {
+          alert(
+            'GIF search needs a GIPHY key. Add VITE_GIPHY_API_KEY to .env.local (see .env.example) and rebuild, or set it in Cloudflare Pages for production.',
+          );
+        } else if (error.message.includes('429') || /rate/i.test(error.message)) {
           alert('GIF search rate limited. Please try again in a moment.');
-        } else if (error.message.includes('403')) {
-          alert('GIF search access denied. Please check your API key.');
+        } else if (error.message.includes('403') || /forbidden|invalid.*key|access denied/i.test(error.message)) {
+          alert('GIF search was denied. Check that VITE_GIPHY_API_KEY is a valid key from developers.giphy.com.');
         } else {
           alert(`Failed to search GIFs: ${error.message}`);
         }
       } else {
         alert('Failed to search GIFs. Please try again.');
       }
-      
+
       setGifResults([]);
     } finally {
       setSearchingGifs(false);
     }
   };
 
-  const sendGif = async (gif: GifResult) => {
+  const sendGif = async (gif: GiphyGif) => {
     if (!user || sending || !postMessageUrl) return;
+    const previewUrl = pickGiphyPreviewUrl(gif);
+    if (!previewUrl) {
+      alert('This GIF could not be loaded (no preview URL). Try another.');
+      return;
+    }
     setSending(true);
     try {
-      const gifContent = `[GIF: ${gif.title}](${gif.images.fixed_height.url})`;
+      const caption = safeGifCaption(gif.title);
+      const gifContent = `[GIF: ${caption}](${previewUrl})`;
       const response = await api.request<{ success: boolean; message: Message }>(postMessageUrl, {
         method: 'POST',
         body: JSON.stringify({ content: gifContent, messageType: 'TEXT' }),
@@ -370,11 +381,17 @@ const ChatSidebar: React.FC = () => {
     if (gifMatch) {
       return (
         <div>
-          <img 
-            src={gifMatch[2]} 
-            alt={gifMatch[1]} 
+          <img
+            src={gifMatch[2]}
+            alt={gifMatch[1]}
             className="max-w-full rounded-sm"
             style={{ maxHeight: '200px' }}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            onError={(e) => {
+              const el = e.currentTarget;
+              el.style.display = 'none';
+            }}
           />
         </div>
       );
@@ -590,7 +607,12 @@ const ChatSidebar: React.FC = () => {
                 placeholder="Search GIFs..."
                 value={gifSearchTerm}
                 onChange={(e) => setGifSearchTerm(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && searchGifs(gifSearchTerm)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    void searchGifs(gifSearchTerm);
+                  }
+                }}
                 className="flex-1 px-2 py-1 rounded-sm bg-neutral-700 text-white border border-neutral-600 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-sm"
                 autoComplete="off"
               />
@@ -603,19 +625,26 @@ const ChatSidebar: React.FC = () => {
               </button>
             </div>
             <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto">
-              {gifResults.map((gif) => (
-                <button
-                  key={gif.id}
-                  onClick={() => sendGif(gif)}
-                  className="hover:opacity-80 transition-opacity"
-                >
-                  <img
-                    src={gif.images.fixed_height.url}
-                    alt={gif.title}
-                    className="w-full rounded-sm"
-                  />
-                </button>
-              ))}
+              {gifResults.map((gif) => {
+                const thumb = pickGiphyPreviewUrl(gif);
+                if (!thumb) return null;
+                return (
+                  <button
+                    key={gif.id}
+                    type="button"
+                    onClick={() => void sendGif(gif)}
+                    className="hover:opacity-80 transition-opacity"
+                  >
+                    <img
+                      src={thumb}
+                      alt={safeGifCaption(gif.title)}
+                      className="w-full rounded-sm"
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    />
+                  </button>
+                );
+              })}
             </div>
             {gifResults.length === 0 && !searchingGifs && (
               <div className="text-center text-neutral-400 text-sm py-4">

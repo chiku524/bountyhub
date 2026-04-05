@@ -12,11 +12,9 @@ export const config = {
     uploadPreset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'bountyhub',
   },
   
-  // GIPHY Configuration
+  // GIPHY Configuration (set VITE_GIPHY_API_KEY in .env.local and Cloudflare Pages)
   giphy: {
-    // For production, this will be injected by Vite's define option
-    // For development, we'll use a hardcoded key (only for local dev)
-    apiKey: import.meta.env.VITE_GIPHY_API_KEY || (import.meta.env.DEV ? '8tPzDynfDBevgXLsAaPztARWyvWzNLPK' : ''),
+    apiKey: import.meta.env.VITE_GIPHY_API_KEY || '',
   },
   
   // App Configuration

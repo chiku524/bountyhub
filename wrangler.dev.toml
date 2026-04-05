@@ -49,7 +49,8 @@ HTML2PDF_API_KEY = "dev-key"
 VITE_CLOUDINARY_CLOUD_NAME = "dqobhvk07"
 VITE_CLOUDINARY_UPLOAD_PRESET = "bountyhub"
 VITE_API_URL = "http://localhost:8788"
-VITE_GIPHY_API_KEY = "8tPzDynfDBevgXLsAaPztARWyvWzNLPK"
+# Local: use .dev.vars or paste key here temporarily (do not commit secrets)
+VITE_GIPHY_API_KEY = ""
 
 # GitHub OAuth Configuration (Development)
 GITHUB_CLIENT_ID = "Ov23liVwcihvw3cEMGWC"
