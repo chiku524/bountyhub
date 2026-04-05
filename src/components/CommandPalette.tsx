@@ -153,9 +153,8 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
     })
   }, [allItems, query, user])
 
-  useEffect(() => {
-    setHighlight(0)
-  }, [query, items.length])
+  const maxIdx = Math.max(0, items.length - 1)
+  const safeHighlight = items.length === 0 ? 0 : Math.min(highlight, maxIdx)
 
   useEffect(() => {
     inputRef.current?.focus()
@@ -179,17 +178,24 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
       }
       if (e.key === 'ArrowDown') {
         e.preventDefault()
-        setHighlight((h) => Math.min(h + 1, Math.max(0, items.length - 1)))
+        const max = Math.max(0, items.length - 1)
+        setHighlight((h) => Math.min(Math.min(h, max) + 1, max))
         return
       }
       if (e.key === 'ArrowUp') {
         e.preventDefault()
-        setHighlight((h) => Math.max(h - 1, 0))
+        const max = Math.max(0, items.length - 1)
+        setHighlight((h) => Math.max(Math.min(h, max) - 1, 0))
         return
       }
-      if (e.key === 'Enter' && items[highlight]) {
-        e.preventDefault()
-        run(items[highlight]!.to)
+      if (e.key === 'Enter' && items.length > 0) {
+        const max = Math.max(0, items.length - 1)
+        const idx = Math.min(highlight, max)
+        const item = items[idx]
+        if (item) {
+          e.preventDefault()
+          run(item.to)
+        }
       }
     }
     document.addEventListener('keydown', onKey)
@@ -213,7 +219,10 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
             ref={inputRef}
             type="search"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value)
+              setHighlight(0)
+            }}
             placeholder="Go to…"
             className="min-w-0 flex-1 bg-transparent py-2 text-neutral-900 outline-none placeholder:text-neutral-400 dark:text-white"
             aria-autocomplete="list"
@@ -228,11 +237,11 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
             <li className="px-4 py-6 text-center text-sm text-neutral-500 dark:text-neutral-400">No matches</li>
           ) : (
             items.map((item, i) => (
-              <li key={item.id} role="option" aria-selected={i === highlight}>
+              <li key={item.id} role="option" aria-selected={i === safeHighlight}>
                 <button
                   type="button"
                   className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors ${
-                    i === highlight
+                    i === safeHighlight
                       ? 'bg-indigo-100 text-indigo-900 dark:bg-indigo-900/40 dark:text-indigo-100'
                       : 'text-neutral-800 hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-white/5'
                   }`}
