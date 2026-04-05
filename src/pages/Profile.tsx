@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useRestoreFocusWhenOpen } from '../hooks/useRestoreFocus'
 import { Link } from 'react-router-dom'
 import { FiCamera, FiShield, FiStar, FiThumbsUp } from 'react-icons/fi'
 import { FaGithub, FaTwitter, FaLinkedin, FaInstagram, FaFacebook, FaYoutube, FaTiktok, FaDiscord, FaReddit, FaMedium, FaStackOverflow, FaDev } from 'react-icons/fa'
@@ -124,6 +125,7 @@ const ProfilePictureUpload = ({ currentPicture, username, onPictureUpdate }: { c
   const [isUploading, setIsUploading] = useState(false)
   const [imageError, setImageError] = useState(false)
   const toast = useToast()
+  useRestoreFocusWhenOpen(isUploading)
 
   const handleImageError = () => {
     setImageError(true)

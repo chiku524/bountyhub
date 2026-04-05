@@ -3,6 +3,8 @@ import { ConnectionProvider, WalletProvider, useWallet } from '@solana/wallet-ad
 import { WalletModalProvider, useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { SolflareWalletAdapter } from '@solana/wallet-adapter-wallets';
 import '@solana/wallet-adapter-react-ui/styles.css';
+import { WalletModalFocusBridge } from '../components/WalletModalFocusBridge';
+import { rememberFocusBeforeWalletModal } from '../utils/walletModalFocus';
 
 // Phantom is registered as a Standard Wallet by the browser; no need to add PhantomWalletAdapter
 const endpoint = import.meta.env.VITE_SOLANA_RPC_URL || 'https://api.bountyhub.tech/api/wallet/solana-proxy'
@@ -31,6 +33,7 @@ const SolanaWalletInner: FC<{ children: ReactNode }> = ({ children }) => {
 
   const connect = () => {
     try {
+      rememberFocusBeforeWalletModal();
       setVisible(true);
     } catch (error) {
       console.error('Error opening wallet modal:', error);
@@ -72,7 +75,9 @@ export const SolanaWalletProvider: FC<{ children: ReactNode }> = ({ children }) 
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} autoConnect>
         <WalletModalProvider>
-          <SolanaWalletInner>{children}</SolanaWalletInner>
+          <WalletModalFocusBridge>
+            <SolanaWalletInner>{children}</SolanaWalletInner>
+          </WalletModalFocusBridge>
         </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>

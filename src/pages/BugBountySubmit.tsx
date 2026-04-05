@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { api } from '../utils/api'
 import { useAuth } from '../contexts/AuthProvider'
@@ -7,6 +7,8 @@ import { ErrorMessage } from '../components/ErrorMessage'
 import { PageMetadata } from '../components/PageMetadata'
 import { FiArrowLeft, FiSend } from 'react-icons/fi'
 import type { BugBountyCampaign } from '../types'
+import { EmptyState } from '../components/EmptyState'
+import { useLocalStorageDraft } from '../hooks/useLocalStorageDraft'
 
 const SEVERITIES = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFO'] as const
 
@@ -25,6 +27,25 @@ export default function BugBountySubmit() {
   const [stepsToReproduce, setStepsToReproduce] = useState('')
   const [impact, setImpact] = useState('')
   const [suggestedFix, setSuggestedFix] = useState('')
+  const [showDraftBanner, setShowDraftBanner] = useState(false)
+
+  const submitDraftKey = `bountyhub-draft-bug-submit-${campaignId ?? 'none'}`
+  const submitDraftSnapshot = useMemo(
+    () => ({
+      title,
+      description,
+      severity,
+      stepsToReproduce,
+      impact,
+      suggestedFix,
+    }),
+    [title, description, severity, stepsToReproduce, impact, suggestedFix],
+  )
+  const { clearDraft, readDraft } = useLocalStorageDraft(
+    submitDraftKey,
+    submitDraftSnapshot,
+    Boolean(user && campaignId),
+  )
 
   useEffect(() => {
     if (campaignId && user) {
@@ -33,6 +54,29 @@ export default function BugBountySubmit() {
       setLoading(false)
     }
   }, [campaignId, user])
+
+  useEffect(() => {
+    if (!user || !campaignId) return
+    const d = readDraft() as Record<string, unknown> | null
+    if (!d || typeof d !== 'object') return
+    const has =
+      (typeof d.title === 'string' && d.title.trim()) || (typeof d.description === 'string' && d.description.trim())
+    if (has) setShowDraftBanner(true)
+  }, [user, campaignId, readDraft])
+
+  const applyBugSubmitDraft = () => {
+    const d = readDraft() as Record<string, unknown> | null
+    if (!d) return
+    if (typeof d.title === 'string') setTitle(d.title)
+    if (typeof d.description === 'string') setDescription(d.description)
+    if (typeof d.severity === 'string' && SEVERITIES.includes(d.severity as (typeof SEVERITIES)[number])) {
+      setSeverity(d.severity as (typeof SEVERITIES)[number])
+    }
+    if (typeof d.stepsToReproduce === 'string') setStepsToReproduce(d.stepsToReproduce)
+    if (typeof d.impact === 'string') setImpact(d.impact)
+    if (typeof d.suggestedFix === 'string') setSuggestedFix(d.suggestedFix)
+    setShowDraftBanner(false)
+  }
 
   const loadCampaign = async () => {
     if (!campaignId) return
@@ -74,6 +118,7 @@ export default function BugBountySubmit() {
         impact: impact.trim() || undefined,
         suggestedFix: suggestedFix.trim() || undefined,
       })
+      clearDraft()
       navigate(`/bug-bounty/campaigns/${campaignId}`)
     } catch (err: any) {
       setError(err?.message || err?.errorData?.error || 'Failed to submit bug')
@@ -84,16 +129,21 @@ export default function BugBountySubmit() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xs flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-4">Please log in to submit a bug</h1>
-          <Link
-            to="/login"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
-          >
-            Login
-          </Link>
-        </div>
+      <div className="flex min-h-[60vh] items-center justify-center px-4">
+        <EmptyState
+          title="Sign in to submit a report"
+          description="Log in to send a vulnerability report to this campaign."
+          action={
+            <Link to="/login" className="btn-primary">
+              Log in
+            </Link>
+          }
+          secondaryAction={
+            <Link to="/signup" className="btn-secondary">
+              Sign up
+            </Link>
+          }
+        />
       </div>
     )
   }
@@ -162,6 +212,30 @@ export default function BugBountySubmit() {
           <p className="text-neutral-600 dark:text-neutral-400 mb-6">
             Submitting to: <span className="font-medium text-neutral-900 dark:text-white">{campaign.title}</span>
           </p>
+        )}
+
+        {showDraftBanner && campaignId && (
+          <div
+            className="mb-6 flex flex-col gap-3 rounded-xl border border-indigo-200/80 bg-indigo-50/90 p-4 text-sm text-indigo-950 dark:border-indigo-500/35 dark:bg-indigo-950/40 dark:text-indigo-100 @sm/main:flex-row @sm/main:items-center @sm/main:justify-between"
+            role="status"
+          >
+            <p className="font-medium">You have an unsaved submission draft for this campaign.</p>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" onClick={applyBugSubmitDraft} className="btn-primary text-sm py-2 px-3">
+                Restore draft
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  clearDraft()
+                  setShowDraftBanner(false)
+                }}
+                className="btn-secondary text-sm py-2 px-3"
+              >
+                Discard
+              </button>
+            </div>
+          </div>
         )}
 
         {error && (

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect, useMemo } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
 import { api } from '../utils/api'
 import { useAuth } from '../contexts/AuthProvider'
 import { isDesktopApp } from '../utils/desktop'
@@ -10,6 +10,10 @@ import { MediaUpload } from '../components/MediaUpload'
 import { FaDollarSign, FaGift, FaClock as FaClockIcon } from 'react-icons/fa'
 import { FiInfo } from 'react-icons/fi'
 import type { CodeBlock, Media } from '../types'
+import { EmptyState } from '../components/EmptyState'
+import { useLocalStorageDraft } from '../hooks/useLocalStorageDraft'
+
+const CREATE_POST_DRAFT_KEY = 'bountyhub-draft-create-post'
 
 interface Tag {
   id: string;
@@ -35,6 +39,27 @@ export default function CreatePost() {
   const [hasBounty, setHasBounty] = useState(false)
   const [bountyAmount, setBountyAmount] = useState('')
   const [bountyDuration, setBountyDuration] = useState(7)
+  const [showDraftBanner, setShowDraftBanner] = useState(false)
+
+  const createPostDraftSnapshot = useMemo(
+    () => ({
+      title,
+      content,
+      selectedTags,
+      hasBounty,
+      bountyAmount,
+      bountyDuration,
+      codeBlocks,
+      media,
+    }),
+    [title, content, selectedTags, hasBounty, bountyAmount, bountyDuration, codeBlocks, media],
+  )
+
+  const { clearDraft, readDraft } = useLocalStorageDraft(
+    CREATE_POST_DRAFT_KEY,
+    createPostDraftSnapshot,
+    Boolean(user),
+  )
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -48,14 +73,48 @@ export default function CreatePost() {
     fetchTags()
   }, [])
 
+  useEffect(() => {
+    if (!user) return
+    const d = readDraft() as Record<string, unknown> | null
+    if (!d || typeof d !== 'object') return
+    const t = typeof d.title === 'string' ? d.title.trim() : ''
+    const c = typeof d.content === 'string' ? d.content.trim() : ''
+    if (t || c) setShowDraftBanner(true)
+  }, [user, readDraft])
+
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-4">Please log in to create a post</h1>
-        </div>
+      <div className="flex min-h-[60vh] items-center justify-center px-4">
+        <EmptyState
+          title="Sign in to create a post"
+          description="Log in or create an account to ask a question, attach a bounty, and publish to the community."
+          action={
+            <Link to="/login" className="btn-primary">
+              Log in
+            </Link>
+          }
+          secondaryAction={
+            <Link to="/signup" className="btn-secondary">
+              Sign up
+            </Link>
+          }
+        />
       </div>
     )
+  }
+
+  const applyCreatePostDraft = () => {
+    const d = readDraft() as Record<string, unknown> | null
+    if (!d) return
+    if (typeof d.title === 'string') setTitle(d.title)
+    if (typeof d.content === 'string') setContent(d.content)
+    if (Array.isArray(d.selectedTags)) setSelectedTags(d.selectedTags.filter((x): x is string => typeof x === 'string'))
+    if (typeof d.hasBounty === 'boolean') setHasBounty(d.hasBounty)
+    if (typeof d.bountyAmount === 'string') setBountyAmount(d.bountyAmount)
+    if (typeof d.bountyDuration === 'number' && !Number.isNaN(d.bountyDuration)) setBountyDuration(d.bountyDuration)
+    if (Array.isArray(d.codeBlocks)) setCodeBlocks(d.codeBlocks as CodeBlock[])
+    if (Array.isArray(d.media)) setMedia(d.media as Media[])
+    setShowDraftBanner(false)
   }
 
   const handleMediaUpload = (newMedia: { type: string; url: string; thumbnailUrl?: string; isScreenRecording: boolean }) => {
@@ -111,6 +170,7 @@ export default function CreatePost() {
 
       const response = await api.createPost(postData)
       if (response.success) {
+        clearDraft()
         navigate(`/posts/${response.post.id}`)
       } else {
         setError('Failed to create post')
@@ -131,6 +191,30 @@ export default function CreatePost() {
         <div className="mb-6 flex justify-between items-center mt-16">
           <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-white">Create New Post</h1>
         </div>
+
+        {showDraftBanner && (
+          <div
+            className="mb-6 flex flex-col gap-3 rounded-xl border border-violet-200/80 bg-violet-50/90 p-4 text-sm text-violet-950 dark:border-violet-500/35 dark:bg-violet-950/40 dark:text-violet-100 @sm/main:flex-row @sm/main:items-center @sm/main:justify-between"
+            role="status"
+          >
+            <p className="font-medium">You have an unsaved post draft on this device (saved automatically).</p>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" onClick={applyCreatePostDraft} className="btn-primary text-sm py-2 px-3">
+                Restore draft
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  clearDraft()
+                  setShowDraftBanner(false)
+                }}
+                className="btn-secondary text-sm py-2 px-3"
+              >
+                Discard
+              </button>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className={`space-y-6 mx-auto ${isDesktop ? 'max-w-5xl' : 'max-w-4xl'}`}>
           <div>
@@ -295,6 +379,13 @@ export default function CreatePost() {
                       <FiInfo className="w-3 h-3" />
                       <span>5% goes to community governance rewards</span>
                     </div>
+                    <p className="mt-2 text-xs text-gray-400 leading-relaxed">
+                      Bounties use your on-platform BBUX balance. Ensure you have enough BBUX in{' '}
+                      <Link to="/wallet" className="text-violet-300 underline decoration-violet-500/50 underline-offset-2 hover:text-violet-200">
+                        Wallet
+                      </Link>{' '}
+                      before posting; deposit via Solana if needed. When the duration ends, unresolved bounty rules follow platform policy.
+                    </p>
                   </div>
 
                   {/* Duration Section */}

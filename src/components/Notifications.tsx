@@ -37,6 +37,21 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
   const [isOpen, setIsOpen] = useState(false)
   const [popupStyle, setPopupStyle] = useState<{ left?: string; right?: string; top: string }>({ top: '0px' })
   const popupRef = useRef<HTMLDivElement>(null)
+  const notifWasOpenRef = useRef(false)
+
+  useEffect(() => {
+    if (isOpen) {
+      notifWasOpenRef.current = true
+      return
+    }
+    if (notifWasOpenRef.current) {
+      notifWasOpenRef.current = false
+      const btn = document.querySelector<HTMLElement>(
+        '[data-notifications-button-topnav], [data-notifications-button]',
+      )
+      btn?.focus()
+    }
+  }, [isOpen])
 
   useImperativeHandle(ref, () => ({
     toggle: handleToggle

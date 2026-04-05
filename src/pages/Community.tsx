@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback, memo } from 'react'
+import { useEffect, useState, useMemo, useCallback, memo, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../utils/api'
 import { SearchBar } from '../components/SearchBar'
@@ -14,6 +14,7 @@ import { VoteButton } from '../components/VoteButton'
 import { BookmarkButton } from '../components/BookmarkButton'
 import { ProfilePicture } from '../components/ProfilePicture'
 import { PageMetadata } from '../components/PageMetadata'
+import { RelativeTime } from '../components/RelativeTime'
 import type { Post } from '../types'
 
 interface FilterOptions {
@@ -53,7 +54,7 @@ const PostList: React.FC<{
                 <div className="flex flex-col @xl/main:flex-row @xl/main:items-center @xl/main:justify-between">
                   <div className="min-w-0 flex-1">
                     <div className="mb-1 flex flex-col gap-2 @xl/main:flex-row @xl/main:items-center">
-                      <h2 className="line-clamp-2 text-base font-semibold text-neutral-900 @sm/main:line-clamp-1 @xl/main:text-xl dark:text-white">{post.title.length > 60 ? post.title.slice(0, 60) + '...' : post.title}</h2>
+                      <h2 className="line-clamp-2 text-base font-semibold text-neutral-900 @xl/main:text-xl dark:text-white">{post.title}</h2>
                       {post.reward && post.reward > 0 && (
                         <div className="flex w-fit items-center gap-1 rounded-full border border-cyan-300 bg-linear-to-r from-cyan-100 to-blue-100 px-2 py-1 dark:border-cyan-400/40 dark:from-cyan-500/20 dark:to-blue-500/20">
                           <span className="text-xs font-medium text-cyan-600 @sm/main:text-sm dark:text-cyan-300">💰</span>
@@ -61,13 +62,13 @@ const PostList: React.FC<{
                         </div>
                       )}
                     </div>
-                    <p className="mt-1 line-clamp-2 text-sm text-neutral-500 @sm/main:text-base dark:text-gray-400">{post.content.length > 120 ? post.content.slice(0, 120) + '...' : post.content}</p>
+                    <p className="mt-1 line-clamp-2 text-sm text-neutral-500 @sm/main:text-base dark:text-gray-400">{post.content}</p>
                     <div className="mt-2 flex flex-col gap-2 text-xs text-neutral-400 @sm/main:gap-4 @xl/main:flex-row @xl/main:items-center @sm/main:text-sm dark:text-gray-500">
                       <span className="flex items-center space-x-2">
                         <ProfilePicture user={post.author} size="sm" />
                         <span>By: <Link to={`/users/${post.author?.username || post.authorId}`} className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300" onClick={(e) => e.stopPropagation()}>{post.author?.username || `User ${post.authorId}`}</Link></span>
                       </span>
-                      <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                      <RelativeTime date={post.createdAt} className="text-neutral-400 @sm/main:text-inherit dark:text-gray-500" />
                     </div>
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-2 @xl/main:mt-0">
@@ -114,6 +115,7 @@ const PostList: React.FC<{
 export default function Community() {
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
@@ -126,23 +128,29 @@ export default function Community() {
     selectedTags: []
   })
   const postsPerPage = 10
+  const everLoadedPostsRef = useRef(false)
 
   useEffect(() => {
     fetchPosts()
   }, [])
 
   const fetchPosts = async () => {
-    setLoading(true)
+    const initial = !everLoadedPostsRef.current
+    if (initial) {
+      setLoading(true)
+    } else {
+      setIsRefreshing(true)
+    }
     setError(null)
     try {
-      // For now, fetch all posts to maintain current behavior
-      // TODO: Update to use paginated API when frontend pagination is fully implemented
       const fetchedPosts = await api.getAllPosts()
       setPosts(Array.isArray(fetchedPosts) ? fetchedPosts : [])
+      everLoadedPostsRef.current = true
     } catch (err: any) {
       setError(err.message)
     } finally {
       setLoading(false)
+      setIsRefreshing(false)
     }
   }
 
@@ -303,9 +311,19 @@ export default function Community() {
           }
         />
           
+          {isRefreshing && posts.length > 0 && (
+            <div
+              className="mb-4 flex items-center gap-2 rounded-lg border border-indigo-200/80 bg-indigo-50/90 px-3 py-2 text-sm text-indigo-900 dark:border-indigo-500/35 dark:bg-indigo-950/40 dark:text-indigo-100"
+              role="status"
+            >
+              <LoadingSpinner size="sm" label={false} />
+              <span>Updating posts…</span>
+            </div>
+          )}
+
           {/* Search Bar */}
           <div className="mb-6">
-            <SearchBar 
+            <SearchBar
               onSearch={handleSearch}
               placeholder="Search posts by title, content, or author..."
               className="w-full max-w-md"

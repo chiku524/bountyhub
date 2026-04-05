@@ -14,10 +14,13 @@ import {
   FiBarChart2,
   FiGithub,
   FiFileText,
+  FiSearch,
 } from 'react-icons/fi'
 import { useAuth } from '../contexts/AuthProvider'
 import { isDesktopApp } from '../utils/desktop'
 import { logoUrl } from '../utils/logoUrl'
+import { WalletMenuButton } from './WalletMenuButton'
+import { useCommandPalette } from './CommandPalette'
 
 const SIDEBAR_WIDTH = 240
 
@@ -25,6 +28,7 @@ function DesktopSidebar() {
   const { user, loading, logout } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
+  const { open: openCommandPalette } = useCommandPalette()
 
   function navLink(
     href: string,
@@ -55,17 +59,26 @@ function DesktopSidebar() {
       className="fixed left-0 top-0 z-40 flex h-screen w-[240px] flex-col border-r border-white/5 bg-neutral-900/98 backdrop-blur-md"
       style={{ width: SIDEBAR_WIDTH }}
     >
-      <div className="flex h-14 shrink-0 items-center gap-2 border-b border-white/5 px-4">
+      <div className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-white/5 px-2">
         <Link
           to="/community"
-          className="flex min-w-0 items-center gap-2 font-semibold tracking-tight text-white transition hover:text-white"
+          className="flex min-w-0 flex-1 items-center gap-2 font-semibold tracking-tight text-white transition hover:text-white"
         >
           <img src={logoUrl} alt="" className="h-8 w-8 shrink-0 object-contain" width={32} height={32} aria-hidden />
           <span className="truncate">BountyHub</span>
         </Link>
-        <span className="rounded bg-white/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-neutral-400">
-          App
-        </span>
+        <div className="flex shrink-0 items-center gap-0.5">
+          <button
+            type="button"
+            onClick={openCommandPalette}
+            className="flex h-10 w-10 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-white/5 hover:text-white"
+            aria-label="Open command palette"
+            title="Go to… (⌘K)"
+          >
+            <FiSearch className="h-5 w-5" />
+          </button>
+          <WalletMenuButton />
+        </div>
       </div>
       <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto scrollbar-hide px-3 py-4">
         <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-neutral-500">

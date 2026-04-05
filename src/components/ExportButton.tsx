@@ -1,4 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react'
+import { useRestoreFocusWhenOpen } from '../hooks/useRestoreFocus'
+import { useEscapeKey } from '../hooks/useEscapeKey'
 
 interface ExportButtonProps {
   data: any[]
@@ -12,6 +14,31 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
   className = ''
 }) => {
   const [isOpen, setIsOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const firstItemRef = useRef<HTMLButtonElement>(null)
+
+  useRestoreFocusWhenOpen(isOpen)
+
+  useLayoutEffect(() => {
+    if (!isOpen) return
+    firstItemRef.current?.focus({ preventScroll: true })
+  }, [isOpen])
+
+  const closeMenu = useCallback(() => setIsOpen(false), [])
+  useEscapeKey(isOpen, closeMenu)
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [isOpen])
 
   const exportAsJSON = () => {
     const jsonString = JSON.stringify(data, null, 2)
@@ -99,10 +126,20 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
     setIsOpen(false)
   }
 
+  const handleToggleClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsOpen((o) => !o)
+  }
+
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative ${className}`} ref={containerRef}>
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        type="button"
+        onClick={handleToggleClick}
+        aria-expanded={isOpen}
+        aria-haspopup="true"
+        aria-label={isOpen ? 'Close export options' : 'Open export options'}
         className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
         disabled={data.length === 0}
       >
@@ -116,9 +153,16 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-neutral-800 border border-neutral-700 rounded-lg shadow-lg z-50">
+        <div
+          className="absolute right-0 mt-2 w-48 bg-neutral-800 border border-neutral-700 rounded-lg shadow-lg z-50"
+          role="menu"
+          aria-label="Export format"
+        >
           <div className="py-1">
             <button
+              ref={firstItemRef}
+              type="button"
+              role="menuitem"
               onClick={exportAsJSON}
               className="w-full px-4 py-2 text-left text-gray-300 hover:bg-neutral-700 flex items-center space-x-2"
             >
@@ -128,6 +172,8 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
               <span>Export as JSON</span>
             </button>
             <button
+              type="button"
+              role="menuitem"
               onClick={exportAsCSV}
               className="w-full px-4 py-2 text-left text-gray-300 hover:bg-neutral-700 flex items-center space-x-2"
             >
@@ -137,6 +183,8 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
               <span>Export as CSV</span>
             </button>
             <button
+              type="button"
+              role="menuitem"
               onClick={exportAsPDF}
               className="w-full px-4 py-2 text-left text-gray-300 hover:bg-neutral-700 flex items-center space-x-2"
             >

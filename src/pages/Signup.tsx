@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthProvider'
+import { useRestoreFocusWhenOpen } from '../hooks/useRestoreFocus'
 import { config } from '../utils/config'
 import { isDesktopApp } from '../utils/desktop'
 import { LoadingSpinner } from '../components/LoadingSpinner'
@@ -18,6 +19,7 @@ export default function Signup() {
   const passwordRef = useRef(null)
   const usernameRef = useRef(null)
   const isDesktop = isDesktopApp()
+  useRestoreFocusWhenOpen(loading)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

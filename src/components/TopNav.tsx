@@ -1,64 +1,37 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { 
-  FiCreditCard, FiLogOut, FiUsers, FiDollarSign, FiSettings, 
-  FiCheckSquare, FiRefreshCw, FiBarChart2, FiShield, FiGithub, 
-  FiAward, FiChevronDown, FiMenu, FiX, FiDownload, FiMessageCircle
+import {
+  FiLogOut,
+  FiUsers,
+  FiDollarSign,
+  FiSettings,
+  FiCheckSquare,
+  FiRefreshCw,
+  FiBarChart2,
+  FiShield,
+  FiGithub,
+  FiAward,
+  FiChevronDown,
+  FiMenu,
+  FiX,
+  FiDownload,
+  FiMessageCircle,
+  FiSearch,
 } from 'react-icons/fi'
 import { useAuth } from '../contexts/AuthProvider'
-import { useWallet } from '@solana/wallet-adapter-react'
-import { useWalletModal } from '@solana/wallet-adapter-react-ui'
 import { Notifications } from './Notifications'
 import { ThemeToggle } from './ThemeToggle'
 import type { NotificationsRef } from './Notifications'
 import { logoUrl } from '../utils/logoUrl'
 import { isDesktopApp } from '../utils/desktop'
-
-function WalletButton() {
-  const { wallet, connected, disconnect } = useWallet()
-  const { setVisible } = useWalletModal()
-
-  const handleWalletClick = () => {
-    if (connected) {
-      disconnect()
-    } else {
-      setVisible(true)
-    }
-  }
-
-  const formatAddress = (address: string) => {
-    return `${address.slice(0, 4)}...${address.slice(-4)}`
-  }
-
-  if (connected) {
-    return (
-      <button
-        onClick={handleWalletClick}
-        className="px-3 py-1.5 bg-green-600/20 border border-green-500/30 rounded-lg text-green-400 text-xs font-medium transition-all duration-300 hover:bg-green-600/30 hover:border-green-500/50 flex items-center gap-2"
-      >
-        <FiCreditCard className="w-4 h-4" />
-        <span className="hidden sm:inline">
-          {wallet?.adapter?.publicKey ? formatAddress(wallet.adapter.publicKey.toString()) : 'Connected'}
-        </span>
-      </button>
-    )
-  }
-
-  return (
-    <button
-      onClick={handleWalletClick}
-      className="px-3 py-1.5 bg-amber-600/20 border border-amber-500/35 rounded-lg text-amber-700 dark:text-amber-400 text-xs font-medium transition-all duration-300 hover:bg-amber-600/30 hover:border-amber-500/50 flex items-center gap-2"
-    >
-      <FiCreditCard className="w-4 h-4" />
-      <span className="hidden sm:inline">Connect Wallet</span>
-    </button>
-  )
-}
+import { WalletMenuButton } from './WalletMenuButton'
+import { useCommandPalette } from './CommandPalette'
 
 export function TopNav() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const { open: openCommandPalette } = useCommandPalette()
   const [exploreOpen, setExploreOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -68,6 +41,105 @@ export function TopNav() {
 
   const exploreMenuRef = useRef<HTMLDivElement>(null)
   const profileMenuRef = useRef<HTMLDivElement>(null)
+  const exploreCloseFocusRef = useRef<HTMLElement | null>(null)
+  const profileCloseFocusRef = useRef<HTMLElement | null>(null)
+  const exploreWasOpenRef = useRef(false)
+  const profileWasOpenRef = useRef(false)
+
+  useEffect(() => {
+    if (exploreOpen) {
+      exploreWasOpenRef.current = true
+      return
+    }
+    if (exploreWasOpenRef.current) {
+      exploreWasOpenRef.current = false
+      const el = exploreCloseFocusRef.current
+      exploreCloseFocusRef.current = null
+      if (el && document.documentElement.contains(el)) {
+        try {
+          el.focus({ preventScroll: true })
+        } catch {
+          try {
+            el.focus()
+          } catch {
+            /* noop */
+          }
+        }
+      }
+    }
+  }, [exploreOpen])
+
+  useEffect(() => {
+    if (profileOpen) {
+      profileWasOpenRef.current = true
+      return
+    }
+    if (profileWasOpenRef.current) {
+      profileWasOpenRef.current = false
+      const el = profileCloseFocusRef.current
+      profileCloseFocusRef.current = null
+      if (el && document.documentElement.contains(el)) {
+        try {
+          el.focus({ preventScroll: true })
+        } catch {
+          try {
+            el.focus()
+          } catch {
+            /* noop */
+          }
+        }
+      }
+    }
+  }, [profileOpen])
+
+  const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null)
+  const mobileAccountTriggerRef = useRef<HTMLButtonElement>(null)
+  const mobileMenuWasOpenRef = useRef(false)
+  const mobileAccountWasOpenRef = useRef(false)
+
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      mobileMenuWasOpenRef.current = true
+      return
+    }
+    if (mobileMenuWasOpenRef.current) {
+      mobileMenuWasOpenRef.current = false
+      const el = mobileMenuTriggerRef.current
+      if (el && document.documentElement.contains(el)) {
+        try {
+          el.focus({ preventScroll: true })
+        } catch {
+          try {
+            el.focus()
+          } catch {
+            /* noop */
+          }
+        }
+      }
+    }
+  }, [mobileMenuOpen])
+
+  useEffect(() => {
+    if (mobileAccountOpen) {
+      mobileAccountWasOpenRef.current = true
+      return
+    }
+    if (mobileAccountWasOpenRef.current) {
+      mobileAccountWasOpenRef.current = false
+      const el = mobileAccountTriggerRef.current
+      if (el && document.documentElement.contains(el)) {
+        try {
+          el.focus({ preventScroll: true })
+        } catch {
+          try {
+            el.focus()
+          } catch {
+            /* noop */
+          }
+        }
+      }
+    }
+  }, [mobileAccountOpen])
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -95,7 +167,10 @@ export function TopNav() {
       }
       if (e.altKey && e.key === 'e') {
         e.preventDefault()
-        setExploreOpen((open) => !open)
+        setExploreOpen((open) => {
+          if (!open) exploreCloseFocusRef.current = document.activeElement as HTMLElement | null
+          return !open
+        })
       }
     }
     document.addEventListener('keydown', handleKeyDown)
@@ -165,7 +240,12 @@ export function TopNav() {
             <div className="relative nav-dropdown">
               <button
                 type="button"
-                onClick={() => setExploreOpen(!exploreOpen)}
+                onClick={() =>
+                  setExploreOpen((o) => {
+                    if (!o) exploreCloseFocusRef.current = document.activeElement as HTMLElement | null
+                    return !o
+                  })
+                }
                 className={`nav-dropdown-trigger px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
                   isActive('/community') || isActive('/chat') || isActive('/download') || isActive('/governance') || isActive('/refund-requests') || isActive('/analytics') || isActive('/bug-bounty') || isActive('/repositories') || isActive('/contributions')
                     ? 'bg-amber-100 dark:bg-amber-900/25 text-amber-900 dark:text-amber-300'
@@ -277,7 +357,16 @@ export function TopNav() {
 
           {/* Right: Wallet, Notifications, Profile dropdown, Theme */}
           <div className="hidden md:flex items-center gap-1 shrink-0">
-            <WalletButton />
+            <button
+              type="button"
+              onClick={openCommandPalette}
+              className="flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-neutral-700 transition-colors hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-white/5"
+              aria-label="Open command palette"
+              title="Search and go to… (⌘K)"
+            >
+              <FiSearch className="h-5 w-5" />
+            </button>
+            <WalletMenuButton />
             <div className="relative">
               <button
                 type="button"
@@ -303,7 +392,12 @@ export function TopNav() {
               <div className="relative nav-dropdown">
                 <button
                   type="button"
-                  onClick={() => setProfileOpen(!profileOpen)}
+                  onClick={() =>
+                    setProfileOpen((o) => {
+                      if (!o) profileCloseFocusRef.current = document.activeElement as HTMLElement | null
+                      return !o
+                    })
+                  }
                   className={`nav-dropdown-trigger flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     isActive('/profile') || isActive('/settings') || isActive('/wallet')
                       ? 'bg-amber-100 dark:bg-amber-900/25 text-amber-900 dark:text-amber-300'
@@ -380,6 +474,7 @@ export function TopNav() {
 
           {/* Mobile Menu Button */}
           <button
+            ref={mobileMenuTriggerRef}
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden p-2 rounded-md text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5"
@@ -396,7 +491,18 @@ export function TopNav() {
           <div id="mobile-nav-menu" className="md:hidden py-4 border-t border-neutral-200 dark:border-neutral-700" role="navigation" aria-label="Mobile navigation">
             {/* Quick actions: Wallet + Notifications */}
             <div className="flex items-center gap-2 pb-4 mb-4 border-b border-neutral-200 dark:border-neutral-600">
-              <WalletButton />
+              <button
+                type="button"
+                onClick={() => {
+                  openCommandPalette()
+                  setMobileMenuOpen(false)
+                }}
+                className="flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-white/5"
+                aria-label="Open command palette"
+              >
+                <FiSearch className="h-5 w-5" />
+              </button>
+              <WalletMenuButton />
               <button
                 type="button"
                 onClick={() => {
@@ -428,7 +534,12 @@ export function TopNav() {
               <div>
                 <button
                   type="button"
-                  onClick={() => setExploreOpen(!exploreOpen)}
+                  onClick={() =>
+                    setExploreOpen((o) => {
+                      if (!o) exploreCloseFocusRef.current = document.activeElement as HTMLElement | null
+                      return !o
+                    })
+                  }
                   className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-base font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5"
                 >
                   <span>Explore</span>
@@ -516,6 +627,7 @@ export function TopNav() {
               {user && (
                 <div>
                   <button
+                    ref={mobileAccountTriggerRef}
                     type="button"
                     onClick={() => setMobileAccountOpen(!mobileAccountOpen)}
                     className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-base font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5"

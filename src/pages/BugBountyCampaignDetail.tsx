@@ -6,6 +6,8 @@ import { useAuth } from '../contexts/AuthProvider'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { ErrorMessage } from '../components/ErrorMessage'
 import { PageMetadata } from '../components/PageMetadata'
+import { Breadcrumbs } from '../components/Breadcrumbs'
+import { FocusRestoreBoundary } from '../components/FocusRestoreBoundary'
 import { FiArrowLeft, FiEdit, FiTrash2, FiPlus, FiDollarSign, FiTrendingUp, FiUsers, FiExternalLink, FiAlertCircle } from 'react-icons/fi'
 import type { BugBountyCampaign, BugSubmission } from '../types'
 
@@ -133,6 +135,16 @@ export default function BugBountyCampaignDetail() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-6">
+          <Breadcrumbs
+            className="mb-3"
+            items={[
+              { label: 'Bug bounty programs', to: '/bug-bounty/campaigns' },
+              {
+                label:
+                  campaign.title.length > 48 ? `${campaign.title.slice(0, 48)}…` : campaign.title,
+              },
+            ]}
+          />
           <Link
             to="/bug-bounty/campaigns"
             className="inline-flex items-center gap-2 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 mb-4"
@@ -193,6 +205,7 @@ export default function BugBountyCampaignDetail() {
 
         {/* Delete Confirmation Modal */}
         {showDeleteConfirm && (
+          <FocusRestoreBoundary>
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 max-w-md w-full">
               <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-2">
@@ -218,6 +231,7 @@ export default function BugBountyCampaignDetail() {
               </div>
             </div>
           </div>
+          </FocusRestoreBoundary>
         )}
 
         {/* Error Message */}

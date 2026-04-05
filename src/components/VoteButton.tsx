@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useAuth } from '../contexts/AuthProvider'
+import { useToast } from '../contexts/ToastContext'
 import { config } from '../utils/config'
 
 interface VoteButtonProps {
@@ -22,6 +23,7 @@ export const VoteButton: React.FC<VoteButtonProps> = ({
   className = ''
 }) => {
   const { user } = useAuth()
+  const toast = useToast()
   const [votes, setVotes] = useState(initialVotes)
   const [userVoteState, setUserVoteState] = useState(userVote)
   const [loading, setLoading] = useState(false)
@@ -56,7 +58,8 @@ export const VoteButton: React.FC<VoteButtonProps> = ({
       onVoteChange?.(result.totalVotes, result.userVote)
     } catch (error) {
       console.error('Vote error:', error)
-      // You could show a toast notification here
+      const msg = error instanceof Error ? error.message : 'Could not save your vote'
+      toast.error(msg)
     } finally {
       setLoading(false)
     }
@@ -81,9 +84,10 @@ export const VoteButton: React.FC<VoteButtonProps> = ({
   return (
     <div className={`flex flex-col items-center justify-center space-y-1 ${className}`}>
       <button
+        type="button"
         onClick={handleUpvote}
         disabled={loading || !user}
-        className={`p-1 rounded transition-colors ${
+        className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-md transition-colors ${
           userVoteState === 1
             ? 'text-green-500 bg-green-500/20'
             : 'text-gray-400 hover:text-green-500 hover:bg-green-500/20'
@@ -100,9 +104,10 @@ export const VoteButton: React.FC<VoteButtonProps> = ({
       </span>
 
       <button
+        type="button"
         onClick={handleDownvote}
         disabled={loading || !user}
-        className={`p-1 rounded transition-colors ${
+        className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-md transition-colors ${
           userVoteState === -1
             ? 'text-red-500 bg-red-500/20'
             : 'text-gray-400 hover:text-red-500 hover:bg-red-500/20'

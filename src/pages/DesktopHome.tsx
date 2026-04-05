@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthProvider'
+import { useRestoreFocusWhenOpen } from '../hooks/useRestoreFocus'
 import { PageMetadata } from '../components/PageMetadata'
 import { isDesktopApp } from '../utils/desktop'
 import { logoUrl } from '../utils/logoUrl'
@@ -33,6 +34,7 @@ export default function DesktopHome() {
   })
   const [portalVisible, setPortalVisible] = useState(false)
   const [showWelcomeBack, setShowWelcomeBack] = useState(false)
+  useRestoreFocusWhenOpen(showWelcomeBack)
 
   // Center window as soon as desktop home loads (handles initial position before phase effect)
   useEffect(() => {

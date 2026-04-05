@@ -9,6 +9,7 @@ import type { Team, TeamTask } from '../types';
 import { useChatWebSocket, type ChatWsMessagePayload } from '../hooks/useChatWebSocket';
 import { useEscapeKey } from '../hooks/useEscapeKey';
 import { faviconUrl } from '../utils/faviconUrl';
+import { FocusRestoreBoundary } from '../components/FocusRestoreBoundary';
 
 interface Message {
   id: string;
@@ -636,6 +637,7 @@ const Chat: React.FC = () => {
 
         {/* Create Team Modal */}
         {createTeamOpen && (
+          <FocusRestoreBoundary>
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => !createTeamLoading && setCreateTeamOpen(false)}>
             <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-xl p-6 w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Create team</h3>
@@ -672,10 +674,12 @@ const Chat: React.FC = () => {
               </form>
             </div>
           </div>
+          </FocusRestoreBoundary>
         )}
 
         {/* Create Room Modal (public/private chat room) */}
         {createRoomOpen && (
+          <FocusRestoreBoundary>
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => !createRoomLoading && setCreateRoomOpen(false)}>
             <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-xl p-6 w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Create chat room</h3>
@@ -726,6 +730,7 @@ const Chat: React.FC = () => {
               </form>
             </div>
           </div>
+          </FocusRestoreBoundary>
         )}
 
         {/* Chat / Team Area */}

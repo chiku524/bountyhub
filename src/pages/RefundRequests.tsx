@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthProvider'
 import { useEscapeKey } from '../hooks/useEscapeKey'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { ErrorMessage } from '../components/ErrorMessage'
+import { FocusRestoreBoundary } from '../components/FocusRestoreBoundary'
 
 interface RefundRequest {
   id: string
@@ -301,6 +302,7 @@ const RefundRequests: React.FC = () => {
 
                 {/* Vote Modal */}
                 {selectedRequest === request.id && request.status === 'PENDING' && (
+                  <FocusRestoreBoundary>
                   <div className="mt-6 p-4 bg-neutral-100 dark:bg-neutral-700 rounded-lg border border-neutral-200 dark:border-neutral-600">
                     <h4 className="text-indigo-600 dark:text-indigo-400 font-medium mb-3">
                       Vote on Refund Request
@@ -364,6 +366,7 @@ const RefundRequests: React.FC = () => {
                       </button>
                     </div>
                   </div>
+                  </FocusRestoreBoundary>
                 )}
               </div>
             </div>

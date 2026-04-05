@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { Routes, Route, useLocation, Navigate, useParams } from 'react-router-dom'
+import { isReservedProfilePath } from './utils/reservedProfilePaths'
 import { HelmetProvider } from 'react-helmet-async'
 import { AuthProvider, useAuth } from './contexts/AuthProvider'
 import { SolanaWalletProvider } from './contexts/SolanaWalletProvider'
@@ -20,8 +21,9 @@ import { useDesktopWindowState } from './hooks/useDesktopWindowState'
 import { useDesktopMenuEvents } from './hooks/useDesktopMenuEvents'
 import { useDesktopShortcuts } from './hooks/useDesktopShortcuts'
 import ChatSidebar from './components/ChatSidebar'
-import { LoadingSpinner } from './components/LoadingSpinner'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import { PageRouteSkeleton } from './components/PageRouteSkeleton'
+import { CommandPaletteProvider } from './components/CommandPalette'
 import '@solana/wallet-adapter-react-ui/styles.css'
 
 // Eager-load critical above-the-fold route
@@ -65,11 +67,15 @@ const Download = lazy(() => import('./pages/Download'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 
 function RouteFallback() {
-  return (
-    <div className="flex min-h-[50vh] items-center justify-center">
-      <LoadingSpinner size="lg" graphic="logo" />
-    </div>
-  )
+  return <PageRouteSkeleton />
+}
+
+function UserProfileRoute() {
+  const { username } = useParams<{ username: string }>()
+  if (username && isReservedProfilePath(username)) {
+    return <NotFound />
+  }
+  return <UserProfile />
 }
 
 function RepositoryDetailRoute() {
@@ -98,11 +104,11 @@ function DocsAwareRoutes() {
         <Route path="/settings" element={<Settings />} />
         <Route path="/posts/create" element={<CreatePost />} />
         <Route path="/posts/:postId" element={<PostDetail />} />
-        <Route path="/users/:username" element={<UserProfile />} />
+        <Route path="/users/:username" element={<UserProfileRoute />} />
         <Route path="/users/:username/posts" element={<UserPosts />} />
         <Route path="/download" element={<Download />} />
         <Route path="/downloads" element={<Navigate to="/download" replace />} />
-        <Route path="/:username" element={<UserProfile />} />
+        <Route path="/:username" element={<UserProfileRoute />} />
         <Route path="/transactions" element={<Transactions />} />
         <Route path="/refund-requests" element={<RefundRequests />} />
         <Route path="/docs" element={<DocsSingle />} />
@@ -220,7 +226,7 @@ function AppContent() {
       {/* Light/Dark mode container - Always flex-col; data-desktop for app-like styling */}
       <div className="relative z-10 flex min-h-screen min-w-0 w-full flex-col bg-white/5 dark:bg-neutral-900/5 transition-colors duration-200" data-desktop={isDesktop ? 'true' : undefined}>
         {/* Skip to main content - visible on focus for keyboard/screen reader users */}
-        {(showAuthenticatedNav || showHomeNav) && (
+        {(showAuthenticatedNav || showHomeNav || (isDesktop && showDesktopShell)) && (
           <a
             href="#main-content"
             className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-indigo-600 focus:text-white focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-neutral-900"
@@ -283,7 +289,9 @@ function App() {
         <SolanaWalletProvider>
           <ToastProvider>
             <DesktopUpdateProvider>
-              <AppContent />
+              <CommandPaletteProvider>
+                <AppContent />
+              </CommandPaletteProvider>
             </DesktopUpdateProvider>
           </ToastProvider>
         </SolanaWalletProvider>

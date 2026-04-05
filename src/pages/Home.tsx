@@ -46,6 +46,7 @@ export default function Home() {
   const { user } = useAuth()
   const [stats, setStats] = useState<PlatformStats | null>(null)
   const [loading, setLoading] = useState(true)
+  const [statsError, setStatsError] = useState(false)
   const [heroMounted, setHeroMounted] = useState(false)
 
   useScrollAnimations()
@@ -60,8 +61,10 @@ export default function Home() {
       try {
         const platformStats = await api.getPlatformStats()
         setStats(platformStats)
+        setStatsError(false)
       } catch (error) {
         console.error('Failed to fetch platform stats:', error)
+        setStatsError(true)
         setStats({
           activeBounties: 0,
           questionsAnswered: 0,
@@ -387,8 +390,18 @@ export default function Home() {
           <div className="text-center mb-16" data-animate="fade-in-up">
             <h2 className="text-4xl font-bold mb-4">Platform statistics</h2>
             <p className="text-xl text-neutral-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Live activity across Q&amp;A bounties, answers, and BBUX offered across the platform
+              {statsError
+                ? 'We could not load live numbers right now — the figures below are placeholders until the service is reachable again.'
+                : 'Live activity across Q&amp;A bounties, answers, and BBUX offered across the platform'}
             </p>
+            {!loading && statsError && (
+              <p
+                className="mt-4 mx-auto max-w-xl rounded-lg border border-amber-200/80 bg-amber-50/90 px-4 py-2 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-950/50 dark:text-amber-100"
+                role="status"
+              >
+                Couldn&apos;t load live stats. Refresh the page to try again.
+              </p>
+            )}
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center rounded-xl py-6 px-4 border border-transparent transition-all duration-300 hover:border-indigo-200/80 dark:hover:border-indigo-500/30 hover:bg-white/50 dark:hover:bg-neutral-700/30 hover:shadow-md" data-animate="scale-in" data-animate-delay="0">

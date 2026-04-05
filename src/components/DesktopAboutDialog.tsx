@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useRestoreFocusWhenOpen } from '../hooks/useRestoreFocus'
 import { FiX } from 'react-icons/fi'
 import { isDesktopApp } from '../utils/desktop'
 import { logoUrl } from '../utils/logoUrl'
@@ -13,6 +14,8 @@ interface DesktopAboutDialogProps {
 
 export function DesktopAboutDialog({ open, onClose }: DesktopAboutDialogProps) {
   const [version, setVersion] = useState<string>('')
+
+  useRestoreFocusWhenOpen(open)
 
   useEffect(() => {
     if (!open || !isDesktopApp()) return

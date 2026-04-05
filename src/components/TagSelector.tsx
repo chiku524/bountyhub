@@ -1,5 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { FiX, FiTag } from 'react-icons/fi';
+import { useRestoreFocusWhenOpen } from '../hooks/useRestoreFocus';
+import { useEscapeKey } from '../hooks/useEscapeKey';
 
 interface Tag {
   id: string;
@@ -30,7 +32,23 @@ export default function TagSelector({
 }: TagSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  useRestoreFocusWhenOpen(isOpen);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const id = requestAnimationFrame(() => {
+      searchInputRef.current?.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [isOpen]);
+
+  const closeDropdown = useCallback(() => {
+    setIsOpen(false);
+    setSearchTerm('');
+  }, []);
+  useEscapeKey(isOpen, closeDropdown);
 
   const filteredTags = availableTags.filter(tag =>
     tag.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -42,12 +60,12 @@ export default function TagSelector({
     selectedTags.includes(tag.id)
   );
 
-  // Handle click outside to close dropdown
+  // Handle click outside to close dropdown (container = trigger + panel, same pattern as AdvancedFilters)
   useEffect(() => {
     if (disableClickOutside) return;
-    
+
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
         setSearchTerm('');
       }
@@ -75,11 +93,10 @@ export default function TagSelector({
     onTagsChange(newSelectedTags);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      setIsOpen(false);
-      setSearchTerm('');
-    }
+  const handleToggleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsOpen((o) => !o);
   };
 
   return (
@@ -121,10 +138,13 @@ export default function TagSelector({
       )}
 
       {/* Tag Selector Dropdown */}
-      <div className="relative">
+      <div className="relative" ref={containerRef}>
         <button
           type="button"
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={handleToggleClick}
+          aria-expanded={isOpen}
+          aria-haspopup="dialog"
+          aria-label={isOpen ? 'Close tag selector' : 'Open tag selector'}
           className={`w-full px-4 py-3 text-left bg-white dark:bg-neutral-800/60 border border-neutral-300 dark:border-violet-500/30 rounded-lg transition-colors ${
             error 
               ? 'border-red-500/50 dark:border-red-500/50 focus:border-red-500' 
@@ -157,15 +177,21 @@ export default function TagSelector({
         </button>
 
         {isOpen && (
-          <div className="absolute z-50 w-full mt-1 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-violet-500/30 rounded-lg shadow-xl max-h-64 overflow-hidden" ref={dropdownRef}>
+          <div
+            className="absolute z-50 w-full mt-1 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-violet-500/30 rounded-lg shadow-xl max-h-64 overflow-hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Select tags"
+          >
             {/* Search Input */}
             <div className="p-3 border-b border-neutral-200 dark:border-violet-500/20">
               <input
-                type="text"
+                ref={searchInputRef}
+                type="search"
                 placeholder="Search tags..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={handleKeyDown}
+                enterKeyHint="search"
                 className="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/20 rounded-md text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400 focus:outline-hidden focus:border-violet-500"
               />
             </div>

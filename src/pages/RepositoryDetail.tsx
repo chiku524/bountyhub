@@ -5,6 +5,8 @@ import { useAuth } from '../contexts/AuthProvider'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { ErrorMessage } from '../components/ErrorMessage'
 import { PageMetadata } from '../components/PageMetadata'
+import { Breadcrumbs } from '../components/Breadcrumbs'
+import { EmptyState } from '../components/EmptyState'
 import { FiGithub, FiStar, FiGitBranch, FiExternalLink, FiArrowLeft, FiDollarSign } from 'react-icons/fi'
 import type { GitHubRepository } from '../types'
 
@@ -37,16 +39,21 @@ export default function RepositoryDetail() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xs flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-4">Please log in to view repository details</h1>
-          <Link
-            to="/login"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
-          >
-            Login
-          </Link>
-        </div>
+      <div className="flex min-h-[60vh] items-center justify-center px-4">
+        <EmptyState
+          title="Sign in to view this repository"
+          description="Log in to see repository details and start a bug bounty campaign."
+          action={
+            <Link to="/login" className="btn-primary">
+              Log in
+            </Link>
+          }
+          secondaryAction={
+            <Link to="/signup" className="btn-secondary">
+              Sign up
+            </Link>
+          }
+        />
       </div>
     )
   }
@@ -108,6 +115,10 @@ export default function RepositoryDetail() {
         description={repo.description || `View ${repo.fullName} on BountyHub`}
       />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Breadcrumbs
+          items={[{ label: 'Repositories', to: '/repositories' }, { label: repo.fullName }]}
+          className="mb-4"
+        />
         <Link
           to="/repositories"
           className="inline-flex items-center gap-2 text-neutral-600 dark:text-neutral-400 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium mb-6"

@@ -13,6 +13,8 @@ import { PageContainer } from '../components/PageContainer'
 import { PageHeader } from '../components/PageHeader'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { ErrorMessage } from '../components/ErrorMessage'
+import { FocusRestoreBoundary } from '../components/FocusRestoreBoundary'
+import { rememberFocusBeforeWalletModal } from '../utils/walletModalFocus'
 
 function WalletContent() {
   const { user, loading: authLoading } = useAuth()
@@ -484,7 +486,11 @@ function WalletContent() {
               <div className="flex flex-col sm:flex-row gap-3">
                 {!connected ? (
                   <button
-                    onClick={() => setVisible(true)}
+                    type="button"
+                    onClick={() => {
+                      rememberFocusBeforeWalletModal()
+                      setVisible(true)
+                    }}
                     className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors text-sm sm:text-base"
                   >
                     Connect Wallet
@@ -519,6 +525,7 @@ function WalletContent() {
 
           {/* Deposit Modal */}
           {showDepositModal && (
+            <FocusRestoreBoundary>
             <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4">
               <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-center mb-4">
@@ -659,10 +666,12 @@ function WalletContent() {
                 )}
               </div>
             </div>
+            </FocusRestoreBoundary>
           )}
 
           {/* Deposit Confirmation Modal */}
           {showDepositConfirmation && (
+            <FocusRestoreBoundary>
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-neutral-800 border border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4">
                 <div className="flex justify-between items-center mb-4">
@@ -744,10 +753,12 @@ function WalletContent() {
                 </form>
               </div>
             </div>
+            </FocusRestoreBoundary>
           )}
 
           {/* Withdraw Modal */}
           {showWithdrawModal && (
+            <FocusRestoreBoundary>
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-neutral-800 border border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4">
                 <div className="flex justify-between items-center mb-4">
@@ -840,10 +851,12 @@ function WalletContent() {
                 </form>
               </div>
             </div>
+            </FocusRestoreBoundary>
           )}
 
           {/* Withdraw Result Modal */}
           {withdrawResult && withdrawResult.success && (
+            <FocusRestoreBoundary>
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-neutral-800 border border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4">
                 <div className="bg-blue-900 border border-blue-700 rounded-lg p-4">
@@ -870,6 +883,7 @@ function WalletContent() {
                 </div>
               </div>
             </div>
+            </FocusRestoreBoundary>
           )}
 
           {/* Recent Transactions */}

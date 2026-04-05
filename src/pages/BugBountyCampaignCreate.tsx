@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { api } from '../utils/api'
 import { useAuth } from '../contexts/AuthProvider'
@@ -8,6 +8,10 @@ import { PageMetadata } from '../components/PageMetadata'
 import { FiArrowLeft, FiSave } from 'react-icons/fi'
 import { Link } from 'react-router-dom'
 import type { GitHubRepository } from '../types'
+import { EmptyState } from '../components/EmptyState'
+import { useLocalStorageDraft } from '../hooks/useLocalStorageDraft'
+
+const CAMPAIGN_DRAFT_KEY = 'bountyhub-draft-bug-campaign'
 
 export default function BugBountyCampaignCreate() {
   const { user } = useAuth()
@@ -34,14 +38,58 @@ export default function BugBountyCampaignCreate() {
   const [scope, setScope] = useState('')
   const [rules, setRules] = useState('')
   const [severityLevels, setSeverityLevels] = useState('')
+  const [showDraftBanner, setShowDraftBanner] = useState(false)
+
+  const campaignDraftSnapshot = useMemo(
+    () => ({
+      repositoryId,
+      title,
+      description,
+      status,
+      totalBudget,
+      minReward,
+      maxReward,
+      startDate,
+      endDate,
+      isPublic,
+      allowTeamBounties,
+      scope,
+      rules,
+      severityLevels,
+    }),
+    [
+      repositoryId,
+      title,
+      description,
+      status,
+      totalBudget,
+      minReward,
+      maxReward,
+      startDate,
+      endDate,
+      isPublic,
+      allowTeamBounties,
+      scope,
+      rules,
+      severityLevels,
+    ],
+  )
+
+  const { clearDraft, readDraft } = useLocalStorageDraft(CAMPAIGN_DRAFT_KEY, campaignDraftSnapshot, Boolean(user))
 
   useEffect(() => {
-    if (!user) {
-      navigate('/login')
-      return
-    }
+    if (!user) return
     loadRepositories()
-  }, [user, navigate])
+  }, [user])
+
+  useEffect(() => {
+    if (!user) return
+    const d = readDraft() as Record<string, unknown> | null
+    if (!d || typeof d !== 'object') return
+    const has =
+      (typeof d.title === 'string' && d.title.trim()) || (typeof d.description === 'string' && d.description.trim())
+    if (has) setShowDraftBanner(true)
+  }, [user, readDraft])
 
   // When repos load and URL has repositoryId, pre-select that repo
   useEffect(() => {
@@ -173,6 +221,7 @@ export default function BugBountyCampaignCreate() {
       }
 
       const campaign = await api.createBugBountyCampaign(campaignData)
+      clearDraft()
       navigate(`/bug-bounty/campaigns/${campaign.id}`)
     } catch (err: any) {
       setError(err.message || 'Failed to create campaign')
@@ -182,7 +231,44 @@ export default function BugBountyCampaignCreate() {
   }
 
   if (!user) {
-    return null
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center px-4">
+        <EmptyState
+          title="Sign in to create a campaign"
+          description="Log in to create a bug bounty program linked to your repositories."
+          action={
+            <Link to="/login" className="btn-primary">
+              Log in
+            </Link>
+          }
+          secondaryAction={
+            <Link to="/signup" className="btn-secondary">
+              Sign up
+            </Link>
+          }
+        />
+      </div>
+    )
+  }
+
+  const applyCampaignDraft = () => {
+    const d = readDraft() as Record<string, unknown> | null
+    if (!d) return
+    if (typeof d.repositoryId === 'string') setRepositoryId(d.repositoryId)
+    if (typeof d.title === 'string') setTitle(d.title)
+    if (typeof d.description === 'string') setDescription(d.description)
+    if (d.status === 'DRAFT' || d.status === 'ACTIVE') setStatus(d.status)
+    if (typeof d.totalBudget === 'string') setTotalBudget(d.totalBudget)
+    if (typeof d.minReward === 'string') setMinReward(d.minReward)
+    if (typeof d.maxReward === 'string') setMaxReward(d.maxReward)
+    if (typeof d.startDate === 'string') setStartDate(d.startDate)
+    if (typeof d.endDate === 'string') setEndDate(d.endDate)
+    if (typeof d.isPublic === 'boolean') setIsPublic(d.isPublic)
+    if (typeof d.allowTeamBounties === 'boolean') setAllowTeamBounties(d.allowTeamBounties)
+    if (typeof d.scope === 'string') setScope(d.scope)
+    if (typeof d.rules === 'string') setRules(d.rules)
+    if (typeof d.severityLevels === 'string') setSeverityLevels(d.severityLevels)
+    setShowDraftBanner(false)
   }
 
   return (
@@ -193,6 +279,29 @@ export default function BugBountyCampaignCreate() {
       />
       
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {showDraftBanner && (
+          <div
+            className="mb-6 flex flex-col gap-3 rounded-xl border border-violet-200/80 bg-violet-50/90 p-4 text-sm text-violet-950 dark:border-violet-500/35 dark:bg-violet-950/40 dark:text-violet-100 @sm/main:flex-row @sm/main:items-center @sm/main:justify-between"
+            role="status"
+          >
+            <p className="font-medium">You have an unsaved campaign draft on this device.</p>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" onClick={applyCampaignDraft} className="btn-primary text-sm py-2 px-3">
+                Restore draft
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  clearDraft()
+                  setShowDraftBanner(false)
+                }}
+                className="btn-secondary text-sm py-2 px-3"
+              >
+                Discard
+              </button>
+            </div>
+          </div>
+        )}
         {/* Header */}
         <div className="mb-6">
           <Link

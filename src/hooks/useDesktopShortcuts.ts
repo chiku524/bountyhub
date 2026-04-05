@@ -1,15 +1,18 @@
 import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { isDesktopApp } from '../utils/desktop'
+import { COMMAND_PALETTE_TOGGLE_EVENT } from '../constants/commandPaletteEvents'
 
 const QUIT_SHORTCUT = 'CommandOrControl+Q'
 const PREFS_SHORTCUT = 'CommandOrControl+,'
+const COMMAND_PALETTE_SHORTCUT = 'CommandOrControl+K'
 const DEVTOOLS_SHORTCUT = 'CommandOrControl+Shift+I'
 
 /**
  * Registers global keyboard shortcuts for the desktop app:
  * - Cmd/Ctrl+Q: Quit
  * - Cmd/Ctrl+,: Open Settings (Desktop app tab)
+ * - Cmd/Ctrl+K: Toggle command palette (webview listens on window)
  * - Cmd/Ctrl+Shift+I (dev only): Toggle developer tools (invokes Rust open_devtools)
  */
 export function useDesktopShortcuts() {
@@ -28,6 +31,11 @@ export function useDesktopShortcuts() {
         register(PREFS_SHORTCUT, (e) => {
           if (e.state === 'Pressed') navigate('/settings?tab=desktop')
         }).catch(() => {})
+        register(COMMAND_PALETTE_SHORTCUT, (e) => {
+          if (e.state === 'Pressed') {
+            window.dispatchEvent(new Event(COMMAND_PALETTE_TOGGLE_EVENT))
+          }
+        }).catch(() => {})
         if (import.meta.env.DEV) {
           register(DEVTOOLS_SHORTCUT, (e) => {
             if (e.state === 'Pressed') {
@@ -43,6 +51,7 @@ export function useDesktopShortcuts() {
       if (unreg) {
         unreg(QUIT_SHORTCUT).catch(() => {})
         unreg(PREFS_SHORTCUT).catch(() => {})
+        unreg(COMMAND_PALETTE_SHORTCUT).catch(() => {})
         if (import.meta.env.DEV) {
           unreg(DEVTOOLS_SHORTCUT).catch(() => {})
         }

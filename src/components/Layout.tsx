@@ -2,6 +2,7 @@ import { ReactNode } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthProvider'
 import { BackToTop } from './BackToTop'
+import { FirstRunTips } from './FirstRunTips'
 import { isDesktopApp } from '../utils/desktop'
 
 interface LayoutProps {
@@ -20,6 +21,7 @@ export default function Layout({ children, showNav = true }: LayoutProps) {
   const isDocsPage = location.pathname === '/docs'
   const isChatPage = location.pathname === '/chat'
   const isLaunchPage = location.pathname === '/launch'
+  const isDownloadPage = location.pathname === '/download'
   /**
    * Desktop splash/auth/launch must not sit inside the frosted panel: backdrop-filter on an ancestor
    * breaks `position: fixed` for `.desktop-splash` and clips the sign-in canvas.
@@ -46,8 +48,22 @@ export default function Layout({ children, showNav = true }: LayoutProps) {
     glassFillsViewport ? 'flex min-h-0 flex-1 flex-col overflow-hidden' : ''
   ].join(' ')
 
+  const showFirstRunTips =
+    Boolean(user) &&
+    !isHomePage &&
+    !isAuthPage &&
+    !isLegalPage &&
+    !isLaunchPage &&
+    !isDownloadPage &&
+    !isFullBleedPage &&
+    !isDocsPage &&
+    !isChatPage
+
+  const mobileBottomPad =
+    'pb-[max(4rem,env(safe-area-inset-bottom,0px))] md:pb-0'
+
   return (
-    <div className={`flex min-h-0 min-w-0 flex-1 flex-col ${topPaddingClass} pb-16 md:pb-0`}>
+    <div className={`flex min-h-0 min-w-0 flex-1 flex-col ${topPaddingClass} ${mobileBottomPad}`}>
       <main id="main-content" className={mainClasses} tabIndex={-1}>
         {isDocsPage ? (
           <div className="box-border flex min-h-0 min-w-0 flex-1 flex-col px-2 py-2 @sm/main:px-2.5 @sm/main:py-2.5 @3xl/main:px-3 @3xl/main:py-3">
@@ -57,7 +73,10 @@ export default function Layout({ children, showNav = true }: LayoutProps) {
           <div className="box-border flex min-h-full min-w-0 w-full flex-1 flex-col">{children}</div>
         ) : (
           <div className="box-border flex min-h-full w-full flex-1 flex-col items-stretch justify-center px-3 py-4 @sm/main:px-5 @3xl/main:px-8 @3xl/main:py-6">
-            <div className={glassPanelClass}>{children}</div>
+            <div className={glassPanelClass}>
+              {showFirstRunTips ? <FirstRunTips /> : null}
+              {children}
+            </div>
           </div>
         )}
       </main>

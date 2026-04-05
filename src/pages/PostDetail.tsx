@@ -6,6 +6,8 @@ import { api } from '../utils/api'
 import { isDesktopApp } from '../utils/desktop'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { ErrorMessage } from '../components/ErrorMessage'
+import { Breadcrumbs } from '../components/Breadcrumbs'
+import { FocusRestoreBoundary } from '../components/FocusRestoreBoundary'
 import { PostChatRoom } from '../components/PostChatRoom'
 import { Answers } from '../components/Answers'
 import { BookmarkButton } from '../components/BookmarkButton'
@@ -33,6 +35,7 @@ export default function PostDetail() {
   const [availableTags, setAvailableTags] = useState<Array<{ id: string; name: string; color: string; description: string | null }>>([])
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
 
   useEscapeKey(showDeleteConfirm, () => setShowDeleteConfirm(false))
 
@@ -75,6 +78,20 @@ export default function PostDetail() {
       setError(err.message)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const refreshPost = async () => {
+    if (!postId) return
+    setRefreshing(true)
+    setError(null)
+    try {
+      const fetchedPost = await api.getPost(postId)
+      setPost(fetchedPost)
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setRefreshing(false)
     }
   }
 
@@ -130,8 +147,7 @@ export default function PostDetail() {
       setPost(updated)
       setEditing(false)
       
-      // Refresh the post data to ensure we have the latest state
-      await fetchPost()
+      await refreshPost()
     } catch (err: any) {
       setEditError(err.message || 'Failed to update post')
     } finally {
@@ -254,12 +270,28 @@ export default function PostDetail() {
   return (
     <div className="p-8 min-h-screen">
       <div className={`mx-auto ${isDesktop ? 'max-w-6xl' : 'max-w-7xl'}`}>
-        <div className="mb-4">
-          <Link to="/community" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300">
+        <div className="mb-4 space-y-2">
+          <Breadcrumbs
+            items={[
+              { label: 'Community', to: '/community' },
+              {
+                label: post?.title ? (post.title.length > 56 ? `${post.title.slice(0, 56)}…` : post.title) : 'Post',
+              },
+            ]}
+          />
+          <Link to="/community" className="inline-block text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300">
             ← Back to Community
           </Link>
         </div>
-        <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-8">Post Detail</h1>
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
+          <h1 className="text-3xl font-bold text-neutral-900 dark:text-white">Post Detail</h1>
+          {refreshing && (
+            <span className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400" role="status">
+              <LoadingSpinner size="sm" label={false} />
+              Updating…
+            </span>
+          )}
+        </div>
         <div className={`card bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 p-6 ${post?.reward && post.reward > 0 ? 'border-2 border-cyan-500/60 dark:border-cyan-400/60 bg-linear-to-br from-cyan-50 to-blue-50 dark:from-neutral-800 dark:to-cyan-500/5' : ''}`}>
           {loading && (
             <div className="animate-pulse space-y-4 p-2">
@@ -281,10 +313,7 @@ export default function PostDetail() {
           )}
           
           {error && (
-            <ErrorMessage 
-              message={error} 
-              onRetry={fetchPost}
-            />
+            <ErrorMessage message={error} onRetry={post ? refreshPost : fetchPost} />
           )}
           
           {!loading && !error && post && (
@@ -502,6 +531,7 @@ export default function PostDetail() {
 
         {/* Delete Confirmation Modal */}
         {showDeleteConfirm && (
+          <FocusRestoreBoundary>
           <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50">
             <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4">
               <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg p-4">
@@ -533,6 +563,7 @@ export default function PostDetail() {
               </div>
             </div>
           </div>
+          </FocusRestoreBoundary>
         )}
       </div>
     </div>
