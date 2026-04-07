@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthProvider';
 import { ApiClient } from '../utils/api';
 import { config } from '../utils/config';
 import { pickGiphyPreviewUrl, safeGifCaption, type GiphyGif } from '../utils/giphy';
+import { ChatMessageBody } from './ChatMessageBody';
 import { Link } from 'react-router-dom';
 import { FiSend, FiMessageSquare, FiX, FiMessageCircle, FiSmile, FiImage, FiGrid, FiUsers, FiChevronLeft, FiChevronDown, FiPlusCircle } from 'react-icons/fi';
 import type { Team } from '../types';
@@ -44,6 +45,12 @@ interface ChatRoomOption {
 
 type HubView = 'list' | 'chat';
 type ChatTarget = { type: 'global'; roomId: string; name: string } | { type: 'room'; id: string; name: string } | { type: 'team'; roomId: string; name: string };
+
+function mergeChatMessages(prev: Message[], msg: Message): Message[] {
+  const id = String(msg.id);
+  if (prev.some((m) => String(m.id) === id)) return prev;
+  return [...prev, msg];
+}
 
 const ChatSidebar: React.FC = () => {
   const { user } = useAuth();
@@ -109,10 +116,7 @@ const ChatSidebar: React.FC = () => {
     : null;
 
   const handleWsMessage = useCallback((message: { id: string; content: string; createdAt?: string; author: { id: string; username: string; role: string }; [key: string]: unknown }) => {
-    setMessages(prev => {
-      if (prev.some(m => m.id === message.id)) return prev;
-      return [...prev, message as Message];
-    });
+    setMessages((prev) => mergeChatMessages(prev, message as Message));
     if (message.createdAt) setLastMessageTimestamp(message.createdAt);
   }, []);
 
@@ -127,10 +131,10 @@ const ChatSidebar: React.FC = () => {
       const url = lastMessageTimestamp ? `${messagesUrl}?limit=30&after=${encodeURIComponent(lastMessageTimestamp)}` : `${messagesUrl}?limit=30`;
       const res = await api.request<{ success: boolean; messages: Message[] }>(url);
       if (res.success && res.messages.length > 0) {
-        setMessages(prev => {
-          const existingIds = new Set(prev.map(msg => msg.id));
-          const newMessages = res.messages.filter(msg => !existingIds.has(msg.id));
-          return [...prev, ...newMessages];
+        setMessages((prev) => {
+          const existingIds = new Set(prev.map((msg) => String(msg.id)));
+          const newMessages = res.messages.filter((msg) => !existingIds.has(String(msg.id)));
+          return newMessages.length ? [...prev, ...newMessages] : prev;
         });
         const latest = res.messages[res.messages.length - 1];
         if (latest.createdAt) setLastMessageTimestamp(latest.createdAt);
@@ -266,7 +270,7 @@ const ChatSidebar: React.FC = () => {
         body: JSON.stringify({ content: messageContent, messageType: 'TEXT' }),
       });
       if (response.success) {
-        setMessages(prev => [...prev, response.message]);
+        setMessages((prev) => mergeChatMessages(prev, response.message));
         if (response.message.createdAt) setLastMessageTimestamp(response.message.createdAt);
         setTimeout(() => scrollToBottom(), 0);
       }
@@ -362,7 +366,7 @@ const ChatSidebar: React.FC = () => {
         body: JSON.stringify({ content: gifContent, messageType: 'TEXT' }),
       });
       if (response.success) {
-        setMessages(prev => [...prev, response.message]);
+        setMessages((prev) => mergeChatMessages(prev, response.message));
         if (response.message.createdAt) setLastMessageTimestamp(response.message.createdAt);
         setShowGifSearch(false);
         setGifSearchTerm('');
@@ -375,29 +379,9 @@ const ChatSidebar: React.FC = () => {
     }
   };
 
-  const renderMessageContent = (content: string) => {
-    // Check if it's a GIF message
-    const gifMatch = content.match(/\[GIF: (.+?)\]\((.+?)\)/);
-    if (gifMatch) {
-      return (
-        <div>
-          <img
-            src={gifMatch[2]}
-            alt={gifMatch[1]}
-            className="max-w-full rounded-sm"
-            style={{ maxHeight: '200px' }}
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            onError={(e) => {
-              const el = e.currentTarget;
-              el.style.display = 'none';
-            }}
-          />
-        </div>
-      );
-    }
-    return <div className="text-sm">{content}</div>;
-  };
+  const renderMessageContent = (content: string) => (
+    <ChatMessageBody content={content} className="text-sm" />
+  );
 
   if (!user) {
     return null;
@@ -640,7 +624,7 @@ const ChatSidebar: React.FC = () => {
                       alt={safeGifCaption(gif.title)}
                       className="w-full rounded-sm"
                       loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
+                      decoding="async"
                     />
                   </button>
                 );

@@ -10,6 +10,7 @@ import { useChatWebSocket, type ChatWsMessagePayload } from '../hooks/useChatWeb
 import { useEscapeKey } from '../hooks/useEscapeKey';
 import { faviconUrl } from '../utils/faviconUrl';
 import { FocusRestoreBoundary } from '../components/FocusRestoreBoundary';
+import { ChatMessageBody } from '../components/ChatMessageBody';
 
 interface Message {
   id: string;
@@ -55,6 +56,13 @@ function normalizeMessage(m: Message): Message {
     author,
     profile: m.profile && typeof m.profile === 'object' ? m.profile : undefined,
   };
+}
+
+function mergeChatMessages(prev: Message[], msg: Message): Message[] {
+  const n = normalizeMessage(msg);
+  const id = String(n.id);
+  if (prev.some((m) => String(m.id) === id)) return prev;
+  return [...prev, n];
 }
 
 const Chat: React.FC = () => {
@@ -111,14 +119,13 @@ const Chat: React.FC = () => {
   }, [messages, checkAtBottom]);
 
   const handleWsMessage = useCallback((message: ChatWsMessagePayload) => {
-    setMessages(prev => {
-      if (prev.some(m => m.id === message.id)) return prev;
-      return [...prev, {
-        ...message,
-        messageType: (message.messageType as Message['messageType']) ?? 'TEXT',
-        isEdited: false,
-      } as Message];
-    });
+    const incoming: Message = {
+      ...message,
+      messageType: (message.messageType as Message['messageType']) ?? 'TEXT',
+      isEdited: false,
+      createdAt: message.createdAt ?? '',
+    } as Message;
+    setMessages((prev) => mergeChatMessages(prev, incoming));
     setLastMessageId(message.id);
   }, []);
 
@@ -260,7 +267,11 @@ const Chat: React.FC = () => {
             const lastKnownIndex = normalizedList.findIndex(msg => msg.id === currentLastId);
             if (lastKnownIndex !== -1) {
               const newMessages = normalizedList.slice(lastKnownIndex + 1);
-              setMessages(prev => [...prev, ...newMessages]);
+              setMessages((prev) => {
+                const ids = new Set(prev.map((m) => String(m.id)));
+                const merged = newMessages.filter((m) => !ids.has(String(m.id)));
+                return merged.length ? [...prev, ...merged] : prev;
+              });
               setLastMessageId(lastMessage.id);
               if (document.hidden && newMessages.length > 0 && user) {
                 const latest = newMessages[newMessages.length - 1];
@@ -338,7 +349,7 @@ const Chat: React.FC = () => {
       });
 
       if (response.success && response.message) {
-        setMessages(prev => [...prev, normalizeMessage(response.message)]);
+        setMessages((prev) => mergeChatMessages(prev, response.message));
         setLastMessageId(response.message.id);
         setNewMessage('');
         setTimeout(() => scrollToBottom(), 0);
@@ -904,8 +915,13 @@ const Chat: React.FC = () => {
                                 </div>
                               )}
 
-                              <div className="text-sm text-neutral-900 dark:text-neutral-100">
-                                {message.content}
+                              <div
+                                className={`text-sm ${isOwn ? 'text-white' : 'text-neutral-900 dark:text-neutral-100'}`}
+                              >
+                                <ChatMessageBody
+                                  content={message.content}
+                                  className={isOwn ? 'text-white' : 'text-neutral-900 dark:text-neutral-100'}
+                                />
                                 {message.isEdited && (
                                   <span className="text-xs opacity-70 ml-2">(edited)</span>
                                 )}

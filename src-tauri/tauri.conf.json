@@ -44,7 +44,7 @@
   },
   "productName": "BountyHub",
   "mainBinaryName": "BountyHub",
-  "version": "1.1.42",
+  "version": "1.1.43",
   "identifier": "tech.bountyhub.desktop",
   "plugins": {
     "updater": {
@@ -98,7 +98,7 @@
         "default-src": "'self' asset:",
         "connect-src": "ipc: http://ipc.localhost https://api.bountyhub.tech wss://api.bountyhub.tech http://127.0.0.1:8788 http://localhost:8788 https://bountyhub-api.nico-chikuji.workers.dev https://api.cloudinary.com https://api.giphy.com https://api.dicebear.com https://api.html2pdf.app https://api.mainnet-beta.solana.com",
         "font-src": ["https://fonts.gstatic.com"],
-        "img-src": "'self' asset: http://asset.localhost blob: data: https: http:",
+        "img-src": "'self' asset: http://asset.localhost blob: data: https: http: https://*.giphy.com https://media.giphy.com https://media0.giphy.com https://media1.giphy.com https://media2.giphy.com https://media3.giphy.com https://media4.giphy.com https://i.giphy.com",
         "style-src": "'unsafe-inline' 'self' https://fonts.googleapis.com"
       }
     }
