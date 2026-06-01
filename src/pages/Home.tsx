@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthProvider'
 import { useEffect, useState } from 'react'
 import { api } from '../utils/api'
 import { PageMetadata } from '../components/PageMetadata'
+import { TinyStartupsBadge } from '../components/TinyStartupsBadge'
 import { FiUsers, FiDollarSign, FiAward, FiZap, FiShield, FiTrendingUp, FiGithub, FiCode } from 'react-icons/fi'
 
 /** Run scroll-triggered animations when elements with data-animate enter view. */
@@ -188,6 +189,15 @@ export default function Home() {
                   </Link>
                 </>
               )}
+            </div>
+
+            <div
+              className={`mt-10 flex justify-center transition-opacity duration-300 ${
+                heroMounted ? 'animate-fade-in-up' : 'opacity-0'
+              }`}
+              style={heroMounted ? { animationDelay: '360ms' } : undefined}
+            >
+              <TinyStartupsBadge />
             </div>
           </div>
         </section>
