@@ -3,7 +3,6 @@ import { useAuth } from '../contexts/AuthProvider'
 import { useEffect, useState } from 'react'
 import { api } from '../utils/api'
 import { PageMetadata } from '../components/PageMetadata'
-import { TinyStartupsBadge } from '../components/TinyStartupsBadge'
 import { FiUsers, FiDollarSign, FiAward, FiZap, FiShield, FiTrendingUp, FiGithub, FiCode } from 'react-icons/fi'
 
 /** Run scroll-triggered animations when elements with data-animate enter view. */
@@ -55,6 +54,17 @@ export default function Home() {
   useEffect(() => {
     const t = requestAnimationFrame(() => setHeroMounted(true))
     return () => cancelAnimationFrame(t)
+  }, [])
+
+  // Mount static Tiny Startups embed (in index.html) into the hero for layout.
+  useEffect(() => {
+    const badge = document.getElementById('tinystartups-badge')
+    const hero = document.getElementById('tinystartups-badge-hero')
+    if (!badge || !hero) return
+    hero.appendChild(badge)
+    return () => {
+      document.body.appendChild(badge)
+    }
   }, [])
 
   useEffect(() => {
@@ -192,13 +202,12 @@ export default function Home() {
             </div>
 
             <div
+              id="tinystartups-badge-hero"
               className={`mt-10 flex justify-center transition-opacity duration-300 ${
                 heroMounted ? 'animate-fade-in-up' : 'opacity-0'
               }`}
               style={heroMounted ? { animationDelay: '360ms' } : undefined}
-            >
-              <TinyStartupsBadge />
-            </div>
+            />
           </div>
         </section>
 
