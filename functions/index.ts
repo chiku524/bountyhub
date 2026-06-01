@@ -29,6 +29,8 @@ import githubRoutes from './api/github'
 import releasesRoutes from './api/releases'
 import contributionsRoutes from './api/contributions'
 import mediaRoutes from './api/media'
+import { onRequest as serveTermsPdf } from './api/terms.pdf'
+import { onRequest as servePrivacyPdf } from './api/privacy.pdf'
 
 interface Env {
   DB: D1Database
@@ -562,6 +564,9 @@ app.route('/api/github', githubRoutes)
 app.route('/api/releases', releasesRoutes)
 app.route('/api/contributions', contributionsRoutes)
 app.route('/api/media', mediaRoutes)
+
+app.get('/api/terms.pdf', (c) => serveTermsPdf({ env: c.env, request: c.req.raw }))
+app.get('/api/privacy.pdf', (c) => servePrivacyPdf({ env: c.env, request: c.req.raw }))
 
 // 404 handler
 app.notFound((c) => {

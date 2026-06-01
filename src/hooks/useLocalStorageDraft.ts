@@ -7,7 +7,7 @@ export function useLocalStorageDraft<T extends object>(
   enabled: boolean,
   debounceMs = 800,
 ) {
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const timer = useRef<number | null>(null)
 
   useEffect(() => {
     if (!enabled) return

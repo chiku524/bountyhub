@@ -1,5 +1,7 @@
 # BountyHub Desktop App (Tauri)
 
+For project overview and local setup, see [ESSENTIALS.md](./ESSENTIALS.md).
+
 The same BountyHub web app runs as a **desktop application** using [Tauri](https://tauri.app/). Tauri uses your OS webview (WebView2 on Windows, WebKit on macOS/Linux) and a small Rust binary, so the app is much smaller and lighter than an Electron build.
 
 **Production:** The desktop app talks to `https://api.bountyhub.tech` when built for production. Official installers are built by GitHub Actions when you publish a release (see below). Set `VITE_GITHUB_RELEASES_URL` (e.g. `https://github.com/your-org/bountyhub/releases/latest`) in your site env so the [Download](/download) page links to the latest release.

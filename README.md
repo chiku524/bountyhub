@@ -2,91 +2,63 @@
 
 A decentralized Q&A platform where questions meet rewards. Ask questions, offer bounties, and earn cryptocurrency rewards on Solana.
 
-## 🚀 Features
+## Features
 
-- **Decentralized Bounty System**: Create bounties with BBUX tokens to incentivize quality answers
-- **Virtual Token Economy**: Earn and spend BBUX tokens through community participation
-- **Real-Time Global Chat**: Community-wide chat with emoji and GIF support
-- **Governance & Staking**: Participate in platform governance and earn staking rewards
-- **Bug Bounty Campaigns**: Create and manage bug bounty campaigns for open source projects
-- **GitHub Integration**: Connect GitHub repositories and track contributions
-- **Integrity Rating System**: Community-driven reputation and integrity scoring
-- **Light/Dark Mode**: Beautiful, responsive UI with theme support
-- **Mobile Responsive**: Optimized experience across all devices
-- **Desktop App**: Native app for Windows, macOS, and Linux — [Download](https://bountyhub.tech/download) (Tauri)
+- **Bounty System** — Create questions with BBUX bounties; accept answers to distribute rewards
+- **Virtual Token Economy** — Earn and spend BBUX through community participation
+- **Real-Time Chat** — Global chat, team hubs, and per-post chat rooms via WebSockets
+- **Governance & Staking** — Stake BBUX, vote on refund requests, earn daily rewards
+- **Bug Bounty Campaigns** — Create campaigns for open source projects
+- **GitHub Integration** — Connect repositories and track contributions
+- **Integrity Rating** — Community-driven reputation scoring
+- **Desktop App** — Native Windows, macOS, and Linux app ([Download](https://bountyhub.tech/download))
 
-## 📖 Documentation
+## Documentation
 
-- [Project docs](./docs/README.md) – Deployment (Cloudflare Pages & Workers, DNS, troubleshooting) and tech stack
-- **In-app docs**: [Documentation](/docs) – single page with table of contents (Overview, Platform Features, User Guide, Developer Guide, API Reference, Deployment, Legal, Refund System)
+| Doc | Description |
+|-----|-------------|
+| **[docs/ESSENTIALS.md](./docs/ESSENTIALS.md)** | Start here — architecture, quick start, env vars |
+| **[docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md)** | Cloudflare Pages + Workers deployment |
+| **[docs/DESKTOP.md](./docs/DESKTOP.md)** | Tauri desktop builds and releases |
+| **In-app [/docs](https://bountyhub.tech/docs)** | User guide, API reference, legal |
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS
-- **Backend**: Cloudflare Workers, Hono, Drizzle ORM
-- **Database**: Cloudflare D1 (SQLite)
-- **Blockchain**: Solana Web3.js
-- **Deployment**: Cloudflare Pages (auto-deploy) + Cloudflare Workers
+- **Frontend:** React 19, TypeScript, Vite 8, Tailwind CSS 4, React Router 7
+- **Backend:** Cloudflare Workers, Hono 4, Drizzle ORM
+- **Database:** Cloudflare D1 · **Realtime:** Durable Objects + WebSockets
+- **Blockchain:** Solana Web3.js
+- **Desktop:** Tauri 2
 
-## 🚢 Deployment
-
-This project uses **auto-deployment from GitHub** for Cloudflare Pages and **manual deployment** for Cloudflare Workers.
-
-See [docs/README.md](./docs/README.md#deployment-guide) for complete deployment instructions.
-
-## 📝 Quick Start
+## Quick Start
 
 ```bash
-# Install dependencies
 npm install
-
-# Start development server
-npm run dev:full
-
-# Build for production
-npm run build
-
-# Deploy Workers (manual)
-npm run deploy:workers
+cp .env.example .env.local
+npm run dev:full        # frontend + API
+npm run build           # production build
+npm run deploy:workers  # deploy API (manual)
 ```
 
-## 🖥️ Desktop app (local)
+See [docs/ESSENTIALS.md](./docs/ESSENTIALS.md) for full commands and environment setup.
 
-To run the desktop app locally before releasing a new version:
+## Desktop App
 
 ```bash
-npm run desktop
+npm run desktop         # dev mode
+npm run desktop:build   # production installers
 ```
 
-This starts Tauri in dev mode: the app opens in a native window and hot-reloads on code changes. Use it to test the intro animation, update overlay, and full app flow.
+Release workflow, signing, and auto-updates: [docs/DESKTOP.md](./docs/DESKTOP.md).
 
-To build installers for distribution:
-
-```bash
-npm run desktop:build
-```
-
-Releases, GitHub Actions, signing, and the in-app updater are documented in [docs/DESKTOP.md](./docs/DESKTOP.md).
-
-## 🎨 Brand & social assets
-
-Raster brand images (PNG/JPG) are generated from SVGs in `public/`. After changing any of these source files, re-run:
+## Brand Assets
 
 ```bash
 node scripts/generate-brand-images.js
 ```
 
-**Source SVGs:** `public/logo.svg`, `public/og-image.svg`, `public/social-banner.svg`, `public/social-square.svg`
+Sources: `public/logo.svg`, `og-image.svg`, `social-banner.svg`, `social-square.svg`
 
-**Generated files in `public/`:**
+## License
 
-| Asset | Use |
-|-------|-----|
-| `logo-192.png`, `logo-512.png`, `logo-1024.png`, `logo-1024.jpg` | PWA icons, app icons, general logo |
-| `og-image.png`, `og-image.jpg` | Open Graph / Twitter cards (1200×630); used in meta tags |
-| `social-banner.png`, `social-banner.jpg` (1500×500) | Twitter/X header, LinkedIn banner, YouTube banner |
-| `social-square.png`, `social-square.jpg` (1080×1080) | Profile images, square posts (Instagram, etc.) |
-
-## 📄 License
-
-Private project - All rights reserved 
+Private project — All rights reserved

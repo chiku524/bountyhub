@@ -116,8 +116,8 @@ export default function DocsSingle() {
                   <p className={body}>
                     bountyhub is a decentralized question-and-answer platform that incentivizes knowledge sharing through
                     a virtual token system (BBUX). Ask questions with bounties, provide quality answers, and earn rewards.
-                    The platform combines community-driven governance, real-time chat, bug bounty campaigns, and GitHub
-                    integration — all with optional Solana wallet support.
+                    The platform combines community-driven governance, real-time WebSocket chat, team hubs, bug bounty campaigns,
+                    and GitHub integration — with optional Solana wallet support and a native desktop app.
                   </p>
                   <p className={`${body} mt-3`}>
                     Our mission is to create a sustainable ecosystem where knowledge is valued and rewarded.
@@ -155,8 +155,12 @@ export default function DocsSingle() {
                     <p className={body}>Real-time notifications for answers, votes, comments, bounty awards, and refund updates. Unread count and mark-as-read.</p>
                   </div>
                   <div className={card}>
-                    <h2 className={subsectionTitle}>Global Chat</h2>
-                    <p className={body}>Real-time community chat with text, emojis, and GIFs (GIPHY). Persistent sidebar, mobile-friendly.</p>
+                    <h2 className={subsectionTitle}>Global Chat & Team Hubs</h2>
+                    <p className={body}>Real-time community chat with WebSockets, text, emojis, and GIFs (GIPHY). Team hubs for group collaboration with shared chat rooms and tasks. Persistent sidebar, mobile-friendly.</p>
+                  </div>
+                  <div className={card}>
+                    <h2 className={subsectionTitle}>Post Chat Rooms</h2>
+                    <p className={body}>Each bounty post has a dedicated chat room for discussion while the post is active. Message history is saved; replaces legacy comment threads on post detail pages.</p>
                   </div>
                   <div className={card}>
                     <h2 className={subsectionTitle}>Bug Bounty Campaigns</h2>
@@ -188,7 +192,7 @@ export default function DocsSingle() {
                   </div>
                   <div className={card}>
                     <h2 className={subsectionTitle}>Answering Questions</h2>
-                    <p className={body}>Open a post and submit an answer. Authors can accept one answer; bounty is then distributed. Vote on quality to build reputation.</p>
+                    <p className={body}>Open a post and submit an answer. Use the post chat room to discuss with the author and community. Authors can accept one answer; bounty is then distributed. Vote on quality to build reputation.</p>
                   </div>
                   <div className={card}>
                     <h2 className={subsectionTitle}>Wallet & Transactions</h2>
@@ -245,15 +249,17 @@ export default function DocsSingle() {
                 <div className={card}>
                   <h2 className={subsectionTitle}>Tech Stack</h2>
                   <ul className={list}>
-                    <li>Frontend: React 18, TypeScript, Vite, Tailwind CSS, React Router</li>
-                    <li>Backend: Cloudflare Workers, Hono, Drizzle ORM, D1 (SQLite)</li>
-                    <li>Auth: JWT; optional GitHub OAuth</li>
+                    <li>Frontend: React 19, TypeScript, Vite 8, Tailwind CSS 4, React Router 7</li>
+                    <li>Backend: Cloudflare Workers, Hono 4, Drizzle ORM, D1 (SQLite)</li>
+                    <li>Realtime: WebSockets via Durable Objects (chat rooms)</li>
+                    <li>Auth: Session cookies; optional GitHub OAuth</li>
                     <li>Wallet: Solana Web3.js, wallet adapters</li>
+                    <li>Desktop: Tauri 2 (Windows, macOS, Linux)</li>
                   </ul>
                   <h2 className={subsectionTitle}>Development</h2>
-                  <p className={body}>Clone repo, <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">npm install</code>, copy <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">.env.example</code> to <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">.env</code>, then <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">npm run dev:full</code> for frontend + Workers.</p>
+                  <p className={body}>Clone repo, <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">npm install</code>, copy <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">.env.example</code> to <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">.env.local</code>, then <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">npm run dev:full</code> for frontend + Workers API.</p>
                   <h2 className={subsectionTitle}>Project Layout</h2>
-                  <p className={body}>Frontend in <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">src/</code> (pages, components, contexts, utils). API in <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">functions/</code>. Schema and migrations in <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">drizzle/</code>.</p>
+                  <p className={body}>Frontend in <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">src/</code> (pages, components, contexts, utils). API in <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">functions/</code>. Schema and migrations in <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">drizzle/</code>. Maintainer docs in <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">docs/ESSENTIALS.md</code>.</p>
                 </div>
               </>
             )}
@@ -263,18 +269,23 @@ export default function DocsSingle() {
                 <h1 className={sectionTitle}>API Reference</h1>
                 <div className={card}>
                   <h2 className={subsectionTitle}>Base URL</h2>
-                  <p className={body}>Production: your Workers URL. Development: <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">http://localhost:8787</code>.</p>
+                  <p className={body}>Production: <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">https://api.bountyhub.tech</code>. Development: <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">http://localhost:8788</code>.</p>
                   <h2 className={subsectionTitle}>Authentication</h2>
-                  <p className={body}>Cookie-based sessions (credentials: include). Login/signup return user; protected routes require a valid session.</p>
+                  <p className={body}>Cookie-based sessions (<code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">credentials: include</code>). Login/signup return user; protected routes require a valid session. GitHub OAuth via <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">/api/auth/github</code>.</p>
                   <h2 className={subsectionTitle}>Main Areas</h2>
                   <ul className={list}>
-                    <li><code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">/api/auth</code> — login, signup, logout, me, GitHub</li>
-                    <li><code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">/api/posts</code> — CRUD, list, get, create, edit, delete</li>
+                    <li><code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">/api/auth</code> — login, signup, logout, me, password, GitHub</li>
+                    <li><code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">/api/posts</code> — CRUD, votes, answers, post chat</li>
                     <li><code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">/api/wallet</code> — balance, deposit, withdraw, transactions</li>
                     <li><code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">/api/notifications</code> — list, read, unread count</li>
-                    <li><code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">/api/chat</code> — rooms, messages, global chat</li>
+                    <li><code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">/api/chat</code> — rooms, messages, WebSocket at <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">/api/chat/ws</code></li>
+                    <li><code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">/api/teams</code> — team hubs, tasks, group chat</li>
                     <li><code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">/api/governance</code> — stake, rewards, refund votes</li>
+                    <li><code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">/api/bug-bounty</code> — campaigns and submissions</li>
+                    <li><code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">/api/github</code> — repository sync</li>
+                    <li><code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">/api/media</code> — upload and serve attachments</li>
                     <li><code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">/api/tags</code> — list tags</li>
+                    <li><code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">/api/releases/latest</code> — desktop download metadata</li>
                   </ul>
                   <p className={`${body} mt-3`}>All request/response bodies use JSON. Errors return a message or details field.</p>
                 </div>
@@ -286,11 +297,13 @@ export default function DocsSingle() {
                 <h1 className={sectionTitle}>Deployment</h1>
                 <div className={card}>
                   <p className={body}>
-                    Frontend: Cloudflare Pages (e.g. auto-deploy from GitHub). Build with <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">npm run build</code>.
-                    Backend: Cloudflare Workers. Create D1 database, run migrations (<code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">wrangler d1 migrations apply</code>),
-                    set secrets (JWT, GitHub client, etc.), then <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">npm run deploy:workers</code>.
+                    Frontend: Cloudflare Pages at <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">bountyhub.tech</code> (auto-deploy from GitHub on push to <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">main</code>).
+                    Build with <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">npm run build</code>.
+                    Backend: Cloudflare Workers at <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">api.bountyhub.tech</code>.
+                    Create D1 database, run migrations (<code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">wrangler d1 migrations apply</code>),
+                    set secrets (session, GitHub OAuth, etc.), then <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">npm run deploy:workers</code>.
                   </p>
-                  <p className={`${body} mt-3`}>See the repository <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">docs/deployment.md</code> for prerequisites, DNS, and troubleshooting.</p>
+                  <p className={`${body} mt-3`}>Full deployment guide, DNS, R2/KV setup, and troubleshooting: see <code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">docs/DEPLOYMENT.md</code> in the repository (linked from <a href="https://github.com/chiku524/bountyhub/blob/main/docs/DEPLOYMENT.md" className="text-indigo-600 dark:text-indigo-400 hover:underline" target="_blank" rel="noopener noreferrer">GitHub</a>).</p>
                 </div>
               </>
             )}

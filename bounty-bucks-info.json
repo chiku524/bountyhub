@@ -3,8 +3,8 @@
   "symbol": "BBUX",
   "mint": "8TxxzfEUbQcMTmsC5z1SS9TuLNzbL2iBVTLvb5JaKR6M",
   "description": "BountyBucks (BBUX) is the native token for bountyhub's revolutionary decentralized bounty platform. Built on Solana, BBUX powers a hybrid virtual/real token model with innovative staking pools and an integrity rating system. Earn BBUX by completing bounties, stake for rewards, and participate in platform governance. The future of decentralized bounty platforms starts here.",
-  "image": "https://bountybucks.vercel.app/logo.svg",
-  "external_url": "https://bountybucks.vercel.app/",
+  "image": "https://bountyhub.tech/logo.svg",
+  "external_url": "https://bountyhub.tech/",
   "attributes": [
     { "trait_type": "Token Type", "value": "Utility Token" },
     { "trait_type": "Blockchain", "value": "Solana" },
@@ -16,7 +16,7 @@
   ],
   "properties": {
     "files": [
-      { "type": "image/svg+xml", "uri": "https://bountybucks.vercel.app/logo.svg" }
+      { "type": "image/svg+xml", "uri": "https://bountyhub.tech/logo.svg" }
     ],
     "category": "image",
     "creators": [
@@ -24,7 +24,7 @@
     ]
   },
   "extensions": {
-    "website": "https://bountybucks.vercel.app/",
+    "website": "https://bountyhub.tech/",
     "twitter": "https://x.com/bountyhub_tech",
     "discord": "https://discord.gg/9uwHxMP9mz",
     "email": "bountybucks524@gmail.com",

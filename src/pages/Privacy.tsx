@@ -1,3 +1,5 @@
+import { config } from '../utils/config'
+
 export default function Privacy() {
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -5,7 +7,7 @@ export default function Privacy() {
           <h1 className="text-3xl font-bold text-neutral-900 dark:text-white">Privacy Policy</h1>
           <div className="flex gap-3">
             <a
-              href="/api/privacy.pdf"
+              href={`${config.api.baseUrl}/api/privacy.pdf`}
               className="px-4 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-colors flex items-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

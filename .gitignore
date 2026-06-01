@@ -7,8 +7,8 @@ node_modules/
 .env.production
 .dev.vars
 
-# Patched wry crate (created by scripts/patch-wry-linux.cjs)
-patches/wry/
+# Local patched crates (legacy; not used with Tauri 2)
+patches/
 
 # Wrangler / Miniflare local state (D1, etc.)
 .wrangler/
