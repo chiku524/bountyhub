@@ -395,9 +395,9 @@ export default function UserProfile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-900">
-        <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
-          <div className="mb-6 flex justify-between items-center mt-16">
+      <div className="min-w-0 w-full">
+        <div className="min-w-0 w-full">
+          <div className="mb-6 flex flex-col gap-4 @sm/main:flex-row @sm/main:justify-between @sm/main:items-center">
             <h1 className="text-2xl font-bold text-white">Profile</h1>
           </div>
           <div className="bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
@@ -413,9 +413,9 @@ export default function UserProfile() {
 
   if (error || !user) {
     return (
-      <div className="min-h-screen bg-neutral-900">
-        <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
-          <div className="mb-6 flex justify-between items-center mt-16">
+      <div className="min-w-0 w-full">
+        <div className="min-w-0 w-full">
+          <div className="mb-6 flex flex-col gap-4 @sm/main:flex-row @sm/main:justify-between @sm/main:items-center">
             <h1 className="text-2xl font-bold text-white">Profile</h1>
           </div>
           <div className="bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
@@ -434,9 +434,9 @@ export default function UserProfile() {
   const recentActivities = reputationHistory.slice(0, 5)
 
   return (
-    <div className="min-h-screen bg-neutral-900">
-      <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
-        <div className="mb-6 flex justify-between items-center mt-16">
+    <div className="min-w-0 w-full">
+      <div className="min-w-0 w-full">
+        <div className="mb-6 flex flex-col gap-4 @sm/main:flex-row @sm/main:justify-between @sm/main:items-center">
           <h1 className="text-2xl font-bold text-white">
             {isOwnProfile ? 'Your Profile' : `${user.username}'s Profile`}
           </h1>

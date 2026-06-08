@@ -539,7 +539,7 @@ const Chat: React.FC = () => {
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-gray-50 dark:bg-neutral-900 @xl/main:flex-row">
         {/* Sidebar: Team Hub (Global + Teams) */}
-        <div className="flex max-h-[44vh] w-full min-h-0 shrink-0 flex-col border-b border-gray-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 @xl/main:max-h-none @xl/main:h-auto @xl/main:w-72 @xl/main:max-w-[min(20rem,42%)] @xl/main:border-b-0 @xl/main:border-r @2xl/main:w-80">
+        <div className="flex max-h-[38vh] w-full min-h-0 shrink-0 flex-col border-b border-gray-200 bg-white dark:border-neutral-700 dark:bg-neutral-800 @xl/main:max-h-none @xl/main:h-auto @xl/main:w-72 @xl/main:max-w-[min(20rem,42%)] @xl/main:border-b-0 @xl/main:border-r @2xl/main:w-80">
           <div className="p-4 border-b border-gray-200 dark:border-neutral-700">
             <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Team Hub</h1>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Chat together, create teams, and manage task lists</p>

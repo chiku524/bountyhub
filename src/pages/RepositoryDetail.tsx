@@ -60,7 +60,7 @@ export default function RepositoryDetail() {
 
   if (!idOk) {
     return (
-      <div className="min-h-screen bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xs">
+      <div className="w-full min-w-0">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <ErrorMessage message="Invalid repository" />
           <Link
@@ -77,7 +77,7 @@ export default function RepositoryDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xs flex items-center justify-center">
+      <div className="w-full min-w-0 flex items-center justify-center">
         <LoadingSpinner size="lg" />
       </div>
     )
@@ -86,7 +86,7 @@ export default function RepositoryDetail() {
   if (error || !repo) {
     const is404 = error?.toLowerCase().includes('not found') || error?.toLowerCase().includes('404')
     return (
-      <div className="min-h-screen bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xs">
+      <div className="w-full min-w-0">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <ErrorMessage message={error || 'Repository not found'} />
           {is404 && (
@@ -109,7 +109,7 @@ export default function RepositoryDetail() {
   const topics = repo.topics ? (() => { try { return JSON.parse(repo.topics) as string[] } catch { return [] } })() : []
 
   return (
-    <div className="min-h-screen bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xs">
+    <div className="w-full min-w-0">
       <PageMetadata
         title={`${repo.name} - GitHub Repositories`}
         description={repo.description || `View ${repo.fullName} on BountyHub`}

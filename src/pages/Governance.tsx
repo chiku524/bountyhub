@@ -251,7 +251,7 @@ const Governance: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="flex justify-center items-center py-16">
         <LoadingSpinner />
       </div>
     )
@@ -260,14 +260,14 @@ const Governance: React.FC = () => {
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 @sm/main:px-6 @5xl/main:px-8">
       <div className="mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">Governance Dashboard</h1>
+        <div className="flex flex-col gap-4 @sm/main:flex-row @sm/main:items-center @sm/main:justify-between mb-4">
+          <div className="min-w-0">
+            <h1 className="text-2xl @sm/main:text-3xl font-bold text-neutral-900 dark:text-white mb-2">Governance Dashboard</h1>
             <p className="text-neutral-600 dark:text-gray-400">Transparent virtual governance system for BountyBucks</p>
           </div>
           <Link
             to="/refund-requests"
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
+            className="shrink-0 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium text-center"
           >
             View Refund Requests
           </Link>

@@ -98,6 +98,15 @@ export function TopNav() {
   const mobileAccountWasOpenRef = useRef(false)
 
   useEffect(() => {
+    if (!mobileMenuOpen) return
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prevOverflow
+    }
+  }, [mobileMenuOpen])
+
+  useEffect(() => {
     if (mobileMenuOpen) {
       mobileMenuWasOpenRef.current = true
       return

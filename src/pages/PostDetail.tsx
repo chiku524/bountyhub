@@ -268,8 +268,8 @@ export default function PostDetail() {
 
   const isDesktop = isDesktopApp()
   return (
-    <div className="p-8 min-h-screen">
-      <div className={`mx-auto ${isDesktop ? 'max-w-6xl' : 'max-w-7xl'}`}>
+    <div className="p-4 @sm/main:p-6 @3xl/main:p-8">
+      <div className={`mx-auto min-w-0 w-full ${isDesktop ? 'max-w-6xl' : 'max-w-7xl'}`}>
         <div className="mb-4 space-y-2">
           <Breadcrumbs
             items={[
@@ -284,7 +284,7 @@ export default function PostDetail() {
           </Link>
         </div>
         <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
-          <h1 className="text-3xl font-bold text-neutral-900 dark:text-white">Post Detail</h1>
+          <h1 className="text-2xl @sm/main:text-3xl font-bold text-neutral-900 dark:text-white">Post Detail</h1>
           {refreshing && (
             <span className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400" role="status">
               <LoadingSpinner size="sm" label={false} />
@@ -320,8 +320,8 @@ export default function PostDetail() {
             <div>
               <div className="mb-4 flex flex-col justify-between gap-4 @xl/main:flex-row @xl/main:items-start">
                 <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h2 className="text-2xl font-semibold text-neutral-900 dark:text-white">{post.title}</h2>
+                  <div className="mb-2 flex flex-wrap items-start gap-2 @sm/main:gap-3">
+                    <h2 className="min-w-0 flex-1 text-xl @sm/main:text-2xl font-semibold text-neutral-900 dark:text-white">{post.title}</h2>
                     {post.reward && post.reward > 0 && (
                       <div className="flex items-center gap-2 px-3 py-1 bg-linear-to-r from-cyan-100 to-blue-100 dark:from-cyan-500/20 dark:to-blue-500/20 border border-cyan-300 dark:border-cyan-400/40 rounded-full">
                         <span className="text-cyan-600 dark:text-cyan-300 text-lg">💰</span>
@@ -333,7 +333,7 @@ export default function PostDetail() {
                 <div className="flex items-center gap-2 flex-wrap">
                   {/* Tags */}
                   {post.tags && post.tags.length > 0 && (
-                    <div className="flex items-center gap-1 mr-2 flex-wrap max-w-xs">
+                    <div className="flex flex-wrap items-center gap-1 mr-2">
                       {post.tags.map((tagName, index) => (
                         <span
                           key={index}

@@ -272,7 +272,7 @@ export default function BugBountyCampaignCreate() {
   }
 
   return (
-    <div className="min-h-screen bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xs">
+    <div className="w-full min-w-0">
       <PageMetadata
         title="Create Bug Bounty Campaign"
         description="Create a new bug bounty campaign"

@@ -150,7 +150,7 @@ export default function BugBountySubmit() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xs flex items-center justify-center">
+      <div className="w-full min-w-0 flex items-center justify-center">
         <LoadingSpinner size="lg" />
       </div>
     )
@@ -158,7 +158,7 @@ export default function BugBountySubmit() {
 
   if (error && !campaign) {
     return (
-      <div className="min-h-screen bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xs">
+      <div className="w-full min-w-0">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <ErrorMessage message={error} />
           <Link
@@ -175,7 +175,7 @@ export default function BugBountySubmit() {
 
   if (campaign && campaign.status !== 'ACTIVE') {
     return (
-      <div className="min-h-screen bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xs">
+      <div className="w-full min-w-0">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <ErrorMessage message="This campaign is not accepting submissions. Only active campaigns accept new bug reports." />
           <Link
@@ -191,7 +191,7 @@ export default function BugBountySubmit() {
   }
 
   return (
-    <div className="min-h-screen bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xs">
+    <div className="w-full min-w-0">
       <PageMetadata
         title={`Submit Bug - ${campaign?.title ?? 'Campaign'}`}
         description="Submit a bug report to this bug bounty campaign"

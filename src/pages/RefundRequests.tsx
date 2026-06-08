@@ -160,7 +160,7 @@ const RefundRequests: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="flex justify-center items-center py-16">
         <LoadingSpinner />
       </div>
     )
@@ -206,9 +206,9 @@ const RefundRequests: React.FC = () => {
           {refundRequests.map((request) => (
             <div key={request.id} className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 overflow-hidden">
               <div className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
+                <div className="flex flex-col gap-4 @sm/main:flex-row @sm/main:items-start @sm/main:justify-between mb-4">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2 @sm/main:gap-3 mb-2">
                       <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">
                         Refund Request by @{request.requesterUsername}
                       </h3>
@@ -221,7 +221,7 @@ const RefundRequests: React.FC = () => {
                       {formatTimeRemaining(request.expiresAt)} • {request.communityVotes}/{request.requiredVotes} votes
                     </p>
                   </div>
-                  <div className="text-right">
+                  <div className="shrink-0 @sm/main:text-right">
                     <span className="text-yellow-600 dark:text-yellow-400 font-semibold text-lg">{request.bountyAmount} BBUX</span>
                   </div>
                 </div>
@@ -259,7 +259,7 @@ const RefundRequests: React.FC = () => {
                   </div>
                 )}
 
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-3 @sm/main:flex-row @sm/main:items-center @sm/main:justify-between">
                   <div className="flex gap-2">
                     {request.status === 'PENDING' && (
                       <>

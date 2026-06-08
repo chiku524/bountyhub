@@ -186,7 +186,7 @@ export default function Repositories() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xs flex items-center justify-center">
+      <div className="w-full min-w-0 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-4">Please log in to view repositories</h1>
           <Link

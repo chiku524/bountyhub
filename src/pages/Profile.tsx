@@ -405,33 +405,35 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
-          <div className="mb-6 flex justify-between items-center mt-16">
-            <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Profile</h1>
-          </div>
-          <div className="bg-white/80 dark:bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)] dark:shadow-[0_0_15px_rgba(139,92,246,0.3)]">
-            <div className="flex items-center justify-center py-8">
-              <LoadingSpinner size="md" />
-              <span className="ml-3 text-neutral-600 dark:text-gray-300">Loading profile...</span>
-            </div>
+      <div className="min-w-0 w-full">
+        <div className="mb-6 flex flex-col gap-4 @sm/main:flex-row @sm/main:justify-between @sm/main:items-center">
+          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Profile</h1>
+        </div>
+        <div className="rounded-lg border-2 border-violet-500/50 bg-white/80 p-6 shadow-[0_0_15px_rgba(139,92,246,0.3)] dark:bg-neutral-800/80 dark:shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+          <div className="flex items-center justify-center py-8">
+            <LoadingSpinner size="md" />
+            <span className="ml-3 text-neutral-600 dark:text-gray-300">Loading profile...</span>
           </div>
         </div>
+      </div>
     )
   }
 
   if (error || !user) {
     return (
-      <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
-          <div className="mb-6 flex justify-between items-center mt-16">
-            <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Profile</h1>
-          </div>
-          <div className="bg-white/80 dark:bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)] dark:shadow-[0_0_15px_rgba(139,92,246,0.3)]">
-            <div className="flex flex-col justify-center items-center w-full h-full">
-              <h1 className="text-neutral-900 dark:text-white text-2xl">User not found</h1>
-              <Link to="/community" className="mt-4 text-violet-400 hover:text-violet-300">Go to Community</Link>
-            </div>
+      <div className="min-w-0 w-full">
+        <div className="mb-6 flex flex-col gap-4 @sm/main:flex-row @sm/main:justify-between @sm/main:items-center">
+          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Profile</h1>
+        </div>
+        <div className="rounded-lg border-2 border-violet-500/50 bg-white/80 p-6 shadow-[0_0_15px_rgba(139,92,246,0.3)] dark:bg-neutral-800/80 dark:shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+          <div className="flex flex-col items-center justify-center w-full">
+            <h2 className="text-2xl text-neutral-900 dark:text-white">User not found</h2>
+            <Link to="/community" className="mt-4 text-violet-600 hover:text-violet-500 dark:text-violet-400 dark:hover:text-violet-300">
+              Go to Community
+            </Link>
           </div>
         </div>
+      </div>
     )
   }
 
@@ -441,8 +443,8 @@ export default function Profile() {
   const limitedBookmarks = bookmarks.slice(0, BOOKMARKS_LIMIT)
 
   return (
-    <div className="w-auto max-w-8xl mx-auto mt-4 px-4 pb-16">
-        <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mt-16">
+    <div className="min-w-0 w-full">
+        <div className="mb-6 flex flex-col gap-4 @sm/main:flex-row @sm/main:justify-between @sm/main:items-center">
           <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-white">Profile</h1>
           <Link 
             to="/posts/create" 

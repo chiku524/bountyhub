@@ -131,7 +131,7 @@ export default function Home() {
         <section id="hero" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 border-b border-neutral-200/70 dark:border-neutral-700/50">
           <div className="text-center">
             <h1
-              className={`text-5xl md:text-7xl font-bold mb-6 transition-opacity duration-300 ${
+              className={`text-3xl sm:text-5xl md:text-7xl font-bold mb-6 transition-opacity duration-300 ${
                 heroMounted ? 'animate-fade-in-up' : 'opacity-0'
               }`}
               style={heroMounted ? { animationDelay: '0ms' } : undefined}
@@ -214,7 +214,7 @@ export default function Home() {
         {/* Features Section */}
         <section id="features" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-b border-neutral-200/70 dark:border-neutral-700/50 transition-colors duration-200 hover:bg-neutral-50/30 dark:hover:bg-neutral-800/20">
           <div className="text-center mb-16" data-animate="fade-in-up">
-            <h2 className="text-4xl font-bold mb-4">Platform features</h2>
+            <h2 className="text-2xl sm:text-4xl font-bold mb-4">Platform features</h2>
             <p className="text-xl text-neutral-600 dark:text-gray-300 max-w-2xl mx-auto">
               One place for knowledge bounties, security campaigns, and BBUX rewards—with Solana for deposits and withdrawals
             </p>
@@ -301,7 +301,7 @@ export default function Home() {
           className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-b border-neutral-200/70 dark:border-neutral-700/50 bg-linear-to-b from-amber-50/50 via-white/60 to-transparent dark:from-amber-950/20 dark:via-neutral-900/40 dark:to-transparent"
         >
           <div className="text-center mb-12" data-animate="fade-in-up">
-            <h2 className="text-4xl font-bold mb-4">Security bug bounty programs</h2>
+            <h2 className="text-2xl sm:text-4xl font-bold mb-4">Security bug bounty programs</h2>
             <p className="text-xl text-neutral-600 dark:text-gray-300 max-w-3xl mx-auto">
               Run structured campaigns on top of repositories you track on bountyhub. Set scope and rewards in BBUX, collect vulnerability reports through a guided submission flow, and triage outcomes with your team before crediting researchers on-platform.
             </p>
@@ -365,7 +365,7 @@ export default function Home() {
         {/* How It Works Section */}
         <section id="how-it-works" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 bg-white/50 dark:bg-neutral-800/30 border-y border-neutral-200/70 dark:border-neutral-700/50 transition-colors duration-200 hover:bg-white/70 dark:hover:bg-neutral-800/40">
           <div className="text-center mb-16" data-animate="fade-in-up">
-            <h2 className="text-4xl font-bold mb-4">How it works</h2>
+            <h2 className="text-2xl sm:text-4xl font-bold mb-4">How it works</h2>
             <p className="text-xl text-neutral-600 dark:text-gray-300 max-w-2xl mx-auto">
               Three steps to fund knowledge, ship fixes, or hunt bugs with BBUX
             </p>
@@ -407,7 +407,7 @@ export default function Home() {
         {/* Stats Section */}
         <section id="stats" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-b border-neutral-200/70 dark:border-neutral-700/50 transition-colors duration-200 hover:bg-neutral-50/30 dark:hover:bg-neutral-800/20">
           <div className="text-center mb-16" data-animate="fade-in-up">
-            <h2 className="text-4xl font-bold mb-4">Platform statistics</h2>
+            <h2 className="text-2xl sm:text-4xl font-bold mb-4">Platform statistics</h2>
             <p className="text-xl text-neutral-600 dark:text-gray-300 max-w-2xl mx-auto">
               {statsError
                 ? 'We could not load live numbers right now — the figures below are placeholders until the service is reachable again.'
@@ -468,8 +468,8 @@ export default function Home() {
 
         {/* CTA Section */}
         <section id="cta" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="bg-white/80 dark:bg-neutral-800/80 backdrop-blur-xs rounded-2xl p-12 text-center border-2 border-amber-500/45 dark:border-amber-500/40 shadow-[0_0_24px_rgba(245,158,11,0.12)] dark:shadow-[0_0_28px_rgba(245,158,11,0.15)] transition-all duration-300 hover:scale-[1.01] hover:border-amber-400/60 hover:shadow-[0_0_32px_rgba(245,158,11,0.18)] dark:hover:shadow-[0_0_36px_rgba(251,191,36,0.18)]" data-animate="scale-in">
-            <h2 className="text-4xl font-bold mb-4 text-neutral-900 dark:text-white">Ready to get started?</h2>
+          <div className="bg-white/80 dark:bg-neutral-800/80 backdrop-blur-xs rounded-2xl p-6 sm:p-12 text-center border-2 border-amber-500/45 dark:border-amber-500/40 shadow-[0_0_24px_rgba(245,158,11,0.12)] dark:shadow-[0_0_28px_rgba(245,158,11,0.15)] transition-all duration-300 hover:scale-[1.01] hover:border-amber-400/60 hover:shadow-[0_0_32px_rgba(245,158,11,0.18)] dark:hover:shadow-[0_0_36px_rgba(251,191,36,0.18)]" data-animate="scale-in">
+            <h2 className="text-2xl sm:text-4xl font-bold mb-4 text-neutral-900 dark:text-white">Ready to get started?</h2>
             <p className="text-xl mb-8 text-neutral-600 dark:text-neutral-300 max-w-2xl mx-auto">
               Open a Q&amp;A bounty, browse active security programs, or launch your own campaign — fund BBUX with Solana deposits and withdraw when you cash out.
             </p>

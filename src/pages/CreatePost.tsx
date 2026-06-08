@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { api } from '../utils/api'
 import { useAuth } from '../contexts/AuthProvider'
-import { isDesktopApp } from '../utils/desktop'
+import { PageContainer } from '../components/PageContainer'
+import { PageHeader } from '../components/PageHeader'
 import { useToast } from '../contexts/ToastContext'
 import TagSelector from '../components/TagSelector'
 import { CodeBlockEditor } from '../components/CodeBlockEditor'
@@ -184,13 +185,9 @@ export default function CreatePost() {
     }
   }
 
-  const isDesktop = isDesktopApp()
   return (
-    <div className="p-4 sm:p-8">
-      <div className={`mx-auto ${isDesktop ? 'max-w-5xl' : 'max-w-4xl'}`}>
-        <div className="mb-6 flex justify-between items-center mt-16">
-          <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-white">Create New Post</h1>
-        </div>
+    <PageContainer maxWidth="narrow">
+        <PageHeader title="Create New Post" compact />
 
         {showDraftBanner && (
           <div
@@ -216,7 +213,7 @@ export default function CreatePost() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className={`space-y-6 mx-auto ${isDesktop ? 'max-w-5xl' : 'max-w-4xl'}`}>
+        <form onSubmit={handleSubmit} className="mx-auto space-y-6">
           <div>
             <TagSelector
               selectedTags={selectedTags}
@@ -481,7 +478,6 @@ export default function CreatePost() {
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </PageContainer>
   )
 } 

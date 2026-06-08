@@ -2,9 +2,9 @@ import { config } from '../utils/config'
 
 export default function Terms() {
   return (
-    <div className="max-w-4xl mx-auto p-6">
-        <div className="mb-6 flex justify-between items-center mt-16">
-          <h1 className="text-3xl font-bold text-neutral-900 dark:text-white">Terms of Service</h1>
+    <div className="max-w-4xl mx-auto p-4 sm:p-6">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
+          <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-white">Terms of Service</h1>
           <div className="flex gap-3">
             <a
               href={`${config.api.baseUrl}/api/terms.pdf`}
@@ -27,7 +27,7 @@ export default function Terms() {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white rounded-lg shadow-lg p-8 print:shadow-none border border-neutral-200 dark:border-neutral-700">
+        <div className="bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white rounded-lg shadow-lg p-4 sm:p-8 print:shadow-none border border-neutral-200 dark:border-neutral-700">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-4">Terms of Service</h1>
