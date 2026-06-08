@@ -1,6 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { api } from '../utils/api'
-import { filterCommunityPosts, type CommunityFilterOptions } from '../utils/communityPosts'
+import {
+  buildCommunityPostsQuery,
+  type CommunityFilterOptions,
+  type CommunityPostsPagination,
+} from '../utils/communityPosts'
 import type { Post } from '../types'
 
 const DEFAULT_FILTERS: CommunityFilterOptions = {
@@ -11,15 +15,44 @@ const DEFAULT_FILTERS: CommunityFilterOptions = {
   selectedTags: [],
 }
 
+const EXPORT_LIMIT = 100
+
 export function useCommunityPosts(postsPerPage = 10) {
   const [posts, setPosts] = useState<Post[]>([])
+  const [pagination, setPagination] = useState<CommunityPostsPagination>({
+    page: 1,
+    limit: postsPerPage,
+    total: 0,
+    totalPages: 0,
+    hasNextPage: false,
+    hasPrevPage: false,
+  })
   const [loading, setLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [filters, setFilters] = useState<CommunityFilterOptions>(DEFAULT_FILTERS)
+  const [exportPosts, setExportPosts] = useState<Post[]>([])
   const everLoadedPostsRef = useRef(false)
+  const fetchRequestIdRef = useRef(0)
+
+  const loadPosts = useCallback(
+    async (page: number, search: string, activeFilters: CommunityFilterOptions, mode: 'list' | 'export' = 'list') => {
+      const requestId = ++fetchRequestIdRef.current
+      const query = buildCommunityPostsQuery(
+        page,
+        mode === 'export' ? EXPORT_LIMIT : postsPerPage,
+        search,
+        activeFilters
+      )
+
+      const response = await api.getCommunityPosts(query)
+      if (requestId !== fetchRequestIdRef.current) return null
+      return response
+    },
+    [postsPerPage]
+  )
 
   const fetchPosts = useCallback(async () => {
     const initial = !everLoadedPostsRef.current
@@ -29,9 +62,13 @@ export function useCommunityPosts(postsPerPage = 10) {
       setIsRefreshing(true)
     }
     setError(null)
+
     try {
-      const fetchedPosts = await api.getAllPosts()
-      setPosts(Array.isArray(fetchedPosts) ? fetchedPosts : [])
+      const response = await loadPosts(currentPage, searchQuery, filters)
+      if (!response) return
+
+      setPosts(response.posts)
+      setPagination(response.pagination)
       everLoadedPostsRef.current = true
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to load posts')
@@ -39,26 +76,27 @@ export function useCommunityPosts(postsPerPage = 10) {
       setLoading(false)
       setIsRefreshing(false)
     }
-  }, [])
+  }, [currentPage, searchQuery, filters, loadPosts])
+
+  const fetchExportPosts = useCallback(async () => {
+    try {
+      const response = await loadPosts(1, searchQuery, filters, 'export')
+      if (!response) return []
+      setExportPosts(response.posts)
+      return response.posts
+    } catch {
+      return posts
+    }
+  }, [filters, loadPosts, posts, searchQuery])
 
   useEffect(() => {
     fetchPosts()
   }, [fetchPosts])
 
-  const filteredPosts = useMemo(
-    () => filterCommunityPosts(posts, searchQuery, filters),
-    [posts, searchQuery, filters]
-  )
-
-  const paginatedPosts = useMemo(() => {
-    const startIndex = (currentPage - 1) * postsPerPage
-    return filteredPosts.slice(startIndex, startIndex + postsPerPage)
-  }, [filteredPosts, currentPage, postsPerPage])
-
-  const totalPages = useMemo(
-    () => Math.max(1, Math.ceil(filteredPosts.length / postsPerPage)),
-    [filteredPosts.length, postsPerPage]
-  )
+  useEffect(() => {
+    if (!everLoadedPostsRef.current) return
+    fetchExportPosts()
+  }, [fetchExportPosts])
 
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query)
@@ -102,6 +140,8 @@ export function useCommunityPosts(postsPerPage = 10) {
     filters.hasBounty ||
     filters.selectedTags.length > 0
 
+  const totalPages = Math.max(1, pagination.totalPages || 1)
+
   return {
     posts,
     loading,
@@ -110,11 +150,12 @@ export function useCommunityPosts(postsPerPage = 10) {
     searchQuery,
     currentPage,
     filters,
-    filteredPosts,
-    paginatedPosts,
+    totalPosts: pagination.total,
     totalPages,
     hasActiveFilters,
+    exportPosts,
     fetchPosts,
+    fetchExportPosts,
     handleSearch,
     handlePageChange,
     handleFiltersChange,

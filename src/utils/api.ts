@@ -2,6 +2,11 @@ import type { LoginForm, SignupForm, PostForm, User, Post, WalletInfo, CodeBlock
 import { config } from './config'
 import { isDesktopApp } from './desktop'
 import { getDesktopSessionId } from './authSession'
+import {
+  communityPostsQueryToSearchParams,
+  type CommunityPostsQuery,
+  type CommunityPostsResponse,
+} from './communityPosts'
 
 interface Tag {
   id: string;
@@ -162,14 +167,20 @@ export class ApiClient {
     }
     return response
   }
+
+  async getCommunityPosts(query: CommunityPostsQuery): Promise<CommunityPostsResponse> {
+    const qs = communityPostsQueryToSearchParams(query)
+    const response = await this.request<CommunityPostsResponse>(`/api/posts?${qs}`)
+    return {
+      posts: response.posts || [],
+      pagination: response.pagination,
+    }
+  }
   
   // Get all posts (for backward compatibility, fetches all with pagination)
   async getAllPosts(): Promise<Post[]> {
-    const response = await this.request<{ posts: Post[], pagination: any } | Post[]>(`/api/posts?limit=1000`)
-    if (Array.isArray(response)) {
-      return response
-    }
-    return response.posts || []
+    const response = await this.getCommunityPosts({ page: 1, limit: 100 })
+    return response.posts
   }
 
   async createPost(data: CreatePostData): Promise<{ success: boolean; post: Post; message: string }> {

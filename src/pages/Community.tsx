@@ -42,11 +42,12 @@ export default function Community() {
     isRefreshing,
     error,
     filters,
-    filteredPosts,
-    paginatedPosts,
+    posts,
+    totalPosts,
     totalPages,
     currentPage,
     hasActiveFilters,
+    exportPosts,
     fetchPosts,
     handleSearch,
     handlePageChange,
@@ -86,13 +87,13 @@ export default function Community() {
             !loading ? (
               <>
                 <AdvancedFilters filters={filters} onFiltersChange={handleFiltersChange} />
-                <ExportButton data={filteredPosts} filename="community-posts" />
+                <ExportButton data={exportPosts.length > 0 ? exportPosts : posts} filename="community-posts" />
               </>
             ) : undefined
           }
         />
 
-        {isRefreshing && filteredPosts.length > 0 && (
+        {isRefreshing && posts.length > 0 && (
           <div
             className="mb-4 flex items-center gap-2 rounded-lg border border-indigo-200/80 bg-indigo-50/90 px-3 py-2 text-sm text-indigo-900 dark:border-indigo-500/35 dark:bg-indigo-950/40 dark:text-indigo-100"
             role="status"
@@ -114,7 +115,7 @@ export default function Community() {
         {!loading && (
           <div className="mb-4 flex flex-col gap-3 @sm/main:flex-row @sm/main:items-center @sm/main:justify-between">
             <p className="text-sm text-neutral-500 @sm/main:text-base dark:text-gray-400">
-              Showing {paginatedPosts.length} of {filteredPosts.length} posts
+              Showing {posts.length} of {totalPosts} posts
             </p>
             <div
               className="inline-flex w-full shrink-0 rounded-lg border border-neutral-200 bg-neutral-100 p-0.5 @sm/main:w-auto dark:border-neutral-600 dark:bg-neutral-900/60"
@@ -177,7 +178,7 @@ export default function Community() {
             </div>
           )}
 
-          {!loading && paginatedPosts.length === 0 && (
+          {!loading && posts.length === 0 && (
             <div className="p-4 @sm/main:p-8">
               <EmptyState
                 icon="🔍"
@@ -198,31 +199,33 @@ export default function Community() {
             </div>
           )}
 
-          {!loading && paginatedPosts.length > 0 && (
+          {!loading && posts.length > 0 && (
             <>
               {postView === 'card' ? (
-                <CommunityPostCardGrid posts={paginatedPosts} onVoteChange={handleVoteChange} />
+                <CommunityPostCardGrid posts={posts} onVoteChange={handleVoteChange} />
               ) : (
                 <CommunityPostList
-                  posts={paginatedPosts}
+                  posts={posts}
                   density={postView === 'compact' ? 'compact' : 'comfortable'}
                   onVoteChange={handleVoteChange}
                 />
               )}
 
-              <div
-                className={`border-t border-neutral-200 p-4 @sm/main:p-6 dark:border-neutral-700 ${
-                  postView === 'card'
-                    ? 'mx-4 mb-4 rounded-xl border bg-white @sm/main:mx-6 dark:bg-neutral-800'
-                    : ''
-                }`}
-              >
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={handlePageChange}
-                />
-              </div>
+              {totalPages > 1 && (
+                <div
+                  className={`border-t border-neutral-200 p-4 @sm/main:p-6 dark:border-neutral-700 ${
+                    postView === 'card'
+                      ? 'mx-4 mb-4 rounded-xl border bg-white @sm/main:mx-6 dark:bg-neutral-800'
+                      : ''
+                  }`}
+                >
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                  />
+                </div>
+              )}
             </>
           )}
         </div>

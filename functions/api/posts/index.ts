@@ -4,6 +4,7 @@ import { getUserIdFromSession } from '../../../src/utils/auth'
 import { posts, postTags, bounties, media, codeBlocks, users, votes, tags, profiles, virtualWallets } from '../../../drizzle/schema'
 import { eq, sql, desc } from 'drizzle-orm'
 import { GovernanceService } from '../../../src/utils/governance'
+import { listCommunityPosts } from '../../utils/listCommunityPosts'
 
 // Import subroutes for comments and voting
 import commentsRoute from './[id]/comments'
@@ -20,170 +21,45 @@ interface Env {
 
 const app = new Hono<{ Bindings: Env }>()
 
-// GET all posts with pagination
+// GET all posts with pagination, search, filters, and sort
 app.get(async (c) => {
   const sessionId = c.get('sessionId')
   const db = createDb(c.env.DB)
-  
+
   try {
-    // Get pagination parameters from query string
     const page = parseInt(c.req.query('page') || '1', 10)
     const limit = parseInt(c.req.query('limit') || '20', 10)
-    
-    // Validate pagination parameters
-    const validPage = Math.max(1, page)
-    const validLimit = Math.min(Math.max(1, limit), 100) // Max 100 posts per page
-    const validOffset = (validPage - 1) * validLimit
+    const q = c.req.query('q') || undefined
+    const status = c.req.query('status') || undefined
+    const dateRange = c.req.query('dateRange') || undefined
+    const hasBounty = c.req.query('hasBounty') === 'true'
+    const sortBy = c.req.query('sortBy') || undefined
+    const tagsParam = c.req.query('tags')
+    const tags = tagsParam
+      ? tagsParam.split(',').map((tag) => tag.trim()).filter(Boolean)
+      : undefined
 
-    // Get user ID from session if available
     let userId: string | null = null
     if (sessionId) {
       userId = await getUserIdFromSession(sessionId, db)
     }
 
-    // Get total count of posts for pagination metadata
-    const totalPostsResult = await db.select({ count: sql<number>`count(*)` }).from(posts)
-    const totalPosts = Number(totalPostsResult[0]?.count || 0)
+    const result = await listCommunityPosts(
+      db,
+      {
+        page,
+        limit,
+        q,
+        status,
+        dateRange,
+        hasBounty: hasBounty || undefined,
+        tags,
+        sortBy,
+      },
+      userId
+    )
 
-    // Get posts with author information (paginated)
-    const postsWithAuthors = await db
-      .select({
-        id: posts.id,
-        title: posts.title,
-        content: posts.content,
-        authorId: posts.authorId,
-        createdAt: posts.createdAt,
-        updatedAt: posts.updatedAt,
-        visibilityVotes: posts.visibilityVotes,
-        qualityUpvotes: posts.qualityUpvotes,
-        qualityDownvotes: posts.qualityDownvotes,
-        hasBounty: posts.hasBounty,
-        status: posts.status,
-        reward: bounties.amount,
-        author: {
-          id: users.id,
-          username: users.username,
-          email: users.email,
-          profilePicture: profiles.profilePicture
-        }
-      })
-      .from(posts)
-      .leftJoin(users, eq(posts.authorId, users.id))
-      .leftJoin(profiles, eq(users.id, profiles.userId))
-      .leftJoin(bounties, eq(posts.id, bounties.postId))
-      .orderBy(desc(posts.createdAt))
-      .limit(validLimit)
-      .offset(validOffset)
-
-    // Get tags for all posts
-    const postTagsData = await db
-      .select({
-        postId: postTags.postId,
-        tagName: tags.name
-      })
-      .from(postTags)
-      .leftJoin(tags, eq(postTags.tagId, tags.id))
-
-    // Group tags by post ID
-    const tagsByPostId = postTagsData.reduce((acc: { [postId: string]: string[] }, item) => {
-      if (item.postId && item.tagName) {
-        if (!acc[item.postId]) {
-          acc[item.postId] = []
-        }
-        acc[item.postId].push(item.tagName)
-      }
-      return acc
-    }, {})
-
-    // If user is authenticated, get their votes for all posts
-    let userVotes: { [postId: string]: number } = {}
-    if (userId) {
-      const userVotesData = await db
-        .select({
-          postId: votes.postId,
-          value: votes.value
-        })
-        .from(votes)
-        .where(eq(votes.userId, userId))
-
-      userVotes = userVotesData.reduce((acc: { [postId: string]: number }, vote: { postId: string | null; value: number }) => {
-        if (vote.postId) {
-          acc[vote.postId] = vote.value
-        }
-        return acc
-      }, {} as { [postId: string]: number })
-    }
-
-    // Add user votes and tags to posts
-    const postsWithVotes = postsWithAuthors.map(post => {
-      // Safe date formatting function
-      const formatDate = (dateValue: any): string => {
-        if (!dateValue) return new Date().toISOString()
-        
-        try {
-          // If it's already a valid ISO string, return it as is
-          if (typeof dateValue === 'string' && dateValue.includes('T') && dateValue.includes('Z')) {
-            return dateValue
-          }
-          
-          // Handle different date formats
-          let date: Date
-          if (typeof dateValue === 'number') {
-            // If it's a timestamp, check if it's in seconds or milliseconds
-            // Unix timestamps in seconds are typically 10 digits, milliseconds are 13 digits
-            if (dateValue < 10000000000) {
-              // Likely in seconds, convert to milliseconds
-              date = new Date(dateValue * 1000)
-            } else {
-              // Likely in milliseconds
-              date = new Date(dateValue)
-            }
-          } else if (typeof dateValue === 'string') {
-            // If it's a string, try to parse it
-            date = new Date(dateValue)
-          } else {
-            // If it's already a Date object
-            date = dateValue
-          }
-          
-          // Check if the date is valid
-          if (isNaN(date.getTime())) {
-            return new Date().toISOString()
-          }
-          
-          return date.toISOString()
-        } catch (_error) {
-          return new Date().toISOString()
-        }
-      }
-
-      const formattedPost = {
-        ...post,
-        userVote: userVotes[post.id] || 0,
-        tags: tagsByPostId[post.id] || [],
-        createdAt: formatDate(post.createdAt),
-        updatedAt: formatDate(post.updatedAt)
-      }
-
-      return formattedPost
-    })
-
-    // Calculate pagination metadata
-    const totalPages = Math.ceil(totalPosts / validLimit)
-    const hasNextPage = validPage < totalPages
-    const hasPrevPage = validPage > 1
-
-    return c.json({
-      posts: postsWithVotes,
-      pagination: {
-        page: validPage,
-        limit: validLimit,
-        total: totalPosts,
-        totalPages,
-        hasNextPage,
-        hasPrevPage
-      }
-    })
+    return c.json(result)
   } catch (error) {
     console.error('Error fetching posts:', error)
     return c.json({ error: 'Failed to fetch posts' }, 500)

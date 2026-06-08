@@ -8,6 +8,65 @@ export interface CommunityFilterOptions {
   selectedTags: string[]
 }
 
+export interface CommunityPostsQuery {
+  page: number
+  limit: number
+  q?: string
+  status?: string
+  dateRange?: string
+  hasBounty?: boolean
+  tags?: string[]
+  sortBy?: string
+}
+
+export interface CommunityPostsPagination {
+  page: number
+  limit: number
+  total: number
+  totalPages: number
+  hasNextPage: boolean
+  hasPrevPage: boolean
+}
+
+export interface CommunityPostsResponse {
+  posts: Post[]
+  pagination: CommunityPostsPagination
+}
+
+export function buildCommunityPostsQuery(
+  page: number,
+  limit: number,
+  searchQuery: string,
+  filters: CommunityFilterOptions
+): CommunityPostsQuery {
+  return {
+    page,
+    limit,
+    q: searchQuery.trim() || undefined,
+    status: filters.status || undefined,
+    dateRange: filters.dateRange || undefined,
+    hasBounty: filters.hasBounty || undefined,
+    tags: filters.selectedTags.length > 0 ? filters.selectedTags : undefined,
+    sortBy: filters.sortBy !== 'newest' ? filters.sortBy : undefined,
+  }
+}
+
+export function communityPostsQueryToSearchParams(query: CommunityPostsQuery): string {
+  const params = new URLSearchParams()
+  params.set('page', String(query.page))
+  params.set('limit', String(query.limit))
+
+  if (query.q) params.set('q', query.q)
+  if (query.status) params.set('status', query.status)
+  if (query.dateRange) params.set('dateRange', query.dateRange)
+  if (query.hasBounty) params.set('hasBounty', 'true')
+  if (query.tags?.length) params.set('tags', query.tags.join(','))
+  if (query.sortBy) params.set('sortBy', query.sortBy)
+
+  return params.toString()
+}
+
+/** @deprecated Client-side filtering replaced by server-side query params. */
 export function filterCommunityPosts(
   posts: Post[],
   searchQuery: string,
