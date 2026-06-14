@@ -132,7 +132,7 @@ export default function Transactions() {
                       <p className="text-neutral-900 dark:text-white font-mono text-xs break-all">{tx.id}</p>
                     </div>
                     {tx.metadata && (
-                      <div className="md:col-span-2">
+                      <div className="@xl/main:col-span-2">
                         <p className="text-neutral-500 dark:text-gray-400">Details</p>
                         <div className="bg-neutral-100 dark:bg-neutral-700 rounded-sm p-3 mt-1">
                           <pre className="text-neutral-800 dark:text-white text-xs whitespace-pre-wrap">

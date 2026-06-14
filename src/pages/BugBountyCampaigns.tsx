@@ -85,7 +85,7 @@ export default function BugBountyCampaigns() {
       <div className="mx-auto max-w-7xl px-4 py-8 @sm/main:px-6 @5xl/main:px-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div className="flex flex-col @sm/main:flex-row @sm/main:items-center @sm/main:justify-between gap-4 mb-6">
             <div>
               <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">
                 Bug Bounty Campaigns
@@ -106,7 +106,7 @@ export default function BugBountyCampaigns() {
           </div>
 
           {/* Filters and Search */}
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col @sm/main:flex-row gap-4">
             <div className="flex-1 relative">
               <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-5 h-5" />
               <input

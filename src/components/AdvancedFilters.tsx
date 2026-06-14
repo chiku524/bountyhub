@@ -141,12 +141,12 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
 
       {isOpen && (
         <div
-          className="absolute top-full z-50 mt-2 w-[min(26rem,calc(100vw-2rem))] max-h-[min(90vh,36rem)] overflow-y-auto rounded-2xl border border-neutral-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 shadow-xl right-0 left-auto sm:right-0 sm:left-auto"
+          className="absolute top-full z-50 mt-2 w-[min(26rem,calc(100vw-2rem))] max-h-[min(90vh,36rem)] overflow-y-auto rounded-2xl border border-neutral-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 shadow-xl right-0 left-auto"
           role="dialog"
           aria-modal="true"
           aria-label="Filter options"
         >
-          <div className="p-5 sm:p-6 space-y-6">
+          <div className="p-5 @sm/main:p-6 space-y-6">
             {/* Quick filters: single column for comfortable dropdown space */}
             <div className="space-y-4">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">

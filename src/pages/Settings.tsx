@@ -434,14 +434,14 @@ export default function Settings() {
 
         {/* Success Notice */}
         {success && (
-          <div className="mb-6 p-3 sm:p-4 bg-green-500/20 border border-green-500/50 rounded-lg flex items-center gap-2 text-green-400 text-sm sm:text-base">
+          <div className="mb-6 p-3 @sm/main:p-4 bg-green-500/20 border border-green-500/50 rounded-lg flex items-center gap-2 text-green-400 text-sm @sm/main:text-base">
             <FiCheck className="w-5 h-5" />
             <span>{success}</span>
           </div>
         )}
 
         {error && (
-          <div className="mb-6 p-3 sm:p-4 bg-red-500/20 border border-red-500/50 rounded-lg flex items-center gap-2 text-red-400 text-sm sm:text-base">
+          <div className="mb-6 p-3 @sm/main:p-4 bg-red-500/20 border border-red-500/50 rounded-lg flex items-center gap-2 text-red-400 text-sm @sm/main:text-base">
             <span>{error}</span>
           </div>
         )}
@@ -454,25 +454,25 @@ export default function Settings() {
                 key={tab.id}
                 type="button"
                 onClick={() => selectTab(tab.id)}
-                className={`flex items-center gap-2 px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium transition-colors ${
+                className={`flex items-center gap-2 px-3 @sm/main:px-6 py-3 @sm/main:py-4 text-xs @sm/main:text-sm font-medium transition-colors ${
                   activeTab === tab.id
                     ? 'text-violet-600 dark:text-violet-400 border-b-2 border-violet-600 dark:border-violet-400'
                     : 'text-neutral-500 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-300'
                 }`}
               >
-                <tab.icon className="w-4 h-4 sm:w-5 sm:h-5" />
-                <span className="hidden sm:inline">{tab.label}</span>
-                <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
+                <tab.icon className="w-4 h-4 @sm/main:w-5 @sm/main:h-5" />
+                <span className="hidden @sm/main:inline">{tab.label}</span>
+                <span className="@sm/main:hidden">{tab.label.split(' ')[0]}</span>
               </button>
             ))}
           </div>
 
           {/* Tab Content */}
-          <div className="p-4 sm:p-6">
-            <form onSubmit={handleProfileUpdate} className="space-y-4 sm:space-y-6">
+          <div className="p-4 @sm/main:p-6">
+            <form onSubmit={handleProfileUpdate} className="space-y-4 @sm/main:space-y-6">
               {activeTab === 'profile' && (
-                <div className="space-y-4 sm:space-y-6">
-                  <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 sm:gap-6">
+                <div className="space-y-4 @sm/main:space-y-6">
+                  <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @sm/main:gap-6">
                     <div>
                       <label htmlFor="firstName" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
                         First Name
@@ -483,7 +483,7 @@ export default function Settings() {
                         value={profileData.firstName}
                         onChange={(e) => handleInputChange('firstName', e.target.value)}
                         placeholder="Enter your first name"
-                        className="w-full px-3 sm:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
+                        className="w-full px-3 @sm/main:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm @sm/main:text-base"
                       />
                     </div>
                     <div>
@@ -496,7 +496,7 @@ export default function Settings() {
                         value={profileData.lastName}
                         onChange={(e) => handleInputChange('lastName', e.target.value)}
                         placeholder="Enter your last name"
-                        className="w-full px-3 sm:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
+                        className="w-full px-3 @sm/main:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm @sm/main:text-base"
                       />
                     </div>
                   </div>
@@ -511,7 +511,7 @@ export default function Settings() {
                       onChange={(e) => handleInputChange('bio', e.target.value)}
                       placeholder="Tell us about yourself..."
                       rows={4}
-                      className="w-full px-3 sm:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
+                      className="w-full px-3 @sm/main:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm @sm/main:text-base"
                     />
                   </div>
 
@@ -525,7 +525,7 @@ export default function Settings() {
                       value={profileData.location}
                       onChange={(e) => handleInputChange('location', e.target.value)}
                       placeholder="City, Country"
-                      className="w-full px-3 sm:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
+                      className="w-full px-3 @sm/main:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm @sm/main:text-base"
                     />
                   </div>
 
@@ -539,14 +539,14 @@ export default function Settings() {
                       value={profileData.website}
                       onChange={(e) => handleInputChange('website', e.target.value)}
                       placeholder="https://your-website.com"
-                      className="w-full px-3 sm:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
+                      className="w-full px-3 @sm/main:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm @sm/main:text-base"
                     />
                   </div>
                 </div>
               )}
 
               {activeTab === 'social' && (
-                <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 sm:gap-6">
+                <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @sm/main:gap-6">
                   <div>
                     <label htmlFor="facebook" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
                       Facebook
@@ -557,7 +557,7 @@ export default function Settings() {
                       value={profileData.facebook}
                       onChange={(e) => handleInputChange('facebook', e.target.value)}
                       placeholder="facebook.com/username"
-                      className="w-full px-3 sm:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
+                      className="w-full px-3 @sm/main:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm @sm/main:text-base"
                     />
                   </div>
                   <div>
@@ -570,7 +570,7 @@ export default function Settings() {
                       value={profileData.twitter}
                       onChange={(e) => handleInputChange('twitter', e.target.value)}
                       placeholder="@username"
-                      className="w-full px-3 sm:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
+                      className="w-full px-3 @sm/main:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm @sm/main:text-base"
                     />
                   </div>
                   <div>
@@ -583,7 +583,7 @@ export default function Settings() {
                       value={profileData.instagram}
                       onChange={(e) => handleInputChange('instagram', e.target.value)}
                       placeholder="@username"
-                      className="w-full px-3 sm:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
+                      className="w-full px-3 @sm/main:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm @sm/main:text-base"
                     />
                   </div>
                   <div>
@@ -596,7 +596,7 @@ export default function Settings() {
                       value={profileData.linkedin}
                       onChange={(e) => handleInputChange('linkedin', e.target.value)}
                       placeholder="linkedin.com/in/username"
-                      className="w-full px-3 sm:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
+                      className="w-full px-3 @sm/main:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm @sm/main:text-base"
                     />
                   </div>
                   <div>
@@ -619,7 +619,7 @@ export default function Settings() {
                       value={profileData.github}
                       onChange={(e) => handleInputChange('github', e.target.value)}
                       placeholder="github.com/username"
-                      className="w-full px-3 sm:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
+                      className="w-full px-3 @sm/main:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm @sm/main:text-base"
                     />
                     <p className="mt-1 text-xs text-neutral-500 dark:text-gray-400">
                       This is your public GitHub profile URL. To connect your account for repository syncing, use the GitHub Integration section in the Account tab.
@@ -635,7 +635,7 @@ export default function Settings() {
                       value={profileData.youtube}
                       onChange={(e) => handleInputChange('youtube', e.target.value)}
                       placeholder="youtube.com/@username"
-                      className="w-full px-3 sm:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm sm:text-base"
+                      className="w-full px-3 @sm/main:px-4 py-2 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm @sm/main:text-base"
                     />
                   </div>
                   <div>

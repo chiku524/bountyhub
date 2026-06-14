@@ -352,7 +352,7 @@ export function MediaUpload({ onMediaUpload, onMediaRemove, uploadedMedia }: Med
       </div>
 
       {uploadedMedia.length > 0 && (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 @sm/main:grid-cols-2">
           {uploadedMedia.map((media, index) => (
             <div key={index} className="relative group">
               {media.type === 'VIDEO' ? (

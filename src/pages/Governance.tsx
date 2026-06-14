@@ -258,7 +258,7 @@ const Governance: React.FC = () => {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 @sm/main:px-6 @5xl/main:px-8">
+    <div className="mx-auto min-w-0 max-w-7xl px-4 py-8 @sm/main:px-6 @5xl/main:px-8">
       <div className="mb-8">
         <div className="flex flex-col gap-4 @sm/main:flex-row @sm/main:items-center @sm/main:justify-between mb-4">
           <div className="min-w-0">
@@ -468,20 +468,20 @@ const Governance: React.FC = () => {
               <label className="block text-sm font-medium text-neutral-700 dark:text-gray-300 mb-2">
                 Stake BBUX for Governance
               </label>
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2 @sm/main:flex-row">
                 <input
                   type="number"
                   value={stakeAmount}
                   onChange={(e) => setStakeAmount(e.target.value)}
                   placeholder="Amount to stake"
-                  className="flex-1 px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400"
+                  className="min-w-0 flex-1 px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400"
                   min="0"
                   step="0.01"
                 />
                 <button
                   onClick={handleStake}
                   disabled={stakingLoading || !stakeAmount}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                  className="shrink-0 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
                 >
                   {stakingLoading ? 'Staking...' : 'Stake'}
                 </button>
@@ -496,20 +496,20 @@ const Governance: React.FC = () => {
               <label className="block text-sm font-medium text-neutral-700 dark:text-gray-300 mb-2">
                 Unstake BBUX from Governance
               </label>
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2 @sm/main:flex-row">
                 <input
                   type="number"
                   value={unstakeAmount}
                   onChange={(e) => setUnstakeAmount(e.target.value)}
                   placeholder="Amount to unstake"
-                  className="flex-1 px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400"
+                  className="min-w-0 flex-1 px-3 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400"
                   min="0"
                   step="0.01"
                 />
                 <button
                   onClick={handleUnstake}
                   disabled={stakingLoading || !unstakeAmount}
-                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+                  className="shrink-0 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
                 >
                   {stakingLoading ? 'Unstaking...' : 'Unstake'}
                 </button>
@@ -525,38 +525,38 @@ const Governance: React.FC = () => {
           <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Transparency Logs</h2>
           <p className="text-sm text-neutral-600 dark:text-gray-400">Real-time transparency of all governance activities</p>
         </div>
-        <div className="overflow-auto scrollbar-thin max-h-96">
+        <div className="overflow-x-auto overflow-y-auto scrollbar-thin max-h-96">
           {transparencyLogs.length === 0 ? (
             <div className="text-center text-neutral-500 dark:text-gray-400 py-4">No transparency logs available.</div>
           ) : (
-            <table className="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
+            <table className="min-w-[640px] w-full divide-y divide-neutral-200 dark:divide-neutral-700">
               <thead className="bg-neutral-100 dark:bg-neutral-700">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-gray-300 uppercase tracking-wider">Type</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-gray-300 uppercase tracking-wider">Amount</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-gray-300 uppercase tracking-wider">Fee</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-gray-300 uppercase tracking-wider">Description</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-gray-300 uppercase tracking-wider">Date</th>
+                  <th className="px-3 @sm/main:px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-gray-300 uppercase tracking-wider">Type</th>
+                  <th className="px-3 @sm/main:px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-gray-300 uppercase tracking-wider">Amount</th>
+                  <th className="px-3 @sm/main:px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-gray-300 uppercase tracking-wider">Fee</th>
+                  <th className="px-3 @sm/main:px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-gray-300 uppercase tracking-wider">Description</th>
+                  <th className="px-3 @sm/main:px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-gray-300 uppercase tracking-wider">Date</th>
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-neutral-800 divide-y divide-neutral-200 dark:divide-neutral-700">
                 {transparencyLogs.map((log) => (
                   <tr key={log.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-700">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 @sm/main:px-6 py-4 whitespace-nowrap">
                       <span className={`text-sm font-medium ${getLogTypeColor(log.logType)}`}>
                         {log.logType.replace(/_/g, ' ')}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-900 dark:text-white">
+                    <td className="px-3 @sm/main:px-6 py-4 whitespace-nowrap text-sm text-neutral-900 dark:text-white">
                       {formatAmount(log.amount)} BBUX
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-900 dark:text-white">
+                    <td className="px-3 @sm/main:px-6 py-4 whitespace-nowrap text-sm text-neutral-900 dark:text-white">
                       {log.feeAmount > 0 ? `${formatAmount(log.feeAmount)} BBUX` : '-'}
                     </td>
-                    <td className="px-6 py-4 text-sm text-neutral-900 dark:text-white">
+                    <td className="px-3 @sm/main:px-6 py-4 text-sm text-neutral-900 dark:text-white">
                       {log.description}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-500 dark:text-gray-400">
+                    <td className="px-3 @sm/main:px-6 py-4 whitespace-nowrap text-sm text-neutral-500 dark:text-gray-400">
                       {formatDate(log.createdAt)}
                     </td>
                   </tr>
@@ -573,34 +573,34 @@ const Governance: React.FC = () => {
           <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Governance Activity Feed</h2>
           <p className="text-sm text-neutral-600 dark:text-gray-400">Recent governance actions and events</p>
         </div>
-        <div className="overflow-auto scrollbar-thin max-h-96">
+        <div className="overflow-x-auto overflow-y-auto scrollbar-thin max-h-96">
           {governanceActivity.length === 0 ? (
             <div className="text-center text-neutral-500 dark:text-gray-400 py-4">No governance activity available.</div>
           ) : (
-            <table className="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
+            <table className="min-w-[560px] w-full divide-y divide-neutral-200 dark:divide-neutral-700">
               <thead className="bg-neutral-100 dark:bg-neutral-700">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-gray-300 uppercase tracking-wider">Type</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-gray-300 uppercase tracking-wider">Amount</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-gray-300 uppercase tracking-wider">Description</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-gray-300 uppercase tracking-wider">Date</th>
+                  <th className="px-3 @sm/main:px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-gray-300 uppercase tracking-wider">Type</th>
+                  <th className="px-3 @sm/main:px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-gray-300 uppercase tracking-wider">Amount</th>
+                  <th className="px-3 @sm/main:px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-gray-300 uppercase tracking-wider">Description</th>
+                  <th className="px-3 @sm/main:px-6 py-3 text-left text-xs font-medium text-neutral-600 dark:text-gray-300 uppercase tracking-wider">Date</th>
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-neutral-800 divide-y divide-neutral-200 dark:divide-neutral-700">
                 {governanceActivity.map((activity) => (
                   <tr key={activity.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-700">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 @sm/main:px-6 py-4 whitespace-nowrap">
                       <span className={`text-sm font-medium ${getLogTypeColor(activity.activityType)}`}>
                         {activity.activityType.replace(/_/g, ' ')}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-900 dark:text-white">
+                    <td className="px-3 @sm/main:px-6 py-4 whitespace-nowrap text-sm text-neutral-900 dark:text-white">
                       {formatAmount(activity.amount)} BBUX
                     </td>
-                    <td className="px-6 py-4 text-sm text-neutral-900 dark:text-white">
+                    <td className="px-3 @sm/main:px-6 py-4 text-sm text-neutral-900 dark:text-white">
                       {activity.description}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-500 dark:text-gray-400">
+                    <td className="px-3 @sm/main:px-6 py-4 whitespace-nowrap text-sm text-neutral-500 dark:text-gray-400">
                       {formatDate(activity.createdAt)}
                     </td>
                   </tr>

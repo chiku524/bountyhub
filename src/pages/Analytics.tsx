@@ -214,7 +214,7 @@ export default function Analytics() {
               <FiActivity className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               Admin Statistics
             </h2>
-            <div className="grid grid-cols-2 gap-4 @3xl/main:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 @sm/main:grid-cols-2 @3xl/main:grid-cols-4">
               <div className="text-center p-4 bg-neutral-100 dark:bg-neutral-700 rounded-lg">
                 <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{adminStats.totalUsers}</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Total Users</p>

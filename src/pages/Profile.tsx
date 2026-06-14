@@ -445,7 +445,7 @@ export default function Profile() {
   return (
     <div className="min-w-0 w-full">
         <div className="mb-6 flex flex-col gap-4 @sm/main:flex-row @sm/main:justify-between @sm/main:items-center">
-          <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-white">Profile</h1>
+          <h1 className="text-xl @sm/main:text-2xl font-bold text-neutral-900 dark:text-white">Profile</h1>
           <Link 
             to="/posts/create" 
             className="px-4 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-colors flex items-center gap-2 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)] hover:shadow-[0_0_20px_rgba(139,92,246,0.5)] w-fit"
@@ -457,8 +457,8 @@ export default function Profile() {
           </Link>
         </div>
 
-        <div className="bg-white/80 dark:bg-neutral-800/80 rounded-lg p-4 sm:p-6 border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)] dark:shadow-[0_0_15px_rgba(139,92,246,0.3)]">
-          <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6">
+        <div className="bg-white/80 dark:bg-neutral-800/80 rounded-lg p-4 @sm/main:p-6 border-2 border-violet-500/50 dark:border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)] dark:shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+          <div className="flex flex-col @sm/main:flex-row @sm/main:items-start gap-4 @sm/main:gap-6">
             <ProfilePictureUpload 
               currentPicture={user.profilePicture || null}
               username={user.username}
@@ -472,8 +472,8 @@ export default function Profile() {
               }}
             />
             <div className="flex-1">
-              <h2 className="text-lg sm:text-xl font-semibold text-neutral-900 dark:text-white">{user.username}</h2>
-              <p className="text-sm sm:text-base text-neutral-500 dark:text-gray-400 mt-1">
+              <h2 className="text-lg @sm/main:text-xl font-semibold text-neutral-900 dark:text-white">{user.username}</h2>
+              <p className="text-sm @sm/main:text-base text-neutral-500 dark:text-gray-400 mt-1">
                 Member since {new Date(user.createdAt).toLocaleDateString()}
               </p>
               <div className="mt-4">
@@ -489,18 +489,18 @@ export default function Profile() {
             </div>
           </div>
 
-          <div className="mt-6 sm:mt-8">
-            <h2 className="text-base sm:text-lg font-semibold text-violet-600 dark:text-violet-300 mb-4">Profile Information</h2>
-            <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 sm:gap-6">
-              <div className="bg-neutral-100 dark:bg-neutral-700/50 rounded-lg p-3 sm:p-4 border border-violet-500/30 dark:border-violet-500/30">
+          <div className="mt-6 @sm/main:mt-8">
+            <h2 className="text-base @sm/main:text-lg font-semibold text-violet-600 dark:text-violet-300 mb-4">Profile Information</h2>
+            <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @sm/main:gap-6">
+              <div className="bg-neutral-100 dark:bg-neutral-700/50 rounded-lg p-3 @sm/main:p-4 border border-violet-500/30 dark:border-violet-500/30">
                 <label htmlFor="bio" className="block text-sm font-medium text-violet-600 dark:text-violet-300">Bio</label>
                 <p id="bio" className="mt-1 text-sm text-neutral-600 dark:text-gray-300">{user.profile?.bio || 'No bio provided'}</p>
               </div>
-              <div className="bg-neutral-100 dark:bg-neutral-700/50 rounded-lg p-3 sm:p-4 border border-violet-500/30 dark:border-violet-500/30">
+              <div className="bg-neutral-100 dark:bg-neutral-700/50 rounded-lg p-3 @sm/main:p-4 border border-violet-500/30 dark:border-violet-500/30">
                 <label htmlFor="location" className="block text-sm font-medium text-violet-600 dark:text-violet-300">Location</label>
                 <p id="location" className="mt-1 text-sm text-neutral-600 dark:text-gray-300">{user.profile?.location || 'No location provided'}</p>
               </div>
-              <div className="bg-neutral-100 dark:bg-neutral-700/50 rounded-lg p-3 sm:p-4 border border-violet-500/30 dark:border-violet-500/30">
+              <div className="bg-neutral-100 dark:bg-neutral-700/50 rounded-lg p-3 @sm/main:p-4 border border-violet-500/30 dark:border-violet-500/30">
                 <label htmlFor="website" className="block text-sm font-medium text-violet-600 dark:text-violet-300">Website</label>
                 <p id="website" className="mt-1 text-sm text-neutral-600 dark:text-gray-300">
                   {user.profile?.website ? (
@@ -511,7 +511,7 @@ export default function Profile() {
                   ) : 'No website provided'}
                 </p>
               </div>
-              <div className="bg-neutral-100 dark:bg-neutral-700/50 rounded-lg p-3 sm:p-4 border border-violet-500/30 dark:border-violet-500/30">
+              <div className="bg-neutral-100 dark:bg-neutral-700/50 rounded-lg p-3 @sm/main:p-4 border border-violet-500/30 dark:border-violet-500/30">
                 <label htmlFor="socialMedia" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">Social Media</label>
                 {githubConnected && (
                   <div className="mb-3 flex items-center gap-2 p-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
@@ -535,7 +535,7 @@ export default function Profile() {
           </div>
 
           {/* Integrity Display */}
-          <div className="mt-6 sm:mt-8">
+          <div className="mt-6 @sm/main:mt-8">
             <IntegrityDisplay
               user={{
                 id: user.id,
@@ -546,9 +546,9 @@ export default function Profile() {
             />
           </div>
 
-          <div className="mt-6 grid grid-cols-1 gap-6 @xl/main:grid-cols-2 sm:mt-8">
+          <div className="mt-6 grid grid-cols-1 gap-6 @xl/main:grid-cols-2 @sm/main:mt-8">
             <div>
-              <h2 className="text-base sm:text-lg font-semibold text-violet-600 dark:text-violet-300 mb-4">Recent Activity</h2>
+              <h2 className="text-base @sm/main:text-lg font-semibold text-violet-600 dark:text-violet-300 mb-4">Recent Activity</h2>
               <div className="space-y-2">
                 {recentActivities.map((history) => (
                   <div key={history.id} className="flex items-center justify-between p-3 bg-neutral-100 dark:bg-neutral-700/50 rounded-lg border border-violet-500/30 dark:border-violet-500/30">
@@ -579,7 +579,7 @@ export default function Profile() {
             </div>
 
             <div>
-              <h2 className="text-base sm:text-lg font-semibold text-violet-600 dark:text-violet-300 mb-4">Recent Posts</h2>
+              <h2 className="text-base @sm/main:text-lg font-semibold text-violet-600 dark:text-violet-300 mb-4">Recent Posts</h2>
               <div className="space-y-2">
                 {limitedPosts.map((post) => (
                   <div key={post.id} className={`p-3 bg-neutral-100 dark:bg-neutral-700/50 rounded-lg border border-violet-500/30 dark:border-violet-500/30 ${post.reward && post.reward > 0 ? 'border-l-4 border-cyan-400/60 bg-linear-to-r from-cyan-500/5 to-neutral-100 dark:to-neutral-700/50' : ''}`}>
@@ -627,14 +627,14 @@ export default function Profile() {
           </div>
 
           {/* Bookmarks Section */}
-          <div className="mt-6 sm:mt-8">
-            <h2 className="text-lg sm:text-xl font-bold text-yellow-600 dark:text-yellow-400 mb-4">Bookmarked Posts</h2>
+          <div className="mt-6 @sm/main:mt-8">
+            <h2 className="text-lg @sm/main:text-xl font-bold text-yellow-600 dark:text-yellow-400 mb-4">Bookmarked Posts</h2>
             {limitedBookmarks.length > 0 ? (
               <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2">
                 {limitedBookmarks.map((bookmark) => (
                   <div key={bookmark.id} className="bg-white dark:bg-neutral-800/80 rounded-lg p-4 border border-yellow-400/40 dark:border-yellow-400/40 transition-all duration-300 hover:bg-neutral-50 dark:hover:bg-neutral-700/80 hover:border-yellow-300/60 dark:hover:border-yellow-300/60 hover:shadow-lg hover:shadow-yellow-400/20 dark:hover:shadow-yellow-400/20 hover:scale-[1.02] group">
                     <Link to={`/posts/${bookmark.post.id}`} className="block">
-                      <h3 className="text-base sm:text-lg font-semibold text-neutral-900 dark:text-white mb-2 group-hover:text-yellow-600 dark:group-hover:text-yellow-300 transition-colors duration-300 line-clamp-2">
+                      <h3 className="text-base @sm/main:text-lg font-semibold text-neutral-900 dark:text-white mb-2 group-hover:text-yellow-600 dark:group-hover:text-yellow-300 transition-colors duration-300 line-clamp-2">
                         {bookmark.post.title}
                       </h3>
                       <p className="text-sm text-neutral-600 dark:text-gray-300 mb-2 line-clamp-2 group-hover:text-neutral-700 dark:group-hover:text-gray-200 transition-colors duration-300">
@@ -651,7 +651,7 @@ export default function Profile() {
                 ))}
               </div>
             ) : (
-              <div className="bg-white dark:bg-neutral-800/80 rounded-lg p-4 sm:p-6 border border-yellow-400/40 dark:border-yellow-400/40 text-center">
+              <div className="bg-white dark:bg-neutral-800/80 rounded-lg p-4 @sm/main:p-6 border border-yellow-400/40 dark:border-yellow-400/40 text-center">
                 <p className="text-neutral-500 dark:text-gray-400">No bookmarked posts yet</p>
                 <p className="text-sm text-neutral-400 dark:text-gray-500 mt-1">Bookmark posts from the community to see them here</p>
               </div>

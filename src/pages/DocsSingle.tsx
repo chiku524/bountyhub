@@ -352,7 +352,7 @@ export default function DocsSingle() {
             {sectionId === 'need-help' && (
               <>
                 <h1 className={sectionTitle}>Need Help?</h1>
-                <div className={`${card} flex flex-col sm:flex-row gap-4 items-center justify-between`}>
+                <div className={`${card} flex flex-col @sm/main:flex-row gap-4 items-center justify-between`}>
                   <p className={body}>Can’t find what you need? Ask the community or contact support.</p>
                   <div className="flex flex-wrap gap-3 shrink-0">
                     <Link

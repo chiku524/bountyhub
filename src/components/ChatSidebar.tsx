@@ -9,6 +9,7 @@ import { FiSend, FiMessageSquare, FiX, FiMessageCircle, FiSmile, FiImage, FiGrid
 import type { Team } from '../types';
 import { useChatWebSocket } from '../hooks/useChatWebSocket';
 import { LoadingSpinner } from './LoadingSpinner';
+import { isDesktopApp } from '../utils/desktop';
 
 // Simple emoji data
 const EMOJIS = [
@@ -387,23 +388,25 @@ const ChatSidebar: React.FC = () => {
     return null;
   }
 
+  const isDesktop = isDesktopApp();
+  const sidebarTopPad = isDesktop ? 'pt-0' : 'pt-16';
+
   return (
     <>
       {/* Floating Toggle Button (always visible) */}
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-6 right-6 z-50 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full shadow-lg p-4 flex items-center justify-center focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
+          className="fixed bottom-[max(1.5rem,env(safe-area-inset-bottom,0px))] right-[max(1.5rem,env(safe-area-inset-right,0px))] z-50 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full shadow-lg p-4 flex items-center justify-center focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
           aria-label="Open chat sidebar"
         >
           <FiMessageCircle className="h-6 w-6" />
         </button>
       )}
 
-      {/* Sidebar - pt-16 so content starts below the top navbar */}
+      {/* Sidebar — top padding clears web TopNav only (desktop uses sidebar shell) */}
       <div
-        className={`fixed top-0 right-0 h-full z-40 transition-transform duration-300 ${open ? 'translate-x-0' : 'translate-x-full'} w-full max-w-[320px] sm:max-w-sm bg-neutral-900 border-l border-neutral-800 shadow-2xl flex flex-col pt-16`}
-        style={{ minWidth: '280px' }}
+        className={`fixed top-0 right-0 h-full z-40 transition-transform duration-300 ${open ? 'translate-x-0' : 'translate-x-full'} w-full max-w-[min(100vw,20rem)] sm:max-w-sm bg-neutral-900 border-l border-neutral-800 shadow-2xl flex flex-col ${sidebarTopPad}`}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-3 border-b border-neutral-800 bg-neutral-900 flex-shrink-0">

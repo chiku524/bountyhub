@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthProvider'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { ErrorMessage } from '../components/ErrorMessage'
 import { PageMetadata } from '../components/PageMetadata'
+import { PageContainer } from '../components/PageContainer'
 import { FiArrowLeft, FiSend } from 'react-icons/fi'
 import type { BugBountyCampaign } from '../types'
 import { EmptyState } from '../components/EmptyState'
@@ -159,7 +160,7 @@ export default function BugBountySubmit() {
   if (error && !campaign) {
     return (
       <div className="w-full min-w-0">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <PageContainer maxWidth="narrow">
           <ErrorMessage message={error} />
           <Link
             to="/bug-bounty/campaigns"
@@ -168,7 +169,7 @@ export default function BugBountySubmit() {
             <FiArrowLeft className="w-4 h-4" />
             Back to Campaigns
           </Link>
-        </div>
+        </PageContainer>
       </div>
     )
   }
@@ -176,7 +177,7 @@ export default function BugBountySubmit() {
   if (campaign && campaign.status !== 'ACTIVE') {
     return (
       <div className="w-full min-w-0">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <PageContainer maxWidth="narrow">
           <ErrorMessage message="This campaign is not accepting submissions. Only active campaigns accept new bug reports." />
           <Link
             to={`/bug-bounty/campaigns/${campaignId}`}
@@ -185,7 +186,7 @@ export default function BugBountySubmit() {
             <FiArrowLeft className="w-4 h-4" />
             Back to Campaign
           </Link>
-        </div>
+        </PageContainer>
       </div>
     )
   }
@@ -196,7 +197,7 @@ export default function BugBountySubmit() {
         title={`Submit Bug - ${campaign?.title ?? 'Campaign'}`}
         description="Submit a bug report to this bug bounty campaign"
       />
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <PageContainer maxWidth="narrow">
         <Link
           to={`/bug-bounty/campaigns/${campaignId}`}
           className="inline-flex items-center gap-2 text-neutral-600 dark:text-neutral-400 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium mb-6"
@@ -357,7 +358,7 @@ export default function BugBountySubmit() {
             </button>
           </div>
         </form>
-      </div>
+      </PageContainer>
     </div>
   )
 }

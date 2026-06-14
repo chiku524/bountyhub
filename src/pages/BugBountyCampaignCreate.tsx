@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthProvider'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { ErrorMessage } from '../components/ErrorMessage'
 import { PageMetadata } from '../components/PageMetadata'
+import { PageContainer } from '../components/PageContainer'
 import { FiArrowLeft, FiSave } from 'react-icons/fi'
 import { Link } from 'react-router-dom'
 import type { GitHubRepository } from '../types'
@@ -272,13 +273,13 @@ export default function BugBountyCampaignCreate() {
   }
 
   return (
-    <div className="w-full min-w-0">
+    <>
       <PageMetadata
         title="Create Bug Bounty Campaign"
         description="Create a new bug bounty campaign"
       />
-      
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+      <PageContainer maxWidth="narrow">
         {showDraftBanner && (
           <div
             className="mb-6 flex flex-col gap-3 rounded-xl border border-violet-200/80 bg-violet-50/90 p-4 text-sm text-violet-950 dark:border-violet-500/35 dark:bg-violet-950/40 dark:text-violet-100 @sm/main:flex-row @sm/main:items-center @sm/main:justify-between"
@@ -410,7 +411,7 @@ export default function BugBountyCampaignCreate() {
               Budget & Rewards
             </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 @xl/main:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                   Total Budget ($) *
@@ -468,7 +469,7 @@ export default function BugBountyCampaignCreate() {
             </h2>
             
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 @xl/main:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                     Start Date (Optional)
@@ -614,8 +615,8 @@ export default function BugBountyCampaignCreate() {
             </button>
           </div>
         </form>
-      </div>
-    </div>
+      </PageContainer>
+    </>
   )
 }
 

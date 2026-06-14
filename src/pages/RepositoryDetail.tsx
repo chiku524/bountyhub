@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthProvider'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { ErrorMessage } from '../components/ErrorMessage'
 import { PageMetadata } from '../components/PageMetadata'
+import { PageContainer } from '../components/PageContainer'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import { EmptyState } from '../components/EmptyState'
 import { FiGithub, FiStar, FiGitBranch, FiExternalLink, FiArrowLeft, FiDollarSign } from 'react-icons/fi'
@@ -61,7 +62,7 @@ export default function RepositoryDetail() {
   if (!idOk) {
     return (
       <div className="w-full min-w-0">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <PageContainer maxWidth="narrow">
           <ErrorMessage message="Invalid repository" />
           <Link
             to="/repositories"
@@ -70,7 +71,7 @@ export default function RepositoryDetail() {
             <FiArrowLeft className="w-4 h-4" />
             Back to Repositories
           </Link>
-        </div>
+        </PageContainer>
       </div>
     )
   }
@@ -87,7 +88,7 @@ export default function RepositoryDetail() {
     const is404 = error?.toLowerCase().includes('not found') || error?.toLowerCase().includes('404')
     return (
       <div className="w-full min-w-0">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <PageContainer maxWidth="narrow">
           <ErrorMessage message={error || 'Repository not found'} />
           {is404 && (
             <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
@@ -101,7 +102,7 @@ export default function RepositoryDetail() {
             <FiArrowLeft className="w-4 h-4" />
             Back to Repositories
           </Link>
-        </div>
+        </PageContainer>
       </div>
     )
   }
@@ -114,7 +115,7 @@ export default function RepositoryDetail() {
         title={`${repo.name} - GitHub Repositories`}
         description={repo.description || `View ${repo.fullName} on BountyHub`}
       />
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <PageContainer maxWidth="narrow">
         <Breadcrumbs
           items={[{ label: 'Repositories', to: '/repositories' }, { label: repo.fullName }]}
           className="mb-4"
@@ -127,12 +128,12 @@ export default function RepositoryDetail() {
           Back to Repositories
         </Link>
 
-        <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 p-6 sm:p-8">
+        <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 p-6 @sm/main:p-8">
           <div className="mb-6 flex flex-col gap-4 @xl/main:flex-row @xl/main:items-start @xl/main:justify-between">
             <div className="flex items-start gap-3 min-w-0">
               <FiGithub className="w-10 h-10 text-neutral-500 dark:text-neutral-400 shrink-0 mt-0.5" />
               <div className="min-w-0">
-                <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-white truncate">
+                <h1 className="text-2xl @sm/main:text-3xl font-bold text-neutral-900 dark:text-white truncate">
                   {repo.name}
                 </h1>
                 <p className="text-neutral-500 dark:text-neutral-400 truncate">{repo.fullName}</p>
@@ -213,7 +214,7 @@ export default function RepositoryDetail() {
             </Link>
           </div>
         </div>
-      </div>
+      </PageContainer>
     </div>
   )
 }

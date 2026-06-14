@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthProvider'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { ErrorMessage } from '../components/ErrorMessage'
 import { PageMetadata } from '../components/PageMetadata'
+import { PageContainer } from '../components/PageContainer'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import { FocusRestoreBoundary } from '../components/FocusRestoreBoundary'
 import { FiArrowLeft, FiEdit, FiTrash2, FiPlus, FiDollarSign, FiTrendingUp, FiUsers, FiExternalLink, FiAlertCircle } from 'react-icons/fi'
@@ -109,7 +110,7 @@ export default function BugBountyCampaignDetail() {
     return (
       <div className="w-full min-w-0">
         <PageMetadata title="Campaign Not Found" />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <PageContainer maxWidth="narrow">
           <div className="text-center">
             <ErrorMessage message={error || 'Campaign not found'} />
             <Link
@@ -120,7 +121,7 @@ export default function BugBountyCampaignDetail() {
               Back to Campaigns
             </Link>
           </div>
-        </div>
+        </PageContainer>
       </div>
     )
   }
@@ -132,7 +133,7 @@ export default function BugBountyCampaignDetail() {
         description={campaign.description}
       />
       
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <PageContainer maxWidth="wide">
         {/* Header */}
         <div className="mb-6">
           <Breadcrumbs
@@ -448,7 +449,7 @@ export default function BugBountyCampaignDetail() {
             </div>
           </div>
         </div>
-      </div>
+      </PageContainer>
     </div>
   )
 }

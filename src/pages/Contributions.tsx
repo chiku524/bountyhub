@@ -185,7 +185,7 @@ export default function Contributions() {
         </div>
 
         {/* Filters */}
-        <div className="mb-6 flex flex-col sm:flex-row gap-4">
+        <div className="mb-6 flex flex-col @sm/main:flex-row gap-4">
           <div className="flex-1 relative">
             <input
               type="text"

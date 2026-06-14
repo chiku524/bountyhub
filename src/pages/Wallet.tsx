@@ -432,20 +432,20 @@ function WalletContent() {
           )}
 
           {message && (
-            <div className="bg-blue-900 border border-blue-700 rounded-lg p-3 sm:p-4 mb-6">
-              <p className="text-blue-200 text-sm sm:text-base">{message}</p>
+            <div className="bg-blue-900 border border-blue-700 rounded-lg p-3 @sm/main:p-4 mb-6">
+              <p className="text-blue-200 text-sm @sm/main:text-base">{message}</p>
             </div>
           )}
 
           {/* Wallet Overview Card */}
-          <div className="bg-linear-to-r from-blue-500 to-purple-600 rounded-lg p-4 sm:p-6 text-white mb-6 sm:mb-8">
+          <div className="bg-linear-to-r from-blue-500 to-purple-600 rounded-lg p-4 @sm/main:p-6 text-white mb-6 @sm/main:mb-8">
             <div className="flex flex-col gap-4 @xl/main:flex-row @xl/main:items-center @xl/main:justify-between">
               <div>
-                <h2 className="text-xl sm:text-2xl font-semibold mb-2">BBUX Token Balances</h2>
+                <h2 className="text-xl @sm/main:text-2xl font-semibold mb-2">BBUX Token Balances</h2>
                 <div className="space-y-2">
                   <div>
                     <p className="text-sm text-blue-100">Platform Balance</p>
-                    <p className="text-xl sm:text-2xl font-bold">{walletData ? walletData.virtualBalance.toFixed(4) : '0.0000'} BBUX</p>
+                    <p className="text-xl @sm/main:text-2xl font-bold">{walletData ? walletData.virtualBalance.toFixed(4) : '0.0000'} BBUX</p>
                     <p className="text-xs text-blue-200">Virtual tokens in the platform</p>
                   </div>
                 </div>
@@ -453,23 +453,23 @@ function WalletContent() {
               <div className="text-left @xl/main:text-right">
                 <div className="mb-2">
                   <p className="text-blue-100 text-sm">Total Earned</p>
-                  <p className="text-lg sm:text-xl font-semibold">{walletData ? walletData.totalEarned.toFixed(4) : '0.0000'} BBUX</p>
+                  <p className="text-lg @sm/main:text-xl font-semibold">{walletData ? walletData.totalEarned.toFixed(4) : '0.0000'} BBUX</p>
                 </div>
                 <div>
                   <p className="text-blue-100 text-sm">Total Spent</p>
-                  <p className="text-lg sm:text-xl font-semibold">{walletData ? walletData.totalSpent.toFixed(4) : '0.0000'} BBUX</p>
+                  <p className="text-lg @sm/main:text-xl font-semibold">{walletData ? walletData.totalSpent.toFixed(4) : '0.0000'} BBUX</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Wallet Connection Status */}
-          <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 sm:p-6 mb-6">
-            <h3 className="text-lg sm:text-xl font-semibold mb-4 text-neutral-900 dark:text-white">Wallet Connection</h3>
+          <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 @sm/main:p-6 mb-6">
+            <h3 className="text-lg @sm/main:text-xl font-semibold mb-4 text-neutral-900 dark:text-white">Wallet Connection</h3>
             <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <span className="text-neutral-600 dark:text-gray-300 text-sm sm:text-base">Connection Status:</span>
-                <span className={`px-3 py-1 rounded-full text-xs sm:text-sm font-medium w-fit ${
+              <div className="flex flex-col @sm/main:flex-row @sm/main:items-center @sm/main:justify-between gap-2">
+                <span className="text-neutral-600 dark:text-gray-300 text-sm @sm/main:text-base">Connection Status:</span>
+                <span className={`px-3 py-1 rounded-full text-xs @sm/main:text-sm font-medium w-fit ${
                   connected ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200' : 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200'
                 }`}>
                   {connected ? 'Connected' : 'Disconnected'}
@@ -477,13 +477,13 @@ function WalletContent() {
               </div>
               {connected && publicKey && (
                 <div>
-                  <span className="text-neutral-600 dark:text-gray-300 text-sm sm:text-base">Connected Address:</span>
-                  <p className="font-mono text-xs sm:text-sm bg-neutral-100 dark:bg-neutral-700 p-2 rounded-sm border border-neutral-300 dark:border-neutral-600 break-all text-neutral-800 dark:text-gray-200 mt-1">
+                  <span className="text-neutral-600 dark:text-gray-300 text-sm @sm/main:text-base">Connected Address:</span>
+                  <p className="font-mono text-xs @sm/main:text-sm bg-neutral-100 dark:bg-neutral-700 p-2 rounded-sm border border-neutral-300 dark:border-neutral-600 break-all text-neutral-800 dark:text-gray-200 mt-1">
                     {publicKey}
                   </p>
                 </div>
               )}
-              <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex flex-col @sm/main:flex-row gap-3">
                 {!connected ? (
                   <button
                     type="button"
@@ -491,14 +491,14 @@ function WalletContent() {
                       rememberFocusBeforeWalletModal()
                       setVisible(true)
                     }}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors text-sm sm:text-base"
+                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors text-sm @sm/main:text-base"
                   >
                     Connect Wallet
                   </button>
                 ) : (
                   <button
                     onClick={disconnect}
-                    className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors text-sm sm:text-base"
+                    className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors text-sm @sm/main:text-base"
                   >
                     Disconnect Wallet
                   </button>
@@ -508,16 +508,16 @@ function WalletContent() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6">
+          <div className="flex flex-col @sm/main:flex-row gap-3 @sm/main:gap-4 mb-6">
             <button
               onClick={() => setShowDepositModal(true)}
-              className="bg-green-500 hover:bg-green-600 text-white px-4 sm:px-6 py-3 rounded-lg font-semibold transition-colors text-sm sm:text-base"
+              className="bg-green-500 hover:bg-green-600 text-white px-4 @sm/main:px-6 py-3 rounded-lg font-semibold transition-colors text-sm @sm/main:text-base"
             >
               💰 Buy BBUX with SOL
             </button>
             <button
               onClick={() => setShowWithdrawModal(true)}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 sm:px-6 py-3 rounded-lg font-semibold transition-colors text-sm sm:text-base"
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 @sm/main:px-6 py-3 rounded-lg font-semibold transition-colors text-sm @sm/main:text-base"
             >
               💸 Sell BBUX for SOL
             </button>
@@ -527,12 +527,12 @@ function WalletContent() {
           {showDepositModal && (
             <FocusRestoreBoundary>
             <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4">
-              <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+              <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 @sm/main:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg sm:text-xl font-semibold text-neutral-900 dark:text-white">Buy BBUX with SOL</h3>
+                  <h3 className="text-lg @sm/main:text-xl font-semibold text-neutral-900 dark:text-white">Buy BBUX with SOL</h3>
                   <button
                     onClick={() => setShowDepositModal(false)}
-                    className="text-neutral-500 dark:text-gray-400 hover:text-neutral-700 dark:hover:text-gray-200 text-xl sm:text-2xl font-bold"
+                    className="text-neutral-500 dark:text-gray-400 hover:text-neutral-700 dark:hover:text-gray-200 text-xl @sm/main:text-2xl font-bold"
                   >
                     ×
                   </button>
@@ -542,7 +542,7 @@ function WalletContent() {
                 <div className="flex space-x-1 mb-6 bg-neutral-100 dark:bg-neutral-700 rounded-lg p-1">
                   <button
                     onClick={() => setDepositMode('direct')}
-                    className={`flex-1 py-2 px-2 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-colors ${
+                    className={`flex-1 py-2 px-2 @sm/main:px-4 rounded-md text-xs @sm/main:text-sm font-medium transition-colors ${
                       depositMode === 'direct'
                         ? 'bg-blue-500 text-white'
                         : 'text-neutral-600 dark:text-gray-300 hover:text-neutral-900 dark:hover:text-white'
@@ -552,7 +552,7 @@ function WalletContent() {
                   </button>
                   <button
                     onClick={() => setDepositMode('manual')}
-                    className={`flex-1 py-2 px-2 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-colors ${
+                    className={`flex-1 py-2 px-2 @sm/main:px-4 rounded-md text-xs @sm/main:text-sm font-medium transition-colors ${
                       depositMode === 'manual'
                         ? 'bg-blue-500 text-white'
                         : 'text-neutral-600 dark:text-gray-300 hover:text-neutral-900 dark:hover:text-white'

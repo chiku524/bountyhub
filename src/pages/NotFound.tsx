@@ -10,7 +10,7 @@ export default function NotFound() {
         description="The page you're looking for doesn't exist or has been moved."
       />
       <div className="text-center max-w-md">
-        <p className="text-6xl sm:text-7xl font-bold text-indigo-500/30 dark:text-indigo-400/20 select-none">
+        <p className="text-6xl @sm/main:text-7xl font-bold text-indigo-500/30 dark:text-indigo-400/20 select-none">
           404
         </p>
         <h1 className="mt-4 text-xl font-semibold text-neutral-900 dark:text-white">
@@ -19,7 +19,7 @@ export default function NotFound() {
         <p className="mt-2 text-neutral-600 dark:text-neutral-400">
           The page you're looking for doesn't exist or has been moved.
         </p>
-        <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+        <div className="mt-8 flex flex-col @sm/main:flex-row gap-3 justify-center">
           <Link
             to="/"
             className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors font-medium"

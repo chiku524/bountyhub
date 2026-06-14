@@ -39,7 +39,7 @@ export function Footer() {
                 <FaTwitter className="w-5 h-5" />
               </a>
             </div>
-            <nav className="flex items-center gap-6" aria-label="Footer navigation">
+            <nav className="flex flex-wrap items-center justify-center gap-4 sm:gap-6" aria-label="Footer navigation">
               <Link to="/download" className="text-neutral-600 dark:text-neutral-400 hover:text-amber-700 dark:hover:text-amber-400 transition-colors text-sm">
                 Download
               </Link>
