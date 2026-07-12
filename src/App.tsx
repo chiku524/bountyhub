@@ -24,6 +24,7 @@ import ChatSidebar from './components/ChatSidebar'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { PageRouteSkeleton } from './components/PageRouteSkeleton'
 import { CommandPaletteProvider } from './components/CommandPalette'
+import { ProtectedRoute } from './components/ProtectedRoute'
 import '@solana/wallet-adapter-react-ui/styles.css'
 
 // Eager-load critical above-the-fold route
@@ -92,25 +93,24 @@ function DocsAwareRoutes() {
         <Route path="/launch" element={<DesktopLaunch />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/profile/activity" element={<ProfileActivity />} />
-        <Route path="/profile/posts" element={<ProfilePosts />} />
-        <Route path="/profile/bookmarks" element={<ProfileBookmarks />} />
+        <Route path="/profile" element={<ProtectedRoute title="Sign in to view your profile"><Profile /></ProtectedRoute>} />
+        <Route path="/profile/activity" element={<ProtectedRoute><ProfileActivity /></ProtectedRoute>} />
+        <Route path="/profile/posts" element={<ProtectedRoute><ProfilePosts /></ProtectedRoute>} />
+        <Route path="/profile/bookmarks" element={<ProtectedRoute><ProfileBookmarks /></ProtectedRoute>} />
         <Route path="/community" element={<Community />} />
-        <Route path="/chat" element={<Chat />} />
-        <Route path="/governance" element={<Governance />} />
+        <Route path="/chat" element={<ProtectedRoute title="Sign in to use chat"><Chat /></ProtectedRoute>} />
+        <Route path="/governance" element={<ProtectedRoute title="Sign in for governance"><Governance /></ProtectedRoute>} />
         <Route path="/analytics" element={<Analytics />} />
-        <Route path="/wallet" element={<Wallet />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/posts/create" element={<CreatePost />} />
+        <Route path="/wallet" element={<ProtectedRoute title="Wallet access required" description="Please log in to access your wallet."><Wallet /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute title="Sign in to open settings"><Settings /></ProtectedRoute>} />
+        <Route path="/posts/create" element={<ProtectedRoute title="Sign in to create a post"><CreatePost /></ProtectedRoute>} />
         <Route path="/posts/:postId" element={<PostDetail />} />
         <Route path="/users/:username" element={<UserProfileRoute />} />
         <Route path="/users/:username/posts" element={<UserPosts />} />
         <Route path="/download" element={<Download />} />
         <Route path="/downloads" element={<Navigate to="/download" replace />} />
-        <Route path="/:username" element={<UserProfileRoute />} />
-        <Route path="/transactions" element={<Transactions />} />
-        <Route path="/refund-requests" element={<RefundRequests />} />
+        <Route path="/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
+        <Route path="/refund-requests" element={<ProtectedRoute><RefundRequests /></ProtectedRoute>} />
         <Route path="/docs" element={<DocsSingle />} />
         <Route path="/docs/platform" element={<Navigate to="/docs#platform-features" replace />} />
         <Route path="/docs/user-guide" element={<Navigate to="/docs#user-guide" replace />} />
@@ -121,14 +121,16 @@ function DocsAwareRoutes() {
         <Route path="/docs/refund-system" element={<Navigate to="/docs#refund-system" replace />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
-        <Route path="/admin" element={<Admin />} />
+        <Route path="/admin" element={<ProtectedRoute role="admin" title="Admin access required"><Admin /></ProtectedRoute>} />
         <Route path="/bug-bounty/campaigns" element={<BugBountyCampaigns />} />
-        <Route path="/bug-bounty/campaigns/create" element={<BugBountyCampaignCreate />} />
+        <Route path="/bug-bounty/campaigns/create" element={<ProtectedRoute><BugBountyCampaignCreate /></ProtectedRoute>} />
         <Route path="/bug-bounty/campaigns/:id" element={<BugBountyCampaignDetail />} />
-        <Route path="/bug-bounty/campaigns/:id/submit" element={<BugBountySubmit />} />
-        <Route path="/repositories" element={<Repositories />} />
-        <Route path="/repositories/:id" element={<RepositoryDetailRoute />} />
-        <Route path="/contributions" element={<Contributions />} />
+        <Route path="/bug-bounty/campaigns/:id/submit" element={<ProtectedRoute><BugBountySubmit /></ProtectedRoute>} />
+        <Route path="/repositories" element={<ProtectedRoute title="Sign in to view repositories"><Repositories /></ProtectedRoute>} />
+        <Route path="/repositories/:id" element={<ProtectedRoute><RepositoryDetailRoute /></ProtectedRoute>} />
+        <Route path="/contributions" element={<ProtectedRoute title="Sign in to view contributions"><Contributions /></ProtectedRoute>} />
+        {/* Short @username links — must stay after all fixed app paths */}
+        <Route path="/:username" element={<UserProfileRoute />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
@@ -189,6 +191,7 @@ function AppContent() {
           setPhase: desktopUpdate.setPhase,
           setPendingUpdateVersion: desktopUpdate.setPendingUpdateVersion,
           registerRetry: desktopUpdate.registerRetry,
+          registerConfirm: desktopUpdate.registerConfirm,
         }
       : null,
   )

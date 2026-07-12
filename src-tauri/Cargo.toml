@@ -1,10 +1,10 @@
 [package]
 name = "bountyhub"
-version = "0.1.0"
+version = "1.1.43"
 description = "BountyHub desktop app"
-authors = ["you"]
-license = ""
-repository = ""
+authors = ["BountyHub"]
+license = "MIT"
+repository = "https://github.com/chiku524/bountyhub"
 edition = "2021"
 
 [build-dependencies]

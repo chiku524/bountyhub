@@ -60,6 +60,10 @@ interface Env {
   GITHUB_PAT?: string
   /** Repo for releases e.g. chiku524/bountyhub */
   GITHUB_RELEASES_REPO?: string
+  /** Shared secret for cron / cleanup HTTP triggers (wrangler secret put CRON_SECRET) */
+  CRON_SECRET?: string
+  /** Base64-encoded 32-byte AES-GCM key for GitHub tokens at rest */
+  TOKEN_ENCRYPTION_KEY?: string
 }
 
 const app = new Hono<{ Bindings: Env }>()
@@ -107,32 +111,35 @@ app.get('/', (c) => {
   })
 })
 
-// Cron trigger handler for cleanup jobs
+// HTTP cron entry — requires CRON_SECRET (Cloudflare Cron Triggers should use scheduled() below)
 app.get('/cron', async (c) => {
+  const { isAuthorizedCronRequest } = await import('./utils/cronAuth')
+  if (!isAuthorizedCronRequest(c, c.env.CRON_SECRET)) {
+    if (!c.env.CRON_SECRET) {
+      return c.json({ error: 'CRON_SECRET is not configured' }, 503)
+    }
+    return c.json({ error: 'Unauthorized' }, 401)
+  }
+
   try {
-    // Call the cleanup endpoint
-    const cleanupResponse = await fetch(`${c.req.url.replace('/cron', '/api/cleanup/cron')}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    })
-    
-    const result = await cleanupResponse.json()
-    
+    const { expirePendingTransactions } = await import('./utils/expirePendingTransactions')
+    const cleanup = await expirePendingTransactions(c.env.DB)
     return c.json({
       success: true,
       message: 'Cron job executed successfully',
-      cleanup: result,
-      timestamp: new Date().toISOString()
+      cleanup,
+      timestamp: new Date().toISOString(),
     })
   } catch (error) {
     console.error('Cron job error:', error)
-    return c.json({
-      success: false,
-      error: 'Failed to execute cron job',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, 500)
+    return c.json(
+      {
+        success: false,
+        error: 'Failed to execute cron job',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
+      500
+    )
   }
 })
 
@@ -183,33 +190,13 @@ app.all('/auth/callback', async (c) => {
       return c.redirect(`${frontendUrl}/login?error=missing_code`)
     }
     
-    // Verify state to prevent CSRF attacks
-    // Note: If cookie is missing (cross-site redirect issue), we'll still validate
-    // the state parameter format for basic security
-    if (!storedState) {
-      console.warn('State cookie not found, validating state parameter format instead:', {
-        state: state,
-        stateLength: state?.length || 0,
-        action
-      })
-      
-      // If cookie is missing but state is present, validate it's a valid UUID format
-      // This provides basic protection while handling cookie issues
-      if (state && state.length === 36 && state.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
-        // Continue with the flow - state parameter provides some CSRF protection
-      } else {
-        console.error('Invalid state parameter format:', state)
-        return c.redirect(`${frontendUrl}/login?error=invalid_state`)
-      }
-    } else if (state !== storedState) {
-      console.error('State mismatch:', {
+    // Verify state to prevent CSRF — fail closed if cookie missing or mismatched
+    if (!storedState || state !== storedState) {
+      console.error('OAuth state validation failed:', {
         receivedState: state,
-        storedState: storedState,
         hasStoredState: !!storedState,
-        stateMatch: state === storedState,
-        stateLength: state?.length || 0,
-        storedStateLength: storedState?.length || 0,
-        action
+        stateMatch: storedState ? state === storedState : false,
+        action,
       })
       return c.redirect(`${frontendUrl}/login?error=invalid_state`)
     }
@@ -257,6 +244,8 @@ app.all('/auth/callback', async (c) => {
     }
     
     const accessToken = tokenData.access_token
+    const { encryptSecret } = await import('./utils/tokenEncryption')
+    const encryptedAccessToken = await encryptSecret(accessToken, c.env.TOKEN_ENCRYPTION_KEY)
 
     // Get user info from GitHub
     const userResponse = await fetch('https://api.github.com/user', {
@@ -392,7 +381,7 @@ app.all('/auth/callback', async (c) => {
           githubId: githubUser.id.toString(),
           githubUsername: githubUser.login,
           githubAvatarUrl: githubUser.avatar_url || null,
-          githubAccessToken: accessToken,
+          githubAccessToken: encryptedAccessToken,
           githubConnectedAt: new Date(),
           updatedAt: new Date()
         })
@@ -425,7 +414,7 @@ app.all('/auth/callback', async (c) => {
           .set({
             githubUsername: githubUser.login,
             githubAvatarUrl: githubUser.avatar_url || null,
-            githubAccessToken: accessToken, // In production, encrypt this
+            githubAccessToken: encryptedAccessToken,
             githubConnectedAt: new Date(),
             updatedAt: new Date()
           })
@@ -442,7 +431,7 @@ app.all('/auth/callback', async (c) => {
               githubId: githubUser.id.toString(),
               githubUsername: githubUser.login,
               githubAvatarUrl: githubUser.avatar_url || null,
-              githubAccessToken: accessToken,
+              githubAccessToken: encryptedAccessToken,
               githubConnectedAt: new Date(),
               updatedAt: new Date()
             })
@@ -466,7 +455,7 @@ app.all('/auth/callback', async (c) => {
             githubId: githubUser.id.toString(),
             githubUsername: githubUser.login,
             githubAvatarUrl: githubUser.avatar_url || null,
-            githubAccessToken: accessToken,
+            githubAccessToken: encryptedAccessToken,
             githubConnectedAt: new Date(),
             reputationPoints: 0,
             integrityScore: 5.0,
@@ -579,4 +568,19 @@ app.onError((err, c) => {
   return c.json({ error: 'Internal Server Error' }, 500)
 })
 
-export default app 
+export default {
+  fetch: app.fetch,
+  async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
+    ctx.waitUntil(
+      (async () => {
+        try {
+          const { expirePendingTransactions } = await import('./utils/expirePendingTransactions')
+          const result = await expirePendingTransactions(env.DB)
+          console.log('[scheduled] cleanup', result)
+        } catch (err) {
+          console.error('[scheduled] cleanup failed', err)
+        }
+      })()
+    )
+  },
+} 

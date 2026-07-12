@@ -96,9 +96,9 @@
       ],
       "csp": {
         "default-src": "'self' asset:",
-        "connect-src": "ipc: http://ipc.localhost https://api.bountyhub.tech wss://api.bountyhub.tech http://127.0.0.1:8788 http://localhost:8788 https://bountyhub-api.nico-chikuji.workers.dev https://api.cloudinary.com https://api.giphy.com https://api.dicebear.com https://api.html2pdf.app https://api.mainnet-beta.solana.com",
+        "connect-src": "ipc: http://ipc.localhost https://api.bountyhub.tech wss://api.bountyhub.tech http://127.0.0.1:8788 http://localhost:8788 https://api.cloudinary.com https://api.giphy.com https://api.dicebear.com https://api.html2pdf.app https://api.mainnet-beta.solana.com",
         "font-src": ["https://fonts.gstatic.com"],
-        "img-src": "'self' asset: http://asset.localhost blob: data: https: http: https://*.giphy.com https://media.giphy.com https://media0.giphy.com https://media1.giphy.com https://media2.giphy.com https://media3.giphy.com https://media4.giphy.com https://i.giphy.com",
+        "img-src": "'self' asset: http://asset.localhost blob: data: https://*.giphy.com https://media.giphy.com https://media0.giphy.com https://media1.giphy.com https://media2.giphy.com https://media3.giphy.com https://media4.giphy.com https://i.giphy.com https://res.cloudinary.com https://*.cloudinary.com https://api.dicebear.com https://*.dicebear.com https://avatars.githubusercontent.com https://*.githubusercontent.com https://github.com https://bountyhub.tech https://www.bountyhub.tech",
         "style-src": "'unsafe-inline' 'self' https://fonts.googleapis.com"
       }
     }

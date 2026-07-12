@@ -37,12 +37,18 @@ function networkErrorMessage(): string {
   return `Cannot reach the server (${base}). Check your connection and try again.`
 }
 
+/** Default request timeout — prevents hung UI when the API never responds. */
+const DEFAULT_TIMEOUT_MS = 30_000
+
 export class ApiClient {
   /** Wraps fetch so desktop/web show a clear message when the API is unreachable (instead of only "Failed to fetch"). */
   private async fetchResolved(url: string, init: RequestInit): Promise<Response> {
     try {
       return await fetch(url, init)
     } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        throw err
+      }
       const isFailedFetch =
         err instanceof TypeError ||
         (err instanceof Error && /failed to fetch|networkerror|load failed/i.test(err.message))
@@ -67,23 +73,42 @@ export class ApiClient {
       }
     }
 
-    const response = await this.fetchResolved(url, {
-      ...options,
-      headers,
-      credentials: 'include', // Include cookies for authentication (web + desktop when cookies work)
-    })
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Network error' }))
-      const errorObj = new Error(error.error || error.details || `HTTP ${response.status}`)
-      // Attach response for detailed error handling
-      ;(errorObj as any).response = response
-      ;(errorObj as any).errorData = error
-      throw errorObj
+    const controller = new AbortController()
+    const externalSignal = options.signal
+    const onExternalAbort = () => controller.abort()
+    if (externalSignal) {
+      if (externalSignal.aborted) controller.abort()
+      else externalSignal.addEventListener('abort', onExternalAbort, { once: true })
     }
+    const timeoutId = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS)
 
-    const data = await response.json()
-    return data
+    try {
+      const response = await this.fetchResolved(url, {
+        ...options,
+        headers,
+        credentials: 'include',
+        signal: controller.signal,
+      })
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: 'Network error' }))
+        const errorObj = new Error(error.error || error.details || `HTTP ${response.status}`)
+        ;(errorObj as any).response = response
+        ;(errorObj as any).errorData = error
+        throw errorObj
+      }
+
+      return await response.json()
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        if (externalSignal?.aborted) throw err
+        throw new Error(`Request timed out after ${DEFAULT_TIMEOUT_MS / 1000}s. Please try again.`)
+      }
+      throw err
+    } finally {
+      clearTimeout(timeoutId)
+      if (externalSignal) externalSignal.removeEventListener('abort', onExternalAbort)
+    }
   }
 
   // Special method for tags that uses production API in development

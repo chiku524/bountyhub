@@ -9,8 +9,8 @@ const INTRO_DURATION_MS = 1800
 const DESKTOP_INITIAL_PATH_KEY = 'desktop_initial_path'
 
 /**
- * Frameless splash: dice.express-style intro (staggered logo / title / tagline) →
- * quiet update check (no overlay while checking) → optional download/install overlay → main window.
+ * Frameless splash: intro → quiet update check → if update available, wait for
+ * Install/Later on the overlay → then main window. No silent auto-install.
  */
 export function DesktopHomeGate() {
   const { user, loading } = useAuth()
@@ -18,6 +18,10 @@ export function DesktopHomeGate() {
   const [introDone, setIntroDone] = useState(false)
   const [postUpdate, setPostUpdate] = useState(false)
   const updateCancelledRef = useRef(false)
+  const pendingUpdateRef = useRef<{
+    version: string
+    downloadAndInstall: (onEvent?: (ev: { event: string }) => void) => Promise<void>
+  } | null>(null)
 
   useEffect(() => {
     if (!isDesktopApp()) {
@@ -28,47 +32,91 @@ export function DesktopHomeGate() {
     return () => clearTimeout(t)
   }, [])
 
-  // After intro: run updater once; on any failure or no update, allow auth gate to close splash
+  // After intro: check once; offer install if available, otherwise continue
   useEffect(() => {
     if (!introDone || !isDesktopApp()) return
     updateCancelledRef.current = false
 
     const setPhase = desktopUpdate?.setPhase
     const setPendingUpdateVersion = desktopUpdate?.setPendingUpdateVersion
+    const registerConfirm = desktopUpdate?.registerConfirm
+    const registerRetry = desktopUpdate?.registerRetry
 
-    const run = async () => {
-      try {
-        const { check } = await import('@tauri-apps/plugin-updater')
-        const { relaunch } = await import('@tauri-apps/plugin-process')
-
-        const update = await check()
-        if (updateCancelledRef.current) return
-
-        if (update) {
-          setPendingUpdateVersion?.(update.version)
-          setPhase?.('downloading')
-          await update.downloadAndInstall((ev) => {
-            if (ev.event === 'Finished') setPhase?.('installing')
-          })
-          setPhase?.('restarting')
-          await relaunch()
-          return
-        }
-      } catch {
-        // dice.express: missing updater / network errors do not block the app
-      }
-
+    const finishSplash = () => {
       if (updateCancelledRef.current) return
       setPostUpdate(true)
     }
 
-    void run()
+    const installPending = async () => {
+      const update = pendingUpdateRef.current
+      if (!update) {
+        finishSplash()
+        return
+      }
+      try {
+        const { relaunch } = await import('@tauri-apps/plugin-process')
+        setPhase?.('downloading')
+        await update.downloadAndInstall((ev) => {
+          if (ev.event === 'Finished') setPhase?.('installing')
+        })
+        setPhase?.('restarting')
+        await relaunch()
+      } catch {
+        setPhase?.('idle')
+        finishSplash()
+      }
+    }
+
+    registerConfirm?.(installPending)
+    registerRetry?.(() => {
+      void runCheck()
+    })
+
+    async function runCheck() {
+      try {
+        const { check } = await import('@tauri-apps/plugin-updater')
+        setPhase?.('checking')
+        const update = await check()
+        if (updateCancelledRef.current) return
+
+        if (update) {
+          pendingUpdateRef.current = update
+          setPendingUpdateVersion?.(update.version)
+          setPhase?.('available')
+          // Stay on splash until user chooses Install or Later (Later → dismiss → we watch phase)
+          return
+        }
+      } catch {
+        // Missing updater / network errors do not block the app
+      }
+
+      setPhase?.('idle')
+      finishSplash()
+    }
+
+    void runCheck()
     return () => {
       updateCancelledRef.current = true
     }
-  }, [introDone, desktopUpdate?.setPhase, desktopUpdate?.setPendingUpdateVersion])
+  }, [
+    introDone,
+    desktopUpdate?.setPhase,
+    desktopUpdate?.setPendingUpdateVersion,
+    desktopUpdate?.registerConfirm,
+    desktopUpdate?.registerRetry,
+  ])
 
-  // Close splash only after auth has settled (web app) or updater finished without relaunch
+  // When user dismisses "available" on splash (Later), continue into the app
+  useEffect(() => {
+    if (!introDone || !isDesktopApp()) return
+    if (desktopUpdate?.phase === 'idle' && !postUpdate && pendingUpdateRef.current) {
+      // User dismissed an available update
+      pendingUpdateRef.current = null
+      setPostUpdate(true)
+    }
+  }, [desktopUpdate?.phase, introDone, postUpdate])
+
+  // Close splash only after auth has settled and updater finished without relaunch
   useEffect(() => {
     if (!postUpdate || !isDesktopApp() || loading) return
 

@@ -45,7 +45,7 @@ export class ErrorBoundary extends Component<Props, State> {
               Something went wrong
             </h1>
             <p className="mt-2 text-neutral-600 dark:text-neutral-400 text-sm">
-              We've been notified and are looking into it. You can try refreshing or head back home.
+              An unexpected error occurred. You can try refreshing the page or head back home.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
               <button

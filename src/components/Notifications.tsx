@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthProvider'
 import { useNavigate } from 'react-router-dom'
 import { LoadingSpinner } from './LoadingSpinner'
 import { browserNotificationService } from '../utils/browserNotifications'
+import { useVisibilityAwareInterval } from '../hooks/useVisibilityAwareInterval'
 
 interface Notification {
   id: string
@@ -72,16 +73,14 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
     }
   }, [user, isOpen])
 
-  // Poll for new notifications every 30 seconds
-  useEffect(() => {
-    if (!user) return
-
-    const pollInterval = setInterval(() => {
+  // Poll for new notifications every 30 seconds while the tab is visible
+  useVisibilityAwareInterval(
+    () => {
       fetchNotifications()
-    }, 30000) // Poll every 30 seconds
-
-    return () => clearInterval(pollInterval)
-  }, [user])
+    },
+    30000,
+    Boolean(user)
+  )
 
   // Show browser notifications for new unread notifications
   useEffect(() => {

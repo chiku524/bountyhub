@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { useAuth } from '../contexts/AuthProvider'
 import { api } from '../utils/api'
 import { PageContainer } from '../components/PageContainer'
@@ -6,6 +6,7 @@ import { PageHeader } from '../components/PageHeader'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { ErrorMessage } from '../components/ErrorMessage'
 import { FiTrendingUp, FiUsers, FiDollarSign, FiMessageSquare, FiCheckCircle, FiActivity } from 'react-icons/fi'
+import { useVisibilityAwareInterval } from '../hooks/useVisibilityAwareInterval'
 
 interface PlatformStats {
   activeBounties: number
@@ -32,14 +33,7 @@ export default function Analytics() {
   const [error, setError] = useState<string | null>(null)
   const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'all'>('all')
 
-  useEffect(() => {
-    fetchStats()
-    // Refresh stats every 5 minutes
-    const interval = setInterval(fetchStats, 300000)
-    return () => clearInterval(interval)
-  }, [selectedPeriod])
-
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       setLoading(true)
       const [platformData, adminData] = await Promise.all([
@@ -48,15 +42,18 @@ export default function Analytics() {
       ])
 
       setPlatformStats(platformData)
-      if (adminData) {
-        setAdminStats(adminData.stats)
-      }
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch analytics')
+      setAdminStats(adminData?.stats ?? null)
+      setError(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load analytics')
     } finally {
       setLoading(false)
     }
-  }
+  }, [user?.role])
+
+  useVisibilityAwareInterval(() => {
+    void fetchStats()
+  }, 300000, true)
 
   if (loading && !platformStats) {
     return (

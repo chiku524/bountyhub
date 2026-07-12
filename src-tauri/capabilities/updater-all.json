@@ -1,9 +1,8 @@
 {
   "identifier": "updater-all",
-  "description": "Grant updater plugin IPC on all windows/webviews (main + splash + any default webview label).",
+  "description": "Grant updater plugin IPC on splash and main windows only.",
   "local": true,
-  "windows": ["*"],
-  "webviews": ["*"],
+  "windows": ["main", "splashscreen"],
   "permissions": [
     "updater:allow-check",
     "updater:allow-download",

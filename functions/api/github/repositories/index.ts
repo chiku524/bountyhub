@@ -9,6 +9,7 @@ interface Env {
   NODE_ENV?: string
   GITHUB_CLIENT_ID: string
   GITHUB_CLIENT_SECRET: string
+  TOKEN_ENCRYPTION_KEY?: string
 }
 
 const app = new Hono<{ Bindings: Env }>()
@@ -151,12 +152,25 @@ app.post('/sync', async (c) => {
       }, 400)
     }
 
+    let githubToken: string
+    try {
+      const { decryptSecret } = await import('../../../utils/tokenEncryption')
+      githubToken = await decryptSecret(user.githubAccessToken, c.env.TOKEN_ENCRYPTION_KEY)
+    } catch (decryptErr) {
+      console.error('Failed to decrypt GitHub access token:', decryptErr)
+      return c.json({
+        error: 'GitHub token could not be decrypted. Please reconnect your GitHub account from Settings.',
+        phase: 'auth',
+        requiresReconnect: true
+      }, 400)
+    }
+
     let githubResponse: Response
     try {
       // Fetch repositories from GitHub API (use recommended Accept and API version headers)
       githubResponse = await fetch('https://api.github.com/user/repos?per_page=100&sort=updated', {
         headers: {
-          'Authorization': `Bearer ${user.githubAccessToken}`,
+          'Authorization': `Bearer ${githubToken}`,
           'Accept': 'application/vnd.github+json',
           'X-GitHub-Api-Version': '2022-11-28',
           'User-Agent': 'BountyHub-OAuth'

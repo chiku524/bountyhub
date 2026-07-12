@@ -24,8 +24,38 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Build frontend
-        run: npm run build
+      - name: Type-check frontend
+        run: npm run typecheck
 
       - name: Type-check API
         run: npm run typecheck:api
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Build frontend
+        run: npm run build
+
+  desktop-rust:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src-tauri
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Cargo clippy
+        run: cargo clippy -- -D warnings
+
+      - name: Cargo check
+        run: cargo check

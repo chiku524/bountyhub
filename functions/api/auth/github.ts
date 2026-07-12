@@ -13,6 +13,7 @@ interface Env {
   GITHUB_CLIENT_SECRET: string
   GITHUB_CALLBACK_URL: string
   SESSION_SECRET: string
+  TOKEN_ENCRYPTION_KEY?: string
 }
 
 const app = new Hono<{ Bindings: Env }>()
@@ -288,6 +289,8 @@ app.get('/callback', async (c) => {
     }
     
     const accessToken = tokenData.access_token
+    const { encryptSecret } = await import('../../utils/tokenEncryption')
+    const encryptedAccessToken = await encryptSecret(accessToken, c.env.TOKEN_ENCRYPTION_KEY)
     
     // Get user info from GitHub
     const userResponse = await fetch('https://api.github.com/user', {
@@ -343,7 +346,7 @@ app.get('/callback', async (c) => {
         .set({
           githubUsername: githubUser.login,
           githubAvatarUrl: githubUser.avatar_url || null,
-          githubAccessToken: accessToken, // In production, encrypt this
+          githubAccessToken: encryptedAccessToken, // AES-GCM when TOKEN_ENCRYPTION_KEY is set
           githubConnectedAt: new Date(),
           updatedAt: new Date()
         })
@@ -360,7 +363,7 @@ app.get('/callback', async (c) => {
             githubId: githubUser.id.toString(),
             githubUsername: githubUser.login,
             githubAvatarUrl: githubUser.avatar_url || null,
-            githubAccessToken: accessToken,
+            githubAccessToken: encryptedAccessToken,
             githubConnectedAt: new Date(),
             updatedAt: new Date()
           })
@@ -384,7 +387,7 @@ app.get('/callback', async (c) => {
           githubId: githubUser.id.toString(),
           githubUsername: githubUser.login,
           githubAvatarUrl: githubUser.avatar_url || null,
-          githubAccessToken: accessToken,
+          githubAccessToken: encryptedAccessToken,
           githubConnectedAt: new Date(),
           reputationPoints: 0,
           integrityScore: 5.0,

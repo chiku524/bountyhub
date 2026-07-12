@@ -52,6 +52,11 @@ VITE_API_URL = "http://localhost:8788"
 # Local: use .dev.vars or paste key here temporarily (do not commit secrets)
 VITE_GIPHY_API_KEY = ""
 
+# Local cron auth + token encryption (override in .dev.vars for real values)
+CRON_SECRET = "dev-cron-secret"
+# 32 zero bytes base64 — replace in .dev.vars for anything beyond local testing
+TOKEN_ENCRYPTION_KEY = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+
 # GitHub OAuth Configuration (Development)
 GITHUB_CLIENT_ID = "Ov23liVwcihvw3cEMGWC"
 GITHUB_CLIENT_SECRET = "c0be0053c57a56409761b55f573243335aa27300"

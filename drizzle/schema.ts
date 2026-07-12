@@ -17,7 +17,7 @@ export const users = sqliteTable('users', {
   // GitHub integration fields
   githubId: text('github_id').unique(),
   githubUsername: text('github_username'),
-  githubAccessToken: text('github_access_token'), // Should be encrypted in production
+  githubAccessToken: text('github_access_token'), // AES-GCM via TOKEN_ENCRYPTION_KEY (enc:v1:…)
   githubAvatarUrl: text('github_avatar_url'),
   githubConnectedAt: integer('github_connected_at', { mode: 'timestamp' }),
 });

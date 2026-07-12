@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { isDesktopApp } from '../utils/desktop'
 import {
   DESKTOP_WINDOW_STATE_KEY,
+  clampWindowStateToScreen,
   parseSavedWindowState,
   saveWindowStateToStorage,
   type DesktopWindowState,
@@ -39,11 +40,12 @@ export function useDesktopWindowState(isMainApp: boolean) {
         const win = getCurrentWebviewWindow()
 
         if (saved) {
+          const clamped = clampWindowStateToScreen(saved)
           await invoke('set_window_state', {
-            width: saved.width,
-            height: saved.height,
-            x: saved.x,
-            y: saved.y,
+            width: clamped.width,
+            height: clamped.height,
+            x: clamped.x,
+            y: clamped.y,
           })
         } else {
           await win.setSize(new LogicalSize(FULL_WIDTH, FULL_HEIGHT))

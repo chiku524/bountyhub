@@ -8,12 +8,72 @@ import './desktop-update-overlay.css'
 const FULL_WINDOW_WIDTH = 1200
 const FULL_WINDOW_HEIGHT = 800
 
+async function expandMainWindow() {
+  if (!isDesktopApp()) return
+  try {
+    const { getCurrentWebviewWindow } = await import('@tauri-apps/api/webviewWindow')
+    const { LogicalSize } = await import('@tauri-apps/api/dpi')
+    const win = getCurrentWebviewWindow()
+    await win.setSize(new LogicalSize(FULL_WINDOW_WIDTH, FULL_WINDOW_HEIGHT))
+    await win.center()
+  } catch (e) {
+    if (import.meta.env.DEV) console.debug('[DesktopUpdateOverlay] expand window', e)
+  }
+}
+
 export function DesktopUpdateOverlay() {
   const ctx = useDesktopUpdate()
 
   if (!ctx) return null
-  const { phase, errorMessage, pendingUpdateVersion, setPhase, retryUpdate } = ctx
+  const {
+    phase,
+    errorMessage,
+    pendingUpdateVersion,
+    setPhase,
+    retryUpdate,
+    confirmUpdate,
+    dismissUpdate,
+  } = ctx
   if (phase === 'idle') return null
+
+  if (phase === 'available') {
+    return (
+      <div className="desktop-update-overlay" role="dialog" aria-modal="true" aria-labelledby="desktop-update-available-title">
+        <div className="desktop-update-overlay__card">
+          <div className="desktop-update-overlay__symbol" aria-hidden>
+            <img src={logoUrl} alt="" width={56} height={56} />
+          </div>
+          <p className="desktop-update-overlay__name" id="desktop-update-available-title">
+            Update available
+          </p>
+          <p className="desktop-update-overlay__message">
+            {pendingUpdateVersion
+              ? `Version ${pendingUpdateVersion} is ready to install.`
+              : 'A new version is ready to install.'}
+          </p>
+          <div className="desktop-update-overlay__actions">
+            <button
+              type="button"
+              className="desktop-update-overlay__btn desktop-update-overlay__btn--secondary"
+              onClick={() => {
+                void expandMainWindow()
+                dismissUpdate()
+              }}
+            >
+              Later
+            </button>
+            <button
+              type="button"
+              className="desktop-update-overlay__btn desktop-update-overlay__btn--primary"
+              onClick={() => confirmUpdate()}
+            >
+              Install and restart
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   if (phase === 'error') {
     return (
@@ -31,17 +91,7 @@ export function DesktopUpdateOverlay() {
               type="button"
               className="desktop-update-overlay__btn desktop-update-overlay__btn--secondary"
               onClick={async () => {
-                if (isDesktopApp()) {
-                  try {
-                    const { getCurrentWebviewWindow } = await import('@tauri-apps/api/webviewWindow')
-                    const { LogicalSize } = await import('@tauri-apps/api/dpi')
-                    const win = getCurrentWebviewWindow()
-                    await win.setSize(new LogicalSize(FULL_WINDOW_WIDTH, FULL_WINDOW_HEIGHT))
-                    await win.center()
-                  } catch (e) {
-                    if (import.meta.env.DEV) console.debug('[DesktopUpdateOverlay] expand on Continue', e)
-                  }
-                }
+                await expandMainWindow()
                 setPhase('idle')
               }}
             >

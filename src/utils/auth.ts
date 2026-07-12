@@ -43,22 +43,17 @@ export async function register({
       return { success: false, error: 'Username already taken' }
     }
 
-    // Check if this is the first user (to grant admin role)
-    const allUsers = await db.select().from(users).limit(1)
-    const isFirstUser = allUsers.length === 0
-    const userRole: 'user' | 'moderator' | 'admin' = isFirstUser ? 'admin' : 'user'
-
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12)
 
-    // Create new user
+    // Create new user (admin must be granted explicitly — never via first signup)
     const userId = crypto.randomUUID()
     const newUser = {
       id: userId,
       email,
       username,
       password: hashedPassword,
-      role: userRole, // Grant admin role to first user
+      role: 'user' as const,
       reputationPoints: 0,
       integrityScore: 5.0,
       totalRatings: 0,
