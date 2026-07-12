@@ -1,59 +1,16 @@
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import { useAuth } from '../contexts/AuthProvider'
-import { api } from '../utils/api'
 import { PageContainer } from '../components/PageContainer'
 import { PageHeader } from '../components/PageHeader'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { ErrorMessage } from '../components/ErrorMessage'
 import { FiTrendingUp, FiUsers, FiDollarSign, FiMessageSquare, FiCheckCircle, FiActivity } from 'react-icons/fi'
-import { useVisibilityAwareInterval } from '../hooks/useVisibilityAwareInterval'
-
-interface PlatformStats {
-  activeBounties: number
-  questionsAnswered: number
-  totalRewards: string
-  communityMembers: number
-  totalPosts: number
-  totalAnswers: number
-  totalBBUX: string
-}
-
-interface AdminStats {
-  totalUsers: number
-  userCount: number
-  moderatorCount: number
-  adminCount: number
-}
+import { useAnalyticsData } from '../hooks/useAnalyticsData'
 
 export default function Analytics() {
   const { user } = useAuth()
-  const [platformStats, setPlatformStats] = useState<PlatformStats | null>(null)
-  const [adminStats, setAdminStats] = useState<AdminStats | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'all'>('all')
-
-  const fetchStats = useCallback(async () => {
-    try {
-      setLoading(true)
-      const [platformData, adminData] = await Promise.all([
-        api.request<PlatformStats>('/api/stats'),
-        user?.role === 'admin' ? api.getAdminStats().catch(() => null) : Promise.resolve(null)
-      ])
-
-      setPlatformStats(platformData)
-      setAdminStats(adminData?.stats ?? null)
-      setError(null)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load analytics')
-    } finally {
-      setLoading(false)
-    }
-  }, [user?.role])
-
-  useVisibilityAwareInterval(() => {
-    void fetchStats()
-  }, 300000, true)
+  const { platformStats, adminStats, loading, error, refetch } = useAnalyticsData()
 
   if (loading && !platformStats) {
     return (
@@ -69,7 +26,7 @@ export default function Analytics() {
   if (error) {
     return (
       <PageContainer>
-        <ErrorMessage message={error} onRetry={fetchStats} />
+        <ErrorMessage message={error} onRetry={() => { void refetch() }} />
       </PageContainer>
     )
   }

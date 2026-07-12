@@ -65,3 +65,12 @@ bash.exe.stackdump
 
 # Windows shell artifact
 nul
+
+# Local secret backups (never commit)
+.secrets.local
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

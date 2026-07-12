@@ -3,22 +3,9 @@ import { useAuth } from '../contexts/AuthProvider'
 import { useNavigate } from 'react-router-dom'
 import { LoadingSpinner } from './LoadingSpinner'
 import { browserNotificationService } from '../utils/browserNotifications'
-import { useVisibilityAwareInterval } from '../hooks/useVisibilityAwareInterval'
+import { useNotificationsQuery, type AppNotification } from '../hooks/useNotificationsQuery'
 
-interface Notification {
-  id: string
-  userId: string
-  type: 'comment' | 'vote' | 'answer' | 'bounty' | 'system'
-  title: string
-  message: string
-  read: boolean
-  createdAt: string
-  navigation?: {
-    type: 'post' | 'home' | 'profile' | 'wallet'
-    id?: string
-    url: string
-  }
-}
+export type Notification = AppNotification
 
 export interface NotificationsRef {
   toggle: () => void
@@ -28,13 +15,10 @@ interface NotificationsProps {
   onUnreadCountChange?: (count: number) => void
 }
 
-const API_URL = import.meta.env.VITE_API_URL || '';
-
 export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({ onUnreadCountChange }, ref) => {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const [notifications, setNotifications] = useState<Notification[]>([])
-  const [loading, setLoading] = useState(false)
+  const { notifications, loading, refetch, markAsRead, markAllAsRead } = useNotificationsQuery(Boolean(user))
   const [isOpen, setIsOpen] = useState(false)
   const [popupStyle, setPopupStyle] = useState<{ left?: string; right?: string; top: string }>({ top: '0px' })
   const popupRef = useRef<HTMLDivElement>(null)
@@ -58,51 +42,34 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
     toggle: handleToggle
   }))
 
-  // Fetch notifications on mount and when popup opens
   useEffect(() => {
     if (user) {
-      fetchNotifications()
-      // Request browser notification permission
-      browserNotificationService.requestPermission()
+      void browserNotificationService.requestPermission()
     }
   }, [user])
 
   useEffect(() => {
     if (user && isOpen) {
-      fetchNotifications()
+      void refetch()
     }
-  }, [user, isOpen])
+  }, [user, isOpen, refetch])
 
-  // Poll for new notifications every 30 seconds while the tab is visible
-  useVisibilityAwareInterval(
-    () => {
-      fetchNotifications()
-    },
-    30000,
-    Boolean(user)
-  )
-
-  // Show browser notifications for new unread notifications
   useEffect(() => {
     if (!user || notifications.length === 0) return
 
-    // Check for new unread notifications
-    const unreadNotifications = notifications.filter(n => !n.read)
-    
+    const unreadNotifications = notifications.filter((n) => !n.read)
+
     if (unreadNotifications.length > 0 && browserNotificationService.isEnabled()) {
-      // Show notification for the most recent unread
       const latest = unreadNotifications[0]
-      
-      // Only show if it's a bounty notification or recently created (within last minute)
       const isRecent = new Date(latest.createdAt).getTime() > Date.now() - 60000
-      
+
       if (latest.type === 'bounty' || isRecent) {
         if (latest.type === 'bounty') {
           browserNotificationService.showBountyNotification(
             latest.title,
             latest.message,
             latest.navigation?.id,
-            undefined // amount not available in notification
+            undefined
           )
         } else if (latest.type === 'answer') {
           browserNotificationService.showAnswerNotification(
@@ -121,186 +88,98 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
             body: latest.message,
             data: {
               url: latest.navigation?.url || '/',
-              type: latest.type
-            }
+              type: latest.type,
+            },
           })
         }
       }
     }
   }, [notifications, user])
 
+  const unreadCount = notifications.filter((n) => !n.read).length
+
   useEffect(() => {
-    if (onUnreadCountChange) {
-      onUnreadCountChange(unreadCount)
-    }
-  }, [notifications, onUnreadCountChange])
-
-  const fetchNotifications = async () => {
-    setLoading(true)
-    try {
-      const response = await fetch(`${API_URL}/api/notifications`, { credentials: 'include' })
-      if (!response.ok) throw new Error('Failed to fetch notifications')
-      const data = await response.json()
-      setNotifications(data)
-    } catch (error) {
-      console.error('Failed to fetch notifications:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const markAsRead = async (notificationId: string) => {
-    try {
-      await fetch(`${API_URL}/api/notifications/${notificationId}/read`, { 
-        method: 'POST',
-        credentials: 'include'
-      })
-      setNotifications(prev => 
-        prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
-      )
-    } catch (error) {
-      console.error('Failed to mark notification as read:', error)
-    }
-  }
-
-  const markAllAsRead = async () => {
-    try {
-      await fetch(`${API_URL}/api/notifications/read-all`, { 
-        method: 'POST',
-        credentials: 'include'
-      })
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })))
-    } catch (error) {
-      console.error('Failed to mark all notifications as read:', error)
-    }
-  }
+    onUnreadCountChange?.(unreadCount)
+  }, [unreadCount, onUnreadCountChange])
 
   const handleNotificationClick = async (notification: Notification) => {
-    // Mark as read first
     await markAsRead(notification.id)
-    
-    // Close the notifications popup
     setIsOpen(false)
-    
-    // Navigate to the appropriate page
     if (notification.navigation) {
       navigate(notification.navigation.url)
     }
   }
 
-  const unreadCount = notifications.filter(n => !n.read).length
-
   const handleToggle = () => {
     if (!isOpen) {
-      // Find the notifications button - check both sidebar and top navbar
       const sidebarButton = document.querySelector('[data-notifications-button]') as HTMLElement
       const topNavButton = document.querySelector('[data-notifications-button-topnav]') as HTMLElement
       const notificationsButton = sidebarButton || topNavButton
-      
+
       if (notificationsButton) {
         const buttonRect = notificationsButton.getBoundingClientRect()
-        
         const viewportWidth = window.innerWidth
         const viewportHeight = window.innerHeight
-        const popupWidth = 320 // w-80 = 320px
-        const popupHeight = 400 // max-h-96 + header + padding = ~400px
-        const margin = 16 // 16px margin from button
-        
-        // Determine if button is in top navbar (TopNav) or sidebar (Nav)
+        const popupWidth = 320
+        const popupHeight = 400
+        const margin = 16
         const isTopNav = !!topNavButton
-        
         let newPopupStyle: { left?: string; right?: string; top: string }
-        
+
         if (isTopNav) {
-          // For TopNav: position below the button, aligned to the right edge
           let topPosition = buttonRect.bottom + margin
-          
-          // If popup would overflow bottom, position it above the button
           if (topPosition + popupHeight > viewportHeight - margin) {
             topPosition = buttonRect.top - popupHeight - margin
-            // Ensure it doesn't go above viewport
-            if (topPosition < margin) {
-              topPosition = margin
-            }
+            if (topPosition < margin) topPosition = margin
           }
-          
-          // Align to the right edge of the button
-          const rightPosition = viewportWidth - buttonRect.right
-          
           newPopupStyle = {
-            right: `${rightPosition}px`,
-            top: `${topPosition}px`
+            right: `${viewportWidth - buttonRect.right}px`,
+            top: `${topPosition}px`,
           }
         } else {
-          // For sidebar: position to the right of the button
-          // Calculate vertical positioning to prevent overflow
-          let topPosition = buttonRect.top + (buttonRect.height / 2) - (popupHeight / 2)
-          
-          // Ensure popup doesn't go above viewport
-          if (topPosition < margin) {
-            topPosition = margin
-          }
-          
-          // Ensure popup doesn't go below viewport
+          let topPosition = buttonRect.top + buttonRect.height / 2 - popupHeight / 2
+          if (topPosition < margin) topPosition = margin
           if (topPosition + popupHeight > viewportHeight - margin) {
             topPosition = viewportHeight - popupHeight - margin
           }
-          
-          // Calculate left position from button's right edge
           const leftPosition = buttonRect.right + margin
-          
-          // Ensure popup doesn't overflow viewport width
           if (leftPosition + popupWidth > viewportWidth - margin) {
-            // If popup would overflow, position it with margin from right edge
-            newPopupStyle = {
-              right: `${margin}px`,
-              top: `${topPosition}px`
-            }
+            newPopupStyle = { right: `${margin}px`, top: `${topPosition}px` }
           } else {
-            newPopupStyle = {
-              left: `${leftPosition}px`,
-              top: `${topPosition}px`
-            }
+            newPopupStyle = { left: `${leftPosition}px`, top: `${topPosition}px` }
           }
         }
-        
+
         setPopupStyle(newPopupStyle)
       }
     }
     setIsOpen(!isOpen)
   }
 
-  // Handle click outside to close popup
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (isOpen && popupRef.current && !popupRef.current.contains(event.target as Node)) {
-        // Check if click is on the notifications button
         const target = event.target as HTMLElement
         const sidebarButton = document.querySelector('[data-notifications-button]')
         const topNavButton = document.querySelector('[data-notifications-button-topnav]')
         const notificationsButton = sidebarButton || topNavButton
-        
         if (notificationsButton && (notificationsButton.contains(target) || notificationsButton === target)) {
-          // Don't close if clicking the button itself
           return
         }
-        
         setIsOpen(false)
       }
     }
 
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside)
-      return () => {
-        document.removeEventListener('mousedown', handleClickOutside)
-      }
+      return () => document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [isOpen])
 
   return (
     <>
       {isOpen && (
-        <div 
+        <div
           ref={popupRef}
           className="fixed w-80 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-lg z-10000 text-neutral-900 dark:text-white"
           style={popupStyle}
@@ -321,7 +200,9 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
                   <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Notifications</h3>
                   {unreadCount > 0 && (
                     <button
-                      onClick={markAllAsRead}
+                      onClick={() => {
+                        void markAllAsRead()
+                      }}
                       className="text-sm text-indigo-400 hover:text-indigo-300"
                     >
                       Mark all read
@@ -336,9 +217,7 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
                     <LoadingSpinner size="sm" />
                   </div>
                 ) : notifications.length === 0 ? (
-                  <div className="p-4 text-center text-neutral-500 dark:text-gray-400">
-                    No notifications
-                  </div>
+                  <div className="p-4 text-center text-neutral-500 dark:text-gray-400">No notifications</div>
                 ) : (
                   <div className="divide-y divide-neutral-200 dark:divide-neutral-700">
                     {notifications.map((notification) => (
@@ -347,12 +226,16 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
                         className={`p-4 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 cursor-pointer transition-colors ${
                           !notification.read ? 'bg-blue-500/10 dark:bg-blue-500/10' : ''
                         }`}
-                        onClick={() => handleNotificationClick(notification)}
+                        onClick={() => {
+                          void handleNotificationClick(notification)
+                        }}
                       >
                         <div className="flex items-start space-x-3">
-                          <div className={`w-2 h-2 rounded-full mt-2 ${
-                            notification.read ? 'bg-neutral-400 dark:bg-gray-500' : 'bg-blue-500'
-                          }`} />
+                          <div
+                            className={`w-2 h-2 rounded-full mt-2 ${
+                              notification.read ? 'bg-neutral-400 dark:bg-gray-500' : 'bg-blue-500'
+                            }`}
+                          />
                           <div className="flex-1">
                             <div className="flex items-center justify-between">
                               <h4 className="text-sm font-medium text-neutral-900 dark:text-white">
@@ -364,9 +247,7 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
                                 </svg>
                               )}
                             </div>
-                            <p className="text-sm text-neutral-600 dark:text-gray-400 mt-1">
-                              {notification.message}
-                            </p>
+                            <p className="text-sm text-neutral-600 dark:text-gray-400 mt-1">{notification.message}</p>
                             <p className="text-xs text-neutral-400 dark:text-gray-500 mt-2">
                               {new Date(notification.createdAt).toLocaleDateString()}
                             </p>
@@ -383,4 +264,4 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
       )}
     </>
   )
-}) 
+})

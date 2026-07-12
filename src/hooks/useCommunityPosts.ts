@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../utils/api'
 import {
   buildCommunityPostsQuery,
   type CommunityFilterOptions,
-  type CommunityPostsPagination,
 } from '../utils/communityPosts'
 import type { Post } from '../types'
+import { queryKeys } from '../lib/queryClient'
 
 const DEFAULT_FILTERS: CommunityFilterOptions = {
   status: '',
@@ -18,85 +19,63 @@ const DEFAULT_FILTERS: CommunityFilterOptions = {
 const EXPORT_LIMIT = 100
 
 export function useCommunityPosts(postsPerPage = 10) {
-  const [posts, setPosts] = useState<Post[]>([])
-  const [pagination, setPagination] = useState<CommunityPostsPagination>({
-    page: 1,
+  const queryClient = useQueryClient()
+  const [searchQuery, setSearchQuery] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [filters, setFilters] = useState<CommunityFilterOptions>(DEFAULT_FILTERS)
+
+  const listParams = useMemo(
+    () => ({
+      page: currentPage,
+      limit: postsPerPage,
+      search: searchQuery,
+      filters,
+    }),
+    [currentPage, postsPerPage, searchQuery, filters]
+  )
+
+  const listQuery = useQuery({
+    queryKey: queryKeys.communityPosts(listParams),
+    queryFn: async () => {
+      const query = buildCommunityPostsQuery(
+        currentPage,
+        postsPerPage,
+        searchQuery,
+        filters
+      )
+      return api.getCommunityPosts(query)
+    },
+    placeholderData: (prev) => prev,
+  })
+
+  const exportParams = useMemo(
+    () => ({
+      search: searchQuery,
+      filters,
+      limit: EXPORT_LIMIT,
+    }),
+    [searchQuery, filters]
+  )
+
+  const exportQuery = useQuery({
+    queryKey: queryKeys.communityExport(exportParams),
+    queryFn: async () => {
+      const query = buildCommunityPostsQuery(1, EXPORT_LIMIT, searchQuery, filters)
+      return api.getCommunityPosts(query)
+    },
+    enabled: listQuery.isSuccess,
+    staleTime: 60_000,
+  })
+
+  const posts = listQuery.data?.posts ?? []
+  const pagination = listQuery.data?.pagination ?? {
+    page: currentPage,
     limit: postsPerPage,
     total: 0,
     totalPages: 0,
     hasNextPage: false,
     hasPrevPage: false,
-  })
-  const [loading, setLoading] = useState(true)
-  const [isRefreshing, setIsRefreshing] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [currentPage, setCurrentPage] = useState(1)
-  const [filters, setFilters] = useState<CommunityFilterOptions>(DEFAULT_FILTERS)
-  const [exportPosts, setExportPosts] = useState<Post[]>([])
-  const everLoadedPostsRef = useRef(false)
-  const fetchRequestIdRef = useRef(0)
-
-  const loadPosts = useCallback(
-    async (page: number, search: string, activeFilters: CommunityFilterOptions, mode: 'list' | 'export' = 'list') => {
-      const requestId = ++fetchRequestIdRef.current
-      const query = buildCommunityPostsQuery(
-        page,
-        mode === 'export' ? EXPORT_LIMIT : postsPerPage,
-        search,
-        activeFilters
-      )
-
-      const response = await api.getCommunityPosts(query)
-      if (requestId !== fetchRequestIdRef.current) return null
-      return response
-    },
-    [postsPerPage]
-  )
-
-  const fetchPosts = useCallback(async () => {
-    const initial = !everLoadedPostsRef.current
-    if (initial) {
-      setLoading(true)
-    } else {
-      setIsRefreshing(true)
-    }
-    setError(null)
-
-    try {
-      const response = await loadPosts(currentPage, searchQuery, filters)
-      if (!response) return
-
-      setPosts(response.posts)
-      setPagination(response.pagination)
-      everLoadedPostsRef.current = true
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to load posts')
-    } finally {
-      setLoading(false)
-      setIsRefreshing(false)
-    }
-  }, [currentPage, searchQuery, filters, loadPosts])
-
-  const fetchExportPosts = useCallback(async () => {
-    try {
-      const response = await loadPosts(1, searchQuery, filters, 'export')
-      if (!response) return []
-      setExportPosts(response.posts)
-      return response.posts
-    } catch {
-      return posts
-    }
-  }, [filters, loadPosts, posts, searchQuery])
-
-  useEffect(() => {
-    fetchPosts()
-  }, [fetchPosts])
-
-  useEffect(() => {
-    if (!everLoadedPostsRef.current) return
-    fetchExportPosts()
-  }, [fetchExportPosts])
+  }
 
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query)
@@ -113,25 +92,41 @@ export function useCommunityPosts(postsPerPage = 10) {
     setCurrentPage(1)
   }, [])
 
-  const handleVoteChange = useCallback((postId: string, newVotes: number, newUserVote?: number) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) =>
-        post.id === postId
-          ? {
-              ...post,
-              qualityUpvotes: newVotes,
-              userVote: newUserVote !== undefined ? newUserVote : post.userVote,
-            }
-          : post
-      )
-    )
-  }, [])
+  const handleVoteChange = useCallback(
+    (postId: string, newVotes: number, newUserVote?: number) => {
+      queryClient.setQueryData(queryKeys.communityPosts(listParams), (old: typeof listQuery.data) => {
+        if (!old) return old
+        return {
+          ...old,
+          posts: old.posts.map((post: Post) =>
+            post.id === postId
+              ? {
+                  ...post,
+                  qualityUpvotes: newVotes,
+                  userVote: newUserVote !== undefined ? newUserVote : post.userVote,
+                }
+              : post
+          ),
+        }
+      })
+    },
+    [listParams, queryClient, listQuery.data]
+  )
 
   const clearFilters = useCallback(() => {
     setSearchQuery('')
     setFilters(DEFAULT_FILTERS)
     setCurrentPage(1)
   }, [])
+
+  const fetchPosts = useCallback(async () => {
+    await listQuery.refetch()
+  }, [listQuery])
+
+  const fetchExportPosts = useCallback(async () => {
+    const result = await exportQuery.refetch()
+    return result.data?.posts ?? posts
+  }, [exportQuery, posts])
 
   const hasActiveFilters =
     Boolean(searchQuery.trim()) ||
@@ -140,20 +135,18 @@ export function useCommunityPosts(postsPerPage = 10) {
     filters.hasBounty ||
     filters.selectedTags.length > 0
 
-  const totalPages = Math.max(1, pagination.totalPages || 1)
-
   return {
     posts,
-    loading,
-    isRefreshing,
-    error,
+    loading: listQuery.isLoading && !listQuery.data,
+    isRefreshing: listQuery.isFetching && !!listQuery.data,
+    error: listQuery.error instanceof Error ? listQuery.error.message : listQuery.error ? 'Failed to load posts' : null,
     searchQuery,
     currentPage,
     filters,
     totalPosts: pagination.total,
-    totalPages,
+    totalPages: Math.max(1, pagination.totalPages || 1),
     hasActiveFilters,
-    exportPosts,
+    exportPosts: exportQuery.data?.posts ?? [],
     fetchPosts,
     fetchExportPosts,
     handleSearch,
