@@ -13,6 +13,9 @@
 # and optional password). The workflow exports both legacy names and Tauri 2 names (TAURI_SIGNING_*).
 # Without the private key, .sig files are not produced and latest.json will have empty platforms.
 #
+# OS code signing (Authenticode / Apple notarization) is NOT configured here — see docs/DESKTOP.md
+# “OS code signing and notarization”. Updater signing alone is enough for in-app updates after install.
+#
 # Set VITE_GITHUB_RELEASES_URL in repo or env so /download page links work.
 
 name: Desktop Release
@@ -102,7 +105,7 @@ jobs:
 
       # Single frontend build: beforeBuildCommand (npm run build) runs inside tauri build; avoid building twice.
       # desktop:build runs generate-desktop-icons first so Windows/macOS/Linux bundle + tray use public/logo.svg.
-      - name: Build Tauri app (with updater signing if TAURI_PRIVATE_KEY is set)
+      - name: Build Tauri app (updater signing if TAURI_PRIVATE_KEY is set; OS signing optional — see docs/DESKTOP.md)
         run: npm run desktop:build
         env:
           VITE_API_URL: https://api.bountyhub.tech
@@ -112,6 +115,15 @@ jobs:
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          # Optional OS signing (uncomment / add secrets when certificates are available):
+          # APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          # APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          # APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          # APPLE_ID: ${{ secrets.APPLE_ID }}
+          # APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          # APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          # WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+          # WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
 
       # Discover bundles under any target triple (e.g. target/release vs target/x86_64-.../release).
       - name: Upload Windows artifacts

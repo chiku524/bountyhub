@@ -1,6 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { FiRefreshCw, FiHome } from 'react-icons/fi'
+import { reportError } from '../utils/errorReporting'
 
 interface Props {
   children: ReactNode
@@ -21,6 +22,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo)
+    reportError(error, { componentStack: errorInfo.componentStack ?? undefined })
   }
 
   handleReload = () => {

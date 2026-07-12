@@ -66,6 +66,11 @@ export function FirstRunTips() {
               </Link>
               .
             </li>
+            {isDesktop && (
+              <li>
+                Closing the window hides BountyHub to the system tray — use the tray icon or the dock/taskbar to bring it back.
+              </li>
+            )}
           </ol>
         </div>
         <button

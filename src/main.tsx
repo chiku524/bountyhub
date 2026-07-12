@@ -4,7 +4,10 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App.tsx'
 import { ThemeProvider } from './contexts/ThemeProvider'
 import { AppQueryProvider } from './providers/AppQueryProvider'
+import { initErrorReporting } from './utils/errorReporting'
 import './index.css'
+
+initErrorReporting()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

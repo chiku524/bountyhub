@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useEscapeKey } from '../hooks/useEscapeKey'
 import { useWalletModal } from '@solana/wallet-adapter-react-ui'
 import { api } from '../utils/api'
-import type { WalletInfo, TransactionLog } from '../types'
 import { PublicKey, Transaction as Web3Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js'
 import { config } from '../utils/config'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthProvider'
+import { useWalletData } from '../hooks/useWalletData'
 import { PageMetadata } from '../components/PageMetadata'
 import { PageContainer } from '../components/PageContainer'
 import { PageHeader } from '../components/PageHeader'
@@ -20,10 +20,7 @@ function WalletContent() {
   const { user, loading: authLoading } = useAuth()
   const { wallet, connected, disconnect, signTransaction } = useWallet()
   const { setVisible } = useWalletModal()
-  const [walletData, setWalletData] = useState<WalletInfo | null>(null)
-  const [transactions, setTransactions] = useState<TransactionLog[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { walletData, transactions, loading, error, refetch: refetchWalletData } = useWalletData()
   const [showDepositModal, setShowDepositModal] = useState(false)
   const [showWithdrawModal, setShowWithdrawModal] = useState(false)
   const [showDepositConfirmation, setShowDepositConfirmation] = useState(false)
@@ -43,40 +40,6 @@ function WalletContent() {
   useEscapeKey(withdrawResult !== null, () => setWithdrawResult(null))
 
   const publicKey = wallet?.adapter?.publicKey?.toString() || null
-
-  useEffect(() => {
-    if (authLoading) {
-      return
-    }
-
-    if (user) {
-      fetchWalletData()
-      fetchTransactions()
-    } else {
-      setLoading(false)
-    }
-  }, [authLoading, user, connected, publicKey])
-
-  const fetchWalletData = async () => {
-    try {
-      setLoading(true)
-      const response = await api.getWalletInfo()
-      setWalletData(response)
-    } catch (_error) {
-      setError('Failed to fetch wallet data')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const fetchTransactions = async () => {
-    try {
-      const response = await api.getRecentTransactions()
-      setTransactions(response)
-    } catch (_error) {
-      setError('Failed to fetch transactions')
-    }
-  }
 
   const handleDirectDeposit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -192,8 +155,7 @@ function WalletContent() {
           
           // Refresh wallet data after successful deposit
           setTimeout(() => {
-            fetchWalletData()
-            fetchTransactions()
+            void refetchWalletData()
           }, 2000)
         } else {
           setMessage(`Transaction sent but confirmation failed: ${confirmResponse.message}`)
@@ -268,8 +230,7 @@ function WalletContent() {
         
         // Refresh wallet data
         setTimeout(() => {
-          fetchWalletData()
-          fetchTransactions()
+          void refetchWalletData()
         }, 1000)
       } else {
         setMessage(response.message || 'Failed to confirm deposit')
@@ -312,8 +273,7 @@ function WalletContent() {
           setShowWithdrawModal(false)
           setWithdrawAmount('')
           setDestinationAddress('')
-          await fetchWalletData()
-          await fetchTransactions() // Refresh transaction list
+          await refetchWalletData()
           setWithdrawResult({ 
             success: true, 
             fee: typeof result.fee === 'string' ? parseFloat(result.fee) : result.fee,
@@ -322,7 +282,7 @@ function WalletContent() {
         } else {
           // Processing failed - BBUX will be refunded automatically
           setWithdrawError(processResult.message || 'Failed to process withdrawal. Your BBUX has been refunded.')
-          await fetchWalletData() // Refresh to show refunded balance
+          await refetchWalletData() // Refresh to show refunded balance
         }
       } else {
         // Creation failed
@@ -332,7 +292,7 @@ function WalletContent() {
       console.error('Withdrawal error:', err)
       setWithdrawError(err.message || 'Withdrawal failed. Please try again.')
       // Refresh wallet data in case of any partial state changes
-      await fetchWalletData()
+      await refetchWalletData()
     } finally {
       setActionLoading(false)
       setWithdrawInProgress(false)
@@ -428,7 +388,7 @@ function WalletContent() {
         />
 
         {error && (
-          <ErrorMessage message={error} onRetry={fetchWalletData} className="mb-6" />
+          <ErrorMessage message={error} onRetry={() => void refetchWalletData()} className="mb-6" />
           )}
 
           {message && (

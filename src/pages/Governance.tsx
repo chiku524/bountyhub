@@ -1,206 +1,59 @@
-import React, { useState, useEffect } from 'react'
-import { useAuth } from '../contexts/AuthProvider'
+import React, { useState } from 'react'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { ErrorMessage } from '../components/ErrorMessage'
 import { Link } from 'react-router-dom'
-
-interface GovernanceStats {
-  totalStaked: number
-  totalTreasury: number
-  totalCollected: number
-  totalDistributed: number
-  activeStakers: number
-  totalProposals: number
-  activeProposals: number
-}
-
-interface UserGovernanceStats {
-  stakedAmount: number
-  totalRewardsEarned: number
-  votingPower: number
-  governanceParticipation: number
-  lastRewardAt: string | null
-}
-
-interface RewardRate {
-  baseRate: number
-  activityBonus: number
-  treasuryBonus: number
-  participationPenalty: number
-  totalRate: number
-  maxRate: number
-}
-
-interface UserRewardRate extends RewardRate {
-  governanceBonus: number
-}
-
-interface PlatformMetrics {
-  monthlyVolume: number
-  activeStakers: number
-  treasuryHealth: 'LOW' | 'MEDIUM' | 'HIGH'
-  participationLevel: 'LOW' | 'MEDIUM' | 'HIGH'
-}
-
-interface TransparencyLog {
-  id: string
-  logType: string
-  amount: number
-  feeAmount: number
-  description: string
-  userId?: string
-  referenceId?: string
-  referenceType?: string
-  balanceBefore?: number
-  balanceAfter?: number
-  treasuryBalanceBefore?: number
-  treasuryBalanceAfter?: number
-  createdAt: string
-}
-
-interface GovernanceActivity {
-  id: string
-  activityType: string
-  amount: number
-  description: string
-  userId?: string
-  referenceId?: string
-  referenceType?: string
-  metadata?: string
-  createdAt: string
-}
-
-const API_URL = import.meta.env.VITE_API_URL || '';
+import { useGovernanceData } from '../hooks/useGovernanceData'
 
 const Governance: React.FC = () => {
-  const { user } = useAuth()
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [stats, setStats] = useState<GovernanceStats | null>(null)
-  const [userStats, setUserStats] = useState<UserGovernanceStats | null>(null)
-  const [rewardRate, setRewardRate] = useState<RewardRate | null>(null)
-  const [userRewardRate, setUserRewardRate] = useState<UserRewardRate | null>(null)
-  const [platformMetrics, setPlatformMetrics] = useState<PlatformMetrics | null>(null)
-  const [transparencyLogs, setTransparencyLogs] = useState<TransparencyLog[]>([])
-  const [governanceActivity, setGovernanceActivity] = useState<GovernanceActivity[]>([])
+  const {
+    stats,
+    userStats,
+    rewardRate,
+    userRewardRate,
+    platformMetrics,
+    transparencyLogs,
+    governanceActivity,
+    loading,
+    error: loadError,
+    stake,
+    unstake,
+    stakingLoading,
+  } = useGovernanceData()
   const [stakeAmount, setStakeAmount] = useState('')
   const [unstakeAmount, setUnstakeAmount] = useState('')
-  const [stakingLoading, setStakingLoading] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (user) {
-      loadGovernanceData()
-    }
-  }, [user])
-
-  const loadGovernanceData = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-
-      const [statsRes, userStatsRes, rewardRateRes, userRewardRateRes, platformMetricsRes, logsRes, activityRes] = await Promise.all([
-        fetch(`${API_URL}/api/governance?action=stats`, { credentials: 'include' }),
-        fetch(`${API_URL}/api/governance?action=user-stats`, { credentials: 'include' }),
-        fetch(`${API_URL}/api/governance?action=reward-rate`, { credentials: 'include' }),
-        fetch(`${API_URL}/api/governance?action=user-reward-rate`, { credentials: 'include' }),
-        fetch(`${API_URL}/api/governance?action=platform-metrics`, { credentials: 'include' }),
-        fetch(`${API_URL}/api/governance?action=transparency-logs&limit=20`, { credentials: 'include' }),
-        fetch(`${API_URL}/api/governance?action=governance-activity&limit=20`, { credentials: 'include' })
-      ])
-
-      // Helper to handle error objects
-      const handleApiResponse = async (res: Response, setState: (v: any) => void, key: string) => {
-        const data = await res.json()
-        if (!res.ok || data.error) {
-          if (data.error === 'Invalid action') {
-            setError('Governance data is not available right now. (Invalid action)')
-          } else {
-            setError(data.error || 'Failed to load governance data')
-          }
-          setState(null)
-        } else {
-          setState(data[key])
-        }
-      }
-
-      await handleApiResponse(statsRes, setStats, 'stats')
-      await handleApiResponse(userStatsRes, setUserStats, 'userStats')
-      await handleApiResponse(rewardRateRes, setRewardRate, 'rewardRate')
-      await handleApiResponse(userRewardRateRes, setUserRewardRate, 'userRewardRate')
-      await handleApiResponse(platformMetricsRes, setPlatformMetrics, 'platformMetrics')
-      await handleApiResponse(logsRes, setTransparencyLogs, 'logs')
-      await handleApiResponse(activityRes, setGovernanceActivity, 'activity')
-    } catch (err) {
-      setError('Failed to load governance data')
-      console.error('Error loading governance data:', err)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const error = actionError || loadError
 
   const handleStake = async () => {
     if (!stakeAmount || parseFloat(stakeAmount) <= 0) {
-      setError('Please enter a valid amount')
+      setActionError('Please enter a valid amount')
       return
     }
 
     try {
-      setStakingLoading(true)
-      setError(null)
-
-      const response = await fetch(`${API_URL}/api/governance`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'stake', amount: parseFloat(stakeAmount) }),
-        credentials: 'include',
-      })
-
-      const result = await response.json()
-
-      if (result.success) {
-        setStakeAmount('')
-        await loadGovernanceData()
-      } else {
-        setError(result.error || 'Failed to stake')
-      }
+      setActionError(null)
+      await stake(parseFloat(stakeAmount))
+      setStakeAmount('')
     } catch (err) {
-      setError('Failed to stake')
+      setActionError(err instanceof Error ? err.message : 'Failed to stake')
       console.error('Error staking:', err)
-    } finally {
-      setStakingLoading(false)
     }
   }
 
   const handleUnstake = async () => {
     if (!unstakeAmount || parseFloat(unstakeAmount) <= 0) {
-      setError('Please enter a valid amount')
+      setActionError('Please enter a valid amount')
       return
     }
 
     try {
-      setStakingLoading(true)
-      setError(null)
-
-      const response = await fetch(`${API_URL}/api/governance`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'unstake', amount: parseFloat(unstakeAmount) }),
-        credentials: 'include',
-      })
-
-      const result = await response.json()
-
-      if (result.success) {
-        setUnstakeAmount('')
-        await loadGovernanceData()
-      } else {
-        setError(result.error || 'Failed to unstake')
-      }
+      setActionError(null)
+      await unstake(parseFloat(unstakeAmount))
+      setUnstakeAmount('')
     } catch (err) {
-      setError('Failed to unstake')
+      setActionError(err instanceof Error ? err.message : 'Failed to unstake')
       console.error('Error unstaking:', err)
-    } finally {
-      setStakingLoading(false)
     }
   }
 

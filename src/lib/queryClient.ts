@@ -19,4 +19,7 @@ export const queryKeys = {
   notifications: (userId: string) => ['notifications', userId] as const,
   platformStats: () => ['platform-stats'] as const,
   adminStats: () => ['admin-stats'] as const,
+  walletInfo: (userId: string) => ['wallet-info', userId] as const,
+  walletTransactions: (userId: string) => ['wallet-transactions', userId] as const,
+  governance: (userId: string, slice: string) => ['governance', userId, slice] as const,
 }

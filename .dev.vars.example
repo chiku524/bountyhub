@@ -1,5 +1,16 @@
-# Copy to .dev.vars and fill in. Used by wrangler dev for local API.
-# .dev.vars is gitignored; never commit real tokens.
+# Local development secrets for `wrangler.dev.toml` (copy to .dev.vars — never commit).
+# Wrangler loads .dev.vars automatically in `wrangler dev`.
 
-# GitHub PAT (repo scope) so /download page can fetch releases for private repos
+SESSION_SECRET=dev-secret-key-change-me
+SOLANA_RPC_URL=https://api.devnet.solana.com
+SOLANA_WALLET_PRIVATE_KEY=dev-key
+SOLANA_WALLET_ADDRESS=dev-address
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+HTML2PDF_API_KEY=
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
+CRON_SECRET=dev-cron-secret
+# 32 random bytes, base64 — e.g. openssl rand -base64 32
+TOKEN_ENCRYPTION_KEY=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
 GITHUB_PAT=

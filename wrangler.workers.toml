@@ -33,37 +33,19 @@ class_name = "ChatRoomDO"
 tag = "v1"
 new_sqlite_classes = ["ChatRoomDO"]
 
+# Non-secret public config only. Secrets are set via:
+#   wrangler secret put <NAME> --config wrangler.workers.toml
+# Required secrets: SESSION_SECRET, SOLANA_RPC_URL, SOLANA_WALLET_PRIVATE_KEY,
+# SOLANA_WALLET_ADDRESS, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, HTML2PDF_API_KEY,
+# GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GITHUB_PAT, CRON_SECRET, TOKEN_ENCRYPTION_KEY
 [vars]
 NODE_ENV = "production"
-SESSION_SECRET = "mysupersecretpassword"
-SOLANA_RPC_URL = "https://mainnet.helius-rpc.com/?api-key=22e3e8b6-b2a0-4b4d-944a-226099908bd6"
 SOLANA_DEVNET_RPC_URL = "https://api.devnet.solana.com"
-SOLANA_WALLET_PRIVATE_KEY = "xZK9zb3WUAHoLmrFrPq6pWxbPQWkgxyeAgDb/3dblw0JgGjCG2FTsm+zbVDykC0Ufc8IAnvgqH9H01s52bmRiQ=="
-SOLANA_WALLET_ADDRESS = "e6EdfgpEdo48zUKFC18cADxTqgbt68JE8uDjAgdCzkp"
-
-# Cloudinary Configuration
 CLOUDINARY_CLOUD_NAME = "dqobhvk07"
-CLOUDINARY_API_KEY = "237281724716253"
-CLOUDINARY_API_SECRET = "N7Y40ttKyduI_5un60Cfv8kGfzI"
 CLOUDINARY_UPLOAD_PRESET = "bountyhub"
-
-# GIPHY (frontend GIF search) — set VITE_GIPHY_API_KEY in Cloudflare Pages env for production builds
 VITE_GIPHY_API_KEY = ""
-
-# HTML2PDF Configuration
-HTML2PDF_API_KEY = "28q7AasnbwG213fOLEt58Cjw4FEZVxNxAoaXl0MybGEGWeM9u73X4hGltgIMBz90"
-
-# Vite Client-Side Environment Variables (for direct uploads)
 VITE_CLOUDINARY_CLOUD_NAME = "dqobhvk07"
 VITE_CLOUDINARY_UPLOAD_PRESET = "bountyhub"
 VITE_API_URL = "https://api.bountyhub.tech"
-
-# GitHub OAuth Configuration
-# Note: GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET should be set as secrets in Cloudflare Dashboard
-# Set via: wrangler secret put GITHUB_CLIENT_ID
-# Set via: wrangler secret put GITHUB_CLIENT_SECRET
 GITHUB_CALLBACK_URL = "https://api.bountyhub.tech/auth/callback"
-
-# Download page: repo for releases/latest (used with GITHUB_PAT)
-# Set PAT via: wrangler secret put GITHUB_PAT
 GITHUB_RELEASES_REPO = "chiku524/bountyhub"

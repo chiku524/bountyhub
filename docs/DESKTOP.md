@@ -146,6 +146,29 @@ Without `TAURI_PRIVATE_KEY`, builds may still run but the updater will not insta
 
 ---
 
+## OS code signing and notarization (optional, recommended for distribution)
+
+Updater signing (`TAURI_PRIVATE_KEY`) proves update authenticity to the in-app updater. It does **not** replace OS code signing:
+
+| Platform | What users see without OS signing | What to add |
+|----------|-----------------------------------|-------------|
+| **Windows** | SmartScreen “unknown publisher” warnings | Authenticode certificate; set Tauri `bundle.windows.certificateThumbprint` / CI secrets for `WINDOWS_CERTIFICATE` + password |
+| **macOS** | Gatekeeper blocks until “Open Anyway” | Apple Developer ID Application cert + notarization (`APPLE_ID`, `APPLE_PASSWORD`/`APP_SPECIFIC_PASSWORD`, `APPLE_TEAM_ID`) wired into the release job |
+| **Linux** | Usually fine for AppImage/deb from GitHub | Optional GPG signing of packages |
+
+The current `desktop-release.yml` builds **unsigned** OS installers and signs only the **Tauri updater** payloads when `TAURI_PRIVATE_KEY` is present. That is enough for auto-update among users who already trust the first install.
+
+**To enable OS signing later:**
+
+1. Obtain platform certificates (Windows EV/OV Authenticode; Apple Developer Program for macOS).
+2. Store certs/passwords as GitHub Actions secrets (never commit `.p12` / `.pem` files).
+3. Extend `desktop-release.yml` matrix steps with Tauri’s [code signing](https://v2.tauri.app/distribute/) env vars for each OS.
+4. Keep `TAURI_PRIVATE_KEY` for updater `.sig` / `latest.json` — both layers are complementary.
+
+Until those secrets exist, prefer documenting the SmartScreen/Gatekeeper path on `/download` rather than failing the release workflow.
+
+---
+
 ## Desktop and real-time chat
 
 The desktop app uses the same Vite build as the web app. Real-time chat (WebSocket) uses the same React code as the browser.
