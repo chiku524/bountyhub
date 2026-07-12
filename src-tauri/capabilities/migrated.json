@@ -1,0 +1,10 @@
+{
+  "identifier": "migrated",
+  "description": "Core app/window permissions for main and splash windows.",
+  "local": true,
+  "windows": ["main", "splashscreen"],
+  "permissions": [
+    "core:default",
+    "process:default"
+  ]
+}

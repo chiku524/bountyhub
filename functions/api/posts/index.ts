@@ -1,8 +1,8 @@
 import { Hono } from 'hono'
 import { createDb } from '../../../src/utils/db'
 import { getUserIdFromSession } from '../../../src/utils/auth'
-import { posts, postTags, bounties, media, codeBlocks, users, votes, tags, profiles, virtualWallets } from '../../../drizzle/schema'
-import { eq, sql, desc } from 'drizzle-orm'
+import { posts, postTags, bounties, media, codeBlocks, users, tags, profiles, virtualWallets } from '../../../drizzle/schema'
+import { eq, sql } from 'drizzle-orm'
 import { GovernanceService } from '../../../src/utils/governance'
 import { listCommunityPosts } from '../../utils/listCommunityPosts'
 

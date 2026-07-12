@@ -12,6 +12,8 @@
     "splashscreen"
   ],
   "permissions": [
+    "core:default",
+    "process:default",
     "global-shortcut:default",
     "updater:default"
   ],
