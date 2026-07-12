@@ -1,4 +1,4 @@
-import { useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react'
+import { useState, useEffect, forwardRef, useImperativeHandle, useRef, useCallback } from 'react'
 import { useAuth } from '../contexts/AuthProvider'
 import { useNavigate } from 'react-router-dom'
 import { LoadingSpinner } from './LoadingSpinner'
@@ -24,6 +24,54 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
   const popupRef = useRef<HTMLDivElement>(null)
   const notifWasOpenRef = useRef(false)
 
+  const handleToggle = useCallback(() => {
+    setIsOpen((open) => {
+      if (!open) {
+        const sidebarButton = document.querySelector('[data-notifications-button]') as HTMLElement
+        const topNavButton = document.querySelector('[data-notifications-button-topnav]') as HTMLElement
+        const notificationsButton = sidebarButton || topNavButton
+
+        if (notificationsButton) {
+          const buttonRect = notificationsButton.getBoundingClientRect()
+          const viewportWidth = window.innerWidth
+          const viewportHeight = window.innerHeight
+          const popupWidth = 320
+          const popupHeight = 400
+          const margin = 16
+          const isTopNav = !!topNavButton
+          let newPopupStyle: { left?: string; right?: string; top: string }
+
+          if (isTopNav) {
+            let topPosition = buttonRect.bottom + margin
+            if (topPosition + popupHeight > viewportHeight - margin) {
+              topPosition = buttonRect.top - popupHeight - margin
+              if (topPosition < margin) topPosition = margin
+            }
+            newPopupStyle = {
+              right: `${viewportWidth - buttonRect.right}px`,
+              top: `${topPosition}px`,
+            }
+          } else {
+            let topPosition = buttonRect.top + buttonRect.height / 2 - popupHeight / 2
+            if (topPosition < margin) topPosition = margin
+            if (topPosition + popupHeight > viewportHeight - margin) {
+              topPosition = viewportHeight - popupHeight - margin
+            }
+            const leftPosition = buttonRect.right + margin
+            if (leftPosition + popupWidth > viewportWidth - margin) {
+              newPopupStyle = { right: `${margin}px`, top: `${topPosition}px` }
+            } else {
+              newPopupStyle = { left: `${leftPosition}px`, top: `${topPosition}px` }
+            }
+          }
+
+          setPopupStyle(newPopupStyle)
+        }
+      }
+      return !open
+    })
+  }, [])
+
   useEffect(() => {
     if (isOpen) {
       notifWasOpenRef.current = true
@@ -39,8 +87,8 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
   }, [isOpen])
 
   useImperativeHandle(ref, () => ({
-    toggle: handleToggle
-  }))
+    toggle: handleToggle,
+  }), [handleToggle])
 
   useEffect(() => {
     if (user) {
@@ -108,52 +156,6 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
     if (notification.navigation) {
       navigate(notification.navigation.url)
     }
-  }
-
-  const handleToggle = () => {
-    if (!isOpen) {
-      const sidebarButton = document.querySelector('[data-notifications-button]') as HTMLElement
-      const topNavButton = document.querySelector('[data-notifications-button-topnav]') as HTMLElement
-      const notificationsButton = sidebarButton || topNavButton
-
-      if (notificationsButton) {
-        const buttonRect = notificationsButton.getBoundingClientRect()
-        const viewportWidth = window.innerWidth
-        const viewportHeight = window.innerHeight
-        const popupWidth = 320
-        const popupHeight = 400
-        const margin = 16
-        const isTopNav = !!topNavButton
-        let newPopupStyle: { left?: string; right?: string; top: string }
-
-        if (isTopNav) {
-          let topPosition = buttonRect.bottom + margin
-          if (topPosition + popupHeight > viewportHeight - margin) {
-            topPosition = buttonRect.top - popupHeight - margin
-            if (topPosition < margin) topPosition = margin
-          }
-          newPopupStyle = {
-            right: `${viewportWidth - buttonRect.right}px`,
-            top: `${topPosition}px`,
-          }
-        } else {
-          let topPosition = buttonRect.top + buttonRect.height / 2 - popupHeight / 2
-          if (topPosition < margin) topPosition = margin
-          if (topPosition + popupHeight > viewportHeight - margin) {
-            topPosition = viewportHeight - popupHeight - margin
-          }
-          const leftPosition = buttonRect.right + margin
-          if (leftPosition + popupWidth > viewportWidth - margin) {
-            newPopupStyle = { right: `${margin}px`, top: `${topPosition}px` }
-          } else {
-            newPopupStyle = { left: `${leftPosition}px`, top: `${topPosition}px` }
-          }
-        }
-
-        setPopupStyle(newPopupStyle)
-      }
-    }
-    setIsOpen(!isOpen)
   }
 
   useEffect(() => {

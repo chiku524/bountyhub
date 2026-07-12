@@ -50,6 +50,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Placeholder frontend dist for Tauri context macros
+        working-directory: .
+        run: |
+          mkdir -p dist
+          printf '%s\n' '<!doctype html><html><body></body></html>' > dist/index.html
+
       - name: Install system deps
         run: |
           sudo apt-get update

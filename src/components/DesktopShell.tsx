@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   FiAward,
@@ -207,14 +207,9 @@ function DesktopSidebar({
 function DesktopShellInner({ children }: { children: React.ReactNode }) {
   const isNarrowWindow = useMediaQuery(NARROW_WINDOW_QUERY)
   const [userCollapsed, setUserCollapsed] = useState<boolean | null>(null)
+  // null = follow viewport; explicit boolean = user override
   const collapsed = userCollapsed ?? isNarrowWindow
   const sidebarWidth = collapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH_EXPANDED
-
-  useEffect(() => {
-    if (userCollapsed === null && !isNarrowWindow) {
-      setUserCollapsed(false)
-    }
-  }, [isNarrowWindow, userCollapsed])
 
   function handleToggleCollapse() {
     setUserCollapsed((prev) => !(prev ?? isNarrowWindow))
