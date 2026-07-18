@@ -11,6 +11,8 @@ interface VoteButtonProps {
   userVote?: number
   onVoteChange?: (newVotes: number, newUserVote: number) => void
   className?: string
+  /** Horizontal compact control for card footers; vertical is the list default. */
+  orientation?: 'vertical' | 'horizontal'
 }
 
 export const VoteButton: React.FC<VoteButtonProps> = ({
@@ -20,7 +22,8 @@ export const VoteButton: React.FC<VoteButtonProps> = ({
   initialVotes,
   userVote = 0,
   onVoteChange,
-  className = ''
+  className = '',
+  orientation = 'vertical',
 }) => {
   const { user } = useAuth()
   const toast = useToast()
@@ -81,40 +84,66 @@ export const VoteButton: React.FC<VoteButtonProps> = ({
     }
   }
 
+  const compact = orientation === 'horizontal'
+  const btnSize = compact
+    ? 'inline-flex h-8 w-8 items-center justify-center rounded-md transition-colors'
+    : 'inline-flex min-h-11 min-w-11 items-center justify-center rounded-md transition-colors'
+  const iconClass = compact ? 'h-3.5 w-3.5' : 'h-5 w-5'
+
   return (
-    <div className={`flex flex-col items-center justify-center space-y-1 ${className}`}>
+    <div
+      className={
+        compact
+          ? `inline-flex items-center gap-0.5 ${className}`
+          : `flex flex-col items-center justify-center space-y-1 ${className}`
+      }
+    >
       <button
         type="button"
-        onClick={handleUpvote}
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          handleUpvote()
+        }}
         disabled={loading || !user}
-        className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-md transition-colors ${
+        className={`${btnSize} ${
           userVoteState === 1
-            ? 'text-green-500 bg-green-500/20'
-            : 'text-gray-400 hover:text-green-500 hover:bg-green-500/20'
-        } ${!user ? 'opacity-50 cursor-not-allowed' : ''}`}
+            ? 'bg-green-500/20 text-green-500'
+            : 'text-neutral-400 hover:bg-green-500/20 hover:text-green-500 dark:text-gray-400'
+        } ${!user ? 'cursor-not-allowed opacity-50' : ''}`}
         title={!user ? 'Login to vote' : 'Upvote'}
       >
-        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+        <svg className={iconClass} fill="currentColor" viewBox="0 0 20 20" aria-hidden>
           <path fillRule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
         </svg>
       </button>
 
-      <span className="text-sm font-medium text-gray-300 min-w-8 text-center">
+      <span
+        className={
+          compact
+            ? 'min-w-6 text-center text-xs font-medium tabular-nums text-neutral-600 dark:text-neutral-300'
+            : 'min-w-8 text-center text-sm font-medium text-gray-300'
+        }
+      >
         {votes}
       </span>
 
       <button
         type="button"
-        onClick={handleDownvote}
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          handleDownvote()
+        }}
         disabled={loading || !user}
-        className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-md transition-colors ${
+        className={`${btnSize} ${
           userVoteState === -1
-            ? 'text-red-500 bg-red-500/20'
-            : 'text-gray-400 hover:text-red-500 hover:bg-red-500/20'
-        } ${!user ? 'opacity-50 cursor-not-allowed' : ''}`}
+            ? 'bg-red-500/20 text-red-500'
+            : 'text-neutral-400 hover:bg-red-500/20 hover:text-red-500 dark:text-gray-400'
+        } ${!user ? 'cursor-not-allowed opacity-50' : ''}`}
         title={!user ? 'Login to vote' : 'Downvote'}
       >
-        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+        <svg className={iconClass} fill="currentColor" viewBox="0 0 20 20" aria-hidden>
           <path fillRule="evenodd" d="M16.707 10.293a1 1 0 010 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l4.293-4.293a1 1 0 011.414 0z" clipRule="evenodd" />
         </svg>
       </button>
