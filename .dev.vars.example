@@ -3,6 +3,7 @@
 
 SESSION_SECRET=dev-secret-key-change-me
 SOLANA_RPC_URL=https://api.devnet.solana.com
+# Phantom-style base58 secret key (64-byte) or legacy base64
 SOLANA_WALLET_PRIVATE_KEY=dev-key
 SOLANA_WALLET_ADDRESS=dev-address
 CLOUDINARY_API_KEY=

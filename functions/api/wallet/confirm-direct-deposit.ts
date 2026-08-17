@@ -8,6 +8,7 @@ import { Connection } from '@solana/web3.js'
 interface Env {
   DB: any
   SOLANA_RPC_URL: string
+  SOLANA_WALLET_ADDRESS: string
 }
 
 const app = new Hono<{ Bindings: Env }>()
@@ -24,6 +25,11 @@ app.post(async (c) => {
     if (!userId) return c.json({ error: 'Unauthorized' }, 401)
 
     if (!destinationAddress) return c.json({ error: 'No destination address provided' }, 400)
+
+    const platformAddress = c.env.SOLANA_WALLET_ADDRESS
+    if (platformAddress && destinationAddress !== platformAddress) {
+      return c.json({ error: 'Transaction was not sent to the current platform address' }, 400)
+    }
 
     // Create Solana connection using environment variable
     const rpcUrl = c.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com'

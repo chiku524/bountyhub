@@ -1,16 +1,30 @@
 import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL, sendAndConfirmTransaction, Keypair } from '@solana/web3.js'
 import { getAssociatedTokenAddress, createAssociatedTokenAccountInstruction, createTransferInstruction, getAccount, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import bountyBucksInfo from '../../bounty-bucks-info.json'
-import * as bs58 from 'bs58'
+import { decodeSolanaSecretKey } from './solanaSecretKey'
 
 const BBUX_MINT = new PublicKey(bountyBucksInfo.mint)
 
-// Platform wallet configuration
-const PLATFORM_WALLET_ADDRESS = 'e6EdfgpEdo48zUKFC18cADxTqgbt68JE8uDjAgdCzkp'
-const PLATFORM_WALLET_PRIVATE_KEY = 'xZK9zb3WUAHoLmrFrPq6pWxbPQWkgxyeAgDb/3dblw0JgGjCG2FTsm+zbVDykC0Ufc8IAnvgqH9H01s52bmRiQ=='
+// Public platform deposit address. The signing key lives in Worker secrets
+// (`SOLANA_WALLET_PRIVATE_KEY`) or `VITE_PLATFORM_PRIVATE_KEY` for local frontend use.
+const PLATFORM_WALLET_ADDRESS = '7MZuvhtSYagg2zNKsKo4UyLkJtAAsCcxY4co786GoBaq'
 
 // Load platform wallet keypair
 let platformKeypair: Keypair | null = null
+
+function resolvePrivateKeyString(env?: { SOLANA_WALLET_PRIVATE_KEY?: string; VITE_PLATFORM_PRIVATE_KEY?: string }): string {
+  if (env?.SOLANA_WALLET_PRIVATE_KEY) {
+    return env.SOLANA_WALLET_PRIVATE_KEY
+  }
+  if (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_PLATFORM_PRIVATE_KEY) {
+    return (import.meta as any).env.VITE_PLATFORM_PRIVATE_KEY as string
+  }
+  throw new Error('Platform private key not configured')
+}
+
+function keypairFromSecret(privateKeyString: string): Keypair {
+  return Keypair.fromSecretKey(decodeSolanaSecretKey(privateKeyString))
+}
 
 export const loadPlatformWallet = async (): Promise<Keypair> => {
   if (platformKeypair) {
@@ -18,14 +32,7 @@ export const loadPlatformWallet = async (): Promise<Keypair> => {
   }
 
   try {
-    // Type guard for import.meta.env (Vite-specific, not available in Workers)
-    const privateKeyString = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_PLATFORM_PRIVATE_KEY) as string | undefined
-    if (!privateKeyString) {
-      throw new Error('Platform private key not configured')
-    }
-
-    const privateKeyBytes = bs58.decode(privateKeyString)
-    platformKeypair = Keypair.fromSecretKey(privateKeyBytes)
+    platformKeypair = keypairFromSecret(resolvePrivateKeyString())
     return platformKeypair
   } catch (error) {
     throw new Error(`Failed to load platform wallet: ${error}`)
@@ -55,8 +62,8 @@ export class SolanaService {
     }
   }
 
-  static getPlatformWalletAddress(): string {
-    return PLATFORM_WALLET_ADDRESS
+  static getPlatformWalletAddress(env?: { SOLANA_WALLET_ADDRESS?: string }): string {
+    return env?.SOLANA_WALLET_ADDRESS || PLATFORM_WALLET_ADDRESS
   }
 
   static async loadPlatformWallet(env?: any): Promise<Keypair> {
@@ -65,42 +72,8 @@ export class SolanaService {
     }
 
     try {
-      let privateKeyString: string | undefined
-      
-      // Check if we're in a backend environment with env parameter
-      if (env && env.SOLANA_WALLET_PRIVATE_KEY) {
-        privateKeyString = env.SOLANA_WALLET_PRIVATE_KEY
-      } else if (typeof import.meta !== 'undefined' && (import.meta as any).env) {
-        privateKeyString = (import.meta as any).env?.VITE_PLATFORM_PRIVATE_KEY
-      }
-
-      if (!privateKeyString) {
-        throw new Error('Platform private key not configured')
-      }
-
-      let privateKeyBytes: Uint8Array
-
-      if (typeof Buffer !== 'undefined') {
-        privateKeyBytes = new Uint8Array(Buffer.from(privateKeyString, 'base64'))
-      } else {
-        const decodedPrivateKey = atob(privateKeyString)
-        privateKeyBytes = new Uint8Array(decodedPrivateKey.length)
-        for (let i = 0; i < decodedPrivateKey.length; i++) {
-          privateKeyBytes[i] = decodedPrivateKey.charCodeAt(i)
-        }
-      }
-
-      if (privateKeyBytes.length !== 64) {
-        throw new Error(`Invalid private key length: ${privateKeyBytes.length} bytes (expected 64)`)
-      }
-
-      try {
-        platformKeypair = Keypair.fromSecretKey(privateKeyBytes)
-        return platformKeypair
-      } catch (keypairError) {
-        console.error('Keypair creation failed:', keypairError)
-        throw new Error(`Failed to create keypair: ${keypairError}`)
-      }
+      platformKeypair = keypairFromSecret(resolvePrivateKeyString(env))
+      return platformKeypair
     } catch (error) {
       console.error('Detailed platform wallet loading error:', error)
       throw new Error(`Failed to load platform wallet: ${error}`)
@@ -239,7 +212,7 @@ export class SolanaService {
       }
 
       const userPublicKey = new PublicKey(userAddress)
-      const platformPublicKey = new PublicKey(PLATFORM_WALLET_ADDRESS)
+      const platformPublicKey = new PublicKey(this.getPlatformWalletAddress())
       
       // Get user's token account
       const userTokenAccount = await getAssociatedTokenAddress(
@@ -442,7 +415,7 @@ export class SolanaService {
       }
 
       const userPublicKey = new PublicKey(userAddress)
-      const platformPublicKey = new PublicKey(PLATFORM_WALLET_ADDRESS)
+      const platformPublicKey = new PublicKey(this.getPlatformWalletAddress())
 
       // Create transfer transaction
       const transaction = new Transaction().add(
@@ -562,24 +535,7 @@ export class SolanaService {
 
   static getPlatformWalletKeypair(): Keypair {
     try {
-      // Decode base64 private key using environment-appropriate method
-      let privateKeyBytes: Uint8Array
-      
-      // Use Buffer in Node.js/Cloudflare Workers environment, atob in browser
-      if (typeof Buffer !== 'undefined') {
-        // Node.js/Cloudflare Workers environment
-        privateKeyBytes = new Uint8Array(Buffer.from(PLATFORM_WALLET_PRIVATE_KEY, 'base64'))
-      } else {
-        // Browser environment
-        const privateKeyString = atob(PLATFORM_WALLET_PRIVATE_KEY)
-        privateKeyBytes = new Uint8Array(privateKeyString.length)
-        for (let i = 0; i < privateKeyString.length; i++) {
-          privateKeyBytes[i] = privateKeyString.charCodeAt(i)
-        }
-      }
-      
-      const keypair = Keypair.fromSecretKey(privateKeyBytes)
-      return keypair
+      return keypairFromSecret(resolvePrivateKeyString())
     } catch (error) {
       throw new Error(`Failed to load platform wallet: ${error}`)
     }

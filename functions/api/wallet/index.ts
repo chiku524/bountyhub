@@ -319,6 +319,7 @@ app.post('/action', async (c) => {
     }
 
     if (action === 'deposit') {
+      const platformAddress = c.env.SOLANA_WALLET_ADDRESS || 'Platform address not configured'
       // Create pending transaction record
       const transactionId = uuidv4()
       await db.insert(transactionLogs).values({
@@ -329,7 +330,11 @@ app.post('/action', async (c) => {
         transactionId: transactionId, // Store without prefix
         timestamp: new Date(),
         status: 'pending',
-        metadata: JSON.stringify({ action: 'manual_deposit' }),
+        metadata: JSON.stringify({
+          action: 'manual_deposit',
+          expectedAmount: amount,
+          platformAddress,
+        }),
         ipAddress: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown',
         userAgent: c.req.header('user-agent') || 'unknown',
         createdAt: new Date(),
@@ -339,7 +344,8 @@ app.post('/action', async (c) => {
       return c.json({ 
         success: true, 
         message: 'Deposit request created', 
-        transactionId: transactionId 
+        transactionId: transactionId,
+        platformAddress,
       })
     } else if (action === 'withdraw') {
       const walletResult = await db.select().from(virtualWallets).where(eq(virtualWallets.userId, userId)).limit(1)

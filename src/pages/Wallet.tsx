@@ -18,7 +18,7 @@ import { rememberFocusBeforeWalletModal } from '../utils/walletModalFocus'
 
 function WalletContent() {
   const { user, loading: authLoading } = useAuth()
-  const { wallet, connected, disconnect, signTransaction } = useWallet()
+  const { publicKey: walletPublicKey, connected, disconnect, signTransaction } = useWallet()
   const { setVisible } = useWalletModal()
   const { walletData, transactions, loading, error, refetch: refetchWalletData } = useWalletData()
   const [showDepositModal, setShowDepositModal] = useState(false)
@@ -29,6 +29,8 @@ function WalletContent() {
   const [withdrawError, setWithdrawError] = useState<string | null>(null)
   const [withdrawInProgress, setWithdrawInProgress] = useState(false)
   const [depositAmount, setDepositAmount] = useState('')
+  const [confirmDepositAmount, setConfirmDepositAmount] = useState('')
+  const [pendingDepositTxId, setPendingDepositTxId] = useState('')
   const [withdrawAmount, setWithdrawAmount] = useState('')
   const [destinationAddress, setDestinationAddress] = useState('')
   const [actionLoading, setActionLoading] = useState(false)
@@ -39,7 +41,7 @@ function WalletContent() {
   useEscapeKey(showDepositConfirmation, () => setShowDepositConfirmation(false))
   useEscapeKey(withdrawResult !== null, () => setWithdrawResult(null))
 
-  const publicKey = wallet?.adapter?.publicKey?.toString() || null
+  const publicKey = walletPublicKey?.toBase58() ?? null
 
   const handleDirectDeposit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -194,6 +196,8 @@ function WalletContent() {
       const response = await api.performWalletAction('deposit', parsedAmount)
       
       if (response.success) {
+        setPendingDepositTxId(response.transactionId || '')
+        setConfirmDepositAmount(depositAmount)
         setShowDepositModal(false)
         setShowDepositConfirmation(true)
         setDepositAmount('')
@@ -222,11 +226,13 @@ function WalletContent() {
       setActionLoading(true)
       setMessage('')
       
-      const response = await api.confirmDeposit('', signature)
+      const response = await api.confirmDeposit(pendingDepositTxId, signature)
       
       if (response.success) {
-        setMessage(`Deposit confirmed successfully! ${response.bbuxAmount ? response.bbuxAmount.toFixed(4) : depositAmount} BBUX added to your wallet.`)
+        setMessage(`Deposit confirmed successfully! ${response.bbuxAmount ? response.bbuxAmount.toFixed(4) : confirmDepositAmount} BBUX added to your wallet.`)
         setShowDepositConfirmation(false)
+        setPendingDepositTxId('')
+        setConfirmDepositAmount('')
         
         // Refresh wallet data
         setTimeout(() => {
@@ -648,7 +654,7 @@ function WalletContent() {
                   <h4 className="font-semibold text-blue-200 mb-2">Step-by-Step Instructions:</h4>
                   <ol className="list-decimal list-inside space-y-2 text-blue-300 text-sm">
                     <li>Copy the platform address below</li>
-                    <li>Send exactly <strong>{depositAmount} SOL</strong> to that address from your wallet</li>
+                    <li>Send exactly <strong>{confirmDepositAmount} SOL</strong> to that address from your wallet</li>
                     <li>Copy the transaction signature from your wallet</li>
                     <li>Paste the signature below and click "Confirm Deposit"</li>
                   </ol>
@@ -786,6 +792,15 @@ function WalletContent() {
                       className="w-full px-3 py-2 border border-neutral-600 bg-neutral-700 text-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                       placeholder="Enter your Solana address"
                     />
+                    {connected && publicKey && (
+                      <button
+                        type="button"
+                        onClick={() => setDestinationAddress(publicKey)}
+                        className="mt-2 text-xs text-blue-400 hover:text-blue-300"
+                      >
+                        Use connected wallet
+                      </button>
+                    )}
                   </div>
                   {withdrawError && (
                     <div className="bg-red-900 border border-red-700 text-red-200 rounded-lg p-3 text-sm">
