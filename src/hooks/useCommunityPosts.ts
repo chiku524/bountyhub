@@ -13,6 +13,7 @@ const DEFAULT_FILTERS: CommunityFilterOptions = {
   dateRange: '',
   sortBy: 'newest',
   hasBounty: false,
+  unanswered: false,
   selectedTags: [],
 }
 
@@ -133,6 +134,7 @@ export function useCommunityPosts(postsPerPage = 10) {
     filters.status !== '' ||
     filters.dateRange !== '' ||
     filters.hasBounty ||
+    filters.unanswered ||
     filters.selectedTags.length > 0
 
   return {

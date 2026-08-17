@@ -229,7 +229,7 @@ export default function DocsSingle() {
                   </div>
                   <div className={card}>
                     <h2 className={subsectionTitle}>Community Filters</h2>
-                    <p className={body}>The Filters panel (Community page) includes Status, Date range, Sort by, and “Has Bounty only.” Tags are in a separate section with search. Layout is spaced for clarity; “Clear all filters” resets everything.</p>
+                    <p className={body}>The Community page has discovery chips (All, New this week, Open, Unanswered, Bounties), a visible sort control, and a Filters panel for status, date range, tags, bounty, and unanswered. “Clear filters” resets everything.</p>
                   </div>
                   <div className={card}>
                     <h2 className={subsectionTitle}>Theme-Aware Loading</h2>

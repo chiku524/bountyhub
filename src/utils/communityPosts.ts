@@ -5,6 +5,7 @@ export interface CommunityFilterOptions {
   dateRange: string
   sortBy: string
   hasBounty: boolean
+  unanswered: boolean
   selectedTags: string[]
 }
 
@@ -15,6 +16,7 @@ export interface CommunityPostsQuery {
   status?: string
   dateRange?: string
   hasBounty?: boolean
+  unanswered?: boolean
   tags?: string[]
   sortBy?: string
 }
@@ -46,6 +48,7 @@ export function buildCommunityPostsQuery(
     status: filters.status || undefined,
     dateRange: filters.dateRange || undefined,
     hasBounty: filters.hasBounty || undefined,
+    unanswered: filters.unanswered || undefined,
     tags: filters.selectedTags.length > 0 ? filters.selectedTags : undefined,
     sortBy: filters.sortBy !== 'newest' ? filters.sortBy : undefined,
   }
@@ -60,6 +63,7 @@ export function communityPostsQueryToSearchParams(query: CommunityPostsQuery): s
   if (query.status) params.set('status', query.status)
   if (query.dateRange) params.set('dateRange', query.dateRange)
   if (query.hasBounty) params.set('hasBounty', 'true')
+  if (query.unanswered) params.set('unanswered', 'true')
   if (query.tags?.length) params.set('tags', query.tags.join(','))
   if (query.sortBy) params.set('sortBy', query.sortBy)
 
@@ -128,6 +132,10 @@ export function filterCommunityPosts(
 
   if (filters.hasBounty) {
     filtered = filtered.filter((post) => post.reward && post.reward > 0)
+  }
+
+  if (filters.unanswered) {
+    filtered = filtered.filter((post) => (post.commentCount || 0) === 0)
   }
 
   const sorted = [...filtered]

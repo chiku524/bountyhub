@@ -4,6 +4,21 @@ export function postHasBounty(post: Post): boolean {
   return Boolean(post.reward && post.reward > 0)
 }
 
+const NEW_POST_HOURS = 36
+
+export function isNewPost(createdAt: string | Date, hours = NEW_POST_HOURS): boolean {
+  const timestamp = typeof createdAt === 'string' ? new Date(createdAt).getTime() : createdAt.getTime()
+  return Number.isFinite(timestamp) && Date.now() - timestamp < hours * 60 * 60 * 1000
+}
+
+export function PostNewBadge() {
+  return (
+    <span className="inline-flex items-center rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800 dark:bg-amber-400/15 dark:text-amber-300">
+      New
+    </span>
+  )
+}
+
 /** Card-grid shell: title-first tile with a quiet bounty accent (not a full cyan wash). */
 export function postCardShellClass(post: Post, extra = ''): string {
   const bounty = postHasBounty(post)

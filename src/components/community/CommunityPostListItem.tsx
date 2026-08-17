@@ -6,7 +6,14 @@ import { VoteButton } from '../VoteButton'
 import { BookmarkButton } from '../BookmarkButton'
 import { ProfilePicture } from '../ProfilePicture'
 import { RelativeTime } from '../RelativeTime'
-import { PostBountyBadge, PostStatusBadge, PostTagList, postHasBounty } from './postCardShared'
+import {
+  PostBountyBadge,
+  PostNewBadge,
+  PostStatusBadge,
+  PostTagList,
+  isNewPost,
+  postHasBounty,
+} from './postCardShared'
 
 export interface CommunityPostListItemProps {
   post: Post
@@ -21,16 +28,22 @@ export const CommunityPostListItem = memo(function CommunityPostListItem({
 }: CommunityPostListItemProps) {
   const compact = density === 'compact'
   const bounty = postHasBounty(post)
+  const fresh = isNewPost(post.createdAt)
+  const justPosted = isNewPost(post.createdAt, 6)
   const commentCount = post.commentCount ?? 0
+  const authorHref = `/users/${post.author?.username || post.authorId}`
+  const authorLabel = post.author?.username || `User ${post.authorId}`
 
   return (
     <li
-      className={`${compact ? 'py-2 @sm/main:py-2.5' : 'py-3 @sm/main:py-4'} ${bounty ? 'rounded-lg border border-cyan-200 bg-linear-to-r from-cyan-50 to-blue-50 dark:border-cyan-400/30 dark:from-cyan-500/10 dark:to-blue-500/10' : ''}`}
+      className={`relative border-l-[3px] ${
+        bounty
+          ? 'border-l-amber-500 dark:border-l-amber-400'
+          : 'border-l-transparent'
+      } ${justPosted ? 'bg-amber-50/60 dark:bg-amber-400/5' : ''}`}
     >
-      <div className={`flex ${compact ? 'gap-2' : 'gap-2 @sm/main:gap-4'}`}>
-        <div
-          className={`flex shrink-0 items-center justify-center ${compact ? 'w-10 @sm/main:w-12' : 'w-12 @sm/main:w-16'}`}
-        >
+      <div className={`flex ${compact ? 'gap-2 px-3 py-2.5 @sm/main:px-4' : 'gap-3 px-3 py-3.5 @sm/main:gap-4 @sm/main:px-5'}`}>
+        <div className={`flex shrink-0 items-start justify-center pt-0.5 ${compact ? 'w-10' : 'w-11 @sm/main:w-12'}`}>
           <VoteButton
             itemId={post.id}
             itemType="post"
@@ -42,57 +55,69 @@ export const CommunityPostListItem = memo(function CommunityPostListItem({
         </div>
 
         <div className="min-w-0 flex-1">
-          <Link
-            to={`/posts/${post.id}`}
-            className={`block rounded-lg transition hover:bg-neutral-100 dark:hover:bg-neutral-700/40 ${compact ? 'p-1.5 @sm/main:p-2' : 'p-2'} ${bounty ? 'hover:bg-cyan-100 dark:hover:bg-cyan-500/10' : ''}`}
-          >
-            <div className="flex flex-col gap-2 @xl/main:flex-row @xl/main:items-start @xl/main:justify-between">
-              <div className="min-w-0 flex-1">
-                <div className="mb-1 flex flex-col gap-2 @sm/main:flex-row @sm/main:flex-wrap @sm/main:items-center">
-                  <h2
-                    className={`font-semibold text-neutral-900 dark:text-white ${compact ? 'line-clamp-1 text-sm @sm/main:text-base' : 'line-clamp-2 text-base @xl/main:text-xl'}`}
-                  >
-                    {post.title}
-                  </h2>
-                  {bounty && post.reward != null && <PostBountyBadge reward={post.reward} />}
-                </div>
-                <p
-                  className={`text-neutral-500 dark:text-gray-400 ${compact ? 'mt-0.5 line-clamp-1 text-xs @sm/main:text-sm' : 'mt-1 line-clamp-2 text-sm @sm/main:text-base'}`}
+          <div className="flex items-start gap-3">
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <Link
+                  to={`/posts/${post.id}`}
+                  className={`font-semibold text-neutral-900 hover:text-neutral-700 dark:text-white dark:hover:text-neutral-100 ${
+                    compact ? 'line-clamp-1 text-sm @sm/main:text-[15px]' : 'line-clamp-2 text-[15px] leading-snug @xl/main:text-base'
+                  }`}
                 >
+                  {post.title}
+                </Link>
+                {fresh && <PostNewBadge />}
+                <PostStatusBadge status={post.status} variant="quiet" />
+              </div>
+              {!compact && post.content?.trim() && (
+                <p className="mt-1 line-clamp-1 text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
                   {post.content}
                 </p>
-                <div
-                  className={`flex flex-wrap items-center gap-x-3 gap-y-1 text-neutral-400 dark:text-gray-500 ${compact ? 'mt-1 text-xs' : 'mt-2 text-xs @sm/main:text-sm'}`}
-                >
-                  <span className="flex min-w-0 items-center gap-2">
-                    <ProfilePicture user={post.author} size="sm" />
-                    <span className="truncate">
-                      <Link
-                        to={`/users/${post.author?.username || post.authorId}`}
-                        className="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {post.author?.username || `User ${post.authorId}`}
-                      </Link>
-                    </span>
-                  </span>
-                  <RelativeTime date={post.createdAt} className="shrink-0" />
-                  <span
-                    className="inline-flex shrink-0 items-center gap-1"
-                    title={`${commentCount} comment${commentCount === 1 ? '' : 's'}`}
-                  >
-                    <FiMessageSquare className="h-3.5 w-3.5" aria-hidden />
-                    {commentCount}
-                  </span>
-                </div>
-              </div>
-              <div className={`flex flex-wrap items-center gap-2 ${compact ? 'gap-1.5' : ''}`}>
-                <PostStatusBadge status={post.status} />
-                <PostTagList tags={post.tags} maxVisible={compact ? 1 : 2} />
-                <BookmarkButton postId={post.id} size="sm" />
-              </div>
+              )}
             </div>
-          </Link>
+            <div className="flex shrink-0 items-center gap-2">
+              {bounty && post.reward != null && (
+                <PostBountyBadge reward={post.reward} variant="emphasis" />
+              )}
+              <BookmarkButton postId={post.id} size="sm" />
+            </div>
+          </div>
+
+          <div
+            className={`flex flex-wrap items-center gap-x-2.5 gap-y-1 text-neutral-500 dark:text-neutral-400 ${
+              compact ? 'mt-1 text-xs' : 'mt-1.5 text-xs @sm/main:text-[13px]'
+            }`}
+          >
+            <Link
+              to={authorHref}
+              className="inline-flex min-w-0 items-center gap-1.5 font-medium text-neutral-600 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white"
+            >
+              <ProfilePicture user={post.author} size="sm" />
+              <span className="truncate">{authorLabel}</span>
+            </Link>
+            <span className="text-neutral-300 dark:text-neutral-600" aria-hidden>
+              ·
+            </span>
+            <RelativeTime date={post.createdAt} className="shrink-0" />
+            <span className="text-neutral-300 dark:text-neutral-600" aria-hidden>
+              ·
+            </span>
+            <span
+              className="inline-flex shrink-0 items-center gap-1"
+              title={`${commentCount} comment${commentCount === 1 ? '' : 's'}`}
+            >
+              <FiMessageSquare className="h-3.5 w-3.5" aria-hidden />
+              {commentCount === 0 ? 'No replies' : commentCount}
+            </span>
+            {post.tags && post.tags.length > 0 && (
+              <>
+                <span className="text-neutral-300 dark:text-neutral-600" aria-hidden>
+                  ·
+                </span>
+                <PostTagList tags={post.tags} maxVisible={compact ? 1 : 2} variant="muted" />
+              </>
+            )}
+          </div>
         </div>
       </div>
     </li>

@@ -8,6 +8,7 @@ interface FilterOptions {
   dateRange: string
   sortBy: string
   hasBounty: boolean
+  unanswered: boolean
   selectedTags: string[]
 }
 
@@ -111,8 +112,9 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
     filters.dateRange !== '' ||
     filters.sortBy !== 'newest' ||
     filters.hasBounty ||
+    filters.unanswered ||
     (filters.selectedTags && filters.selectedTags.length > 0)
-  const activeCount = [filters.status, filters.dateRange, filters.hasBounty].filter(Boolean).length + (filters.selectedTags?.length || 0)
+  const activeCount = [filters.status, filters.dateRange, filters.hasBounty, filters.unanswered].filter(Boolean).length + (filters.selectedTags?.length || 0)
 
   return (
     <div className={`relative inline-block ${className}`} ref={dropdownRef}>
@@ -213,6 +215,16 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
                     />
                     <span className="text-sm text-neutral-600 dark:text-neutral-400">Has Bounty only</span>
                   </label>
+                  <label className="flex items-center gap-3 py-2.5 cursor-pointer rounded-lg hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors -ml-1 pl-1">
+                    <input
+                      type="checkbox"
+                      id="unanswered"
+                      checked={filters.unanswered}
+                      onChange={(e) => handleFilterChange('unanswered', e.target.checked)}
+                      className="h-4 w-4 rounded border-neutral-300 text-indigo-600 focus:ring-indigo-500 dark:border-neutral-600 dark:bg-neutral-700"
+                    />
+                    <span className="text-sm text-neutral-600 dark:text-neutral-400">Unanswered only</span>
+                  </label>
                 </div>
               </div>
             </div>
@@ -245,6 +257,7 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
                   dateRange: '',
                   sortBy: 'newest',
                   hasBounty: false,
+                  unanswered: false,
                   selectedTags: []
                 })}
                 className="text-sm font-medium px-4 py-2 rounded-lg text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 hover:text-neutral-900 dark:hover:text-white transition-colors"

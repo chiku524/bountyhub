@@ -1,5 +1,6 @@
 import { and, asc, desc, eq, gte, inArray, or, sql, type SQL } from 'drizzle-orm'
 import {
+  answers,
   bounties,
   comments,
   postTags,
@@ -19,6 +20,7 @@ export interface ListCommunityPostsParams {
   status?: string
   dateRange?: string
   hasBounty?: boolean
+  unanswered?: boolean
   tags?: string[]
   sortBy?: string
 }
@@ -107,6 +109,12 @@ function buildWhereConditions(params: ListCommunityPostsParams, db: Db): SQL | u
 
   if (params.hasBounty) {
     conditions.push(eq(posts.hasBounty, true))
+  }
+
+  if (params.unanswered) {
+    conditions.push(
+      sql`(SELECT COUNT(*) FROM ${answers} WHERE ${answers.postId} = ${posts.id}) = 0`
+    )
   }
 
   if (params.tags && params.tags.length > 0) {

@@ -9,7 +9,9 @@ import { RelativeTime } from '../RelativeTime'
 import {
   postCardShellClass,
   postHasBounty,
+  isNewPost,
   PostBountyBadge,
+  PostNewBadge,
   PostStatusBadge,
   PostTagList,
 } from './postCardShared'
@@ -30,6 +32,7 @@ export const CommunityPostCard = memo(function CommunityPostCard({
   onVoteChange,
 }: CommunityPostCardProps) {
   const bounty = postHasBounty(post)
+  const fresh = isNewPost(post.createdAt)
   const commentCount = post.commentCount ?? 0
   const thumb = firstImageUrl(post)
   const authorHref = `/users/${post.author?.username || post.authorId}`
@@ -58,6 +61,7 @@ export const CommunityPostCard = memo(function CommunityPostCard({
       <div className="pointer-events-none relative z-10 flex min-h-0 flex-1 flex-col p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+            {fresh && <PostNewBadge />}
             <PostStatusBadge status={post.status} variant="quiet" />
             {bounty && post.reward != null && (
               <PostBountyBadge reward={post.reward} variant="emphasis" />

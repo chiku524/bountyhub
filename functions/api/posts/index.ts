@@ -33,6 +33,7 @@ app.get(async (c) => {
     const status = c.req.query('status') || undefined
     const dateRange = c.req.query('dateRange') || undefined
     const hasBounty = c.req.query('hasBounty') === 'true'
+    const unanswered = c.req.query('unanswered') === 'true'
     const sortBy = c.req.query('sortBy') || undefined
     const tagsParam = c.req.query('tags')
     const tags = tagsParam
@@ -53,6 +54,7 @@ app.get(async (c) => {
         status,
         dateRange,
         hasBounty: hasBounty || undefined,
+        unanswered: unanswered || undefined,
         tags,
         sortBy,
       },
