@@ -56,7 +56,8 @@ export default function Home() {
     return () => cancelAnimationFrame(t)
   }, [])
 
-  // Mount static Tiny Startups embed (in index.html) into the hero for layout.
+  // Mount static Tiny Startups embed (in index.html) into the hero.
+  // CSS hides the badge unless it lives inside #tinystartups-badge-hero.
   useEffect(() => {
     const badge = document.getElementById('tinystartups-badge')
     const hero = document.getElementById('tinystartups-badge-hero')

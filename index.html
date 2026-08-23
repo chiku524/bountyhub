@@ -48,6 +48,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tiny Startups embed stays in the document so their script can find it.
+         Hide it unless the landing page mounts it into the hero. -->
+    <style>
+      #tinystartups-badge { display: none; }
+      #tinystartups-badge-hero #tinystartups-badge { display: block; }
+    </style>
     
     <!-- JSON-LD structured data for SEO -->
     <script type="application/ld+json">
