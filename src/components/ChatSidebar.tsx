@@ -397,8 +397,9 @@ const ChatSidebar: React.FC = () => {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-[max(1.5rem,env(safe-area-inset-bottom,0px))] right-[max(1.5rem,env(safe-area-inset-right,0px))] z-50 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full shadow-lg p-4 flex items-center justify-center focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
+          className="fixed bottom-[max(5.75rem,calc(env(safe-area-inset-bottom,0px)+4.25rem))] right-[max(1.5rem,env(safe-area-inset-right,0px))] z-50 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full shadow-lg p-4 flex items-center justify-center focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
           aria-label="Open chat sidebar"
+          data-tour="chat"
         >
           <FiMessageCircle className="h-6 w-6" />
         </button>

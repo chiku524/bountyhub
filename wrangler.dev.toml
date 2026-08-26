@@ -29,6 +29,10 @@ preview_id = "27bafcd35c634a5facf96d6fc8b70be0"
 name = "CHAT_ROOM_DO"
 class_name = "ChatRoomDO"
 
+# Workers AI — in-app Guide (uses remote models when wrangler is logged in)
+[ai]
+binding = "AI"
+
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["ChatRoomDO"]

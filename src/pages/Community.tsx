@@ -97,9 +97,11 @@ export default function Community() {
         <PageHeader
           title="Community"
           description="Discover new questions and open bounties worth answering"
+          dataTour="community"
           actions={
             <Link
               to="/posts/create"
+              data-tour="create-bounty"
               className="btn-primary inline-flex min-h-11 items-center gap-2 px-4"
             >
               <FiEdit3 className="h-4 w-4" aria-hidden />

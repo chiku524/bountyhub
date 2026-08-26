@@ -9,6 +9,7 @@ interface PageHeaderProps {
   /** Smaller title on mobile */
   compact?: boolean
   className?: string
+  dataTour?: string
 }
 
 export function PageHeader({
@@ -16,12 +17,14 @@ export function PageHeader({
   description,
   actions,
   compact = false,
-  className = ''
+  className = '',
+  dataTour,
 }: PageHeaderProps) {
   return (
     <div
       className={`mb-6 flex flex-col gap-4 @xl/main:flex-row @xl/main:items-center @xl/main:justify-between @3xl/main:mb-8 ${className}`}
       aria-label="Page header"
+      {...(dataTour ? { 'data-tour': dataTour } : {})}
     >
       <div className="min-w-0">
         <h1

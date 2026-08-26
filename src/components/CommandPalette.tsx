@@ -24,8 +24,11 @@ import {
   FiCreditCard,
   FiCheckSquare,
   FiRefreshCw,
+  FiHelpCircle,
+  FiCompass,
 } from 'react-icons/fi'
 import { useAuth } from '../contexts/AuthProvider'
+import { useSupportGuide } from '../contexts/SupportGuideContext'
 import { isDesktopApp } from '../utils/desktop'
 import { useRestoreFocusOnUnmount } from '../hooks/useRestoreFocus'
 import { COMMAND_PALETTE_TOGGLE_EVENT } from '../constants/commandPaletteEvents'
@@ -33,7 +36,8 @@ import { COMMAND_PALETTE_TOGGLE_EVENT } from '../constants/commandPaletteEvents'
 interface CommandItem {
   id: string
   label: string
-  to: string
+  to?: string
+  run?: 'open-guide' | 'start-tour'
   keywords?: string
   icon: ReactNode
   requireAuth?: boolean
@@ -117,12 +121,15 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
   useRestoreFocusOnUnmount()
   const navigate = useNavigate()
   const { user } = useAuth()
+  const { open: openGuide, startTour } = useSupportGuide()
   const [query, setQuery] = useState('')
   const [highlight, setHighlight] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const allItems: CommandItem[] = useMemo(
     () => [
+      { id: 'guide', label: 'Ask Guide', run: 'open-guide', keywords: 'help support ai assistant', icon: <FiHelpCircle className="h-4 w-4" /> },
+      { id: 'tour', label: 'Start product tour', run: 'start-tour', keywords: 'walkthrough onboarding intro', icon: <FiCompass className="h-4 w-4" /> },
       { id: 'community', label: 'Community', to: '/community', keywords: 'posts browse', icon: <FiUsers className="h-4 w-4" /> },
       { id: 'create', label: 'Create post', to: '/posts/create', keywords: 'bounty question new', icon: <FiEdit3 className="h-4 w-4" />, requireAuth: true },
       { id: 'chat', label: 'Team Hub', to: '/chat', keywords: 'messages', icon: <FiMessageCircle className="h-4 w-4" />, requireAuth: true },
@@ -161,12 +168,26 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
   }, [])
 
   const run = useCallback(
-    (to: string) => {
-      navigate(to)
-      onClose()
-      setQuery('')
+    (item: CommandItem) => {
+      if (item.run === 'open-guide') {
+        openGuide()
+        onClose()
+        setQuery('')
+        return
+      }
+      if (item.run === 'start-tour') {
+        startTour()
+        onClose()
+        setQuery('')
+        return
+      }
+      if (item.to) {
+        navigate(item.to)
+        onClose()
+        setQuery('')
+      }
     },
-    [navigate, onClose],
+    [navigate, onClose, openGuide, startTour],
   )
 
   useEffect(() => {
@@ -194,7 +215,7 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
         const item = items[idx]
         if (item) {
           e.preventDefault()
-          run(item.to)
+          run(item)
         }
       }
     }
@@ -246,7 +267,7 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
                       : 'text-neutral-800 hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-white/5'
                   }`}
                   onMouseEnter={() => setHighlight(i)}
-                  onClick={() => run(item.to)}
+                  onClick={() => run(item)}
                 >
                   <span className="text-neutral-500 dark:text-neutral-400">{item.icon}</span>
                   {item.label}

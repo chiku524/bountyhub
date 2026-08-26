@@ -46,13 +46,15 @@ function DesktopSidebar({
     href: string,
     label: string,
     Icon: React.ComponentType<{ className?: string }>,
-    active?: boolean
+    active?: boolean,
+    tourId?: string,
   ) {
     return (
       <Link
         to={href}
         title={collapsed ? label : undefined}
         aria-label={collapsed ? label : undefined}
+        data-tour={tourId}
         className={`flex items-center rounded-lg text-sm transition-colors ${
           collapsed ? 'justify-center px-2 py-2.5' : 'gap-3 px-3 py-2.5'
         } ${
@@ -72,6 +74,7 @@ function DesktopSidebar({
 
   return (
     <aside
+      data-tour="desktop-sidebar"
       className="fixed left-0 top-0 z-40 flex h-screen flex-col border-r border-white/5 bg-neutral-900/98 backdrop-blur-md transition-[width] duration-200"
       style={{ width: collapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH_EXPANDED }}
     >
@@ -91,6 +94,7 @@ function DesktopSidebar({
             <button
               type="button"
               onClick={openCommandPalette}
+              data-tour="command-palette"
               className="flex h-10 w-10 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-white/5 hover:text-white"
               aria-label="Open command palette"
               title="Go to… (⌘K)"
@@ -107,11 +111,11 @@ function DesktopSidebar({
             Main
           </p>
         )}
-        {navLink('/community', 'Community', FiUsers, location.pathname === '/community')}
+        {navLink('/community', 'Community', FiUsers, location.pathname === '/community', 'community')}
         {navLink('/chat', 'Team Hub', FiMessageCircle, location.pathname === '/chat')}
-        {navLink('/posts/create', 'Create post', FiEdit3, location.pathname === '/posts/create')}
+        {navLink('/posts/create', 'Create post', FiEdit3, location.pathname === '/posts/create', 'create-bounty')}
         {navLink('/profile', 'Profile', FiUser, location.pathname.startsWith('/profile'))}
-        {navLink('/wallet', 'Wallet', FiCreditCard, location.pathname === '/wallet')}
+        {navLink('/wallet', 'Wallet', FiCreditCard, location.pathname === '/wallet', 'wallet')}
         {!collapsed && (
           <p className="mb-1 mt-4 px-3 text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
             Explore
@@ -152,6 +156,7 @@ function DesktopSidebar({
             <button
               type="button"
               onClick={openCommandPalette}
+              data-tour="command-palette"
               className="flex h-10 w-10 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-white/5 hover:text-white"
               aria-label="Open command palette"
               title="Go to… (⌘K)"

@@ -102,6 +102,7 @@ Copy `.dev.vars.example` to `.dev.vars` for local API development. Sensitive val
 | **R2** | Media storage (`MEDIA_BUCKET`) — profile pictures, post attachments |
 | **KV** | Platform stats cache, auth rate limiting |
 | **Durable Objects** | Per-room chat WebSocket hub (`ChatRoomDO`) |
+| **Workers AI** | In-app Guide (`AI` binding) — product tour helper and support Q&A at `POST /api/support-ai` |
 
 Details for R2/KV setup and bindings: [DEPLOYMENT.md](./DEPLOYMENT.md#cloudflare-services).
 

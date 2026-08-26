@@ -218,7 +218,7 @@ export function TopNav() {
   const navHeightClass = isDesktop ? 'h-14' : 'h-16'
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 bg-white/70 dark:bg-neutral-800/70 backdrop-blur-xs border-b border-neutral-200/50 dark:border-neutral-700/50 shadow-xs ${isDesktop ? 'supports-[(-webkit-app-region:drag)]:bg-white/90 dark:supports-[(-webkit-app-region:drag)]:bg-neutral-800/90' : ''}`}>
+    <nav data-tour="top-nav" className={`fixed top-0 left-0 right-0 z-50 bg-white/70 dark:bg-neutral-800/70 backdrop-blur-xs border-b border-neutral-200/50 dark:border-neutral-700/50 shadow-xs ${isDesktop ? 'supports-[(-webkit-app-region:drag)]:bg-white/90 dark:supports-[(-webkit-app-region:drag)]:bg-neutral-800/90' : ''}`}>
       <div className={`mx-auto px-4 sm:px-6 lg:px-8 ${isDesktop ? 'max-w-6xl' : 'max-w-7xl'}`}>
         <div className={`flex items-center justify-between ${navHeightClass}`}>
           {/* Logo + app name: draggable region on desktop for window move */}
@@ -239,6 +239,7 @@ export function TopNav() {
             {user && (
               <Link
                 to="/posts/create"
+                data-tour="create-bounty"
                 className="btn-primary text-sm py-2 px-3 flex items-center gap-2"
               >
                 <FiAward className="w-4 h-4 shrink-0" />
@@ -369,6 +370,7 @@ export function TopNav() {
             <button
               type="button"
               onClick={openCommandPalette}
+              data-tour="command-palette"
               className="flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-neutral-700 transition-colors hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-white/5"
               aria-label="Open command palette"
               title="Search and go to… (⌘K)"
@@ -506,6 +508,7 @@ export function TopNav() {
                   openCommandPalette()
                   setMobileMenuOpen(false)
                 }}
+                data-tour="command-palette"
                 className="flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-white/5"
                 aria-label="Open command palette"
               >
@@ -535,6 +538,7 @@ export function TopNav() {
                 <Link
                   to="/posts/create"
                   onClick={() => setMobileMenuOpen(false)}
+                  data-tour="create-bounty"
                   className="block px-3 py-2.5 rounded-lg text-base font-medium btn-primary text-center"
                 >
                   Create Bounty

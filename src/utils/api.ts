@@ -59,12 +59,13 @@ export class ApiClient {
     }
   }
 
-  public async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  public async request<T>(endpoint: string, options: RequestInit & { timeoutMs?: number } = {}): Promise<T> {
     const url = `${config.api.baseUrl}${endpoint}`
+    const { timeoutMs = DEFAULT_TIMEOUT_MS, ...fetchOptions } = options
     
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...(options.headers as Record<string, string> | undefined),
+      ...(fetchOptions.headers as Record<string, string> | undefined),
     }
     if (isDesktopApp()) {
       const sid = getDesktopSessionId()
@@ -74,17 +75,17 @@ export class ApiClient {
     }
 
     const controller = new AbortController()
-    const externalSignal = options.signal
+    const externalSignal = fetchOptions.signal
     const onExternalAbort = () => controller.abort()
     if (externalSignal) {
       if (externalSignal.aborted) controller.abort()
       else externalSignal.addEventListener('abort', onExternalAbort, { once: true })
     }
-    const timeoutId = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS)
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
 
     try {
       const response = await this.fetchResolved(url, {
-        ...options,
+        ...fetchOptions,
         headers,
         credentials: 'include',
         signal: controller.signal,
@@ -102,7 +103,7 @@ export class ApiClient {
     } catch (err) {
       if (err instanceof DOMException && err.name === 'AbortError') {
         if (externalSignal?.aborted) throw err
-        throw new Error(`Request timed out after ${DEFAULT_TIMEOUT_MS / 1000}s. Please try again.`)
+        throw new Error(`Request timed out after ${timeoutMs / 1000}s. Please try again.`)
       }
       throw err
     } finally {

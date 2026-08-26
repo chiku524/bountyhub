@@ -212,6 +212,10 @@ export default function DocsSingle() {
                 <p className={`${body} mb-4`}>These features make the app easier and more pleasant to use.</p>
                 <div className="space-y-4">
                   <div className={card}>
+                    <h2 className={subsectionTitle}>Guide (in-app assistant)</h2>
+                    <p className={body}>A help button stays at the bottom-right on web and desktop. New visitors get a short product tour. Anyone can ask Guide how bounties, wallet, chat, and other features work, or say “give me a tour” to replay the walkthrough. Also available from the command palette (Ask Guide).</p>
+                  </div>
+                  <div className={card}>
                     <h2 className={subsectionTitle}>Toast Notifications</h2>
                     <p className={body}>Success and error feedback appear as toasts (bottom-right). Shown after creating a post, updating profile picture or settings, changing password, connecting GitHub, and on upload/recording errors. You can dismiss them manually.</p>
                   </div>
@@ -284,6 +288,7 @@ export default function DocsSingle() {
                     <li><code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">/api/bug-bounty</code> — campaigns and submissions</li>
                     <li><code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">/api/github</code> — repository sync</li>
                     <li><code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">/api/media</code> — upload and serve attachments</li>
+                    <li><code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">/api/support-ai</code> — in-app Guide (product tour + support Q&amp;A)</li>
                     <li><code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">/api/tags</code> — list tags</li>
                     <li><code className="bg-neutral-200 dark:bg-neutral-700 px-1 rounded">/api/releases/latest</code> — desktop download metadata</li>
                   </ul>
@@ -353,7 +358,7 @@ export default function DocsSingle() {
               <>
                 <h1 className={sectionTitle}>Need Help?</h1>
                 <div className={`${card} flex flex-col @sm/main:flex-row gap-4 items-center justify-between`}>
-                  <p className={body}>Can’t find what you need? Ask the community or contact support.</p>
+                  <p className={body}>Can’t find what you need? Open <strong>Guide</strong> (the help button at the bottom-right) for a product tour or answers, ask the community, or contact support.</p>
                   <div className="flex flex-wrap gap-3 shrink-0">
                     <Link
                       to="/community"

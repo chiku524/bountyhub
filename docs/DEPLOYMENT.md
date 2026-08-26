@@ -132,3 +132,14 @@ Chat uses **WebSockets + Durable Objects** for live delivery, with REST for hist
 - Frontend: `useChatWebSocket` hook in Chat page, sidebar, and post chat rooms
 
 Polling with `?after=` remains as a fallback when WebSockets are unavailable.
+
+---
+
+## In-app Guide (Workers AI)
+
+The Guide widget (`src/components/support/SupportGuide.tsx`) is always available in the web and desktop apps. It calls `POST /api/support-ai`.
+
+- Bind Workers AI in `wrangler.workers.toml` / `wrangler.dev.toml` (`[ai] binding = "AI"`).
+- Default model: `@cf/meta/llama-3.1-8b-instruct`. Override with `SUPPORT_AI_MODEL` if needed.
+- If the binding is missing (local wrangler without an account), the endpoint falls back to a built-in FAQ so tours still work.
+- Rate limit: 20 requests / minute / IP via KV.

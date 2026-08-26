@@ -182,6 +182,7 @@ export default function Home() {
                   <button
                     type="button"
                     onClick={() => scrollToSection('cta')}
+                    data-tour="get-started"
                     className="btn-primary text-lg px-8 py-4"
                   >
                     Get started
@@ -500,6 +501,7 @@ export default function Home() {
                 <>
                   <Link
                     to="/signup"
+                    data-tour="get-started"
                     className="btn-primary text-lg px-8 py-4 font-semibold shadow-lg shadow-amber-900/15"
                   >
                     Sign up free

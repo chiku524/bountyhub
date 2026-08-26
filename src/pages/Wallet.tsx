@@ -391,6 +391,7 @@ function WalletContent() {
         <PageHeader
           title="My Wallet"
           description="Manage your virtual BBUX balance and transactions"
+          dataTour="wallet"
         />
 
         {error && (

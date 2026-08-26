@@ -21,6 +21,13 @@ test.describe('public smoke', () => {
     await expect(page.locator('form').first()).toBeVisible({ timeout: 20_000 })
   })
 
+  test('guide assistant is available on public pages', async ({ page }) => {
+    await page.goto('/')
+    await expect(page.getByRole('button', { name: /open guide|close guide/i })).toBeVisible({
+      timeout: 20_000,
+    })
+  })
+
   test('docs page is reachable', async ({ page }) => {
     await page.goto('/docs')
     await expect(page.locator('body')).toContainText(/docs|guide|api|bounty/i, { timeout: 20_000 })

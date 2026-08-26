@@ -24,6 +24,8 @@ import ChatSidebar from './components/ChatSidebar'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { PageRouteSkeleton } from './components/PageRouteSkeleton'
 import { CommandPaletteProvider } from './components/CommandPalette'
+import { SupportGuideProvider } from './contexts/SupportGuideContext'
+import { SupportGuide } from './components/support/SupportGuide'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import '@solana/wallet-adapter-react-ui/styles.css'
 
@@ -275,6 +277,9 @@ function AppContent() {
         {/* Chat Sidebar - Only for authenticated pages */}
         {!isPublicPage && <ChatSidebar />}
 
+        {/* Guide: product tour + support Q&A, always present (except /launch) */}
+        <SupportGuide />
+
         {/* Desktop: About dialog (from tray → About BountyHub) */}
         {isDesktop && (
           <DesktopAboutDialog open={aboutOpen} onClose={() => setAboutOpen(false)} />
@@ -292,9 +297,11 @@ function App() {
         <SolanaWalletProvider>
           <ToastProvider>
             <DesktopUpdateProvider>
-              <CommandPaletteProvider>
-                <AppContent />
-              </CommandPaletteProvider>
+              <SupportGuideProvider>
+                <CommandPaletteProvider>
+                  <AppContent />
+                </CommandPaletteProvider>
+              </SupportGuideProvider>
             </DesktopUpdateProvider>
           </ToastProvider>
         </SolanaWalletProvider>

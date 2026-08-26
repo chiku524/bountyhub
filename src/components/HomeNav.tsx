@@ -56,6 +56,7 @@ export function HomeNav({ onScrollTo }: HomeNavProps) {
 
   return (
     <nav
+      data-tour="home-nav"
       className={`fixed top-0 left-0 right-0 z-50 overflow-x-clip transition-all duration-300 ${
         scrolled
           ? 'bg-white/70 dark:bg-neutral-900/70 backdrop-blur-md shadow-lg border-b border-neutral-200 dark:border-neutral-700'
@@ -107,6 +108,7 @@ export function HomeNav({ onScrollTo }: HomeNavProps) {
                 </Link>
                 <Link
                   to="/signup"
+                  data-tour="get-started"
                   className="btn-primary px-3 py-1.5 text-sm sm:px-4 sm:py-2 whitespace-nowrap"
                 >
                   Get started

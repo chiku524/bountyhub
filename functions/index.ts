@@ -29,11 +29,16 @@ import githubRoutes from './api/github'
 import releasesRoutes from './api/releases'
 import contributionsRoutes from './api/contributions'
 import mediaRoutes from './api/media'
+import supportAiRoutes from './api/support-ai'
 import { onRequest as serveTermsPdf } from './api/terms.pdf'
 import { onRequest as servePrivacyPdf } from './api/privacy.pdf'
 
 interface Env {
   DB: D1Database
+  /** Cloudflare Workers AI (in-app Guide). Optional in local wrangler without login. */
+  AI?: Ai
+  /** Override default support model, e.g. @cf/meta/llama-3.1-8b-instruct */
+  SUPPORT_AI_MODEL?: string
   /** Durable Object namespace for chat room WebSockets */
   CHAT_ROOM_DO: DurableObjectNamespace
   /** R2 bucket for media (profile pictures, post attachments). Optional until migration from Cloudinary. */
@@ -553,6 +558,7 @@ app.route('/api/github', githubRoutes)
 app.route('/api/releases', releasesRoutes)
 app.route('/api/contributions', contributionsRoutes)
 app.route('/api/media', mediaRoutes)
+app.route('/api/support-ai', supportAiRoutes)
 
 app.get('/api/terms.pdf', (c) => serveTermsPdf({ env: c.env, request: c.req.raw }))
 app.get('/api/privacy.pdf', (c) => servePrivacyPdf({ env: c.env, request: c.req.raw }))
