@@ -153,7 +153,7 @@ dependencies = [
 
 [[package]]
 name = "bountyhub"
-version = "1.1.45"
+version = "1.1.47"
 dependencies = [
  "serde",
  "serde_json",
