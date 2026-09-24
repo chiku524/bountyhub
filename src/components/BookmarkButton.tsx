@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+﻿import React, { useState, useEffect } from 'react'
 import { FaBookmark } from 'react-icons/fa'
 import { useAuth } from '../contexts/AuthProvider'
 import { config } from '../utils/config'
@@ -18,9 +18,10 @@ export const BookmarkButton: React.FC<BookmarkButtonProps> = ({
   const [isBookmarked, setIsBookmarked] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
-  // Check initial bookmark status
   useEffect(() => {
-    if (!user) return
+    if (!user || !postId) return
+
+    let cancelled = false
 
     const checkBookmarkStatus = async () => {
       try {
@@ -29,25 +30,30 @@ export const BookmarkButton: React.FC<BookmarkButtonProps> = ({
           credentials: 'include'
         })
 
-        if (response.ok) {
-          const data = await response.json()
-          setIsBookmarked(data.status[postId] || false)
+        if (!response.ok || cancelled) return
+
+        const data = await response.json().catch(() => null)
+        const statusMap = data && typeof data === 'object' ? (data as { status?: Record<string, boolean> }).status : undefined
+        if (statusMap && typeof statusMap === 'object') {
+          setIsBookmarked(Boolean(statusMap[postId]))
         }
       } catch (error) {
         console.error('Error checking bookmark status:', error)
       }
     }
 
-    checkBookmarkStatus()
+    void checkBookmarkStatus()
+    return () => {
+      cancelled = true
+    }
   }, [user, postId])
 
   const handleBookmarkToggle = async (e: React.MouseEvent) => {
-    e.stopPropagation() // Prevent event bubbling to parent Link
-    if (!user || isLoading) return
+    e.preventDefault()
+    e.stopPropagation()
+    if (!user || isLoading || !postId) return
 
     setIsLoading(true)
-    
-    // Optimistically update the UI
     setIsBookmarked(prev => !prev)
 
     try {
@@ -61,12 +67,10 @@ export const BookmarkButton: React.FC<BookmarkButtonProps> = ({
       })
 
       if (!response.ok) {
-        // Revert the optimistic update if the API call failed
         setIsBookmarked(prev => !prev)
         console.error('Failed to toggle bookmark:', response.status)
       }
     } catch (error) {
-      // Revert the optimistic update if there was an error
       setIsBookmarked(prev => !prev)
       console.error('Error toggling bookmark:', error)
     } finally {
@@ -86,6 +90,7 @@ export const BookmarkButton: React.FC<BookmarkButtonProps> = ({
 
   return (
     <button
+      type="button"
       onClick={handleBookmarkToggle}
       disabled={isLoading}
       className={`p-2 rounded-full transition-colors ${
@@ -94,8 +99,10 @@ export const BookmarkButton: React.FC<BookmarkButtonProps> = ({
           : 'bg-neutral-200 dark:bg-neutral-700/50 text-yellow-500 dark:text-yellow-400 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-400/20'
       } ${className}`}
       title={isBookmarked ? 'Remove Bookmark' : 'Bookmark'}
+      aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark'}
+      aria-pressed={isBookmarked}
     >
       <FaBookmark className={`${sizeClasses[size]} ${isBookmarked ? 'fill-current' : 'stroke-current stroke-2 fill-none'}`} />
     </button>
   )
-} 
+}

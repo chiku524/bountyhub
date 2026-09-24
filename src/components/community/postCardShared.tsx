@@ -1,13 +1,17 @@
-import type { Post } from '../../types'
+﻿import type { Post } from '../../types'
 
 export function postHasBounty(post: Post): boolean {
   return Boolean(post.reward && post.reward > 0)
 }
 
+/** First image URL for card/gallery thumbs. Tolerates missing/non-array media and IMAGE vs image. */
 export function firstImageUrl(post: Post): string | null {
-  const image = post.media?.find((m) => m.type === 'image')
+  const media = post.media
+  if (!Array.isArray(media) || media.length === 0) return null
+  const image = media.find((m) => typeof m?.type === 'string' && m.type.toLowerCase() === 'image')
   if (!image) return null
-  return image.thumbnailUrl || image.url || null
+  const url = image.thumbnailUrl || image.url
+  return typeof url === 'string' && url.length > 0 ? url : null
 }
 
 /** Gallery tile shell: image-first with quiet bounty accent. */
@@ -28,8 +32,21 @@ export function postGalleryShellClass(post: Post, extra = ''): string {
 
 const NEW_POST_HOURS = 36
 
-export function isNewPost(createdAt: string | Date, hours = NEW_POST_HOURS): boolean {
-  const timestamp = typeof createdAt === 'string' ? new Date(createdAt).getTime() : createdAt.getTime()
+function toTimestamp(createdAt: string | Date | number | null | undefined): number {
+  if (createdAt == null) return NaN
+  if (typeof createdAt === 'number') {
+    return createdAt < 10_000_000_000 ? createdAt * 1000 : createdAt
+  }
+  if (typeof createdAt === 'string') return new Date(createdAt).getTime()
+  if (createdAt instanceof Date) return createdAt.getTime()
+  return NaN
+}
+
+export function isNewPost(
+  createdAt: string | Date | number | null | undefined,
+  hours = NEW_POST_HOURS,
+): boolean {
+  const timestamp = toTimestamp(createdAt)
   return Number.isFinite(timestamp) && Date.now() - timestamp < hours * 60 * 60 * 1000
 }
 
@@ -67,29 +84,33 @@ export function PostStatusBadge({
   status,
   variant = 'default',
 }: {
-  status: Post['status']
-  /** Quiet: humanized label, muted chip. Hide â€œOpenâ€ (default state) in card feeds. */
+  status: Post['status'] | string | null | undefined
+  /** Quiet: humanized label, muted chip. Hide "Open" (default state) in card feeds. */
   variant?: 'default' | 'quiet'
 }) {
+  const normalized =
+    typeof status === 'string' ? (status.toUpperCase() as Post['status']) : undefined
+  if (!normalized || !(normalized in STATUS_LABEL)) return null
+
   if (variant === 'quiet') {
-    if (status === 'OPEN') return null
+    if (normalized === 'OPEN') return null
     return (
       <span className="text-xs font-medium tracking-wide text-neutral-500 dark:text-neutral-400">
-        {STATUS_LABEL[status]}
+        {STATUS_LABEL[normalized]}
       </span>
     )
   }
 
   const styles =
-    status === 'OPEN'
+    normalized === 'OPEN'
       ? 'bg-green-100 text-green-700 dark:bg-green-600 dark:text-white'
-      : status === 'COMPLETED'
+      : normalized === 'COMPLETED'
         ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-600 dark:text-white'
         : 'bg-neutral-100 text-neutral-700 dark:bg-gray-600 dark:text-white'
 
   return (
     <span className={`inline-flex shrink-0 rounded-full px-2 py-0.5 text-xs font-medium @sm/main:py-1 ${styles}`}>
-      {status}
+      {STATUS_LABEL[normalized]}
     </span>
   )
 }
@@ -99,7 +120,7 @@ export function PostBountyBadge({
   variant = 'default',
 }: {
   reward: number
-  /** Emphasis: amount-first, no emoji â€” for card grid. */
+  /** Emphasis: amount-first, no emoji — for card grid. */
   variant?: 'default' | 'emphasis'
 }) {
   if (variant === 'emphasis') {
@@ -114,7 +135,7 @@ export function PostBountyBadge({
   return (
     <div className="inline-flex w-fit shrink-0 items-center gap-1 rounded-full border border-cyan-300 bg-linear-to-r from-cyan-100 to-blue-100 px-2 py-0.5 dark:border-cyan-400/40 dark:from-cyan-500/20 dark:to-blue-500/20 @sm/main:py-1">
       <span className="text-xs font-medium text-cyan-600 dark:text-cyan-300" aria-hidden>
-        ðŸ’°
+        💰
       </span>
       <span className="text-xs font-medium text-cyan-700 dark:text-cyan-200">{reward} BBUX</span>
     </div>
@@ -126,14 +147,17 @@ export function PostTagList({
   maxVisible = 2,
   variant = 'default',
 }: {
-  tags?: string[]
+  tags?: string[] | null
   maxVisible?: number
   variant?: 'default' | 'muted'
 }) {
-  if (!tags || tags.length === 0) return null
+  if (!Array.isArray(tags) || tags.length === 0) return null
 
-  const visible = tags.slice(0, maxVisible)
-  const overflow = tags.length - maxVisible
+  const normalized = tags.filter((t): t is string => typeof t === 'string' && t.length > 0)
+  if (normalized.length === 0) return null
+
+  const visible = normalized.slice(0, maxVisible)
+  const overflow = normalized.length - maxVisible
 
   if (variant === 'muted') {
     return (
@@ -145,7 +169,7 @@ export function PostTagList({
           >
             {tagName}
             {index < visible.length - 1 || overflow > 0 ? (
-              <span className="text-neutral-300 dark:text-neutral-600"> Â·</span>
+              <span className="text-neutral-300 dark:text-neutral-600"> ·</span>
             ) : null}
           </span>
         ))}

@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 import type { User } from '../types'
 
 interface ProfilePictureProps {
@@ -16,11 +16,10 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
   size = 'md',
   className = ''
 }) => {
-  // Determine the source of data (user object takes precedence)
-  const displayUsername = user?.username || username || 'User'
+  const rawName = user?.username || username || 'User'
+  const displayUsername = typeof rawName === 'string' && rawName.length > 0 ? rawName : 'User'
   const displayPicture = user?.profilePicture || profilePicture
 
-  // Size classes
   const sizeClasses = {
     xs: 'w-4 h-4 text-xs',
     sm: 'w-6 h-6 text-xs',
@@ -46,4 +45,4 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({
       {displayUsername.charAt(0).toUpperCase()}
     </div>
   )
-} 
+}

@@ -111,7 +111,7 @@ export function useCommunityPosts(postsPerPage = 10) {
         }
       })
     },
-    [listParams, queryClient, listQuery.data]
+    [listParams, queryClient]
   )
 
   const clearFilters = useCallback(() => {

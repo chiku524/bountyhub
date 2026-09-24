@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthProvider'
 import { useToast } from '../contexts/ToastContext'
 import { config } from '../utils/config'
@@ -30,6 +30,14 @@ export const VoteButton: React.FC<VoteButtonProps> = ({
   const [votes, setVotes] = useState(initialVotes)
   const [userVoteState, setUserVoteState] = useState(userVote)
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    setVotes(Number(initialVotes) || 0)
+  }, [initialVotes])
+
+  useEffect(() => {
+    setUserVoteState(Number(userVote) || 0)
+  }, [userVote])
 
   const handleVote = async (value: number) => {
     if (!user) return

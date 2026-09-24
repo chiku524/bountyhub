@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+﻿import { useState, useRef, useEffect, useCallback } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import {
   FiLogOut,
@@ -26,6 +26,11 @@ import { logoUrl } from '../utils/logoUrl'
 import { isDesktopApp } from '../utils/desktop'
 import { WalletMenuButton } from './WalletMenuButton'
 import { useCommandPalette } from './CommandPalette'
+
+function userInitial(username: string | null | undefined, email?: string | null): string {
+  const name = (typeof username === 'string' && username.trim()) || (typeof email === 'string' && email.trim()) || '?'
+  return name.charAt(0).toUpperCase()
+}
 
 export function TopNav() {
   const { user, logout } = useAuth()
@@ -201,9 +206,9 @@ export function TopNav() {
   }, [profileOpen])
 
   // Fetch unread count from Notifications component
-  const handleNotificationsUpdate = (count: number) => {
+  const handleNotificationsUpdate = useCallback((count: number) => {
     setUnreadCount(count)
-  }
+  }, [])
 
   const handleLogout = async () => {
     await logout()
@@ -373,7 +378,7 @@ export function TopNav() {
               data-tour="command-palette"
               className="flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-neutral-700 transition-colors hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-white/5"
               aria-label="Open command palette"
-              title="Search and go to… (⌘K)"
+              title="Search and go toâ€¦ (âŒ˜K)"
             >
               <FiSearch className="h-5 w-5" />
             </button>
@@ -426,10 +431,10 @@ export function TopNav() {
                     />
                   ) : (
                     <div className="w-8 h-8 rounded-full bg-amber-600 flex items-center justify-center shrink-0">
-                      <span className="text-white text-sm font-bold">{user.username.charAt(0).toUpperCase()}</span>
+                      <span className="text-white text-sm font-bold">{userInitial(user.username, user.email)}</span>
                     </div>
                   )}
-                  <span className="max-w-28 truncate hidden lg:inline">{user.username}</span>
+                  <span className="max-w-28 truncate hidden lg:inline">{user.username || user.email || 'Account'}</span>
                   <FiChevronDown className={`w-4 h-4 shrink-0 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {profileOpen && (
@@ -443,7 +448,7 @@ export function TopNav() {
                         <img src={user.profilePicture} alt="" className="w-6 h-6 rounded-full object-cover" />
                       ) : (
                         <div className="w-6 h-6 rounded-full bg-amber-600 flex items-center justify-center">
-                          <span className="text-white text-xs font-bold">{user.username.charAt(0).toUpperCase()}</span>
+                          <span className="text-white text-xs font-bold">{userInitial(user.username, user.email)}</span>
                         </div>
                       )}
                       <span>Profile</span>
@@ -650,7 +655,7 @@ export function TopNav() {
                         <img src={user.profilePicture} alt="" className="w-6 h-6 rounded-full object-cover" />
                       ) : (
                         <span className="w-6 h-6 rounded-full bg-amber-600 flex items-center justify-center text-white text-xs font-bold">
-                          {user.username.charAt(0).toUpperCase()}
+                          {userInitial(user.username, user.email)}
                         </span>
                       )}
                       Account

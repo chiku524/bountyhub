@@ -79,8 +79,10 @@ export function useNotificationsQuery(enabled = true) {
     },
   })
 
+  const notifications = Array.isArray(query.data) ? query.data : []
+
   return {
-    notifications: query.data ?? [],
+    notifications,
     loading: query.isLoading || query.isFetching,
     error: query.error,
     refetch: query.refetch,

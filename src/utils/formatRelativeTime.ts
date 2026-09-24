@@ -1,5 +1,5 @@
-export function formatRelativeTime(iso: string | Date, nowMs: number = Date.now()): string {
-  const t = typeof iso === 'string' ? new Date(iso).getTime() : iso.getTime()
+﻿export function formatRelativeTime(iso: string | Date, nowMs: number = Date.now()): string {
+  const t = typeof iso === 'string' ? new Date(iso).getTime() : iso instanceof Date ? iso.getTime() : NaN
   if (Number.isNaN(t)) return '—'
   const diffMs = nowMs - t
   const abs = Math.abs(diffMs)
@@ -48,7 +48,7 @@ export function formatRelativeTime(iso: string | Date, nowMs: number = Date.now(
 }
 
 export function formatAbsoluteDateTime(iso: string | Date): string {
-  const d = typeof iso === 'string' ? new Date(iso) : iso
+  const d = typeof iso === 'string' ? new Date(iso) : iso instanceof Date ? iso : new Date(NaN)
   if (Number.isNaN(d.getTime())) return '—'
   return d.toLocaleString(undefined, {
     dateStyle: 'medium',

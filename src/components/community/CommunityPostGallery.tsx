@@ -1,4 +1,4 @@
-import { memo } from 'react'
+﻿import { memo } from 'react'
 import { Link } from 'react-router-dom'
 import { FiMessageSquare } from 'react-icons/fi'
 import type { Post } from '../../types'
@@ -28,10 +28,11 @@ const PLACEHOLDER_GRADIENTS = [
   'from-slate-600/90 via-neutral-600/80 to-zinc-500/70',
 ]
 
-function placeholderGradient(postId: string): string {
+function placeholderGradient(postId: string | null | undefined): string {
+  const seed = typeof postId === 'string' && postId.length > 0 ? postId : 'post'
   let hash = 0
-  for (let i = 0; i < postId.length; i++) {
-    hash = (hash * 31 + postId.charCodeAt(i)) | 0
+  for (let i = 0; i < seed.length; i++) {
+    hash = (hash * 31 + seed.charCodeAt(i)) | 0
   }
   return PLACEHOLDER_GRADIENTS[Math.abs(hash) % PLACEHOLDER_GRADIENTS.length]
 }

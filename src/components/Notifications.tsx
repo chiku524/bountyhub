@@ -103,7 +103,7 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
   }, [user, isOpen, refetch])
 
   useEffect(() => {
-    if (!user || notifications.length === 0) return
+    if (!user || !Array.isArray(notifications) || notifications.length === 0) return
 
     const unreadNotifications = notifications.filter((n) => !n.read)
 
@@ -144,7 +144,8 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
     }
   }, [notifications, user])
 
-  const unreadCount = notifications.filter((n) => !n.read).length
+  const safeNotifications = Array.isArray(notifications) ? notifications : []
+  const unreadCount = safeNotifications.filter((n) => !n.read).length
 
   useEffect(() => {
     onUnreadCountChange?.(unreadCount)
@@ -218,11 +219,11 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
                   <div className="p-4 text-center">
                     <LoadingSpinner size="sm" />
                   </div>
-                ) : notifications.length === 0 ? (
+                ) : safeNotifications.length === 0 ? (
                   <div className="p-4 text-center text-neutral-500 dark:text-gray-400">No notifications</div>
                 ) : (
                   <div className="divide-y divide-neutral-200 dark:divide-neutral-700">
-                    {notifications.map((notification) => (
+                    {safeNotifications.map((notification) => (
                       <div
                         key={notification.id}
                         className={`p-4 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 cursor-pointer transition-colors ${
