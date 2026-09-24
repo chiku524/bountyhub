@@ -72,7 +72,7 @@ export const CommunityPostCard = memo(function CommunityPostCard({
           </div>
         </div>
 
-        <h2 className="mt-2 line-clamp-2 min-h-[2.5rem] text-base font-semibold leading-snug text-neutral-900 group-hover:text-neutral-700 dark:text-white dark:group-hover:text-neutral-100">
+        <h2 className="mt-2 line-clamp-3 min-h-[2.5rem] text-base font-semibold leading-snug text-neutral-900 group-hover:text-neutral-700 dark:text-white dark:group-hover:text-neutral-100 @sm/main:line-clamp-2">
           {post.title}
         </h2>
 
@@ -93,7 +93,7 @@ export const CommunityPostCard = memo(function CommunityPostCard({
         <div className="pointer-events-auto relative z-20 mt-auto flex items-center gap-2 border-t border-neutral-100 pt-3 text-xs text-neutral-500 dark:border-neutral-700 dark:text-neutral-400">
           <Link
             to={authorHref}
-            className="inline-flex min-w-0 items-center gap-1.5 font-medium text-neutral-700 hover:text-neutral-900 dark:text-neutral-200 dark:hover:text-white"
+            className="inline-flex min-w-0 max-w-[45%] items-center gap-1.5 font-medium text-neutral-700 hover:text-neutral-900 dark:text-neutral-200 dark:hover:text-white @sm/main:max-w-none"
             onClick={(e) => e.stopPropagation()}
           >
             <ProfilePicture user={post.author} size="sm" />

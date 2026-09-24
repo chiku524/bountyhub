@@ -30,6 +30,7 @@ export const CommunityPostListItem = memo(function CommunityPostListItem({
   const commentCount = post.commentCount ?? 0
   const authorHref = `/users/${post.author?.username || post.authorId}`
   const authorLabel = post.author?.username || `User ${post.authorId}`
+  const showBounty = bounty && post.reward != null
 
   return (
     <li
@@ -40,7 +41,8 @@ export const CommunityPostListItem = memo(function CommunityPostListItem({
       } ${justPosted ? 'bg-amber-50/60 dark:bg-amber-400/5' : ''}`}
     >
       <div className="flex gap-3 px-3 py-3.5 @sm/main:gap-4 @sm/main:px-5">
-        <div className="flex w-11 shrink-0 items-start justify-center pt-0.5 @sm/main:w-12">
+        {/* Desktop: vertical vote column. Mobile: votes move into the meta row. */}
+        <div className="hidden w-12 shrink-0 items-start justify-center pt-0.5 @sm/main:flex">
           <VoteButton
             itemId={post.id}
             itemType="post"
@@ -52,36 +54,46 @@ export const CommunityPostListItem = memo(function CommunityPostListItem({
         </div>
 
         <div className="min-w-0 flex-1">
-          <div className="flex items-start gap-3">
+          <div className="flex items-start gap-2 @sm/main:gap-3">
             <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                <Link
-                  to={`/posts/${post.id}`}
-                  className="line-clamp-2 text-[15px] font-semibold leading-snug text-neutral-900 hover:text-neutral-700 dark:text-white dark:hover:text-neutral-100 @xl/main:text-base"
-                >
-                  {post.title}
-                </Link>
+              <div className="mb-1 flex flex-wrap items-center gap-x-2 gap-y-1">
                 {fresh && <PostNewBadge />}
+                {/* Mobile: bounty sits with badges so the title can use full width */}
+                {showBounty && (
+                  <span className="@sm/main:hidden">
+                    <PostBountyBadge reward={post.reward!} variant="emphasis" />
+                  </span>
+                )}
                 <PostStatusBadge status={post.status} variant="quiet" />
               </div>
+              <Link
+                to={`/posts/${post.id}`}
+                className="block line-clamp-3 text-[15px] font-semibold leading-snug text-neutral-900 hover:text-neutral-700 dark:text-white dark:hover:text-neutral-100 @sm/main:line-clamp-2 @xl/main:text-base"
+              >
+                {post.title}
+              </Link>
               {post.content?.trim() && (
-                <p className="mt-1 line-clamp-1 text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
+                <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-neutral-500 dark:text-neutral-400 @sm/main:line-clamp-1">
                   {post.content}
                 </p>
               )}
             </div>
-            <div className="flex shrink-0 items-center gap-2">
-              {bounty && post.reward != null && (
-                <PostBountyBadge reward={post.reward} variant="emphasis" />
+
+            <div className="flex shrink-0 items-start gap-2 pt-0.5">
+              {/* Desktop: bounty beside bookmark (previous layout) */}
+              {showBounty && (
+                <span className="hidden @sm/main:inline-flex">
+                  <PostBountyBadge reward={post.reward!} variant="emphasis" />
+                </span>
               )}
               <BookmarkButton postId={post.id} size="sm" />
             </div>
           </div>
 
-          <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-neutral-500 dark:text-neutral-400 @sm/main:text-[13px]">
+          <div className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-neutral-500 dark:text-neutral-400 @sm/main:mt-1.5 @sm/main:text-[13px]">
             <Link
               to={authorHref}
-              className="inline-flex min-w-0 items-center gap-1.5 font-medium text-neutral-600 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white"
+              className="inline-flex min-w-0 max-w-[40%] items-center gap-1.5 font-medium text-neutral-600 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white @sm/main:max-w-none"
             >
               <ProfilePicture user={post.author} size="sm" />
               <span className="truncate">{authorLabel}</span>
@@ -98,16 +110,32 @@ export const CommunityPostListItem = memo(function CommunityPostListItem({
               title={`${commentCount} answer${commentCount === 1 ? '' : 's'}`}
             >
               <FiMessageSquare className="h-3.5 w-3.5" aria-hidden />
-              {commentCount === 0 ? 'Unanswered' : `${commentCount} answer${commentCount === 1 ? '' : 's'}`}
+              {commentCount === 0
+                ? 'Unanswered'
+                : `${commentCount} answer${commentCount === 1 ? '' : 's'}`}
             </span>
             {post.tags && post.tags.length > 0 && (
               <>
-                <span className="text-neutral-300 dark:text-neutral-600" aria-hidden>
+                <span className="hidden text-neutral-300 dark:text-neutral-600 @sm/main:inline" aria-hidden>
                   ·
                 </span>
-                <PostTagList tags={post.tags} maxVisible={2} variant="muted" />
+                <span className="hidden @sm/main:inline">
+                  <PostTagList tags={post.tags} maxVisible={2} variant="muted" />
+                </span>
               </>
             )}
+            {/* Mobile: compact horizontal votes in the meta row */}
+            <div className="ml-auto @sm/main:hidden">
+              <VoteButton
+                itemId={post.id}
+                itemType="post"
+                voteType="quality"
+                orientation="horizontal"
+                initialVotes={post.qualityUpvotes || 0}
+                userVote={post.userVote || 0}
+                onVoteChange={(newVotes, newUserVote) => onVoteChange(post.id, newVotes, newUserVote)}
+              />
+            </div>
           </div>
         </div>
       </div>
