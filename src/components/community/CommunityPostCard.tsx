@@ -10,6 +10,7 @@ import {
   postCardShellClass,
   postHasBounty,
   isNewPost,
+  firstImageUrl,
   PostBountyBadge,
   PostNewBadge,
   PostStatusBadge,
@@ -19,12 +20,6 @@ import {
 export interface CommunityPostCardProps {
   post: Post
   onVoteChange: (postId: string, newVotes: number, newUserVote?: number) => void
-}
-
-function firstImageUrl(post: Post): string | null {
-  const image = post.media?.find((m) => m.type === 'image')
-  if (!image) return null
-  return image.thumbnailUrl || image.url || null
 }
 
 export const CommunityPostCard = memo(function CommunityPostCard({
@@ -48,7 +43,7 @@ export const CommunityPostCard = memo(function CommunityPostCard({
       />
 
       {thumb && (
-        <div className="pointer-events-none relative aspect-[16/9] w-full overflow-hidden bg-neutral-100 dark:bg-neutral-900/60">
+        <div className="pointer-events-none relative aspect-[16/9] w-full shrink-0 overflow-hidden bg-neutral-100 dark:bg-neutral-900/60">
           <img
             src={thumb}
             alt=""
@@ -58,7 +53,7 @@ export const CommunityPostCard = memo(function CommunityPostCard({
         </div>
       )}
 
-      <div className="pointer-events-none relative z-10 flex min-h-0 flex-1 flex-col p-4">
+      <div className="pointer-events-none relative z-10 flex min-h-0 flex-1 flex-col p-3.5 @sm/main:p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
             {fresh && <PostNewBadge />}
@@ -72,14 +67,16 @@ export const CommunityPostCard = memo(function CommunityPostCard({
           </div>
         </div>
 
-        <h2 className="mt-2 line-clamp-2 text-base font-semibold leading-snug text-neutral-900 group-hover:text-neutral-700 dark:text-white dark:group-hover:text-neutral-100">
+        <h2 className="mt-2 line-clamp-2 min-h-[2.5rem] text-base font-semibold leading-snug text-neutral-900 group-hover:text-neutral-700 dark:text-white dark:group-hover:text-neutral-100">
           {post.title}
         </h2>
 
-        {post.content?.trim() && (
+        {post.content?.trim() ? (
           <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
             {post.content}
           </p>
+        ) : (
+          <div className="mt-1.5 min-h-[2.5rem]" aria-hidden />
         )}
 
         {post.tags && post.tags.length > 0 && (
@@ -132,9 +129,9 @@ export const CommunityPostCardGrid = memo(function CommunityPostCardGrid({
   onVoteChange,
 }: CommunityPostCardGridProps) {
   return (
-    <ul className="grid list-none grid-cols-1 gap-4 p-4 @md/main:grid-cols-2 @3xl/main:grid-cols-3 @sm/main:p-6">
+    <ul className="grid list-none grid-cols-1 gap-3 p-3 @md/main:grid-cols-2 @3xl/main:grid-cols-3 @sm/main:gap-3.5 @sm/main:p-5">
       {posts.map((post) => (
-        <li key={post.id} className="flex">
+        <li key={post.id} className="flex min-h-0">
           <CommunityPostCard post={post} onVoteChange={onVoteChange} />
         </li>
       ))}

@@ -4,6 +4,28 @@ export function postHasBounty(post: Post): boolean {
   return Boolean(post.reward && post.reward > 0)
 }
 
+export function firstImageUrl(post: Post): string | null {
+  const image = post.media?.find((m) => m.type === 'image')
+  if (!image) return null
+  return image.thumbnailUrl || image.url || null
+}
+
+/** Gallery tile shell: image-first with quiet bounty accent. */
+export function postGalleryShellClass(post: Post, extra = ''): string {
+  const bounty = postHasBounty(post)
+  return [
+    'group relative flex h-full min-h-0 flex-col overflow-hidden rounded-xl border bg-white',
+    'shadow-sm transition-[border-color,box-shadow,transform] duration-200',
+    'hover:border-neutral-400 hover:shadow-md dark:bg-neutral-800/90 dark:hover:border-neutral-500',
+    bounty
+      ? 'border-neutral-200 border-l-[3px] border-l-amber-500 dark:border-neutral-600 dark:border-l-amber-400'
+      : 'border-neutral-200 dark:border-neutral-600',
+    extra,
+  ]
+    .filter(Boolean)
+    .join(' ')
+}
+
 const NEW_POST_HOURS = 36
 
 export function isNewPost(createdAt: string | Date, hours = NEW_POST_HOURS): boolean {
@@ -46,7 +68,7 @@ export function PostStatusBadge({
   variant = 'default',
 }: {
   status: Post['status']
-  /** Quiet: humanized label, muted chip. Hide “Open” (default state) in card feeds. */
+  /** Quiet: humanized label, muted chip. Hide â€œOpenâ€ (default state) in card feeds. */
   variant?: 'default' | 'quiet'
 }) {
   if (variant === 'quiet') {
@@ -77,7 +99,7 @@ export function PostBountyBadge({
   variant = 'default',
 }: {
   reward: number
-  /** Emphasis: amount-first, no emoji — for card grid. */
+  /** Emphasis: amount-first, no emoji â€” for card grid. */
   variant?: 'default' | 'emphasis'
 }) {
   if (variant === 'emphasis') {
@@ -92,7 +114,7 @@ export function PostBountyBadge({
   return (
     <div className="inline-flex w-fit shrink-0 items-center gap-1 rounded-full border border-cyan-300 bg-linear-to-r from-cyan-100 to-blue-100 px-2 py-0.5 dark:border-cyan-400/40 dark:from-cyan-500/20 dark:to-blue-500/20 @sm/main:py-1">
       <span className="text-xs font-medium text-cyan-600 dark:text-cyan-300" aria-hidden>
-        💰
+        ðŸ’°
       </span>
       <span className="text-xs font-medium text-cyan-700 dark:text-cyan-200">{reward} BBUX</span>
     </div>
@@ -123,7 +145,7 @@ export function PostTagList({
           >
             {tagName}
             {index < visible.length - 1 || overflow > 0 ? (
-              <span className="text-neutral-300 dark:text-neutral-600"> ·</span>
+              <span className="text-neutral-300 dark:text-neutral-600"> Â·</span>
             ) : null}
           </span>
         ))}
