@@ -40,12 +40,12 @@ export const CommunityFeaturedStrip = memo(function CommunityFeaturedStrip({
         <span className="text-xs text-neutral-500 dark:text-neutral-400">Top open bounties</span>
       </div>
 
-      <ul className="flex gap-2.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <ul className="flex gap-2.5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {featured.map((post) => {
           const authorLabel = post.author?.username || `User ${post.authorId}`
           const reward = post.reward ?? 0
           return (
-            <li key={post.id} className="w-[220px] shrink-0 @sm/main:w-[240px]">
+            <li key={post.id} className="w-[min(220px,80vw)] shrink-0 snap-start @sm/main:w-[240px]">
               <Link
                 to={`/posts/${post.id}`}
                 className="flex h-full flex-col gap-2 rounded-lg border border-neutral-200 bg-white p-3 shadow-sm transition hover:border-amber-300 hover:shadow-md dark:border-neutral-700 dark:bg-neutral-800/80 dark:hover:border-amber-500/40"

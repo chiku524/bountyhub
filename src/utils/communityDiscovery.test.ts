@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   COMMUNITY_DISCOVERY_TABS,
   filtersForDiscoveryTab,
+  formatFeedSummary,
   getDiscoveryTab,
   isCommunityDiscoveryTab,
   parseDiscoveryTab,
@@ -57,3 +58,42 @@ describe('communityDiscovery', () => {
     expect(parseDiscoveryTab('hot')).toBe('trending')
   })
 })
+
+describe('formatFeedSummary', () => {
+  it('avoids duplicating tab and default sort labels', () => {
+    expect(
+      formatFeedSummary(4, 'trending', {
+        ...base(),
+        status: 'open',
+        dateRange: 'month',
+        sortBy: 'trending',
+      })
+    ).toBe('4 questions · Trending')
+  })
+
+  it('adds sort only when it differs from the tab default', () => {
+    expect(
+      formatFeedSummary(2, 'new', {
+        ...base(),
+        sortBy: 'oldest',
+      })
+    ).toBe('2 questions · New · oldest first')
+  })
+
+  it('includes selected tags when present', () => {
+    expect(
+      formatFeedSummary(1, 'bounties', {
+        ...base(),
+        status: 'open',
+        hasBounty: true,
+        sortBy: 'highestBounty',
+        selectedTags: ['solana'],
+      })
+    ).toBe('1 question · Top Bounties · solana')
+  })
+
+  it('returns No questions when empty', () => {
+    expect(formatFeedSummary(0, 'trending', base())).toBe('No questions')
+  })
+})
+

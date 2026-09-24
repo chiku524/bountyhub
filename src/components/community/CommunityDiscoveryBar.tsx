@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { FiGrid, FiImage, FiList } from 'react-icons/fi'
 import { isDesktopApp } from '../../utils/desktop'
 import { SearchBar } from '../SearchBar'
@@ -83,6 +83,9 @@ interface CommunityDiscoveryBarProps {
 
 const QUICK_TAG_LIMIT = 8
 
+const SCROLL_HIDE =
+  '[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
+
 export function CommunityDiscoveryBar({
   filters,
   postView,
@@ -95,6 +98,17 @@ export function CommunityDiscoveryBar({
 }: CommunityDiscoveryBarProps) {
   const isDesktop = isDesktopApp()
   const [tags, setTags] = useState<TagOption[]>([])
+  const tabScrollRef = useRef<HTMLDivElement>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
+
+  const updateTabOverflow = useCallback(() => {
+    const el = tabScrollRef.current
+    if (!el) return
+    const max = el.scrollWidth - el.clientWidth
+    setCanScrollLeft(el.scrollLeft > 2)
+    setCanScrollRight(max > 2 && el.scrollLeft < max - 2)
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -116,6 +130,29 @@ export function CommunityDiscoveryBar({
     }
   }, [])
 
+  useEffect(() => {
+    updateTabOverflow()
+    const el = tabScrollRef.current
+    if (!el) return
+    const onScroll = () => updateTabOverflow()
+    el.addEventListener('scroll', onScroll, { passive: true })
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(updateTabOverflow) : null
+    ro?.observe(el)
+    window.addEventListener('resize', updateTabOverflow)
+    return () => {
+      el.removeEventListener('scroll', onScroll)
+      ro?.disconnect()
+      window.removeEventListener('resize', updateTabOverflow)
+    }
+  }, [updateTabOverflow])
+
+  // Keep the active tab visible when it changes (e.g. deep-link / arrow keys).
+  useEffect(() => {
+    const btn = document.getElementById(`community-tab-${activeTab}`)
+    btn?.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' })
+    requestAnimationFrame(updateTabOverflow)
+  }, [activeTab, updateTabOverflow])
+
   const selectedTags = filters.selectedTags || []
 
   const toggleTag = (tagName: string) => {
@@ -125,51 +162,82 @@ export function CommunityDiscoveryBar({
     onFiltersChange({ ...filters, selectedTags: next })
   }
 
+  const focusAndSelectTab = (id: CommunityDiscoveryTab) => {
+    onTabChange(id)
+    requestAnimationFrame(() => {
+      const el = document.getElementById(`community-tab-${id}`)
+      el?.focus()
+      el?.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' })
+    })
+  }
+
   return (
     <div className="mb-5 space-y-3 @sm/main:mb-6">
       {/* Sticky discovery tabs — stay visible while scrolling the feed */}
       <div
         className={`${isDesktop ? 'sticky top-0' : 'sticky top-16'} z-20 -mx-1 border-b border-neutral-200/80 bg-white/90 px-1 py-2 backdrop-blur-md dark:border-neutral-700/80 dark:bg-neutral-900/90`}
-        role="tablist"
-        aria-label="Discovery feed"
       >
-        <div className="flex gap-1 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {COMMUNITY_DISCOVERY_TABS.map(({ id, label, hint }) => {
-            const selected = activeTab === id
-            return (
-              <button
-                key={id}
-                type="button"
-                role="tab"
-                id={`community-tab-${id}`}
-                aria-selected={selected}
-                aria-controls="community-feed"
-                title={hint}
-                onClick={() => onTabChange(id)}
-                onKeyDown={(e) => {
-                  if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return
-                  e.preventDefault()
-                  const idx = COMMUNITY_DISCOVERY_TABS.findIndex((t) => t.id === id)
-                  const delta = e.key === 'ArrowRight' ? 1 : -1
-                  const next =
-                    COMMUNITY_DISCOVERY_TABS[
-                      (idx + delta + COMMUNITY_DISCOVERY_TABS.length) % COMMUNITY_DISCOVERY_TABS.length
-                    ]
-                  onTabChange(next.id)
-                  requestAnimationFrame(() => {
-                    document.getElementById(`community-tab-${next.id}`)?.focus()
-                  })
-                }}
-                className={`shrink-0 rounded-lg px-3.5 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
-                  selected
-                    ? 'bg-neutral-900 text-white shadow-sm dark:bg-white dark:text-neutral-900'
-                    : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-white'
-                }`}
-              >
-                {label}
-              </button>
-            )
-          })}
+        <div className="relative">
+          <div
+            ref={tabScrollRef}
+            role="tablist"
+            aria-label="Discovery feed"
+            className={`flex gap-1 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-0.5 ${SCROLL_HIDE}`}
+          >
+            {COMMUNITY_DISCOVERY_TABS.map(({ id, label, hint }) => {
+              const selected = activeTab === id
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  role="tab"
+                  id={`community-tab-${id}`}
+                  aria-selected={selected}
+                  aria-controls="community-feed"
+                  title={hint}
+                  tabIndex={selected ? 0 : -1}
+                  onClick={() => focusAndSelectTab(id)}
+                  onKeyDown={(e) => {
+                    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft' && e.key !== 'Home' && e.key !== 'End') {
+                      return
+                    }
+                    e.preventDefault()
+                    const idx = COMMUNITY_DISCOVERY_TABS.findIndex((t) => t.id === id)
+                    let nextIdx = idx
+                    if (e.key === 'ArrowRight') {
+                      nextIdx = (idx + 1) % COMMUNITY_DISCOVERY_TABS.length
+                    } else if (e.key === 'ArrowLeft') {
+                      nextIdx = (idx - 1 + COMMUNITY_DISCOVERY_TABS.length) % COMMUNITY_DISCOVERY_TABS.length
+                    } else if (e.key === 'Home') {
+                      nextIdx = 0
+                    } else if (e.key === 'End') {
+                      nextIdx = COMMUNITY_DISCOVERY_TABS.length - 1
+                    }
+                    focusAndSelectTab(COMMUNITY_DISCOVERY_TABS[nextIdx].id)
+                  }}
+                  className={`snap-start shrink-0 rounded-lg px-3 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 @sm/main:px-3.5 ${
+                    selected
+                      ? 'bg-neutral-900 text-white shadow-sm dark:bg-white dark:text-neutral-900'
+                      : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-white'
+                  }`}
+                >
+                  {label}
+                </button>
+              )
+            })}
+          </div>
+          {canScrollLeft && (
+            <div
+              className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-linear-to-r from-white via-white/80 to-transparent dark:from-neutral-900 dark:via-neutral-900/80"
+              aria-hidden
+            />
+          )}
+          {canScrollRight && (
+            <div
+              className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-linear-to-l from-white via-white/80 to-transparent dark:from-neutral-900 dark:via-neutral-900/80"
+              aria-hidden
+            />
+          )}
         </div>
       </div>
 
@@ -177,26 +245,10 @@ export function CommunityDiscoveryBar({
         <SearchBar
           onSearch={onSearch}
           placeholder="Search questions by title, topic, or author…"
-          className="min-w-0 flex-1"
+          className="min-w-0 w-full flex-1"
           debounceMs={300}
         />
         <div className="flex flex-wrap items-center gap-2">
-          <label className="sr-only" htmlFor="community-sort">
-            Sort questions
-          </label>
-          <select
-            id="community-sort"
-            value={filters.sortBy}
-            onChange={(e) => onFiltersChange({ ...filters, sortBy: e.target.value })}
-            className="min-h-11 rounded-lg border border-neutral-300 bg-white px-3 text-sm text-neutral-800 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white"
-          >
-            <option value="newest">Newest</option>
-            <option value="oldest">Oldest</option>
-            <option value="trending">Trending</option>
-            <option value="mostVoted">Most voted</option>
-            <option value="mostCommented">Most discussed</option>
-            <option value="highestBounty">Highest bounty</option>
-          </select>
           <AdvancedFilters filters={filters} onFiltersChange={onFiltersChange} />
           <ExportButton data={exportPosts} filename="community-posts" />
           <div
@@ -246,7 +298,7 @@ export function CommunityDiscoveryBar({
 
       {tags.length > 0 && (
         <div
-          className="flex gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className={`flex gap-2 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-0.5 ${SCROLL_HIDE}`}
           role="group"
           aria-label="Filter by topic"
         >
@@ -258,7 +310,7 @@ export function CommunityDiscoveryBar({
                 type="button"
                 aria-pressed={selected}
                 onClick={() => toggleTag(tag.name)}
-                className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition @sm/main:text-sm ${
+                className={`snap-start shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition @sm/main:text-sm ${
                   selected
                     ? 'bg-violet-600 text-white dark:bg-violet-500'
                     : 'border border-neutral-200 bg-white text-neutral-600 hover:border-violet-300 hover:text-violet-700 dark:border-neutral-600 dark:bg-neutral-800/80 dark:text-neutral-300 dark:hover:border-violet-500/50 dark:hover:text-violet-300'

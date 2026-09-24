@@ -23,41 +23,12 @@ import {
   type CommunityPostView,
 } from '../utils/communityPostView'
 import {
+  formatFeedSummary,
   parseDiscoveryTab,
   type CommunityDiscoveryTab,
 } from '../utils/communityDiscovery'
 import { useCommunityPosts } from '../hooks/useCommunityPosts'
 import { BookmarkStatusProvider } from '../contexts/BookmarkStatusContext'
-
-function sortLabel(sortBy: string): string {
-  switch (sortBy) {
-    case 'oldest':
-      return 'oldest first'
-    case 'mostVoted':
-      return 'most voted'
-    case 'mostCommented':
-      return 'most discussed'
-    case 'trending':
-      return 'trending'
-    case 'highestBounty':
-      return 'highest bounty'
-    default:
-      return 'newest first'
-  }
-}
-
-function tabLabel(tab: CommunityDiscoveryTab): string {
-  switch (tab) {
-    case 'trending':
-      return 'Trending'
-    case 'bounties':
-      return 'Top Bounties'
-    case 'unanswered':
-      return 'Unanswered'
-    default:
-      return 'New'
-  }
-}
 
 export default function Community() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -187,15 +158,7 @@ export default function Community() {
         {!loading && (
           <div className="mb-3 flex items-baseline justify-between gap-3">
             <p className="text-sm text-neutral-500 dark:text-neutral-400">
-              {totalPosts === 0
-                ? 'No questions'
-                : `${totalPosts} question${totalPosts === 1 ? '' : 's'}`}
-              {totalPosts > 0 && (
-                <span className="text-neutral-400 dark:text-neutral-500">
-                  {' '}
-                  · {tabLabel(activeTab)} · {sortLabel(filters.sortBy)}
-                </span>
-              )}
+              {formatFeedSummary(totalPosts, activeTab, filters)}
             </p>
           </div>
         )}

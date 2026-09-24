@@ -197,8 +197,10 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
                   >
                     <option value="newest">Newest First</option>
                     <option value="oldest">Oldest First</option>
+                    <option value="trending">Trending</option>
                     <option value="mostVoted">Most Voted</option>
-                    <option value="mostCommented">Most Commented</option>
+                    <option value="mostCommented">Most Discussed</option>
+                    <option value="highestBounty">Highest Bounty</option>
                   </select>
                 </div>
                 <div className="space-y-2 flex flex-col justify-end">

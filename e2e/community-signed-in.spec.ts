@@ -85,4 +85,21 @@ test.describe('signed-in Community', () => {
       'true'
     )
   })
+
+  test('hides redundant sort dropdown and shows a clean summary', async ({ page }) => {
+    await page.goto('/community')
+    await expect(page.getByRole('tab', { name: /^trending$/i })).toBeVisible({
+      timeout: 30_000,
+    })
+    await expect(page.locator('#community-sort')).toHaveCount(0)
+    await expect(page.getByText(/\d+ questions? · Trending$/)).toBeVisible({ timeout: 15_000 })
+    // Unanswered tab should be reachable on a narrow viewport via horizontal scroll
+    await page.setViewportSize({ width: 390, height: 844 })
+    const unanswered = page.getByRole('tab', { name: /^unanswered$/i })
+    await unanswered.scrollIntoViewIfNeeded()
+    await unanswered.click()
+    await expect(page).toHaveURL(/tab=unanswered/)
+    await expect(unanswered).toHaveAttribute('aria-selected', 'true')
+  })
+
 })

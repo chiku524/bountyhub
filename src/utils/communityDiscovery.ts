@@ -116,3 +116,79 @@ export function getDiscoveryTab(filters: CommunityFilterOptions): CommunityDisco
 export function discoveryTabFromSearchParam(tabParam: string | null): CommunityDiscoveryTab {
   return parseDiscoveryTab(tabParam)
 }
+
+const TAB_LABEL: Record<CommunityDiscoveryTab, string> = {
+  trending: 'Trending',
+  new: 'New',
+  bounties: 'Top Bounties',
+  unanswered: 'Unanswered',
+}
+
+export function discoveryTabLabel(tab: CommunityDiscoveryTab): string {
+  return TAB_LABEL[tab]
+}
+
+/** Sort applied by filtersForDiscoveryTab for each tab. */
+export function defaultSortForTab(tab: CommunityDiscoveryTab): string {
+  switch (tab) {
+    case 'trending':
+      return 'trending'
+    case 'bounties':
+      return 'highestBounty'
+    case 'new':
+    case 'unanswered':
+    default:
+      return 'newest'
+  }
+}
+
+function humanSortLabel(sortBy: string): string {
+  switch (sortBy) {
+    case 'oldest':
+      return 'oldest first'
+    case 'mostVoted':
+      return 'most voted'
+    case 'mostCommented':
+      return 'most discussed'
+    case 'trending':
+      return 'trending'
+    case 'highestBounty':
+      return 'highest bounty'
+    case 'newest':
+      return 'newest first'
+    default:
+      return sortBy
+  }
+}
+
+/**
+ * Single clean summary line: "4 questions · Trending".
+ * Adds sort/tag extras only when they differ from the tab defaults.
+ */
+export function formatFeedSummary(
+  totalPosts: number,
+  activeTab: CommunityDiscoveryTab,
+  filters: CommunityFilterOptions
+): string {
+  if (totalPosts === 0) return 'No questions'
+
+  const parts: string[] = [
+    `${totalPosts} question${totalPosts === 1 ? '' : 's'}`,
+    discoveryTabLabel(activeTab),
+  ]
+
+  const defaultSort = defaultSortForTab(activeTab)
+  if (filters.sortBy && filters.sortBy !== defaultSort) {
+    parts.push(humanSortLabel(filters.sortBy))
+  }
+
+  const tags = filters.selectedTags || []
+  if (tags.length === 1) {
+    parts.push(tags[0])
+  } else if (tags.length > 1) {
+    parts.push(`${tags.length} tags`)
+  }
+
+  return parts.join(' · ')
+}
+
