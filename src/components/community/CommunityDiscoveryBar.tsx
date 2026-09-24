@@ -1,88 +1,178 @@
+import { useEffect, useState } from 'react'
 import { FiGrid, FiImage, FiList } from 'react-icons/fi'
+import { isDesktopApp } from '../../utils/desktop'
 import { SearchBar } from '../SearchBar'
 import { AdvancedFilters } from '../AdvancedFilters'
 import { ExportButton } from '../ExportButton'
+import { api } from '../../utils/api'
 import type { CommunityFilterOptions } from '../../utils/communityPosts'
 import type { Post } from '../../types'
 import type { CommunityPostView } from '../../utils/communityPostView'
+import {
+  COMMUNITY_DISCOVERY_TABS,
+  filtersForDiscoveryTab,
+  getDiscoveryTab,
+  type CommunityDiscoveryTab,
+} from '../../utils/communityDiscovery'
 
-export type { CommunityPostView }
-export type CommunityDiscoveryPreset = 'all' | 'new' | 'open' | 'unanswered' | 'bounties'
+export type { CommunityPostView, CommunityDiscoveryTab }
+export {
+  filtersForDiscoveryTab,
+  getDiscoveryTab,
+  COMMUNITY_DISCOVERY_TABS,
+}
 
-const PRESETS: Array<{ id: CommunityDiscoveryPreset; label: string; hint: string }> = [
-  { id: 'all', label: 'All', hint: 'Every question' },
-  { id: 'new', label: 'New this week', hint: 'Posted in the last 7 days' },
-  { id: 'open', label: 'Open', hint: 'Still accepting answers' },
-  { id: 'unanswered', label: 'Unanswered', hint: 'No answers yet' },
-  { id: 'bounties', label: 'Bounties', hint: 'Questions with BBUX rewards' },
-]
+/** @deprecated Use CommunityDiscoveryTab / filtersForDiscoveryTab */
+export type CommunityDiscoveryPreset = CommunityDiscoveryTab | 'all' | 'open'
 
+/** @deprecated Prefer getDiscoveryTab */
 export function getDiscoveryPreset(filters: CommunityFilterOptions): CommunityDiscoveryPreset | null {
+  const tab = getDiscoveryTab(filters)
+  if (tab) return tab
   const { status, dateRange, hasBounty, unanswered } = filters
-  if (unanswered) return 'unanswered'
-  if (hasBounty && !dateRange) return 'bounties'
-  if (status === 'open' && !hasBounty && !dateRange) return 'open'
-  if (dateRange === 'week' && !hasBounty && !status) return 'new'
+  if (status === 'open' && !hasBounty && !dateRange && !unanswered) return 'open'
   if (!status && !dateRange && !hasBounty && !unanswered) return 'all'
   return null
 }
 
+/** @deprecated Prefer filtersForDiscoveryTab */
 export function filtersForPreset(
   preset: CommunityDiscoveryPreset,
   filters: CommunityFilterOptions
 ): CommunityFilterOptions {
-  const next: CommunityFilterOptions = {
-    ...filters,
-    status: '',
-    dateRange: '',
-    hasBounty: false,
-    unanswered: false,
+  if (preset === 'all') {
+    return {
+      ...filters,
+      status: '',
+      dateRange: '',
+      hasBounty: false,
+      unanswered: false,
+      sortBy: 'newest',
+    }
   }
-
-  switch (preset) {
-    case 'new':
-      next.dateRange = 'week'
-      next.sortBy = 'newest'
-      break
-    case 'open':
-      next.status = 'open'
-      break
-    case 'unanswered':
-      next.status = 'open'
-      next.unanswered = true
-      break
-    case 'bounties':
-      next.status = 'open'
-      next.hasBounty = true
-      break
-    default:
-      break
+  if (preset === 'open') {
+    return {
+      ...filters,
+      status: 'open',
+      dateRange: '',
+      hasBounty: false,
+      unanswered: false,
+    }
   }
+  if (preset === 'new') {
+    return filtersForDiscoveryTab('new', filters)
+  }
+  return filtersForDiscoveryTab(preset, filters)
+}
 
-  return next
+interface TagOption {
+  id: string
+  name: string
 }
 
 interface CommunityDiscoveryBarProps {
   filters: CommunityFilterOptions
   postView: CommunityPostView
+  activeTab: CommunityDiscoveryTab
   exportPosts: Post[]
   onSearch: (query: string) => void
   onFiltersChange: (filters: CommunityFilterOptions) => void
+  onTabChange: (tab: CommunityDiscoveryTab) => void
   onPostViewChange: (view: CommunityPostView) => void
 }
+
+const QUICK_TAG_LIMIT = 8
 
 export function CommunityDiscoveryBar({
   filters,
   postView,
+  activeTab,
   exportPosts,
   onSearch,
   onFiltersChange,
+  onTabChange,
   onPostViewChange,
 }: CommunityDiscoveryBarProps) {
-  const activePreset = getDiscoveryPreset(filters)
+  const isDesktop = isDesktopApp()
+  const [tags, setTags] = useState<TagOption[]>([])
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const all = await api.getTags()
+        if (cancelled) return
+        const normalized = (all || [])
+          .filter((t) => Boolean(t?.id && t?.name))
+          .map((t) => ({ id: t.id, name: t.name }))
+          .slice(0, QUICK_TAG_LIMIT)
+        setTags(normalized)
+      } catch {
+        if (!cancelled) setTags([])
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const selectedTags = filters.selectedTags || []
+
+  const toggleTag = (tagName: string) => {
+    const next = selectedTags.includes(tagName)
+      ? selectedTags.filter((t) => t !== tagName)
+      : [...selectedTags, tagName]
+    onFiltersChange({ ...filters, selectedTags: next })
+  }
 
   return (
     <div className="mb-5 space-y-3 @sm/main:mb-6">
+      {/* Sticky discovery tabs — stay visible while scrolling the feed */}
+      <div
+        className={`${isDesktop ? 'sticky top-0' : 'sticky top-16'} z-20 -mx-1 border-b border-neutral-200/80 bg-white/90 px-1 py-2 backdrop-blur-md dark:border-neutral-700/80 dark:bg-neutral-900/90`}
+        role="tablist"
+        aria-label="Discovery feed"
+      >
+        <div className="flex gap-1 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {COMMUNITY_DISCOVERY_TABS.map(({ id, label, hint }) => {
+            const selected = activeTab === id
+            return (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                id={`community-tab-${id}`}
+                aria-selected={selected}
+                aria-controls="community-feed"
+                title={hint}
+                onClick={() => onTabChange(id)}
+                onKeyDown={(e) => {
+                  if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return
+                  e.preventDefault()
+                  const idx = COMMUNITY_DISCOVERY_TABS.findIndex((t) => t.id === id)
+                  const delta = e.key === 'ArrowRight' ? 1 : -1
+                  const next =
+                    COMMUNITY_DISCOVERY_TABS[
+                      (idx + delta + COMMUNITY_DISCOVERY_TABS.length) % COMMUNITY_DISCOVERY_TABS.length
+                    ]
+                  onTabChange(next.id)
+                  requestAnimationFrame(() => {
+                    document.getElementById(`community-tab-${next.id}`)?.focus()
+                  })
+                }}
+                className={`shrink-0 rounded-lg px-3.5 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+                  selected
+                    ? 'bg-neutral-900 text-white shadow-sm dark:bg-white dark:text-neutral-900'
+                    : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-white'
+                }`}
+              >
+                {label}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
       <div className="flex flex-col gap-2 @xl/main:flex-row @xl/main:items-center">
         <SearchBar
           onSearch={onSearch}
@@ -102,8 +192,10 @@ export function CommunityDiscoveryBar({
           >
             <option value="newest">Newest</option>
             <option value="oldest">Oldest</option>
+            <option value="trending">Trending</option>
             <option value="mostVoted">Most voted</option>
             <option value="mostCommented">Most discussed</option>
+            <option value="highestBounty">Highest bounty</option>
           </select>
           <AdvancedFilters filters={filters} onFiltersChange={onFiltersChange} />
           <ExportButton data={exportPosts} filename="community-posts" />
@@ -129,9 +221,9 @@ export function CommunityDiscoveryBar({
                   const delta = e.key === 'ArrowRight' ? 1 : -1
                   const next = all[(index + delta + all.length) % all.length]
                   onPostViewChange(next.id)
-                  // Focus moves with pressed state on next paint via aria-pressed
                   requestAnimationFrame(() => {
-                    const buttons = (e.currentTarget.parentElement?.querySelectorAll('button') ?? []) as NodeListOf<HTMLButtonElement>
+                    const buttons = (e.currentTarget.parentElement?.querySelectorAll('button') ??
+                      []) as NodeListOf<HTMLButtonElement>
                     buttons[(index + delta + all.length) % all.length]?.focus()
                   })
                 }}
@@ -152,27 +244,32 @@ export function CommunityDiscoveryBar({
         </div>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {PRESETS.map(({ id, label, hint }) => {
-          const selected = activePreset === id
-          return (
-            <button
-              key={id}
-              type="button"
-              title={hint}
-              aria-pressed={selected}
-              onClick={() => onFiltersChange(filtersForPreset(id, filters))}
-              className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition @sm/main:text-sm ${
-                selected
-                  ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900'
-                  : 'border border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300 hover:text-neutral-900 dark:border-neutral-600 dark:bg-neutral-800/80 dark:text-neutral-300 dark:hover:border-neutral-500 dark:hover:text-white'
-              }`}
-            >
-              {label}
-            </button>
-          )
-        })}
-      </div>
+      {tags.length > 0 && (
+        <div
+          className="flex gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          role="group"
+          aria-label="Filter by topic"
+        >
+          {tags.map((tag) => {
+            const selected = selectedTags.includes(tag.name)
+            return (
+              <button
+                key={tag.id}
+                type="button"
+                aria-pressed={selected}
+                onClick={() => toggleTag(tag.name)}
+                className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition @sm/main:text-sm ${
+                  selected
+                    ? 'bg-violet-600 text-white dark:bg-violet-500'
+                    : 'border border-neutral-200 bg-white text-neutral-600 hover:border-violet-300 hover:text-violet-700 dark:border-neutral-600 dark:bg-neutral-800/80 dark:text-neutral-300 dark:hover:border-violet-500/50 dark:hover:text-violet-300'
+                }`}
+              >
+                {tag.name}
+              </button>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }

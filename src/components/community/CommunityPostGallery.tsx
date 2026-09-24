@@ -89,7 +89,7 @@ export const CommunityPostGalleryItem = memo(function CommunityPostGalleryItem({
                 New
               </span>
             )}
-            {post.status !== 'OPEN' && (
+            {post.status && post.status !== 'OPEN' && (
               <span className="rounded-full bg-black/45 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-white backdrop-blur-sm">
                 {post.status === 'COMPLETED' ? 'Completed' : 'Closed'}
               </span>
@@ -127,7 +127,7 @@ export const CommunityPostGalleryItem = memo(function CommunityPostGalleryItem({
         <RelativeTime date={post.createdAt} className="hidden shrink-0 @sm/main:inline" />
         <span
           className="inline-flex shrink-0 items-center gap-1 text-neutral-400 dark:text-neutral-500"
-          title={`${commentCount} comment${commentCount === 1 ? '' : 's'}`}
+          title={`${commentCount} answer${commentCount === 1 ? '' : 's'}`}
         >
           <FiMessageSquare className="h-3.5 w-3.5" aria-hidden />
           <span>{commentCount}</span>

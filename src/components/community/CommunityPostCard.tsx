@@ -102,7 +102,7 @@ export const CommunityPostCard = memo(function CommunityPostCard({
           <RelativeTime date={post.createdAt} className="shrink-0" />
           <span
             className="inline-flex shrink-0 items-center gap-1 text-neutral-400 dark:text-neutral-500"
-            title={`${commentCount} comment${commentCount === 1 ? '' : 's'}`}
+            title={`${commentCount} answer${commentCount === 1 ? '' : 's'}`}
           >
             <FiMessageSquare className="h-3.5 w-3.5" aria-hidden />
             <span>{commentCount}</span>

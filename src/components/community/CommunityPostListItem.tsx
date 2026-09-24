@@ -87,23 +87,23 @@ export const CommunityPostListItem = memo(function CommunityPostListItem({
               <span className="truncate">{authorLabel}</span>
             </Link>
             <span className="text-neutral-300 dark:text-neutral-600" aria-hidden>
-              ?
+              ·
             </span>
             <RelativeTime date={post.createdAt} className="shrink-0" />
             <span className="text-neutral-300 dark:text-neutral-600" aria-hidden>
-              ?
+              ·
             </span>
             <span
               className="inline-flex shrink-0 items-center gap-1"
-              title={`${commentCount} comment${commentCount === 1 ? '' : 's'}`}
+              title={`${commentCount} answer${commentCount === 1 ? '' : 's'}`}
             >
               <FiMessageSquare className="h-3.5 w-3.5" aria-hidden />
-              {commentCount === 0 ? 'No replies' : commentCount}
+              {commentCount === 0 ? 'Unanswered' : `${commentCount} answer${commentCount === 1 ? '' : 's'}`}
             </span>
             {post.tags && post.tags.length > 0 && (
               <>
                 <span className="text-neutral-300 dark:text-neutral-600" aria-hidden>
-                  ?
+                  ·
                 </span>
                 <PostTagList tags={post.tags} maxVisible={2} variant="muted" />
               </>

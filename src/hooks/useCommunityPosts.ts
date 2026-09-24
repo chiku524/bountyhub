@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../utils/api'
 import {
@@ -7,6 +7,12 @@ import {
 } from '../utils/communityPosts'
 import type { Post } from '../types'
 import { queryKeys } from '../lib/queryClient'
+import {
+  DEFAULT_DISCOVERY_TAB,
+  filtersForDiscoveryTab,
+  parseDiscoveryTab,
+  type CommunityDiscoveryTab,
+} from '../utils/communityDiscovery'
 
 const DEFAULT_FILTERS: CommunityFilterOptions = {
   status: '',
@@ -18,12 +24,35 @@ const DEFAULT_FILTERS: CommunityFilterOptions = {
 }
 
 const EXPORT_LIMIT = 100
+const FEATURED_LIMIT = 6
 
-export function useCommunityPosts(postsPerPage = 10) {
+function filtersFromTab(tab: CommunityDiscoveryTab): CommunityFilterOptions {
+  return filtersForDiscoveryTab(tab, DEFAULT_FILTERS)
+}
+
+export function useCommunityPosts(
+  postsPerPage = 10,
+  options?: {
+    initialTab?: CommunityDiscoveryTab
+    onTabChange?: (tab: CommunityDiscoveryTab) => void
+  }
+) {
   const queryClient = useQueryClient()
+  const initialTab = options?.initialTab ?? DEFAULT_DISCOVERY_TAB
+  const onTabChangeRef = useRef(options?.onTabChange)
+  onTabChangeRef.current = options?.onTabChange
   const [searchQuery, setSearchQuery] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
-  const [filters, setFilters] = useState<CommunityFilterOptions>(DEFAULT_FILTERS)
+  const [activeTab, setActiveTab] = useState<CommunityDiscoveryTab>(initialTab)
+  const [filters, setFilters] = useState<CommunityFilterOptions>(() => filtersFromTab(initialTab))
+
+  // Sync when URL tab changes (e.g. back/forward)
+  useEffect(() => {
+    const tab = parseDiscoveryTab(initialTab)
+    setActiveTab(tab)
+    setFilters((prev) => filtersForDiscoveryTab(tab, { ...prev, selectedTags: prev.selectedTags }))
+    setCurrentPage(1)
+  }, [initialTab])
 
   const listParams = useMemo(
     () => ({
@@ -68,6 +97,31 @@ export function useCommunityPosts(postsPerPage = 10) {
     staleTime: 60_000,
   })
 
+  const featuredFilters = useMemo<CommunityFilterOptions>(
+    () => ({
+      ...DEFAULT_FILTERS,
+      status: 'open',
+      hasBounty: true,
+      sortBy: 'highestBounty',
+    }),
+    []
+  )
+
+  const featuredQuery = useQuery({
+    queryKey: queryKeys.communityPosts({
+      page: 1,
+      limit: FEATURED_LIMIT,
+      search: '',
+      filters: featuredFilters,
+      purpose: 'featured',
+    }),
+    queryFn: async () => {
+      const query = buildCommunityPostsQuery(1, FEATURED_LIMIT, '', featuredFilters)
+      return api.getCommunityPosts(query)
+    },
+    staleTime: 60_000,
+  })
+
   const posts = listQuery.data?.posts ?? []
   const pagination = listQuery.data?.pagination ?? {
     page: currentPage,
@@ -93,6 +147,18 @@ export function useCommunityPosts(postsPerPage = 10) {
     setCurrentPage(1)
   }, [])
 
+  const handleTabChange = useCallback((tab: CommunityDiscoveryTab) => {
+    setActiveTab(tab)
+    setFilters((prev) =>
+      filtersForDiscoveryTab(tab, {
+        ...DEFAULT_FILTERS,
+        selectedTags: prev.selectedTags,
+      })
+    )
+    setCurrentPage(1)
+    onTabChangeRef.current?.(tab)
+  }, [])
+
   const handleVoteChange = useCallback(
     (postId: string, newVotes: number, newUserVote?: number) => {
       queryClient.setQueryData(queryKeys.communityPosts(listParams), (old: typeof listQuery.data) => {
@@ -116,8 +182,10 @@ export function useCommunityPosts(postsPerPage = 10) {
 
   const clearFilters = useCallback(() => {
     setSearchQuery('')
-    setFilters(DEFAULT_FILTERS)
+    setActiveTab(DEFAULT_DISCOVERY_TAB)
+    setFilters(filtersFromTab(DEFAULT_DISCOVERY_TAB))
     setCurrentPage(1)
+    onTabChangeRef.current?.(DEFAULT_DISCOVERY_TAB)
   }, [])
 
   const fetchPosts = useCallback(async () => {
@@ -129,22 +197,26 @@ export function useCommunityPosts(postsPerPage = 10) {
     return result.data?.posts ?? posts
   }, [exportQuery, posts])
 
+  const tabBaseline = filtersFromTab(activeTab)
   const hasActiveFilters =
     Boolean(searchQuery.trim()) ||
-    filters.status !== '' ||
-    filters.dateRange !== '' ||
-    filters.hasBounty ||
-    filters.unanswered ||
-    filters.selectedTags.length > 0
+    filters.selectedTags.length > 0 ||
+    filters.status !== tabBaseline.status ||
+    filters.dateRange !== tabBaseline.dateRange ||
+    filters.hasBounty !== tabBaseline.hasBounty ||
+    filters.unanswered !== tabBaseline.unanswered ||
+    filters.sortBy !== tabBaseline.sortBy
 
   return {
     posts,
+    featuredPosts: featuredQuery.data?.posts ?? [],
     loading: listQuery.isLoading && !listQuery.data,
     isRefreshing: listQuery.isFetching && !!listQuery.data,
     error: listQuery.error instanceof Error ? listQuery.error.message : listQuery.error ? 'Failed to load posts' : null,
     searchQuery,
     currentPage,
     filters,
+    activeTab,
     totalPosts: pagination.total,
     totalPages: Math.max(1, pagination.totalPages || 1),
     hasActiveFilters,
@@ -154,6 +226,7 @@ export function useCommunityPosts(postsPerPage = 10) {
     handleSearch,
     handlePageChange,
     handleFiltersChange,
+    handleTabChange,
     handleVoteChange,
     clearFilters,
   }

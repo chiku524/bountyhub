@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { FiEdit3 } from 'react-icons/fi'
 import { Pagination } from '../components/Pagination'
 import { PageContainer } from '../components/PageContainer'
@@ -16,11 +16,16 @@ import {
 import { CommunityPostGallery } from '../components/community/CommunityPostGallery'
 import { CommunityPostList } from '../components/community/CommunityPostListItem'
 import { CommunityDiscoveryBar } from '../components/community/CommunityDiscoveryBar'
+import { CommunityFeaturedStrip } from '../components/community/CommunityFeaturedStrip'
 import {
   persistPostView,
   readStoredPostView,
   type CommunityPostView,
 } from '../utils/communityPostView'
+import {
+  parseDiscoveryTab,
+  type CommunityDiscoveryTab,
+} from '../utils/communityDiscovery'
 import { useCommunityPosts } from '../hooks/useCommunityPosts'
 import { BookmarkStatusProvider } from '../contexts/BookmarkStatusContext'
 
@@ -32,30 +37,74 @@ function sortLabel(sortBy: string): string {
       return 'most voted'
     case 'mostCommented':
       return 'most discussed'
+    case 'trending':
+      return 'trending'
+    case 'highestBounty':
+      return 'highest bounty'
     default:
       return 'newest first'
   }
 }
 
+function tabLabel(tab: CommunityDiscoveryTab): string {
+  switch (tab) {
+    case 'trending':
+      return 'Trending'
+    case 'bounties':
+      return 'Top Bounties'
+    case 'unanswered':
+      return 'Unanswered'
+    default:
+      return 'New'
+  }
+}
+
 export default function Community() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const urlTab = parseDiscoveryTab(searchParams.get('tab'))
+
+  const handleUrlTabChange = useCallback(
+    (tab: CommunityDiscoveryTab) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev)
+          if (tab === 'trending') {
+            next.delete('tab')
+          } else {
+            next.set('tab', tab)
+          }
+          return next
+        },
+        { replace: true }
+      )
+    },
+    [setSearchParams]
+  )
+
   const {
     loading,
     isRefreshing,
     error,
     filters,
     posts,
+    featuredPosts,
     totalPosts,
     totalPages,
     currentPage,
     hasActiveFilters,
+    activeTab,
     exportPosts,
     fetchPosts,
     handleSearch,
     handlePageChange,
     handleFiltersChange,
+    handleTabChange,
     handleVoteChange,
     clearFilters,
-  } = useCommunityPosts(12)
+  } = useCommunityPosts(12, {
+    initialTab: urlTab,
+    onTabChange: handleUrlTabChange,
+  })
 
   const [postView, setPostView] = useState<CommunityPostView>(() => readStoredPostView())
 
@@ -69,6 +118,11 @@ export default function Community() {
     () => posts.map((post) => post.id).filter((id): id is string => Boolean(id)),
     [posts]
   )
+
+  const showFeatured =
+    (activeTab === 'trending' || activeTab === 'new') &&
+    !filters.selectedTags.length &&
+    featuredPosts.length > 0
 
   if (error && !loading) {
     return (
@@ -88,7 +142,7 @@ export default function Community() {
       <PageContainer>
         <PageHeader
           title="Community"
-          description="Discover new questions and open bounties worth answering"
+          description="Discover trending questions and open bounties worth answering"
           dataTour="community"
           actions={
             <Link
@@ -105,11 +159,20 @@ export default function Community() {
         <CommunityDiscoveryBar
           filters={filters}
           postView={postView}
+          activeTab={activeTab}
           exportPosts={exportPosts.length > 0 ? exportPosts : posts}
           onSearch={handleSearch}
           onFiltersChange={handleFiltersChange}
+          onTabChange={handleTabChange}
           onPostViewChange={handlePostViewChange}
         />
+
+        {showFeatured && (
+          <CommunityFeaturedStrip
+            posts={featuredPosts}
+            title={activeTab === 'trending' ? 'Trending now' : 'Featured bounties'}
+          />
+        )}
 
         {isRefreshing && posts.length > 0 && (
           <div
@@ -130,7 +193,7 @@ export default function Community() {
               {totalPosts > 0 && (
                 <span className="text-neutral-400 dark:text-neutral-500">
                   {' '}
-                  · {sortLabel(filters.sortBy)}
+                  · {tabLabel(activeTab)} · {sortLabel(filters.sortBy)}
                 </span>
               )}
             </p>
@@ -138,6 +201,9 @@ export default function Community() {
         )}
 
         <div
+          id="community-feed"
+          role="tabpanel"
+          aria-labelledby={`community-tab-${activeTab}`}
           aria-busy={isRefreshing || loading || undefined}
           className={
             isTiled
@@ -176,7 +242,7 @@ export default function Community() {
                 title={hasActiveFilters ? 'No questions match this view' : 'No questions yet'}
                 description={
                   hasActiveFilters
-                    ? 'Try another chip, a different search, or clear filters to see everything.'
+                    ? 'Try another tab, a different search, or clear filters to see everything.'
                     : 'Be the first to ask the community a question.'
                 }
                 action={
@@ -198,7 +264,7 @@ export default function Community() {
           {!loading && posts.length > 0 && (
             <BookmarkStatusProvider postIds={postIds}>
               {/* Keep all layouts mounted to avoid remounting cards/bookmarks on view switch.
-                  Page size is 12 ? virtualization is overkill (see commit message). */}
+                  Page size is 12 — virtualization is overkill. */}
               <div
                 className={postView === 'grid' ? undefined : 'hidden'}
                 aria-hidden={postView !== 'grid' || undefined}
