@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   FiAward,
@@ -16,6 +16,7 @@ import {
   FiGithub,
   FiFileText,
   FiSearch,
+  FiBell,
   FiChevronLeft,
   FiChevronRight,
 } from 'react-icons/fi'
@@ -23,6 +24,7 @@ import { useAuth } from '../contexts/AuthProvider'
 import { isDesktopApp } from '../utils/desktop'
 import { logoUrl } from '../utils/logoUrl'
 import { WalletMenuButton } from './WalletMenuButton'
+import { Notifications, type NotificationsRef } from './Notifications'
 import { useCommandPalette } from './CommandPalette'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 
@@ -41,6 +43,12 @@ function DesktopSidebar({
   const location = useLocation()
   const navigate = useNavigate()
   const { open: openCommandPalette } = useCommandPalette()
+
+  const notificationsRef = useRef<NotificationsRef>(null)
+  const [unreadCount, setUnreadCount] = useState(0)
+  const handleNotificationsUpdate = useCallback((count: number) => {
+    setUnreadCount(count)
+  }, [])
 
   function navLink(
     href: string,
@@ -102,6 +110,21 @@ function DesktopSidebar({
               <FiSearch className="h-5 w-5" />
             </button>
             <WalletMenuButton />
+            <button
+              type="button"
+              data-notifications-button
+              onClick={() => notificationsRef.current?.toggle()}
+              className="relative flex h-10 w-10 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-white/5 hover:text-white"
+              aria-label={unreadCount > 0 ? `Notifications (${unreadCount} unread)` : 'Notifications'}
+              title="Notifications"
+            >
+              <FiBell className="h-5 w-5" aria-hidden />
+              {user && unreadCount > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </button>
           </div>
         )}
       </div>
@@ -164,6 +187,21 @@ function DesktopSidebar({
               <FiSearch className="h-5 w-5" />
             </button>
             <WalletMenuButton />
+            <button
+              type="button"
+              data-notifications-button
+              onClick={() => notificationsRef.current?.toggle()}
+              className="relative flex h-10 w-10 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-white/5 hover:text-white"
+              aria-label={unreadCount > 0 ? `Notifications (${unreadCount} unread)` : 'Notifications'}
+              title="Notifications"
+            >
+              <FiBell className="h-5 w-5" aria-hidden />
+              {user && unreadCount > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </button>
           </div>
         )}
         {!loading && user ? (
@@ -205,6 +243,7 @@ function DesktopSidebar({
           {collapsed ? <FiChevronRight className="h-5 w-5" /> : <FiChevronLeft className="h-5 w-5" />}
         </button>
       </div>
+      <Notifications ref={notificationsRef} onUnreadCountChange={handleNotificationsUpdate} />
     </aside>
   )
 }
