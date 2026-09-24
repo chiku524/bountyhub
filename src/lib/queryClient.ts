@@ -17,6 +17,9 @@ export const queryKeys = {
   communityExport: (params: Record<string, unknown>) =>
     ['community-posts-export', params] as const,
   notifications: (userId: string) => ['notifications', userId] as const,
+  /** Batch bookmark status for a sorted, comma-joined list of post ids. */
+  bookmarkStatuses: (userId: string, postIdsKey: string) =>
+    ['bookmark-statuses', userId, postIdsKey] as const,
   platformStats: () => ['platform-stats'] as const,
   adminStats: () => ['admin-stats'] as const,
   walletInfo: (userId: string) => ['wallet-info', userId] as const,

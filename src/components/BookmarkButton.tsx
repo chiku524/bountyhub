@@ -1,7 +1,8 @@
-﻿import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FaBookmark } from 'react-icons/fa'
 import { useAuth } from '../contexts/AuthProvider'
 import { config } from '../utils/config'
+import { useBookmarkStatusContext } from '../contexts/BookmarkStatusContext'
 
 interface BookmarkButtonProps {
   postId: string
@@ -12,28 +13,42 @@ interface BookmarkButtonProps {
 export const BookmarkButton: React.FC<BookmarkButtonProps> = ({
   postId,
   className = '',
-  size = 'md'
+  size = 'md',
 }) => {
   const { user } = useAuth()
+  const batch = useBookmarkStatusContext()
   const [isBookmarked, setIsBookmarked] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
+  // Sync from batched map when available (Community feeds).
   useEffect(() => {
-    if (!user || !postId) return
+    if (!user || !postId || !batch) return
+    if (batch.hasStatus(postId)) {
+      setIsBookmarked(batch.isBookmarked(postId))
+    }
+  }, [user, postId, batch, batch?.statusMap, batch?.isLoading])
+
+  // Single-post fallback (detail pages, etc.) when no batch provider is mounted.
+  useEffect(() => {
+    if (!user || !postId || batch) return
 
     let cancelled = false
 
     const checkBookmarkStatus = async () => {
       try {
         const postIdsParam = encodeURIComponent(JSON.stringify([postId]))
-        const response = await fetch(`${config.api.baseUrl}/api/bookmarks/status?postIds=${postIdsParam}`, {
-          credentials: 'include'
-        })
+        const response = await fetch(
+          `${config.api.baseUrl}/api/bookmarks/status?postIds=${postIdsParam}`,
+          { credentials: 'include' }
+        )
 
         if (!response.ok || cancelled) return
 
         const data = await response.json().catch(() => null)
-        const statusMap = data && typeof data === 'object' ? (data as { status?: Record<string, boolean> }).status : undefined
+        const statusMap =
+          data && typeof data === 'object'
+            ? (data as { status?: Record<string, boolean> }).status
+            : undefined
         if (statusMap && typeof statusMap === 'object') {
           setIsBookmarked(Boolean(statusMap[postId]))
         }
@@ -46,7 +61,7 @@ export const BookmarkButton: React.FC<BookmarkButtonProps> = ({
     return () => {
       cancelled = true
     }
-  }, [user, postId])
+  }, [user, postId, batch])
 
   const handleBookmarkToggle = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -54,24 +69,32 @@ export const BookmarkButton: React.FC<BookmarkButtonProps> = ({
     if (!user || isLoading || !postId) return
 
     setIsLoading(true)
-    setIsBookmarked(prev => !prev)
+    const next = !isBookmarked
+    setIsBookmarked(next)
+    batch?.setBookmarked(postId, next)
 
     try {
       const response = await fetch(`${config.api.baseUrl}/api/bookmarks/toggle`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ postId })
+        body: JSON.stringify({ postId }),
       })
 
       if (!response.ok) {
-        setIsBookmarked(prev => !prev)
+        setIsBookmarked(!next)
+        batch?.setBookmarked(postId, !next)
         console.error('Failed to toggle bookmark:', response.status)
+      } else {
+        const data = (await response.json().catch(() => null)) as { bookmarked?: boolean } | null
+        if (data && typeof data.bookmarked === 'boolean') {
+          setIsBookmarked(data.bookmarked)
+          batch?.setBookmarked(postId, data.bookmarked)
+        }
       }
     } catch (error) {
-      setIsBookmarked(prev => !prev)
+      setIsBookmarked(!next)
+      batch?.setBookmarked(postId, !next)
       console.error('Error toggling bookmark:', error)
     } finally {
       setIsLoading(false)
@@ -85,7 +108,7 @@ export const BookmarkButton: React.FC<BookmarkButtonProps> = ({
   const sizeClasses = {
     sm: 'w-4 h-4',
     md: 'w-5 h-5',
-    lg: 'w-6 h-6'
+    lg: 'w-6 h-6',
   }
 
   return (
@@ -93,16 +116,18 @@ export const BookmarkButton: React.FC<BookmarkButtonProps> = ({
       type="button"
       onClick={handleBookmarkToggle}
       disabled={isLoading}
-      className={`p-2 rounded-full transition-colors ${
-        isBookmarked 
-          ? 'bg-yellow-100 dark:bg-yellow-400/20 text-yellow-600 dark:text-yellow-400' 
-          : 'bg-neutral-200 dark:bg-neutral-700/50 text-yellow-500 dark:text-yellow-400 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-400/20'
+      className={`rounded-full p-2 transition-colors ${
+        isBookmarked
+          ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-400/20 dark:text-yellow-400'
+          : 'bg-neutral-200 text-yellow-500 hover:bg-yellow-100 hover:text-yellow-600 dark:bg-neutral-700/50 dark:text-yellow-400 dark:hover:bg-yellow-400/20 dark:hover:text-yellow-400'
       } ${className}`}
       title={isBookmarked ? 'Remove Bookmark' : 'Bookmark'}
       aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark'}
       aria-pressed={isBookmarked}
     >
-      <FaBookmark className={`${sizeClasses[size]} ${isBookmarked ? 'fill-current' : 'stroke-current stroke-2 fill-none'}`} />
+      <FaBookmark
+        className={`${sizeClasses[size]} ${isBookmarked ? 'fill-current' : 'fill-none stroke-current stroke-2'}`}
+      />
     </button>
   )
 }

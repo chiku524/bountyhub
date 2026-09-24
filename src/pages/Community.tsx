@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { FiEdit3 } from 'react-icons/fi'
 import { Pagination } from '../components/Pagination'
@@ -22,6 +22,7 @@ import {
   type CommunityPostView,
 } from '../utils/communityPostView'
 import { useCommunityPosts } from '../hooks/useCommunityPosts'
+import { BookmarkStatusProvider } from '../contexts/BookmarkStatusContext'
 
 function sortLabel(sortBy: string): string {
   switch (sortBy) {
@@ -64,6 +65,10 @@ export default function Community() {
   }, [])
 
   const isTiled = postView === 'grid' || postView === 'gallery'
+  const postIds = useMemo(
+    () => posts.map((post) => post.id).filter((id): id is string => Boolean(id)),
+    [posts]
+  )
 
   if (error && !loading) {
     return (
@@ -191,14 +196,27 @@ export default function Community() {
           )}
 
           {!loading && posts.length > 0 && (
-            <>
-              {postView === 'grid' ? (
+            <BookmarkStatusProvider postIds={postIds}>
+              {/* Keep all layouts mounted to avoid remounting cards/bookmarks on view switch.
+                  Page size is 12 ? virtualization is overkill (see commit message). */}
+              <div
+                className={postView === 'grid' ? undefined : 'hidden'}
+                aria-hidden={postView !== 'grid' || undefined}
+              >
                 <CommunityPostCardGrid posts={posts} onVoteChange={handleVoteChange} />
-              ) : postView === 'gallery' ? (
+              </div>
+              <div
+                className={postView === 'gallery' ? undefined : 'hidden'}
+                aria-hidden={postView !== 'gallery' || undefined}
+              >
                 <CommunityPostGallery posts={posts} onVoteChange={handleVoteChange} />
-              ) : (
+              </div>
+              <div
+                className={postView === 'list' ? undefined : 'hidden'}
+                aria-hidden={postView !== 'list' || undefined}
+              >
                 <CommunityPostList posts={posts} onVoteChange={handleVoteChange} />
-              )}
+              </div>
 
               {totalPages > 1 && (
                 <div
@@ -215,7 +233,7 @@ export default function Community() {
                   />
                 </div>
               )}
-            </>
+            </BookmarkStatusProvider>
           )}
         </div>
       </PageContainer>
