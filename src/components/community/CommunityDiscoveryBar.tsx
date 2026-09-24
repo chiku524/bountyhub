@@ -1,11 +1,12 @@
-import { FiGrid, FiList } from 'react-icons/fi'
+import { FiGrid, FiImage, FiList } from 'react-icons/fi'
 import { SearchBar } from '../SearchBar'
 import { AdvancedFilters } from '../AdvancedFilters'
 import { ExportButton } from '../ExportButton'
 import type { CommunityFilterOptions } from '../../utils/communityPosts'
 import type { Post } from '../../types'
+import type { CommunityPostView } from '../../utils/communityPostView'
 
-export type CommunityPostView = 'list' | 'card'
+export type { CommunityPostView }
 export type CommunityDiscoveryPreset = 'all' | 'new' | 'open' | 'unanswered' | 'bounties'
 
 const PRESETS: Array<{ id: CommunityDiscoveryPreset; label: string; hint: string }> = [
@@ -114,7 +115,8 @@ export function CommunityDiscoveryBar({
             {(
               [
                 { id: 'list' as const, label: 'List', icon: FiList },
-                { id: 'card' as const, label: 'Cards', icon: FiGrid },
+                { id: 'grid' as const, label: 'Grid', icon: FiGrid },
+                { id: 'gallery' as const, label: 'Gallery', icon: FiImage },
               ] as const
             ).map(({ id, label, icon: Icon }) => (
               <button

@@ -1,7 +1,7 @@
 export function CommunityPostCardSkeleton() {
   return (
     <div className="flex h-full animate-pulse flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white dark:border-neutral-600 dark:bg-neutral-800/90">
-      <div className="flex flex-1 flex-col p-4">
+      <div className="flex flex-1 flex-col p-3.5 @sm/main:p-4">
         <div className="mb-3 flex items-center justify-between gap-2">
           <div className="h-4 w-16 rounded bg-neutral-200 dark:bg-neutral-700" />
           <div className="h-7 w-7 rounded-md bg-neutral-200 dark:bg-neutral-700" />
@@ -21,9 +21,32 @@ export function CommunityPostCardSkeleton() {
 
 export function CommunityPostCardSkeletonGrid({ count = 6 }: { count?: number }) {
   return (
-    <div className="grid grid-cols-1 gap-4 p-4 @md/main:grid-cols-2 @3xl/main:grid-cols-3 @sm/main:p-6">
+    <div className="grid grid-cols-1 gap-3 p-3 @md/main:grid-cols-2 @3xl/main:grid-cols-3 @sm/main:gap-3.5 @sm/main:p-5">
       {[...Array(count)].map((_, i) => (
         <CommunityPostCardSkeleton key={i} />
+      ))}
+    </div>
+  )
+}
+
+export function CommunityPostGallerySkeleton() {
+  return (
+    <div className="flex h-full animate-pulse flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white dark:border-neutral-600 dark:bg-neutral-800/90">
+      <div className="aspect-[4/3] w-full bg-neutral-200 dark:bg-neutral-700" />
+      <div className="flex items-center gap-2 border-t border-neutral-100 px-2.5 py-2 dark:border-neutral-700">
+        <div className="h-6 w-6 rounded-full bg-neutral-200 dark:bg-neutral-700" />
+        <div className="h-3 w-16 rounded bg-neutral-200 dark:bg-neutral-700" />
+        <div className="ml-auto h-7 w-14 rounded bg-neutral-200 dark:bg-neutral-700" />
+      </div>
+    </div>
+  )
+}
+
+export function CommunityPostGallerySkeletonGrid({ count = 8 }: { count?: number }) {
+  return (
+    <div className="grid grid-cols-2 gap-2.5 p-3 @md/main:grid-cols-3 @2xl/main:grid-cols-4 @sm/main:gap-3 @sm/main:p-5">
+      {[...Array(count)].map((_, i) => (
+        <CommunityPostGallerySkeleton key={i} />
       ))}
     </div>
   )

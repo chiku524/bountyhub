@@ -9,34 +9,19 @@ import { ErrorMessage } from '../components/ErrorMessage'
 import { EmptyState } from '../components/EmptyState'
 import { PageMetadata } from '../components/PageMetadata'
 import { CommunityPostCardGrid } from '../components/community/CommunityPostCard'
-import { CommunityPostCardSkeletonGrid } from '../components/community/CommunityPostCardSkeleton'
-import { CommunityPostList } from '../components/community/CommunityPostListItem'
 import {
-  CommunityDiscoveryBar,
+  CommunityPostCardSkeletonGrid,
+  CommunityPostGallerySkeletonGrid,
+} from '../components/community/CommunityPostCardSkeleton'
+import { CommunityPostGallery } from '../components/community/CommunityPostGallery'
+import { CommunityPostList } from '../components/community/CommunityPostListItem'
+import { CommunityDiscoveryBar } from '../components/community/CommunityDiscoveryBar'
+import {
+  persistPostView,
+  readStoredPostView,
   type CommunityPostView,
-} from '../components/community/CommunityDiscoveryBar'
+} from '../utils/communityPostView'
 import { useCommunityPosts } from '../hooks/useCommunityPosts'
-
-const COMMUNITY_POST_VIEW_KEY = 'bountyhub:community-post-view'
-
-function readStoredPostView(): CommunityPostView {
-  try {
-    const raw = localStorage.getItem(COMMUNITY_POST_VIEW_KEY)
-    if (raw === 'card') return 'card'
-    if (raw === 'list' || raw === 'compact') return 'list'
-  } catch {
-    /* ignore */
-  }
-  return 'list'
-}
-
-function persistPostView(view: CommunityPostView) {
-  try {
-    localStorage.setItem(COMMUNITY_POST_VIEW_KEY, view)
-  } catch {
-    /* ignore */
-  }
-}
 
 function sortLabel(sortBy: string): string {
   switch (sortBy) {
@@ -77,6 +62,8 @@ export default function Community() {
     setPostView(view)
     persistPostView(view)
   }, [])
+
+  const isTiled = postView === 'grid' || postView === 'gallery'
 
   if (error && !loading) {
     return (
@@ -147,21 +134,23 @@ export default function Community() {
 
         <div
           className={
-            postView === 'card'
+            isTiled
               ? ''
               : 'overflow-hidden rounded-xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800'
           }
         >
           {loading && (
-            <div className={postView === 'card' ? '' : 'p-4 @sm/main:p-5'}>
+            <div className={isTiled ? '' : 'p-4 @sm/main:p-5'}>
               <div
-                className={`mb-4 flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400 ${postView === 'card' ? 'px-4 pt-4 @sm/main:px-6' : ''}`}
+                className={`mb-4 flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400 ${isTiled ? 'px-4 pt-4 @sm/main:px-6' : ''}`}
               >
                 <LoadingSpinner size="sm" />
                 <span>Loading questions…</span>
               </div>
-              {postView === 'card' ? (
+              {postView === 'grid' ? (
                 <CommunityPostCardSkeletonGrid />
+              ) : postView === 'gallery' ? (
+                <CommunityPostGallerySkeletonGrid />
               ) : (
                 <ul className="divide-y divide-neutral-200 dark:divide-neutral-700">
                   {[...Array(6)].map((_, i) => (
@@ -202,8 +191,10 @@ export default function Community() {
 
           {!loading && posts.length > 0 && (
             <>
-              {postView === 'card' ? (
+              {postView === 'grid' ? (
                 <CommunityPostCardGrid posts={posts} onVoteChange={handleVoteChange} />
+              ) : postView === 'gallery' ? (
+                <CommunityPostGallery posts={posts} onVoteChange={handleVoteChange} />
               ) : (
                 <CommunityPostList posts={posts} onVoteChange={handleVoteChange} />
               )}
@@ -211,7 +202,7 @@ export default function Community() {
               {totalPages > 1 && (
                 <div
                   className={`border-t border-neutral-200 p-4 @sm/main:p-5 dark:border-neutral-700 ${
-                    postView === 'card'
+                    isTiled
                       ? 'mx-4 mb-4 rounded-xl border bg-white @sm/main:mx-6 dark:bg-neutral-800'
                       : ''
                   }`}
