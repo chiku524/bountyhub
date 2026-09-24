@@ -40,9 +40,9 @@ export const CommunityPostListItem = memo(function CommunityPostListItem({
           : 'border-l-transparent'
       } ${justPosted ? 'bg-amber-50/60 dark:bg-amber-400/5' : ''}`}
     >
-      <div className="flex gap-3 px-3 py-3.5 @sm/main:gap-4 @sm/main:px-5">
-        {/* Desktop: vertical vote column. Mobile: votes move into the meta row. */}
-        <div className="hidden w-12 shrink-0 items-start justify-center pt-0.5 @sm/main:flex">
+      <div className="flex gap-3 px-3 py-3.5 @md/main:gap-4 @md/main:px-5">
+        {/* Desktop (@md/main ≥448px): vertical votes. Phones at ~390px still match @sm (384px), so we use @md + max-sm. */}
+        <div className="hidden w-12 shrink-0 items-start justify-center pt-0.5 max-sm:hidden @md/main:flex">
           <VoteButton
             itemId={post.id}
             itemType="post"
@@ -54,13 +54,13 @@ export const CommunityPostListItem = memo(function CommunityPostListItem({
         </div>
 
         <div className="min-w-0 flex-1">
-          <div className="flex items-start gap-2 @sm/main:gap-3">
+          <div className="flex items-start gap-2 @md/main:gap-3">
             <div className="min-w-0 flex-1">
               <div className="mb-1 flex flex-wrap items-center gap-x-2 gap-y-1">
                 {fresh && <PostNewBadge />}
                 {/* Mobile: bounty sits with badges so the title can use full width */}
                 {showBounty && (
-                  <span className="@sm/main:hidden">
+                  <span className="max-sm:inline @md/main:hidden">
                     <PostBountyBadge reward={post.reward!} variant="emphasis" />
                   </span>
                 )}
@@ -68,12 +68,12 @@ export const CommunityPostListItem = memo(function CommunityPostListItem({
               </div>
               <Link
                 to={`/posts/${post.id}`}
-                className="block line-clamp-3 text-[15px] font-semibold leading-snug text-neutral-900 hover:text-neutral-700 dark:text-white dark:hover:text-neutral-100 @sm/main:line-clamp-2 @xl/main:text-base"
+                className="block line-clamp-3 text-[15px] font-semibold leading-snug text-neutral-900 hover:text-neutral-700 dark:text-white dark:hover:text-neutral-100 @md/main:line-clamp-2 @xl/main:text-base"
               >
                 {post.title}
               </Link>
               {post.content?.trim() && (
-                <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-neutral-500 dark:text-neutral-400 @sm/main:line-clamp-1">
+                <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-neutral-500 dark:text-neutral-400 @md/main:line-clamp-1">
                   {post.content}
                 </p>
               )}
@@ -82,7 +82,7 @@ export const CommunityPostListItem = memo(function CommunityPostListItem({
             <div className="flex shrink-0 items-start gap-2 pt-0.5">
               {/* Desktop: bounty beside bookmark (previous layout) */}
               {showBounty && (
-                <span className="hidden @sm/main:inline-flex">
+                <span className="hidden max-sm:hidden @md/main:inline-flex">
                   <PostBountyBadge reward={post.reward!} variant="emphasis" />
                 </span>
               )}
@@ -90,10 +90,10 @@ export const CommunityPostListItem = memo(function CommunityPostListItem({
             </div>
           </div>
 
-          <div className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-neutral-500 dark:text-neutral-400 @sm/main:mt-1.5 @sm/main:text-[13px]">
+          <div className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-neutral-500 dark:text-neutral-400 @md/main:mt-1.5 @md/main:text-[13px]">
             <Link
               to={authorHref}
-              className="inline-flex min-w-0 max-w-[40%] items-center gap-1.5 font-medium text-neutral-600 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white @sm/main:max-w-none"
+              className="inline-flex min-w-0 max-w-[40%] items-center gap-1.5 font-medium text-neutral-600 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white @md/main:max-w-none"
             >
               <ProfilePicture user={post.author} size="sm" />
               <span className="truncate">{authorLabel}</span>
@@ -116,16 +116,16 @@ export const CommunityPostListItem = memo(function CommunityPostListItem({
             </span>
             {post.tags && post.tags.length > 0 && (
               <>
-                <span className="hidden text-neutral-300 dark:text-neutral-600 @sm/main:inline" aria-hidden>
+                <span className="hidden text-neutral-300 dark:text-neutral-600 @md/main:inline" aria-hidden>
                   ·
                 </span>
-                <span className="hidden @sm/main:inline">
+                <span className="hidden @md/main:inline">
                   <PostTagList tags={post.tags} maxVisible={2} variant="muted" />
                 </span>
               </>
             )}
             {/* Mobile: compact horizontal votes in the meta row */}
-            <div className="ml-auto @sm/main:hidden">
+            <div className="ml-auto @md/main:hidden">
               <VoteButton
                 itemId={post.id}
                 itemType="post"

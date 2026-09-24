@@ -109,16 +109,16 @@ export const CommunityPostGalleryItem = memo(function CommunityPostGalleryItem({
               </span>
             </div>
           )}
-          <h2 className="line-clamp-3 text-[15px] font-semibold leading-snug text-white drop-shadow-sm @sm/main:line-clamp-2">
+          <h2 className="line-clamp-3 text-[15px] font-semibold leading-snug text-white drop-shadow-sm @md/main:line-clamp-2">
             {post.title}
           </h2>
         </div>
       </div>
 
-      <div className="pointer-events-auto relative z-20 mt-auto flex items-center gap-1.5 border-t border-neutral-100 px-2 py-2 text-xs text-neutral-500 dark:border-neutral-700 dark:text-neutral-400 @sm/main:gap-2 @sm/main:px-2.5">
+      <div className="pointer-events-auto relative z-20 mt-auto flex items-center gap-1.5 border-t border-neutral-100 px-2 py-2 text-xs text-neutral-500 dark:border-neutral-700 dark:text-neutral-400 @md/main:gap-2 @md/main:px-2.5">
         <Link
           to={authorHref}
-          className="inline-flex min-w-0 max-w-[42%] items-center gap-1.5 font-medium text-neutral-700 hover:text-neutral-900 dark:text-neutral-200 dark:hover:text-white @sm/main:max-w-none"
+          className="inline-flex min-w-0 max-w-[42%] items-center gap-1.5 font-medium text-neutral-700 hover:text-neutral-900 dark:text-neutral-200 dark:hover:text-white @md/main:max-w-none"
           onClick={(e) => e.stopPropagation()}
         >
           <ProfilePicture user={post.author} size="sm" />
