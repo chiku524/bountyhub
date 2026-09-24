@@ -40,19 +40,25 @@ export function useCommunityPosts(
   const queryClient = useQueryClient()
   const initialTab = options?.initialTab ?? DEFAULT_DISCOVERY_TAB
   const onTabChangeRef = useRef(options?.onTabChange)
-  onTabChangeRef.current = options?.onTabChange
+  useEffect(() => {
+    onTabChangeRef.current = options?.onTabChange
+  }, [options?.onTabChange])
   const [searchQuery, setSearchQuery] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
-  const [activeTab, setActiveTab] = useState<CommunityDiscoveryTab>(initialTab)
-  const [filters, setFilters] = useState<CommunityFilterOptions>(() => filtersFromTab(initialTab))
-
-  // Sync when URL tab changes (e.g. back/forward)
-  useEffect(() => {
+  const [activeTab, setActiveTab] = useState<CommunityDiscoveryTab>(() => parseDiscoveryTab(initialTab))
+  const [filters, setFilters] = useState<CommunityFilterOptions>(() =>
+    filtersFromTab(parseDiscoveryTab(initialTab)),
+  )
+  // Adjust local state when the URL tab prop changes (back/forward). Prefer
+  // render-time sync over an effect to avoid react-hooks/set-state-in-effect.
+  const [syncedInitialTab, setSyncedInitialTab] = useState(initialTab)
+  if (initialTab !== syncedInitialTab) {
+    setSyncedInitialTab(initialTab)
     const tab = parseDiscoveryTab(initialTab)
     setActiveTab(tab)
     setFilters((prev) => filtersForDiscoveryTab(tab, { ...prev, selectedTags: prev.selectedTags }))
     setCurrentPage(1)
-  }, [initialTab])
+  }
 
   const listParams = useMemo(
     () => ({

@@ -95,7 +95,6 @@ export function SupportGuide() {
     }
     const t = window.setTimeout(() => inputRef.current?.focus(), 80)
     return () => window.clearTimeout(t)
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only when opened
   }, [isOpen])
 
   useEffect(() => {

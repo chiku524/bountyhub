@@ -50,7 +50,7 @@ function tooltipStyle(box: HighlightBox | null): CSSProperties {
   const top = preferBelow
     ? Math.min(window.innerHeight - 24, box.top + box.height + 12)
     : Math.max(12, box.top - 12)
-  let left = Math.min(Math.max(12, box.left), window.innerWidth - width - 12)
+  const left = Math.min(Math.max(12, box.left), window.innerWidth - width - 12)
   return {
     top,
     left,
@@ -68,8 +68,20 @@ async function waitForSelector(selector: string, timeoutMs: number): Promise<boo
   return false
 }
 
+/**
+ * Outer shell: remount ActiveProductTour when the tour starts so index/box
+ * reset without setState-in-effect. Derive "ready" from readyStepId === step.id
+ * so changing steps hides the tooltip until the async setup finishes.
+ */
 export function ProductTour() {
-  const { tourActive, stopTour } = useSupportGuide()
+  const { tourActive } = useSupportGuide()
+  useRestoreFocusWhenOpen(tourActive)
+  if (!tourActive) return null
+  return <ActiveProductTour />
+}
+
+function ActiveProductTour() {
+  const { stopTour } = useSupportGuide()
   const { user } = useAuth()
   const isDesktop = isDesktopApp()
   const location = useLocation()
@@ -81,11 +93,10 @@ export function ProductTour() {
 
   const [index, setIndex] = useState(0)
   const [box, setBox] = useState<HighlightBox | null>(null)
-  const [ready, setReady] = useState(false)
-
-  useRestoreFocusWhenOpen(tourActive)
+  const [readyStepId, setReadyStepId] = useState<string | null>(null)
 
   const step: TourStep | undefined = steps[index]
+  const ready = Boolean(step && readyStepId === step.id)
 
   const recapture = useCallback(() => {
     if (!step?.selector) {
@@ -96,19 +107,8 @@ export function ProductTour() {
   }, [step])
 
   useEffect(() => {
-    if (!tourActive) {
-      setIndex(0)
-      setBox(null)
-      setReady(false)
-      return
-    }
-    setIndex(0)
-  }, [tourActive])
-
-  useEffect(() => {
-    if (!tourActive || !step) return
+    if (!step) return
     let cancelled = false
-    setReady(false)
 
     const run = async () => {
       if (step.route && location.pathname !== step.route) {
@@ -126,17 +126,17 @@ export function ProductTour() {
       }
       if (cancelled) return
       recapture()
-      setReady(true)
+      setReadyStepId(step.id)
     }
 
     void run()
     return () => {
       cancelled = true
     }
-  }, [tourActive, step, location.pathname, navigate, recapture])
+  }, [step, location.pathname, navigate, recapture])
 
   useEffect(() => {
-    if (!tourActive || !ready) return
+    if (!ready) return
     const onWin = () => recapture()
     window.addEventListener('resize', onWin)
     window.addEventListener('scroll', onWin, true)
@@ -144,17 +144,15 @@ export function ProductTour() {
       window.removeEventListener('resize', onWin)
       window.removeEventListener('scroll', onWin, true)
     }
-  }, [tourActive, ready, recapture])
+  }, [ready, recapture])
 
   useEffect(() => {
-    if (!tourActive) return
     if (index >= steps.length) {
       stopTour(true)
     }
-  }, [index, steps.length, tourActive, stopTour])
+  }, [index, steps.length, stopTour])
 
   useEffect(() => {
-    if (!tourActive) return
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault()
@@ -169,9 +167,9 @@ export function ProductTour() {
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [tourActive, stopTour])
+  }, [stopTour])
 
-  if (!tourActive || !step || !ready) return null
+  if (!step || !ready) return null
 
   const isLast = index >= steps.length - 1
   const tooltip = (

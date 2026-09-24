@@ -31,8 +31,9 @@ interface BookmarkStatusProviderProps {
  * BookmarkButton consumes this when present and skips per-post status fetches.
  */
 export function BookmarkStatusProvider({ postIds, children }: BookmarkStatusProviderProps) {
-  const idsKey = postIds.join('|')
-  const stableIds = useMemo(() => [...postIds], [idsKey])
+  // Depend on postIds directly so React Compiler can preserve the memo; callers
+  // (Community) already memoize the ids array by content identity.
+  const stableIds = useMemo(() => [...postIds], [postIds])
   const batch = useBookmarkStatuses(stableIds)
 
   const value = useMemo<BookmarkStatusContextValue>(
