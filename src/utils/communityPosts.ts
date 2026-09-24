@@ -147,6 +147,14 @@ export function filterCommunityPosts(
         return (b.qualityUpvotes || 0) - (a.qualityUpvotes || 0)
       case 'mostCommented':
         return (b.commentCount || 0) - (a.commentCount || 0)
+      case 'highestBounty':
+        return (b.reward || 0) - (a.reward || 0)
+      case 'trending': {
+        const score = (p: typeof a) => (p.qualityUpvotes || 0) * 2 + (p.commentCount || 0)
+        const diff = score(b) - score(a)
+        if (diff !== 0) return diff
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      }
       default:
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     }

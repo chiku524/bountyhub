@@ -132,7 +132,7 @@ function buildWhereConditions(params: ListCommunityPostsParams, db: Db): SQL | u
   return and(...conditions)
 }
 
-function buildOrderBy(sortBy?: string) {
+function buildOrderBy(sortBy?: string): SQL | ReturnType<typeof asc> | ReturnType<typeof desc> {
   switch (sortBy) {
     case 'oldest':
       return asc(posts.createdAt)
@@ -142,6 +142,14 @@ function buildOrderBy(sortBy?: string) {
       return desc(
         sql`(SELECT COUNT(*) FROM ${comments} WHERE ${comments.postId} = ${posts.id})`
       )
+    case 'highestBounty':
+      // Null rewards sort last; amount desc for open bounty discovery.
+      return sql`CASE WHEN ${bounties.amount} IS NULL THEN -1 ELSE ${bounties.amount} END DESC`
+    case 'trending': {
+      // Engagement-weighted hot ranking; pair with dateRange=month on the client for a fresh window.
+      const commentCount = sql`(SELECT COUNT(*) FROM ${comments} WHERE ${comments.postId} = ${posts.id})`
+      return sql`(COALESCE(${posts.qualityUpvotes}, 0) * 2 + COALESCE(${commentCount}, 0)) DESC, ${posts.createdAt} DESC`
+    }
     default:
       return desc(posts.createdAt)
   }
