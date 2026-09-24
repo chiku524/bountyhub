@@ -17,16 +17,13 @@ import {
 
 export interface CommunityPostListItemProps {
   post: Post
-  density?: 'comfortable' | 'compact'
   onVoteChange: (postId: string, newVotes: number, newUserVote?: number) => void
 }
 
 export const CommunityPostListItem = memo(function CommunityPostListItem({
   post,
-  density = 'comfortable',
   onVoteChange,
 }: CommunityPostListItemProps) {
-  const compact = density === 'compact'
   const bounty = postHasBounty(post)
   const fresh = isNewPost(post.createdAt)
   const justPosted = isNewPost(post.createdAt, 6)
@@ -42,8 +39,8 @@ export const CommunityPostListItem = memo(function CommunityPostListItem({
           : 'border-l-transparent'
       } ${justPosted ? 'bg-amber-50/60 dark:bg-amber-400/5' : ''}`}
     >
-      <div className={`flex ${compact ? 'gap-2 px-3 py-2.5 @sm/main:px-4' : 'gap-3 px-3 py-3.5 @sm/main:gap-4 @sm/main:px-5'}`}>
-        <div className={`flex shrink-0 items-start justify-center pt-0.5 ${compact ? 'w-10' : 'w-11 @sm/main:w-12'}`}>
+      <div className="flex gap-3 px-3 py-3.5 @sm/main:gap-4 @sm/main:px-5">
+        <div className="flex w-11 shrink-0 items-start justify-center pt-0.5 @sm/main:w-12">
           <VoteButton
             itemId={post.id}
             itemType="post"
@@ -60,16 +57,14 @@ export const CommunityPostListItem = memo(function CommunityPostListItem({
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                 <Link
                   to={`/posts/${post.id}`}
-                  className={`font-semibold text-neutral-900 hover:text-neutral-700 dark:text-white dark:hover:text-neutral-100 ${
-                    compact ? 'line-clamp-1 text-sm @sm/main:text-[15px]' : 'line-clamp-2 text-[15px] leading-snug @xl/main:text-base'
-                  }`}
+                  className="line-clamp-2 text-[15px] font-semibold leading-snug text-neutral-900 hover:text-neutral-700 dark:text-white dark:hover:text-neutral-100 @xl/main:text-base"
                 >
                   {post.title}
                 </Link>
                 {fresh && <PostNewBadge />}
                 <PostStatusBadge status={post.status} variant="quiet" />
               </div>
-              {!compact && post.content?.trim() && (
+              {post.content?.trim() && (
                 <p className="mt-1 line-clamp-1 text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
                   {post.content}
                 </p>
@@ -83,11 +78,7 @@ export const CommunityPostListItem = memo(function CommunityPostListItem({
             </div>
           </div>
 
-          <div
-            className={`flex flex-wrap items-center gap-x-2.5 gap-y-1 text-neutral-500 dark:text-neutral-400 ${
-              compact ? 'mt-1 text-xs' : 'mt-1.5 text-xs @sm/main:text-[13px]'
-            }`}
-          >
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-neutral-500 dark:text-neutral-400 @sm/main:text-[13px]">
             <Link
               to={authorHref}
               className="inline-flex min-w-0 items-center gap-1.5 font-medium text-neutral-600 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white"
@@ -96,11 +87,11 @@ export const CommunityPostListItem = memo(function CommunityPostListItem({
               <span className="truncate">{authorLabel}</span>
             </Link>
             <span className="text-neutral-300 dark:text-neutral-600" aria-hidden>
-              ·
+              ?
             </span>
             <RelativeTime date={post.createdAt} className="shrink-0" />
             <span className="text-neutral-300 dark:text-neutral-600" aria-hidden>
-              ·
+              ?
             </span>
             <span
               className="inline-flex shrink-0 items-center gap-1"
@@ -112,9 +103,9 @@ export const CommunityPostListItem = memo(function CommunityPostListItem({
             {post.tags && post.tags.length > 0 && (
               <>
                 <span className="text-neutral-300 dark:text-neutral-600" aria-hidden>
-                  ·
+                  ?
                 </span>
-                <PostTagList tags={post.tags} maxVisible={compact ? 1 : 2} variant="muted" />
+                <PostTagList tags={post.tags} maxVisible={2} variant="muted" />
               </>
             )}
           </div>
@@ -126,13 +117,11 @@ export const CommunityPostListItem = memo(function CommunityPostListItem({
 
 export interface CommunityPostListProps {
   posts: Post[]
-  density?: 'comfortable' | 'compact'
   onVoteChange: (postId: string, newVotes: number, newUserVote?: number) => void
 }
 
 export const CommunityPostList = memo(function CommunityPostList({
   posts,
-  density = 'comfortable',
   onVoteChange,
 }: CommunityPostListProps) {
   return (
@@ -141,10 +130,10 @@ export const CommunityPostList = memo(function CommunityPostList({
         <CommunityPostListItem
           key={post.id}
           post={post}
-          density={density}
           onVoteChange={onVoteChange}
         />
       ))}
     </ul>
   )
-})
+}, (prevProps, nextProps) =>
+  prevProps.posts === nextProps.posts && prevProps.onVoteChange === nextProps.onVoteChange)

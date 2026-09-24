@@ -49,6 +49,11 @@ export const CommunityPostCard = memo(function CommunityPostCard({
             alt=""
             className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
             loading="lazy"
+            decoding="async"
+            onError={(e) => {
+              const el = e.currentTarget
+              el.style.display = 'none'
+            }}
           />
         </div>
       )}

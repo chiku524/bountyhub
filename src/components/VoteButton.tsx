@@ -133,7 +133,7 @@ export const VoteButton: React.FC<VoteButtonProps> = ({
             : 'min-w-8 text-center text-sm font-medium text-gray-300'
         }
       >
-        {votes}
+        {Number(votes) || 0}
       </span>
 
       <button

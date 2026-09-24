@@ -49,6 +49,11 @@ export class ErrorBoundary extends Component<Props, State> {
             <p className="mt-2 text-neutral-600 dark:text-neutral-400 text-sm">
               An unexpected error occurred. You can try refreshing the page or head back home.
             </p>
+            {import.meta.env.DEV && this.state.error?.message ? (
+              <pre className="mt-4 max-h-40 overflow-auto rounded-lg bg-neutral-100 p-3 text-left text-xs text-red-700 dark:bg-neutral-800 dark:text-red-300">
+                {this.state.error.message}
+              </pre>
+            ) : null}
             <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 type="button"

@@ -118,14 +118,27 @@ export function CommunityDiscoveryBar({
                 { id: 'grid' as const, label: 'Grid', icon: FiGrid },
                 { id: 'gallery' as const, label: 'Gallery', icon: FiImage },
               ] as const
-            ).map(({ id, label, icon: Icon }) => (
+            ).map(({ id, label, icon: Icon }, index, all) => (
               <button
                 key={id}
                 type="button"
                 onClick={() => onPostViewChange(id)}
+                onKeyDown={(e) => {
+                  if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return
+                  e.preventDefault()
+                  const delta = e.key === 'ArrowRight' ? 1 : -1
+                  const next = all[(index + delta + all.length) % all.length]
+                  onPostViewChange(next.id)
+                  // Focus moves with pressed state on next paint via aria-pressed
+                  requestAnimationFrame(() => {
+                    const buttons = (e.currentTarget.parentElement?.querySelectorAll('button') ?? []) as NodeListOf<HTMLButtonElement>
+                    buttons[(index + delta + all.length) % all.length]?.focus()
+                  })
+                }}
                 title={label}
+                aria-label={`${label} layout${postView === id ? ' (selected)' : ''}`}
                 aria-pressed={postView === id}
-                className={`inline-flex items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition @sm/main:px-3 @sm/main:text-sm ${
+                className={`inline-flex min-h-9 min-w-9 items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition @sm/main:px-3 @sm/main:text-sm ${
                   postView === id
                     ? 'bg-white text-neutral-900 shadow-sm dark:bg-neutral-800 dark:text-white'
                     : 'text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white'

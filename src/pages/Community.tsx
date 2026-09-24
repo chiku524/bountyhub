@@ -133,6 +133,7 @@ export default function Community() {
         )}
 
         <div
+          aria-busy={isRefreshing || loading || undefined}
           className={
             isTiled
               ? ''

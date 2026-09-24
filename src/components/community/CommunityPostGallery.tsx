@@ -63,6 +63,11 @@ export const CommunityPostGalleryItem = memo(function CommunityPostGalleryItem({
             alt=""
             className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
             loading="lazy"
+            decoding="async"
+            onError={(e) => {
+              const el = e.currentTarget
+              el.style.display = 'none'
+            }}
           />
         ) : (
           <div
