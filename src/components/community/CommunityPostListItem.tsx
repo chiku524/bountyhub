@@ -125,7 +125,7 @@ export const CommunityPostList = memo(function CommunityPostList({
   onVoteChange,
 }: CommunityPostListProps) {
   return (
-    <ul className="divide-y divide-neutral-200 dark:divide-neutral-700">
+    <ul className="divide-y divide-neutral-200 dark:divide-neutral-700 [content-visibility:auto] [contain-intrinsic-size:auto_120px]">
       {posts.map((post) => (
         <CommunityPostListItem
           key={post.id}
