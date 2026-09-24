@@ -13,16 +13,17 @@ test.describe('signed-in Community', () => {
       timeout: 30_000,
     })
     await expect(page.getByText(/something went wrong/i)).toHaveCount(0)
-    await expect(page.getByText(/E2E Sample Bounty Question/i)).toBeVisible({
-      timeout: 20_000,
-    })
+    // All three layouts stay mounted (hidden) to avoid remount cost ? assert a visible match.
+    await expect(
+      page.getByRole('link', { name: /E2E Sample Bounty Question/i }).first()
+    ).toBeVisible({ timeout: 20_000 })
   })
 
   test('layout toggles List / Grid / Gallery', async ({ page }) => {
     await page.goto('/community')
-    await expect(page.getByText(/E2E Sample Bounty Question/i)).toBeVisible({
-      timeout: 30_000,
-    })
+    await expect(
+      page.getByRole('link', { name: /E2E Sample Bounty Question/i }).first()
+    ).toBeVisible({ timeout: 30_000 })
 
     const listBtn = page.getByRole('button', { name: /list layout/i })
     const gridBtn = page.getByRole('button', { name: /grid layout/i })
@@ -31,14 +32,20 @@ test.describe('signed-in Community', () => {
     await expect(listBtn).toBeVisible()
     await gridBtn.click()
     await expect(gridBtn).toHaveAttribute('aria-pressed', 'true')
-    await expect(page.getByText(/E2E Sample Bounty Question/i)).toBeVisible()
+    await expect(
+      page.getByRole('link', { name: /E2E Sample Bounty Question/i }).first()
+    ).toBeVisible()
 
     await galleryBtn.click()
     await expect(galleryBtn).toHaveAttribute('aria-pressed', 'true')
-    await expect(page.getByText(/E2E Sample Bounty Question/i)).toBeVisible()
+    await expect(
+      page.getByRole('link', { name: /E2E Sample Bounty Question/i }).first()
+    ).toBeVisible()
 
     await listBtn.click()
     await expect(listBtn).toHaveAttribute('aria-pressed', 'true')
-    await expect(page.getByText(/Another E2E Community Post/i)).toBeVisible()
+    await expect(
+      page.getByRole('link', { name: /Another E2E Community Post/i }).first()
+    ).toBeVisible()
   })
 })
