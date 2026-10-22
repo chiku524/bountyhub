@@ -1,6 +1,8 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
 import { checkRateLimit } from '../../utils/kv'
+import type { GravityContext } from '@gravity-ai/api'
+import { fetchGuideAds } from '../../utils/gravityAds'
 import {
   SUPPORT_KNOWLEDGE,
   defaultUnknownReply,
@@ -17,11 +19,34 @@ interface Env {
   AI?: Ai
   CACHE?: KVNamespace
   SUPPORT_AI_MODEL?: string
+  GRAVITY_API_KEY?: string
+  GRAVITY_PRODUCTION?: string
+  NODE_ENV?: string
 }
 
 const RATE_LIMIT = 20
 const RATE_WINDOW = 60
 const DEFAULT_MODEL = '@cf/meta/llama-3.1-8b-instruct'
+
+const GravityContextSchema = z
+  .object({
+    sessionId: z.string().min(1).max(200).optional(),
+    user: z
+      .object({
+        userId: z.string().min(1).max(200).optional(),
+        id: z.string().min(1).max(200).optional(),
+        email_hash: z.string().max(128).optional(),
+        hashed_phone: z.string().max(128).optional(),
+        gruid: z.string().max(200).optional(),
+        grclid: z.string().max(200).optional(),
+        graid: z.string().max(200).optional(),
+      })
+      .passthrough()
+      .optional(),
+    device: z.record(z.union([z.string(), z.number(), z.boolean()])).optional(),
+    consent: z.record(z.unknown()).optional(),
+  })
+  .passthrough()
 
 const BodySchema = z.object({
   messages: z
@@ -40,6 +65,8 @@ const BodySchema = z.object({
       isAuthenticated: z.boolean().optional(),
     })
     .optional(),
+  /** Client context from `@gravity-ai/api` `gravityContext()` — forwarded to Gravity. */
+  gravity_context: GravityContextSchema.optional(),
 })
 
 const app = new Hono<{ Bindings: Env }>()
@@ -108,13 +135,33 @@ app.post('/', async (c) => {
   const local = localGuideResponse(lastUser.content)
   const faq = matchFaqFallback(lastUser.content)
 
+  // Fire Gravity in parallel with the LLM — never block Guide on ad latency.
+  const adsPromise = fetchGuideAds({
+    env: c.env,
+    headers: c.req.raw.headers,
+    messages: history,
+    gravity_context: parsed.gravity_context as GravityContext | undefined,
+    clientIp: ip !== 'unknown' ? ip : null,
+  })
+
+  const withAds = async <T extends Record<string, unknown>>(payload: T) => {
+    const { ads, gravityApiKey } = await adsPromise
+    return {
+      ...payload,
+      ads,
+      ...(gravityApiKey ? { gravityApiKey } : {}),
+    }
+  }
+
   const ai = c.env.AI
   if (!ai) {
-    return c.json({
-      reply: local.reply,
-      actions: local.actions,
-      source: 'faq' as const,
-    })
+    return c.json(
+      await withAds({
+        reply: local.reply,
+        actions: local.actions,
+        source: 'faq' as const,
+      }),
+    )
   }
 
   const model = (c.env.SUPPORT_AI_MODEL?.trim() || DEFAULT_MODEL) as Parameters<Ai['run']>[0]
@@ -132,11 +179,13 @@ app.post('/', async (c) => {
 
     const raw = extractAiText(result).trim()
     if (!raw) {
-      return c.json({
-        reply: local.reply,
-        actions: local.actions,
-        source: 'faq' as const,
-      })
+      return c.json(
+        await withAds({
+          reply: local.reply,
+          actions: local.actions,
+          source: 'faq' as const,
+        }),
+      )
     }
 
     const parsedReply = parseSupportActions(raw)
@@ -149,18 +198,22 @@ app.post('/', async (c) => {
     }
 
     const reply = parsedReply.reply || local.reply
-    return c.json({
-      reply,
-      actions,
-      source: 'ai' as const,
-    })
+    return c.json(
+      await withAds({
+        reply,
+        actions,
+        source: 'ai' as const,
+      }),
+    )
   } catch (err) {
     console.error('[support-ai] model error', err)
-    return c.json({
-      reply: local.reply || defaultUnknownReply(),
-      actions: local.actions,
-      source: 'faq' as const,
-    })
+    return c.json(
+      await withAds({
+        reply: local.reply || defaultUnknownReply(),
+        actions: local.actions,
+        source: 'faq' as const,
+      }),
+    )
   }
 })
 

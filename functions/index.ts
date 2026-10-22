@@ -69,6 +69,10 @@ interface Env {
   CRON_SECRET?: string
   /** Base64-encoded 32-byte AES-GCM key for GitHub tokens at rest */
   TOKEN_ENCRYPTION_KEY?: string
+  /** Gravity publisher API key (contextual ads for Guide). Set via wrangler secret put. */
+  GRAVITY_API_KEY?: string
+  /** Set to "true" to serve live Gravity ads; omit/false for test creatives. */
+  GRAVITY_PRODUCTION?: string
 }
 
 const app = new Hono<{ Bindings: Env }>()

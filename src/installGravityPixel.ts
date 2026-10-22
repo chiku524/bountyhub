@@ -1,0 +1,27 @@
+/**
+ * Gravity Pixel — exact vendor snippet (pixel ID + script URL must stay as-is).
+ * Called once from the root App component. Guarded so React Strict Mode
+ * (double useEffect in dev) does not inject a second copy.
+ *
+ * The vendor IIFE is run via `Function` so ESLint/TS don't rewrite the
+ * minified bootstrap while preserving identical runtime behavior.
+ */
+declare global {
+  interface Window {
+    __bountyhubGravityPixelInstalled?: boolean
+  }
+}
+
+const GRAVITY_PIXEL_SNIPPET = `!function(w,d,t,u,n,a,m){w['GravityPixelObject']=n;w[n]=w[n]||function(){
+(w[n].q=w[n].q||[]).push(arguments)},w[n].l=1*new Date();a=d.createElement(t),
+m=d.getElementsByTagName(t)[0];a.async=1;a.src=u;m.parentNode.insertBefore(a,m)
+}(window,document,'script','https://code.trygravity.com/gr-pix.js','gravity');
+gravity('init', '21bc572a-7a9c-4ee7-b10d-aaeddf02025e');`
+
+export function installGravityPixel(): void {
+  if (typeof window === 'undefined') return
+  if (window.__bountyhubGravityPixelInstalled) return
+  window.__bountyhubGravityPixelInstalled = true
+
+  new Function(GRAVITY_PIXEL_SNIPPET)()
+}
