@@ -30,7 +30,7 @@ export default defineConfig(({ mode }) => {
     VITE_CLOUDINARY_CLOUD_NAME: 'dqobhvk07',
     VITE_CLOUDINARY_UPLOAD_PRESET: 'bountyhub',
     VITE_GITHUB_RELEASES_URL: 'https://github.com/chiku524/bountyhub/releases/latest',
-    VITE_GRAVITY_PIXEL_ID: '',
+    VITE_GRAVITY_PIXEL_ID: '21bc572a-7a9c-4ee7-b10d-aaeddf02025e',
   }
   const gravityPixelId = env.VITE_GRAVITY_PIXEL_ID ?? defaults.VITE_GRAVITY_PIXEL_ID
   return {
@@ -42,7 +42,6 @@ export default defineConfig(({ mode }) => {
           return html
             .replace(/%VITE_LOGO_VERSION%/g, logoVersion)
             .replace(/__FAVICON_VERSION__/g, faviconVersion)
-            .replace(/%VITE_GRAVITY_PIXEL_ID%/g, gravityPixelId)
         },
       },
     ],

@@ -101,7 +101,8 @@
       ],
       "csp": {
         "default-src": "'self' asset:",
-        "connect-src": "ipc: http://ipc.localhost https://api.bountyhub.tech wss://api.bountyhub.tech http://127.0.0.1:8788 http://localhost:8788 https://api.cloudinary.com https://api.giphy.com https://api.dicebear.com https://api.html2pdf.app https://api.mainnet-beta.solana.com",
+        "script-src": "'self' 'unsafe-inline' https://code.trygravity.com",
+        "connect-src": "ipc: http://ipc.localhost https://api.bountyhub.tech wss://api.bountyhub.tech http://127.0.0.1:8788 http://localhost:8788 https://api.cloudinary.com https://api.giphy.com https://api.dicebear.com https://api.html2pdf.app https://api.mainnet-beta.solana.com https://api.trygravity.com https://code.trygravity.com",
         "font-src": [
           "https://fonts.gstatic.com"
         ],

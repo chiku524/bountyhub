@@ -21,5 +21,8 @@ interface ImportMeta {
 declare global {
   interface Window {
     __TAURI__?: Record<string, unknown>
+    /** Set by Gravity Pixel (`gr-pix.js`) after init */
+    gravityPixel?: unknown
+    gravity?: (...args: unknown[]) => void
   }
 } 

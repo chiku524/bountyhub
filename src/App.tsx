@@ -35,6 +35,7 @@ import { DesktopShell } from './components/DesktopShell'
 import { DesktopHomeGate } from './components/DesktopHomeGate'
 import { DesktopLaunch } from './components/DesktopLaunch'
 import { isDesktopApp } from './utils/desktop'
+import { installGravityPixel } from './installGravityPixel'
 
 // Lazy-load all other routes for smaller initial bundle
 const Login = lazy(() => import('./pages/Login'))
@@ -291,6 +292,11 @@ function AppContent() {
 }
 
 function App() {
+  // Gravity Pixel — once at root; do not re-init on route changes.
+  useEffect(() => {
+    installGravityPixel()
+  }, [])
+
   return (
     <HelmetProvider>
       <AuthProvider>

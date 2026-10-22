@@ -71,7 +71,7 @@ npm run dev:full             # API (8788) + Vite (5173)
 | `VITE_CLOUDINARY_CLOUD_NAME` | Media uploads (fallback when R2 unavailable) |
 | `VITE_CLOUDINARY_UPLOAD_PRESET` | Cloudinary upload preset |
 | `VITE_SOLANA_RPC_URL` | Optional custom Solana RPC |
-| `VITE_GRAVITY_PIXEL_ID` | Gravity pixel UUID (Settings → Platform Settings); omit to skip pixel |
+| `VITE_GRAVITY_PIXEL_ID` | Gravity pixel UUID `21bc572a-7a9c-4ee7-b10d-aaeddf02025e` (also hardcoded in `src/App.tsx`) |
 
 ### Workers (`.dev.vars` locally / Cloudflare Secrets in prod)
 

@@ -44,7 +44,7 @@ See [docs/ESSENTIALS.md](./docs/ESSENTIALS.md) for full commands and environment
 
 ### Gravity (Guide ads)
 
-Contextual ads for the in-app Guide use Gravity. Set `GRAVITY_API_KEY` in `.dev.vars` (local) or via `wrangler secret put GRAVITY_API_KEY` (prod). Optionally set `VITE_GRAVITY_PIXEL_ID` for the web pixel. Seed a QA login with `npm run seed:gravity-user` (add `-- --remote` for production D1).
+Contextual ads for the in-app Guide use Gravity. Set `GRAVITY_API_KEY` in `.dev.vars` (local) or via `wrangler secret put GRAVITY_API_KEY` (prod). The Gravity Pixel is installed once in `src/App.tsx` (pixel ID `21bc572a-7a9c-4ee7-b10d-aaeddf02025e`). Seed a QA login with `npm run seed:gravity-user` (add `-- --remote` for production D1).
 
 ## Desktop App
 

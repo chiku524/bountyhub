@@ -117,17 +117,5 @@
       </a>
     </div>
     <script type="module" src="/src/main.tsx"></script>
-    <!-- Gravity pixel (attribution / payouts). Set VITE_GRAVITY_PIXEL_ID from Gravity → Settings → Platform Settings. -->
-    <script>
-      (function () {
-        var pixelId = '%VITE_GRAVITY_PIXEL_ID%';
-        if (!pixelId || pixelId.indexOf('%VITE_') === 0 || pixelId === 'undefined') return;
-        !function(w,d,t,u,n,a,m){w['GravityPixelObject']=n;w[n]=w[n]||function(){
-        (w[n].q=w[n].q||[]).push(arguments)},w[n].l=1*new Date();a=d.createElement(t),
-        m=d.getElementsByTagName(t)[0];a.async=1;a.src=u;m.parentNode.insertBefore(a,m)
-        }(window,document,'script','https://code.trygravity.com/gr-pix.js','gravity');
-        gravity('init', pixelId);
-      })();
-    </script>
   </body>
 </html> 
