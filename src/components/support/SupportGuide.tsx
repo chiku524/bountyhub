@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { FiHelpCircle, FiSend, FiX } from 'react-icons/fi'
+import { gravityContext } from '@gravity-ai/api'
+import { GravityAd, type AdResponse } from '@gravity-ai/react'
 import { useAuth } from '../../contexts/AuthProvider'
 import { useSupportGuide } from '../../contexts/SupportGuideContext'
 import { ApiClient } from '../../utils/api'
@@ -33,6 +35,9 @@ interface VisibleMessage {
   id: string
   role: 'user' | 'assistant'
   content: string
+  ads?: AdResponse[]
+  gravityApiKey?: string
+  gravitySessionId?: string
 }
 
 function applyActions(
@@ -59,6 +64,18 @@ export function SupportGuide() {
   const [error, setError] = useState<string | null>(null)
   const listRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const guideSessionId = useMemo(() => {
+    try {
+      const key = 'bountyhub.guide.gravitySession'
+      const existing = sessionStorage.getItem(key)
+      if (existing) return existing
+      const id = crypto.randomUUID()
+      sessionStorage.setItem(key, id)
+      return id
+    } catch {
+      return crypto.randomUUID()
+    }
+  }, [])
 
   const hideOnLaunch = location.pathname === '/launch'
 
@@ -129,9 +146,21 @@ export function SupportGuide() {
       }
 
       try {
+        let gravity_context: ReturnType<typeof gravityContext> | undefined
+        try {
+          gravity_context = gravityContext({
+            sessionId: guideSessionId,
+            user: { userId: user?.id ?? 'anonymous' },
+          })
+        } catch (ctxErr) {
+          console.warn('[Guide] gravityContext failed', ctxErr)
+        }
+
         const res = await api.request<{
           reply: string
           actions?: SupportAction[]
+          ads?: AdResponse[]
+          gravityApiKey?: string
         }>('/api/support-ai', {
           method: 'POST',
           body: JSON.stringify({
@@ -141,12 +170,20 @@ export function SupportGuide() {
               isDesktop,
               isAuthenticated: Boolean(user),
             },
+            ...(gravity_context ? { gravity_context } : {}),
           }),
           timeoutMs: 45_000,
         })
         setMessages((prev) => [
           ...prev,
-          { id: crypto.randomUUID(), role: 'assistant', content: res.reply },
+          {
+            id: crypto.randomUUID(),
+            role: 'assistant',
+            content: res.reply,
+            ads: (res.ads ?? []).filter(Boolean) as AdResponse[],
+            gravityApiKey: res.gravityApiKey,
+            gravitySessionId: guideSessionId,
+          },
         ])
         applyActions(res.actions ?? [], startTour, navigate)
       } catch (err) {
@@ -163,7 +200,7 @@ export function SupportGuide() {
         setSending(false)
       }
     },
-    [api, isDesktop, location.pathname, messages, navigate, sending, startTour, user],
+    [api, guideSessionId, isDesktop, location.pathname, messages, navigate, sending, startTour, user],
   )
 
   if (hideOnLaunch) return <ProductTour />
@@ -215,15 +252,27 @@ export function SupportGuide() {
           </div>
         )}
         {messages.map((m) => (
-          <div
-            key={m.id}
-            className={`max-w-[95%] rounded-xl px-3 py-2 text-sm leading-relaxed ${
-              m.role === 'user'
-                ? 'ml-auto bg-indigo-600 text-white'
-                : 'bg-neutral-100 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-100'
-            }`}
-          >
-            {m.content}
+          <div key={m.id} className="space-y-2">
+            <div
+              className={`max-w-[95%] rounded-xl px-3 py-2 text-sm leading-relaxed ${
+                m.role === 'user'
+                  ? 'ml-auto bg-indigo-600 text-white'
+                  : 'bg-neutral-100 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-100'
+              }`}
+            >
+              {m.content}
+            </div>
+            {m.role === 'assistant' && m.ads?.[0] && (
+              <div className="max-w-[95%]">
+                <GravityAd
+                  ad={m.ads[0]}
+                  variant="inline"
+                  sessionId={m.gravitySessionId}
+                  userId={user?.id}
+                  apiKey={m.gravityApiKey}
+                />
+              </div>
+            )}
           </div>
         ))}
         {sending && (

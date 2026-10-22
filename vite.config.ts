@@ -30,7 +30,9 @@ export default defineConfig(({ mode }) => {
     VITE_CLOUDINARY_CLOUD_NAME: 'dqobhvk07',
     VITE_CLOUDINARY_UPLOAD_PRESET: 'bountyhub',
     VITE_GITHUB_RELEASES_URL: 'https://github.com/chiku524/bountyhub/releases/latest',
+    VITE_GRAVITY_PIXEL_ID: '',
   }
+  const gravityPixelId = env.VITE_GRAVITY_PIXEL_ID ?? defaults.VITE_GRAVITY_PIXEL_ID
   return {
     plugins: [
       react(),
@@ -40,6 +42,7 @@ export default defineConfig(({ mode }) => {
           return html
             .replace(/%VITE_LOGO_VERSION%/g, logoVersion)
             .replace(/__FAVICON_VERSION__/g, faviconVersion)
+            .replace(/%VITE_GRAVITY_PIXEL_ID%/g, gravityPixelId)
         },
       },
     ],
@@ -52,6 +55,7 @@ export default defineConfig(({ mode }) => {
       'import.meta.env.VITE_CLOUDINARY_CLOUD_NAME': JSON.stringify(env.VITE_CLOUDINARY_CLOUD_NAME ?? defaults.VITE_CLOUDINARY_CLOUD_NAME),
       'import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET': JSON.stringify(env.VITE_CLOUDINARY_UPLOAD_PRESET ?? defaults.VITE_CLOUDINARY_UPLOAD_PRESET),
       'import.meta.env.VITE_GITHUB_RELEASES_URL': JSON.stringify(env.VITE_GITHUB_RELEASES_URL ?? defaults.VITE_GITHUB_RELEASES_URL),
+      'import.meta.env.VITE_GRAVITY_PIXEL_ID': JSON.stringify(gravityPixelId),
       'import.meta.env.VITE_LOGO_VERSION': JSON.stringify(logoVersion),
       'import.meta.env.VITE_FAVICON_VERSION': JSON.stringify(faviconVersion),
       'import.meta.env.VITE_APP_VERSION': JSON.stringify(appVersion),
