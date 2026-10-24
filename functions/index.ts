@@ -37,7 +37,7 @@ interface Env {
   DB: D1Database
   /** Cloudflare Workers AI (in-app Guide). Optional in local wrangler without login. */
   AI?: Ai
-  /** Override default support model, e.g. @cf/meta/llama-3.1-8b-instruct */
+  /** Override default support model, e.g. @cf/meta/llama-3.2-3b-instruct */
   SUPPORT_AI_MODEL?: string
   /** Durable Object namespace for chat room WebSockets */
   CHAT_ROOM_DO: DurableObjectNamespace

@@ -41,6 +41,12 @@ describe('supportKnowledge', () => {
     expect(hit?.actions).toEqual([{ type: 'navigate', path: '/wallet' }])
   })
 
+  it('matches plural bounties FAQ (suggested Guide prompt)', () => {
+    const hit = matchFaqFallback('How do bounties work?')
+    expect(hit?.reply).toMatch(/Create a bounty/i)
+    expect(hit?.actions).toEqual([{ type: 'navigate', path: '/posts/create' }])
+  })
+
   it('returns a tour action from localGuideResponse', () => {
     const res = localGuideResponse('take me on a tour')
     expect(res.actions).toEqual([{ type: 'start_tour' }])

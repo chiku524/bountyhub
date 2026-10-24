@@ -26,7 +26,8 @@ interface Env {
 
 const RATE_LIMIT = 20
 const RATE_WINDOW = 60
-const DEFAULT_MODEL = '@cf/meta/llama-3.1-8b-instruct'
+// llama-3.1-8b-instruct was deprecated 2026-05-30. Use an active catalog model.
+const DEFAULT_MODEL = '@cf/meta/llama-3.2-3b-instruct'
 
 const GravityContextSchema = z
   .object({
@@ -206,7 +207,7 @@ app.post('/', async (c) => {
       }),
     )
   } catch (err) {
-    console.error('[support-ai] model error', err)
+    console.error('[support-ai] model error', { model, err })
     return c.json(
       await withAds({
         reply: local.reply || defaultUnknownReply(),
