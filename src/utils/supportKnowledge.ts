@@ -134,7 +134,7 @@ const FAQ: FaqEntry[] = [
     actions: [{ type: 'navigate', path: '/wallet' }],
   },
   {
-    tests: [/\b(create|post|ask|bounty|question)\b/i],
+    tests: [/\b(create|post|ask|bount(?:y|ies)|question)\b/i],
     reply:
       'Create a bounty from Create Bounty in the top nav (or Create post in the desktop sidebar). Add a title, details, tags, and optionally a BBUX bounty and duration. Authors accept one answer to pay out the bounty.',
     actions: [{ type: 'navigate', path: '/posts/create' }],
