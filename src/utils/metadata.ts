@@ -88,6 +88,13 @@ export const PAGE_METADATA: Record<string, PageMetadata> = {
     keywords: 'download, desktop app, Windows, macOS, Linux, Tauri, bountyhub'
   },
 
+  '/pitch': {
+    title: 'BountyHub — Pitch',
+    description:
+      'Executive summary of BountyHub: Q&A bounties, BBUX wallet, Guide, and desktop — where questions meet rewards on Solana.',
+    keywords: 'BountyHub, pitch, bounties, BBUX, Solana, Guide, desktop, bug bounty',
+  },
+
   // Documentation (single /docs page with hash sections)
   '/docs': {
     title: 'Documentation - bountyhub',

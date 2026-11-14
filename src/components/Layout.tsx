@@ -16,16 +16,18 @@ export default function Layout({ children, showNav = true }: LayoutProps) {
   const isHomePage = location.pathname === '/'
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup'
   const isLegalPage = location.pathname === '/privacy' || location.pathname === '/terms'
-  const isPublicPage = isHomePage || isAuthPage || isLegalPage
+  const isPitchPage = location.pathname === '/pitch'
+  const isPublicPage = isHomePage || isAuthPage || isLegalPage || isPitchPage
   const isDocsPage = location.pathname === '/docs'
   const isChatPage = location.pathname === '/chat'
   const isLaunchPage = location.pathname === '/launch'
   /**
    * Desktop splash/auth/launch must not sit inside the frosted panel: backdrop-filter on an ancestor
    * breaks `position: fixed` for `.desktop-splash` and clips the sign-in canvas.
+   * Pitch is a full-bleed landing composition (hero edge-to-edge).
    */
   const isFullBleedPage =
-    isLaunchPage || (isDesktop && (isHomePage || isAuthPage))
+    isLaunchPage || isPitchPage || (isDesktop && (isHomePage || isAuthPage))
   /** Full-height routes: glass panel fills the scroll region (flex) so inner layouts can scroll. */
   const glassFillsViewport = isDocsPage || isChatPage
 

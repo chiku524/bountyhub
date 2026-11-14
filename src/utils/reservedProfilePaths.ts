@@ -17,6 +17,7 @@ const RESERVED = new Set(
     'users',
     'download',
     'downloads',
+    'pitch',
     'docs',
     'privacy',
     'terms',

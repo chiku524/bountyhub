@@ -131,12 +131,15 @@ export function SupportGuide() {
   }, [])
 
   const hideOnLaunch = location.pathname === '/launch'
+  const isPitchPage = location.pathname === '/pitch'
+  const suppressAutoChrome = hideOnLaunch || isPitchPage
 
   useRestoreFocusWhenOpen(isOpen)
 
   // First-run: 3-step tour once (localStorage). Skippable; never re-shows after dismiss/complete.
+  // Skip on /pitch so the executive page stays uninterrupted.
   useEffect(() => {
-    if (hideOnLaunch) return
+    if (suppressAutoChrome) return
     if (readStorageFlag(TOUR_STORAGE_KEY)) return
     const params = new URLSearchParams(window.location.search)
     // welcome=true still triggers tour; otherwise auto for new users.
@@ -144,11 +147,11 @@ export function SupportGuide() {
     writeStorageFlag(GUIDE_WELCOMED_KEY, true)
     const t = window.setTimeout(() => startTour(), delay)
     return () => window.clearTimeout(t)
-  }, [hideOnLaunch, startTour])
+  }, [suppressAutoChrome, startTour])
 
   // Soft Guide panel welcome only after tour has already been completed once.
   useEffect(() => {
-    if (hideOnLaunch) return
+    if (suppressAutoChrome) return
     if (!readStorageFlag(TOUR_STORAGE_KEY)) return
     if (readStorageFlag(GUIDE_WELCOMED_KEY)) return
     const params = new URLSearchParams(window.location.search)
@@ -161,7 +164,7 @@ export function SupportGuide() {
       writeStorageFlag(GUIDE_WELCOMED_KEY, true)
     }, 900)
     return () => window.clearTimeout(t)
-  }, [hideOnLaunch, open])
+  }, [suppressAutoChrome, open])
 
   useEffect(() => {
     if (!isOpen) return

@@ -68,6 +68,7 @@ const Repositories = lazy(() => import('./pages/Repositories'))
 const RepositoryDetail = lazy(() => import('./pages/RepositoryDetail'))
 const Contributions = lazy(() => import('./pages/Contributions'))
 const Download = lazy(() => import('./pages/Download'))
+const Pitch = lazy(() => import('./pages/Pitch'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 
 function RouteFallback() {
@@ -112,6 +113,7 @@ function DocsAwareRoutes() {
         <Route path="/users/:username/posts" element={<UserPosts />} />
         <Route path="/download" element={<Download />} />
         <Route path="/downloads" element={<Navigate to="/download" replace />} />
+        <Route path="/pitch" element={<Pitch />} />
         <Route path="/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
         <Route path="/refund-requests" element={<ProtectedRoute><RefundRequests /></ProtectedRoute>} />
         <Route path="/docs" element={<DocsSingle />} />
@@ -157,6 +159,7 @@ function AppContent() {
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup'
   const isLegalPage = location.pathname === '/privacy' || location.pathname === '/terms'
   const isDownloadPage = location.pathname === '/download'
+  const isPitchPage = location.pathname === '/pitch'
   const isDesktop = isDesktopApp()
   const isLoginOrSignupOrRoot =
     location.pathname === '/' ||
@@ -166,7 +169,8 @@ function AppContent() {
   const showDesktopShell = isDesktop && !isLoginOrSignupOrRoot
 
   // Determine which navbar to show: HomeNav on home and download (web only; desktop has its own portal)
-  const isPublicPage = isHomePage || isAuthPage || isLegalPage || isDownloadPage
+  // Pitch ships its own slim nav — treat as public so TopNav/ChatSidebar stay out of the way.
+  const isPublicPage = isHomePage || isAuthPage || isLegalPage || isDownloadPage || isPitchPage
   const showAuthenticatedNav = Boolean(user) && !isPublicPage && !loading
   const showHomeNav = (isHomePage || isDownloadPage) && !isDesktop
   
