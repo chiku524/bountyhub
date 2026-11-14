@@ -5,10 +5,13 @@ import { gravityContext } from '@gravity-ai/api'
 import { GravityAd, type AdResponse } from '@gravity-ai/react'
 import { useAuth } from '../../contexts/AuthProvider'
 import { useSupportGuide } from '../../contexts/SupportGuideContext'
+import { ErrorBoundary } from '../ErrorBoundary'
 import { ApiClient } from '../../utils/api'
 import { isDesktopApp } from '../../utils/desktop'
 import {
+  guideFollowUps,
   localGuideResponse,
+  type GuideFollowUp,
   type SupportAction,
   type SupportChatMessage,
 } from '../../utils/supportKnowledge'
@@ -31,10 +34,14 @@ const SUGGESTIONS = [
   { label: 'Open docs', prompt: 'Where is the documentation?' },
 ] as const
 
+type GuideSource = 'ai' | 'faq' | 'offline'
+
 interface VisibleMessage {
   id: string
   role: 'user' | 'assistant'
   content: string
+  source?: GuideSource
+  followUps?: GuideFollowUp[]
   ads?: AdResponse[]
   gravityApiKey?: string
   gravitySessionId?: string
@@ -49,6 +56,52 @@ function applyActions(
     if (action.type === 'start_tour') startTour()
     if (action.type === 'navigate') navigate(action.path)
   }
+}
+
+function TypingIndicator() {
+  return (
+    <div
+      className="flex max-w-[95%] items-center gap-2 rounded-xl bg-neutral-100 px-3 py-2.5 dark:bg-neutral-800"
+      aria-live="polite"
+      aria-label="Guide is typing"
+    >
+      <span className="text-xs text-neutral-500 dark:text-neutral-400">Guide is typing</span>
+      <span className="flex items-center gap-1" aria-hidden>
+        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.2s]" />
+        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.1s]" />
+        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-indigo-500" />
+      </span>
+    </div>
+  )
+}
+
+function GuideSponsoredSlot({
+  ad,
+  sessionId,
+  userId,
+  apiKey,
+}: {
+  ad: AdResponse
+  sessionId?: string
+  userId?: string
+  apiKey?: string
+}) {
+  return (
+    <ErrorBoundary fallback={<></>}>
+      <div className="max-w-[95%] overflow-hidden rounded-xl border border-neutral-200/80 bg-neutral-50/80 dark:border-neutral-700 dark:bg-neutral-900/60">
+        <GravityAd
+          ad={ad}
+          variant="labeled"
+          showLabel
+          labelText="Sponsored"
+          sessionId={sessionId}
+          userId={userId}
+          apiKey={apiKey}
+          fallback={<></>}
+        />
+      </div>
+    </ErrorBoundary>
+  )
 }
 
 export function SupportGuide() {
@@ -78,11 +131,28 @@ export function SupportGuide() {
   }, [])
 
   const hideOnLaunch = location.pathname === '/launch'
+  const isPitchPage = location.pathname === '/pitch'
+  const suppressAutoChrome = hideOnLaunch || isPitchPage
 
   useRestoreFocusWhenOpen(isOpen)
 
+  // First-run: 3-step tour once (localStorage). Skippable; never re-shows after dismiss/complete.
+  // Skip on /pitch so the executive page stays uninterrupted.
   useEffect(() => {
-    if (hideOnLaunch) return
+    if (suppressAutoChrome) return
+    if (readStorageFlag(TOUR_STORAGE_KEY)) return
+    const params = new URLSearchParams(window.location.search)
+    // welcome=true still triggers tour; otherwise auto for new users.
+    const delay = params.get('welcome') === 'true' ? 700 : 1100
+    writeStorageFlag(GUIDE_WELCOMED_KEY, true)
+    const t = window.setTimeout(() => startTour(), delay)
+    return () => window.clearTimeout(t)
+  }, [suppressAutoChrome, startTour])
+
+  // Soft Guide panel welcome only after tour has already been completed once.
+  useEffect(() => {
+    if (suppressAutoChrome) return
+    if (!readStorageFlag(TOUR_STORAGE_KEY)) return
     if (readStorageFlag(GUIDE_WELCOMED_KEY)) return
     const params = new URLSearchParams(window.location.search)
     if (params.get('welcome') === 'true') {
@@ -94,15 +164,7 @@ export function SupportGuide() {
       writeStorageFlag(GUIDE_WELCOMED_KEY, true)
     }, 900)
     return () => window.clearTimeout(t)
-  }, [hideOnLaunch, open])
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search)
-    if (params.get('welcome') !== 'true') return
-    if (readStorageFlag(TOUR_STORAGE_KEY)) return
-    const t = window.setTimeout(() => startTour(), 700)
-    return () => window.clearTimeout(t)
-  }, [location.search, startTour])
+  }, [suppressAutoChrome, open])
 
   useEffect(() => {
     if (!isOpen) return
@@ -138,7 +200,13 @@ export function SupportGuide() {
       if (optimistic.actions.some((a) => a.type === 'start_tour')) {
         setMessages((prev) => [
           ...prev,
-          { id: crypto.randomUUID(), role: 'assistant', content: optimistic.reply },
+          {
+            id: crypto.randomUUID(),
+            role: 'assistant',
+            content: optimistic.reply,
+            source: 'faq',
+            followUps: guideFollowUps(text),
+          },
         ])
         applyActions(optimistic.actions, startTour, navigate)
         setSending(false)
@@ -159,6 +227,7 @@ export function SupportGuide() {
         const res = await api.request<{
           reply: string
           actions?: SupportAction[]
+          source?: GuideSource
           ads?: AdResponse[]
           gravityApiKey?: string
         }>('/api/support-ai', {
@@ -174,15 +243,22 @@ export function SupportGuide() {
           }),
           timeoutMs: 45_000,
         })
+
+        const source: GuideSource = res.source === 'faq' ? 'faq' : 'ai'
+        const ads = (res.ads ?? []).filter(Boolean) as AdResponse[]
+
+        // Paint the answer immediately; ads (if any) ride along but never gated the reply UI.
         setMessages((prev) => [
           ...prev,
           {
             id: crypto.randomUUID(),
             role: 'assistant',
             content: res.reply,
-            ads: (res.ads ?? []).filter(Boolean) as AdResponse[],
-            gravityApiKey: res.gravityApiKey,
-            gravitySessionId: guideSessionId,
+            source,
+            followUps: guideFollowUps(text),
+            ads: ads.length ? ads : undefined,
+            gravityApiKey: ads.length ? res.gravityApiKey : undefined,
+            gravitySessionId: ads.length ? guideSessionId : undefined,
           },
         ])
         applyActions(res.actions ?? [], startTour, navigate)
@@ -190,7 +266,13 @@ export function SupportGuide() {
         const local = localGuideResponse(text)
         setMessages((prev) => [
           ...prev,
-          { id: crypto.randomUUID(), role: 'assistant', content: local.reply },
+          {
+            id: crypto.randomUUID(),
+            role: 'assistant',
+            content: local.reply,
+            source: 'offline',
+            followUps: guideFollowUps(text),
+          },
         ])
         applyActions(local.actions, startTour, navigate)
         if (!local.actions.length) {
@@ -257,29 +339,43 @@ export function SupportGuide() {
               className={`max-w-[95%] rounded-xl px-3 py-2 text-sm leading-relaxed ${
                 m.role === 'user'
                   ? 'ml-auto bg-indigo-600 text-white'
-                  : 'bg-neutral-100 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-100'
+                  : m.source === 'faq' || m.source === 'offline'
+                    ? 'border border-amber-200/80 bg-amber-50 text-neutral-800 dark:border-amber-500/30 dark:bg-amber-950/30 dark:text-neutral-100'
+                    : 'bg-neutral-100 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-100'
               }`}
             >
+              {m.role === 'assistant' && (m.source === 'faq' || m.source === 'offline') && (
+                <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">
+                  Quick answer — AI temporarily unavailable
+                </p>
+              )}
               {m.content}
             </div>
-            {m.role === 'assistant' && m.ads?.[0] && (
-              <div className="max-w-[95%]">
-                <GravityAd
-                  ad={m.ads[0]}
-                  variant="inline"
-                  sessionId={m.gravitySessionId}
-                  userId={user?.id}
-                  apiKey={m.gravityApiKey}
-                />
+            {m.role === 'assistant' && m.followUps && m.followUps.length > 0 && !sending && (
+              <div className="flex max-w-[95%] flex-wrap gap-1.5">
+                {m.followUps.map((chip) => (
+                  <button
+                    key={chip.prompt}
+                    type="button"
+                    onClick={() => void sendMessage(chip.prompt)}
+                    className="rounded-full border border-indigo-200/80 bg-white px-2.5 py-1 text-xs font-medium text-indigo-700 hover:border-indigo-400 hover:bg-indigo-50 dark:border-indigo-500/40 dark:bg-neutral-900 dark:text-indigo-200 dark:hover:bg-indigo-950/40"
+                  >
+                    {chip.label}
+                  </button>
+                ))}
               </div>
             )}
+            {m.role === 'assistant' && m.ads?.[0] ? (
+              <GuideSponsoredSlot
+                ad={m.ads[0]}
+                sessionId={m.gravitySessionId}
+                userId={user?.id}
+                apiKey={m.gravityApiKey}
+              />
+            ) : null}
           </div>
         ))}
-        {sending && (
-          <p className="text-xs text-neutral-500 dark:text-neutral-400" aria-live="polite">
-            Guide is thinking…
-          </p>
-        )}
+        {sending && <TypingIndicator />}
         {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
       </div>
 

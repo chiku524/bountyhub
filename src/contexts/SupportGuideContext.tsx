@@ -70,9 +70,10 @@ export function SupportGuideProvider({ children }: { children: ReactNode }) {
     setTourActive(true)
   }, [])
 
-  const stopTour = useCallback((completed: boolean) => {
+  const stopTour = useCallback((_completed: boolean) => {
     setTourActive(false)
-    if (completed) writeStorageFlag(TOUR_STORAGE_KEY, true)
+    // Persist on both complete and skip/dismiss so first-run never re-shows.
+    writeStorageFlag(TOUR_STORAGE_KEY, true)
   }, [])
 
   const value = useMemo(

@@ -15,6 +15,8 @@ import { LoadingSpinner } from '../components/LoadingSpinner'
 import { ErrorMessage } from '../components/ErrorMessage'
 import { FocusRestoreBoundary } from '../components/FocusRestoreBoundary'
 import { rememberFocusBeforeWalletModal } from '../utils/walletModalFocus'
+import { StatusLabel } from '../components/StatusLabel'
+import { formatTransactionStatus } from '../utils/walletStatus'
 
 function WalletContent() {
   const { user, loading: authLoading } = useAuth()
@@ -305,19 +307,6 @@ function WalletContent() {
     }
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'completed':
-      case 'complete':
-        return 'text-green-400';
-      case 'pending':
-        return 'text-yellow-400';
-      case 'failed':
-        return 'text-red-400';
-      default:
-        return 'text-gray-400';
-    }
-  }
 
   const getTransactionAction = (metadata: string | null | undefined): string => {
     try {
@@ -895,9 +884,7 @@ function WalletContent() {
                         <p className={`font-medium ${tx.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                           {tx.amount >= 0 ? '+' : ''}{tx.amount.toFixed(4)} BBUX
                         </p>
-                        <p className={`text-sm font-medium ${getStatusColor(tx.status)}`}>
-                          {tx.status.charAt(0).toUpperCase() + tx.status.slice(1)}
-                        </p>
+                        <StatusLabel status={formatTransactionStatus(tx.status)} />
                       </div>
                     </div>
                   </div>

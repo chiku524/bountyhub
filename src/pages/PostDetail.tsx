@@ -17,6 +17,7 @@ import { MediaUpload } from '../components/MediaUpload'
 import { ProfilePicture } from '../components/ProfilePicture'
 import { useAuth } from '../contexts/AuthProvider'
 import type { Post, CodeBlock, Media } from '../types'
+import { formatPostStatus } from '../utils/walletStatus'
 
 export default function PostDetail() {
   const { postId } = useParams()
@@ -279,12 +280,19 @@ export default function PostDetail() {
               },
             ]}
           />
-          <Link to="/community" className="inline-block text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300">
+          {/* Desktop-only back link — breadcrumbs cover navigation on small screens */}
+          <Link
+            to="/community"
+            className="hidden @xl/main:inline-block text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300"
+          >
             ← Back to Community
           </Link>
         </div>
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
-          <h1 className="text-2xl @sm/main:text-3xl font-bold text-neutral-900 dark:text-white">Post Detail</h1>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2 @xl/main:mb-6">
+          {/* Redundant page chrome — post title is the real heading on mobile */}
+          <h1 className="hidden text-2xl font-bold text-neutral-900 @xl/main:block @sm/main:text-3xl dark:text-white">
+            Post Detail
+          </h1>
           {refreshing && (
             <span className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400" role="status">
               <LoadingSpinner size="sm" label={false} />
@@ -495,7 +503,7 @@ export default function PostDetail() {
                   )}
                 </>
               )}
-              <div className="flex items-center space-x-4 text-sm text-neutral-500 dark:text-gray-500 mb-4">
+              <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-neutral-500 dark:text-gray-500">
                 <span className="flex items-center space-x-2">
                   <ProfilePicture user={post.author} size="sm" />
                   <span>By: <Link 
@@ -505,13 +513,29 @@ export default function PostDetail() {
                     {post.author?.username || `User ${post.authorId}`}
                   </Link></span>
                 </span>
-                <span>Status: <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  post.status === 'OPEN' ? 'bg-green-100 dark:bg-green-600 text-green-700 dark:text-white' :
-                  post.status === 'COMPLETED' ? 'bg-yellow-100 dark:bg-yellow-600 text-yellow-700 dark:text-white' :
-                  'bg-neutral-100 dark:bg-neutral-600 text-neutral-700 dark:text-white'
-                }`}>{post.status}</span></span>
-                <span>Created: {formattedCreatedAt}</span>
-                {post.editedAt && <span>Last Edited: {formattedEditedAt}</span>}
+                {(() => {
+                  const postStatus = formatPostStatus(post.status)
+                  return (
+                    <span className="inline-flex items-center gap-1.5" title={postStatus.detail}>
+                      Status:
+                      <span
+                        className={`rounded-full px-2 py-1 text-xs font-medium ${
+                          postStatus.tone === 'success'
+                            ? 'bg-green-100 text-green-700 dark:bg-green-600 dark:text-white'
+                            : postStatus.tone === 'warning'
+                              ? 'bg-amber-100 text-amber-800 dark:bg-amber-600 dark:text-white'
+                              : 'bg-neutral-100 text-neutral-700 dark:bg-neutral-600 dark:text-white'
+                        }`}
+                      >
+                        {postStatus.label}
+                      </span>
+                    </span>
+                  )
+                })()}
+                <span className="hidden @sm/main:inline">Created: {formattedCreatedAt}</span>
+                {post.editedAt && (
+                  <span className="hidden @xl/main:inline">Last Edited: {formattedEditedAt}</span>
+                )}
               </div>
             </div>
           )}

@@ -463,6 +463,7 @@ export function TopNav() {
                     </Link>
                     <Link
                       to="/wallet"
+                      data-tour="wallet"
                       onClick={() => setProfileOpen(false)}
                       className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
                     >
@@ -549,6 +550,24 @@ export function TopNav() {
                   Create Bounty
                 </Link>
               )}
+              {/* Primary destinations up-front — fewer taps than burying Community in Explore */}
+              <Link
+                to="/community"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2.5 rounded-lg text-base font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5"
+              >
+                Community
+              </Link>
+              {user && (
+                <Link
+                  to="/wallet"
+                  data-tour="wallet"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-3 py-2.5 rounded-lg text-base font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5"
+                >
+                  Wallet
+                </Link>
+              )}
               <div>
                 <button
                   type="button"
@@ -560,18 +579,11 @@ export function TopNav() {
                   }
                   className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-base font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5"
                 >
-                  <span>Explore</span>
+                  <span>More</span>
                   <FiChevronDown className={`w-4 h-4 transition-transform ${exploreOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {exploreOpen && (
                   <div className="pl-4 mt-0.5 space-y-0.5">
-                    <Link
-                      to="/community"
-                      onClick={() => { setMobileMenuOpen(false); setExploreOpen(false) }}
-                      className="block px-3 py-2 rounded-lg text-sm text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5"
-                    >
-                      Community
-                    </Link>
                     <Link
                       to="/chat"
                       onClick={() => { setMobileMenuOpen(false); setExploreOpen(false) }}
@@ -594,11 +606,11 @@ export function TopNav() {
                       Governance
                     </Link>
                     <Link
-                      to="/refund-requests"
+                      to="/bug-bounty/campaigns"
                       onClick={() => { setMobileMenuOpen(false); setExploreOpen(false) }}
                       className="block px-3 py-2 rounded-lg text-sm text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5"
                     >
-                      Refund Requests
+                      Bug Bounty
                     </Link>
                     <Link
                       to="/analytics"
@@ -608,11 +620,11 @@ export function TopNav() {
                       Analytics
                     </Link>
                     <Link
-                      to="/bug-bounty/campaigns"
+                      to="/refund-requests"
                       onClick={() => { setMobileMenuOpen(false); setExploreOpen(false) }}
                       className="block px-3 py-2 rounded-lg text-sm text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5"
                     >
-                      Bug Bounty
+                      Refund Requests
                     </Link>
                     <Link
                       to="/repositories"
@@ -680,6 +692,7 @@ export function TopNav() {
                       </Link>
                       <Link
                         to="/wallet"
+                        data-tour="wallet"
                         onClick={() => { setMobileMenuOpen(false); setMobileAccountOpen(false) }}
                         className="block px-3 py-2 rounded-lg text-sm text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5"
                       >

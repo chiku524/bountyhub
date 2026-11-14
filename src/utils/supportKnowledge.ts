@@ -227,3 +227,61 @@ export function localGuideResponse(message: string): { reply: string; actions: S
   }
   return { reply: defaultUnknownReply(), actions: [] }
 }
+
+export interface GuideFollowUp {
+  label: string
+  prompt: string
+}
+
+const DEFAULT_FOLLOW_UPS: GuideFollowUp[] = [
+  { label: 'How do bounties work?', prompt: 'How do bounties work?' },
+  { label: 'Wallet & BBUX', prompt: 'How do I use my wallet?' },
+  { label: 'Take a tour', prompt: 'Give me a tour of the app' },
+]
+
+/**
+ * 2–3 short follow-up chips after a Guide answer, biased by the last user message.
+ */
+export function guideFollowUps(userMessage: string): GuideFollowUp[] {
+  const text = userMessage.trim().toLowerCase()
+  const picks: GuideFollowUp[] = []
+  const push = (item: GuideFollowUp) => {
+    if (picks.some((p) => p.prompt === item.prompt)) return
+    if (text && item.prompt.toLowerCase() === text) return
+    picks.push(item)
+  }
+
+  if (/\b(bount(?:y|ies)|answer|accept|reward)\b/.test(text)) {
+    push({ label: 'Create a bounty', prompt: 'How do I create a bounty?' })
+    push({ label: 'Wallet & payouts', prompt: 'How do payouts work in my wallet?' })
+    push({ label: 'Refunds', prompt: 'How do bounty refunds work?' })
+  } else if (/\b(wallet|deposit|withdraw|bbux|solana|payout)\b/.test(text)) {
+    push({ label: 'Deposit SOL', prompt: 'How do I deposit SOL for BBUX?' })
+    push({ label: 'Withdraw', prompt: 'How do I withdraw BBUX?' })
+    push({ label: 'Bounties', prompt: 'How do bounties work?' })
+  } else if (/\b(chat|team hub|gif|message)\b/.test(text)) {
+    push({ label: 'Open Team Hub', prompt: 'Where is Team Hub?' })
+    push({ label: 'Post chat rooms', prompt: 'How does post chat work?' })
+    push({ label: 'Wallet', prompt: 'How do I use my wallet?' })
+  } else if (/\b(tour|walkthrough|show me around)\b/.test(text)) {
+    push({ label: 'Bounties', prompt: 'How do bounties work?' })
+    push({ label: 'Wallet', prompt: 'How do I use my wallet?' })
+    push({ label: 'Docs', prompt: 'Where is the documentation?' })
+  } else if (/\b(docs|help|support)\b/.test(text)) {
+    push({ label: 'Bounties', prompt: 'How do bounties work?' })
+    push({ label: 'Contact support', prompt: 'How do I contact support?' })
+    push({ label: 'Take a tour', prompt: 'Give me a tour of the app' })
+  } else {
+    for (const item of DEFAULT_FOLLOW_UPS) push(item)
+  }
+
+  while (picks.length < 2) {
+    for (const item of DEFAULT_FOLLOW_UPS) {
+      push(item)
+      if (picks.length >= 3) break
+    }
+    break
+  }
+
+  return picks.slice(0, 3)
+}

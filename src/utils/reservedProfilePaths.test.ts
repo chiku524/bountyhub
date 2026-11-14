@@ -6,6 +6,7 @@ describe('isReservedProfilePath', () => {
     expect(isReservedProfilePath('transactions')).toBe(true)
     expect(isReservedProfilePath('wallet')).toBe(true)
     expect(isReservedProfilePath('Admin')).toBe(true)
+    expect(isReservedProfilePath('pitch')).toBe(true)
   })
 
   it('allows normal usernames', () => {
