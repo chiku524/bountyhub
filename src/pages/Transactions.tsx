@@ -6,6 +6,8 @@ import { PageHeader } from '../components/PageHeader'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { ErrorMessage } from '../components/ErrorMessage'
 import { Pagination } from '../components/Pagination'
+import { StatusLabel } from '../components/StatusLabel'
+import { formatTransactionStatus } from '../utils/walletStatus'
 
 export default function Transactions() {
   const [transactions, setTransactions] = useState<TransactionLog[]>([])
@@ -34,19 +36,6 @@ export default function Transactions() {
       setError(err.message || 'Failed to fetch transactions')
     } finally {
       setLoading(false)
-    }
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'completed':
-        return 'text-green-600 dark:text-green-400'
-      case 'pending':
-        return 'text-yellow-600 dark:text-yellow-400'
-      case 'failed':
-        return 'text-red-600 dark:text-red-400'
-      default:
-        return 'text-neutral-600 dark:text-gray-400'
     }
   }
 
@@ -116,9 +105,9 @@ export default function Transactions() {
                       <p className={`text-xl font-bold ${tx.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                         {tx.amount >= 0 ? '+' : ''}{tx.amount.toFixed(4)} BBUX
                       </p>
-                      <p className={`text-sm font-medium ${getStatusColor(tx.status)} mt-1`}>
-                        {tx.status.charAt(0).toUpperCase() + tx.status.slice(1)}
-                      </p>
+                      <div className="mt-1">
+                        <StatusLabel status={formatTransactionStatus(tx.status)} />
+                      </div>
                     </div>
                   </div>
                   

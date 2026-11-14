@@ -144,13 +144,31 @@ app.post('/', async (c) => {
     gravity_context: parsed.gravity_context as GravityContext | undefined,
     clientIp: ip !== 'unknown' ? ip : null,
   })
+  // Keep the fetch alive if we return before it settles (ads attach only when already ready).
+  try {
+    c.executionCtx.waitUntil(adsPromise.then(() => undefined).catch(() => undefined))
+  } catch {
+    /* executionCtx unavailable in some local runners */
+  }
 
+  /**
+   * Attach ads only if Gravity already finished during the LLM wait.
+   * Never delay the Guide reply on ad latency — empty fill hides the slot client-side.
+   * (adsPromise listed first so an already-settled result wins the race.)
+   */
   const withAds = async <T extends Record<string, unknown>>(payload: T) => {
-    const { ads, gravityApiKey } = await adsPromise
+    type AdsResult = Awaited<typeof adsPromise>
+    const adsResult = await Promise.race([
+      adsPromise.catch((): AdsResult => ({ ads: [] })),
+      Promise.resolve(null as AdsResult | null),
+    ])
+    if (!adsResult || !adsResult.ads.length) {
+      return { ...payload, ads: [] as AdsResult['ads'] }
+    }
     return {
       ...payload,
-      ads,
-      ...(gravityApiKey ? { gravityApiKey } : {}),
+      ads: adsResult.ads,
+      ...(adsResult.gravityApiKey ? { gravityApiKey: adsResult.gravityApiKey } : {}),
     }
   }
 

@@ -201,8 +201,33 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
     )
   }
 
+  const isAuthor = Boolean(user && user.id === post.authorId)
+  const isOpen = post.status === 'OPEN'
+  const hasBounty = Boolean(post.reward && post.reward > 0)
+  const stickyCtaLabel = !user
+    ? 'Sign in to answer'
+    : isAuthor && hasBounty && isOpen
+      ? 'Review answers to pay'
+      : hasBounty && isOpen
+        ? `Answer for ${post.reward} BBUX`
+        : 'Write an answer'
+
+  const scrollToPrimary = () => {
+    if (!user) {
+      window.location.href = '/login'
+      return
+    }
+    const target = isAuthor
+      ? document.getElementById('post-answers-list')
+      : document.getElementById('post-answer-form')
+    target?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    if (!isAuthor) {
+      window.setTimeout(() => document.getElementById('answer-content')?.focus(), 350)
+    }
+  }
+
   return (
-    <div className="mt-8">
+    <div className="mt-8 pb-24 md:pb-0">
       <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-4">
         Answers ({answers.length})
       </h3>
@@ -217,7 +242,7 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
 
       {/* Add Answer Form */}
       {user && (
-        <form onSubmit={handleSubmitAnswer} className="mb-6">
+        <form id="post-answer-form" onSubmit={handleSubmitAnswer} className="mb-6 scroll-mt-24">
           <textarea
             id="answer-content"
             name="answerContent"
@@ -282,7 +307,10 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
       )}
 
       {/* Answers List */}
-      <div className="space-y-4 max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-600 scrollbar-track-neutral-800 pr-2">
+      <div
+        id="post-answers-list"
+        className="space-y-4 max-h-[600px] scroll-mt-24 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-600 scrollbar-track-neutral-800 pr-2"
+      >
         {answers.length === 0 ? (
           <p className="text-neutral-500 dark:text-gray-400 text-center py-4">No answers yet. Be the first to answer!</p>
         ) : (
@@ -359,6 +387,26 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
           ))
         )}
       </div>
+
+      {/* Mobile sticky primary CTA — sits left of Guide FAB */}
+      {isOpen && (
+        <div
+          className="fixed inset-x-0 z-40 border-t border-neutral-200/80 bg-white/95 px-3 pt-2 shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur-sm dark:border-neutral-700 dark:bg-neutral-900/95 md:hidden"
+          style={{
+            bottom: 0,
+            paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom, 0px))',
+            paddingRight: 'max(5rem, calc(env(safe-area-inset-right, 0px) + 4.5rem))',
+          }}
+        >
+          <button
+            type="button"
+            onClick={scrollToPrimary}
+            className="btn-primary w-full min-h-11 justify-center text-sm font-semibold"
+          >
+            {stickyCtaLabel}
+          </button>
+        </div>
+      )}
     </div>
   )
 }) 
