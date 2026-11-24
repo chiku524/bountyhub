@@ -19,6 +19,7 @@ import {
   FiBell,
   FiChevronLeft,
   FiChevronRight,
+  FiList,
 } from 'react-icons/fi'
 import { useAuth } from '../contexts/AuthProvider'
 import { isDesktopApp } from '../utils/desktop'
@@ -27,7 +28,7 @@ import { WalletMenuButton } from './WalletMenuButton'
 import { Notifications, type NotificationsRef } from './Notifications'
 import { useCommandPalette } from './CommandPalette'
 import { useMediaQuery } from '../hooks/useMediaQuery'
-
+import { ConfirmDialog } from './ConfirmDialog'
 const SIDEBAR_WIDTH_EXPANDED = 240
 const SIDEBAR_WIDTH_COLLAPSED = 72
 const NARROW_WINDOW_QUERY = '(max-width: 1024px)'
@@ -75,7 +76,9 @@ function DesktopSidebar({
     )
   }
 
+  const [confirmSignOut, setConfirmSignOut] = useState(false)
   async function handleSignOut() {
+    setConfirmSignOut(false)
     await logout()
     navigate('/login', { replace: true })
   }
@@ -152,7 +155,7 @@ function DesktopSidebar({
         {navLink('/repositories', 'Repositories', FiGithub, location.pathname.startsWith('/repositories'))}
         {navLink('/contributions', 'Contributions', FiAward, location.pathname === '/contributions')}
         {navLink('/docs', 'Docs', FiFileText, location.pathname.startsWith('/docs'))}
-        {navLink('/transactions', 'Transactions', FiCreditCard, location.pathname === '/transactions')}
+        {navLink('/transactions', 'Transactions', FiList, location.pathname === '/transactions')}
         {!collapsed && (
           <p className="mb-1 mt-4 px-3 text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
             Settings
@@ -213,7 +216,7 @@ function DesktopSidebar({
             )}
             <button
               type="button"
-              onClick={handleSignOut}
+              onClick={() => setConfirmSignOut(true)}
               title={collapsed ? 'Log out' : undefined}
               className={`flex w-full items-center rounded-lg text-sm text-red-400/90 transition hover:bg-red-500/10 hover:text-red-300 ${
                 collapsed ? 'justify-center px-2 py-2.5' : 'gap-3 px-3 py-2.5'
@@ -244,6 +247,14 @@ function DesktopSidebar({
         </button>
       </div>
       <Notifications ref={notificationsRef} onUnreadCountChange={handleNotificationsUpdate} />
+      <ConfirmDialog
+        open={confirmSignOut}
+        title="Log out of BountyHub?"
+        confirmLabel="Log out"
+        tone="danger"
+        onCancel={() => setConfirmSignOut(false)}
+        onConfirm={() => void handleSignOut()}
+      />
     </aside>
   )
 }

@@ -46,8 +46,8 @@ export default function Layout({ children, showNav = true }: LayoutProps) {
     glassFillsViewport ? 'flex min-h-0 flex-1 flex-col overflow-hidden' : ''
   ].join(' ')
 
-  const mobileBottomPad =
-    'pb-[max(4rem,env(safe-area-inset-bottom,0px))] md:pb-0'
+  // Only reserve the iOS home-indicator inset; there is no mobile bottom nav to clear.
+  const mobileBottomPad = 'pb-[env(safe-area-inset-bottom,0px)] md:pb-0'
 
   return (
     <div className={`flex min-h-0 min-w-0 flex-1 flex-col ${topPaddingClass} ${mobileBottomPad}`}>

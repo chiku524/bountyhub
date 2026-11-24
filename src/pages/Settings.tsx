@@ -11,7 +11,7 @@ import { PageHeader } from '../components/PageHeader'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { isDesktopApp } from '../utils/desktop'
 import { useDesktopUpdate } from '../contexts/DesktopUpdateContext'
-
+import { ConfirmDialog } from '../components/ConfirmDialog'
 type SettingsTab = 'profile' | 'social' | 'account' | 'security' | 'desktop'
 
 interface ProfileData {
@@ -209,11 +209,10 @@ export default function Settings() {
     }
   }
 
+  const [confirmGithubDisconnect, setConfirmGithubDisconnect] = useState(false)
+
   const handleGitHubDisconnect = async () => {
-    if (!confirm('Are you sure you want to disconnect your GitHub account? You will need to set a password if you don\'t have one.')) {
-      return
-    }
-    
+    setConfirmGithubDisconnect(false)
     try {
       setGithubLoading(true)
       setError(null)
@@ -769,7 +768,7 @@ export default function Settings() {
                           </div>
                           <button
                             type="button"
-                            onClick={handleGitHubDisconnect}
+                            onClick={() => setConfirmGithubDisconnect(true)}
                             disabled={githubLoading}
                             className="px-4 py-2 text-sm bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors disabled:opacity-50"
                           >
@@ -902,6 +901,16 @@ export default function Settings() {
             </form>
           </div>
         </div>
+        <ConfirmDialog
+          open={confirmGithubDisconnect}
+          title="Disconnect GitHub?"
+          confirmLabel="Disconnect"
+          tone="danger"
+          onCancel={() => setConfirmGithubDisconnect(false)}
+          onConfirm={() => void handleGitHubDisconnect()}
+        >
+          <p>You'll need a password to sign in afterwards. If you don't have one yet, set it in the Security tab first.</p>
+        </ConfirmDialog>
     </PageContainer>
   )
 } 

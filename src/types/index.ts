@@ -58,6 +58,10 @@ export interface Post {
   media?: Media[]
   userVote?: number
   tags?: string[]
+  /** Single-post API only */
+  bountyStatus?: 'ACTIVE' | 'CLAIMED' | 'REFUNDED' | 'EXPIRED' | null
+  /** ISO time the bounty ends (single-post and Community list APIs) */
+  bountyExpiresAt?: string | null
 }
 
 // Comment types

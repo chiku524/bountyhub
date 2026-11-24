@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, memo } from 'react'
+import React, { useState, useEffect, useCallback, useMemo, memo } from 'react'
 import { useAuth } from '../contexts/AuthProvider'
 import { LoadingSpinner } from './LoadingSpinner'
 import { ErrorMessage } from './ErrorMessage'
@@ -8,6 +8,8 @@ import { config } from '../utils/config'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useToast } from '../contexts/ToastContext'
 import { ConfirmDialog } from './ConfirmDialog'
+import { CodeBlockView } from './CodeBlockView'
+import { useLocalStorageDraft } from '../hooks/useLocalStorageDraft'
 import type { Answer, Post, CodeBlock } from '../types'
 
 interface AnswersProps {
@@ -28,11 +30,22 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post, onPostChang
   const [answers, setAnswers] = useState<Answer[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [newAnswer, setNewAnswer] = useState('')
+  const draftKey = `bountyhub-draft-answer-${postId}`
+  // Restore an unsent answer for this post (saved automatically while typing).
+  const [newAnswer, setNewAnswer] = useState(() => {
+    try {
+      const raw = localStorage.getItem(draftKey)
+      const parsed = raw ? (JSON.parse(raw) as { content?: unknown }) : null
+      return typeof parsed?.content === 'string' ? parsed.content : ''
+    } catch {
+      return ''
+    }
+  })
   const [submitting, setSubmitting] = useState(false)
   const [userVotes, setUserVotes] = useState<Record<string, number>>({})
   const [answerCodeBlocks, setAnswerCodeBlocks] = useState<CodeBlock[]>([])
-
+  const answerDraft = useMemo(() => ({ content: newAnswer }), [newAnswer])
+  const { clearDraft: clearAnswerDraft } = useLocalStorageDraft(draftKey, answerDraft, Boolean(user))
   useEffect(() => {
     fetchAnswers()
   }, [postId])
@@ -149,6 +162,8 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post, onPostChang
       const newAnswerData = await response.json()
       setAnswers(prev => [newAnswerData, ...prev])
       setNewAnswer('')
+      clearAnswerDraft()
+      toast.success('Answer posted')
       setAnswerCodeBlocks([])
       setError(null)
     } catch (err: any) {
@@ -156,7 +171,7 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post, onPostChang
     } finally {
       setSubmitting(false)
     }
-  }, [user, postId, newAnswer, answerCodeBlocks])
+  }, [user, postId, newAnswer, answerCodeBlocks, clearAnswerDraft, toast])
 
   const handleAddCodeBlock = useCallback((codeBlock: CodeBlock) => {
     setAnswerCodeBlocks(prev => [...prev, codeBlock])
@@ -263,8 +278,8 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post, onPostChang
         />
       )}
 
-      {/* Add Answer Form */}
-      {user && (
+      {/* Add Answer Form (not shown to the question's author) */}
+      {user && !isAuthor && (
         <form id="post-answer-form" onSubmit={handleSubmitAnswer} className="mb-6 scroll-mt-24">
           <textarea
             id="answer-content"
@@ -290,29 +305,21 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post, onPostChang
             <div className="mt-4 space-y-3">
               <h4 className="text-sm font-medium text-neutral-700 dark:text-gray-300">Added Code Blocks:</h4>
               {answerCodeBlocks.map((block, index) => (
-                <div key={index} className="bg-white dark:bg-neutral-900/80 rounded-lg p-4 border border-violet-300 dark:border-violet-500/30">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="px-2 py-1 bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300 rounded-sm text-sm">
-                      {block.language}
-                    </span>
+                <CodeBlockView
+                  key={index}
+                  code={block.code}
+                  language={block.language}
+                  description={block.description}
+                  action={
                     <button
                       type="button"
                       onClick={() => handleRemoveCodeBlock(index)}
-                      className="text-neutral-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
-                      title="Remove code block"
+                      className="text-xs text-neutral-500 transition-colors hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
+                      Remove
                     </button>
-                  </div>
-                  <pre className="bg-white dark:bg-neutral-900/80 p-4 rounded-lg overflow-x-auto max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-600 scrollbar-track-neutral-800 border border-neutral-200 dark:border-neutral-700">
-                    <code className="text-sm text-neutral-900 dark:text-gray-300">{block.code}</code>
-                  </pre>
-                  {block.description && (
-                    <p className="mt-2 text-sm text-neutral-600 dark:text-gray-400">{block.description}</p>
-                  )}
-                </div>
+                  }
+                />
               ))}
             </div>
           )}
@@ -332,12 +339,12 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post, onPostChang
       {/* Answers List */}
       <div
         id="post-answers-list"
-        className="space-y-4 max-h-[600px] scroll-mt-24 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-600 scrollbar-track-neutral-800 pr-2"
+        className="space-y-4 scroll-mt-24"
       >
         {answers.length === 0 ? (
           <p className="text-neutral-500 dark:text-gray-400 text-center py-4">No answers yet. Be the first to answer!</p>
         ) : (
-          answers
+          [...answers]
             .sort((a, b) => {
               // Sort by acceptance first, then by vote count
               if (a.isAccepted && !b.isAccepted) return -1
@@ -391,19 +398,7 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post, onPostChang
                 <div className="mt-4 space-y-3">
                   <h4 className="text-sm font-medium text-neutral-700 dark:text-gray-300">Code Blocks:</h4>
                   {answer.codeBlocks.map((block, index) => (
-                    <div key={index} className="bg-white dark:bg-neutral-900/80 rounded-lg p-4 border border-violet-300 dark:border-violet-500/30">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="px-2 py-1 bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300 rounded-sm text-sm">
-                          {block.language}
-                        </span>
-                      </div>
-                      <pre className="bg-white dark:bg-neutral-900/80 p-4 rounded-lg overflow-x-auto max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-600 scrollbar-track-neutral-800 border border-neutral-200 dark:border-neutral-700">
-                        <code className="text-sm text-neutral-900 dark:text-gray-300">{block.code}</code>
-                      </pre>
-                      {block.description && (
-                        <p className="mt-2 text-sm text-neutral-600 dark:text-gray-400">{block.description}</p>
-                      )}
-                    </div>
+                    <CodeBlockView key={index} code={block.code} language={block.language} description={block.description} />
                   ))}
                 </div>
               )}

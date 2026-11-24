@@ -64,7 +64,7 @@ export const CommunityPostCard = memo(function CommunityPostCard({
             {fresh && <PostNewBadge />}
             <PostStatusBadge status={post.status} variant="quiet" />
             {bounty && post.reward != null && (
-              <PostBountyBadge reward={post.reward} variant="emphasis" />
+              <PostBountyBadge reward={post.reward} variant="emphasis" expiresAt={post.status === 'OPEN' ? post.bountyExpiresAt : null} />
             )}
           </div>
           <div className="pointer-events-auto relative z-20 shrink-0">

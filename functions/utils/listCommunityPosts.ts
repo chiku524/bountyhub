@@ -193,6 +193,8 @@ export async function listCommunityPosts(
       hasBounty: posts.hasBounty,
       status: posts.status,
       reward: bounties.amount,
+      bountyExpiresAt: bounties.expiresAt,
+      bountyStatus: bounties.status,
       commentCount: commentCountSql,
       author: {
         id: users.id,
@@ -300,6 +302,7 @@ export async function listCommunityPosts(
       qualityDownvotes: Number(post.qualityDownvotes || 0),
       visibilityVotes: Number(post.visibilityVotes || 0),
       reward: post.reward == null ? null : Number(post.reward),
+      bountyExpiresAt: post.bountyExpiresAt ? formatDate(post.bountyExpiresAt) : null,
       createdAt: formatDate(post.createdAt),
       updatedAt: formatDate(post.updatedAt),
     }

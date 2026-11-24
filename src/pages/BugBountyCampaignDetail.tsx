@@ -208,7 +208,7 @@ export default function BugBountyCampaignDetail() {
         {showDeleteConfirm && (
           <FocusRestoreBoundary>
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 max-w-md w-full">
+            <div role="dialog" aria-modal="true" className="bg-white dark:bg-neutral-800 rounded-lg p-6 max-w-md w-full">
               <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-2">
                 Delete Campaign?
               </h3>

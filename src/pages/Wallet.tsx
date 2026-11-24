@@ -501,7 +501,7 @@ function WalletContent() {
           {showDepositModal && (
             <FocusRestoreBoundary>
             <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4">
-              <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 @sm/main:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+              <div role="dialog" aria-modal="true" className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 @sm/main:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg @sm/main:text-xl font-semibold text-neutral-900 dark:text-white">Buy BBUX with SOL</h3>
                   <button
@@ -647,7 +647,7 @@ function WalletContent() {
           {showDepositConfirmation && (
             <FocusRestoreBoundary>
             <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4">
-              <div className="bg-neutral-800 border border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4">
+              <div role="dialog" aria-modal="true" className="bg-neutral-800 border border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-xl font-semibold text-white">Manual Deposit Instructions</h3>
                   <button
@@ -734,7 +734,7 @@ function WalletContent() {
           {showWithdrawModal && (
             <FocusRestoreBoundary>
             <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4">
-              <div className="bg-neutral-800 border border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4">
+              <div role="dialog" aria-modal="true" className="bg-neutral-800 border border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-xl font-semibold text-white">Sell BBUX for SOL</h3>
                   <button
@@ -873,7 +873,7 @@ function WalletContent() {
           {withdrawResult && withdrawResult.success && (
             <FocusRestoreBoundary>
             <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4">
-              <div className="bg-neutral-800 border border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4">
+              <div role="dialog" aria-modal="true" className="bg-neutral-800 border border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4">
                 <div className="bg-blue-900 border border-blue-700 rounded-lg p-4">
                   <h4 className="font-semibold text-blue-200 mb-2">Withdrawal Successful!</h4>
                   <p className="text-blue-300 mb-2">Your withdrawal has been processed.</p>

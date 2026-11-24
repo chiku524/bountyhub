@@ -1,4 +1,5 @@
-﻿import type { Post } from '../../types'
+import { formatBountyTimeLeft, isBountyEndingSoon } from '../../utils/bountyTime'
+import type { Post } from '../../types'
 
 export function postHasBounty(post: Post): boolean {
   return Boolean(post.reward && post.reward > 0)
@@ -118,16 +119,26 @@ export function PostStatusBadge({
 export function PostBountyBadge({
   reward,
   variant = 'default',
+  expiresAt,
 }: {
   reward: number
   /** Emphasis: amount-first, no emoji — for card grid. */
   variant?: 'default' | 'emphasis'
+  /** When set, shows time left ("3 days left") next to the amount. */
+  expiresAt?: string | null
 }) {
+  const timeLeft = formatBountyTimeLeft(expiresAt)
+  const endingSoon = isBountyEndingSoon(expiresAt)
   if (variant === 'emphasis') {
     return (
       <span className="inline-flex items-baseline gap-1 text-sm font-semibold tabular-nums text-amber-700 dark:text-amber-300">
         <span>{reward}</span>
         <span className="text-xs font-medium text-amber-600/90 dark:text-amber-400/90">BBUX</span>
+        {timeLeft && timeLeft !== 'Ended' && (
+          <span className={`text-xs font-normal ${endingSoon ? 'text-red-600 dark:text-red-400' : 'text-neutral-500 dark:text-neutral-400'}`}>
+            · {timeLeft}
+          </span>
+        )}
       </span>
     )
   }

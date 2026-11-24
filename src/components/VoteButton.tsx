@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthProvider'
 import { useToast } from '../contexts/ToastContext'
 import { config } from '../utils/config'
-
+import { useLocation, useNavigate } from 'react-router-dom'
 interface VoteButtonProps {
   itemId: string
   itemType: 'post' | 'comment'
@@ -27,6 +27,8 @@ export const VoteButton: React.FC<VoteButtonProps> = ({
 }) => {
   const { user } = useAuth()
   const toast = useToast()
+  const navigate = useNavigate()
+  const location = useLocation()
   const [votes, setVotes] = useState(initialVotes)
   const [userVoteState, setUserVoteState] = useState(userVote)
   const [loading, setLoading] = useState(false)
@@ -40,8 +42,11 @@ export const VoteButton: React.FC<VoteButtonProps> = ({
   }, [userVote])
 
   const handleVote = async (value: number) => {
-    if (!user) return
-
+    if (!user) {
+      toast.info('Log in to vote.')
+      navigate(`/login?redirectTo=${encodeURIComponent(location.pathname + location.search)}`)
+      return
+    }
     setLoading(true)
     try {
       const endpoint = itemType === 'post' 

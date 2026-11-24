@@ -61,7 +61,7 @@ export const CommunityPostListItem = memo(function CommunityPostListItem({
                 {/* Mobile: bounty sits with badges so the title can use full width */}
                 {showBounty && (
                   <span className="max-sm:inline @md/main:hidden">
-                    <PostBountyBadge reward={post.reward!} variant="emphasis" />
+                    <PostBountyBadge reward={post.reward!} variant="emphasis" expiresAt={post.status === 'OPEN' ? post.bountyExpiresAt : null} />
                   </span>
                 )}
                 <PostStatusBadge status={post.status} variant="quiet" />
@@ -83,7 +83,7 @@ export const CommunityPostListItem = memo(function CommunityPostListItem({
               {/* Desktop: bounty beside bookmark (previous layout) */}
               {showBounty && (
                 <span className="hidden max-sm:hidden @md/main:inline-flex">
-                  <PostBountyBadge reward={post.reward!} variant="emphasis" />
+                  <PostBountyBadge reward={post.reward!} variant="emphasis" expiresAt={post.status === 'OPEN' ? post.bountyExpiresAt : null} />
                 </span>
               )}
               <BookmarkButton postId={post.id} size="sm" />

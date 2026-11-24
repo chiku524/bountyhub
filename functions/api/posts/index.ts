@@ -1,8 +1,8 @@
 import { Hono } from 'hono'
 import { createDb } from '../../../src/utils/db'
 import { getUserIdFromSession } from '../../../src/utils/auth'
-import { posts, postTags, bounties, media, codeBlocks, users, tags, profiles, virtualWallets } from '../../../drizzle/schema'
-import { eq, sql } from 'drizzle-orm'
+import { posts, postTags, bounties, media, codeBlocks, users, tags, profiles, virtualWallets, votes } from '../../../drizzle/schema'
+import { and, eq, sql } from 'drizzle-orm'
 import { GovernanceService } from '../../../src/utils/governance'
 import { listCommunityPosts } from '../../utils/listCommunityPosts'
 
@@ -91,7 +91,21 @@ app.post(async (c) => {
     if (!selectedTags || selectedTags.length === 0) {
       return c.json({ error: 'At least one tag is required' }, 400)
     }
-    
+
+    // Validate the bounty before creating anything, so a failed bounty doesn't leave a post behind.
+    if (hasBounty) {
+      if (!(typeof bountyAmount === 'number' && bountyAmount > 0)) {
+        return c.json({ error: 'Bounty amount must be greater than 0' }, 400)
+      }
+      if (!(Number.isInteger(bountyDuration) && bountyDuration >= 1 && bountyDuration <= 30)) {
+        return c.json({ error: 'Bounty duration must be between 1 and 30 days' }, 400)
+      }
+      const [wallet] = await db.select({ balance: virtualWallets.balance }).from(virtualWallets).where(eq(virtualWallets.userId, userId)).limit(1)
+      if (!wallet || wallet.balance < bountyAmount) {
+        return c.json({ error: `Insufficient BBUX balance for a ${bountyAmount} BBUX bounty` }, 400)
+      }
+    }
+
     // Create the post
     const now = new Date()
     const [post] = await db.insert(posts).values({
@@ -352,12 +366,32 @@ app.get('/:id', async (c) => {
       .leftJoin(tags, eq(postTags.tagId, tags.id))
       .where(eq(postTags.postId, id)),
       db.select({
-        amount: bounties.amount
+        amount: bounties.amount,
+        status: bounties.status,
+        expiresAt: bounties.expiresAt,
       }).from(bounties)
       .where(eq(bounties.postId, id))
       .limit(1)
     ])
-    
+
+    // The viewer's own quality vote, so the post page can show it highlighted.
+    let userVote = 0
+    const sessionId = c.get('sessionId')
+    if (sessionId) {
+      try {
+        const viewerId = await getUserIdFromSession(sessionId, db)
+        if (viewerId) {
+          const [vote] = await db
+            .select({ value: votes.value })
+            .from(votes)
+            .where(and(eq(votes.postId, id), eq(votes.userId, viewerId), eq(votes.voteType, 'quality')))
+            .limit(1)
+          userVote = Number(vote?.value) || 0
+        }
+      } catch (err) {
+        console.error('Error fetching viewer vote:', err)
+      }
+    }
     // Safe date formatting function
     const formatDate = (dateValue: any): string => {
       if (!dateValue) return new Date().toISOString()
@@ -408,7 +442,10 @@ app.get('/:id', async (c) => {
       media: mediaResult,
       author: authorResult[0] || null,
       tags: tagsResult.map(t => t.tagName).filter(Boolean),
-      reward: bountyResult[0]?.amount || null
+      reward: bountyResult[0]?.amount || null,
+      bountyStatus: bountyResult[0]?.status ?? null,
+      bountyExpiresAt: bountyResult[0]?.expiresAt ? formatDate(bountyResult[0].expiresAt) : null,
+      userVote,
     }
 
     return c.json(response)

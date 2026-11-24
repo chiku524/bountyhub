@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { useEscapeKey } from '../hooks/useEscapeKey'
 import { FocusRestoreBoundary } from './FocusRestoreBoundary'
 
@@ -47,7 +48,8 @@ export function ConfirmDialog({
       ? 'bg-red-600 hover:bg-red-700 focus-visible:ring-red-400'
       : 'bg-violet-600 hover:bg-violet-500 focus-visible:ring-violet-400'
 
-  return (
+  // Portal to <body>: an ancestor with backdrop-filter (e.g. the desktop sidebar) would otherwise trap `position: fixed`.
+  return createPortal(
     <FocusRestoreBoundary>
       <div
         className="fixed inset-0 z-[90] flex items-center justify-center bg-black/50 px-4 dark:bg-black/70"
@@ -91,6 +93,7 @@ export function ConfirmDialog({
           </div>
         </div>
       </div>
-    </FocusRestoreBoundary>
+    </FocusRestoreBoundary>,
+    document.body
   )
 }

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { useToast } from '../contexts/ToastContext'
 import { useAuth } from '../contexts/AuthProvider';
 import { ApiClient } from '../utils/api';
 import { config } from '../utils/config';
@@ -55,6 +56,7 @@ function mergeChatMessages(prev: Message[], msg: Message): Message[] {
 
 const ChatSidebar: React.FC = () => {
   const { user } = useAuth();
+  const toast = useToast()
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [open, setOpen] = useState(false);
@@ -277,7 +279,7 @@ const ChatSidebar: React.FC = () => {
       }
     } catch (error) {
       console.error('Failed to send message:', error);
-      alert('Failed to send message. Please try again.');
+      toast.error('Failed to send message. Please try again.');
     } finally {
       setSending(false);
     }
@@ -331,18 +333,17 @@ const ChatSidebar: React.FC = () => {
 
       if (error instanceof Error) {
         if (error.message.includes('Invalid or missing GIPHY API key')) {
-          alert(
-            'GIF search needs a GIPHY key. Add VITE_GIPHY_API_KEY to .env.local (see .env.example) and rebuild, or set it in Cloudflare Pages for production.',
-          );
+          if (import.meta.env.DEV) console.warn('GIF search needs VITE_GIPHY_API_KEY (see .env.example).');
+          toast.error("GIF search isn't available right now.");
         } else if (error.message.includes('429') || /rate/i.test(error.message)) {
-          alert('GIF search rate limited. Please try again in a moment.');
+          toast.error('GIF search rate limited. Please try again in a moment.');
         } else if (error.message.includes('403') || /forbidden|invalid.*key|access denied/i.test(error.message)) {
-          alert('GIF search was denied. Check that VITE_GIPHY_API_KEY is a valid key from developers.giphy.com.');
+          toast.error("GIF search isn't available right now.");
         } else {
-          alert(`Failed to search GIFs: ${error.message}`);
+          toast.error('Failed to search GIFs. Please try again.');
         }
       } else {
-        alert('Failed to search GIFs. Please try again.');
+        toast.error('Failed to search GIFs. Please try again.');
       }
 
       setGifResults([]);
@@ -355,7 +356,7 @@ const ChatSidebar: React.FC = () => {
     if (!user || sending || !postMessageUrl) return;
     const previewUrl = pickGiphyPreviewUrl(gif);
     if (!previewUrl) {
-      alert('This GIF could not be loaded (no preview URL). Try another.');
+      toast.error('This GIF could not be loaded (no preview URL). Try another.');
       return;
     }
     setSending(true);
@@ -374,7 +375,7 @@ const ChatSidebar: React.FC = () => {
       }
     } catch (error) {
       console.error('Failed to send GIF:', error);
-      alert('Failed to send GIF. Please try again.');
+      toast.error('Failed to send GIF. Please try again.');
     } finally {
       setSending(false);
     }

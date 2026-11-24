@@ -13,7 +13,9 @@ import { FiInfo } from 'react-icons/fi'
 import type { CodeBlock, Media } from '../types'
 import { EmptyState } from '../components/EmptyState'
 import { useLocalStorageDraft } from '../hooks/useLocalStorageDraft'
+import { useWalletData } from '../hooks/useWalletData'
 
+const DURATION_PRESETS = [1, 3, 7, 14, 30] as const
 const CREATE_POST_DRAFT_KEY = 'bountyhub-draft-create-post'
 
 interface Tag {
@@ -41,7 +43,10 @@ export default function CreatePost() {
   const [bountyAmount, setBountyAmount] = useState('')
   const [bountyDuration, setBountyDuration] = useState(7)
   const [showDraftBanner, setShowDraftBanner] = useState(false)
-
+  const { walletData } = useWalletData(hasBounty)
+  const balance = walletData?.virtualBalance ?? null
+  const parsedBounty = parseFloat(bountyAmount)
+  const bountyTooHigh = hasBounty && balance !== null && parsedBounty > balance
   const createPostDraftSnapshot = useMemo(
     () => ({
       title,
@@ -151,7 +156,16 @@ export default function CreatePost() {
       setLoading(false)
       return
     }
-
+    if (hasBounty && !(parsedBounty > 0)) {
+      setError('Enter a bounty amount greater than 0, or turn the bounty off.')
+      setLoading(false)
+      return
+    }
+    if (bountyTooHigh) {
+      setError(`Your balance is ${balance?.toFixed(2)} ${TOKEN_SYMBOL}. Lower the bounty or add BBUX in Wallet first.`)
+      setLoading(false)
+      return
+    }
     try {
       const postData = {
         title,
@@ -214,15 +228,6 @@ export default function CreatePost() {
         )}
 
         <form onSubmit={handleSubmit} className="mx-auto space-y-6">
-          <div>
-            <TagSelector
-              selectedTags={selectedTags}
-              onTagsChange={setSelectedTags}
-              availableTags={availableTags}
-              error={error?.includes('tag') ? error : undefined}
-              required
-            />
-          </div>
 
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
@@ -248,6 +253,15 @@ export default function CreatePost() {
               onChange={(e) => setContent(e.target.value)}
               rows={6}
               className="w-full px-3 @sm/main:px-4 py-2 @sm/main:py-3 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm @sm/main:text-base"
+              required
+            />
+          </div>
+          <div>
+            <TagSelector
+              selectedTags={selectedTags}
+              onTagsChange={setSelectedTags}
+              availableTags={availableTags}
+              error={error?.includes('tag') ? error : undefined}
               required
             />
           </div>
@@ -372,16 +386,19 @@ export default function CreatePost() {
                         {TOKEN_SYMBOL}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
-                      <FiInfo className="w-3 h-3" />
-                      <span>5% goes to community governance rewards</span>
+                    <div className={`mt-2 text-xs ${bountyTooHigh ? 'text-red-400' : 'text-gray-400'}`} role={bountyTooHigh ? 'alert' : undefined}>
+                      {balance === null
+                        ? 'Checking your balance…'
+                        : bountyTooHigh
+                          ? `More than your balance of ${balance.toFixed(2)} ${TOKEN_SYMBOL}.`
+                          : `Your balance: ${balance.toFixed(2)} ${TOKEN_SYMBOL}`}
                     </div>
                     <p className="mt-2 text-xs text-gray-400 leading-relaxed">
                       Bounties use your on-platform BBUX balance. Ensure you have enough BBUX in{' '}
                       <Link to="/wallet" className="text-violet-300 underline decoration-violet-500/50 underline-offset-2 hover:text-violet-200">
                         Wallet
                       </Link>{' '}
-                      before posting; deposit via Solana if needed. When the duration ends, unresolved bounty rules follow platform policy.
+                      before posting; deposit via Solana if needed. If nobody answers before the bounty ends, it's returned to your wallet.
                     </p>
                   </div>
 
@@ -390,21 +407,24 @@ export default function CreatePost() {
                     <div className="flex items-center gap-2 mb-3">
                       <FaClockIcon className="w-4 h-4 text-blue-400" />
                     </div>
-                    <label htmlFor="bountyDuration" className="text-white font-medium mb-1 block text-sm @sm/main:text-base">Bounty Duration</label>
-                    <div className="grid grid-cols-1 gap-3 @xl/main:grid-cols-2">
-                      <input
-                        id="bountyDuration"
-                        type="number"
-                        value={bountyDuration}
-                        onChange={(e) => setBountyDuration(Number(e.target.value))}
-                        min="1"
-                        max="30"
-                        required
-                        className="px-3 @sm/main:px-4 py-2 @sm/main:py-3 bg-neutral-800/50 border border-neutral-600/50 rounded-lg text-white focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all duration-200 text-sm @sm/main:text-base"
-                      />
-                      <div className="flex items-center justify-center px-3 @sm/main:px-4 py-2 @sm/main:py-3 bg-neutral-800/30 border border-neutral-600/30 rounded-lg text-gray-300 text-xs @sm/main:text-sm">
-                        days
-                      </div>
+                    <p id="bountyDurationLabel" className="text-white font-medium mb-2 block text-sm @sm/main:text-base">Bounty Duration</p>
+                    <div className="flex flex-wrap gap-2" role="radiogroup" aria-labelledby="bountyDurationLabel">
+                      {DURATION_PRESETS.map((days) => (
+                        <button
+                          key={days}
+                          type="button"
+                          role="radio"
+                          aria-checked={bountyDuration === days}
+                          onClick={() => setBountyDuration(days)}
+                          className={`rounded-lg border px-3 py-2 text-sm transition-colors ${
+                            bountyDuration === days
+                              ? 'border-violet-400 bg-violet-500/30 text-white'
+                              : 'border-neutral-600/50 bg-neutral-800/50 text-gray-300 hover:border-violet-500/50'
+                          }`}
+                        >
+                          {days} {days === 1 ? 'day' : 'days'}
+                        </button>
+                      ))}
                     </div>
                     <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
                       <FiInfo className="w-3 h-3" />
@@ -429,14 +449,14 @@ export default function CreatePost() {
                       <div className="flex justify-between">
                         <span className="text-gray-400">Governance Fee:</span>
                         <span className="text-yellow-400 font-medium">
-                          {bountyAmount ? `${(parseFloat(bountyAmount) * 0.05).toFixed(3)} ${TOKEN_SYMBOL}` : `0.000 ${TOKEN_SYMBOL}`}
+                          {bountyAmount ? `${(parseFloat(bountyAmount) * 0.05).toFixed(3)} ${TOKEN_SYMBOL} (platform-funded)` : `0.000 ${TOKEN_SYMBOL}`}
                         </span>
                       </div>
                       <div className="border-t border-violet-500/20 pt-2 mt-2">
                         <div className="flex justify-between">
                           <span className="text-gray-400">Total Cost:</span>
                           <span className="text-violet-300 font-semibold">
-                            {bountyAmount ? `${(parseFloat(bountyAmount) * 1.05).toFixed(3)} ${TOKEN_SYMBOL}` : `0.000 ${TOKEN_SYMBOL}`}
+                            {bountyAmount ? `${parseFloat(bountyAmount).toFixed(2)} ${TOKEN_SYMBOL}` : `0.00 ${TOKEN_SYMBOL}`}
                           </span>
                         </div>
                       </div>
@@ -471,7 +491,7 @@ export default function CreatePost() {
           <div className="flex justify-end">
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || bountyTooHigh}
               className="px-4 @sm/main:px-6 py-2 @sm/main:py-3 bg-violet-500 text-white rounded-lg hover:bg-violet-600 disabled:bg-violet-500/50 disabled:cursor-not-allowed disabled:hover:bg-violet-500/50 transition-colors text-sm @sm/main:text-base"
             >
               {loading ? "Creating Post..." : "Create Post"}

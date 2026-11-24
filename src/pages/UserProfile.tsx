@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useToast } from '../contexts/ToastContext'
 import { useParams, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthProvider'
 import { config } from '../utils/config'
@@ -124,6 +125,7 @@ const SocialMediaIcons = ({ profile }: { profile: ProfileData }) => {
 }
 
 const ProfilePictureUpload = ({ currentPicture, username, isOwnProfile }: { currentPicture: string | null; username: string; isOwnProfile: boolean }) => {
+  const toast = useToast()
   const [preview, setPreview] = useState<string | null>(currentPicture)
   const [isUploading, setIsUploading] = useState(false)
 
@@ -135,13 +137,13 @@ const ProfilePictureUpload = ({ currentPicture, username, isOwnProfile }: { curr
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      alert('Please upload an image file')
+      toast.error('Please upload an image file')
       return
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('File size must be less than 5MB')
+      toast.error('File size must be less than 5MB')
       return
     }
 
@@ -171,11 +173,11 @@ const ProfilePictureUpload = ({ currentPicture, username, isOwnProfile }: { curr
         setPreview(result.profilePicture || null)
         window.location.reload()
       } else {
-        alert(result.error || 'Failed to upload profile picture')
+        toast.error(result.error || 'Failed to upload profile picture')
         setPreview(currentPicture)
       }
     } catch (_error) {
-      alert('Failed to upload profile picture')
+      toast.error('Failed to upload profile picture')
       setPreview(currentPicture)
     } finally {
       setIsUploading(false)

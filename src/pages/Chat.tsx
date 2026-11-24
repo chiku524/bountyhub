@@ -650,7 +650,7 @@ const Chat: React.FC = () => {
         {createTeamOpen && (
           <FocusRestoreBoundary>
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => !createTeamLoading && setCreateTeamOpen(false)}>
-            <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-xl p-6 w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
+            <div role="dialog" aria-modal="true" className="bg-white dark:bg-neutral-800 rounded-lg shadow-xl p-6 w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Create team</h3>
               <form onSubmit={handleCreateTeam}>
                 <label htmlFor="create-team-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
@@ -692,7 +692,7 @@ const Chat: React.FC = () => {
         {createRoomOpen && (
           <FocusRestoreBoundary>
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => !createRoomLoading && setCreateRoomOpen(false)}>
-            <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-xl p-6 w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
+            <div role="dialog" aria-modal="true" className="bg-white dark:bg-neutral-800 rounded-lg shadow-xl p-6 w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Create chat room</h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Create a public room (anyone can find and join) or a private room (invite by link).</p>
               <form onSubmit={handleCreateRoom}>
