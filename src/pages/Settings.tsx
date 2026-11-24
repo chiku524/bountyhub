@@ -5,14 +5,15 @@ import { config } from '../utils/config'
 import { useAuth } from '../contexts/AuthProvider'
 import { useToast } from '../contexts/ToastContext'
 import type { User } from '../types'
-import { FiUser, FiLink, FiMail, FiLock, FiSave, FiCheck, FiMonitor } from 'react-icons/fi'
+import { FiUser, FiLink, FiMail, FiLock, FiSave, FiCheck, FiMonitor, FiBell, FiSun } from 'react-icons/fi'
 import { PageContainer } from '../components/PageContainer'
 import { PageHeader } from '../components/PageHeader'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { isDesktopApp } from '../utils/desktop'
 import { useDesktopUpdate } from '../contexts/DesktopUpdateContext'
 import { ConfirmDialog } from '../components/ConfirmDialog'
-type SettingsTab = 'profile' | 'social' | 'account' | 'security' | 'desktop'
+import { NotificationSettings, AppearanceSettings } from '../components/settings/PreferenceSettings'
+type SettingsTab = 'profile' | 'social' | 'account' | 'security' | 'notifications' | 'appearance' | 'desktop'
 
 interface ProfileData {
   firstName: string
@@ -91,8 +92,8 @@ export default function Settings() {
   useEffect(() => {
     const tabParam = searchParams.get('tab')
     const allowed: SettingsTab[] = isDesktopApp()
-      ? ['profile', 'social', 'account', 'security', 'desktop']
-      : ['profile', 'social', 'account', 'security']
+      ? ['profile', 'social', 'account', 'security', 'notifications', 'appearance', 'desktop']
+      : ['profile', 'social', 'account', 'security', 'notifications', 'appearance']
     if (tabParam && allowed.includes(tabParam as SettingsTab)) {
       setActiveTab(tabParam as SettingsTab)
     }
@@ -293,10 +294,9 @@ export default function Settings() {
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (activeTab === 'desktop') {
+    if (activeTab === 'desktop' || activeTab === 'notifications' || activeTab === 'appearance') {
       return
     }
-
     // If we're on the security tab, handle password change
     if (activeTab === 'security') {
       await handlePasswordChange()
@@ -389,6 +389,8 @@ export default function Settings() {
       { id: 'social', label: 'Social Links', icon: FiLink },
       { id: 'account', label: 'Account', icon: FiMail },
       { id: 'security', label: 'Security', icon: FiLock },
+      { id: 'notifications', label: 'Notifications', icon: FiBell },
+      { id: 'appearance', label: 'Appearance', icon: FiSun },
     ]
     if (isDesktop) {
       base.push({ id: 'desktop', label: 'Desktop app', icon: FiMonitor })
@@ -882,7 +884,10 @@ export default function Settings() {
                 </div>
               )}
 
-              {activeTab !== 'desktop' && (
+              {activeTab === 'notifications' && <NotificationSettings />}
+              {activeTab === 'appearance' && <AppearanceSettings />}
+
+              {activeTab !== 'desktop' && activeTab !== 'notifications' && activeTab !== 'appearance' && (
                 <div className="flex justify-end pt-6 border-t border-violet-500/30">
                   <button
                     type="submit"

@@ -7,6 +7,8 @@ interface SearchBarProps {
   className?: string
   /** Debounce onSearch by this many ms. If 0 or omitted, search runs on every keystroke. */
   debounceMs?: number
+  /** Starting text, e.g. restored from the URL. */
+  initialValue?: string
 }
 
 export const SearchBar: React.FC<SearchBarProps> = ({
@@ -14,8 +16,9 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   placeholder = 'Search posts...',
   className = '',
   debounceMs = 0,
+  initialValue = '',
 }) => {
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState(initialValue)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 

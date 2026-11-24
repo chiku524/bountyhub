@@ -218,4 +218,48 @@ app.post(async (c) => {
   }
 })
 
-export default app 
+async function loadOwnAnswer(c: any) {
+  const db = createDb(c.env.DB)
+  const postId = c.req.param('id')
+  const answerId = c.req.param('answerId')
+  const sessionId = c.get('sessionId')
+  if (!sessionId) return { error: c.json({ error: 'Not authenticated' }, 401) }
+  const userId = await getUserIdFromSession(sessionId, db)
+  if (!userId) return { error: c.json({ error: 'Not authenticated' }, 401) }
+  const [answer] = await db.select().from(answers).where(and(eq(answers.id, answerId), eq(answers.postId, postId))).limit(1)
+  if (!answer) return { error: c.json({ error: 'Answer not found' }, 404) }
+  if (answer.authorId !== userId) return { error: c.json({ error: 'You can only change your own answers' }, 403) }
+  if (answer.isAccepted) return { error: c.json({ error: 'Accepted answers can no longer be changed' }, 409) }
+  return { db, answer }
+}
+
+// Edit your own answer (not once it has been accepted)
+app.put('/:answerId', async (c) => {
+  try {
+    const loaded = await loadOwnAnswer(c)
+    if ('error' in loaded) return loaded.error
+    const { content } = await c.req.json().catch(() => ({ content: '' }))
+    if (typeof content !== 'string' || !content.trim()) return c.json({ error: 'Answer cannot be empty' }, 400)
+    const updatedAt = new Date()
+    await loaded.db.update(answers).set({ content: content.trim(), updatedAt }).where(eq(answers.id, loaded.answer.id))
+    return c.json({ success: true, id: loaded.answer.id, content: content.trim(), updatedAt: updatedAt.toISOString() })
+  } catch (error) {
+    console.error('Edit answer error:', error)
+    return c.json({ error: 'Failed to update answer' }, 500)
+  }
+})
+
+// Delete your own answer (not once it has been accepted)
+app.delete('/:answerId', async (c) => {
+  try {
+    const loaded = await loadOwnAnswer(c)
+    if ('error' in loaded) return loaded.error
+    await loaded.db.delete(answers).where(eq(answers.id, loaded.answer.id))
+    return c.json({ success: true })
+  } catch (error) {
+    console.error('Delete answer error:', error)
+    return c.json({ error: 'Failed to delete answer' }, 500)
+  }
+})
+
+export default app

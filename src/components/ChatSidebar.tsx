@@ -411,26 +411,26 @@ const ChatSidebar: React.FC = () => {
         className={`fixed top-0 right-0 h-full z-40 transition-transform duration-300 ${open ? 'translate-x-0' : 'translate-x-full'} w-full max-w-[min(100vw,20rem)] sm:max-w-sm bg-neutral-900 border-l border-neutral-800 shadow-2xl flex flex-col ${sidebarTopPad}`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-3 border-b border-neutral-800 bg-neutral-900 flex-shrink-0">
+        <div className="flex items-center justify-between p-3 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 flex-shrink-0">
           <div className="flex items-center space-x-2 min-w-0">
             {hubView === 'chat' ? (
               <button
                 type="button"
                 onClick={backToList}
-                className="flex-shrink-0 text-neutral-400 hover:text-white p-1 rounded"
+                className="flex-shrink-0 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white p-1 rounded"
                 aria-label="Back to list"
               >
                 <FiChevronLeft className="h-5 w-5" />
               </button>
             ) : null}
             <FiMessageSquare className="h-5 w-5 text-indigo-400 flex-shrink-0" />
-            <span className="font-semibold text-white text-sm sm:text-base truncate">
+            <span className="font-semibold text-neutral-900 dark:text-white text-sm sm:text-base truncate">
               {hubView === 'chat' && chatTarget ? chatTarget.name : 'Team Hub'}
             </span>
             {hubView === 'chat' && chatTarget && (
               <div className="flex items-center space-x-1 flex-shrink-0" title={wsConnected ? 'Connected' : 'Connecting…'}>
                 <div className={`rounded-full h-2 w-2 flex-shrink-0 ${wsConnected ? 'bg-green-500' : 'animate-pulse bg-amber-500'}`} />
-                <span className="text-xs text-neutral-400">{wsConnected ? 'Connected' : 'Connecting…'}</span>
+                <span className="text-xs text-neutral-500 dark:text-neutral-400">{wsConnected ? 'Connected' : 'Connecting…'}</span>
               </div>
             )}
           </div>
@@ -438,7 +438,7 @@ const ChatSidebar: React.FC = () => {
             {hubView === 'list' && (
               <Link
                 to="/chat"
-                className="flex items-center gap-1.5 px-2 py-1.5 rounded text-neutral-300 hover:text-white hover:bg-neutral-800 transition-colors text-xs font-medium"
+                className="flex items-center gap-1.5 px-2 py-1.5 rounded text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-xs font-medium"
                 title="Full page — create teams, rooms, task lists"
               >
                 <FiGrid className="h-4 w-4" />
@@ -447,7 +447,7 @@ const ChatSidebar: React.FC = () => {
             )}
             <button
               onClick={() => setOpen(false)}
-              className="text-neutral-400 hover:text-white p-1 rounded-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
+              className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white p-1 rounded-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
               aria-label="Close chat sidebar"
             >
               <FiX className="h-5 w-5" />
@@ -457,13 +457,13 @@ const ChatSidebar: React.FC = () => {
 
         {hubView === 'list' ? (
           <div className="flex-1 overflow-y-auto p-3 space-y-4">
-            <p className="text-xs text-neutral-400">Choose a chat or open the full hub to create teams and rooms.</p>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">Choose a chat or open the full hub to create teams and rooms.</p>
             <div>
               <button
                 type="button"
                 onClick={selectGlobal}
                 disabled={loadingChat}
-                className="w-full flex items-center gap-2 p-3 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-left text-white transition-colors disabled:opacity-50"
+                className="w-full flex items-center gap-2 p-3 rounded-lg bg-white dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 text-left text-neutral-900 dark:text-white transition-colors disabled:opacity-50"
               >
                 <FiMessageSquare className="h-5 w-5 text-indigo-400 flex-shrink-0" />
                 <span className="font-medium">Global Chat</span>
@@ -471,7 +471,7 @@ const ChatSidebar: React.FC = () => {
             </div>
             <div>
               <div className="flex items-center justify-between px-1 mb-1">
-                <span className="text-xs font-medium text-neutral-400">Rooms</span>
+                <span className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Rooms</span>
                 <Link to="/chat" className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
                   <FiPlusCircle className="h-3 w-3" /> Create
                 </Link>
@@ -486,7 +486,7 @@ const ChatSidebar: React.FC = () => {
                       type="button"
                       onClick={() => selectRoom(room)}
                       disabled={loadingChat}
-                      className="w-full flex items-center justify-between gap-2 p-2.5 rounded-lg hover:bg-neutral-800 text-left text-white text-sm disabled:opacity-50"
+                      className="w-full flex items-center justify-between gap-2 p-2.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-left text-neutral-900 dark:text-white text-sm disabled:opacity-50"
                     >
                       <span className="truncate">{room.name}</span>
                       <span className={`text-[10px] px-1.5 py-0.5 rounded flex-shrink-0 ${room.isPublic ? 'bg-green-900/50 text-green-300' : 'bg-neutral-700 text-neutral-400'}`}>
@@ -499,7 +499,7 @@ const ChatSidebar: React.FC = () => {
             </div>
             <div>
               <div className="flex items-center justify-between px-1 mb-1">
-                <span className="text-xs font-medium text-neutral-400">Teams</span>
+                <span className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Teams</span>
                 <Link to="/chat" className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
                   <FiPlusCircle className="h-3 w-3" /> Create
                 </Link>
@@ -514,7 +514,7 @@ const ChatSidebar: React.FC = () => {
                       type="button"
                       onClick={() => selectTeam(team)}
                       disabled={loadingChat}
-                      className="w-full flex items-center gap-2 p-2.5 rounded-lg hover:bg-neutral-800 text-left text-white text-sm disabled:opacity-50"
+                      className="w-full flex items-center gap-2 p-2.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-left text-neutral-900 dark:text-white text-sm disabled:opacity-50"
                     >
                       <FiUsers className="h-4 w-4 text-neutral-500 flex-shrink-0" />
                       <span className="truncate">{team.name}</span>
@@ -536,7 +536,7 @@ const ChatSidebar: React.FC = () => {
         {/* Messages */}
         <div
           ref={messagesContainerRef}
-          className="flex-1 overflow-y-auto p-3 space-y-2 bg-neutral-900 scrollbar-hide relative"
+          className="flex-1 overflow-y-auto p-3 space-y-2 bg-neutral-50 dark:bg-neutral-900 scrollbar-hide relative"
           onScroll={checkAtBottom}
         >
           {messages.map((msg) => (
@@ -570,13 +570,13 @@ const ChatSidebar: React.FC = () => {
 
         {/* Emoji Picker */}
         {showEmojiPicker && (
-          <div className="p-3 border-t border-neutral-800 bg-neutral-800">
+          <div className="p-3 border-t border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-800">
             <div className="grid grid-cols-8 sm:grid-cols-10 gap-1 max-h-32 overflow-y-auto">
               {EMOJIS.map((emoji, index) => (
                 <button
                   key={index}
                   onClick={() => addEmoji(emoji)}
-                  className="p-1 hover:bg-neutral-700 rounded-sm text-base sm:text-lg"
+                  className="p-1 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-sm text-base sm:text-lg"
                 >
                   {emoji}
                 </button>
@@ -587,7 +587,7 @@ const ChatSidebar: React.FC = () => {
 
         {/* GIF Search */}
         {showGifSearch && (
-          <div className="p-3 border-t border-neutral-800 bg-neutral-800">
+          <div className="p-3 border-t border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-800">
             <div className="flex space-x-2 mb-2">
               <input
                 id="chat-sidebar-gif-search"
@@ -602,7 +602,7 @@ const ChatSidebar: React.FC = () => {
                     void searchGifs(gifSearchTerm);
                   }
                 }}
-                className="flex-1 px-2 py-1 rounded-sm bg-neutral-700 text-white border border-neutral-600 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-sm"
+                className="flex-1 px-2 py-1 rounded-sm bg-neutral-100 dark:bg-neutral-700 text-neutral-900 dark:text-white border border-neutral-300 dark:border-neutral-600 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-sm"
                 autoComplete="off"
               />
               <button
@@ -636,7 +636,7 @@ const ChatSidebar: React.FC = () => {
               })}
             </div>
             {gifResults.length === 0 && !searchingGifs && (
-              <div className="text-center text-neutral-400 text-sm py-4">
+              <div className="text-center text-neutral-500 dark:text-neutral-400 text-sm py-4">
                 No GIFs found. Try searching for something else.
               </div>
             )}
@@ -644,7 +644,7 @@ const ChatSidebar: React.FC = () => {
         )}
 
         {/* Input */}
-        <form onSubmit={sendMessage} className="p-3 border-t border-neutral-800 bg-neutral-900">
+        <form onSubmit={sendMessage} className="p-3 border-t border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900">
           <div className="flex space-x-2 mb-2">
             <button
               type="button"
@@ -652,7 +652,7 @@ const ChatSidebar: React.FC = () => {
                 setShowEmojiPicker(!showEmojiPicker);
                 setShowGifSearch(false);
               }}
-              className="text-neutral-400 hover:text-white p-2 rounded-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
+              className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white p-2 rounded-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
             >
               <FiSmile className="h-4 w-4" />
             </button>
@@ -662,7 +662,7 @@ const ChatSidebar: React.FC = () => {
                 setShowGifSearch(!showGifSearch);
                 setShowEmojiPicker(false);
               }}
-              className="text-neutral-400 hover:text-white p-2 rounded-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
+              className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white p-2 rounded-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
             >
               <FiImage className="h-4 w-4" />
             </button>
@@ -673,7 +673,7 @@ const ChatSidebar: React.FC = () => {
               id="chat-sidebar-message"
               name="globalChatMessage"
               type="text"
-              className="flex-1 px-3 py-2 rounded-sm bg-neutral-800 text-white border border-neutral-700 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 placeholder-neutral-400 text-sm"
+              className="flex-1 px-3 py-2 rounded-sm bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white border border-neutral-200 dark:border-neutral-700 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 placeholder-neutral-400 text-sm"
               placeholder="Type a message..."
               value={input}
               onChange={e => setInput(e.target.value)}

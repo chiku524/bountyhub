@@ -33,7 +33,30 @@ import { BookmarkStatusProvider } from '../contexts/BookmarkStatusContext'
 export default function Community() {
   const [searchParams, setSearchParams] = useSearchParams()
   const urlTab = parseDiscoveryTab(searchParams.get('tab'))
-
+  // Read once on mount: search, tags and page live in the URL so Back from a post and shared links restore them.
+  const [initialUrlState] = useState(() => ({
+    search: searchParams.get('q') ?? '',
+    page: Number(searchParams.get('page')) || 1,
+    tags: (searchParams.get('tags') ?? '').split(',').map((t) => t.trim()).filter(Boolean),
+  }))
+  const handleStateChange = useCallback(
+    ({ search, page, tags }: { search: string; page: number; tags: string[] }) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev)
+          if (search.trim()) next.set('q', search.trim())
+          else next.delete('q')
+          if (page > 1) next.set('page', String(page))
+          else next.delete('page')
+          if (tags.length) next.set('tags', tags.join(','))
+          else next.delete('tags')
+          return next.toString() === prev.toString() ? prev : next
+        },
+        { replace: true }
+      )
+    },
+    [setSearchParams]
+  )
   const handleUrlTabChange = useCallback(
     (tab: CommunityDiscoveryTab) => {
       setSearchParams(
@@ -75,6 +98,10 @@ export default function Community() {
   } = useCommunityPosts(12, {
     initialTab: urlTab,
     onTabChange: handleUrlTabChange,
+    initialSearch: initialUrlState.search,
+    initialPage: initialUrlState.page,
+    initialTags: initialUrlState.tags,
+    onStateChange: handleStateChange,
   })
 
   const [postView, setPostView] = useState<CommunityPostView>(() => readStoredPostView())
@@ -136,6 +163,7 @@ export default function Community() {
           onFiltersChange={handleFiltersChange}
           onTabChange={handleTabChange}
           onPostViewChange={handlePostViewChange}
+          initialSearch={initialUrlState.search}
         />
 
         {showFeatured && (

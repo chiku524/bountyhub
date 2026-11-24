@@ -8,6 +8,9 @@ import { ErrorMessage } from '../components/ErrorMessage'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { CodeBlockView } from '../components/CodeBlockView'
+import { Markdown } from '../components/Markdown'
+import { ImageLightbox } from '../components/ImageLightbox'
+import { MarkdownEditor } from '../components/MarkdownEditor'
 import { VoteButton } from '../components/VoteButton'
 import { formatBountyTimeLeft, isBountyEndingSoon } from '../utils/bountyTime'
 import { FiLink } from 'react-icons/fi'
@@ -43,7 +46,7 @@ export default function PostDetail() {
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
-
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   // Memoize formatted dates to prevent them from changing on re-renders
   const formattedCreatedAt = useMemo(() => {
     if (!post?.createdAt) return ''
@@ -233,12 +236,19 @@ export default function PostDetail() {
     <div key={index} className="relative group">
       {item.type === 'IMAGE' ? (
         <div className="relative overflow-hidden rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800">
-          <img 
-            src={item.url} 
-            alt={`Media ${index + 1}`} 
-            className="w-full h-64 object-cover hover:scale-105 transition-transform duration-300 cursor-pointer relative z-10"
-            onClick={() => window.open(item.url, '_blank')}
-          />
+          <button
+            type="button"
+            className="block w-full"
+            onClick={() => setLightboxIndex(imageMedia.findIndex((m) => m.url === item.url))}
+            aria-label={`View image ${index + 1} full size`}
+          >
+            <img
+              src={item.url}
+              alt={`Media ${index + 1}`}
+              loading="lazy"
+              className="w-full h-64 object-cover hover:scale-105 transition-transform duration-300 cursor-zoom-in relative z-10"
+            />
+          </button>
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center pointer-events-none">
             <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
               <span className="text-white text-sm bg-black bg-opacity-50 px-2 py-1 rounded-sm">
@@ -276,6 +286,7 @@ export default function PostDetail() {
   )
 
   const isDesktop = isDesktopApp()
+  const imageMedia = (post?.media ?? []).filter((m) => String(m.type).toUpperCase() === 'IMAGE')
   return (
     <div className="p-4 @sm/main:p-6 @3xl/main:p-8">
       <div className={`mx-auto min-w-0 w-full ${isDesktop ? 'max-w-6xl' : 'max-w-7xl'}`}>
@@ -422,14 +433,12 @@ export default function PostDetail() {
                     placeholder="Title"
                     disabled={editLoading}
                   />
-                  <textarea
+                  <MarkdownEditor
                     id="post-edit-content"
-                    name="postEditContent"
                     value={editContent}
-                    onChange={e => setEditContent(e.target.value)}
-                    className="w-full p-2 rounded-sm border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
+                    onChange={setEditContent}
                     placeholder="Content"
-                    rows={6}
+                    rows={8}
                     disabled={editLoading}
                   />
                   
@@ -510,7 +519,7 @@ export default function PostDetail() {
                 </form>
               ) : (
                 <>
-                  <p className="text-neutral-700 dark:text-gray-400 mb-4 whitespace-pre-wrap">{post.content}</p>
+                  <Markdown className="mb-4">{post.content}</Markdown>
                   {/* Code Blocks */}
                   {post.codeBlocks && post.codeBlocks.length > 0 && (
                     <div className="mb-6">
@@ -584,6 +593,11 @@ export default function PostDetail() {
           <PostChatRoom postId={postId} postTitle={post.title} />
         )}
 
+        <ImageLightbox
+          images={imageMedia.map((m, i) => ({ url: m.url, alt: `Image ${i + 1} from ${post?.title ?? 'post'}` }))}
+          index={lightboxIndex}
+          onIndexChange={setLightboxIndex}
+        />
         <ConfirmDialog
           open={showDeleteConfirm}
           title="Delete this post?"

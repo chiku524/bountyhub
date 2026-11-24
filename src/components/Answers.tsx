@@ -9,6 +9,8 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useToast } from '../contexts/ToastContext'
 import { ConfirmDialog } from './ConfirmDialog'
 import { CodeBlockView } from './CodeBlockView'
+import { Markdown } from './Markdown'
+import { MarkdownEditor } from './MarkdownEditor'
 import { useLocalStorageDraft } from '../hooks/useLocalStorageDraft'
 import type { Answer, Post, CodeBlock } from '../types'
 
@@ -27,6 +29,11 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post, onPostChang
   const loginHref = `/login?redirectTo=${encodeURIComponent(location.pathname + location.search)}`
   const [acceptTarget, setAcceptTarget] = useState<Answer | null>(null)
   const [accepting, setAccepting] = useState(false)
+  const [editingAnswerId, setEditingAnswerId] = useState<string | null>(null)
+  const [editingText, setEditingText] = useState('')
+  const [savingEdit, setSavingEdit] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<Answer | null>(null)
+  const [deleting, setDeleting] = useState(false)
   const [answers, setAnswers] = useState<Answer[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -173,6 +180,48 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post, onPostChang
     }
   }, [user, postId, newAnswer, answerCodeBlocks, clearAnswerDraft, toast])
 
+  const saveAnswerEdit = async (answerId: string) => {
+    if (!editingText.trim()) return
+    setSavingEdit(true)
+    try {
+      const response = await fetch(`${config.api.baseUrl}/api/posts/${postId}/answers/${answerId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ content: editingText }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(data.error || 'Failed to update answer')
+      setAnswers((prev) => prev.map((a) => (a.id === answerId ? { ...a, content: data.content ?? editingText.trim() } : a)))
+      setEditingAnswerId(null)
+      toast.success('Answer updated')
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to update answer')
+    } finally {
+      setSavingEdit(false)
+    }
+  }
+
+  const deleteAnswer = async () => {
+    if (!deleteTarget) return
+    setDeleting(true)
+    try {
+      const response = await fetch(`${config.api.baseUrl}/api/posts/${postId}/answers/${deleteTarget.id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(data.error || 'Failed to delete answer')
+      setAnswers((prev) => prev.filter((a) => a.id !== deleteTarget.id))
+      setDeleteTarget(null)
+      toast.success('Answer deleted')
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to delete answer')
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   const handleAddCodeBlock = useCallback((codeBlock: CodeBlock) => {
     setAnswerCodeBlocks(prev => [...prev, codeBlock])
   }, [])
@@ -281,13 +330,11 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post, onPostChang
       {/* Add Answer Form (not shown to the question's author) */}
       {user && !isAuthor && (
         <form id="post-answer-form" onSubmit={handleSubmitAnswer} className="mb-6 scroll-mt-24">
-          <textarea
+          <MarkdownEditor
             id="answer-content"
-            name="answerContent"
             value={newAnswer}
-            onChange={(e) => setNewAnswer(e.target.value)}
+            onChange={setNewAnswer}
             placeholder="Write your answer..."
-            className="w-full p-3 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-600 rounded-lg text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 resize-none"
             rows={6}
             disabled={submitting}
           />
@@ -389,9 +436,54 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post, onPostChang
                       Accept
                     </button>
                   )}
+                  {user && answer.authorId === user.id && !answer.isAccepted && editingAnswerId !== answer.id && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingAnswerId(answer.id)
+                          setEditingText(answer.content)
+                        }}
+                        className="text-xs text-neutral-500 hover:text-indigo-500 dark:text-neutral-400"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeleteTarget(answer)}
+                        className="text-xs text-neutral-500 hover:text-red-500 dark:text-neutral-400"
+                      >
+                        Delete
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
-              <p className="text-neutral-700 dark:text-gray-300 whitespace-pre-wrap">{answer.content}</p>
+              {editingAnswerId === answer.id ? (
+                <div className="space-y-2">
+                  <MarkdownEditor value={editingText} onChange={setEditingText} rows={5} disabled={savingEdit} />
+                  <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setEditingAnswerId(null)}
+                      disabled={savingEdit}
+                      className="rounded-md border border-neutral-300 px-3 py-1 text-sm text-neutral-700 hover:bg-neutral-100 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-700"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void saveAnswerEdit(answer.id)}
+                      disabled={savingEdit || !editingText.trim()}
+                      className="btn-primary px-3 py-1 text-sm disabled:opacity-50"
+                    >
+                      {savingEdit ? 'Saving…' : 'Save'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <Markdown>{answer.content}</Markdown>
+              )}
               
               {/* Code Blocks */}
               {answer.codeBlocks && answer.codeBlocks.length > 0 && (
@@ -426,6 +518,17 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post, onPostChang
           </button>
         </div>
       )}
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title="Delete your answer?"
+        confirmLabel="Delete answer"
+        tone="danger"
+        busy={deleting}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={() => void deleteAnswer()}
+      >
+        <p>This can't be undone.</p>
+      </ConfirmDialog>
       <ConfirmDialog
         open={acceptTarget !== null}
         title={hasBounty ? `Accept this answer and pay ${post.reward} BBUX?` : 'Accept this answer?'}

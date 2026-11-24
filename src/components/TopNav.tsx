@@ -228,9 +228,9 @@ export function TopNav() {
         <div className={`flex items-center justify-between ${navHeightClass}`}>
           {/* Logo + app name: draggable region on desktop for window move */}
           <Link
-            to="/"
+            to={user ? '/community' : '/'}
             className="flex items-center space-x-2 shrink-0"
-            aria-label="bountyhub home"
+            aria-label={user ? 'bountyhub community' : 'bountyhub home'}
             {...(isDesktop ? { 'data-tauri-drag-region': true } : {})}
           >
             <img src={logoUrl} alt="" className="w-8 h-8 object-contain" aria-hidden />
@@ -275,6 +275,7 @@ export function TopNav() {
               </button>
               {exploreOpen && (
                 <div ref={exploreMenuRef} className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 w-56 bg-white dark:bg-neutral-800 rounded-xl shadow-lg border border-neutral-200 dark:border-neutral-700 py-1.5 z-50" role="menu">
+                  <p className="px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500" role="presentation">Community</p>
                   <Link
                     to="/community"
                     onClick={() => setExploreOpen(false)}
@@ -291,15 +292,32 @@ export function TopNav() {
                     <FiMessageCircle className="w-4 h-4 shrink-0 text-neutral-500" />
                     <span>Team Hub</span>
                   </Link>
+                  <p className="px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500" role="presentation">Earn</p>
                   <Link
-                    to="/download"
+                    to="/bug-bounty/campaigns"
                     onClick={() => setExploreOpen(false)}
                     className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
                   >
-                    <FiDownload className="w-4 h-4 shrink-0 text-neutral-500" />
-                    <span>Download</span>
+                    <FiShield className="w-4 h-4 shrink-0 text-neutral-500" />
+                    <span>Bug Bounty</span>
                   </Link>
-                  <div className="my-1 border-t border-neutral-200 dark:border-neutral-600" />
+                  <Link
+                    to="/repositories"
+                    onClick={() => setExploreOpen(false)}
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
+                  >
+                    <FiGithub className="w-4 h-4 shrink-0 text-neutral-500" />
+                    <span>Repositories</span>
+                  </Link>
+                  <Link
+                    to="/contributions"
+                    onClick={() => setExploreOpen(false)}
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
+                  >
+                    <FiAward className="w-4 h-4 shrink-0 text-neutral-500" />
+                    <span>Contributions</span>
+                  </Link>
+                  <p className="px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500" role="presentation">Governance</p>
                   <Link
                     to="/governance"
                     onClick={() => setExploreOpen(false)}
@@ -324,30 +342,14 @@ export function TopNav() {
                     <FiBarChart2 className="w-4 h-4 shrink-0 text-neutral-500" />
                     <span>Analytics</span>
                   </Link>
-                  <div className="my-1 border-t border-neutral-200 dark:border-neutral-600" />
+                  <div className="my-1 border-t border-neutral-200 dark:border-neutral-700" role="presentation" />
                   <Link
-                    to="/bug-bounty/campaigns"
+                    to="/download"
                     onClick={() => setExploreOpen(false)}
                     className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
                   >
-                    <FiShield className="w-4 h-4 shrink-0 text-neutral-500" />
-                    <span>Bug Bounty</span>
-                  </Link>
-                  <Link
-                    to="/repositories"
-                    onClick={() => setExploreOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
-                  >
-                    <FiGithub className="w-4 h-4 shrink-0 text-neutral-500" />
-                    <span>Repositories</span>
-                  </Link>
-                  <Link
-                    to="/contributions"
-                    onClick={() => setExploreOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
-                  >
-                    <FiAward className="w-4 h-4 shrink-0 text-neutral-500" />
-                    <span>Contributions</span>
+                    <FiDownload className="w-4 h-4 shrink-0 text-neutral-500" />
+                    <span>Download</span>
                   </Link>
                 </div>
               )}

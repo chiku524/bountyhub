@@ -234,15 +234,15 @@ const IntegrityDisplay = ({
 
   return (
     <>
-      <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
+      <div className="bg-neutral-100/50 dark:bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-violet-500/20 rounded-lg">
-              <FiShield className="w-5 h-5 text-violet-300" />
+              <FiShield className="w-5 h-5 text-violet-700 dark:text-violet-300" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-violet-300">Integrity Score</h3>
-              <p className="text-sm text-gray-400">Based on {user.totalRatings} community ratings</p>
+              <h3 className="text-lg font-semibold text-violet-700 dark:text-violet-300">Integrity Score</h3>
+              <p className="text-sm text-neutral-500 dark:text-gray-400">Based on {user.totalRatings} community ratings</p>
             </div>
           </div>
           {canRate && currentUserId !== user.id && (
@@ -261,7 +261,7 @@ const IntegrityDisplay = ({
             <div className={`text-3xl font-bold ${integrityColor}`}>
               {user.integrityScore.toFixed(1)}
             </div>
-            <div className="text-sm text-gray-400">out of 10</div>
+            <div className="text-sm text-neutral-500 dark:text-gray-400">out of 10</div>
             <div className={`text-sm font-medium ${integrityColor} mt-1`}>
               {integrityLevel}
             </div>
@@ -281,7 +281,7 @@ const IntegrityDisplay = ({
                 />
               ))}
             </div>
-            <div className="text-sm text-gray-400">
+            <div className="text-sm text-neutral-500 dark:text-gray-400">
               {user.totalRatings} rating{user.totalRatings !== 1 ? 's' : ''}
             </div>
           </div>
@@ -297,7 +297,7 @@ const IntegrityDisplay = ({
         {/* Quick Stats */}
         {user.totalRatings > 0 && (
           <div className="mt-4 pt-3 border-t border-violet-500/20">
-            <div className="text-xs text-gray-400 text-center">
+            <div className="text-xs text-neutral-500 dark:text-gray-400 text-center">
               Based on {user.totalRatings} community rating{user.totalRatings !== 1 ? 's' : ''}
             </div>
           </div>
@@ -400,12 +400,12 @@ export default function UserProfile() {
       <div className="min-w-0 w-full">
         <div className="min-w-0 w-full">
           <div className="mb-6 flex flex-col gap-4 @sm/main:flex-row @sm/main:justify-between @sm/main:items-center">
-            <h1 className="text-2xl font-bold text-white">Profile</h1>
+            <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Profile</h1>
           </div>
-          <div className="bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+          <div className="bg-white/80 dark:bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
             <div className="flex items-center justify-center py-8">
               <LoadingSpinner size="md" />
-              <span className="ml-3 text-gray-300">Loading profile...</span>
+              <span className="ml-3 text-neutral-700 dark:text-gray-300">Loading profile...</span>
             </div>
           </div>
         </div>
@@ -418,11 +418,11 @@ export default function UserProfile() {
       <div className="min-w-0 w-full">
         <div className="min-w-0 w-full">
           <div className="mb-6 flex flex-col gap-4 @sm/main:flex-row @sm/main:justify-between @sm/main:items-center">
-            <h1 className="text-2xl font-bold text-white">Profile</h1>
+            <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Profile</h1>
           </div>
-          <div className="bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+          <div className="bg-white/80 dark:bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
             <div className="flex flex-col justify-center items-center w-full h-full">
-              <h1 className="text-white text-2xl">User not found</h1>
+              <h1 className="text-neutral-900 dark:text-white text-2xl">User not found</h1>
               <Link to="/community" className="mt-4 text-violet-400 hover:text-violet-300">Go to Community</Link>
             </div>
           </div>
@@ -439,7 +439,7 @@ export default function UserProfile() {
     <div className="min-w-0 w-full">
       <div className="min-w-0 w-full">
         <div className="mb-6 flex flex-col gap-4 @sm/main:flex-row @sm/main:justify-between @sm/main:items-center">
-          <h1 className="text-2xl font-bold text-white">
+          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">
             {isOwnProfile ? 'Your Profile' : `${user.username}'s Profile`}
           </h1>
           {isOwnProfile && (
@@ -455,7 +455,7 @@ export default function UserProfile() {
           )}
         </div>
 
-        <div className="bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+        <div className="bg-white/80 dark:bg-neutral-800/80 rounded-lg p-6 border-2 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
           <div className="flex items-start space-x-6">
             <ProfilePictureUpload 
               currentPicture={user.profilePicture || null}
@@ -463,17 +463,17 @@ export default function UserProfile() {
               isOwnProfile={isOwnProfile}
             />
             <div className="flex-1">
-              <h2 className="text-xl font-semibold text-white">{user.username}</h2>
-              <p className="text-gray-400 mt-1">
+              <h2 className="text-xl font-semibold text-neutral-900 dark:text-white">{user.username}</h2>
+              <p className="text-neutral-500 dark:text-gray-400 mt-1">
                 Member since {new Date(user.createdAt).toLocaleDateString()}
               </p>
               <div className="mt-4">
                 <div className="flex items-center space-x-2">
                   <div className="bg-violet-500/20 px-3 py-1 rounded-full border border-violet-500/50">
-                    <span className="text-violet-300 font-medium">{reputationLevel}</span>
+                    <span className="text-violet-700 dark:text-violet-300 font-medium">{reputationLevel}</span>
                   </div>
                   <div className="bg-violet-500/20 px-3 py-1 rounded-full border border-violet-500/50">
-                    <span className="text-violet-300 font-medium">{user.reputationPoints || 0} points</span>
+                    <span className="text-violet-700 dark:text-violet-300 font-medium">{user.reputationPoints || 0} points</span>
                   </div>
                 </div>
               </div>
@@ -481,19 +481,19 @@ export default function UserProfile() {
           </div>
 
           <div className="mt-8">
-            <h2 className="text-lg font-semibold text-violet-300 mb-4">Profile Information</h2>
+            <h2 className="text-lg font-semibold text-violet-700 dark:text-violet-300 mb-4">Profile Information</h2>
             <div className="grid grid-cols-1 gap-6 @xl/main:grid-cols-2">
-              <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
-                <label htmlFor="bio" className="block text-sm font-medium text-violet-300">Bio</label>
-                <p id="bio" className="mt-1 text-sm text-gray-300">{user.profile?.bio || 'No bio provided'}</p>
+              <div className="bg-neutral-100/50 dark:bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
+                <label htmlFor="bio" className="block text-sm font-medium text-violet-700 dark:text-violet-300">Bio</label>
+                <p id="bio" className="mt-1 text-sm text-neutral-700 dark:text-gray-300">{user.profile?.bio || 'No bio provided'}</p>
               </div>
-              <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
-                <label htmlFor="location" className="block text-sm font-medium text-violet-300">Location</label>
-                <p id="location" className="mt-1 text-sm text-gray-300">{user.profile?.location || 'No location provided'}</p>
+              <div className="bg-neutral-100/50 dark:bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
+                <label htmlFor="location" className="block text-sm font-medium text-violet-700 dark:text-violet-300">Location</label>
+                <p id="location" className="mt-1 text-sm text-neutral-700 dark:text-gray-300">{user.profile?.location || 'No location provided'}</p>
               </div>
-              <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
-                <label htmlFor="website" className="block text-sm font-medium text-violet-300">Website</label>
-                <p id="website" className="mt-1 text-sm text-gray-300">
+              <div className="bg-neutral-100/50 dark:bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
+                <label htmlFor="website" className="block text-sm font-medium text-violet-700 dark:text-violet-300">Website</label>
+                <p id="website" className="mt-1 text-sm text-neutral-700 dark:text-gray-300">
                   {user.profile?.website ? (
                     <a href={user.profile.website} target="_blank" rel="noopener noreferrer" 
                        className="text-violet-400 hover:text-violet-300">
@@ -502,13 +502,13 @@ export default function UserProfile() {
                   ) : 'No website provided'}
                 </p>
               </div>
-              <div className="bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
-                <label htmlFor="socialMedia" className="block text-sm font-medium text-violet-300">Social Media</label>
+              <div className="bg-neutral-100/50 dark:bg-neutral-700/50 rounded-lg p-4 border border-violet-500/30">
+                <label htmlFor="socialMedia" className="block text-sm font-medium text-violet-700 dark:text-violet-300">Social Media</label>
                 <div id="socialMedia" className="mt-2">
                   {user.profile ? (
                     <SocialMediaIcons profile={user.profile} />
                   ) : (
-                    <p className="text-sm text-gray-300">No social media links provided</p>
+                    <p className="text-sm text-neutral-700 dark:text-gray-300">No social media links provided</p>
                   )}
                 </div>
               </div>
@@ -531,18 +531,18 @@ export default function UserProfile() {
 
           <div className="mt-8 grid grid-cols-1 gap-6 @xl/main:grid-cols-2">
             <div>
-              <h2 className="text-lg font-semibold text-violet-300 mb-4">Recent Activity</h2>
+              <h2 className="text-lg font-semibold text-violet-700 dark:text-violet-300 mb-4">Recent Activity</h2>
               <div className="space-y-2">
                 {recentActivities.length > 0 ? (
                   recentActivities.map((history) => (
-                    <div key={history.id} className="flex items-center justify-between p-3 bg-neutral-700/50 rounded-lg border border-violet-500/30">
+                    <div key={history.id} className="flex items-center justify-between p-3 bg-neutral-100/50 dark:bg-neutral-700/50 rounded-lg border border-violet-500/30">
                       <div className="flex items-center gap-2">
                         <div className="p-1.5 bg-violet-500/20 rounded-lg">
-                          <FiThumbsUp className="w-3.5 h-3.5 text-violet-300" />
+                          <FiThumbsUp className="w-3.5 h-3.5 text-violet-700 dark:text-violet-300" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-violet-300">{getActivityDescription(history.action)}</p>
-                          <p className="text-xs text-gray-400 mt-0.5">
+                          <p className="text-sm font-medium text-violet-700 dark:text-violet-300">{getActivityDescription(history.action)}</p>
+                          <p className="text-xs text-neutral-500 dark:text-gray-400 mt-0.5">
                             {new Date(history.createdAt).toLocaleDateString()}
                           </p>
                         </div>
@@ -568,25 +568,25 @@ export default function UserProfile() {
             </div>
 
             <div>
-              <h2 className="text-lg font-semibold text-violet-300 mb-4">Recent Posts</h2>
+              <h2 className="text-lg font-semibold text-violet-700 dark:text-violet-300 mb-4">Recent Posts</h2>
               <div className="space-y-2">
                 {posts.length > 0 ? (
                   posts.map((post) => (
-                    <div key={post.id} className="p-3 bg-neutral-700/50 rounded-lg border border-violet-500/30">
+                    <div key={post.id} className="p-3 bg-neutral-100/50 dark:bg-neutral-700/50 rounded-lg border border-violet-500/30">
                       <Link to={`/posts/${post.id}`} className="block hover:bg-neutral-600/50 rounded-lg p-1.5 -m-1.5 transition-colors">
                         <div className="flex items-center gap-2 mb-1">
                           <div className="p-1.5 bg-violet-500/20 rounded-lg">
-                            <FiEdit2 className="w-3.5 h-3.5 text-violet-300" />
+                            <FiEdit2 className="w-3.5 h-3.5 text-violet-700 dark:text-violet-300" />
                           </div>
-                          <h3 className="text-sm font-medium text-violet-300">{post.title}</h3>
+                          <h3 className="text-sm font-medium text-violet-700 dark:text-violet-300">{post.title}</h3>
                         </div>
-                        <p className="text-xs text-gray-300 line-clamp-2">{truncateContent(post.content)}</p>
+                        <p className="text-xs text-neutral-700 dark:text-gray-300 line-clamp-2">{truncateContent(post.content)}</p>
                         <div className="mt-1 flex items-center justify-between">
-                          <p className="text-xs text-gray-400">
+                          <p className="text-xs text-neutral-500 dark:text-gray-400">
                             {new Date(post.createdAt).toLocaleDateString()}
                           </p>
                           <div className="flex items-center gap-2">
-                            <span className="text-xs text-green-400">
+                            <span className="text-xs text-green-600 dark:text-green-400">
                               +{post.qualityUpvotes || 0}
                             </span>
                             <span className="text-xs text-red-400">
@@ -601,8 +601,8 @@ export default function UserProfile() {
                     </div>
                   ))
                 ) : (
-                  <div className="p-3 bg-neutral-700/50 rounded-lg border border-violet-500/30">
-                    <p className="text-sm text-gray-300">No posts yet</p>
+                  <div className="p-3 bg-neutral-100/50 dark:bg-neutral-700/50 rounded-lg border border-violet-500/30">
+                    <p className="text-sm text-neutral-700 dark:text-gray-300">No posts yet</p>
                   </div>
                 )}
                 {posts.length > 5 && (
@@ -618,21 +618,21 @@ export default function UserProfile() {
 
           {/* Bookmarks Section */}
           <div className="mt-8">
-            <h2 className="text-xl font-bold text-yellow-400 mb-4">Bookmarked Posts</h2>
+            <h2 className="text-xl font-bold text-amber-600 dark:text-yellow-400 mb-4">Bookmarked Posts</h2>
             {bookmarks.length > 0 ? (
               <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2">
                 {bookmarks.map((bookmark) => (
-                  <div key={bookmark.id} className="bg-neutral-800/80 rounded-lg p-4 border border-yellow-400/40 transition-all duration-300 hover:bg-neutral-700/80 hover:border-yellow-300/60 hover:shadow-lg hover:shadow-yellow-400/20 hover:scale-[1.02] group">
+                  <div key={bookmark.id} className="bg-white/80 dark:bg-neutral-800/80 rounded-lg p-4 border border-yellow-400/40 transition-all duration-300 hover:bg-neutral-700/80 hover:border-yellow-300/60 hover:shadow-lg hover:shadow-yellow-400/20 hover:scale-[1.02] group">
                     <Link to={`/posts/${bookmark.post.id}`} className="block">
-                      <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-yellow-300 transition-colors duration-300">
+                      <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-2 group-hover:text-yellow-300 transition-colors duration-300">
                         {bookmark.post.title}
                       </h3>
-                      <p className="text-gray-300 mb-2 truncate group-hover:text-gray-200 transition-colors duration-300">
+                      <p className="text-neutral-700 dark:text-gray-300 mb-2 truncate group-hover:text-gray-200 transition-colors duration-300">
                         {bookmark.post.content.length > 100 ? bookmark.post.content.substring(0, 100) + '...' : bookmark.post.content}
                       </p>
-                      <div className="flex items-center justify-between text-xs text-gray-400">
+                      <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-gray-400">
                         <span>{new Date(bookmark.post.createdAt).toLocaleDateString()}</span>
-                        <span className="text-yellow-400 group-hover:text-yellow-300 transition-colors duration-300">
+                        <span className="text-amber-600 dark:text-yellow-400 group-hover:text-yellow-300 transition-colors duration-300">
                           Read post →
                         </span>
                       </div>
@@ -641,8 +641,8 @@ export default function UserProfile() {
                 ))}
               </div>
             ) : (
-              <div className="bg-neutral-800/80 rounded-lg p-6 border border-yellow-400/40 text-center">
-                <p className="text-gray-400">No bookmarked posts yet</p>
+              <div className="bg-white/80 dark:bg-neutral-800/80 rounded-lg p-6 border border-yellow-400/40 text-center">
+                <p className="text-neutral-500 dark:text-gray-400">No bookmarked posts yet</p>
                 <p className="text-sm text-gray-500 mt-1">Bookmark posts from the community to see them here</p>
               </div>
             )}

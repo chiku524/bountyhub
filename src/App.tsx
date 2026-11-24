@@ -79,8 +79,13 @@ function RouteFallback() {
 
 function UserProfileRoute() {
   const { username } = useParams<{ username: string }>()
+  const { user } = useAuth()
   if (username && isReservedProfilePath(username)) {
     return <NotFound />
+  }
+  // Your own public URL shows the owner view (editable picture, bookmarks, GitHub sync) instead of a second, different layout.
+  if (user && username && user.username?.toLowerCase() === username.toLowerCase()) {
+    return <Profile />
   }
   return <UserProfile />
 }

@@ -376,18 +376,17 @@ export default function Profile() {
       setLoading(true)
       setError(null)
       
-      const [userData, postsData] = await Promise.all([
-        api.getProfile(),
-        api.getPosts() // This will get all posts, we'll filter for user's posts
-      ])
-      
+      const userData = await api.getProfile()
       setUser(userData)
-      
-      // Filter posts for current user (in a real app, you'd have a specific endpoint)
-      // Handle both array and paginated response
-      const posts = Array.isArray(postsData) ? postsData : postsData.posts
-      const userPosts = posts.filter((post: Post) => post.authorId === userData.id)
-      setPosts(userPosts)
+
+      // The user's own posts come from their public profile endpoint (previously this filtered the
+      // 20 newest site-wide posts, so most users saw an empty list).
+      try {
+        const publicData = await api.request<{ posts?: Post[] }>(`/api/users/${encodeURIComponent(userData.username)}`)
+        setPosts(publicData.posts ?? [])
+      } catch {
+        setPosts([])
+      }
       
       // Use real bookmarks data from API
       setBookmarks(userData.bookmarks || [])

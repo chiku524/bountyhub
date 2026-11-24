@@ -35,6 +35,12 @@ export function useCommunityPosts(
   options?: {
     initialTab?: CommunityDiscoveryTab
     onTabChange?: (tab: CommunityDiscoveryTab) => void
+    /** Restored from the URL so Back from a post returns to the same search, tags and page. */
+    initialSearch?: string
+    initialPage?: number
+    initialTags?: string[]
+    /** Called whenever search, page or tags change, so the caller can mirror them into the URL. */
+    onStateChange?: (state: { search: string; page: number; tags: string[] }) => void
   }
 ) {
   const queryClient = useQueryClient()
@@ -43,12 +49,20 @@ export function useCommunityPosts(
   useEffect(() => {
     onTabChangeRef.current = options?.onTabChange
   }, [options?.onTabChange])
-  const [searchQuery, setSearchQuery] = useState('')
-  const [currentPage, setCurrentPage] = useState(1)
+  const [searchQuery, setSearchQuery] = useState(options?.initialSearch ?? '')
+  const [currentPage, setCurrentPage] = useState(() => Math.max(1, options?.initialPage ?? 1))
   const [activeTab, setActiveTab] = useState<CommunityDiscoveryTab>(() => parseDiscoveryTab(initialTab))
-  const [filters, setFilters] = useState<CommunityFilterOptions>(() =>
-    filtersFromTab(parseDiscoveryTab(initialTab)),
-  )
+  const [filters, setFilters] = useState<CommunityFilterOptions>(() => ({
+    ...filtersFromTab(parseDiscoveryTab(initialTab)),
+    selectedTags: options?.initialTags ?? [],
+  }))
+  const onStateChangeRef = useRef(options?.onStateChange)
+  useEffect(() => {
+    onStateChangeRef.current = options?.onStateChange
+  }, [options?.onStateChange])
+  useEffect(() => {
+    onStateChangeRef.current?.({ search: searchQuery, page: currentPage, tags: filters.selectedTags })
+  }, [searchQuery, currentPage, filters.selectedTags])
   // Adjust local state when the URL tab prop changes (back/forward). Prefer
   // render-time sync over an effect to avoid react-hooks/set-state-in-effect.
   const [syncedInitialTab, setSyncedInitialTab] = useState(initialTab)

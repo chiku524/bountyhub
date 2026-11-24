@@ -13,6 +13,7 @@ import { FiInfo } from 'react-icons/fi'
 import type { CodeBlock, Media } from '../types'
 import { EmptyState } from '../components/EmptyState'
 import { useLocalStorageDraft } from '../hooks/useLocalStorageDraft'
+import { MarkdownEditor } from '../components/MarkdownEditor'
 import { useWalletData } from '../hooks/useWalletData'
 
 const DURATION_PRESETS = [1, 3, 7, 14, 30] as const
@@ -247,12 +248,12 @@ export default function CreatePost() {
             <label htmlFor="content" className="block text-sm font-medium text-violet-600 dark:text-violet-300 mb-2">
               Content
             </label>
-            <textarea
+            <MarkdownEditor
               id="content"
               value={content}
-              onChange={(e) => setContent(e.target.value)}
-              rows={6}
-              className="w-full px-3 @sm/main:px-4 py-2 @sm/main:py-3 bg-white dark:bg-neutral-700/50 border border-neutral-300 dark:border-violet-500/30 rounded-lg text-neutral-900 dark:text-white focus:border-violet-500 focus:ring-violet-500 text-sm @sm/main:text-base"
+              onChange={setContent}
+              rows={8}
+              placeholder="Describe the problem, what you tried, and what a good answer looks like."
               required
             />
           </div>
@@ -267,7 +268,7 @@ export default function CreatePost() {
           </div>
 
           <div>
-            <label htmlFor="media" className="block text-sm font-medium text-violet-300 mb-2">
+            <label htmlFor="media" className="block text-sm font-medium text-violet-700 dark:text-violet-300 mb-2">
               Media
             </label>
             <MediaUpload
@@ -278,7 +279,7 @@ export default function CreatePost() {
           </div>
 
           <div>
-            <label htmlFor="codeBlocks" className="block text-sm font-medium text-violet-300 mb-2">
+            <label htmlFor="codeBlocks" className="block text-sm font-medium text-violet-700 dark:text-violet-300 mb-2">
               Code Blocks
             </label>
             <CodeBlockEditor
@@ -289,9 +290,9 @@ export default function CreatePost() {
             {/* Display Added Code Blocks */}
             {codeBlocks.length > 0 && (
               <div className="mt-4 space-y-3">
-                <h4 className="text-sm font-medium text-gray-300">Added Code Blocks:</h4>
+                <h4 className="text-sm font-medium text-neutral-700 dark:text-gray-300">Added Code Blocks:</h4>
                 {codeBlocks.map((block, index) => (
-                  <div key={index} className="bg-neutral-900/80 rounded-lg p-3 @sm/main:p-4 border border-violet-500/30">
+                  <div key={index} className="bg-neutral-50/80 dark:bg-neutral-900/80 rounded-lg p-3 @sm/main:p-4 border border-violet-500/30">
                     <div className="flex items-center justify-between mb-2">
                       <span className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded-sm text-xs @sm/main:text-sm">
                         {block.language}
@@ -299,7 +300,7 @@ export default function CreatePost() {
                       <button
                         type="button"
                         onClick={() => handleRemoveCodeBlock(index)}
-                        className="text-gray-400 hover:text-red-400 transition-colors"
+                        className="text-neutral-500 dark:text-gray-400 hover:text-red-400 transition-colors"
                         title="Remove code block"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -307,11 +308,11 @@ export default function CreatePost() {
                         </svg>
                       </button>
                     </div>
-                    <pre className="bg-neutral-900/80 p-3 @sm/main:p-4 rounded-lg overflow-x-auto max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-600 scrollbar-track-neutral-800">
-                      <code className="text-xs @sm/main:text-sm text-gray-300">{block.code}</code>
+                    <pre className="bg-neutral-50/80 dark:bg-neutral-900/80 p-3 @sm/main:p-4 rounded-lg overflow-x-auto max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-600 scrollbar-track-neutral-800">
+                      <code className="text-xs @sm/main:text-sm text-neutral-700 dark:text-gray-300">{block.code}</code>
                     </pre>
                     {block.description && (
-                      <p className="mt-2 text-xs @sm/main:text-sm text-gray-400">{block.description}</p>
+                      <p className="mt-2 text-xs @sm/main:text-sm text-neutral-500 dark:text-gray-400">{block.description}</p>
                     )}
                   </div>
                 ))}
@@ -320,14 +321,14 @@ export default function CreatePost() {
           </div>
 
           <div>
-            <h3 className="block text-sm font-medium text-violet-300 mb-3">
+            <h3 className="block text-sm font-medium text-violet-700 dark:text-violet-300 mb-3">
               <div className="flex items-center gap-2">
                 <FaGift className="w-4 h-4" />
                 Bounty Settings
               </div>
             </h3>
             
-            <div className="bg-linear-to-br from-neutral-800/60 to-neutral-900/60 border border-violet-500/20 rounded-xl p-4 @sm/main:p-6 backdrop-blur-xs">
+            <div className="bg-linear-to-br from-violet-50/60 dark:from-neutral-800/60 to-white/60 dark:to-neutral-900/60 border border-violet-500/20 rounded-xl p-4 @sm/main:p-6 backdrop-blur-xs">
               {/* Bounty Toggle */}
               <div className="mb-6 flex flex-col gap-4 @xl/main:flex-row @xl/main:items-center @xl/main:justify-between">
                 <div className="flex items-center gap-3">
@@ -346,17 +347,17 @@ export default function CreatePost() {
                     </label>
                   </div>
                   <div>
-                    <span className="text-white font-medium cursor-pointer text-sm @sm/main:text-base">
+                    <span className="text-neutral-900 dark:text-white font-medium cursor-pointer text-sm @sm/main:text-base">
                       Add Crypto Bounty
                     </span>
-                    <p className="text-gray-400 text-xs @sm/main:text-sm">Reward the best answer with tokens</p>
+                    <p className="text-neutral-500 dark:text-gray-400 text-xs @sm/main:text-sm">Reward the best answer with tokens</p>
                   </div>
                 </div>
                 
                 {hasBounty && (
                   <div className="flex items-center gap-2 px-3 py-1 bg-violet-500/20 border border-violet-500/30 rounded-full">
-                    <FaGift className="w-4 h-4 text-violet-300" />
-                    <span className="text-violet-300 text-xs @sm/main:text-sm font-medium">Active</span>
+                    <FaGift className="w-4 h-4 text-violet-700 dark:text-violet-300" />
+                    <span className="text-violet-700 dark:text-violet-300 text-xs @sm/main:text-sm font-medium">Active</span>
                   </div>
                 )}
               </div>
@@ -365,11 +366,11 @@ export default function CreatePost() {
               {hasBounty && (
                 <div className="space-y-4 @sm/main:space-y-6 animate-in slide-in-from-top-2 duration-300">
                   {/* Amount Section */}
-                  <div className="bg-neutral-700/30 rounded-lg p-3 @sm/main:p-4 border border-neutral-600/50">
+                  <div className="bg-neutral-100/30 dark:bg-neutral-700/30 rounded-lg p-3 @sm/main:p-4 border border-neutral-300 dark:border-neutral-600/50">
                     <div className="flex items-center gap-2 mb-3">
-                      <FaDollarSign className="w-4 h-4 text-yellow-400" />
+                      <FaDollarSign className="w-4 h-4 text-amber-600 dark:text-yellow-400" />
                     </div>
-                    <label htmlFor="bountyAmount" className="text-white font-medium mb-1 block text-sm @sm/main:text-base">Bounty Amount</label>
+                    <label htmlFor="bountyAmount" className="text-neutral-900 dark:text-white font-medium mb-1 block text-sm @sm/main:text-base">Bounty Amount</label>
                     <div className="relative">
                       <input
                         id="bountyAmount"
@@ -380,9 +381,9 @@ export default function CreatePost() {
                         step="0.01"
                         required
                         placeholder="0.00"
-                        className="w-full px-3 @sm/main:px-4 py-2 @sm/main:py-3 bg-neutral-800/50 border border-neutral-600/50 rounded-lg text-white placeholder-gray-400 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all duration-200 text-sm @sm/main:text-base"
+                        className="w-full px-3 @sm/main:px-4 py-2 @sm/main:py-3 bg-white/50 dark:bg-neutral-800/50 border border-neutral-300 dark:border-neutral-600/50 rounded-lg text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all duration-200 text-sm @sm/main:text-base"
                       />
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs @sm/main:text-sm">
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-neutral-500 dark:text-gray-400 text-xs @sm/main:text-sm">
                         {TOKEN_SYMBOL}
                       </div>
                     </div>
@@ -393,9 +394,9 @@ export default function CreatePost() {
                           ? `More than your balance of ${balance.toFixed(2)} ${TOKEN_SYMBOL}.`
                           : `Your balance: ${balance.toFixed(2)} ${TOKEN_SYMBOL}`}
                     </div>
-                    <p className="mt-2 text-xs text-gray-400 leading-relaxed">
+                    <p className="mt-2 text-xs text-neutral-500 dark:text-gray-400 leading-relaxed">
                       Bounties use your on-platform BBUX balance. Ensure you have enough BBUX in{' '}
-                      <Link to="/wallet" className="text-violet-300 underline decoration-violet-500/50 underline-offset-2 hover:text-violet-200">
+                      <Link to="/wallet" className="text-violet-700 dark:text-violet-300 underline decoration-violet-500/50 underline-offset-2 hover:text-violet-200">
                         Wallet
                       </Link>{' '}
                       before posting; deposit via Solana if needed. If nobody answers before the bounty ends, it's returned to your wallet.
@@ -403,11 +404,11 @@ export default function CreatePost() {
                   </div>
 
                   {/* Duration Section */}
-                  <div className="bg-neutral-700/30 rounded-lg p-3 @sm/main:p-4 border border-neutral-600/50">
+                  <div className="bg-neutral-100/30 dark:bg-neutral-700/30 rounded-lg p-3 @sm/main:p-4 border border-neutral-300 dark:border-neutral-600/50">
                     <div className="flex items-center gap-2 mb-3">
                       <FaClockIcon className="w-4 h-4 text-blue-400" />
                     </div>
-                    <p id="bountyDurationLabel" className="text-white font-medium mb-2 block text-sm @sm/main:text-base">Bounty Duration</p>
+                    <p id="bountyDurationLabel" className="text-neutral-900 dark:text-white font-medium mb-2 block text-sm @sm/main:text-base">Bounty Duration</p>
                     <div className="flex flex-wrap gap-2" role="radiogroup" aria-labelledby="bountyDurationLabel">
                       {DURATION_PRESETS.map((days) => (
                         <button
@@ -418,15 +419,15 @@ export default function CreatePost() {
                           onClick={() => setBountyDuration(days)}
                           className={`rounded-lg border px-3 py-2 text-sm transition-colors ${
                             bountyDuration === days
-                              ? 'border-violet-400 bg-violet-500/30 text-white'
-                              : 'border-neutral-600/50 bg-neutral-800/50 text-gray-300 hover:border-violet-500/50'
+                              ? 'border-violet-500 bg-violet-100 text-violet-800 dark:border-violet-400 dark:bg-violet-500/30 dark:text-white'
+                              : 'border-neutral-300 bg-white text-neutral-700 hover:border-violet-400 dark:border-neutral-600/50 dark:bg-neutral-800/50 dark:text-gray-300 dark:hover:border-violet-500/50'
                           }`}
                         >
                           {days} {days === 1 ? 'day' : 'days'}
                         </button>
                       ))}
                     </div>
-                    <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
+                    <div className="flex items-center gap-2 mt-2 text-xs text-neutral-500 dark:text-gray-400">
                       <FiInfo className="w-3 h-3" />
                       <span>Bounty expires after {bountyDuration} days</span>
                     </div>
@@ -434,28 +435,28 @@ export default function CreatePost() {
 
                   {/* Summary Card */}
                   <div className="bg-linear-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/30 rounded-lg p-3 @sm/main:p-4">
-                    <h4 className="text-violet-300 font-medium mb-2 text-sm @sm/main:text-base">Bounty Summary</h4>
+                    <h4 className="text-violet-700 dark:text-violet-300 font-medium mb-2 text-sm @sm/main:text-base">Bounty Summary</h4>
                     <div className="space-y-2 text-xs @sm/main:text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Amount:</span>
-                        <span className="text-white font-medium">
+                        <span className="text-neutral-500 dark:text-gray-400">Amount:</span>
+                        <span className="text-neutral-900 dark:text-white font-medium">
                           {bountyAmount ? `${parseFloat(bountyAmount).toFixed(2)} ${TOKEN_SYMBOL}` : `0.00 ${TOKEN_SYMBOL}`}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Duration:</span>
-                        <span className="text-white font-medium">{bountyDuration} days</span>
+                        <span className="text-neutral-500 dark:text-gray-400">Duration:</span>
+                        <span className="text-neutral-900 dark:text-white font-medium">{bountyDuration} days</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Governance Fee:</span>
-                        <span className="text-yellow-400 font-medium">
+                        <span className="text-neutral-500 dark:text-gray-400">Governance Fee:</span>
+                        <span className="text-amber-600 dark:text-yellow-400 font-medium">
                           {bountyAmount ? `${(parseFloat(bountyAmount) * 0.05).toFixed(3)} ${TOKEN_SYMBOL} (platform-funded)` : `0.000 ${TOKEN_SYMBOL}`}
                         </span>
                       </div>
                       <div className="border-t border-violet-500/20 pt-2 mt-2">
                         <div className="flex justify-between">
-                          <span className="text-gray-400">Total Cost:</span>
-                          <span className="text-violet-300 font-semibold">
+                          <span className="text-neutral-500 dark:text-gray-400">Total Cost:</span>
+                          <span className="text-violet-700 dark:text-violet-300 font-semibold">
                             {bountyAmount ? `${parseFloat(bountyAmount).toFixed(2)} ${TOKEN_SYMBOL}` : `0.00 ${TOKEN_SYMBOL}`}
                           </span>
                         </div>
@@ -467,12 +468,12 @@ export default function CreatePost() {
 
               {/* Info Card when bounty is disabled */}
               {!hasBounty && (
-                <div className="bg-neutral-700/20 rounded-lg p-3 @sm/main:p-4 border border-neutral-600/30">
+                <div className="bg-neutral-100/20 dark:bg-neutral-700/20 rounded-lg p-3 @sm/main:p-4 border border-neutral-300 dark:border-neutral-600/30">
                   <div className="flex items-start gap-3">
-                    <FiInfo className="w-5 h-5 text-gray-400 mt-0.5 shrink-0" />
+                    <FiInfo className="w-5 h-5 text-neutral-500 dark:text-gray-400 mt-0.5 shrink-0" />
                     <div>
-                      <h4 className="text-gray-300 font-medium mb-1 text-sm @sm/main:text-base">No Bounty Selected</h4>
-                      <p className="text-gray-400 text-xs @sm/main:text-sm">
+                      <h4 className="text-neutral-700 dark:text-gray-300 font-medium mb-1 text-sm @sm/main:text-base">No Bounty Selected</h4>
+                      <p className="text-neutral-500 dark:text-gray-400 text-xs @sm/main:text-sm">
                         Enable bounty to reward the best answer with tokens. This will attract more attention to your question and incentivize quality responses.
                       </p>
                     </div>

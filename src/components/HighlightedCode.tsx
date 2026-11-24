@@ -33,8 +33,12 @@ for (const [name, def] of Object.entries(LANGS)) SyntaxHighlighter.registerLangu
 /** Maps CodeBlockEditor language values onto registered Prism grammars. */
 function prismLanguage(language: string | undefined): string {
   const l = (language || '').toLowerCase()
-  if (l === 'html' || l === 'xml') return 'markup'
-  if (l === 'shell' || l === 'sh') return 'bash'
+  const aliases: Record<string, string> = {
+    html: 'markup', xml: 'markup', svg: 'markup', shell: 'bash', sh: 'bash', zsh: 'bash',
+    js: 'javascript', jsx: 'javascript', mjs: 'javascript', ts: 'typescript', tsx: 'typescript',
+    py: 'python', rb: 'ruby', rs: 'rust', yml: 'yaml', md: 'markdown', cs: 'csharp', 'c++': 'cpp', kt: 'kotlin', ps1: 'powershell',
+  }
+  if (aliases[l]) return aliases[l]
   if (l in LANGS) return l
   return 'text'
 }

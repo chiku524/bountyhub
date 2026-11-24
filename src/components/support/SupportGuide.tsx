@@ -138,8 +138,11 @@ export function SupportGuide() {
 
   // First-run: 3-step tour once (localStorage). Skippable; never re-shows after dismiss/complete.
   // Skip on /pitch so the executive page stays uninterrupted.
+  // Only auto-start on hub pages: starting it on a deep link (a shared post, login, reset password)
+  // navigated first-time visitors away from the page they came for.
+  const autoTourAllowed = ['/community', '/profile'].includes(location.pathname)
   useEffect(() => {
-    if (suppressAutoChrome) return
+    if (suppressAutoChrome || !autoTourAllowed) return
     if (readStorageFlag(TOUR_STORAGE_KEY)) return
     const params = new URLSearchParams(window.location.search)
     // welcome=true still triggers tour; otherwise auto for new users.
@@ -147,7 +150,7 @@ export function SupportGuide() {
     writeStorageFlag(GUIDE_WELCOMED_KEY, true)
     const t = window.setTimeout(() => startTour(), delay)
     return () => window.clearTimeout(t)
-  }, [suppressAutoChrome, startTour])
+  }, [suppressAutoChrome, autoTourAllowed, startTour])
 
   // Soft Guide panel welcome only after tour has already been completed once.
   useEffect(() => {
