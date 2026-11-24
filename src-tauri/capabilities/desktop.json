@@ -14,7 +14,8 @@
   "permissions": [
     "core:default",
     "process:default",
-    "global-shortcut:default",
+    "shell:allow-open",
+    "notification:default",
     "updater:default"
   ],
   "remote": {

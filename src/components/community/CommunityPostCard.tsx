@@ -1,3 +1,4 @@
+import { markdownToPlainText } from '../../utils/markdownExcerpt'
 import { memo } from 'react'
 import { Link } from 'react-router-dom'
 import { FiMessageSquare } from 'react-icons/fi'
@@ -78,7 +79,7 @@ export const CommunityPostCard = memo(function CommunityPostCard({
 
         {post.content?.trim() ? (
           <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
-            {post.content}
+            {markdownToPlainText(post.content)}
           </p>
         ) : (
           <div className="mt-1.5 min-h-[2.5rem]" aria-hidden />

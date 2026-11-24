@@ -9,6 +9,7 @@ import { useAuth } from '../contexts/AuthProvider'
 import { useToast } from '../contexts/ToastContext'
 import type { User, Post, Bookmark, ReputationHistory } from '../types'
 import { LoadingSpinner } from '../components/LoadingSpinner'
+import { markdownToPlainText } from '../utils/markdownExcerpt'
 
 interface ProfileData {
   firstName: string | null
@@ -53,7 +54,8 @@ function getProfilePicture(profilePicture: string | null, username: string): str
 
 function truncateContent(content: string | undefined | null): string {
   if (!content) return ''
-  return content.length > 100 ? content.substring(0, 100) + '...' : content
+  const text = markdownToPlainText(content)
+  return text.length > 100 ? text.substring(0, 100) + '...' : text
 }
 
 function getActivityDescription(action: string): string {

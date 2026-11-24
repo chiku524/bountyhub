@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTheme } from '../../contexts/ThemeProvider'
 import { browserNotificationService } from '../../utils/browserNotifications'
 import { isDesktopApp } from '../../utils/desktop'
+import { getCloseToTray, setCloseToTray } from '../../utils/desktopNative'
 
 function Row({ title, description, control }: { title: string; description: string; control: React.ReactNode }) {
   return (
@@ -100,6 +101,51 @@ export function AppearanceSettings() {
           </div>
         }
       />
+    </div>
+  )
+}
+
+const SHORTCUTS: Array<[string, string]> = [
+  ['⌘/Ctrl + K', 'Search and jump anywhere'],
+  ['⌘/Ctrl + ,', 'Open settings'],
+  ['⌘/Ctrl + Q', 'Quit BountyHub'],
+]
+
+/** Settings → Desktop app: window behaviour and keyboard shortcuts (shown above version/update info). */
+export function DesktopPreferences() {
+  const [closeToTray, setCloseToTrayState] = useState(() => getCloseToTray())
+
+  return (
+    <div className="space-y-4">
+      <Row
+        title="Keep running in the tray"
+        description="Closing the window hides BountyHub to the tray so alerts for answers and bounties still arrive. Turn off to quit when you close the window."
+        control={
+          <Switch
+            checked={closeToTray}
+            onChange={(v) => {
+              setCloseToTrayState(v)
+              void setCloseToTray(v)
+            }}
+            label="Keep running in the tray"
+          />
+        }
+      />
+      <div className="rounded-lg border border-neutral-200 p-4 dark:border-neutral-700">
+        <p className="font-medium text-neutral-900 dark:text-white">Keyboard shortcuts</p>
+        <dl className="mt-3 space-y-2 text-sm">
+          {SHORTCUTS.map(([keys, action]) => (
+            <div key={keys} className="flex items-center justify-between gap-4">
+              <dt className="text-neutral-600 dark:text-neutral-400">{action}</dt>
+              <dd>
+                <kbd className="rounded border border-neutral-300 bg-neutral-100 px-2 py-0.5 font-mono text-xs text-neutral-800 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-100">
+                  {keys}
+                </kbd>
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </div>
     </div>
   )
 }

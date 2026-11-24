@@ -2,6 +2,7 @@
 
 use std::io::Write;
 use std::net::{TcpListener, TcpStream};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc;
 use std::thread;
 use std::time::Duration;
@@ -13,6 +14,15 @@ const WINDOW_LABEL_MAIN: &str = "main";
 const WINDOW_LABEL_SPLASH: &str = "splashscreen";
 /// Localhost port for single-instance handoff (second launch pings first to raise the window).
 const INSTANCE_PORT: u16 = 45287;
+
+/// Whether closing the main window hides it to the tray (default) or quits the app.
+/// The webview sets this from Settings → Desktop app on startup and whenever it changes.
+static CLOSE_TO_TRAY: AtomicBool = AtomicBool::new(true);
+
+#[tauri::command]
+fn set_close_to_tray(enabled: bool) {
+    CLOSE_TO_TRAY.store(enabled, Ordering::Relaxed);
+}
 
 /// Returns current window logical size and position for persistence.
 #[tauri::command]
@@ -139,8 +149,8 @@ fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
-        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_notification::init())
         .setup(move |app| {
             if let Some(w) = app.get_webview_window(WINDOW_LABEL_MAIN) {
                 let _ = w.center();
@@ -255,12 +265,19 @@ fn main() {
             set_window_state,
             get_app_version,
             open_devtools,
+            set_close_to_tray,
         ])
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                 if window.label() == WINDOW_LABEL_MAIN {
-                    let _ = window.hide();
-                    api.prevent_close();
+                    if CLOSE_TO_TRAY.load(Ordering::Relaxed) {
+                        let _ = window.hide();
+                        api.prevent_close();
+                        // Lets the webview tell the user (once) that BountyHub is still running in the tray.
+                        let _ = window.emit("window-hidden-to-tray", ());
+                    } else {
+                        window.app_handle().exit(0);
+                    }
                 }
             }
         })

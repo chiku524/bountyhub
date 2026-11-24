@@ -12,7 +12,7 @@ import { LoadingSpinner } from '../components/LoadingSpinner'
 import { isDesktopApp } from '../utils/desktop'
 import { useDesktopUpdate } from '../contexts/DesktopUpdateContext'
 import { ConfirmDialog } from '../components/ConfirmDialog'
-import { NotificationSettings, AppearanceSettings } from '../components/settings/PreferenceSettings'
+import { NotificationSettings, AppearanceSettings, DesktopPreferences } from '../components/settings/PreferenceSettings'
 type SettingsTab = 'profile' | 'social' | 'account' | 'security' | 'notifications' | 'appearance' | 'desktop'
 
 interface ProfileData {
@@ -802,6 +802,7 @@ export default function Settings() {
 
               {activeTab === 'desktop' && isDesktop && (
                 <div className="space-y-6">
+                  <DesktopPreferences />
                   <p className="text-sm text-neutral-600 dark:text-neutral-400">
                     The desktop app checks for updates periodically while it is open. You can also check manually from the
                     tray menu, the menu bar, or here.

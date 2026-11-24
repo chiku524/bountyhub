@@ -34,6 +34,8 @@ import { DesktopShell } from './components/DesktopShell'
 import { DesktopHomeGate } from './components/DesktopHomeGate'
 import { DesktopLaunch } from './components/DesktopLaunch'
 import { isDesktopApp } from './utils/desktop'
+import { OfflineBanner } from './components/OfflineBanner'
+import { useDesktopIntegration } from './hooks/useDesktopIntegration'
 import { isAuthPath } from './utils/authPaths'
 import { installGravityPixel } from './installGravityPixel'
 
@@ -214,9 +216,11 @@ function AppContent() {
   const isMainApp = isDesktop && (location.pathname !== '/' || Boolean(user)) && (desktopUpdate?.phase === 'idle' || !desktopUpdate?.phase)
   useDesktopWindowState(isMainApp)
 
-  // Desktop: native menu events (About, Preferences, Check for Updates) and global shortcuts (Cmd+Q, Cmd+,)
+  // Desktop: native menu events (About, Preferences, Check for Updates), in-window shortcuts (Cmd+Q, Cmd+,),
+  // external links in the default browser and close-to-tray behaviour
   const { aboutOpen, setAboutOpen } = useDesktopMenuEvents()
   useDesktopShortcuts()
+  useDesktopIntegration()
   
   // Scroll to section handler for HomeNav
   const scrollToSection = (sectionId: string) => {
@@ -234,6 +238,7 @@ function AppContent() {
 
   return (
     <ErrorBoundary>
+      <OfflineBanner />
       {/* Desktop: update status mini-app when installing */}
       {isDesktop && desktopUpdate?.phase !== 'idle' && <DesktopUpdateOverlay />}
       {/* Web + desktop main app: canvas. Hidden on splash/auth/launch (dice.express–style flat intro). */}

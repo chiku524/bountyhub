@@ -8,6 +8,7 @@ import { FiThumbsUp, FiEdit2, FiCamera, FiStar, FiShield } from 'react-icons/fi'
 import { FaGithub, FaTwitter, FaLinkedin, FaInstagram, FaFacebook, FaYoutube, FaTiktok, FaDiscord, FaReddit, FaMedium, FaStackOverflow, FaDev } from 'react-icons/fa'
 import IntegrityRatingModal from '../components/IntegrityRatingModal'
 import { LoadingSpinner } from '../components/LoadingSpinner'
+import { markdownToPlainText } from '../utils/markdownExcerpt'
 
 const DEFAULT_PROFILE_PICTURE = 'https://api.dicebear.com/7.x/initials/svg?seed='
 
@@ -57,7 +58,8 @@ function getProfilePicture(profilePicture: string | null, username: string): str
 
 function truncateContent(content: string | undefined | null): string {
   if (!content) return ''
-  return content.length > 100 ? content.substring(0, 100) + '...' : content
+  const text = markdownToPlainText(content)
+  return text.length > 100 ? text.substring(0, 100) + '...' : text
 }
 
 function getActivityDescription(action: string): string {

@@ -3,9 +3,18 @@ import { useAuth } from '../contexts/AuthProvider'
 import { useDesktopUpdate } from '../contexts/DesktopUpdateContext'
 import { isDesktopApp } from '../utils/desktop'
 import { logoUrl } from '../utils/logoUrl'
+import { consumeFirstLaunch } from '../utils/desktopNative'
 import './desktop-splash.css'
 
+/** Full brand intro on first launch only; later launches get a brief splash while auth and updates settle. */
 const INTRO_DURATION_MS = 1800
+const RETURNING_INTRO_DURATION_MS = 500
+let introDurationMs: number | null = null
+/** Memoised per page load so StrictMode's double effect doesn't count as a second launch. */
+function getIntroDurationMs(): number {
+  introDurationMs ??= consumeFirstLaunch() ? INTRO_DURATION_MS : RETURNING_INTRO_DURATION_MS
+  return introDurationMs
+}
 const DESKTOP_INITIAL_PATH_KEY = 'desktop_initial_path'
 
 /**
@@ -28,7 +37,7 @@ export function DesktopHomeGate() {
       setIntroDone(true)
       return
     }
-    const t = setTimeout(() => setIntroDone(true), INTRO_DURATION_MS)
+    const t = setTimeout(() => setIntroDone(true), getIntroDurationMs())
     return () => clearTimeout(t)
   }, [])
 

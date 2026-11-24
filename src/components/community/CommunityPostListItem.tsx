@@ -1,3 +1,4 @@
+import { markdownToPlainText } from '../../utils/markdownExcerpt'
 import { memo } from 'react'
 import { Link } from 'react-router-dom'
 import { FiMessageSquare } from 'react-icons/fi'
@@ -74,7 +75,7 @@ export const CommunityPostListItem = memo(function CommunityPostListItem({
               </Link>
               {post.content?.trim() && (
                 <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-neutral-500 dark:text-neutral-400 @md/main:line-clamp-1">
-                  {post.content}
+                  {markdownToPlainText(post.content)}
                 </p>
               )}
             </div>

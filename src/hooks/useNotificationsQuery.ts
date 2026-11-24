@@ -51,7 +51,8 @@ export function useNotificationsQuery(enabled = true) {
     queryFn: fetchNotificationsList,
     enabled: Boolean(user) && enabled,
     refetchInterval: 30_000,
-    refetchIntervalInBackground: false,
+    // Desktop keeps polling while hidden in the tray so OS alerts still arrive; the web tab pauses.
+    refetchIntervalInBackground: isDesktopApp(),
   })
 
   const markRead = useMutation({
