@@ -1,61 +1,49 @@
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { isDesktopApp } from '../utils/desktop'
-import { COMMAND_PALETTE_TOGGLE_EVENT } from '../constants/commandPaletteEvents'
-
-const QUIT_SHORTCUT = 'CommandOrControl+Q'
-const PREFS_SHORTCUT = 'CommandOrControl+,'
-const COMMAND_PALETTE_SHORTCUT = 'CommandOrControl+K'
-const DEVTOOLS_SHORTCUT = 'CommandOrControl+Shift+I'
 
 /**
- * Registers global keyboard shortcuts for the desktop app:
+ * In-window keyboard shortcuts for the desktop app:
  * - Cmd/Ctrl+Q: Quit
  * - Cmd/Ctrl+,: Open Settings (Desktop app tab)
- * - Cmd/Ctrl+K: Toggle command palette (webview listens on window)
  * - Cmd/Ctrl+Shift+I (dev only): Toggle developer tools (invokes Rust open_devtools)
+ *
+ * Cmd/Ctrl+K (command palette) is handled by CommandPalette itself.
+ *
+ * These are deliberately window-scoped keydown listeners, not OS-level global shortcuts:
+ * global shortcuts fire (and swallow the keys) while any other app is focused, so Ctrl+Q in
+ * another app would quit BountyHub and Ctrl+K / Ctrl+, would stop working elsewhere.
  */
 export function useDesktopShortcuts() {
   const navigate = useNavigate()
-  const unregRef = useRef<((s: string | string[]) => Promise<void>) | null>(null)
 
   useEffect(() => {
     if (!isDesktopApp()) return
 
-    import('@tauri-apps/plugin-global-shortcut')
-      .then(({ register, unregister }) => {
-        unregRef.current = unregister
-        register(QUIT_SHORTCUT, (e) => {
-          if (e.state === 'Pressed') void import('@tauri-apps/plugin-process').then(({ exit }) => exit(0))
-        }).catch(() => {})
-        register(PREFS_SHORTCUT, (e) => {
-          if (e.state === 'Pressed') navigate('/settings?tab=desktop')
-        }).catch(() => {})
-        register(COMMAND_PALETTE_SHORTCUT, (e) => {
-          if (e.state === 'Pressed') {
-            window.dispatchEvent(new Event(COMMAND_PALETTE_TOGGLE_EVENT))
-          }
-        }).catch(() => {})
-        if (import.meta.env.DEV) {
-          register(DEVTOOLS_SHORTCUT, (e) => {
-            if (e.state === 'Pressed') {
-              void import('@tauri-apps/api/core').then(({ invoke }) => invoke('open_devtools').catch(() => {}))
-            }
-          }).catch(() => {})
-        }
-      })
-      .catch((e) => import.meta.env.DEV && console.debug('[useDesktopShortcuts]', e))
+    const onKeyDown = (e: KeyboardEvent) => {
+      const mod = e.metaKey || e.ctrlKey
+      if (!mod || e.altKey) return
+      const key = e.key.toLowerCase()
 
-    return () => {
-      const unreg = unregRef.current
-      if (unreg) {
-        unreg(QUIT_SHORTCUT).catch(() => {})
-        unreg(PREFS_SHORTCUT).catch(() => {})
-        unreg(COMMAND_PALETTE_SHORTCUT).catch(() => {})
-        if (import.meta.env.DEV) {
-          unreg(DEVTOOLS_SHORTCUT).catch(() => {})
-        }
+      if (key === 'q' && !e.shiftKey) {
+        e.preventDefault()
+        void import('@tauri-apps/plugin-process').then(({ exit }) => exit(0)).catch(() => {})
+        return
+      }
+      if (key === ',' && !e.shiftKey) {
+        e.preventDefault()
+        navigate('/settings?tab=desktop')
+        return
+      }
+      if (import.meta.env.DEV && key === 'i' && e.shiftKey) {
+        e.preventDefault()
+        void import('@tauri-apps/api/core')
+          .then(({ invoke }) => invoke('open_devtools'))
+          .catch(() => {})
       }
     }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
   }, [navigate])
 }

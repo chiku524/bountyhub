@@ -15,7 +15,6 @@ import { TopNav } from './components/TopNav'
 import { HomeNav } from './components/HomeNav'
 import { Footer } from './components/Footer'
 import { PageMetadata } from './components/PageMetadata'
-import { useBountyNotifications } from './hooks/useBountyNotifications'
 import { useDesktopUpdater } from './hooks/useDesktopUpdater'
 import { useDesktopWindowState } from './hooks/useDesktopWindowState'
 import { useDesktopMenuEvents } from './hooks/useDesktopMenuEvents'
@@ -171,7 +170,8 @@ function AppContent() {
   // Determine which navbar to show: HomeNav on home and download (web only; desktop has its own portal)
   // Pitch ships its own slim nav — treat as public so TopNav/ChatSidebar stay out of the way.
   const isPublicPage = isHomePage || isAuthPage || isLegalPage || isDownloadPage || isPitchPage
-  const showAuthenticatedNav = Boolean(user) && !isPublicPage && !loading
+  // App pages always get TopNav (logged-out visitors see Log in / Sign up there), so shared post links have navigation.
+  const showAuthenticatedNav = !isPublicPage && !loading
   const showHomeNav = (isHomePage || isDownloadPage) && !isDesktop
   
   // Handle OAuth redirect - wait for auth to load before showing authenticated layout
@@ -187,8 +187,6 @@ function AppContent() {
     }
   }, [loading, user])
   
-  // Enable bounty notifications polling
-  useBountyNotifications()
   const desktopUpdate = useDesktopUpdate()
   // Desktop: check for updates on a schedule (skip on splash "/" — splash handles its own check)
   const skipUpdaterOnSplash = isDesktop && location.pathname === '/'

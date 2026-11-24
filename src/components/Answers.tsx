@@ -5,16 +5,26 @@ import { ErrorMessage } from './ErrorMessage'
 import { CodeBlockEditor } from './CodeBlockEditor'
 import { ProfilePicture } from './ProfilePicture'
 import { config } from '../utils/config'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useToast } from '../contexts/ToastContext'
+import { ConfirmDialog } from './ConfirmDialog'
 import type { Answer, Post, CodeBlock } from '../types'
 
 interface AnswersProps {
   postId: string
   post: Post
+  /** Called after the post's state changes (e.g. an answer was accepted and the bounty paid). */
+  onPostChanged?: () => void
 }
 
-export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
+export const Answers: React.FC<AnswersProps> = memo(({ postId, post, onPostChanged }) => {
   const { user } = useAuth()
+  const toast = useToast()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const loginHref = `/login?redirectTo=${encodeURIComponent(location.pathname + location.search)}`
+  const [acceptTarget, setAcceptTarget] = useState<Answer | null>(null)
+  const [accepting, setAccepting] = useState(false)
   const [answers, setAnswers] = useState<Answer[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -44,8 +54,11 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
   }
 
   const handleVote = useCallback(async (answerId: string, value: number) => {
-    if (!user) return
-
+    if (!user) {
+      toast.info('Log in to vote on answers.')
+      navigate(loginHref)
+      return
+    }
     try {
       const response = await fetch(`${config.api.baseUrl}/api/posts/${postId}/answers/${answerId}/vote`, {
         method: 'POST',
@@ -74,13 +87,13 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
         [answerId]: result.userVote
       }))
     } catch (err: any) {
-      console.error('Vote error:', err)
+      toast.error(err?.message || 'Failed to vote')
     }
-  }, [user, postId])
+  }, [user, postId, toast, navigate, loginHref])
 
   const handleAcceptAnswer = useCallback(async (answerId: string) => {
     if (!user || user.id !== post.authorId) return
-
+    setAccepting(true)
     try {
       const response = await fetch(`${config.api.baseUrl}/api/posts/${postId}/answers/${answerId}/accept`, {
         method: 'POST',
@@ -98,10 +111,19 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
         ...answer,
         isAccepted: answer.id === answerId
       })))
+      toast.success(
+        post.reward && post.reward > 0
+          ? `Answer accepted. ${post.reward} BBUX bounty released.`
+          : 'Answer accepted.'
+      )
+      setAcceptTarget(null)
+      onPostChanged?.()
     } catch (err: any) {
-      console.error('Accept answer error:', err)
+      toast.error(err?.message || 'Failed to accept answer')
+    } finally {
+      setAccepting(false)
     }
-  }, [user, post, postId])
+  }, [user, post, postId, toast, onPostChanged])
 
   const handleSubmitAnswer = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
@@ -202,6 +224,7 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
   }
 
   const isAuthor = Boolean(user && user.id === post.authorId)
+  const hasAcceptedAnswer = answers.some((a) => a.isAccepted)
   const isOpen = post.status === 'OPEN'
   const hasBounty = Boolean(post.reward && post.reward > 0)
   const stickyCtaLabel = !user
@@ -214,7 +237,7 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
 
   const scrollToPrimary = () => {
     if (!user) {
-      window.location.href = '/login'
+      navigate(loginHref)
       return
     }
     const target = isAuthor
@@ -349,9 +372,10 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
                 </div>
                 <div className="flex items-center space-x-2">
                   <VoteButtons answer={answer} />
-                  {user && user.id === post.authorId && !answer.isAccepted && (
+                  {user && user.id === post.authorId && !answer.isAccepted && !hasAcceptedAnswer && answer.authorId !== user.id && (
                     <button
-                      onClick={() => handleAcceptAnswer(answer.id)}
+                      type="button"
+                      onClick={() => setAcceptTarget(answer)}
                       className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded-sm transition-colors"
                       title="Accept this answer"
                     >
@@ -407,6 +431,20 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
           </button>
         </div>
       )}
+      <ConfirmDialog
+        open={acceptTarget !== null}
+        title={hasBounty ? `Accept this answer and pay ${post.reward} BBUX?` : 'Accept this answer?'}
+        confirmLabel={hasBounty ? `Accept and pay ${post.reward} BBUX` : 'Accept answer'}
+        busy={accepting}
+        onCancel={() => setAcceptTarget(null)}
+        onConfirm={() => acceptTarget && handleAcceptAnswer(acceptTarget.id)}
+      >
+        <p>
+          {hasBounty
+            ? `The bounty goes to ${acceptTarget?.author?.username ?? 'this answer\'s author'} and the question is marked completed. This can't be undone.`
+            : 'The question will be marked completed. This can\'t be undone.'}
+        </p>
+      </ConfirmDialog>
     </div>
   )
 }) 

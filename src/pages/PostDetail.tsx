@@ -16,12 +16,14 @@ import TagSelector from '../components/TagSelector'
 import { MediaUpload } from '../components/MediaUpload'
 import { ProfilePicture } from '../components/ProfilePicture'
 import { useAuth } from '../contexts/AuthProvider'
+import { useToast } from '../contexts/ToastContext'
 import type { Post, CodeBlock, Media } from '../types'
 import { formatPostStatus } from '../utils/walletStatus'
 
 export default function PostDetail() {
   const { postId } = useParams()
   const { user } = useAuth()
+  const toast = useToast()
   const [post, setPost] = useState<Post | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -195,10 +197,10 @@ export default function PostDetail() {
         // Redirect to community page after successful deletion
         window.location.href = '/community'
       } else {
-        console.error('Failed to delete post')
+        toast.error('Failed to delete post. Please try again.')
       }
     } catch (err: any) {
-      console.error('Error deleting post:', err)
+      toast.error(err?.message || 'Failed to delete post. Please try again.')
     } finally {
       setDeleteLoading(false)
       setShowDeleteConfirm(false)
@@ -544,7 +546,7 @@ export default function PostDetail() {
         {/* Answers Section */}
         {!loading && !error && post && postId && (
           <div className="mt-8">
-            <Answers postId={postId} post={post} />
+            <Answers postId={postId} post={post} onPostChanged={refreshPost} />
           </div>
         )}
 

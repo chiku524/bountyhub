@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { createDb } from '../../../../../../src/utils/db'
 import { getUserIdFromSession } from '../../../../../../src/utils/auth'
 import { answers, posts, bounties, users } from '../../../../../../drizzle/schema'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { updateReputation } from '../../../../../../src/utils/reputation'
 import { createBountyNotification } from '../../../../../../src/utils/notifications'
 import { GovernanceService } from '../../../../../../src/utils/governance'
@@ -46,8 +46,21 @@ app.post(async (c) => {
 
     // Check if answer exists
     const answerResult = await db.select().from(answers).where(eq(answers.id, answerId)).limit(1)
-    if (answerResult.length === 0) {
+    if (answerResult.length === 0 || answerResult[0].postId !== postId) {
       return c.json({ error: 'Answer not found' }, 404)
+    }
+
+    // Accepting releases the bounty and awards reputation, so it can only happen once per post.
+    const alreadyAccepted = await db
+      .select({ id: answers.id })
+      .from(answers)
+      .where(and(eq(answers.postId, postId), eq(answers.isAccepted, true)))
+      .limit(1)
+    if (alreadyAccepted.length > 0) {
+      return c.json({ error: 'An answer has already been accepted for this post' }, 409)
+    }
+    if (answerResult[0].authorId === userId) {
+      return c.json({ error: 'You cannot accept your own answer' }, 400)
     }
 
     // Unaccept all other answers for this post
