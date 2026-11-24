@@ -87,7 +87,8 @@ app.post(async (c) => {
 
     // Check if there's a bounty on this post and handle bounty distribution
     const bountyResult = await db.select().from(bounties).where(eq(bounties.postId, postId)).limit(1)
-    if (bountyResult.length > 0 && bountyResult[0].status === 'ACTIVE') {
+    // EXPIRED bounties (deadline passed, answers waiting) can still be paid by accepting an answer.
+    if (bountyResult.length > 0 && (bountyResult[0].status === 'ACTIVE' || bountyResult[0].status === 'EXPIRED')) {
       const bounty = bountyResult[0]
       
       // Award additional reputation for bounty

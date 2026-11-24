@@ -17,7 +17,7 @@ import { FocusRestoreBoundary } from '../components/FocusRestoreBoundary'
 import { rememberFocusBeforeWalletModal } from '../utils/walletModalFocus'
 import { StatusLabel } from '../components/StatusLabel'
 import { formatTransactionStatus } from '../utils/walletStatus'
-
+import { isValidSolanaAddress, shortenAddress, withdrawBreakdown } from '../utils/solanaAddress'
 function WalletContent() {
   const { user, loading: authLoading } = useAuth()
   const { publicKey: walletPublicKey, connected, disconnect, signTransaction } = useWallet()
@@ -35,6 +35,8 @@ function WalletContent() {
   const [pendingDepositTxId, setPendingDepositTxId] = useState('')
   const [withdrawAmount, setWithdrawAmount] = useState('')
   const [destinationAddress, setDestinationAddress] = useState('')
+  /** Withdraw is two-step: fill in the form, then confirm a review screen before anything is sent. */
+  const [withdrawReview, setWithdrawReview] = useState(false)
   const [actionLoading, setActionLoading] = useState(false)
   const [message, setMessage] = useState('')
 
@@ -252,13 +254,28 @@ function WalletContent() {
 
   const handleWithdraw = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!withdrawAmount || parseFloat(withdrawAmount) <= 0) return
-
-    if (!destinationAddress) {
+    const amount = parseFloat(withdrawAmount)
+    if (!withdrawAmount || !(amount > 0)) {
+      setWithdrawError('Enter an amount greater than 0.')
+      return
+    }
+    if (walletData && amount > walletData.virtualBalance) {
+      setWithdrawError(`You only have ${walletData.virtualBalance.toFixed(4)} BBUX available.`)
+      return
+    }
+    if (!destinationAddress.trim()) {
       setWithdrawError('Please enter a destination address')
       return
     }
-
+    if (!isValidSolanaAddress(destinationAddress)) {
+      setWithdrawError("That doesn't look like a Solana address. Check it and try again.")
+      return
+    }
+    if (!withdrawReview) {
+      setWithdrawError('')
+      setWithdrawReview(true)
+      return
+    }
     // Prevent double submission
     if (withdrawInProgress) {
       return
@@ -270,7 +287,7 @@ function WalletContent() {
       setWithdrawError('')
       
       // Step 1: Create withdrawal request
-      const result = await api.performWalletActionWithAddress('withdraw', parseFloat(withdrawAmount), destinationAddress)
+      const result = await api.performWalletActionWithAddress('withdraw', amount, destinationAddress.trim())
       
       if (result.success && result.transactionId) {
         // Step 2: Process the withdrawal (send SOL)
@@ -279,6 +296,7 @@ function WalletContent() {
         if (processResult.success) {
           // Success: Update UI and show success message
           setShowWithdrawModal(false)
+          setWithdrawReview(false)
           setWithdrawAmount('')
           setDestinationAddress('')
           await refetchWalletData()
@@ -472,7 +490,7 @@ function WalletContent() {
               💰 Buy BBUX with SOL
             </button>
             <button
-              onClick={() => setShowWithdrawModal(true)}
+              onClick={() => { setWithdrawReview(false); setWithdrawError(""); setShowWithdrawModal(true) }}
               className="bg-blue-500 hover:bg-blue-600 text-white px-4 @sm/main:px-6 py-3 rounded-lg font-semibold transition-colors text-sm @sm/main:text-base"
             >
               💸 Sell BBUX for SOL
@@ -737,14 +755,9 @@ function WalletContent() {
                       value={withdrawAmount}
                       onChange={(e) => {
                         setWithdrawAmount(e.target.value)
-                        const amount = parseFloat(e.target.value) || 0
-                        const fee = amount * 0.03
-                        const netAmount = amount - fee
-                        const feeDisplay = document.getElementById('fee-display')
-                        const netDisplay = document.getElementById('net-display')
-                        if (feeDisplay) feeDisplay.textContent = fee.toFixed(4)
-                        if (netDisplay) netDisplay.textContent = netAmount.toFixed(4)
+                        setWithdrawError('')
                       }}
+                      disabled={withdrawReview}
                       step="0.001"
                       min="0.001"
                       max={walletData ? walletData.virtualBalance : 0}
@@ -752,17 +765,26 @@ function WalletContent() {
                       className="w-full px-3 py-2 border border-neutral-600 bg-neutral-700 text-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                       placeholder="0.1"
                     />
-                    <p className="text-sm text-gray-400 mt-1">
-                      Available: {walletData ? walletData.virtualBalance.toFixed(4) : '0.0000'} BBUX
-                    </p>
+                    <div className="mt-1 flex items-center justify-between text-sm text-gray-400">
+                      <span>Available: {walletData ? walletData.virtualBalance.toFixed(4) : '0.0000'} BBUX</span>
+                      {walletData && walletData.virtualBalance > 0 && !withdrawReview && (
+                        <button
+                          type="button"
+                          onClick={() => setWithdrawAmount(String(Math.floor(walletData.virtualBalance * 10000) / 10000))}
+                          className="text-xs font-medium text-blue-400 hover:text-blue-300"
+                        >
+                          Max
+                        </button>
+                      )}
+                    </div>
                     <div className="mt-2 p-3 bg-neutral-700 rounded-md">
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-300">Platform Fee (3%):</span>
-                        <span className="text-yellow-400" id="fee-display">0.0000</span>
+                        <span className="text-yellow-400">{withdrawBreakdown(parseFloat(withdrawAmount)).fee.toFixed(4)}</span>
                       </div>
                       <div className="flex justify-between text-sm mt-1">
                         <span className="text-gray-300">You&apos;ll receive:</span>
-                        <span className="text-green-400 font-medium" id="net-display">0.0000</span>
+                        <span className="text-green-400 font-medium">{withdrawBreakdown(parseFloat(withdrawAmount)).net.toFixed(4)}</span>
                       </div>
                       <p className="text-xs text-gray-400 mt-2">
                         The platform fee helps maintain and improve our services
@@ -777,12 +799,22 @@ function WalletContent() {
                       id="destination"
                       type="text"
                       value={destinationAddress}
-                      onChange={(e) => setDestinationAddress(e.target.value)}
+                      onChange={(e) => {
+                        setDestinationAddress(e.target.value)
+                        setWithdrawError('')
+                      }}
+                      disabled={withdrawReview}
+                      spellCheck={false}
+                      autoComplete="off"
+                      aria-invalid={destinationAddress.trim().length > 0 && !isValidSolanaAddress(destinationAddress)}
                       required
                       className="w-full px-3 py-2 border border-neutral-600 bg-neutral-700 text-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                       placeholder="Enter your Solana address"
                     />
-                    {connected && publicKey && (
+                    {destinationAddress.trim().length >= 32 && !isValidSolanaAddress(destinationAddress) && (
+                      <p className="mt-1 text-xs text-red-400">Not a valid Solana address.</p>
+                    )}
+                    {connected && publicKey && !withdrawReview && (
                       <button
                         type="button"
                         onClick={() => setDestinationAddress(publicKey)}
@@ -792,25 +824,43 @@ function WalletContent() {
                       </button>
                     )}
                   </div>
+                  {withdrawReview && (
+                    <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-100" role="status">
+                      <p className="font-medium">Review before sending</p>
+                      <p className="mt-1">
+                        You're selling {parseFloat(withdrawAmount).toFixed(4)} BBUX, paying a{' '}
+                        {withdrawBreakdown(parseFloat(withdrawAmount)).fee.toFixed(4)} BBUX fee, and sending the rest to{' '}
+                        <span className="font-mono" title={destinationAddress.trim()}>{shortenAddress(destinationAddress, 6)}</span>.
+                      </p>
+                      <p className="mt-1 text-xs text-amber-200/80">On-chain transfers can't be reversed. Make sure this address is yours.</p>
+                    </div>
+                  )}
                   {withdrawError && (
-                    <div className="bg-red-900 border border-red-700 text-red-200 rounded-lg p-3 text-sm">
+                    <div className="bg-red-900 border border-red-700 text-red-200 rounded-lg p-3 text-sm" role="alert">
                       {withdrawError}
                     </div>
                   )}
                   <div className="flex space-x-3">
                     <button
                       type="button"
-                      onClick={() => setShowWithdrawModal(false)}
-                      className="flex-1 px-4 py-2 text-gray-300 bg-neutral-700 rounded-md hover:bg-neutral-600 transition-colors"
+                      onClick={() => {
+                        if (withdrawReview && !actionLoading) {
+                          setWithdrawReview(false)
+                        } else {
+                          setShowWithdrawModal(false)
+                        }
+                      }}
+                      disabled={actionLoading}
+                      className="flex-1 px-4 py-2 text-gray-300 bg-neutral-700 rounded-md hover:bg-neutral-600 transition-colors disabled:opacity-50"
                     >
-                      Cancel
+                      {withdrawReview ? 'Back' : 'Cancel'}
                     </button>
                     <button
                       type="submit"
                       disabled={actionLoading}
                       className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {actionLoading ? 'Processing...' : 'Withdraw'}
+                      {actionLoading ? 'Processing...' : withdrawReview ? 'Confirm withdrawal' : 'Review withdrawal'}
                     </button>
                   </div>
                 </form>

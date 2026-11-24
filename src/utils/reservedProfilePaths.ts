@@ -6,6 +6,8 @@ const RESERVED = new Set(
   [
     'login',
     'signup',
+    'forgot-password',
+    'reset-password',
     'launch',
     'community',
     'chat',

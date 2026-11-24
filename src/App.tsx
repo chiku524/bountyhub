@@ -34,11 +34,14 @@ import { DesktopShell } from './components/DesktopShell'
 import { DesktopHomeGate } from './components/DesktopHomeGate'
 import { DesktopLaunch } from './components/DesktopLaunch'
 import { isDesktopApp } from './utils/desktop'
+import { isAuthPath } from './utils/authPaths'
 import { installGravityPixel } from './installGravityPixel'
 
 // Lazy-load all other routes for smaller initial bundle
 const Login = lazy(() => import('./pages/Login'))
 const Signup = lazy(() => import('./pages/Signup'))
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
+const ResetPassword = lazy(() => import('./pages/ResetPassword'))
 const Profile = lazy(() => import('./pages/Profile'))
 const ProfileActivity = lazy(() => import('./pages/ProfileActivity'))
 const ProfilePosts = lazy(() => import('./pages/ProfilePosts'))
@@ -96,6 +99,8 @@ function DocsAwareRoutes() {
         <Route path="/launch" element={<DesktopLaunch />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/profile" element={<ProtectedRoute title="Sign in to view your profile"><Profile /></ProtectedRoute>} />
         <Route path="/profile/activity" element={<ProtectedRoute><ProfileActivity /></ProtectedRoute>} />
         <Route path="/profile/posts" element={<ProtectedRoute><ProfilePosts /></ProtectedRoute>} />
@@ -155,15 +160,14 @@ function AppContent() {
   const location = useLocation()
   const { user, loading } = useAuth()
   const isHomePage = location.pathname === '/'
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup'
+  const isAuthPage = isAuthPath(location.pathname)
   const isLegalPage = location.pathname === '/privacy' || location.pathname === '/terms'
   const isDownloadPage = location.pathname === '/download'
   const isPitchPage = location.pathname === '/pitch'
   const isDesktop = isDesktopApp()
   const isLoginOrSignupOrRoot =
     location.pathname === '/' ||
-    location.pathname === '/login' ||
-    location.pathname === '/signup' ||
+    isAuthPage ||
     location.pathname === '/launch'
   const showDesktopShell = isDesktop && !isLoginOrSignupOrRoot
 
@@ -220,8 +224,7 @@ function AppContent() {
   const hideCanvasOnDesktopSplash =
     isDesktop &&
     (location.pathname === '/' ||
-      location.pathname === '/login' ||
-      location.pathname === '/signup' ||
+      isAuthPage ||
       location.pathname === '/launch')
 
   return (

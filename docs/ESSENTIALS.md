@@ -81,7 +81,9 @@ Copy `.dev.vars.example` to `.dev.vars` for local API development. Sensitive val
 |----------|---------|
 | `GRAVITY_API_KEY` | Publisher API key for contextual ads on the in-app Guide |
 | `GRAVITY_PRODUCTION` | `true` for live ads; omit/`false` for test creatives |
-
+| `RESEND_API_KEY` | Resend API key for password-reset email. Without it, reset emails are only logged |
+| `EMAIL_FROM` | Sender address, e.g. `BountyHub <no-reply@bountyhub.tech>` (domain verified in Resend) |
+| `FRONTEND_URL` | Web origin used in emailed links (defaults to `https://bountyhub.tech` in production) |
 Gravity is wired into `POST /api/support-ai` (Guide). Seed a local QA user with `npm run seed:gravity-user`.
 
 ---

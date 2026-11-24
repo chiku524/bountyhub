@@ -128,7 +128,7 @@ export async function createBountyNotification(
     userId: answerAuthorId,
     type: 'bounty',
     title: 'Bounty awarded!',
-    message: `Your answer was accepted and you received ${bountyAmount} SOL bounty for "${postTitle}"`,
+    message: `Your answer was accepted and you received ${bountyAmount} BBUX bounty for "${postTitle}"`,
     navigationType: 'post',
     navigationId: postId,
     navigationUrl: `/posts/${postId}`

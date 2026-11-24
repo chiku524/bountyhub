@@ -2,7 +2,7 @@ import { ReactNode } from 'react'
 import { useLocation } from 'react-router-dom'
 import { BackToTop } from './BackToTop'
 import { isDesktopApp } from '../utils/desktop'
-
+import { isAuthPath } from '../utils/authPaths'
 interface LayoutProps {
   children: ReactNode
   showNav?: boolean
@@ -12,7 +12,7 @@ export default function Layout({ children, showNav = true }: LayoutProps) {
   const location = useLocation()
   const isDesktop = isDesktopApp()
   const isHomePage = location.pathname === '/'
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup'
+  const isAuthPage = isAuthPath(location.pathname)
   const isLegalPage = location.pathname === '/privacy' || location.pathname === '/terms'
   const isPitchPage = location.pathname === '/pitch'
   const isPublicPage = isHomePage || isAuthPage || isLegalPage || isPitchPage
