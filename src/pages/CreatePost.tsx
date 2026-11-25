@@ -15,6 +15,7 @@ import { EmptyState } from '../components/EmptyState'
 import { useLocalStorageDraft } from '../hooks/useLocalStorageDraft'
 import { MarkdownEditor } from '../components/MarkdownEditor'
 import { useWalletData } from '../hooks/useWalletData'
+import { bountyFee, bountyTotalCost } from '../utils/bountyFee'
 
 const DURATION_PRESETS = [1, 3, 7, 14, 30] as const
 const CREATE_POST_DRAFT_KEY = 'bountyhub-draft-create-post'
@@ -47,7 +48,9 @@ export default function CreatePost() {
   const { walletData } = useWalletData(hasBounty)
   const balance = walletData?.virtualBalance ?? null
   const parsedBounty = parseFloat(bountyAmount)
-  const bountyTooHigh = hasBounty && balance !== null && parsedBounty > balance
+  const bountyFeeAmount = bountyFee(parsedBounty)
+  const bountyCost = bountyTotalCost(parsedBounty)
+  const bountyTooHigh = hasBounty && balance !== null && bountyCost > balance
   const createPostDraftSnapshot = useMemo(
     () => ({
       title,
@@ -163,7 +166,7 @@ export default function CreatePost() {
       return
     }
     if (bountyTooHigh) {
-      setError(`Your balance is ${balance?.toFixed(2)} ${TOKEN_SYMBOL}. Lower the bounty or add BBUX in Wallet first.`)
+      setError(`This bounty costs ${bountyCost.toFixed(2)} ${TOKEN_SYMBOL} including the 5% fee, but your balance is ${balance?.toFixed(2)} ${TOKEN_SYMBOL}. Lower the bounty or add BBUX in Wallet first.`)
       setLoading(false)
       return
     }
@@ -391,7 +394,7 @@ export default function CreatePost() {
                       {balance === null
                         ? 'Checking your balance…'
                         : bountyTooHigh
-                          ? `More than your balance of ${balance.toFixed(2)} ${TOKEN_SYMBOL}.`
+                          ? `With the 5% fee this costs ${bountyCost.toFixed(2)} ${TOKEN_SYMBOL}, more than your balance of ${balance.toFixed(2)} ${TOKEN_SYMBOL}.`
                           : `Your balance: ${balance.toFixed(2)} ${TOKEN_SYMBOL}`}
                     </div>
                     <p className="mt-2 text-xs text-neutral-500 dark:text-gray-400 leading-relaxed">
@@ -399,7 +402,7 @@ export default function CreatePost() {
                       <Link to="/wallet" className="text-violet-700 dark:text-violet-300 underline decoration-violet-500/50 underline-offset-2 hover:text-violet-200">
                         Wallet
                       </Link>{' '}
-                      before posting; deposit via Solana if needed. If nobody answers before the bounty ends, it's returned to your wallet.
+                      before posting; deposit via Solana if needed. A 5% governance fee is added on top and goes to the community treasury. If nobody answers before the bounty ends, the bounty (not the fee) is returned to your wallet.
                     </p>
                   </div>
 
@@ -448,16 +451,16 @@ export default function CreatePost() {
                         <span className="text-neutral-900 dark:text-white font-medium">{bountyDuration} days</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-neutral-500 dark:text-gray-400">Governance Fee:</span>
+                        <span className="text-neutral-500 dark:text-gray-400">Governance fee:</span>
                         <span className="text-amber-600 dark:text-yellow-400 font-medium">
-                          {bountyAmount ? `${(parseFloat(bountyAmount) * 0.05).toFixed(3)} ${TOKEN_SYMBOL} (platform-funded)` : `0.000 ${TOKEN_SYMBOL}`}
+                          {`${bountyFeeAmount.toFixed(3)} ${TOKEN_SYMBOL} (5%)`}
                         </span>
                       </div>
                       <div className="border-t border-violet-500/20 pt-2 mt-2">
                         <div className="flex justify-between">
                           <span className="text-neutral-500 dark:text-gray-400">Total Cost:</span>
                           <span className="text-violet-700 dark:text-violet-300 font-semibold">
-                            {bountyAmount ? `${parseFloat(bountyAmount).toFixed(2)} ${TOKEN_SYMBOL}` : `0.00 ${TOKEN_SYMBOL}`}
+                            {`${bountyCost.toFixed(3)} ${TOKEN_SYMBOL}`}
                           </span>
                         </div>
                       </div>

@@ -10,6 +10,7 @@ import {
   governanceProposals
 } from '../../drizzle/schema'
 import type { Db } from './db'
+import { bountyFee, bountyTotalCost } from './bountyFee'
 
 export interface GovernanceStats {
   totalStaked: number
@@ -30,7 +31,6 @@ export interface UserGovernanceStats {
 }
 
 export class GovernanceService {
-  private static readonly GOVERNANCE_FEE_PERCENTAGE = 0.05 // 5%
   private static readonly ACTIVITY_REWARD_RATE = 0.01 // 1% for activities
 
   /**
@@ -43,7 +43,9 @@ export class GovernanceService {
     bountyId: string
   ): Promise<{ success: boolean; feeAmount: number; error?: string }> {
     try {
-      const feeAmount = bountyAmount * this.GOVERNANCE_FEE_PERCENTAGE
+      // The asker pays the fee on top of the bounty, so the treasury credit is backed by real BBUX.
+      const feeAmount = bountyFee(bountyAmount)
+      const totalCost = bountyTotalCost(bountyAmount)
       
       // Get user's virtual wallet
       const userWallet = await db.select().from(virtualWallets).where(eq(virtualWallets.userId, userId)).limit(1)
@@ -52,7 +54,7 @@ export class GovernanceService {
       }
       
       const wallet = userWallet[0]
-      if (wallet.balance < bountyAmount) {
+      if (wallet.balance < totalCost) {
         return { success: false, feeAmount: 0, error: 'Insufficient balance' }
       }
 
@@ -78,8 +80,8 @@ export class GovernanceService {
       // Update user's virtual wallet
       await db.update(virtualWallets)
         .set({
-          balance: wallet.balance - bountyAmount,
-          totalSpent: wallet.totalSpent + bountyAmount,
+          balance: wallet.balance - totalCost,
+          totalSpent: wallet.totalSpent + totalCost,
           updatedAt: new Date()
         })
         .where(eq(virtualWallets.userId, userId))
@@ -103,7 +105,7 @@ export class GovernanceService {
         referenceId: bountyId,
         referenceType: 'bounty',
         balanceBefore: wallet.balance,
-        balanceAfter: wallet.balance - bountyAmount,
+        balanceAfter: wallet.balance - totalCost,
         treasuryBalanceBefore: treasuryBalanceBefore,
         treasuryBalanceAfter: treasuryBalanceAfter
       })

@@ -4,6 +4,7 @@ import { getUserIdFromSession } from '../../../src/utils/auth'
 import { posts, postTags, bounties, media, codeBlocks, users, tags, profiles, virtualWallets, votes } from '../../../drizzle/schema'
 import { and, eq, sql } from 'drizzle-orm'
 import { GovernanceService } from '../../../src/utils/governance'
+import { BOUNTY_FEE_RATE, bountyTotalCost } from '../../../src/utils/bountyFee'
 import { listCommunityPosts } from '../../utils/listCommunityPosts'
 
 // Import subroutes for comments and voting
@@ -101,8 +102,9 @@ app.post(async (c) => {
         return c.json({ error: 'Bounty duration must be between 1 and 30 days' }, 400)
       }
       const [wallet] = await db.select({ balance: virtualWallets.balance }).from(virtualWallets).where(eq(virtualWallets.userId, userId)).limit(1)
-      if (!wallet || wallet.balance < bountyAmount) {
-        return c.json({ error: `Insufficient BBUX balance for a ${bountyAmount} BBUX bounty` }, 400)
+      const totalCost = bountyTotalCost(bountyAmount)
+      if (!wallet || wallet.balance < totalCost) {
+        return c.json({ error: `Insufficient BBUX balance: a ${bountyAmount} BBUX bounty costs ${totalCost} BBUX including the 5% fee` }, 400)
       }
     }
 
@@ -210,7 +212,7 @@ app.post(async (c) => {
         tokenDecimals: 9,
         refundLockPeriod: 24,
         refundPenalty: 0,
-        communityFee: 0.05,
+        communityFee: BOUNTY_FEE_RATE,
         expiresAt: expiresAt,
         createdAt: now,
         updatedAt: now

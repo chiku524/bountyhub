@@ -361,7 +361,12 @@ export default function PostDetail() {
                           </span>
                         )}
                         {post.bountyStatus === 'EXPIRED' && (
-                          <span className="text-xs text-amber-700 dark:text-amber-300">· Ended, awaiting accept</span>
+                          <span
+                            className="text-xs text-amber-700 dark:text-amber-300"
+                            title="The asker has 3 days to accept an answer. After that the top-voted answer wins, or the bounty is returned if no answer has positive votes."
+                          >
+                            · Ended, awaiting accept (top-voted answer wins after 3 days)
+                          </span>
                         )}
                       </div>
                     )}

@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { createDb } from '../../../../../../src/utils/db'
 import { getUserIdFromSession } from '../../../../../../src/utils/auth'
 import { answers, posts, bounties, users } from '../../../../../../drizzle/schema'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, inArray } from 'drizzle-orm'
 import { updateReputation } from '../../../../../../src/utils/reputation'
 import { createBountyNotification } from '../../../../../../src/utils/notifications'
 import { GovernanceService } from '../../../../../../src/utils/governance'
@@ -90,28 +90,21 @@ app.post(async (c) => {
     // EXPIRED bounties (deadline passed, answers waiting) can still be paid by accepting an answer.
     if (bountyResult.length > 0 && (bountyResult[0].status === 'ACTIVE' || bountyResult[0].status === 'EXPIRED')) {
       const bounty = bountyResult[0]
-      
-      // Award additional reputation for bounty
-      await updateReputation(db, answerAuthorId, 'BOUNTY_AWARDED', answerId)
-      
-      // Distribute bounty through governance system
-      const bountyDistribution = await GovernanceService.distributeBounty(
-        db,
-        answerAuthorId,
-        bounty.amount,
-        bounty.id
-      )
-      
-      if (!bountyDistribution.success) {
-        console.error('Failed to distribute bounty:', bountyDistribution.error)
-        // Continue with the process even if bounty distribution fails
+
+      // Claim first, so the hourly expiry job can't refund or auto-award the same bounty concurrently.
+      const claimed = await db
+        .update(bounties)
+        .set({ status: 'CLAIMED', updatedAt: new Date() })
+        .where(and(eq(bounties.id, bounty.id), inArray(bounties.status, ['ACTIVE', 'EXPIRED'])))
+        .returning({ id: bounties.id })
+
+      if (claimed.length > 0) {
+        await updateReputation(db, answerAuthorId, 'BOUNTY_AWARDED', answerId)
+        const bountyDistribution = await GovernanceService.distributeBounty(db, answerAuthorId, bounty.amount, bounty.id)
+        if (!bountyDistribution.success) {
+          console.error('Failed to distribute bounty:', bountyDistribution.error)
+        }
       }
-      
-      // Update bounty status to completed
-      await db.update(bounties).set({
-        status: 'CLAIMED',
-        updatedAt: new Date()
-      }).where(eq(bounties.id, bounty.id))
     }
 
     // Create notification for answer author

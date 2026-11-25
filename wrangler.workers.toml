@@ -42,7 +42,7 @@ new_sqlite_classes = ["ChatRoomDO"]
 # Required secrets: SESSION_SECRET, SOLANA_RPC_URL, SOLANA_WALLET_PRIVATE_KEY,
 # SOLANA_WALLET_ADDRESS, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, HTML2PDF_API_KEY,
 # GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GITHUB_PAT, CRON_SECRET, TOKEN_ENCRYPTION_KEY,
-# GRAVITY_API_KEY
+# GRAVITY_API_KEY, RESEND_API_KEY
 # Optional: GRAVITY_PRODUCTION=true (live ads; default test mode via unset/false)
 [vars]
 NODE_ENV = "production"
@@ -56,3 +56,6 @@ VITE_CLOUDINARY_UPLOAD_PRESET = "bountyhub"
 VITE_API_URL = "https://api.bountyhub.tech"
 GITHUB_CALLBACK_URL = "https://api.bountyhub.tech/auth/callback"
 GITHUB_RELEASES_REPO = "chiku524/bountyhub"
+# Password reset emails (Resend). RESEND_API_KEY is a secret; the sender domain must be verified in Resend.
+EMAIL_FROM = "BountyHub <no-reply@bountyhub.tech>"
+FRONTEND_URL = "https://bountyhub.tech"
