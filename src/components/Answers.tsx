@@ -1,28 +1,58 @@
-import React, { useState, useEffect, useCallback, memo } from 'react'
+import React, { useState, useEffect, useCallback, useMemo, memo } from 'react'
 import { useAuth } from '../contexts/AuthProvider'
 import { LoadingSpinner } from './LoadingSpinner'
 import { ErrorMessage } from './ErrorMessage'
 import { CodeBlockEditor } from './CodeBlockEditor'
 import { ProfilePicture } from './ProfilePicture'
 import { config } from '../utils/config'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useToast } from '../contexts/ToastContext'
+import { ConfirmDialog } from './ConfirmDialog'
+import { CodeBlockView } from './CodeBlockView'
+import { Markdown } from './Markdown'
+import { MarkdownEditor } from './MarkdownEditor'
+import { useLocalStorageDraft } from '../hooks/useLocalStorageDraft'
 import type { Answer, Post, CodeBlock } from '../types'
 
 interface AnswersProps {
   postId: string
   post: Post
+  /** Called after the post's state changes (e.g. an answer was accepted and the bounty paid). */
+  onPostChanged?: () => void
 }
 
-export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
+export const Answers: React.FC<AnswersProps> = memo(({ postId, post, onPostChanged }) => {
   const { user } = useAuth()
+  const toast = useToast()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const loginHref = `/login?redirectTo=${encodeURIComponent(location.pathname + location.search)}`
+  const [acceptTarget, setAcceptTarget] = useState<Answer | null>(null)
+  const [accepting, setAccepting] = useState(false)
+  const [editingAnswerId, setEditingAnswerId] = useState<string | null>(null)
+  const [editingText, setEditingText] = useState('')
+  const [savingEdit, setSavingEdit] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<Answer | null>(null)
+  const [deleting, setDeleting] = useState(false)
   const [answers, setAnswers] = useState<Answer[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [newAnswer, setNewAnswer] = useState('')
+  const draftKey = `bountyhub-draft-answer-${postId}`
+  // Restore an unsent answer for this post (saved automatically while typing).
+  const [newAnswer, setNewAnswer] = useState(() => {
+    try {
+      const raw = localStorage.getItem(draftKey)
+      const parsed = raw ? (JSON.parse(raw) as { content?: unknown }) : null
+      return typeof parsed?.content === 'string' ? parsed.content : ''
+    } catch {
+      return ''
+    }
+  })
   const [submitting, setSubmitting] = useState(false)
   const [userVotes, setUserVotes] = useState<Record<string, number>>({})
   const [answerCodeBlocks, setAnswerCodeBlocks] = useState<CodeBlock[]>([])
-
+  const answerDraft = useMemo(() => ({ content: newAnswer }), [newAnswer])
+  const { clearDraft: clearAnswerDraft } = useLocalStorageDraft(draftKey, answerDraft, Boolean(user))
   useEffect(() => {
     fetchAnswers()
   }, [postId])
@@ -44,8 +74,11 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
   }
 
   const handleVote = useCallback(async (answerId: string, value: number) => {
-    if (!user) return
-
+    if (!user) {
+      toast.info('Log in to vote on answers.')
+      navigate(loginHref)
+      return
+    }
     try {
       const response = await fetch(`${config.api.baseUrl}/api/posts/${postId}/answers/${answerId}/vote`, {
         method: 'POST',
@@ -74,13 +107,13 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
         [answerId]: result.userVote
       }))
     } catch (err: any) {
-      console.error('Vote error:', err)
+      toast.error(err?.message || 'Failed to vote')
     }
-  }, [user, postId])
+  }, [user, postId, toast, navigate, loginHref])
 
   const handleAcceptAnswer = useCallback(async (answerId: string) => {
     if (!user || user.id !== post.authorId) return
-
+    setAccepting(true)
     try {
       const response = await fetch(`${config.api.baseUrl}/api/posts/${postId}/answers/${answerId}/accept`, {
         method: 'POST',
@@ -98,10 +131,19 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
         ...answer,
         isAccepted: answer.id === answerId
       })))
+      toast.success(
+        post.reward && post.reward > 0
+          ? `Answer accepted. ${post.reward} BBUX bounty released.`
+          : 'Answer accepted.'
+      )
+      setAcceptTarget(null)
+      onPostChanged?.()
     } catch (err: any) {
-      console.error('Accept answer error:', err)
+      toast.error(err?.message || 'Failed to accept answer')
+    } finally {
+      setAccepting(false)
     }
-  }, [user, post, postId])
+  }, [user, post, postId, toast, onPostChanged])
 
   const handleSubmitAnswer = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
@@ -127,6 +169,8 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
       const newAnswerData = await response.json()
       setAnswers(prev => [newAnswerData, ...prev])
       setNewAnswer('')
+      clearAnswerDraft()
+      toast.success('Answer posted')
       setAnswerCodeBlocks([])
       setError(null)
     } catch (err: any) {
@@ -134,7 +178,49 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
     } finally {
       setSubmitting(false)
     }
-  }, [user, postId, newAnswer, answerCodeBlocks])
+  }, [user, postId, newAnswer, answerCodeBlocks, clearAnswerDraft, toast])
+
+  const saveAnswerEdit = async (answerId: string) => {
+    if (!editingText.trim()) return
+    setSavingEdit(true)
+    try {
+      const response = await fetch(`${config.api.baseUrl}/api/posts/${postId}/answers/${answerId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ content: editingText }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(data.error || 'Failed to update answer')
+      setAnswers((prev) => prev.map((a) => (a.id === answerId ? { ...a, content: data.content ?? editingText.trim() } : a)))
+      setEditingAnswerId(null)
+      toast.success('Answer updated')
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to update answer')
+    } finally {
+      setSavingEdit(false)
+    }
+  }
+
+  const deleteAnswer = async () => {
+    if (!deleteTarget) return
+    setDeleting(true)
+    try {
+      const response = await fetch(`${config.api.baseUrl}/api/posts/${postId}/answers/${deleteTarget.id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(data.error || 'Failed to delete answer')
+      setAnswers((prev) => prev.filter((a) => a.id !== deleteTarget.id))
+      setDeleteTarget(null)
+      toast.success('Answer deleted')
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to delete answer')
+    } finally {
+      setDeleting(false)
+    }
+  }
 
   const handleAddCodeBlock = useCallback((codeBlock: CodeBlock) => {
     setAnswerCodeBlocks(prev => [...prev, codeBlock])
@@ -202,6 +288,7 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
   }
 
   const isAuthor = Boolean(user && user.id === post.authorId)
+  const hasAcceptedAnswer = answers.some((a) => a.isAccepted)
   const isOpen = post.status === 'OPEN'
   const hasBounty = Boolean(post.reward && post.reward > 0)
   const stickyCtaLabel = !user
@@ -214,7 +301,7 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
 
   const scrollToPrimary = () => {
     if (!user) {
-      window.location.href = '/login'
+      navigate(loginHref)
       return
     }
     const target = isAuthor
@@ -240,16 +327,14 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
         />
       )}
 
-      {/* Add Answer Form */}
-      {user && (
+      {/* Add Answer Form (not shown to the question's author) */}
+      {user && !isAuthor && (
         <form id="post-answer-form" onSubmit={handleSubmitAnswer} className="mb-6 scroll-mt-24">
-          <textarea
+          <MarkdownEditor
             id="answer-content"
-            name="answerContent"
             value={newAnswer}
-            onChange={(e) => setNewAnswer(e.target.value)}
+            onChange={setNewAnswer}
             placeholder="Write your answer..."
-            className="w-full p-3 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-600 rounded-lg text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 resize-none"
             rows={6}
             disabled={submitting}
           />
@@ -267,29 +352,21 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
             <div className="mt-4 space-y-3">
               <h4 className="text-sm font-medium text-neutral-700 dark:text-gray-300">Added Code Blocks:</h4>
               {answerCodeBlocks.map((block, index) => (
-                <div key={index} className="bg-white dark:bg-neutral-900/80 rounded-lg p-4 border border-violet-300 dark:border-violet-500/30">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="px-2 py-1 bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300 rounded-sm text-sm">
-                      {block.language}
-                    </span>
+                <CodeBlockView
+                  key={index}
+                  code={block.code}
+                  language={block.language}
+                  description={block.description}
+                  action={
                     <button
                       type="button"
                       onClick={() => handleRemoveCodeBlock(index)}
-                      className="text-neutral-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
-                      title="Remove code block"
+                      className="text-xs text-neutral-500 transition-colors hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
+                      Remove
                     </button>
-                  </div>
-                  <pre className="bg-white dark:bg-neutral-900/80 p-4 rounded-lg overflow-x-auto max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-600 scrollbar-track-neutral-800 border border-neutral-200 dark:border-neutral-700">
-                    <code className="text-sm text-neutral-900 dark:text-gray-300">{block.code}</code>
-                  </pre>
-                  {block.description && (
-                    <p className="mt-2 text-sm text-neutral-600 dark:text-gray-400">{block.description}</p>
-                  )}
-                </div>
+                  }
+                />
               ))}
             </div>
           )}
@@ -309,12 +386,12 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
       {/* Answers List */}
       <div
         id="post-answers-list"
-        className="space-y-4 max-h-[600px] scroll-mt-24 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-600 scrollbar-track-neutral-800 pr-2"
+        className="space-y-4 scroll-mt-24"
       >
         {answers.length === 0 ? (
           <p className="text-neutral-500 dark:text-gray-400 text-center py-4">No answers yet. Be the first to answer!</p>
         ) : (
-          answers
+          [...answers]
             .sort((a, b) => {
               // Sort by acceptance first, then by vote count
               if (a.isAccepted && !b.isAccepted) return -1
@@ -349,37 +426,71 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
                 </div>
                 <div className="flex items-center space-x-2">
                   <VoteButtons answer={answer} />
-                  {user && user.id === post.authorId && !answer.isAccepted && (
+                  {user && user.id === post.authorId && !answer.isAccepted && !hasAcceptedAnswer && answer.authorId !== user.id && (
                     <button
-                      onClick={() => handleAcceptAnswer(answer.id)}
+                      type="button"
+                      onClick={() => setAcceptTarget(answer)}
                       className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded-sm transition-colors"
                       title="Accept this answer"
                     >
                       Accept
                     </button>
                   )}
+                  {user && answer.authorId === user.id && !answer.isAccepted && editingAnswerId !== answer.id && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingAnswerId(answer.id)
+                          setEditingText(answer.content)
+                        }}
+                        className="text-xs text-neutral-500 hover:text-indigo-500 dark:text-neutral-400"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeleteTarget(answer)}
+                        className="text-xs text-neutral-500 hover:text-red-500 dark:text-neutral-400"
+                      >
+                        Delete
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
-              <p className="text-neutral-700 dark:text-gray-300 whitespace-pre-wrap">{answer.content}</p>
+              {editingAnswerId === answer.id ? (
+                <div className="space-y-2">
+                  <MarkdownEditor value={editingText} onChange={setEditingText} rows={5} disabled={savingEdit} />
+                  <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setEditingAnswerId(null)}
+                      disabled={savingEdit}
+                      className="rounded-md border border-neutral-300 px-3 py-1 text-sm text-neutral-700 hover:bg-neutral-100 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-700"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void saveAnswerEdit(answer.id)}
+                      disabled={savingEdit || !editingText.trim()}
+                      className="btn-primary px-3 py-1 text-sm disabled:opacity-50"
+                    >
+                      {savingEdit ? 'Saving…' : 'Save'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <Markdown>{answer.content}</Markdown>
+              )}
               
               {/* Code Blocks */}
               {answer.codeBlocks && answer.codeBlocks.length > 0 && (
                 <div className="mt-4 space-y-3">
                   <h4 className="text-sm font-medium text-neutral-700 dark:text-gray-300">Code Blocks:</h4>
                   {answer.codeBlocks.map((block, index) => (
-                    <div key={index} className="bg-white dark:bg-neutral-900/80 rounded-lg p-4 border border-violet-300 dark:border-violet-500/30">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="px-2 py-1 bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300 rounded-sm text-sm">
-                          {block.language}
-                        </span>
-                      </div>
-                      <pre className="bg-white dark:bg-neutral-900/80 p-4 rounded-lg overflow-x-auto max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-600 scrollbar-track-neutral-800 border border-neutral-200 dark:border-neutral-700">
-                        <code className="text-sm text-neutral-900 dark:text-gray-300">{block.code}</code>
-                      </pre>
-                      {block.description && (
-                        <p className="mt-2 text-sm text-neutral-600 dark:text-gray-400">{block.description}</p>
-                      )}
-                    </div>
+                    <CodeBlockView key={index} code={block.code} language={block.language} description={block.description} />
                   ))}
                 </div>
               )}
@@ -407,6 +518,31 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post }) => {
           </button>
         </div>
       )}
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title="Delete your answer?"
+        confirmLabel="Delete answer"
+        tone="danger"
+        busy={deleting}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={() => void deleteAnswer()}
+      >
+        <p>This can't be undone.</p>
+      </ConfirmDialog>
+      <ConfirmDialog
+        open={acceptTarget !== null}
+        title={hasBounty ? `Accept this answer and pay ${post.reward} BBUX?` : 'Accept this answer?'}
+        confirmLabel={hasBounty ? `Accept and pay ${post.reward} BBUX` : 'Accept answer'}
+        busy={accepting}
+        onCancel={() => setAcceptTarget(null)}
+        onConfirm={() => acceptTarget && handleAcceptAnswer(acceptTarget.id)}
+      >
+        <p>
+          {hasBounty
+            ? `The bounty goes to ${acceptTarget?.author?.username ?? 'this answer\'s author'} and the question is marked completed. This can't be undone.`
+            : 'The question will be marked completed. This can\'t be undone.'}
+        </p>
+      </ConfirmDialog>
     </div>
   )
 }) 

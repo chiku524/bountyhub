@@ -17,7 +17,7 @@ import { FocusRestoreBoundary } from '../components/FocusRestoreBoundary'
 import { rememberFocusBeforeWalletModal } from '../utils/walletModalFocus'
 import { StatusLabel } from '../components/StatusLabel'
 import { formatTransactionStatus } from '../utils/walletStatus'
-
+import { isValidSolanaAddress, shortenAddress, withdrawBreakdown } from '../utils/solanaAddress'
 function WalletContent() {
   const { user, loading: authLoading } = useAuth()
   const { publicKey: walletPublicKey, connected, disconnect, signTransaction } = useWallet()
@@ -35,6 +35,8 @@ function WalletContent() {
   const [pendingDepositTxId, setPendingDepositTxId] = useState('')
   const [withdrawAmount, setWithdrawAmount] = useState('')
   const [destinationAddress, setDestinationAddress] = useState('')
+  /** Withdraw is two-step: fill in the form, then confirm a review screen before anything is sent. */
+  const [withdrawReview, setWithdrawReview] = useState(false)
   const [actionLoading, setActionLoading] = useState(false)
   const [message, setMessage] = useState('')
 
@@ -252,13 +254,28 @@ function WalletContent() {
 
   const handleWithdraw = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!withdrawAmount || parseFloat(withdrawAmount) <= 0) return
-
-    if (!destinationAddress) {
+    const amount = parseFloat(withdrawAmount)
+    if (!withdrawAmount || !(amount > 0)) {
+      setWithdrawError('Enter an amount greater than 0.')
+      return
+    }
+    if (walletData && amount > walletData.virtualBalance) {
+      setWithdrawError(`You only have ${walletData.virtualBalance.toFixed(4)} BBUX available.`)
+      return
+    }
+    if (!destinationAddress.trim()) {
       setWithdrawError('Please enter a destination address')
       return
     }
-
+    if (!isValidSolanaAddress(destinationAddress)) {
+      setWithdrawError("That doesn't look like a Solana address. Check it and try again.")
+      return
+    }
+    if (!withdrawReview) {
+      setWithdrawError('')
+      setWithdrawReview(true)
+      return
+    }
     // Prevent double submission
     if (withdrawInProgress) {
       return
@@ -270,7 +287,7 @@ function WalletContent() {
       setWithdrawError('')
       
       // Step 1: Create withdrawal request
-      const result = await api.performWalletActionWithAddress('withdraw', parseFloat(withdrawAmount), destinationAddress)
+      const result = await api.performWalletActionWithAddress('withdraw', amount, destinationAddress.trim())
       
       if (result.success && result.transactionId) {
         // Step 2: Process the withdrawal (send SOL)
@@ -279,6 +296,7 @@ function WalletContent() {
         if (processResult.success) {
           // Success: Update UI and show success message
           setShowWithdrawModal(false)
+          setWithdrawReview(false)
           setWithdrawAmount('')
           setDestinationAddress('')
           await refetchWalletData()
@@ -388,8 +406,8 @@ function WalletContent() {
           )}
 
           {message && (
-            <div className="bg-blue-900 border border-blue-700 rounded-lg p-3 @sm/main:p-4 mb-6">
-              <p className="text-blue-200 text-sm @sm/main:text-base">{message}</p>
+            <div className="bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg p-3 @sm/main:p-4 mb-6">
+              <p className="text-blue-800 dark:text-blue-200 text-sm @sm/main:text-base">{message}</p>
             </div>
           )}
 
@@ -402,7 +420,7 @@ function WalletContent() {
                   <div>
                     <p className="text-sm text-blue-100">Platform Balance</p>
                     <p className="text-xl @sm/main:text-2xl font-bold">{walletData ? walletData.virtualBalance.toFixed(4) : '0.0000'} BBUX</p>
-                    <p className="text-xs text-blue-200">Virtual tokens in the platform</p>
+                    <p className="text-xs text-blue-800 dark:text-blue-200">Virtual tokens in the platform</p>
                   </div>
                 </div>
               </div>
@@ -472,7 +490,7 @@ function WalletContent() {
               💰 Buy BBUX with SOL
             </button>
             <button
-              onClick={() => setShowWithdrawModal(true)}
+              onClick={() => { setWithdrawReview(false); setWithdrawError(""); setShowWithdrawModal(true) }}
               className="bg-blue-500 hover:bg-blue-600 text-white px-4 @sm/main:px-6 py-3 rounded-lg font-semibold transition-colors text-sm @sm/main:text-base"
             >
               💸 Sell BBUX for SOL
@@ -483,7 +501,7 @@ function WalletContent() {
           {showDepositModal && (
             <FocusRestoreBoundary>
             <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4">
-              <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 @sm/main:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+              <div role="dialog" aria-modal="true" className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 @sm/main:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg @sm/main:text-xl font-semibold text-neutral-900 dark:text-white">Buy BBUX with SOL</h3>
                   <button
@@ -557,7 +575,7 @@ function WalletContent() {
                       <button
                         type="button"
                         onClick={() => setShowDepositModal(false)}
-                        className="flex-1 px-4 py-2 text-gray-300 bg-neutral-700 rounded-md hover:bg-neutral-600 transition-colors"
+                        className="flex-1 px-4 py-2 text-neutral-700 dark:text-gray-300 bg-neutral-100 dark:bg-neutral-700 rounded-md hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
                       >
                         Cancel
                       </button>
@@ -583,7 +601,7 @@ function WalletContent() {
                     </div>
 
                     <div>
-                      <label htmlFor="depositAmount" className="block text-sm font-medium text-gray-300 mb-2">
+                      <label htmlFor="depositAmount" className="block text-sm font-medium text-neutral-700 dark:text-gray-300 mb-2">
                         Amount (SOL)
                       </label>
                       <input
@@ -595,10 +613,10 @@ function WalletContent() {
                         min="0.001"
                         max="1000"
                         required
-                        className="w-full px-3 py-2 border border-neutral-600 bg-neutral-700 text-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 bg-neutral-100 dark:bg-neutral-700 text-neutral-900 dark:text-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                         placeholder="0.1"
                       />
-                      <p className="text-sm text-gray-400 mt-1">
+                      <p className="text-sm text-neutral-500 dark:text-gray-400 mt-1">
                         You will receive the same amount in virtual BBUX tokens (1:1 exchange rate) in your platform wallet
                       </p>
                     </div>
@@ -606,7 +624,7 @@ function WalletContent() {
                       <button
                         type="button"
                         onClick={() => setShowDepositModal(false)}
-                        className="flex-1 px-4 py-2 text-gray-300 bg-neutral-700 rounded-md hover:bg-neutral-600 transition-colors"
+                        className="flex-1 px-4 py-2 text-neutral-700 dark:text-gray-300 bg-neutral-100 dark:bg-neutral-700 rounded-md hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
                       >
                         Cancel
                       </button>
@@ -629,20 +647,20 @@ function WalletContent() {
           {showDepositConfirmation && (
             <FocusRestoreBoundary>
             <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4">
-              <div className="bg-neutral-800 border border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4">
+              <div role="dialog" aria-modal="true" className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-semibold text-white">Manual Deposit Instructions</h3>
+                  <h3 className="text-xl font-semibold text-neutral-900 dark:text-white">Manual Deposit Instructions</h3>
                   <button
                     onClick={() => setShowDepositConfirmation(false)}
-                    className="text-gray-400 hover:text-gray-200 text-2xl font-bold"
+                    className="text-neutral-500 dark:text-gray-400 hover:text-neutral-900 dark:hover:text-gray-200 text-2xl font-bold"
                   >
                     ×
                   </button>
                 </div>
                 
-                <div className="bg-blue-900 border border-blue-700 rounded-lg p-4 mb-4">
-                  <h4 className="font-semibold text-blue-200 mb-2">Step-by-Step Instructions:</h4>
-                  <ol className="list-decimal list-inside space-y-2 text-blue-300 text-sm">
+                <div className="bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg p-4 mb-4">
+                  <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">Step-by-Step Instructions:</h4>
+                  <ol className="list-decimal list-inside space-y-2 text-blue-700 dark:text-blue-300 text-sm">
                     <li>Copy the platform address below</li>
                     <li>Send exactly <strong>{confirmDepositAmount} SOL</strong> to that address from your wallet</li>
                     <li>Copy the transaction signature from your wallet</li>
@@ -650,10 +668,10 @@ function WalletContent() {
                   </ol>
                 </div>
 
-                <div className="bg-green-900 border border-green-700 rounded-lg p-4 mb-4">
-                  <h4 className="font-semibold text-green-200 mb-2">Platform Address:</h4>
+                <div className="bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-lg p-4 mb-4">
+                  <h4 className="font-semibold text-green-800 dark:text-green-200 mb-2">Platform Address:</h4>
                   <div className="flex items-center space-x-2">
-                    <p className="font-mono text-sm text-green-300 break-all">{walletData?.platformAddress}</p>
+                    <p className="font-mono text-sm text-green-700 dark:text-green-300 break-all">{walletData?.platformAddress}</p>
                     <button
                       type="button"
                       onClick={() => {
@@ -672,7 +690,7 @@ function WalletContent() {
 
                 <form onSubmit={handleConfirmDeposit} className="space-y-4">
                   <div>
-                    <label htmlFor="signature" className="block text-sm font-medium text-gray-300 mb-2">
+                    <label htmlFor="signature" className="block text-sm font-medium text-neutral-700 dark:text-gray-300 mb-2">
                       Transaction Signature *
                     </label>
                     <input
@@ -680,13 +698,13 @@ function WalletContent() {
                       type="text"
                       name="signature"
                       required
-                      className="w-full px-3 py-2 border border-neutral-600 bg-neutral-700 text-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 bg-neutral-100 dark:bg-neutral-700 text-neutral-900 dark:text-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                       placeholder="Paste the transaction signature from your wallet"
                     />
-                    <p className="text-sm text-gray-400 mt-1">
+                    <p className="text-sm text-neutral-500 dark:text-gray-400 mt-1">
                       This signature proves you sent the SOL and allows us to credit your virtual BBUX balance
                     </p>
-                    <p className="text-xs text-yellow-400 mt-1">
+                    <p className="text-xs text-amber-600 dark:text-yellow-400 mt-1">
                       💡 Tip: You can find this signature in your wallet's transaction history after sending SOL
                     </p>
                   </div>
@@ -694,7 +712,7 @@ function WalletContent() {
                     <button
                       type="button"
                       onClick={() => setShowDepositConfirmation(false)}
-                      className="flex-1 px-4 py-2 text-gray-300 bg-neutral-700 rounded-md hover:bg-neutral-600 transition-colors"
+                      className="flex-1 px-4 py-2 text-neutral-700 dark:text-gray-300 bg-neutral-100 dark:bg-neutral-700 rounded-md hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
                     >
                       Cancel
                     </button>
@@ -716,19 +734,19 @@ function WalletContent() {
           {showWithdrawModal && (
             <FocusRestoreBoundary>
             <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4">
-              <div className="bg-neutral-800 border border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4">
+              <div role="dialog" aria-modal="true" className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-semibold text-white">Sell BBUX for SOL</h3>
+                  <h3 className="text-xl font-semibold text-neutral-900 dark:text-white">Sell BBUX for SOL</h3>
                   <button
                     onClick={() => setShowWithdrawModal(false)}
-                    className="text-gray-400 hover:text-gray-200 text-2xl font-bold"
+                    className="text-neutral-500 dark:text-gray-400 hover:text-neutral-900 dark:hover:text-gray-200 text-2xl font-bold"
                   >
                     ×
                   </button>
                 </div>
                 <form onSubmit={handleWithdraw} className="space-y-4">
                   <div>
-                    <label htmlFor="amountWithdraw" className="block text-sm font-medium text-gray-300 mb-2">
+                    <label htmlFor="amountWithdraw" className="block text-sm font-medium text-neutral-700 dark:text-gray-300 mb-2">
                       Amount (BBUX)
                     </label>
                     <input
@@ -737,52 +755,66 @@ function WalletContent() {
                       value={withdrawAmount}
                       onChange={(e) => {
                         setWithdrawAmount(e.target.value)
-                        const amount = parseFloat(e.target.value) || 0
-                        const fee = amount * 0.03
-                        const netAmount = amount - fee
-                        const feeDisplay = document.getElementById('fee-display')
-                        const netDisplay = document.getElementById('net-display')
-                        if (feeDisplay) feeDisplay.textContent = fee.toFixed(4)
-                        if (netDisplay) netDisplay.textContent = netAmount.toFixed(4)
+                        setWithdrawError('')
                       }}
+                      disabled={withdrawReview}
                       step="0.001"
                       min="0.001"
                       max={walletData ? walletData.virtualBalance : 0}
                       required
-                      className="w-full px-3 py-2 border border-neutral-600 bg-neutral-700 text-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 bg-neutral-100 dark:bg-neutral-700 text-neutral-900 dark:text-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                       placeholder="0.1"
                     />
-                    <p className="text-sm text-gray-400 mt-1">
-                      Available: {walletData ? walletData.virtualBalance.toFixed(4) : '0.0000'} BBUX
-                    </p>
-                    <div className="mt-2 p-3 bg-neutral-700 rounded-md">
+                    <div className="mt-1 flex items-center justify-between text-sm text-neutral-500 dark:text-gray-400">
+                      <span>Available: {walletData ? walletData.virtualBalance.toFixed(4) : '0.0000'} BBUX</span>
+                      {walletData && walletData.virtualBalance > 0 && !withdrawReview && (
+                        <button
+                          type="button"
+                          onClick={() => setWithdrawAmount(String(Math.floor(walletData.virtualBalance * 10000) / 10000))}
+                          className="text-xs font-medium text-blue-400 hover:text-blue-300"
+                        >
+                          Max
+                        </button>
+                      )}
+                    </div>
+                    <div className="mt-2 p-3 bg-neutral-100 dark:bg-neutral-700 rounded-md">
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-300">Platform Fee (3%):</span>
-                        <span className="text-yellow-400" id="fee-display">0.0000</span>
+                        <span className="text-neutral-700 dark:text-gray-300">Platform Fee (3%):</span>
+                        <span className="text-amber-600 dark:text-yellow-400">{withdrawBreakdown(parseFloat(withdrawAmount)).fee.toFixed(4)}</span>
                       </div>
                       <div className="flex justify-between text-sm mt-1">
-                        <span className="text-gray-300">You&apos;ll receive:</span>
-                        <span className="text-green-400 font-medium" id="net-display">0.0000</span>
+                        <span className="text-neutral-700 dark:text-gray-300">You&apos;ll receive:</span>
+                        <span className="text-green-600 dark:text-green-400 font-medium">{withdrawBreakdown(parseFloat(withdrawAmount)).net.toFixed(4)}</span>
                       </div>
-                      <p className="text-xs text-gray-400 mt-2">
+                      <p className="text-xs text-neutral-500 dark:text-gray-400 mt-2">
                         The platform fee helps maintain and improve our services
                       </p>
                     </div>
                   </div>
                   <div>
-                    <label htmlFor="destination" className="block text-sm font-medium text-gray-300 mb-2">
+                    <label htmlFor="destination" className="block text-sm font-medium text-neutral-700 dark:text-gray-300 mb-2">
                       Destination Solana Address
                     </label>
                     <input
                       id="destination"
                       type="text"
                       value={destinationAddress}
-                      onChange={(e) => setDestinationAddress(e.target.value)}
+                      onChange={(e) => {
+                        setDestinationAddress(e.target.value)
+                        setWithdrawError('')
+                      }}
+                      disabled={withdrawReview}
+                      spellCheck={false}
+                      autoComplete="off"
+                      aria-invalid={destinationAddress.trim().length > 0 && !isValidSolanaAddress(destinationAddress)}
                       required
-                      className="w-full px-3 py-2 border border-neutral-600 bg-neutral-700 text-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 bg-neutral-100 dark:bg-neutral-700 text-neutral-900 dark:text-white rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                       placeholder="Enter your Solana address"
                     />
-                    {connected && publicKey && (
+                    {destinationAddress.trim().length >= 32 && !isValidSolanaAddress(destinationAddress) && (
+                      <p className="mt-1 text-xs text-red-400">Not a valid Solana address.</p>
+                    )}
+                    {connected && publicKey && !withdrawReview && (
                       <button
                         type="button"
                         onClick={() => setDestinationAddress(publicKey)}
@@ -792,25 +824,43 @@ function WalletContent() {
                       </button>
                     )}
                   </div>
+                  {withdrawReview && (
+                    <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-100" role="status">
+                      <p className="font-medium">Review before sending</p>
+                      <p className="mt-1">
+                        You're selling {parseFloat(withdrawAmount).toFixed(4)} BBUX, paying a{' '}
+                        {withdrawBreakdown(parseFloat(withdrawAmount)).fee.toFixed(4)} BBUX fee, and sending the rest to{' '}
+                        <span className="font-mono" title={destinationAddress.trim()}>{shortenAddress(destinationAddress, 6)}</span>.
+                      </p>
+                      <p className="mt-1 text-xs text-amber-200/80">On-chain transfers can't be reversed. Make sure this address is yours.</p>
+                    </div>
+                  )}
                   {withdrawError && (
-                    <div className="bg-red-900 border border-red-700 text-red-200 rounded-lg p-3 text-sm">
+                    <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-200 rounded-lg p-3 text-sm" role="alert">
                       {withdrawError}
                     </div>
                   )}
                   <div className="flex space-x-3">
                     <button
                       type="button"
-                      onClick={() => setShowWithdrawModal(false)}
-                      className="flex-1 px-4 py-2 text-gray-300 bg-neutral-700 rounded-md hover:bg-neutral-600 transition-colors"
+                      onClick={() => {
+                        if (withdrawReview && !actionLoading) {
+                          setWithdrawReview(false)
+                        } else {
+                          setShowWithdrawModal(false)
+                        }
+                      }}
+                      disabled={actionLoading}
+                      className="flex-1 px-4 py-2 text-neutral-700 dark:text-gray-300 bg-neutral-100 dark:bg-neutral-700 rounded-md hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors disabled:opacity-50"
                     >
-                      Cancel
+                      {withdrawReview ? 'Back' : 'Cancel'}
                     </button>
                     <button
                       type="submit"
                       disabled={actionLoading}
                       className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {actionLoading ? 'Processing...' : 'Withdraw'}
+                      {actionLoading ? 'Processing...' : withdrawReview ? 'Confirm withdrawal' : 'Review withdrawal'}
                     </button>
                   </div>
                 </form>
@@ -823,19 +873,19 @@ function WalletContent() {
           {withdrawResult && withdrawResult.success && (
             <FocusRestoreBoundary>
             <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4">
-              <div className="bg-neutral-800 border border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4">
-                <div className="bg-blue-900 border border-blue-700 rounded-lg p-4">
-                  <h4 className="font-semibold text-blue-200 mb-2">Withdrawal Successful!</h4>
-                  <p className="text-blue-300 mb-2">Your withdrawal has been processed.</p>
+              <div role="dialog" aria-modal="true" className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4">
+                <div className="bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+                  <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">Withdrawal Successful!</h4>
+                  <p className="text-blue-700 dark:text-blue-300 mb-2">Your withdrawal has been processed.</p>
                   {withdrawResult.fee && withdrawResult.netAmount && (
                     <div className="mt-3 p-3 bg-blue-800 rounded-md">
                       <div className="flex justify-between text-sm mb-1">
-                        <span className="text-blue-200">Fee (3%):</span>
+                        <span className="text-blue-800 dark:text-blue-200">Fee (3%):</span>
                         <span className="text-yellow-300">{withdrawResult.fee.toFixed(4)} BBUX</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-blue-200">You received:</span>
-                        <span className="text-green-300 font-medium">{withdrawResult.netAmount.toFixed(4)} SOL</span>
+                        <span className="text-blue-800 dark:text-blue-200">You received:</span>
+                        <span className="text-green-700 dark:text-green-300 font-medium">{withdrawResult.netAmount.toFixed(4)} SOL</span>
                       </div>
                     </div>
                   )}

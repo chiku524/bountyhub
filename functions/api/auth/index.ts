@@ -5,7 +5,7 @@ import me from './me'
 import signup from './signup'
 import changePassword from './change-password'
 import github from './github'
-
+import passwordReset from './password-reset'
 interface Env {
   DB: any
   NODE_ENV: string
@@ -36,6 +36,7 @@ app.route('/logout', logout)
 app.route('/me', me)
 app.route('/signup', signup)
 app.route('/change-password', changePassword)
+app.route('/password-reset', passwordReset)
 // Mount GitHub OAuth routes - this handles /api/auth/github
 app.route('/github', github)
 

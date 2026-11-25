@@ -6,10 +6,12 @@ import { FiEdit2, FiArrowLeft, FiPlus } from 'react-icons/fi'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { PageContainer } from '../components/PageContainer'
 import { PageHeader } from '../components/PageHeader'
+import { markdownToPlainText } from '../utils/markdownExcerpt'
 
 function truncateContent(content: string | undefined | null): string {
   if (!content) return ''
-  return content.length > 150 ? content.substring(0, 150) + '...' : content
+  const text = markdownToPlainText(content)
+  return text.length > 150 ? text.substring(0, 150) + '...' : text
 }
 
 export default function ProfilePosts() {

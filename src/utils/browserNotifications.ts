@@ -1,15 +1,31 @@
 import { logoUrl } from './logoUrl'
+import { isDesktopApp } from './desktop'
+import {
+  nativeNotificationPermission,
+  requestNativeNotificationPermission,
+  sendNativeNotification,
+} from './desktopNative'
 
 // Browser Notification Service
+export const BROWSER_ALERTS_PREF_KEY = 'bountyhub-browser-alerts'
+
 export class BrowserNotificationService {
   private permission: NotificationPermission = 'default'
   private enabled: boolean = false
 
+  /** Desktop app: OS notifications go through the Tauri plugin (the webview's Notification API is unreliable). */
+  private readonly desktop = isDesktopApp()
+  private desktopPermission: NotificationPermission = 'default'
+
   constructor() {
-    this.checkPermission()
+    void this.checkPermission()
   }
 
   async checkPermission(): Promise<NotificationPermission> {
+    if (this.desktop) {
+      this.desktopPermission = await nativeNotificationPermission()
+      return this.desktopPermission
+    }
     if (!('Notification' in window)) {
       return 'denied'
     }
@@ -19,6 +35,11 @@ export class BrowserNotificationService {
   }
 
   async requestPermission(): Promise<boolean> {
+    if (this.desktop) {
+      this.desktopPermission = await requestNativeNotificationPermission()
+      this.enabled = this.desktopPermission === 'granted'
+      return this.enabled
+    }
     if (!('Notification' in window)) {
       return false
     }
@@ -38,12 +59,43 @@ export class BrowserNotificationService {
     return false
   }
 
+  /** True once the OS/browser permission is granted and the user hasn't switched alerts off in Settings. */
   isEnabled(): boolean {
-    return this.enabled && this.permission === 'granted'
+    if (this.desktop) return this.desktopPermission === 'granted' && this.userPreference() !== 'off'
+    if (typeof window === 'undefined' || !('Notification' in window)) return false
+    this.permission = Notification.permission
+    return this.permission === 'granted' && this.userPreference() !== 'off'
+  }
+
+  /** 'default' = never asked; lets the UI offer an explicit opt-in instead of prompting on login. */
+  getPermission(): NotificationPermission {
+    if (this.desktop) return this.desktopPermission
+    if (typeof window === 'undefined' || !('Notification' in window)) return 'denied'
+    return Notification.permission
+  }
+
+  userPreference(): 'on' | 'off' {
+    try {
+      return localStorage.getItem(BROWSER_ALERTS_PREF_KEY) === 'off' ? 'off' : 'on'
+    } catch {
+      return 'on'
+    }
+  }
+
+  setUserPreference(value: 'on' | 'off'): void {
+    try {
+      localStorage.setItem(BROWSER_ALERTS_PREF_KEY, value)
+    } catch {
+      /* storage unavailable */
+    }
   }
 
   async showNotification(title: string, options: NotificationOptions = {}): Promise<void> {
     if (!this.isEnabled()) {
+      return
+    }
+    if (this.desktop) {
+      await sendNativeNotification(title, options.body)
       return
     }
 

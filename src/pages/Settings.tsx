@@ -5,14 +5,15 @@ import { config } from '../utils/config'
 import { useAuth } from '../contexts/AuthProvider'
 import { useToast } from '../contexts/ToastContext'
 import type { User } from '../types'
-import { FiUser, FiLink, FiMail, FiLock, FiSave, FiCheck, FiMonitor } from 'react-icons/fi'
+import { FiUser, FiLink, FiMail, FiLock, FiSave, FiCheck, FiMonitor, FiBell, FiSun } from 'react-icons/fi'
 import { PageContainer } from '../components/PageContainer'
 import { PageHeader } from '../components/PageHeader'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { isDesktopApp } from '../utils/desktop'
 import { useDesktopUpdate } from '../contexts/DesktopUpdateContext'
-
-type SettingsTab = 'profile' | 'social' | 'account' | 'security' | 'desktop'
+import { ConfirmDialog } from '../components/ConfirmDialog'
+import { NotificationSettings, AppearanceSettings, DesktopPreferences } from '../components/settings/PreferenceSettings'
+type SettingsTab = 'profile' | 'social' | 'account' | 'security' | 'notifications' | 'appearance' | 'desktop'
 
 interface ProfileData {
   firstName: string
@@ -91,8 +92,8 @@ export default function Settings() {
   useEffect(() => {
     const tabParam = searchParams.get('tab')
     const allowed: SettingsTab[] = isDesktopApp()
-      ? ['profile', 'social', 'account', 'security', 'desktop']
-      : ['profile', 'social', 'account', 'security']
+      ? ['profile', 'social', 'account', 'security', 'notifications', 'appearance', 'desktop']
+      : ['profile', 'social', 'account', 'security', 'notifications', 'appearance']
     if (tabParam && allowed.includes(tabParam as SettingsTab)) {
       setActiveTab(tabParam as SettingsTab)
     }
@@ -209,11 +210,10 @@ export default function Settings() {
     }
   }
 
+  const [confirmGithubDisconnect, setConfirmGithubDisconnect] = useState(false)
+
   const handleGitHubDisconnect = async () => {
-    if (!confirm('Are you sure you want to disconnect your GitHub account? You will need to set a password if you don\'t have one.')) {
-      return
-    }
-    
+    setConfirmGithubDisconnect(false)
     try {
       setGithubLoading(true)
       setError(null)
@@ -294,10 +294,9 @@ export default function Settings() {
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (activeTab === 'desktop') {
+    if (activeTab === 'desktop' || activeTab === 'notifications' || activeTab === 'appearance') {
       return
     }
-
     // If we're on the security tab, handle password change
     if (activeTab === 'security') {
       await handlePasswordChange()
@@ -390,6 +389,8 @@ export default function Settings() {
       { id: 'social', label: 'Social Links', icon: FiLink },
       { id: 'account', label: 'Account', icon: FiMail },
       { id: 'security', label: 'Security', icon: FiLock },
+      { id: 'notifications', label: 'Notifications', icon: FiBell },
+      { id: 'appearance', label: 'Appearance', icon: FiSun },
     ]
     if (isDesktop) {
       base.push({ id: 'desktop', label: 'Desktop app', icon: FiMonitor })
@@ -769,7 +770,7 @@ export default function Settings() {
                           </div>
                           <button
                             type="button"
-                            onClick={handleGitHubDisconnect}
+                            onClick={() => setConfirmGithubDisconnect(true)}
                             disabled={githubLoading}
                             className="px-4 py-2 text-sm bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors disabled:opacity-50"
                           >
@@ -801,6 +802,7 @@ export default function Settings() {
 
               {activeTab === 'desktop' && isDesktop && (
                 <div className="space-y-6">
+                  <DesktopPreferences />
                   <p className="text-sm text-neutral-600 dark:text-neutral-400">
                     The desktop app checks for updates periodically while it is open. You can also check manually from the
                     tray menu, the menu bar, or here.
@@ -883,7 +885,10 @@ export default function Settings() {
                 </div>
               )}
 
-              {activeTab !== 'desktop' && (
+              {activeTab === 'notifications' && <NotificationSettings />}
+              {activeTab === 'appearance' && <AppearanceSettings />}
+
+              {activeTab !== 'desktop' && activeTab !== 'notifications' && activeTab !== 'appearance' && (
                 <div className="flex justify-end pt-6 border-t border-violet-500/30">
                   <button
                     type="submit"
@@ -902,6 +907,16 @@ export default function Settings() {
             </form>
           </div>
         </div>
+        <ConfirmDialog
+          open={confirmGithubDisconnect}
+          title="Disconnect GitHub?"
+          confirmLabel="Disconnect"
+          tone="danger"
+          onCancel={() => setConfirmGithubDisconnect(false)}
+          onConfirm={() => void handleGitHubDisconnect()}
+        >
+          <p>You'll need a password to sign in afterwards. If you don't have one yet, set it in the Security tab first.</p>
+        </ConfirmDialog>
     </PageContainer>
   )
 } 

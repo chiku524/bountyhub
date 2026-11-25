@@ -1,13 +1,19 @@
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useEffect, useState, useMemo } from 'react'
-import { useEscapeKey } from '../hooks/useEscapeKey'
 import { Link } from 'react-router-dom'
 import { api } from '../utils/api'
 import { isDesktopApp } from '../utils/desktop'
 import { LoadingSpinner } from '../components/LoadingSpinner'
 import { ErrorMessage } from '../components/ErrorMessage'
 import { Breadcrumbs } from '../components/Breadcrumbs'
-import { FocusRestoreBoundary } from '../components/FocusRestoreBoundary'
+import { ConfirmDialog } from '../components/ConfirmDialog'
+import { CodeBlockView } from '../components/CodeBlockView'
+import { Markdown } from '../components/Markdown'
+import { ImageLightbox } from '../components/ImageLightbox'
+import { MarkdownEditor } from '../components/MarkdownEditor'
+import { VoteButton } from '../components/VoteButton'
+import { formatBountyTimeLeft, isBountyEndingSoon } from '../utils/bountyTime'
+import { FiLink } from 'react-icons/fi'
 import { PostChatRoom } from '../components/PostChatRoom'
 import { Answers } from '../components/Answers'
 import { BookmarkButton } from '../components/BookmarkButton'
@@ -16,12 +22,15 @@ import TagSelector from '../components/TagSelector'
 import { MediaUpload } from '../components/MediaUpload'
 import { ProfilePicture } from '../components/ProfilePicture'
 import { useAuth } from '../contexts/AuthProvider'
+import { useToast } from '../contexts/ToastContext'
 import type { Post, CodeBlock, Media } from '../types'
 import { formatPostStatus } from '../utils/walletStatus'
 
 export default function PostDetail() {
   const { postId } = useParams()
   const { user } = useAuth()
+  const toast = useToast()
+  const navigate = useNavigate()
   const [post, setPost] = useState<Post | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -37,9 +46,7 @@ export default function PostDetail() {
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
-
-  useEscapeKey(showDeleteConfirm, () => setShowDeleteConfirm(false))
-
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   // Memoize formatted dates to prevent them from changing on re-renders
   const formattedCreatedAt = useMemo(() => {
     if (!post?.createdAt) return ''
@@ -105,9 +112,25 @@ export default function PostDetail() {
     }
   }
 
-  const canEdit = user && post && user.id === post.authorId && (
-    !post.editedAt || (Date.now() - new Date(post.editedAt).getTime() > 24 * 60 * 60 * 1000)
-  )
+  const isAuthor = Boolean(user && post && user.id === post.authorId)
+  // The API allows one edit per 24 hours; show when editing unlocks instead of hiding the button.
+  const editUnlocksAt = post?.editedAt ? new Date(post.editedAt).getTime() + 24 * 60 * 60 * 1000 : 0
+  const editLockedHours = editUnlocksAt > Date.now() ? Math.ceil((editUnlocksAt - Date.now()) / 3_600_000) : 0
+  const canEdit = isAuthor && editLockedHours === 0
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}/posts/${postId}`
+    try {
+      if (navigator.share && window.matchMedia('(pointer: coarse)').matches) {
+        await navigator.share({ title: post?.title, url })
+        return
+      }
+      await navigator.clipboard.writeText(url)
+      toast.success('Link copied')
+    } catch (err: any) {
+      if (err?.name !== 'AbortError') toast.error('Could not copy the link')
+    }
+  }
 
   const handleEditClick = () => {
     setEditTitle(post?.title || '')
@@ -192,13 +215,13 @@ export default function PostDetail() {
     try {
       const response = await api.deletePost(postId)
       if (response.success) {
-        // Redirect to community page after successful deletion
-        window.location.href = '/community'
+        toast.success('Post deleted')
+        navigate('/community', { replace: true })
       } else {
-        console.error('Failed to delete post')
+        toast.error('Failed to delete post. Please try again.')
       }
     } catch (err: any) {
-      console.error('Error deleting post:', err)
+      toast.error(err?.message || 'Failed to delete post. Please try again.')
     } finally {
       setDeleteLoading(false)
       setShowDeleteConfirm(false)
@@ -206,31 +229,26 @@ export default function PostDetail() {
   }
 
   const renderCodeBlock = (block: any, index: number) => (
-    <div key={index} className="bg-white dark:bg-neutral-900/80 rounded-lg p-4 border border-violet-300 dark:border-violet-500/30 mb-4">
-      <div className="flex items-center gap-2 mb-2">
-        <span className="px-2 py-1 bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300 rounded-sm text-sm">
-          {block.language}
-        </span>
-      </div>
-      <pre className="bg-white dark:bg-neutral-900/80 p-4 rounded-lg overflow-x-auto max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-300 dark:scrollbar-thumb-neutral-600 scrollbar-track-neutral-100 dark:scrollbar-track-neutral-800 border border-neutral-200 dark:border-neutral-700">
-        <code className="text-sm text-neutral-900 dark:text-gray-300">{block.code}</code>
-      </pre>
-      {block.description && (
-        <p className="mt-2 text-sm text-neutral-600 dark:text-gray-400">{block.description}</p>
-      )}
-    </div>
+    <CodeBlockView key={index} code={block.code} language={block.language} description={block.description} />
   )
 
   const renderMedia = (item: any, index: number) => (
     <div key={index} className="relative group">
       {item.type === 'IMAGE' ? (
         <div className="relative overflow-hidden rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800">
-          <img 
-            src={item.url} 
-            alt={`Media ${index + 1}`} 
-            className="w-full h-64 object-cover hover:scale-105 transition-transform duration-300 cursor-pointer relative z-10"
-            onClick={() => window.open(item.url, '_blank')}
-          />
+          <button
+            type="button"
+            className="block w-full"
+            onClick={() => setLightboxIndex(imageMedia.findIndex((m) => m.url === item.url))}
+            aria-label={`View image ${index + 1} full size`}
+          >
+            <img
+              src={item.url}
+              alt={`Media ${index + 1}`}
+              loading="lazy"
+              className="w-full h-64 object-cover hover:scale-105 transition-transform duration-300 cursor-zoom-in relative z-10"
+            />
+          </button>
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center pointer-events-none">
             <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
               <span className="text-white text-sm bg-black bg-opacity-50 px-2 py-1 rounded-sm">
@@ -268,6 +286,7 @@ export default function PostDetail() {
   )
 
   const isDesktop = isDesktopApp()
+  const imageMedia = (post?.media ?? []).filter((m) => String(m.type).toUpperCase() === 'IMAGE')
   return (
     <div className="p-4 @sm/main:p-6 @3xl/main:p-8">
       <div className={`mx-auto min-w-0 w-full ${isDesktop ? 'max-w-6xl' : 'max-w-7xl'}`}>
@@ -334,6 +353,21 @@ export default function PostDetail() {
                       <div className="flex items-center gap-2 px-3 py-1 bg-linear-to-r from-cyan-100 to-blue-100 dark:from-cyan-500/20 dark:to-blue-500/20 border border-cyan-300 dark:border-cyan-400/40 rounded-full">
                         <span className="text-cyan-600 dark:text-cyan-300 text-lg">💰</span>
                         <span className="text-cyan-700 dark:text-cyan-200 font-semibold">{post.reward} BBUX Bounty</span>
+                        {post.bountyStatus === 'ACTIVE' && formatBountyTimeLeft(post.bountyExpiresAt) && (
+                          <span
+                            className={`text-xs ${isBountyEndingSoon(post.bountyExpiresAt) ? 'font-semibold text-red-600 dark:text-red-400' : 'text-cyan-700/80 dark:text-cyan-200/80'}`}
+                          >
+                            · {formatBountyTimeLeft(post.bountyExpiresAt)}
+                          </span>
+                        )}
+                        {post.bountyStatus === 'EXPIRED' && (
+                          <span
+                            className="text-xs text-amber-700 dark:text-amber-300"
+                            title="The asker has 3 days to accept an answer. After that the top-voted answer wins, or the bounty is returned if no answer has positive votes."
+                          >
+                            · Ended, awaiting accept (top-voted answer wins after 3 days)
+                          </span>
+                        )}
                       </div>
                     )}
                   </div>
@@ -352,17 +386,38 @@ export default function PostDetail() {
                       ))}
                     </div>
                   )}
+                  <VoteButton
+                    itemId={post.id}
+                    itemType="post"
+                    voteType="quality"
+                    orientation="horizontal"
+                    initialVotes={post.qualityUpvotes || 0}
+                    userVote={post.userVote || 0}
+                  />
                   <BookmarkButton postId={post.id} size="lg" />
-                  {canEdit && !editing && (
+                  <button
+                    type="button"
+                    onClick={() => void handleShare()}
+                    className="inline-flex items-center gap-1.5 rounded-md border border-neutral-300 px-2.5 py-1 text-sm text-neutral-700 transition hover:bg-neutral-100 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-700"
+                    aria-label="Copy link to this post"
+                  >
+                    <FiLink className="h-4 w-4" aria-hidden />
+                    Share
+                  </button>
+                  {isAuthor && !editing && (
                     <button
-                      className="ml-2 px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-sm transition-colors"
+                      type="button"
+                      className="ml-2 px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                       onClick={handleEditClick}
+                      disabled={!canEdit}
+                      title={canEdit ? undefined : `Posts can be edited once a day. You can edit again in ${editLockedHours} ${editLockedHours === 1 ? 'hour' : 'hours'}.`}
                     >
-                      Edit Post
+                      {canEdit ? 'Edit Post' : `Edit in ${editLockedHours}h`}
                     </button>
                   )}
-                  {canEdit && !editing && (
+                  {isAuthor && !editing && (
                     <button
+                      type="button"
                       className="ml-2 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded-sm transition-colors"
                       onClick={handleDeleteClick}
                     >
@@ -383,14 +438,12 @@ export default function PostDetail() {
                     placeholder="Title"
                     disabled={editLoading}
                   />
-                  <textarea
+                  <MarkdownEditor
                     id="post-edit-content"
-                    name="postEditContent"
                     value={editContent}
-                    onChange={e => setEditContent(e.target.value)}
-                    className="w-full p-2 rounded-sm border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
+                    onChange={setEditContent}
                     placeholder="Content"
-                    rows={6}
+                    rows={8}
                     disabled={editLoading}
                   />
                   
@@ -415,29 +468,21 @@ export default function PostDetail() {
                       <div className="mt-4 space-y-3">
                         <h4 className="text-sm font-medium text-neutral-700 dark:text-gray-300">Added Code Blocks:</h4>
                         {editCodeBlocks.map((block, index) => (
-                          <div key={index} className="bg-white dark:bg-neutral-900/80 rounded-lg p-4 border border-violet-300 dark:border-violet-500/30">
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="px-2 py-1 bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300 rounded-sm text-sm">
-                                {block.language}
-                              </span>
+                          <CodeBlockView
+                            key={index}
+                            code={block.code}
+                            language={block.language}
+                            description={block.description}
+                            action={
                               <button
                                 type="button"
                                 onClick={() => handleRemoveCodeBlock(index)}
-                                className="text-neutral-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
-                                title="Remove code block"
+                                className="text-xs text-neutral-500 transition-colors hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
                               >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
+                                Remove
                               </button>
-                            </div>
-                            <pre className="bg-white dark:bg-neutral-900/80 p-4 rounded-lg overflow-x-auto max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-300 dark:scrollbar-thumb-neutral-600 scrollbar-track-neutral-100 dark:scrollbar-track-neutral-800 border border-neutral-200 dark:border-neutral-700">
-                              <code className="text-sm text-neutral-900 dark:text-gray-300">{block.code}</code>
-                            </pre>
-                            {block.description && (
-                              <p className="mt-2 text-sm text-neutral-600 dark:text-gray-400">{block.description}</p>
-                            )}
-                          </div>
+                            }
+                          />
                         ))}
                       </div>
                     )}
@@ -462,7 +507,7 @@ export default function PostDetail() {
                   <div className="flex gap-2 justify-end">
                     <button
                       type="button"
-                      className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-sm"
+                      className="px-3 py-1 border border-neutral-300 text-neutral-700 hover:bg-neutral-100 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-700 text-sm rounded-sm"
                       onClick={handleEditCancel}
                       disabled={editLoading}
                     >
@@ -479,7 +524,7 @@ export default function PostDetail() {
                 </form>
               ) : (
                 <>
-                  <p className="text-neutral-700 dark:text-gray-400 mb-4 whitespace-pre-wrap">{post.content}</p>
+                  <Markdown className="mb-4">{post.content}</Markdown>
                   {/* Code Blocks */}
                   {post.codeBlocks && post.codeBlocks.length > 0 && (
                     <div className="mb-6">
@@ -544,7 +589,7 @@ export default function PostDetail() {
         {/* Answers Section */}
         {!loading && !error && post && postId && (
           <div className="mt-8">
-            <Answers postId={postId} post={post} />
+            <Answers postId={postId} post={post} onPostChanged={refreshPost} />
           </div>
         )}
 
@@ -553,42 +598,25 @@ export default function PostDetail() {
           <PostChatRoom postId={postId} postTitle={post.title} />
         )}
 
-        {/* Delete Confirmation Modal */}
-        {showDeleteConfirm && (
-          <FocusRestoreBoundary>
-          <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg p-6 w-full max-w-md mx-4">
-              <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg p-4">
-                <h4 className="font-semibold text-red-700 dark:text-red-200 mb-2">Delete Post</h4>
-                <p className="text-red-600 dark:text-red-300 mb-4">
-                  Are you sure you want to delete this post? This action cannot be undone.
-                  {post?.reward && post.reward > 0 && (
-                    <span className="block mt-2 text-yellow-600 dark:text-yellow-300">
-                      ⚠️ If this post has an active bounty, it will be refunded to your wallet.
-                    </span>
-                  )}
-                </p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleDeleteCancel}
-                    disabled={deleteLoading}
-                    className="flex-1 px-4 py-2 bg-neutral-200 dark:bg-neutral-600 text-neutral-900 dark:text-white rounded-md hover:bg-neutral-300 dark:hover:bg-neutral-700 transition-colors disabled:opacity-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleDeleteConfirm}
-                    disabled={deleteLoading}
-                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50"
-                  >
-                    {deleteLoading ? 'Deleting...' : 'Delete'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          </FocusRestoreBoundary>
-        )}
+        <ImageLightbox
+          images={imageMedia.map((m, i) => ({ url: m.url, alt: `Image ${i + 1} from ${post?.title ?? 'post'}` }))}
+          index={lightboxIndex}
+          onIndexChange={setLightboxIndex}
+        />
+        <ConfirmDialog
+          open={showDeleteConfirm}
+          title="Delete this post?"
+          confirmLabel="Delete post"
+          tone="danger"
+          busy={deleteLoading}
+          onCancel={handleDeleteCancel}
+          onConfirm={() => void handleDeleteConfirm()}
+        >
+          <p>This removes the post, its answers and its chat. It can't be undone.</p>
+          {post?.reward && post.reward > 0 && post.bountyStatus === 'ACTIVE' ? (
+            <p className="mt-2 text-amber-700 dark:text-amber-300">The {post.reward} BBUX bounty will be refunded to your wallet.</p>
+          ) : null}
+        </ConfirmDialog>
       </div>
     </div>
   )

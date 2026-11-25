@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { createDb } from '../../../../../../src/utils/db'
 import { getUserIdFromSession } from '../../../../../../src/utils/auth'
 import { answers, posts, bounties, users } from '../../../../../../drizzle/schema'
-import { eq } from 'drizzle-orm'
+import { and, eq, inArray } from 'drizzle-orm'
 import { updateReputation } from '../../../../../../src/utils/reputation'
 import { createBountyNotification } from '../../../../../../src/utils/notifications'
 import { GovernanceService } from '../../../../../../src/utils/governance'
@@ -46,8 +46,21 @@ app.post(async (c) => {
 
     // Check if answer exists
     const answerResult = await db.select().from(answers).where(eq(answers.id, answerId)).limit(1)
-    if (answerResult.length === 0) {
+    if (answerResult.length === 0 || answerResult[0].postId !== postId) {
       return c.json({ error: 'Answer not found' }, 404)
+    }
+
+    // Accepting releases the bounty and awards reputation, so it can only happen once per post.
+    const alreadyAccepted = await db
+      .select({ id: answers.id })
+      .from(answers)
+      .where(and(eq(answers.postId, postId), eq(answers.isAccepted, true)))
+      .limit(1)
+    if (alreadyAccepted.length > 0) {
+      return c.json({ error: 'An answer has already been accepted for this post' }, 409)
+    }
+    if (answerResult[0].authorId === userId) {
+      return c.json({ error: 'You cannot accept your own answer' }, 400)
     }
 
     // Unaccept all other answers for this post
@@ -74,30 +87,24 @@ app.post(async (c) => {
 
     // Check if there's a bounty on this post and handle bounty distribution
     const bountyResult = await db.select().from(bounties).where(eq(bounties.postId, postId)).limit(1)
-    if (bountyResult.length > 0 && bountyResult[0].status === 'ACTIVE') {
+    // EXPIRED bounties (deadline passed, answers waiting) can still be paid by accepting an answer.
+    if (bountyResult.length > 0 && (bountyResult[0].status === 'ACTIVE' || bountyResult[0].status === 'EXPIRED')) {
       const bounty = bountyResult[0]
-      
-      // Award additional reputation for bounty
-      await updateReputation(db, answerAuthorId, 'BOUNTY_AWARDED', answerId)
-      
-      // Distribute bounty through governance system
-      const bountyDistribution = await GovernanceService.distributeBounty(
-        db,
-        answerAuthorId,
-        bounty.amount,
-        bounty.id
-      )
-      
-      if (!bountyDistribution.success) {
-        console.error('Failed to distribute bounty:', bountyDistribution.error)
-        // Continue with the process even if bounty distribution fails
+
+      // Claim first, so the hourly expiry job can't refund or auto-award the same bounty concurrently.
+      const claimed = await db
+        .update(bounties)
+        .set({ status: 'CLAIMED', updatedAt: new Date() })
+        .where(and(eq(bounties.id, bounty.id), inArray(bounties.status, ['ACTIVE', 'EXPIRED'])))
+        .returning({ id: bounties.id })
+
+      if (claimed.length > 0) {
+        await updateReputation(db, answerAuthorId, 'BOUNTY_AWARDED', answerId)
+        const bountyDistribution = await GovernanceService.distributeBounty(db, answerAuthorId, bounty.amount, bounty.id)
+        if (!bountyDistribution.success) {
+          console.error('Failed to distribute bounty:', bountyDistribution.error)
+        }
       }
-      
-      // Update bounty status to completed
-      await db.update(bounties).set({
-        status: 'CLAIMED',
-        updatedAt: new Date()
-      }).where(eq(bounties.id, bounty.id))
     }
 
     // Create notification for answer author

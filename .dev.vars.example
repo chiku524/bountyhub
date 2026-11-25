@@ -19,3 +19,8 @@ GITHUB_PAT=
 GRAVITY_API_KEY=
 # Set to true only when ready for live ads (billing). Default/local: test creatives.
 GRAVITY_PRODUCTION=false
+
+# Password reset email (optional locally; reset links are logged when unset)
+# RESEND_API_KEY=
+# EMAIL_FROM=BountyHub <no-reply@bountyhub.tech>
+# FRONTEND_URL=http://localhost:5173

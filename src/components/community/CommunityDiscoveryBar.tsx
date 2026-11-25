@@ -79,6 +79,8 @@ interface CommunityDiscoveryBarProps {
   onFiltersChange: (filters: CommunityFilterOptions) => void
   onTabChange: (tab: CommunityDiscoveryTab) => void
   onPostViewChange: (view: CommunityPostView) => void
+  /** Search text restored from the URL (?q=). */
+  initialSearch?: string
 }
 
 const QUICK_TAG_LIMIT = 8
@@ -95,6 +97,7 @@ export function CommunityDiscoveryBar({
   onFiltersChange,
   onTabChange,
   onPostViewChange,
+  initialSearch = '',
 }: CommunityDiscoveryBarProps) {
   const isDesktop = isDesktopApp()
   const [tags, setTags] = useState<TagOption[]>([])
@@ -244,6 +247,7 @@ export function CommunityDiscoveryBar({
       <div className="flex flex-col gap-2 @xl/main:flex-row @xl/main:items-center">
         <SearchBar
           onSearch={onSearch}
+          initialValue={initialSearch}
           placeholder="Search questions by title, topic, or author…"
           className="min-w-0 w-full flex-1"
           debounceMs={300}

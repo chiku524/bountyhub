@@ -90,12 +90,18 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
     toggle: handleToggle,
   }), [handleToggle])
 
-  useEffect(() => {
-    if (user) {
-      void browserNotificationService.requestPermission()
-    }
-  }, [user])
-
+  // Ask for OS notification permission only when the user opts in (button in the panel / Settings),
+  // never automatically at login.
+  const [alertPermission, setAlertPermission] = useState<NotificationPermission>(() =>
+    browserNotificationService.getPermission()
+  )
+  const enableAlerts = useCallback(async () => {
+    browserNotificationService.setUserPreference('on')
+    await browserNotificationService.requestPermission()
+    setAlertPermission(browserNotificationService.getPermission())
+  }, [])
+  // Each notification pops at most once per session, and only if it is fresh.
+  const shownAlertIdsRef = useRef<Set<string>>(new Set())
   useEffect(() => {
     if (user && isOpen) {
       void refetch()
@@ -109,9 +115,11 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
 
     if (unreadNotifications.length > 0 && browserNotificationService.isEnabled()) {
       const latest = unreadNotifications[0]
-      const isRecent = new Date(latest.createdAt).getTime() > Date.now() - 60000
+      const isRecent = new Date(latest.createdAt).getTime() > Date.now() - 2 * 60_000
+      const alreadyShown = shownAlertIdsRef.current.has(latest.id)
+      unreadNotifications.forEach((n) => shownAlertIdsRef.current.add(n.id))
 
-      if (latest.type === 'bounty' || isRecent) {
+      if (isRecent && !alreadyShown) {
         if (latest.type === 'bounty') {
           browserNotificationService.showBountyNotification(
             latest.title,
@@ -212,8 +220,16 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
                     </button>
                   )}
                 </div>
+                {alertPermission === 'default' && (
+                  <button
+                    type="button"
+                    onClick={() => void enableAlerts()}
+                    className="mt-2 text-xs font-medium text-violet-600 hover:text-violet-500 dark:text-violet-300 dark:hover:text-violet-200"
+                  >
+                    Turn on desktop alerts for new answers and bounties
+                  </button>
+                )}
               </div>
-
               <div className="max-h-96 overflow-y-auto">
                 {loading ? (
                   <div className="p-4 text-center">

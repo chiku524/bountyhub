@@ -1,3 +1,4 @@
+import { markdownToPlainText } from '../../utils/markdownExcerpt'
 import { memo } from 'react'
 import { Link } from 'react-router-dom'
 import { FiMessageSquare } from 'react-icons/fi'
@@ -64,7 +65,7 @@ export const CommunityPostCard = memo(function CommunityPostCard({
             {fresh && <PostNewBadge />}
             <PostStatusBadge status={post.status} variant="quiet" />
             {bounty && post.reward != null && (
-              <PostBountyBadge reward={post.reward} variant="emphasis" />
+              <PostBountyBadge reward={post.reward} variant="emphasis" expiresAt={post.status === 'OPEN' ? post.bountyExpiresAt : null} />
             )}
           </div>
           <div className="pointer-events-auto relative z-20 shrink-0">
@@ -78,7 +79,7 @@ export const CommunityPostCard = memo(function CommunityPostCard({
 
         {post.content?.trim() ? (
           <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
-            {post.content}
+            {markdownToPlainText(post.content)}
           </p>
         ) : (
           <div className="mt-1.5 min-h-[2.5rem]" aria-hidden />

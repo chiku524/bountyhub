@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useToast } from '../contexts/ToastContext'
 import { FiStar, FiX } from 'react-icons/fi'
 import { config } from '../utils/config'
 import { useEscapeKey } from '../hooks/useEscapeKey'
@@ -60,6 +61,7 @@ export default function IntegrityRatingModal({
   referenceType,
 }: IntegrityRatingModalProps) {
   const [rating, setRating] = useState(5)
+  const toast = useToast()
   const [hoveredRating, setHoveredRating] = useState(0)
   const [selectedContext, setSelectedContext] = useState(context)
   const [reason, setReason] = useState('')
@@ -74,7 +76,7 @@ export default function IntegrityRatingModal({
     e.preventDefault()
     
     if (!reason.trim()) {
-      alert('Please provide a reason for your rating')
+      toast.error('Please provide a reason for your rating')
       return
     }
 
@@ -100,16 +102,16 @@ export default function IntegrityRatingModal({
       const result = await response.json()
 
       if (response.ok && result.success) {
-        alert('Rating submitted successfully')
+        toast.success('Rating submitted')
         onClose()
         // Optionally refresh the page or update the integrity score
         window.location.reload()
       } else {
-        alert(result.error || 'Failed to submit rating')
+        toast.error(result.error || 'Failed to submit rating')
       }
     } catch (error) {
       console.error('Error submitting rating:', error)
-      alert('Failed to submit rating')
+      toast.error('Failed to submit rating')
     } finally {
       setIsSubmitting(false)
     }
@@ -129,7 +131,7 @@ export default function IntegrityRatingModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-neutral-800 rounded-lg p-6 w-full max-w-md mx-4 border border-violet-500/30">
+      <div role="dialog" aria-modal="true" className="bg-neutral-800 rounded-lg p-6 w-full max-w-md mx-4 border border-violet-500/30">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-violet-300">Rate {targetUser.username}</h2>
           <button

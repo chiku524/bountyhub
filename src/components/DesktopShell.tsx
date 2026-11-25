@@ -19,6 +19,7 @@ import {
   FiBell,
   FiChevronLeft,
   FiChevronRight,
+  FiList,
 } from 'react-icons/fi'
 import { useAuth } from '../contexts/AuthProvider'
 import { isDesktopApp } from '../utils/desktop'
@@ -27,7 +28,7 @@ import { WalletMenuButton } from './WalletMenuButton'
 import { Notifications, type NotificationsRef } from './Notifications'
 import { useCommandPalette } from './CommandPalette'
 import { useMediaQuery } from '../hooks/useMediaQuery'
-
+import { ConfirmDialog } from './ConfirmDialog'
 const SIDEBAR_WIDTH_EXPANDED = 240
 const SIDEBAR_WIDTH_COLLAPSED = 72
 const NARROW_WINDOW_QUERY = '(max-width: 1024px)'
@@ -66,7 +67,9 @@ function DesktopSidebar({
         className={`flex items-center rounded-lg text-sm transition-colors ${
           collapsed ? 'justify-center px-2 py-2.5' : 'gap-3 px-3 py-2.5'
         } ${
-          active ? 'bg-white/10 text-white' : 'text-neutral-400 hover:bg-white/5 hover:text-white'
+          active
+            ? 'bg-violet-50 text-violet-700 dark:bg-white/10 dark:text-white'
+            : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-white/5 dark:hover:text-white'
         }`}
       >
         <Icon className="h-5 w-5 shrink-0" />
@@ -75,7 +78,9 @@ function DesktopSidebar({
     )
   }
 
+  const [confirmSignOut, setConfirmSignOut] = useState(false)
   async function handleSignOut() {
+    setConfirmSignOut(false)
     await logout()
     navigate('/login', { replace: true })
   }
@@ -83,14 +88,14 @@ function DesktopSidebar({
   return (
     <aside
       data-tour="desktop-sidebar"
-      className="fixed left-0 top-0 z-40 flex h-screen flex-col border-r border-white/5 bg-neutral-900/98 backdrop-blur-md transition-[width] duration-200"
+      className="fixed left-0 top-0 z-40 flex h-screen flex-col border-r border-neutral-200 dark:border-white/5 bg-white/95 backdrop-blur-md dark:bg-neutral-900/98 transition-[width] duration-200"
       style={{ width: collapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH_EXPANDED }}
     >
-      <div className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-white/5 px-2">
+      <div className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-neutral-200 dark:border-white/5 px-2">
         <Link
           to="/community"
           title={collapsed ? 'BountyHub' : undefined}
-          className={`flex min-w-0 flex-1 items-center font-semibold tracking-tight text-white transition hover:text-white ${
+          className={`flex min-w-0 flex-1 items-center font-semibold tracking-tight text-neutral-900 transition dark:text-white ${
             collapsed ? 'justify-center gap-0' : 'gap-2'
           }`}
         >
@@ -103,7 +108,7 @@ function DesktopSidebar({
               type="button"
               onClick={openCommandPalette}
               data-tour="command-palette"
-              className="flex h-10 w-10 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-white/5 hover:text-white"
+              className="flex h-10 w-10 items-center justify-center rounded-lg text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-white/5 dark:hover:text-white"
               aria-label="Open command palette"
               title="Go to… (⌘K)"
             >
@@ -114,7 +119,7 @@ function DesktopSidebar({
               type="button"
               data-notifications-button
               onClick={() => notificationsRef.current?.toggle()}
-              className="relative flex h-10 w-10 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-white/5 hover:text-white"
+              className="relative flex h-10 w-10 items-center justify-center rounded-lg text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-white/5 dark:hover:text-white"
               aria-label={unreadCount > 0 ? `Notifications (${unreadCount} unread)` : 'Notifications'}
               title="Notifications"
             >
@@ -144,7 +149,7 @@ function DesktopSidebar({
             Explore
           </p>
         )}
-        {collapsed && <div className="my-2 border-t border-white/5" aria-hidden />}
+        {collapsed && <div className="my-2 border-t border-neutral-200 dark:border-white/5" aria-hidden />}
         {navLink('/governance', 'Governance', FiCheckSquare, location.pathname === '/governance')}
         {navLink('/refund-requests', 'Refund requests', FiRefreshCw, location.pathname === '/refund-requests')}
         {navLink('/analytics', 'Analytics', FiBarChart2, location.pathname === '/analytics')}
@@ -152,19 +157,19 @@ function DesktopSidebar({
         {navLink('/repositories', 'Repositories', FiGithub, location.pathname.startsWith('/repositories'))}
         {navLink('/contributions', 'Contributions', FiAward, location.pathname === '/contributions')}
         {navLink('/docs', 'Docs', FiFileText, location.pathname.startsWith('/docs'))}
-        {navLink('/transactions', 'Transactions', FiCreditCard, location.pathname === '/transactions')}
+        {navLink('/transactions', 'Transactions', FiList, location.pathname === '/transactions')}
         {!collapsed && (
           <p className="mb-1 mt-4 px-3 text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
             Settings
           </p>
         )}
-        {collapsed && <div className="my-2 border-t border-white/5" aria-hidden />}
+        {collapsed && <div className="my-2 border-t border-neutral-200 dark:border-white/5" aria-hidden />}
         {navLink('/settings', 'Settings', FiSettings, location.pathname.startsWith('/settings'))}
         {!loading && user?.role === 'admin' && (
           <Link
             to="/admin"
             title={collapsed ? 'Admin' : undefined}
-            className={`mt-2 flex items-center rounded-lg text-sm text-amber-400/90 transition hover:bg-amber-500/10 hover:text-amber-300 ${
+            className={`mt-2 flex items-center rounded-lg text-sm text-amber-700 transition hover:bg-amber-500/10 hover:text-amber-800 dark:text-amber-400/90 dark:hover:text-amber-300 ${
               collapsed ? 'justify-center px-2 py-2.5' : 'gap-3 px-3 py-2.5'
             }`}
           >
@@ -173,14 +178,14 @@ function DesktopSidebar({
           </Link>
         )}
       </nav>
-      <div className="shrink-0 space-y-2 border-t border-white/5 p-2">
+      <div className="shrink-0 space-y-2 border-t border-neutral-200 dark:border-white/5 p-2">
         {collapsed && (
           <div className="flex flex-col items-center gap-1">
             <button
               type="button"
               onClick={openCommandPalette}
               data-tour="command-palette"
-              className="flex h-10 w-10 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-white/5 hover:text-white"
+              className="flex h-10 w-10 items-center justify-center rounded-lg text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-white/5 dark:hover:text-white"
               aria-label="Open command palette"
               title="Go to… (⌘K)"
             >
@@ -191,7 +196,7 @@ function DesktopSidebar({
               type="button"
               data-notifications-button
               onClick={() => notificationsRef.current?.toggle()}
-              className="relative flex h-10 w-10 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-white/5 hover:text-white"
+              className="relative flex h-10 w-10 items-center justify-center rounded-lg text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-white/5 dark:hover:text-white"
               aria-label={unreadCount > 0 ? `Notifications (${unreadCount} unread)` : 'Notifications'}
               title="Notifications"
             >
@@ -213,9 +218,9 @@ function DesktopSidebar({
             )}
             <button
               type="button"
-              onClick={handleSignOut}
+              onClick={() => setConfirmSignOut(true)}
               title={collapsed ? 'Log out' : undefined}
-              className={`flex w-full items-center rounded-lg text-sm text-red-400/90 transition hover:bg-red-500/10 hover:text-red-300 ${
+              className={`flex w-full items-center rounded-lg text-sm text-red-600 transition hover:bg-red-500/10 hover:text-red-700 dark:text-red-400/90 dark:hover:text-red-300 ${
                 collapsed ? 'justify-center px-2 py-2.5' : 'gap-3 px-3 py-2.5'
               }`}
             >
@@ -227,7 +232,7 @@ function DesktopSidebar({
           !collapsed && (
             <Link
               to="/login"
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-cyan-400 transition hover:bg-cyan-500/10"
+              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-cyan-700 transition dark:text-cyan-400 hover:bg-cyan-500/10"
             >
               <span>Sign in</span>
             </Link>
@@ -236,7 +241,7 @@ function DesktopSidebar({
         <button
           type="button"
           onClick={onToggleCollapse}
-          className="flex w-full items-center justify-center rounded-lg py-2 text-neutral-500 transition-colors hover:bg-white/5 hover:text-white"
+          className="flex w-full items-center justify-center rounded-lg py-2 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900 dark:hover:bg-white/5 dark:hover:text-white"
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
@@ -244,6 +249,14 @@ function DesktopSidebar({
         </button>
       </div>
       <Notifications ref={notificationsRef} onUnreadCountChange={handleNotificationsUpdate} />
+      <ConfirmDialog
+        open={confirmSignOut}
+        title="Log out of BountyHub?"
+        confirmLabel="Log out"
+        tone="danger"
+        onCancel={() => setConfirmSignOut(false)}
+        onConfirm={() => void handleSignOut()}
+      />
     </aside>
   )
 }
@@ -260,7 +273,7 @@ function DesktopShellInner({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen min-w-0 bg-neutral-950">
+    <div className="flex min-h-screen min-w-0 bg-neutral-50 dark:bg-neutral-950">
       <DesktopSidebar collapsed={collapsed} onToggleCollapse={handleToggleCollapse} />
       <main
         className="flex min-h-0 flex-1 min-w-0 flex-col overflow-hidden scrollbar-hide transition-[margin-left] duration-200"

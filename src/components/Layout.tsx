@@ -1,9 +1,8 @@
 import { ReactNode } from 'react'
 import { useLocation } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthProvider'
 import { BackToTop } from './BackToTop'
 import { isDesktopApp } from '../utils/desktop'
-
+import { isAuthPath } from '../utils/authPaths'
 interface LayoutProps {
   children: ReactNode
   showNav?: boolean
@@ -11,10 +10,9 @@ interface LayoutProps {
 
 export default function Layout({ children, showNav = true }: LayoutProps) {
   const location = useLocation()
-  const { user } = useAuth()
   const isDesktop = isDesktopApp()
   const isHomePage = location.pathname === '/'
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup'
+  const isAuthPage = isAuthPath(location.pathname)
   const isLegalPage = location.pathname === '/privacy' || location.pathname === '/terms'
   const isPitchPage = location.pathname === '/pitch'
   const isPublicPage = isHomePage || isAuthPage || isLegalPage || isPitchPage
@@ -32,7 +30,7 @@ export default function Layout({ children, showNav = true }: LayoutProps) {
   const glassFillsViewport = isDocsPage || isChatPage
 
   // Determine if we need top padding for authenticated nav (top navbar)
-  const showAuthenticatedNav = Boolean(user) && !isPublicPage
+  const showAuthenticatedNav = !isPublicPage && !isLaunchPage
   const needsTopPadding = showAuthenticatedNav && showNav
   const topPaddingClass = needsTopPadding ? (isDesktop ? 'pt-14' : 'pt-16') : ''
 
@@ -48,8 +46,8 @@ export default function Layout({ children, showNav = true }: LayoutProps) {
     glassFillsViewport ? 'flex min-h-0 flex-1 flex-col overflow-hidden' : ''
   ].join(' ')
 
-  const mobileBottomPad =
-    'pb-[max(4rem,env(safe-area-inset-bottom,0px))] md:pb-0'
+  // Only reserve the iOS home-indicator inset; there is no mobile bottom nav to clear.
+  const mobileBottomPad = 'pb-[env(safe-area-inset-bottom,0px)] md:pb-0'
 
   return (
     <div className={`flex min-h-0 min-w-0 flex-1 flex-col ${topPaddingClass} ${mobileBottomPad}`}>
