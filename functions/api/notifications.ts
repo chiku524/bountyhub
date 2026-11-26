@@ -43,7 +43,7 @@ app.get(async (c) => {
       read: notification.read,
       createdAt: notification.createdAt,
       navigation: notification.navigationType && notification.navigationUrl ? {
-        type: notification.navigationType as 'post' | 'home' | 'profile' | 'wallet',
+        type: notification.navigationType as 'post' | 'home' | 'profile' | 'wallet' | 'chat',
         id: notification.navigationId || undefined,
         url: notification.navigationUrl
       } : undefined

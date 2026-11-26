@@ -8,13 +8,13 @@ import { getDesktopSessionId } from '../utils/authSession'
 export interface AppNotification {
   id: string
   userId: string
-  type: 'comment' | 'vote' | 'answer' | 'bounty' | 'system'
+  type: 'comment' | 'vote' | 'answer' | 'bounty' | 'system' | 'mention'
   title: string
   message: string
   read: boolean
   createdAt: string
   navigation?: {
-    type: 'post' | 'home' | 'profile' | 'wallet'
+    type: 'post' | 'home' | 'profile' | 'wallet' | 'chat'
     id?: string
     url: string
   }

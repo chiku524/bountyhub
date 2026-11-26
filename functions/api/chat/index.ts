@@ -3,6 +3,7 @@ import { eq, desc, and, sql, ne, count } from 'drizzle-orm';
 import { chatRooms, chatMessages, chatRoomParticipants, users, profiles } from '../../../drizzle/schema';
 import { createDb } from '../../../src/utils/db';
 import { getUserIdFromSession } from '../../../src/utils/auth';
+import { notifyMentionedUsers } from '../../../src/utils/notifications';
 
 interface Env {
   DB: any;
@@ -15,6 +16,63 @@ export async function broadcastMessageToRoom(env: Env, roomId: string, message: 
   const id = env.CHAT_ROOM_DO.idFromName(roomId);
   const stub = env.CHAT_ROOM_DO.get(id);
   await stub.fetch(new Request('http://do/broadcast', { method: 'POST', body: JSON.stringify({ message }) }));
+}
+
+type ChatRoomRow = typeof chatRooms.$inferSelect;
+
+/**
+ * Notifies users @mentioned in a chat message. Global, post and public community rooms can
+ * mention anyone; private rooms and team rooms only notify their active participants, so a
+ * mention never links someone to a room they cannot open.
+ */
+export async function notifyChatMentions(
+  db: ReturnType<typeof createDb>,
+  room: Pick<ChatRoomRow, 'id' | 'name' | 'type' | 'isPublic' | 'teamId' | 'postId'>,
+  content: unknown,
+  author: { id: string; username: string }
+): Promise<void> {
+  if (typeof content !== 'string' || !content.includes('@')) return;
+  try {
+    await notifyRoomMentions(db, room, content, author);
+  } catch (error) {
+    // The message is already sent; a failed notification must not turn it into an error.
+    console.error('Error notifying chat mentions:', error);
+  }
+}
+
+async function notifyRoomMentions(
+  db: ReturnType<typeof createDb>,
+  room: Pick<ChatRoomRow, 'id' | 'name' | 'type' | 'isPublic' | 'teamId' | 'postId'>,
+  content: string,
+  author: { id: string; username: string }
+): Promise<void> {
+  const open = room.type === 'GLOBAL' || room.type === 'POST' || (room.isPublic && !room.teamId);
+  let allowedUserIds: Set<string> | undefined;
+  if (!open) {
+    const members = await db
+      .select({ userId: chatRoomParticipants.userId })
+      .from(chatRoomParticipants)
+      .where(and(eq(chatRoomParticipants.roomId, room.id), eq(chatRoomParticipants.isActive, true)));
+    allowedUserIds = new Set(members.map((m) => m.userId));
+  }
+  const navigationUrl = room.type === 'POST' && room.postId
+    ? `/posts/${room.postId}`
+    : room.type === 'GLOBAL'
+      ? '/chat'
+      : room.teamId
+        ? `/chat?team=${encodeURIComponent(room.teamId)}`
+        : `/chat?room=${encodeURIComponent(room.id)}`;
+  await notifyMentionedUsers({
+    db,
+    text: content,
+    authorId: author.id,
+    authorUsername: author.username,
+    where: room.type === 'GLOBAL' ? 'Global Chat' : room.type === 'POST' ? `the chat on "${room.name}"` : `the "${room.name}" chat`,
+    navigationType: room.type === 'POST' ? 'post' : 'chat',
+    navigationId: room.type === 'POST' ? room.postId ?? undefined : room.id,
+    navigationUrl,
+    allowedUserIds,
+  });
 }
 
 const chat = new Hono<{ Bindings: Env }>();
@@ -319,6 +377,14 @@ chat.post('/global-chat/messages', async (c) => {
       .limit(1);
 
     await broadcastMessageToRoom(c.env, roomId, message);
+    if (message?.author) {
+      await notifyChatMentions(
+        db,
+        { id: roomId, name: 'Global Chat', type: 'GLOBAL', isPublic: true, teamId: null, postId: null },
+        content,
+        { id: userId, username: message.author.username }
+      );
+    }
     return c.json({ success: true, message: message });
   } catch (error) {
     console.error('Error sending global chat message:', error);
@@ -542,6 +608,14 @@ chat.post('/:roomId/messages', async (c) => {
       .limit(1);
 
     await broadcastMessageToRoom(c.env, roomId, message[0]);
+    if (message[0]?.author && typeof content === 'string' && content.includes('@')) {
+      try {
+        const [room] = await db.select().from(chatRooms).where(eq(chatRooms.id, roomId)).limit(1);
+        if (room) await notifyChatMentions(db, room, content, { id: userId, username: message[0].author.username });
+      } catch (mentionError) {
+        console.error('Error notifying chat mentions:', mentionError);
+      }
+    }
     return c.json({ success: true, message: message[0] });
   } catch (error) {
     console.error('Error sending message:', error);
