@@ -593,6 +593,9 @@ export const bugBountyCampaigns = sqliteTable('bug_bounty_campaigns', {
   status: text('status', { enum: ['DRAFT', 'ACTIVE', 'PAUSED', 'COMPLETED', 'CANCELLED'] }).notNull().default('DRAFT'),
   totalBudget: real('total_budget').notNull().default(0),
   remainingBudget: real('remaining_budget').notNull().default(0),
+  // True once the budget has been held from the owner's BBUX wallet. Campaigns created
+  // before escrow existed are false: their awards are charged to the owner at award time.
+  budgetEscrowed: integer('budget_escrowed', { mode: 'boolean' }).notNull().default(false),
   minReward: real('min_reward').notNull().default(0),
   maxReward: real('max_reward').notNull().default(0),
   scope: text('scope'), // JSON string for scope definition

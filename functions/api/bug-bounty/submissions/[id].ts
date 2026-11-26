@@ -3,6 +3,7 @@ import { createDb } from '../../../../src/utils/db'
 import { getUserIdFromSession } from '../../../../src/utils/auth'
 import { bugSubmissions, bugSubmissionVerifications, bugBountyCampaigns, users } from '../../../../drizzle/schema'
 import { eq, ne, desc, and, gte, sql } from 'drizzle-orm'
+import { creditPayout, debitWallet, roundBbux } from '../../../utils/bugBountyEscrow'
 
 interface Env {
   DB: any
@@ -84,6 +85,8 @@ app.put(async (c) => {
         minReward: bugBountyCampaigns.minReward,
         maxReward: bugBountyCampaigns.maxReward,
         remainingBudget: bugBountyCampaigns.remainingBudget,
+        status: bugBountyCampaigns.status,
+        budgetEscrowed: bugBountyCampaigns.budgetEscrowed,
       })
       .from(bugBountyCampaigns)
       .where(eq(bugBountyCampaigns.id, submission[0].campaignId))
@@ -123,6 +126,9 @@ app.put(async (c) => {
       if (!campaign) {
         return c.json({ error: 'Campaign not found' }, 404)
       }
+      if (campaign.status === 'COMPLETED' || campaign.status === 'CANCELLED') {
+        return c.json({ error: 'This campaign is closed and its remaining budget has been returned, so it can no longer award submissions' }, 409)
+      }
       awardAmount = typeof body.rewardAmount === 'number' ? body.rewardAmount : submission[0].rewardAmount
       if (typeof awardAmount !== 'number') {
         return c.json({ error: 'rewardAmount is required to award a submission' }, 400)
@@ -130,6 +136,7 @@ app.put(async (c) => {
       if (awardAmount < campaign.minReward || (campaign.maxReward > 0 && awardAmount > campaign.maxReward)) {
         return c.json({ error: `rewardAmount must be between ${campaign.minReward} and ${campaign.maxReward} for this campaign` }, 400)
       }
+      awardAmount = roundBbux(awardAmount)
     }
 
     const updateData: any = {
@@ -175,8 +182,27 @@ app.put(async (c) => {
       return c.json({ error: 'This submission has already been awarded' }, 409)
     }
 
-    if (awarding && awardAmount !== null) {
-      // Deduct from the campaign budget only if enough remains (checked in the same statement).
+    if (awarding && awardAmount !== null && campaign) {
+      const campaignId = submission[0].campaignId
+
+      // Undo the award so the submission and budget stay consistent.
+      const revertSubmission = () => db
+        .update(bugSubmissions)
+        .set({
+          status: submission[0].status,
+          rewardAmount: submission[0].rewardAmount,
+          awardedAt: submission[0].awardedAt,
+          verifiedBy: submission[0].verifiedBy,
+          verifiedAt: submission[0].verifiedAt,
+          verificationNotes: submission[0].verificationNotes,
+          githubIssueUrl: submission[0].githubIssueUrl,
+          githubIssueNumber: submission[0].githubIssueNumber,
+          updatedAt: new Date(),
+        })
+        .where(eq(bugSubmissions.id, submissionId))
+
+      // Deduct from the campaign budget only if enough remains and the campaign is
+      // still open (both checked in the same statement).
       const deducted = await db
         .update(bugBountyCampaigns)
         .set({
@@ -184,29 +210,33 @@ app.put(async (c) => {
           updatedAt: new Date(),
         })
         .where(and(
-          eq(bugBountyCampaigns.id, submission[0].campaignId),
+          eq(bugBountyCampaigns.id, campaignId),
           gte(bugBountyCampaigns.remainingBudget, awardAmount),
+          ne(bugBountyCampaigns.status, 'COMPLETED'),
+          ne(bugBountyCampaigns.status, 'CANCELLED'),
         ))
         .returning({ id: bugBountyCampaigns.id })
 
       if (deducted.length === 0) {
-        // Undo the award so the submission and budget stay consistent.
-        await db
-          .update(bugSubmissions)
-          .set({
-            status: submission[0].status,
-            rewardAmount: submission[0].rewardAmount,
-            awardedAt: submission[0].awardedAt,
-            verifiedBy: submission[0].verifiedBy,
-            verifiedAt: submission[0].verifiedAt,
-            verificationNotes: submission[0].verificationNotes,
-            githubIssueUrl: submission[0].githubIssueUrl,
-            githubIssueNumber: submission[0].githubIssueNumber,
-            updatedAt: new Date(),
-          })
-          .where(eq(bugSubmissions.id, submissionId))
-        return c.json({ error: `Not enough campaign budget left (remaining: ${campaign?.remainingBudget ?? 0})` }, 400)
+        await revertSubmission()
+        return c.json({ error: `Not enough campaign budget left (remaining: ${campaign.remainingBudget ?? 0})` }, 400)
       }
+
+      // Escrowed campaigns already hold this BBUX. Campaigns created before escrow
+      // never took the budget, so charge the owner now.
+      if (!campaign.budgetEscrowed) {
+        const charged = await debitWallet(db, campaign.ownerId, awardAmount, { campaignId, submissionId, reason: 'award_unfunded_campaign' })
+        if (!charged) {
+          await db
+            .update(bugBountyCampaigns)
+            .set({ remainingBudget: sql`${bugBountyCampaigns.remainingBudget} + ${awardAmount}`, updatedAt: new Date() })
+            .where(eq(bugBountyCampaigns.id, campaignId))
+          await revertSubmission()
+          return c.json({ error: `The campaign owner doesn't have the ${awardAmount} BBUX this award needs` }, 400)
+        }
+      }
+
+      await creditPayout(db, submission[0].submitterId, awardAmount, { campaignId, submissionId })
     }
 
     // Create verification record if status changed

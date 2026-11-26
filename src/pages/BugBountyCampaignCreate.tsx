@@ -410,11 +410,14 @@ export default function BugBountyCampaignCreate() {
             <h2 className="text-xl font-semibold text-neutral-900 dark:text-white mb-4">
               Budget & Rewards
             </h2>
+            <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4">
+              The total budget is held from your BBUX wallet when you create the campaign. Awards are paid from it, and whatever is left comes back to you when you complete or cancel the campaign.
+            </p>
             
             <div className="grid grid-cols-1 @xl/main:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                  Total Budget ($) *
+                  Total Budget (BBUX) *
                 </label>
                 <input
                   type="number"
@@ -430,7 +433,7 @@ export default function BugBountyCampaignCreate() {
 
               <div>
                 <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                  Min Reward ($) *
+                  Min Reward (BBUX) *
                 </label>
                 <input
                   type="number"
@@ -446,7 +449,7 @@ export default function BugBountyCampaignCreate() {
 
               <div>
                 <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                  Max Reward ($) *
+                  Max Reward (BBUX) *
                 </label>
                 <input
                   type="number"
