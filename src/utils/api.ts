@@ -15,6 +15,12 @@ interface Tag {
   color: string;
 }
 
+export interface FollowedTag {
+  id: string;
+  name: string;
+  color: string;
+}
+
 interface CreatePostData {
   title: string;
   content: string;
@@ -182,6 +188,32 @@ export class ApiClient {
   async getTags(): Promise<Tag[]> {
     const response = await this.requestTags<{ success: boolean; data: Tag[] }>('/api/tags')
     return response.data
+  }
+
+  // Follows: tags the user follows and questions they watch
+  async getFollowedTags(): Promise<FollowedTag[]> {
+    const response = await this.request<{ tags: FollowedTag[] }>('/api/follows/tags')
+    return response.tags || []
+  }
+
+  async toggleTagFollow(tagName: string): Promise<{ following: boolean; tag: FollowedTag }> {
+    return this.request('/api/follows/tags/toggle', {
+      method: 'POST',
+      body: JSON.stringify({ tag: tagName }),
+    })
+  }
+
+  async getWatchStatus(postIds: string[]): Promise<Record<string, boolean>> {
+    const qs = encodeURIComponent(JSON.stringify(postIds))
+    const response = await this.request<{ status: Record<string, boolean> }>(`/api/follows/posts/status?postIds=${qs}`)
+    return response.status || {}
+  }
+
+  async toggleWatch(postId: string): Promise<{ watching: boolean }> {
+    return this.request('/api/follows/posts/toggle', {
+      method: 'POST',
+      body: JSON.stringify({ postId }),
+    })
   }
 
   // Posts

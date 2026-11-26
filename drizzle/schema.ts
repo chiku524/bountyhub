@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, real, uniqueIndex, index } from 'drizzle-orm/sqlite-core';
 import { sql } from 'drizzle-orm';
 
 // Users table
@@ -265,6 +265,28 @@ export const bookmarks = sqliteTable('bookmarks', {
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
+// Tags a user follows; drives the personal "Following" feed and bounty alerts.
+export const tagFollows = sqliteTable('tag_follows', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  tagId: text('tag_id').notNull().references(() => tags.id, { onDelete: 'cascade' }),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (t) => [
+  uniqueIndex('tag_follows_user_tag_idx').on(t.userId, t.tagId),
+  index('tag_follows_tag_idx').on(t.tagId),
+]);
+
+// Questions a user watches; watchers are notified of new answers, comments and accepted answers.
+export const postWatches = sqliteTable('post_watches', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  postId: text('post_id').notNull().references(() => posts.id, { onDelete: 'cascade' }),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (t) => [
+  uniqueIndex('post_watches_user_post_idx').on(t.userId, t.postId),
+  index('post_watches_post_idx').on(t.postId),
+]);
+
 // Refund requests table
 export const refundRequests = sqliteTable('refund_requests', {
   id: text('id').primaryKey(),
@@ -368,6 +390,12 @@ export const notificationSettings = sqliteTable('notification_settings', {
   voteNotifications: integer('vote_notifications', { mode: 'boolean' }).notNull().default(true),
   bountyNotifications: integer('bounty_notifications', { mode: 'boolean' }).notNull().default(true),
   systemNotifications: integer('system_notifications', { mode: 'boolean' }).notNull().default(true),
+  answerNotifications: integer('answer_notifications', { mode: 'boolean' }).notNull().default(true),
+  /** Optional email digest of new answers and bounties ending soon: 'off' | 'daily' | 'weekly'. */
+  digestFrequency: text('digest_frequency', { enum: ['off', 'daily', 'weekly'] }).notNull().default('off'),
+  lastDigestSentAt: integer('last_digest_sent_at', { mode: 'timestamp' }),
+  /** Random token used in the digest's one-click unsubscribe link. */
+  digestToken: text('digest_token').unique(),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
 });
@@ -593,6 +621,9 @@ export const bugBountyCampaigns = sqliteTable('bug_bounty_campaigns', {
   status: text('status', { enum: ['DRAFT', 'ACTIVE', 'PAUSED', 'COMPLETED', 'CANCELLED'] }).notNull().default('DRAFT'),
   totalBudget: real('total_budget').notNull().default(0),
   remainingBudget: real('remaining_budget').notNull().default(0),
+  // True once the budget has been held from the owner's BBUX wallet. Campaigns created
+  // before escrow existed are false: their awards are charged to the owner at award time.
+  budgetEscrowed: integer('budget_escrowed', { mode: 'boolean' }).notNull().default(false),
   minReward: real('min_reward').notNull().default(0),
   maxReward: real('max_reward').notNull().default(0),
   scope: text('scope'), // JSON string for scope definition

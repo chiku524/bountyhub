@@ -5,6 +5,7 @@ import { answers, users, votes, posts, answerCodeBlocks, profiles } from '../../
 import { eq, and } from 'drizzle-orm'
 import { updateReputation } from '../../../../../src/utils/reputation'
 import { createAnswerNotification, notifyMentionedUsers } from '../../../../../src/utils/notifications'
+import { notifyPostWatchers } from '../../../../../src/utils/followNotifications'
 
 interface Env {
   DB: any
@@ -192,7 +193,7 @@ app.post(async (c) => {
 
       // Notify @mentioned users. The question author already got an "new answer" notification.
       if (postResult.length > 0) {
-        await notifyMentionedUsers({
+        const mentionedIds = await notifyMentionedUsers({
           db,
           text: content,
           authorId: userId,
@@ -202,6 +203,14 @@ app.post(async (c) => {
           navigationId: postId,
           navigationUrl: `/posts/${postId}`,
           excludeUserIds: new Set([postResult[0].authorId]),
+        })
+
+        // Tell watchers, skipping anyone already notified above.
+        await notifyPostWatchers(db, {
+          postId,
+          postTitle: postResult[0].title,
+          activity: { kind: 'answer', actorUsername: user.username },
+          exclude: [userId, postResult[0].authorId, ...mentionedIds],
         })
       }
     } catch (notificationError) {

@@ -36,6 +36,7 @@ import { DesktopLaunch } from './components/DesktopLaunch'
 import { isDesktopApp } from './utils/desktop'
 import { OfflineBanner } from './components/OfflineBanner'
 import { useDesktopIntegration } from './hooks/useDesktopIntegration'
+import { useNotificationAlerts } from './hooks/useNotificationAlerts'
 import { isAuthPath } from './utils/authPaths'
 import { installGravityPixel } from './installGravityPixel'
 
@@ -44,6 +45,7 @@ const Login = lazy(() => import('./pages/Login'))
 const Signup = lazy(() => import('./pages/Signup'))
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
 const ResetPassword = lazy(() => import('./pages/ResetPassword'))
+const EmailUnsubscribe = lazy(() => import('./pages/EmailUnsubscribe'))
 const Profile = lazy(() => import('./pages/Profile'))
 const ProfileActivity = lazy(() => import('./pages/ProfileActivity'))
 const ProfilePosts = lazy(() => import('./pages/ProfilePosts'))
@@ -108,6 +110,7 @@ function DocsAwareRoutes() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/email/unsubscribe" element={<EmailUnsubscribe />} />
         <Route path="/profile" element={<ProtectedRoute title="Sign in to view your profile"><Profile /></ProtectedRoute>} />
         <Route path="/profile/activity" element={<ProtectedRoute><ProfileActivity /></ProtectedRoute>} />
         <Route path="/profile/posts" element={<ProtectedRoute><ProfilePosts /></ProtectedRoute>} />
@@ -221,6 +224,8 @@ function AppContent() {
   const { aboutOpen, setAboutOpen } = useDesktopMenuEvents()
   useDesktopShortcuts()
   useDesktopIntegration()
+  // OS alerts for new answers/bounties and the tray unread badge, on every route
+  useNotificationAlerts()
   
   // Scroll to section handler for HomeNav
   const scrollToSection = (sectionId: string) => {

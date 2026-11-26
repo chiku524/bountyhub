@@ -85,6 +85,8 @@ export function useNotificationsQuery(enabled = true) {
   return {
     notifications,
     loading: query.isLoading || query.isFetching,
+    /** Changes whenever a poll lands (or the cache is updated), so effects can react once per fetch. */
+    dataUpdatedAt: query.dataUpdatedAt,
     error: query.error,
     refetch: query.refetch,
     markAsRead: (id: string) => markRead.mutateAsync(id),

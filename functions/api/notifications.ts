@@ -1,8 +1,14 @@
 import { Hono } from 'hono'
 import { createDb } from '../../src/utils/db'
 import { getUserIdFromSession } from '../../src/utils/auth'
-import { notifications } from '../../drizzle/schema'
+import { notifications, notificationSettings } from '../../drizzle/schema'
 import { eq, desc, and } from 'drizzle-orm'
+import {
+  getNotificationSettingsRow,
+  parsePreferencesUpdate,
+  preferencesFromRow,
+  saveNotificationPreferences,
+} from '../../src/utils/notificationPreferences'
 
 interface Env {
   DB: any
@@ -85,6 +91,58 @@ app.get('/unread-count', async (c) => {
   } catch (error) {
     console.error('Error fetching unread count:', error)
     return c.json({ error: 'Failed to fetch unread count', details: error instanceof Error ? error.message : 'Unknown error' }, 500)
+  }
+})
+
+// Get the user's alert choices and digest frequency (defaults when never saved)
+app.get('/settings', async (c) => {
+  const sessionId = c.get('sessionId')
+  if (!sessionId) return c.json({ error: 'Unauthorized' }, 401)
+  const db = createDb(c.env.DB)
+  try {
+    const userId = await getUserIdFromSession(sessionId, db)
+    if (!userId) return c.json({ error: 'Unauthorized' }, 401)
+    return c.json(preferencesFromRow(await getNotificationSettingsRow(db, userId)))
+  } catch (error) {
+    console.error('Error fetching notification settings:', error)
+    return c.json({ error: 'Failed to load notification settings' }, 500)
+  }
+})
+
+// Update some or all of: answer, comment, vote, bounty, system (booleans), digestFrequency ('off' | 'daily' | 'weekly')
+app.put('/settings', async (c) => {
+  const sessionId = c.get('sessionId')
+  if (!sessionId) return c.json({ error: 'Unauthorized' }, 401)
+  const db = createDb(c.env.DB)
+  try {
+    const userId = await getUserIdFromSession(sessionId, db)
+    if (!userId) return c.json({ error: 'Unauthorized' }, 401)
+    const parsed = parsePreferencesUpdate(await c.req.json().catch(() => null))
+    if (!parsed.ok) return c.json({ error: parsed.error }, 400)
+    return c.json(await saveNotificationPreferences(db, userId, parsed.update))
+  } catch (error) {
+    console.error('Error saving notification settings:', error)
+    return c.json({ error: 'Failed to save notification settings' }, 500)
+  }
+})
+
+// One-click digest unsubscribe from the emailed link; no sign-in needed, the token identifies the user.
+app.post('/digest/unsubscribe', async (c) => {
+  const body = await c.req.json().catch(() => ({}))
+  const token = typeof body?.token === 'string' ? body.token.trim() : ''
+  if (!/^[a-f0-9]{32,128}$/.test(token)) return c.json({ error: 'This unsubscribe link is not valid.' }, 400)
+  const db = createDb(c.env.DB)
+  try {
+    const updated = await db
+      .update(notificationSettings)
+      .set({ digestFrequency: 'off', updatedAt: new Date() })
+      .where(eq(notificationSettings.digestToken, token))
+      .returning({ id: notificationSettings.id })
+    if (updated.length === 0) return c.json({ error: 'This unsubscribe link is not valid.' }, 404)
+    return c.json({ success: true })
+  } catch (error) {
+    console.error('Error unsubscribing from digest:', error)
+    return c.json({ error: 'Could not unsubscribe right now. Try again later.' }, 500)
   }
 })
 

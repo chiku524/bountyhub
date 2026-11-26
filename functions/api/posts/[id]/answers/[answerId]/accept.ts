@@ -5,6 +5,7 @@ import { answers, posts, bounties, users } from '../../../../../../drizzle/schem
 import { and, eq, inArray } from 'drizzle-orm'
 import { updateReputation } from '../../../../../../src/utils/reputation'
 import { createBountyNotification } from '../../../../../../src/utils/notifications'
+import { notifyPostWatchers } from '../../../../../../src/utils/followNotifications'
 import { GovernanceService } from '../../../../../../src/utils/governance'
 
 interface Env {
@@ -130,6 +131,14 @@ app.post(async (c) => {
       console.error('Error creating bounty notification:', notificationError)
       // Don't fail the answer acceptance if notification fails
     }
+
+    // Tell watchers the question was resolved (the asker and the winning answerer already know).
+    await notifyPostWatchers(db, {
+      postId,
+      postTitle: post.title,
+      activity: { kind: 'accepted' },
+      exclude: [userId, answerAuthorId],
+    })
 
     return c.json({ 
       success: true, 

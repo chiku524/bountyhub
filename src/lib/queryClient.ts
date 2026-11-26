@@ -20,6 +20,8 @@ export const queryKeys = {
   /** Batch bookmark status for a sorted, comma-joined list of post ids. */
   bookmarkStatuses: (userId: string, postIdsKey: string) =>
     ['bookmark-statuses', userId, postIdsKey] as const,
+  followedTags: (userId: string) => ['followed-tags', userId] as const,
+  watchStatus: (userId: string, postId: string) => ['watch-status', userId, postId] as const,
   platformStats: () => ['platform-stats'] as const,
   adminStats: () => ['admin-stats'] as const,
   walletInfo: (userId: string) => ['wallet-info', userId] as const,
