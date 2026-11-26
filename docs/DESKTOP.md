@@ -44,6 +44,7 @@ There is **no native menu bar** (File / View / Help) — the window is chrome-fo
 
 - **Second launch:** If BountyHub is already running, starting it again raises the existing window (localhost `127.0.0.1:45287`).
 - **Tray:** Open BountyHub, **Settings…**, **Reload**, **About**, **Check for Updates**, **Log out**, **Quit**.
+- **Alerts and unread count:** The app checks notifications every 30 seconds, including while hidden in the tray. New answers, accepted answers / bounty awards, comments and system messages pop up as native OS notifications (votes stay in the bell only; several at once collapse into one summary). Turn them off in **Settings → Notifications**. The unread count shows as a red dot on the tray icon (Windows/Linux), a number next to the menu-bar icon (macOS), the dock badge (macOS) or taskbar overlay (Windows), and in the tray tooltip.
 - **Shortcuts:** **Cmd/Ctrl+,** → Settings (Desktop app tab). **Cmd/Ctrl+Q** → Quit. **Cmd/Ctrl+Shift+I** (dev only) → developer tools.
 - **Sidebar:** When signed in, the left sidebar shows your username and a **Log out** button.
 - **Settings:** **Settings → Desktop app** shows native/UI versions, **Check for updates**, and release notes.

@@ -80,6 +80,25 @@ export async function sendNativeNotification(title: string, body?: string): Prom
   }
 }
 
+let lastUnreadCount: number | null = null
+
+/**
+ * Mirrors the unread notification count onto the tray icon (badge dot, tooltip, macOS menu-bar count)
+ * and the dock/taskbar badge. Skips the IPC when the count hasn't changed.
+ */
+export async function setDesktopUnreadCount(count: number): Promise<void> {
+  if (!isDesktopApp()) return
+  const next = Math.max(0, Math.floor(count))
+  if (next === lastUnreadCount) return
+  lastUnreadCount = next
+  try {
+    const { invoke } = await import('@tauri-apps/api/core')
+    await invoke('set_unread_count', { count: next })
+  } catch {
+    /* older native shell without the command */
+  }
+}
+
 export function getCloseToTray(): boolean {
   return readFlag(CLOSE_TO_TRAY_KEY) !== 'off'
 }

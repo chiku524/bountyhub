@@ -100,57 +100,12 @@ export const Notifications = forwardRef<NotificationsRef, NotificationsProps>(({
     await browserNotificationService.requestPermission()
     setAlertPermission(browserNotificationService.getPermission())
   }, [])
-  // Each notification pops at most once per session, and only if it is fresh.
-  const shownAlertIdsRef = useRef<Set<string>>(new Set())
+  // OS/browser alerts for new notifications are raised by useNotificationAlerts at the app root.
   useEffect(() => {
     if (user && isOpen) {
       void refetch()
     }
   }, [user, isOpen, refetch])
-
-  useEffect(() => {
-    if (!user || !Array.isArray(notifications) || notifications.length === 0) return
-
-    const unreadNotifications = notifications.filter((n) => !n.read)
-
-    if (unreadNotifications.length > 0 && browserNotificationService.isEnabled()) {
-      const latest = unreadNotifications[0]
-      const isRecent = new Date(latest.createdAt).getTime() > Date.now() - 2 * 60_000
-      const alreadyShown = shownAlertIdsRef.current.has(latest.id)
-      unreadNotifications.forEach((n) => shownAlertIdsRef.current.add(n.id))
-
-      if (isRecent && !alreadyShown) {
-        if (latest.type === 'bounty') {
-          browserNotificationService.showBountyNotification(
-            latest.title,
-            latest.message,
-            latest.navigation?.id,
-            undefined
-          )
-        } else if (latest.type === 'answer') {
-          browserNotificationService.showAnswerNotification(
-            latest.title,
-            latest.message,
-            latest.navigation?.id || ''
-          )
-        } else if (latest.type === 'comment') {
-          browserNotificationService.showCommentNotification(
-            latest.title,
-            latest.message,
-            latest.navigation?.id || ''
-          )
-        } else {
-          browserNotificationService.showNotification(latest.title, {
-            body: latest.message,
-            data: {
-              url: latest.navigation?.url || '/',
-              type: latest.type,
-            },
-          })
-        }
-      }
-    }
-  }, [notifications, user])
 
   const safeNotifications = Array.isArray(notifications) ? notifications : []
   const unreadCount = safeNotifications.filter((n) => !n.read).length
