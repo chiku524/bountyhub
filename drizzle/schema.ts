@@ -368,6 +368,12 @@ export const notificationSettings = sqliteTable('notification_settings', {
   voteNotifications: integer('vote_notifications', { mode: 'boolean' }).notNull().default(true),
   bountyNotifications: integer('bounty_notifications', { mode: 'boolean' }).notNull().default(true),
   systemNotifications: integer('system_notifications', { mode: 'boolean' }).notNull().default(true),
+  answerNotifications: integer('answer_notifications', { mode: 'boolean' }).notNull().default(true),
+  /** Optional email digest of new answers and bounties ending soon: 'off' | 'daily' | 'weekly'. */
+  digestFrequency: text('digest_frequency', { enum: ['off', 'daily', 'weekly'] }).notNull().default('off'),
+  lastDigestSentAt: integer('last_digest_sent_at', { mode: 'timestamp' }),
+  /** Random token used in the digest's one-click unsubscribe link. */
+  digestToken: text('digest_token').unique(),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
 });

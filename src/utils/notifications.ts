@@ -1,6 +1,7 @@
 import { notifications } from '../../drizzle/schema'
+import { isNotificationTypeEnabled, type NotificationType } from './notificationPreferences'
 
-export type NotificationType = 'comment' | 'vote' | 'answer' | 'bounty' | 'system'
+export type { NotificationType }
 
 export interface CreateNotificationParams {
   db: any
@@ -14,7 +15,7 @@ export interface CreateNotificationParams {
 }
 
 /**
- * Creates a notification for a user
+ * Creates a notification for a user, unless they turned that type of alert off in Settings → Notifications.
  */
 export async function createNotification({
   db,
@@ -27,6 +28,7 @@ export async function createNotification({
   navigationUrl
 }: CreateNotificationParams) {
   try {
+    if (!(await isNotificationTypeEnabled(db, userId, type))) return
     await db.insert(notifications).values({
       id: crypto.randomUUID(),
       userId,

@@ -73,7 +73,7 @@ interface Env {
   GRAVITY_API_KEY?: string
   /** Set to "true" to serve live Gravity ads; omit/false for test creatives. */
   GRAVITY_PRODUCTION?: string
-  /** Resend API key for transactional email (password reset). wrangler secret put RESEND_API_KEY */
+  /** Resend API key for transactional email (password reset, email digests). wrangler secret put RESEND_API_KEY */
   RESEND_API_KEY?: string
   /** Sender for transactional email, e.g. "BountyHub <no-reply@bountyhub.tech>" */
   EMAIL_FROM?: string
@@ -141,11 +141,14 @@ app.get('/cron', async (c) => {
     const cleanup = await expirePendingTransactions(c.env.DB)
     const { expireBounties } = await import('./utils/expireBounties')
     const bountyExpiry = await expireBounties(c.env.DB)
+    const { runEmailDigests } = await import('./utils/emailDigest')
+    const digests = await runEmailDigests(c.env)
     return c.json({
       success: true,
       message: 'Cron job executed successfully',
       cleanup,
       bountyExpiry,
+      digests,
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
@@ -605,6 +608,13 @@ export default {
           console.log('[scheduled] bounty expiry', result)
         } catch (err) {
           console.error('[scheduled] bounty expiry failed', err)
+        }
+        try {
+          const { runEmailDigests } = await import('./utils/emailDigest')
+          const result = await runEmailDigests(env)
+          console.log('[scheduled] email digests', result)
+        } catch (err) {
+          console.error('[scheduled] email digests failed', err)
         }
       })()
     )

@@ -44,6 +44,7 @@ const Login = lazy(() => import('./pages/Login'))
 const Signup = lazy(() => import('./pages/Signup'))
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
 const ResetPassword = lazy(() => import('./pages/ResetPassword'))
+const EmailUnsubscribe = lazy(() => import('./pages/EmailUnsubscribe'))
 const Profile = lazy(() => import('./pages/Profile'))
 const ProfileActivity = lazy(() => import('./pages/ProfileActivity'))
 const ProfilePosts = lazy(() => import('./pages/ProfilePosts'))
@@ -108,6 +109,7 @@ function DocsAwareRoutes() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/email/unsubscribe" element={<EmailUnsubscribe />} />
         <Route path="/profile" element={<ProtectedRoute title="Sign in to view your profile"><Profile /></ProtectedRoute>} />
         <Route path="/profile/activity" element={<ProtectedRoute><ProfileActivity /></ProtectedRoute>} />
         <Route path="/profile/posts" element={<ProtectedRoute><ProfilePosts /></ProtectedRoute>} />

@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { api } from '../../utils/api'
+import { useToast } from '../../contexts/ToastContext'
 import { useTheme } from '../../contexts/ThemeProvider'
 import { browserNotificationService } from '../../utils/browserNotifications'
 import { isDesktopApp } from '../../utils/desktop'
@@ -31,14 +33,71 @@ function Switch({ checked, onChange, label }: { checked: boolean; onChange: (v: 
   )
 }
 
-/** Settings → Notifications: opt in to OS/browser alerts for new answers, accepted answers and bounties. */
+type DigestFrequency = 'off' | 'daily' | 'weekly'
+interface ServerPreferences {
+  answer: boolean
+  comment: boolean
+  vote: boolean
+  bounty: boolean
+  system: boolean
+  digestFrequency: DigestFrequency
+}
+
+const ALERT_TYPES: Array<{ key: Exclude<keyof ServerPreferences, 'digestFrequency'>; title: string; description: string }> = [
+  { key: 'answer', title: 'New answers', description: 'Someone answers one of your questions.' },
+  { key: 'bounty', title: 'Bounty payouts', description: 'Your answer is accepted and you receive a bounty.' },
+  { key: 'comment', title: 'Comments', description: 'Someone comments on your post.' },
+  { key: 'vote', title: 'Votes', description: 'Someone votes on your post.' },
+  { key: 'system', title: 'Bounty status updates', description: 'Your bounty ends, is refunded, or is awarded automatically.' },
+]
+
+const DIGEST_OPTIONS: Array<{ value: DigestFrequency; label: string }> = [
+  { value: 'off', label: 'Off' },
+  { value: 'daily', label: 'Daily' },
+  { value: 'weekly', label: 'Weekly' },
+]
+
+/** Settings → Notifications: which alerts the account gets, the optional email digest, and pop-up alerts on this device. */
 export function NotificationSettings() {
+  const toast = useToast()
+  const [prefs, setPrefs] = useState<ServerPreferences | null>(null)
+  const [loadError, setLoadError] = useState('')
   const [permission, setPermission] = useState<NotificationPermission>(() => browserNotificationService.getPermission())
   const [pref, setPref] = useState(() => browserNotificationService.userPreference())
   const enabled = permission === 'granted' && pref === 'on'
   const where = isDesktopApp() ? 'your desktop' : 'this browser'
 
-  const toggle = async (next: boolean) => {
+  useEffect(() => {
+    let cancelled = false
+    api
+      .request<ServerPreferences>('/api/notifications/settings')
+      .then((p) => !cancelled && setPrefs(p))
+      .catch((err: unknown) => !cancelled && setLoadError(err instanceof Error ? err.message : 'Could not load your notification settings.'))
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const save = async (update: Partial<ServerPreferences>) => {
+    if (!prefs) return
+    const previous = prefs
+    setPrefs({ ...prefs, ...update })
+    try {
+      const saved = await api.request<ServerPreferences>('/api/notifications/settings', {
+        method: 'PUT',
+        body: JSON.stringify(update),
+      })
+      setPrefs(saved)
+      if (update.digestFrequency && update.digestFrequency !== 'off') {
+        toast.success(`${update.digestFrequency === 'daily' ? 'Daily' : 'Weekly'} digest turned on. It goes to your account email.`)
+      }
+    } catch (err: unknown) {
+      setPrefs(previous)
+      toast.error(err instanceof Error ? err.message : 'Could not save that change.')
+    }
+  }
+
+  const toggleDevice = async (next: boolean) => {
     if (next) {
       browserNotificationService.setUserPreference('on')
       setPref('on')
@@ -53,20 +112,91 @@ export function NotificationSettings() {
   }
 
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-neutral-600 dark:text-neutral-400">
-        In-app notifications (the bell) are always on. Alerts also pop up on {where} when something needs you.
-      </p>
-      <Row
-        title="Alerts for answers and bounties"
-        description="New answers to your questions, your answer being accepted, and bounty payouts."
-        control={<Switch checked={enabled} onChange={(v) => void toggle(v)} label="Alerts for answers and bounties" />}
-      />
-      {permission === 'denied' && (
-        <p className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
-          Alerts are blocked in your {isDesktopApp() ? 'system' : 'browser'} settings for BountyHub. Allow notifications there, then turn this on.
-        </p>
-      )}
+    <div className="space-y-8">
+      <section className="space-y-4" aria-labelledby="alert-types-heading">
+        <div>
+          <h3 id="alert-types-heading" className="font-semibold text-neutral-900 dark:text-white">What you're notified about</h3>
+          <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+            Applies to the bell and pop-up alerts on every device you use.
+          </p>
+        </div>
+        {loadError && (
+          <p className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-200">
+            {loadError}
+          </p>
+        )}
+        {!prefs && !loadError && <p className="text-sm text-neutral-500">Loading…</p>}
+        {prefs &&
+          ALERT_TYPES.map((t) => (
+            <Row
+              key={t.key}
+              title={t.title}
+              description={t.description}
+              control={<Switch checked={prefs[t.key]} onChange={(v) => void save({ [t.key]: v })} label={t.title} />}
+            />
+          ))}
+      </section>
+
+      <section className="space-y-4" aria-labelledby="digest-heading">
+        <div>
+          <h3 id="digest-heading" className="font-semibold text-neutral-900 dark:text-white">Email digest</h3>
+          <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+            A summary of new answers to your questions and bounties that are about to expire, sent to your account email.
+            Nothing is sent when there's nothing new.
+          </p>
+        </div>
+        {prefs && (
+          <Row
+            title="Send me a digest"
+            description={
+              prefs.digestFrequency === 'daily'
+                ? 'Every day, in the afternoon (UTC).'
+                : prefs.digestFrequency === 'weekly'
+                  ? 'Every Monday, in the afternoon (UTC).'
+                  : 'No digest emails.'
+            }
+            control={
+              <div className="flex gap-2" role="radiogroup" aria-label="Email digest frequency">
+                {DIGEST_OPTIONS.map((o) => (
+                  <button
+                    key={o.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={prefs.digestFrequency === o.value}
+                    onClick={() => prefs.digestFrequency !== o.value && void save({ digestFrequency: o.value })}
+                    className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+                      prefs.digestFrequency === o.value
+                        ? 'border-violet-500 bg-violet-100 text-violet-800 dark:bg-violet-500/20 dark:text-violet-200'
+                        : 'border-neutral-300 text-neutral-700 hover:bg-neutral-100 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-800'
+                    }`}
+                  >
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            }
+          />
+        )}
+      </section>
+
+      <section className="space-y-4" aria-labelledby="device-alerts-heading">
+        <div>
+          <h3 id="device-alerts-heading" className="font-semibold text-neutral-900 dark:text-white">Pop-up alerts on {where}</h3>
+          <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+            The bell always shows your notifications. This also pops them up on {where} when something needs you.
+          </p>
+        </div>
+        <Row
+          title="Show pop-up alerts"
+          description="Uses the alert types you chose above."
+          control={<Switch checked={enabled} onChange={(v) => void toggleDevice(v)} label="Show pop-up alerts" />}
+        />
+        {permission === 'denied' && (
+          <p className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
+            Alerts are blocked in your {isDesktopApp() ? 'system' : 'browser'} settings for BountyHub. Allow notifications there, then turn this on.
+          </p>
+        )}
+      </section>
     </div>
   )
 }
