@@ -17,6 +17,7 @@ import tagsRoutes from './api/tags'
 import statsRoutes from './api/stats'
 import integrityRoutes from './api/integrity'
 import bookmarksRoutes from './api/bookmarks'
+import followsRoutes from './api/follows'
 import refundRequestsRoutes from './api/refund-requests'
 import refundVoteRoutes from './api/refund/vote'
 import governanceRoutes from './api/governance'
@@ -559,6 +560,7 @@ app.route('/api/tags', tagsRoutes)
 app.route('/api/stats', statsRoutes)
 app.route('/api/integrity', integrityRoutes)
 app.route('/api/bookmarks', bookmarksRoutes)
+app.route('/api/follows', followsRoutes)
 app.route('/api/refund-requests', refundRequestsRoutes)
 app.route('/api/refund', refundVoteRoutes)
 app.route('/api/governance', governanceRoutes)

@@ -17,6 +17,7 @@ import { FiLink } from 'react-icons/fi'
 import { PostChatRoom } from '../components/PostChatRoom'
 import { Answers } from '../components/Answers'
 import { BookmarkButton } from '../components/BookmarkButton'
+import { WatchButton } from '../components/WatchButton'
 import { CodeBlockEditor } from '../components/CodeBlockEditor'
 import TagSelector from '../components/TagSelector'
 import { MediaUpload } from '../components/MediaUpload'
@@ -395,6 +396,7 @@ export default function PostDetail() {
                     userVote={post.userVote || 0}
                   />
                   <BookmarkButton postId={post.id} size="lg" />
+                  <WatchButton postId={post.id} />
                   <button
                     type="button"
                     onClick={() => void handleShare()}

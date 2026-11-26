@@ -29,8 +29,12 @@ import {
 } from '../utils/communityDiscovery'
 import { useCommunityPosts } from '../hooks/useCommunityPosts'
 import { BookmarkStatusProvider } from '../contexts/BookmarkStatusContext'
+import { useAuth } from '../contexts/AuthProvider'
+import { FollowTagButton } from '../components/community/FollowTagButton'
+import { FollowedTagsPanel } from '../components/community/FollowedTagsPanel'
 
 export default function Community() {
+  const { user } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const urlTab = parseDiscoveryTab(searchParams.get('tab'))
   // Read once on mount: search, tags and page live in the URL so Back from a post and shared links restore them.
@@ -164,7 +168,10 @@ export default function Community() {
           onTabChange={handleTabChange}
           onPostViewChange={handlePostViewChange}
           initialSearch={initialUrlState.search}
+          showFollowingTab={Boolean(user)}
         />
+
+        {activeTab === 'following' && user && <FollowedTagsPanel />}
 
         {showFeatured && (
           <CommunityFeaturedStrip
@@ -188,6 +195,7 @@ export default function Community() {
             <p className="text-sm text-neutral-500 dark:text-neutral-400">
               {formatFeedSummary(totalPosts, activeTab, filters)}
             </p>
+            {filters.selectedTags.length === 1 && <FollowTagButton tagName={filters.selectedTags[0]} />}
           </div>
         )}
 
@@ -226,7 +234,28 @@ export default function Community() {
             </div>
           )}
 
-          {!loading && posts.length === 0 && (
+          {!loading && posts.length === 0 && activeTab === 'following' && !hasActiveFilters && (
+            <div className="p-4 @sm/main:p-8">
+              <EmptyState
+                icon="👀"
+                title={user ? 'Your feed is empty' : 'Sign in to see your feed'}
+                description={
+                  user
+                    ? 'Follow a few tags above, or press Watch on any question, and new activity will show up here.'
+                    : 'Follow tags and watch questions to build a personal feed.'
+                }
+                action={
+                  user ? undefined : (
+                    <Link to="/login" className="btn-primary inline-flex items-center gap-2">
+                      Sign in
+                    </Link>
+                  )
+                }
+              />
+            </div>
+          )}
+
+          {!loading && posts.length === 0 && !(activeTab === 'following' && !hasActiveFilters) && (
             <div className="p-4 @sm/main:p-8">
               <EmptyState
                 icon="🔍"

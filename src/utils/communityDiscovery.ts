@@ -5,7 +5,7 @@
 
 import type { CommunityFilterOptions } from './communityPosts'
 
-export type CommunityDiscoveryTab = 'trending' | 'new' | 'bounties' | 'unanswered'
+export type CommunityDiscoveryTab = 'trending' | 'new' | 'bounties' | 'unanswered' | 'following'
 
 export const COMMUNITY_DISCOVERY_TABS: Array<{
   id: CommunityDiscoveryTab
@@ -18,10 +18,28 @@ export const COMMUNITY_DISCOVERY_TABS: Array<{
   { id: 'unanswered', label: 'Unanswered', hint: 'Open questions with no answers yet' },
 ]
 
+/** Personal feed tab, shown only to signed-in users. */
+export const FOLLOWING_DISCOVERY_TAB: { id: CommunityDiscoveryTab; label: string; hint: string } = {
+  id: 'following',
+  label: 'Following',
+  hint: 'Questions in tags you follow and questions you watch',
+}
+
+/** Tabs to render: the public tabs, plus Following first when signed in. */
+export function visibleDiscoveryTabs(signedIn: boolean) {
+  return signedIn ? [FOLLOWING_DISCOVERY_TAB, ...COMMUNITY_DISCOVERY_TABS] : COMMUNITY_DISCOVERY_TABS
+}
+
 export const DEFAULT_DISCOVERY_TAB: CommunityDiscoveryTab = 'trending'
 
 export function isCommunityDiscoveryTab(value: string | null | undefined): value is CommunityDiscoveryTab {
-  return value === 'trending' || value === 'new' || value === 'bounties' || value === 'unanswered'
+  return (
+    value === 'trending' ||
+    value === 'new' ||
+    value === 'bounties' ||
+    value === 'unanswered' ||
+    value === 'following'
+  )
 }
 
 export function parseDiscoveryTab(value: string | null | undefined): CommunityDiscoveryTab {
@@ -33,8 +51,9 @@ export function filtersForDiscoveryTab(
   tab: CommunityDiscoveryTab,
   filters: CommunityFilterOptions
 ): CommunityFilterOptions {
+  const { following: _following, ...rest } = filters
   const next: CommunityFilterOptions = {
-    ...filters,
+    ...rest,
     status: '',
     dateRange: '',
     hasBounty: false,
@@ -61,6 +80,10 @@ export function filtersForDiscoveryTab(
       next.unanswered = true
       next.sortBy = 'newest'
       break
+    case 'following':
+      next.following = true
+      next.sortBy = 'newest'
+      break
   }
 
   return next
@@ -69,6 +92,12 @@ export function filtersForDiscoveryTab(
 /** Infer active tab from filters (null when advanced filters diverge from a preset). */
 export function getDiscoveryTab(filters: CommunityFilterOptions): CommunityDiscoveryTab | null {
   const { status, dateRange, hasBounty, unanswered, sortBy } = filters
+
+  if (filters.following) {
+    return !status && !dateRange && !hasBounty && !unanswered && (sortBy === 'newest' || !sortBy)
+      ? 'following'
+      : null
+  }
 
   if (
     unanswered &&
@@ -122,6 +151,7 @@ const TAB_LABEL: Record<CommunityDiscoveryTab, string> = {
   new: 'New',
   bounties: 'Top Bounties',
   unanswered: 'Unanswered',
+  following: 'Following',
 }
 
 export function discoveryTabLabel(tab: CommunityDiscoveryTab): string {
@@ -137,6 +167,7 @@ export function defaultSortForTab(tab: CommunityDiscoveryTab): string {
       return 'highestBounty'
     case 'new':
     case 'unanswered':
+    case 'following':
     default:
       return 'newest'
   }

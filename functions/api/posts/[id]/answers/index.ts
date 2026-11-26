@@ -5,6 +5,7 @@ import { answers, users, votes, posts, answerCodeBlocks, profiles } from '../../
 import { eq, and } from 'drizzle-orm'
 import { updateReputation } from '../../../../../src/utils/reputation'
 import { createAnswerNotification } from '../../../../../src/utils/notifications'
+import { notifyPostWatchers } from '../../../../../src/utils/followNotifications'
 
 interface Env {
   DB: any
@@ -188,6 +189,14 @@ app.post(async (c) => {
           postResult[0].title,
           postId
         )
+      }
+      if (postResult.length > 0) {
+        await notifyPostWatchers(db, {
+          postId,
+          postTitle: postResult[0].title,
+          activity: { kind: 'answer', actorUsername: user.username },
+          exclude: [userId, postResult[0].authorId],
+        })
       }
     } catch (notificationError) {
       console.error('Error creating answer notification:', notificationError)

@@ -4,6 +4,7 @@ import { getUserIdFromSession } from '../../../src/utils/auth'
 import { posts, postTags, bounties, media, codeBlocks, users, tags, profiles, virtualWallets, votes } from '../../../drizzle/schema'
 import { and, eq, sql } from 'drizzle-orm'
 import { GovernanceService } from '../../../src/utils/governance'
+import { notifyTagFollowersOfBounty } from '../../../src/utils/followNotifications'
 import { BOUNTY_FEE_RATE, bountyTotalCost } from '../../../src/utils/bountyFee'
 import { listCommunityPosts } from '../../utils/listCommunityPosts'
 
@@ -35,6 +36,7 @@ app.get(async (c) => {
     const dateRange = c.req.query('dateRange') || undefined
     const hasBounty = c.req.query('hasBounty') === 'true'
     const unanswered = c.req.query('unanswered') === 'true'
+    const following = c.req.query('following') === 'true'
     const sortBy = c.req.query('sortBy') || undefined
     const tagsParam = c.req.query('tags')
     const tags = tagsParam
@@ -58,6 +60,7 @@ app.get(async (c) => {
         unanswered: unanswered || undefined,
         tags,
         sortBy,
+        following: following || undefined,
       },
       userId
     )
@@ -216,6 +219,15 @@ app.post(async (c) => {
         expiresAt: expiresAt,
         createdAt: now,
         updatedAt: now
+      })
+
+      // Tell people following this question's tags that a new bounty is up.
+      await notifyTagFollowersOfBounty(db, {
+        postId,
+        postTitle: title,
+        authorId: userId,
+        tagIds: Array.isArray(selectedTags) ? selectedTags.filter((t: unknown): t is string => typeof t === 'string') : [],
+        amount: bountyAmount,
       })
     }
 
