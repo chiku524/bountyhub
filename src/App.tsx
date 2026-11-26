@@ -36,6 +36,7 @@ import { DesktopLaunch } from './components/DesktopLaunch'
 import { isDesktopApp } from './utils/desktop'
 import { OfflineBanner } from './components/OfflineBanner'
 import { useDesktopIntegration } from './hooks/useDesktopIntegration'
+import { useNotificationAlerts } from './hooks/useNotificationAlerts'
 import { isAuthPath } from './utils/authPaths'
 import { installGravityPixel } from './installGravityPixel'
 
@@ -221,6 +222,8 @@ function AppContent() {
   const { aboutOpen, setAboutOpen } = useDesktopMenuEvents()
   useDesktopShortcuts()
   useDesktopIntegration()
+  // OS alerts for new answers/bounties and the tray unread badge, on every route
+  useNotificationAlerts()
   
   // Scroll to section handler for HomeNav
   const scrollToSection = (sectionId: string) => {

@@ -6,12 +6,18 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc;
 use std::thread;
 use std::time::Duration;
+use tauri::image::Image;
 use tauri::menu::{MenuBuilder, MenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::{include_image, Emitter, LogicalPosition, LogicalSize, Manager, WebviewWindow};
 
 const WINDOW_LABEL_MAIN: &str = "main";
 const WINDOW_LABEL_SPLASH: &str = "splashscreen";
+const TRAY_ID: &str = "bountyhub-tray";
+/// Tray icon (generated from public/logo.svg by `npm run desktop:icons`).
+const TRAY_ICON: Image<'static> = include_image!("icons/icon.png");
+/// Badge colour drawn on the tray icon / Windows taskbar overlay when there are unread notifications.
+const BADGE_RGB: [u8; 3] = [0xEF, 0x44, 0x44];
 /// Localhost port for single-instance handoff (second launch pings first to raise the window).
 const INSTANCE_PORT: u16 = 45287;
 
@@ -22,6 +28,112 @@ static CLOSE_TO_TRAY: AtomicBool = AtomicBool::new(true);
 #[tauri::command]
 fn set_close_to_tray(enabled: bool) {
     CLOSE_TO_TRAY.store(enabled, Ordering::Relaxed);
+}
+
+/// Draws a filled circle (with a white ring) into an RGBA buffer, anti-aliased at the edges.
+#[cfg_attr(target_os = "macos", allow(dead_code))]
+fn draw_badge_dot(rgba: &mut [u8], width: u32, height: u32, cx: f32, cy: f32, radius: f32) {
+    let ring = (radius * 0.18).max(1.0);
+    for y in 0..height {
+        for x in 0..width {
+            let dx = x as f32 + 0.5 - cx;
+            let dy = y as f32 + 0.5 - cy;
+            let d = (dx * dx + dy * dy).sqrt();
+            let outer = (radius + ring + 0.5 - d).clamp(0.0, 1.0);
+            if outer <= 0.0 {
+                continue;
+            }
+            let inner = (radius + 0.5 - d).clamp(0.0, 1.0);
+            // Fill colour: red inside, white ring outside it.
+            let fill = [
+                BADGE_RGB[0] as f32 * inner + 255.0 * (1.0 - inner),
+                BADGE_RGB[1] as f32 * inner + 255.0 * (1.0 - inner),
+                BADGE_RGB[2] as f32 * inner + 255.0 * (1.0 - inner),
+            ];
+            let i = ((y * width + x) * 4) as usize;
+            let a = outer;
+            for c in 0..3 {
+                rgba[i + c] = (fill[c] * a + rgba[i + c] as f32 * (1.0 - a)).round() as u8;
+            }
+            rgba[i + 3] = (255.0 * a + rgba[i + 3] as f32 * (1.0 - a)).round() as u8;
+        }
+    }
+}
+
+/// The tray icon with a red dot in the top-right corner, signalling unread notifications.
+#[cfg(not(target_os = "macos"))]
+fn tray_icon_with_badge() -> Image<'static> {
+    let (w, h) = (TRAY_ICON.width(), TRAY_ICON.height());
+    let mut rgba = TRAY_ICON.rgba().to_vec();
+    let r = w.min(h) as f32 * 0.18;
+    draw_badge_dot(&mut rgba, w, h, w as f32 - r * 1.1, r * 1.1, r);
+    Image::new_owned(rgba, w, h)
+}
+
+/// A small standalone red dot, used as the Windows taskbar overlay icon.
+#[cfg(target_os = "windows")]
+fn overlay_badge() -> Image<'static> {
+    let size = 32u32;
+    let mut rgba = vec![0u8; (size * size * 4) as usize];
+    let c = size as f32 / 2.0;
+    draw_badge_dot(&mut rgba, size, size, c, c, c * 0.8);
+    Image::new_owned(rgba, size, size)
+}
+
+/// Last unread count pushed to the tray, so repeated polls with the same count don't redraw the icon.
+static UNREAD_COUNT: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
+
+/// Reflects the unread notification count in the OS chrome: tray tooltip on every platform, a count
+/// next to the menu-bar icon on macOS, a red dot on the tray icon on Windows/Linux (the macOS icon is a
+/// monochrome template, so it gets the count instead), the dock badge on macOS / launcher badge on
+/// Linux, and a taskbar overlay dot on Windows.
+#[tauri::command]
+fn set_unread_count(app: tauri::AppHandle, count: u32) -> Result<(), String> {
+    if UNREAD_COUNT.swap(count, Ordering::Relaxed) == count {
+        return Ok(());
+    }
+    let label = match count {
+        0 => None,
+        1..=99 => Some(count.to_string()),
+        _ => Some("99+".to_string()),
+    };
+
+    if let Some(tray) = app.tray_by_id(TRAY_ID) {
+        let tooltip = match &label {
+            Some(l) => format!("BountyHub \u{2014} {l} unread"),
+            None => "BountyHub".to_string(),
+        };
+        let _ = tray.set_tooltip(Some(tooltip));
+        #[cfg(target_os = "macos")]
+        {
+            let _ = tray.set_title(label.as_deref());
+        }
+        #[cfg(not(target_os = "macos"))]
+        {
+            let icon = if count > 0 {
+                tray_icon_with_badge()
+            } else {
+                TRAY_ICON.clone()
+            };
+            let _ = tray.set_icon(Some(icon));
+        }
+    }
+
+    if let Some(win) = app.get_webview_window(WINDOW_LABEL_MAIN) {
+        #[cfg(target_os = "windows")]
+        {
+            let _ = win.set_overlay_icon(if count > 0 {
+                Some(overlay_badge())
+            } else {
+                None
+            });
+        }
+        #[cfg(not(target_os = "windows"))]
+        {
+            let _ = win.set_badge_count(if count > 0 { Some(count as i64) } else { None });
+        }
+    }
+    Ok(())
 }
 
 /// Returns current window logical size and position for persistence.
@@ -217,9 +329,10 @@ fn main() {
 
             // icon.png is generated from public/logo.svg (npm run desktop:icons). Template images are for
             // macOS menu bar; Windows/Linux tray should use the full-color app icon.
-            let _tray = TrayIconBuilder::with_id("bountyhub-tray")
+            let _tray = TrayIconBuilder::with_id(TRAY_ID)
                 .icon_as_template(cfg!(target_os = "macos"))
-                .icon(include_image!("icons/icon.png"))
+                .icon(TRAY_ICON.clone())
+                .tooltip("BountyHub")
                 .menu(&tray_menu)
                 .show_menu_on_left_click(false)
                 .on_menu_event(move |app, event| match event.id.as_ref() {
@@ -266,6 +379,7 @@ fn main() {
             get_app_version,
             open_devtools,
             set_close_to_tray,
+            set_unread_count,
         ])
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
