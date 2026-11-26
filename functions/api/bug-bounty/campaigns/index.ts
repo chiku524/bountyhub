@@ -2,7 +2,8 @@ import { Hono } from 'hono'
 import { createDb } from '../../../../src/utils/db'
 import { getUserIdFromSession } from '../../../../src/utils/auth'
 import { bugBountyCampaigns, bugSubmissions, githubRepositories, users, profiles } from '../../../../drizzle/schema'
-import { eq, sql, desc, and } from 'drizzle-orm'
+import { eq, sql, desc, and, notInArray } from 'drizzle-orm'
+import { creditRefund, debitWallet, isNonNegativeAmount, roundBbux } from '../../../utils/bugBountyEscrow'
 
 interface Env {
   DB: any
@@ -10,8 +11,11 @@ interface Env {
 
 const app = new Hono<{ Bindings: Env }>()
 
+const CLOSED_STATUSES = ['COMPLETED', 'CANCELLED'] as const
+const isClosed = (status: string) => (CLOSED_STATUSES as readonly string[]).includes(status)
+
 // GET all campaigns with pagination and filters
-app.get(async (c) => {
+app.get('/', async (c) => {
   const db = createDb(c.env.DB)
   
   try {
@@ -152,7 +156,7 @@ app.get('/:id', async (c) => {
 })
 
 // POST create new campaign
-app.post(async (c) => {
+app.post('/', async (c) => {
   const db = createDb(c.env.DB)
   
   try {
@@ -188,12 +192,19 @@ app.post(async (c) => {
       return c.json({ error: 'Title and description are required' }, 400)
     }
 
-    if (totalBudget < 0 || minReward < 0 || maxReward < 0) {
-      return c.json({ error: 'Budget and rewards must be non-negative' }, 400)
+    const budget = roundBbux(totalBudget ?? 0)
+    const min = minReward ?? 0
+    const max = maxReward ?? 0
+    if (!isNonNegativeAmount(budget) || !isNonNegativeAmount(min) || !isNonNegativeAmount(max)) {
+      return c.json({ error: 'Budget and rewards must be non-negative numbers' }, 400)
     }
 
-    if (minReward > maxReward) {
+    if (min > max) {
       return c.json({ error: 'Minimum reward cannot exceed maximum reward' }, 400)
+    }
+
+    if (max > budget) {
+      return c.json({ error: 'Maximum reward cannot exceed the total budget' }, 400)
     }
 
     // Validate repository if provided
@@ -212,17 +223,25 @@ app.post(async (c) => {
     const now = new Date()
     const campaignId = crypto.randomUUID()
 
-    const [campaign] = await db.insert(bugBountyCampaigns).values({
+    // Hold the whole budget from the creator's wallet before the campaign exists.
+    if (!(await debitWallet(db, userId, budget, { campaignId, reason: 'campaign_created' }))) {
+      return c.json({ error: `Insufficient BBUX balance: this campaign needs ${budget} BBUX for its budget` }, 400)
+    }
+
+    let campaign
+    try {
+      [campaign] = await db.insert(bugBountyCampaigns).values({
       id: campaignId,
       title,
       description,
       ownerId: userId,
       repositoryId: repositoryId || null,
       status: 'DRAFT' as const,
-      totalBudget: totalBudget || 0,
-      remainingBudget: totalBudget || 0,
-      minReward: minReward || 0,
-      maxReward: maxReward || 0,
+      totalBudget: budget,
+      remainingBudget: budget,
+      budgetEscrowed: true,
+      minReward: min,
+      maxReward: max,
       scope: scope ? JSON.stringify(scope) : null,
       rules: rules ? JSON.stringify(rules) : null,
       severityLevels: severityLevels ? JSON.stringify(severityLevels) : null,
@@ -233,6 +252,11 @@ app.post(async (c) => {
       createdAt: now,
       updatedAt: now,
     }).returning()
+    } catch (insertError) {
+      // Give the held budget back if the campaign couldn't be saved.
+      await creditRefund(db, userId, budget, { campaignId, reason: 'campaign_create_failed' })
+      throw insertError
+    }
 
     return c.json(campaign, 201)
   } catch (error) {
@@ -277,29 +301,59 @@ app.put('/:id', async (c) => {
     }
 
     const body = await c.req.json()
+    const current = existing[0]
     const updateData: any = {
       updatedAt: new Date(),
+    }
+
+    const validStatuses = ['DRAFT', 'ACTIVE', 'PAUSED', 'COMPLETED', 'CANCELLED']
+    const nextStatus: string | undefined =
+      body.status !== undefined && validStatuses.includes(body.status) && body.status !== current.status
+        ? body.status
+        : undefined
+    const closing = nextStatus !== undefined && isClosed(nextStatus)
+
+    // A closed campaign has already returned its budget, so its money and status are final.
+    if (isClosed(current.status) && (nextStatus !== undefined || body.totalBudget !== undefined || body.minReward !== undefined || body.maxReward !== undefined)) {
+      return c.json({ error: 'This campaign is closed: its status, budget and rewards can no longer change' }, 409)
+    }
+    if (closing && body.totalBudget !== undefined) {
+      return c.json({ error: 'Change the budget and close the campaign in separate requests' }, 400)
+    }
+
+    const min = body.minReward !== undefined ? body.minReward : current.minReward
+    const max = body.maxReward !== undefined ? body.maxReward : current.maxReward
+    if (!isNonNegativeAmount(min) || !isNonNegativeAmount(max)) {
+      return c.json({ error: 'Rewards must be non-negative numbers' }, 400)
+    }
+    if (min > max) {
+      return c.json({ error: 'Minimum reward cannot exceed maximum reward' }, 400)
     }
 
     // Only update provided fields
     if (body.title !== undefined) updateData.title = body.title
     if (body.description !== undefined) updateData.description = body.description
-    if (body.status !== undefined) {
-      const validStatuses = ['DRAFT', 'ACTIVE', 'PAUSED', 'COMPLETED', 'CANCELLED']
-      if (validStatuses.includes(body.status)) {
-        updateData.status = body.status as 'DRAFT' | 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'CANCELLED'
-      }
+    if (nextStatus !== undefined) {
+      updateData.status = nextStatus as 'DRAFT' | 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'CANCELLED'
     }
+
+    // Budget changes move the difference between the owner's wallet and the campaign.
+    let budgetDelta = 0
     if (body.totalBudget !== undefined) {
-      updateData.totalBudget = body.totalBudget
-      // Adjust remaining budget proportionally
-      const budgetRatio = existing[0].totalBudget > 0 
-        ? existing[0].remainingBudget / existing[0].totalBudget 
-        : 1
-      updateData.remainingBudget = body.totalBudget * budgetRatio
+      if (!isNonNegativeAmount(body.totalBudget)) {
+        return c.json({ error: 'Budget must be a non-negative number' }, 400)
+      }
+      const newTotal = roundBbux(body.totalBudget)
+      const alreadyAwarded = roundBbux(current.totalBudget - current.remainingBudget)
+      if (newTotal < alreadyAwarded) {
+        return c.json({ error: `Budget cannot be lower than the ${alreadyAwarded} BBUX already awarded` }, 400)
+      }
+      budgetDelta = roundBbux(newTotal - current.totalBudget)
+      updateData.totalBudget = newTotal
+      updateData.remainingBudget = sql`${bugBountyCampaigns.remainingBudget} + ${budgetDelta}`
     }
-    if (body.minReward !== undefined) updateData.minReward = body.minReward
-    if (body.maxReward !== undefined) updateData.maxReward = body.maxReward
+    if (body.minReward !== undefined) updateData.minReward = min
+    if (body.maxReward !== undefined) updateData.maxReward = max
     if (body.scope !== undefined) updateData.scope = JSON.stringify(body.scope)
     if (body.rules !== undefined) updateData.rules = JSON.stringify(body.rules)
     if (body.severityLevels !== undefined) updateData.severityLevels = JSON.stringify(body.severityLevels)
@@ -308,11 +362,49 @@ app.put('/:id', async (c) => {
     if (body.isPublic !== undefined) updateData.isPublic = body.isPublic
     if (body.allowTeamBounties !== undefined) updateData.allowTeamBounties = body.allowTeamBounties
 
+    // Closing hands back whatever is left. Matching on the remaining budget we read
+    // means an award landing at the same moment makes this update miss instead of
+    // refunding money that was just paid out.
+    const refund = closing && current.budgetEscrowed ? roundBbux(current.remainingBudget) : 0
+    if (closing) {
+      updateData.remainingBudget = 0
+    }
+
+    // Raising an escrowed budget takes the extra BBUX from the owner first.
+    if (current.budgetEscrowed && budgetDelta > 0) {
+      if (!(await debitWallet(db, userId, budgetDelta, { campaignId, reason: 'budget_increased' }))) {
+        return c.json({ error: `Insufficient BBUX balance: raising the budget needs ${budgetDelta} more BBUX` }, 400)
+      }
+    }
+
+    const conditions = [eq(bugBountyCampaigns.id, campaignId), notInArray(bugBountyCampaigns.status, [...CLOSED_STATUSES])]
+    if (closing) {
+      conditions.push(eq(bugBountyCampaigns.remainingBudget, current.remainingBudget))
+    }
+    if (budgetDelta < 0) {
+      // Never lower the budget below what is still unspent right now.
+      conditions.push(sql`${bugBountyCampaigns.remainingBudget} + ${budgetDelta} >= 0`)
+    }
+
     const [updated] = await db
       .update(bugBountyCampaigns)
       .set(updateData)
-      .where(eq(bugBountyCampaigns.id, campaignId))
+      .where(and(...conditions))
       .returning()
+
+    if (!updated) {
+      if (current.budgetEscrowed && budgetDelta > 0) {
+        await creditRefund(db, userId, budgetDelta, { campaignId, reason: 'budget_increase_failed' })
+      }
+      return c.json({ error: 'The campaign changed while saving (an award may have just been paid). Reload and try again.' }, 409)
+    }
+
+    if (current.budgetEscrowed && budgetDelta < 0) {
+      await creditRefund(db, current.ownerId, -budgetDelta, { campaignId, reason: 'budget_decreased' })
+    }
+    if (refund > 0) {
+      await creditRefund(db, current.ownerId, refund, { campaignId, reason: `campaign_${nextStatus!.toLowerCase()}` })
+    }
 
     return c.json(updated)
   } catch (error) {
@@ -361,9 +453,19 @@ app.delete('/:id', async (c) => {
       return c.json({ error: 'Only draft campaigns can be deleted' }, 400)
     }
 
-    await db
+    const [deleted] = await db
       .delete(bugBountyCampaigns)
-      .where(eq(bugBountyCampaigns.id, campaignId))
+      .where(and(eq(bugBountyCampaigns.id, campaignId), eq(bugBountyCampaigns.status, 'DRAFT')))
+      .returning({ remainingBudget: bugBountyCampaigns.remainingBudget, budgetEscrowed: bugBountyCampaigns.budgetEscrowed })
+
+    if (!deleted) {
+      return c.json({ error: 'Only draft campaigns can be deleted' }, 409)
+    }
+
+    // Return the unspent budget held for this campaign.
+    if (deleted.budgetEscrowed) {
+      await creditRefund(db, userId, roundBbux(deleted.remainingBudget), { campaignId, reason: 'campaign_deleted' })
+    }
 
     return c.json({ message: 'Campaign deleted successfully' })
   } catch (error) {
