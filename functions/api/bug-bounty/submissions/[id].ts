@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { createDb } from '../../../../src/utils/db'
 import { getUserIdFromSession } from '../../../../src/utils/auth'
-import { bugSubmissions, bugSubmissionVerifications } from '../../../../drizzle/schema'
+import { bugSubmissions, bugSubmissionVerifications, bugBountyCampaigns, users } from '../../../../drizzle/schema'
 import { eq, desc } from 'drizzle-orm'
 
 interface Env {
@@ -77,7 +77,31 @@ app.put(async (c) => {
       return c.json({ error: 'Submission not found' }, 404)
     }
 
+    // Only the campaign owner or a site admin may review, verify or award a submission.
+    const [campaign] = await db
+      .select({ ownerId: bugBountyCampaigns.ownerId })
+      .from(bugBountyCampaigns)
+      .where(eq(bugBountyCampaigns.id, submission[0].campaignId))
+      .limit(1)
+
+    if (campaign?.ownerId !== userId) {
+      const [caller] = await db
+        .select({ role: users.role })
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1)
+      if (caller?.role !== 'admin') {
+        return c.json({ error: 'Only the campaign owner can update this submission' }, 403)
+      }
+    }
+
     const body = await c.req.json()
+
+    if (body.rewardAmount !== undefined && body.rewardAmount !== null) {
+      if (typeof body.rewardAmount !== 'number' || !Number.isFinite(body.rewardAmount) || body.rewardAmount < 0) {
+        return c.json({ error: 'rewardAmount must be a non-negative number' }, 400)
+      }
+    }
     const updateData: any = {
       updatedAt: new Date(),
     }
