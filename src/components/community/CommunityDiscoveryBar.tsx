@@ -12,6 +12,7 @@ import {
   COMMUNITY_DISCOVERY_TABS,
   filtersForDiscoveryTab,
   getDiscoveryTab,
+  visibleDiscoveryTabs,
   type CommunityDiscoveryTab,
 } from '../../utils/communityDiscovery'
 
@@ -81,6 +82,8 @@ interface CommunityDiscoveryBarProps {
   onPostViewChange: (view: CommunityPostView) => void
   /** Search text restored from the URL (?q=). */
   initialSearch?: string
+  /** Show the personal Following tab (signed-in users). */
+  showFollowingTab?: boolean
 }
 
 const QUICK_TAG_LIMIT = 8
@@ -98,8 +101,10 @@ export function CommunityDiscoveryBar({
   onTabChange,
   onPostViewChange,
   initialSearch = '',
+  showFollowingTab = false,
 }: CommunityDiscoveryBarProps) {
   const isDesktop = isDesktopApp()
+  const discoveryTabs = visibleDiscoveryTabs(showFollowingTab)
   const [tags, setTags] = useState<TagOption[]>([])
   const tabScrollRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
@@ -187,7 +192,7 @@ export function CommunityDiscoveryBar({
             aria-label="Discovery feed"
             className={`flex gap-1 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-0.5 ${SCROLL_HIDE}`}
           >
-            {COMMUNITY_DISCOVERY_TABS.map(({ id, label, hint }) => {
+            {discoveryTabs.map(({ id, label, hint }) => {
               const selected = activeTab === id
               return (
                 <button
@@ -205,18 +210,18 @@ export function CommunityDiscoveryBar({
                       return
                     }
                     e.preventDefault()
-                    const idx = COMMUNITY_DISCOVERY_TABS.findIndex((t) => t.id === id)
+                    const idx = discoveryTabs.findIndex((t) => t.id === id)
                     let nextIdx = idx
                     if (e.key === 'ArrowRight') {
-                      nextIdx = (idx + 1) % COMMUNITY_DISCOVERY_TABS.length
+                      nextIdx = (idx + 1) % discoveryTabs.length
                     } else if (e.key === 'ArrowLeft') {
-                      nextIdx = (idx - 1 + COMMUNITY_DISCOVERY_TABS.length) % COMMUNITY_DISCOVERY_TABS.length
+                      nextIdx = (idx - 1 + discoveryTabs.length) % discoveryTabs.length
                     } else if (e.key === 'Home') {
                       nextIdx = 0
                     } else if (e.key === 'End') {
-                      nextIdx = COMMUNITY_DISCOVERY_TABS.length - 1
+                      nextIdx = discoveryTabs.length - 1
                     }
-                    focusAndSelectTab(COMMUNITY_DISCOVERY_TABS[nextIdx].id)
+                    focusAndSelectTab(discoveryTabs[nextIdx].id)
                   }}
                   className={`snap-start shrink-0 rounded-lg px-3 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 @sm/main:px-3.5 ${
                     selected

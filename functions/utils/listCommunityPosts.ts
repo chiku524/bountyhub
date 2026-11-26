@@ -4,10 +4,12 @@ import {
   bounties,
   comments,
   postTags,
+  postWatches,
   media,
   posts,
   profiles,
   tags,
+  tagFollows,
   users,
   votes,
 } from '../../drizzle/schema'
@@ -24,6 +26,10 @@ export interface ListCommunityPostsParams {
   unanswered?: boolean
   tags?: string[]
   sortBy?: string
+  /** Personal feed: questions in tags the viewer follows, plus questions they watch. */
+  following?: boolean
+  /** Set by listCommunityPosts from the viewer; required when `following` is true. */
+  followerId?: string
 }
 
 export interface ListCommunityPostsResult {
@@ -128,6 +134,20 @@ function buildWhereConditions(params: ListCommunityPostsParams, db: Db): SQL | u
     conditions.push(inArray(posts.id, taggedPostIds))
   }
 
+  if (params.following && params.followerId) {
+    const followedTagPostIds = db
+      .select({ id: postTags.postId })
+      .from(postTags)
+      .innerJoin(tagFollows, eq(postTags.tagId, tagFollows.tagId))
+      .where(eq(tagFollows.userId, params.followerId))
+    const watchedPostIds = db
+      .select({ id: postWatches.postId })
+      .from(postWatches)
+      .where(eq(postWatches.userId, params.followerId))
+
+    conditions.push(or(inArray(posts.id, followedTagPostIds), inArray(posts.id, watchedPostIds))!)
+  }
+
   if (conditions.length === 0) return undefined
   return and(...conditions)
 }
@@ -163,7 +183,16 @@ export async function listCommunityPosts(
   const validPage = Math.max(1, params.page)
   const validLimit = Math.min(Math.max(1, params.limit), 100)
   const offset = (validPage - 1) * validLimit
-  const whereClause = buildWhereConditions(params, db)
+
+  if (params.following && !userId) {
+    // Signed-out viewers have no personal feed.
+    return {
+      posts: [],
+      pagination: { page: validPage, limit: validLimit, total: 0, totalPages: 0, hasNextPage: false, hasPrevPage: false },
+    }
+  }
+
+  const whereClause = buildWhereConditions({ ...params, followerId: userId ?? undefined }, db)
   const orderBy = buildOrderBy(params.sortBy)
 
   const commentCountSql = sql<number>`(SELECT COUNT(*) FROM ${comments} WHERE ${comments.postId} = ${posts.id})`.as(

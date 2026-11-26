@@ -5,6 +5,7 @@ import { comments, users, votes, posts, profiles } from '../../../../drizzle/sch
 import { eq, and } from 'drizzle-orm'
 import { updateReputation } from '../../../../src/utils/reputation'
 import { createCommentNotification } from '../../../../src/utils/notifications'
+import { notifyPostWatchers } from '../../../../src/utils/followNotifications'
 
 interface Env {
   DB: any
@@ -148,6 +149,14 @@ app.post(async (c) => {
           postResult[0].title,
           postId
         )
+      }
+      if (postResult.length > 0) {
+        await notifyPostWatchers(db, {
+          postId,
+          postTitle: postResult[0].title,
+          activity: { kind: 'comment', actorUsername: user.username },
+          exclude: [userId, postResult[0].authorId],
+        })
       }
     } catch (notificationError) {
       console.error('Error creating comment notification:', notificationError)

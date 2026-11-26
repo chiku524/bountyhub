@@ -6,8 +6,13 @@ import {
   getDiscoveryTab,
   isCommunityDiscoveryTab,
   parseDiscoveryTab,
+  visibleDiscoveryTabs,
 } from './communityDiscovery'
-import type { CommunityFilterOptions } from './communityPosts'
+import {
+  buildCommunityPostsQuery,
+  communityPostsQueryToSearchParams,
+  type CommunityFilterOptions,
+} from './communityPosts'
 
 const base = (): CommunityFilterOptions => ({
   status: '',
@@ -97,3 +102,28 @@ describe('formatFeedSummary', () => {
   })
 })
 
+
+describe('Following tab', () => {
+  it('is only shown to signed-in users, first in the list', () => {
+    expect(visibleDiscoveryTabs(false).map((t) => t.id)).not.toContain('following')
+    expect(visibleDiscoveryTabs(true)[0].id).toBe('following')
+  })
+
+  it('maps to the following filter and back', () => {
+    const next = filtersForDiscoveryTab('following', { ...base(), selectedTags: ['rust'] })
+    expect(next.following).toBe(true)
+    expect(next.selectedTags).toEqual(['rust'])
+    expect(getDiscoveryTab(next)).toBe('following')
+    expect(parseDiscoveryTab('following')).toBe('following')
+  })
+
+  it('clears the following filter when switching to a public tab', () => {
+    const next = filtersForDiscoveryTab('new', { ...base(), following: true })
+    expect(next.following).toBeUndefined()
+  })
+
+  it('sends following=true to the API', () => {
+    const query = buildCommunityPostsQuery(1, 12, '', { ...base(), following: true })
+    expect(communityPostsQueryToSearchParams(query)).toContain('following=true')
+  })
+})

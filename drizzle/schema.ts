@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, real, uniqueIndex, index } from 'drizzle-orm/sqlite-core';
 import { sql } from 'drizzle-orm';
 
 // Users table
@@ -264,6 +264,28 @@ export const bookmarks = sqliteTable('bookmarks', {
   postId: text('post_id').notNull().references(() => posts.id, { onDelete: 'cascade' }),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
 });
+
+// Tags a user follows; drives the personal "Following" feed and bounty alerts.
+export const tagFollows = sqliteTable('tag_follows', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  tagId: text('tag_id').notNull().references(() => tags.id, { onDelete: 'cascade' }),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (t) => [
+  uniqueIndex('tag_follows_user_tag_idx').on(t.userId, t.tagId),
+  index('tag_follows_tag_idx').on(t.tagId),
+]);
+
+// Questions a user watches; watchers are notified of new answers, comments and accepted answers.
+export const postWatches = sqliteTable('post_watches', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  postId: text('post_id').notNull().references(() => posts.id, { onDelete: 'cascade' }),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (t) => [
+  uniqueIndex('post_watches_user_post_idx').on(t.userId, t.postId),
+  index('post_watches_post_idx').on(t.postId),
+]);
 
 // Refund requests table
 export const refundRequests = sqliteTable('refund_requests', {

@@ -7,6 +7,8 @@ export interface CommunityFilterOptions {
   hasBounty: boolean
   unanswered: boolean
   selectedTags: string[]
+  /** Personal feed: followed tags + watched questions (signed-in only). */
+  following?: boolean
 }
 
 export interface CommunityPostsQuery {
@@ -19,6 +21,7 @@ export interface CommunityPostsQuery {
   unanswered?: boolean
   tags?: string[]
   sortBy?: string
+  following?: boolean
 }
 
 export interface CommunityPostsPagination {
@@ -51,6 +54,7 @@ export function buildCommunityPostsQuery(
     unanswered: filters.unanswered || undefined,
     tags: filters.selectedTags.length > 0 ? filters.selectedTags : undefined,
     sortBy: filters.sortBy !== 'newest' ? filters.sortBy : undefined,
+    following: filters.following || undefined,
   }
 }
 
@@ -66,6 +70,7 @@ export function communityPostsQueryToSearchParams(query: CommunityPostsQuery): s
   if (query.unanswered) params.set('unanswered', 'true')
   if (query.tags?.length) params.set('tags', query.tags.join(','))
   if (query.sortBy) params.set('sortBy', query.sortBy)
+  if (query.following) params.set('following', 'true')
 
   return params.toString()
 }
