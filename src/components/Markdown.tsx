@@ -1,9 +1,22 @@
 import ReactMarkdown, { type Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { Link } from 'react-router-dom'
+import { remarkMentions } from '../utils/remarkMentions'
 import { CodeBlockView } from './CodeBlockView'
 
+const plainPlugins = [remarkGfm]
+const mentionPlugins = [remarkGfm, remarkMentions]
+
 const components: Components = {
-  a: ({ href, children }) => {
+  a: ({ href, children, node }) => {
+    const mention = node?.properties?.dataMention
+    if (mention && href) {
+      return (
+        <Link to={href} className="font-semibold text-indigo-600 hover:underline dark:text-indigo-400">
+          {children}
+        </Link>
+      )
+    }
     const external = Boolean(href && /^https?:\/\//i.test(href))
     return (
       <a
@@ -44,13 +57,14 @@ const components: Components = {
 /**
  * Renders user-written Markdown (GitHub-flavoured). Raw HTML is not rendered, so content stays safe.
  * Plain text written before Markdown support renders the same, with line breaks kept.
+ * With `mentions`, `@username` outside code links to that user's profile.
  */
-export function Markdown({ children, className = '' }: { children: string; className?: string }) {
+export function Markdown({ children, className = '', mentions = false }: { children: string; className?: string; mentions?: boolean }) {
   return (
     <div
       className={`markdown-body break-words text-neutral-700 dark:text-gray-300 [&_blockquote]:border-l-4 [&_blockquote]:border-neutral-300 [&_blockquote]:pl-3 [&_blockquote]:italic dark:[&_blockquote]:border-neutral-600 [&_h1]:mt-4 [&_h1]:text-xl [&_h1]:font-semibold [&_h2]:mt-4 [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:mt-3 [&_h3]:font-semibold [&_li]:my-0.5 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:my-2 [&_p]:whitespace-pre-line [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-6 ${className}`}
     >
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+      <ReactMarkdown remarkPlugins={mentions ? mentionPlugins : plainPlugins} components={components}>
         {children}
       </ReactMarkdown>
     </div>

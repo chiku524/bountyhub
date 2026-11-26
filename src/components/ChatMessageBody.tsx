@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { parseGifMarkdown } from '../utils/chatGif';
+import { MentionText } from './MentionText';
 
 function ChatGifImage({ src, alt }: { src: string; alt: string }) {
   const [failed, setFailed] = useState(false);
@@ -28,7 +29,7 @@ function ChatGifImage({ src, alt }: { src: string; alt: string }) {
   );
 }
 
-/** Renders `[GIF: …](url)` as an image, otherwise plain text (optionally wrapped). */
+/** Renders `[GIF: …](url)` as an image, otherwise plain text with @mentions linked (optionally wrapped). */
 export function ChatMessageBody({
   content,
   className,
@@ -46,7 +47,11 @@ export function ChatMessageBody({
     );
   }
   if (className) {
-    return <div className={className}>{content}</div>;
+    return (
+      <div className={className}>
+        <MentionText text={content} />
+      </div>
+    );
   }
-  return <>{content}</>;
+  return <MentionText text={content} />;
 }

@@ -4,7 +4,7 @@ import { eq, desc, and, sql } from 'drizzle-orm';
 import { chatMessages, chatRoomParticipants, users, profiles, posts } from '../../../../drizzle/schema';
 import { createDb } from '../../../../src/utils/db';
 import { getUserIdFromSession } from '../../../../src/utils/auth';
-import { broadcastMessageToRoom } from '../../chat';
+import { broadcastMessageToRoom, notifyChatMentions } from '../../chat';
 
 interface Env {
   DB: D1Database;
@@ -261,6 +261,14 @@ export async function postPostChatMessage(c: AppContext, postId: string) {
       .limit(1);
 
     await broadcastMessageToRoom(c.env, roomId, message[0]);
+    if (message[0]?.author) {
+      await notifyChatMentions(
+        db,
+        { id: roomId, name: postRow[0].title, type: 'POST', isPublic: true, teamId: null, postId },
+        content,
+        { id: userId, username: message[0].author.username }
+      );
+    }
     return c.json({ success: true, message: message[0] });
   } catch (error) {
     console.error('Error sending post chat message:', error);

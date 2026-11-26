@@ -1,5 +1,7 @@
-import { notifications } from '../../drizzle/schema'
+import { inArray, sql } from 'drizzle-orm'
+import { notifications, users } from '../../drizzle/schema'
 import { isNotificationTypeEnabled, type NotificationType } from './notificationPreferences'
+import { extractMentions, mentionSnippet } from './mentions'
 
 export type { NotificationType }
 
@@ -9,7 +11,7 @@ export interface CreateNotificationParams {
   type: NotificationType
   title: string
   message: string
-  navigationType?: 'post' | 'home' | 'profile' | 'wallet'
+  navigationType?: 'post' | 'home' | 'profile' | 'wallet' | 'chat'
   navigationId?: string
   navigationUrl?: string
 }
@@ -157,3 +159,80 @@ export async function createSystemNotification(
     navigationUrl: navigationUrl || undefined
   })
 } 
+export interface NotifyMentionsParams {
+  db: any
+  /** The content that may contain @mentions (Markdown or plain text). */
+  text: string
+  authorId: string
+  authorUsername: string
+  /** Where the mention happened, e.g. `an answer on "Title"` or `Global Chat`. */
+  where: string
+  navigationType: 'post' | 'chat'
+  navigationId?: string
+  navigationUrl: string
+  /** When set, only these users can be notified (e.g. members of a private room). */
+  allowedUserIds?: ReadonlySet<string>
+  /** User ids that must not get a mention notification (e.g. already notified another way). */
+  excludeUserIds?: ReadonlySet<string>
+  /** Usernames (any case) already mentioned before an edit, so they are not notified twice. */
+  previousText?: string
+}
+
+/**
+ * Notifies every user @mentioned in `text` (except the author). Unknown usernames are ignored.
+ * Never throws: a failed notification must not fail the message or answer that triggered it.
+ * Returns the ids of the users who were notified.
+ */
+export async function notifyMentionedUsers({
+  db,
+  text,
+  authorId,
+  authorUsername,
+  where,
+  navigationType,
+  navigationId,
+  navigationUrl,
+  allowedUserIds,
+  excludeUserIds,
+  previousText,
+}: NotifyMentionsParams): Promise<string[]> {
+  try {
+    const before = new Set(extractMentions(previousText ?? '').map((n) => n.toLowerCase()))
+    const names = extractMentions(text)
+      .map((n) => n.toLowerCase())
+      .filter((n) => !before.has(n))
+    if (names.length === 0) return []
+
+    const mentioned: { id: string }[] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(inArray(sql`lower(${users.username})`, names))
+
+    const recipients = [...new Set(mentioned.map((u) => u.id))].filter(
+      (id) => id !== authorId && !excludeUserIds?.has(id) && (!allowedUserIds || allowedUserIds.has(id))
+    )
+    if (recipients.length === 0) return []
+
+    const snippet = mentionSnippet(text)
+    const now = new Date()
+    await db.insert(notifications).values(
+      recipients.map((userId) => ({
+        id: crypto.randomUUID(),
+        userId,
+        type: 'mention',
+        title: `${authorUsername} mentioned you`,
+        message: snippet ? `${authorUsername} mentioned you in ${where}: "${snippet}"` : `${authorUsername} mentioned you in ${where}`,
+        read: false,
+        navigationType,
+        navigationId: navigationId || null,
+        navigationUrl,
+        createdAt: now,
+        updatedAt: now,
+      }))
+    )
+    return recipients
+  } catch (error) {
+    console.error('Error creating mention notifications:', error)
+    return []
+  }
+}

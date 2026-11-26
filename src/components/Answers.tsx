@@ -334,9 +334,10 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post, onPostChang
             id="answer-content"
             value={newAnswer}
             onChange={setNewAnswer}
-            placeholder="Write your answer..."
+            placeholder="Write your answer... (type @ to mention someone)"
             rows={6}
             disabled={submitting}
+            mentions
           />
           
           {/* Code Block Editor */}
@@ -461,7 +462,7 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post, onPostChang
               </div>
               {editingAnswerId === answer.id ? (
                 <div className="space-y-2">
-                  <MarkdownEditor value={editingText} onChange={setEditingText} rows={5} disabled={savingEdit} />
+                  <MarkdownEditor value={editingText} onChange={setEditingText} rows={5} disabled={savingEdit} mentions />
                   <div className="flex justify-end gap-2">
                     <button
                       type="button"
@@ -482,7 +483,7 @@ export const Answers: React.FC<AnswersProps> = memo(({ postId, post, onPostChang
                   </div>
                 </div>
               ) : (
-                <Markdown>{answer.content}</Markdown>
+                <Markdown mentions>{answer.content}</Markdown>
               )}
               
               {/* Code Blocks */}

@@ -5,6 +5,8 @@ import { LoadingSpinner } from './LoadingSpinner';
 import { ProfilePicture } from './ProfilePicture';
 import { FiMessageCircle, FiSend, FiChevronDown } from 'react-icons/fi';
 import { useChatWebSocket, type ChatWsMessagePayload } from '../hooks/useChatWebSocket';
+import { MentionText } from './MentionText';
+import { useMentionAutocomplete } from '../hooks/useMentionAutocomplete';
 
 interface PostChatMessage {
   id: string;
@@ -29,6 +31,7 @@ export function PostChatRoom({ postId }: PostChatRoomProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [input, setInput] = useState('');
+  const mention = useMentionAutocomplete({ value: input, onChange: setInput, enabled: !!user, placement: 'above' });
   const [sending, setSending] = useState(false);
   const [lastMessageTimestamp, setLastMessageTimestamp] = useState<string | null>(null);
   const [isPageVisible, setIsPageVisible] = useState(true);
@@ -243,7 +246,7 @@ export function PostChatRoom({ postId }: PostChatRoomProps) {
                       </span>
                     </div>
                   )}
-                  <div className="text-sm whitespace-pre-wrap break-words">{msg.content}</div>
+                  <div className="text-sm whitespace-pre-wrap break-words"><MentionText text={msg.content} /></div>
                   <div
                     className={`text-xs mt-1 ${
                       msg.author.id === user?.id ? 'text-indigo-200' : 'text-neutral-500 dark:text-gray-500'
@@ -270,17 +273,20 @@ export function PostChatRoom({ postId }: PostChatRoomProps) {
 
         {user ? (
           <form onSubmit={sendMessage} className="p-3 border-t border-neutral-200 dark:border-neutral-700 flex gap-2">
+            <div className="relative flex min-w-0 flex-1">
             <input
+              {...mention.fieldProps}
               id="post-chat-message"
               name="postChatMessage"
               type="text"
               value={input}
-              onChange={(e) => setInput(e.target.value)}
               placeholder="Message..."
-              className="flex-1 px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="min-w-0 flex-1 px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               disabled={sending}
               autoComplete="off"
             />
+            {mention.list}
+            </div>
             <button
               type="submit"
               disabled={sending || !input.trim()}

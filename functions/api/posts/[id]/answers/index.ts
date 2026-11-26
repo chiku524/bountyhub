@@ -4,7 +4,7 @@ import { getUserIdFromSession } from '../../../../../src/utils/auth'
 import { answers, users, votes, posts, answerCodeBlocks, profiles } from '../../../../../drizzle/schema'
 import { eq, and } from 'drizzle-orm'
 import { updateReputation } from '../../../../../src/utils/reputation'
-import { createAnswerNotification } from '../../../../../src/utils/notifications'
+import { createAnswerNotification, notifyMentionedUsers } from '../../../../../src/utils/notifications'
 import { notifyPostWatchers } from '../../../../../src/utils/followNotifications'
 
 interface Env {
@@ -190,12 +190,27 @@ app.post(async (c) => {
           postId
         )
       }
+
+      // Notify @mentioned users. The question author already got an "new answer" notification.
       if (postResult.length > 0) {
+        const mentionedIds = await notifyMentionedUsers({
+          db,
+          text: content,
+          authorId: userId,
+          authorUsername: user.username,
+          where: `an answer on "${postResult[0].title}"`,
+          navigationType: 'post',
+          navigationId: postId,
+          navigationUrl: `/posts/${postId}`,
+          excludeUserIds: new Set([postResult[0].authorId]),
+        })
+
+        // Tell watchers, skipping anyone already notified above.
         await notifyPostWatchers(db, {
           postId,
           postTitle: postResult[0].title,
           activity: { kind: 'answer', actorUsername: user.username },
-          exclude: [userId, postResult[0].authorId],
+          exclude: [userId, postResult[0].authorId, ...mentionedIds],
         })
       }
     } catch (notificationError) {
@@ -251,6 +266,27 @@ app.put('/:answerId', async (c) => {
     if (typeof content !== 'string' || !content.trim()) return c.json({ error: 'Answer cannot be empty' }, 400)
     const updatedAt = new Date()
     await loaded.db.update(answers).set({ content: content.trim(), updatedAt }).where(eq(answers.id, loaded.answer.id))
+
+    // Only people newly @mentioned by this edit are notified.
+    try {
+      const [post] = await loaded.db.select({ title: posts.title }).from(posts).where(eq(posts.id, loaded.answer.postId)).limit(1)
+      const [author] = await loaded.db.select({ username: users.username }).from(users).where(eq(users.id, loaded.answer.authorId)).limit(1)
+      if (post && author) {
+        await notifyMentionedUsers({
+          db: loaded.db,
+          text: content.trim(),
+          previousText: loaded.answer.content,
+          authorId: loaded.answer.authorId,
+          authorUsername: author.username,
+          where: `an answer on "${post.title}"`,
+          navigationType: 'post',
+          navigationId: loaded.answer.postId,
+          navigationUrl: `/posts/${loaded.answer.postId}`,
+        })
+      }
+    } catch (notificationError) {
+      console.error('Error creating mention notifications for edited answer:', notificationError)
+    }
     return c.json({ success: true, id: loaded.answer.id, content: content.trim(), updatedAt: updatedAt.toISOString() })
   } catch (error) {
     console.error('Edit answer error:', error)

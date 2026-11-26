@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthProvider';
 import { api } from '../utils/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
@@ -11,6 +11,7 @@ import { useEscapeKey } from '../hooks/useEscapeKey';
 import { faviconUrl } from '../utils/faviconUrl';
 import { FocusRestoreBoundary } from '../components/FocusRestoreBoundary';
 import { ChatMessageBody } from '../components/ChatMessageBody';
+import { useMentionAutocomplete } from '../hooks/useMentionAutocomplete';
 
 interface Message {
   id: string;
@@ -86,6 +87,7 @@ const Chat: React.FC = () => {
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [hubTab, setHubTab] = useState<'chat' | 'tasks'>('chat');
   const [newMessage, setNewMessage] = useState('');
+  const mention = useMentionAutocomplete({ value: newMessage, onChange: setNewMessage, placement: 'above' });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
@@ -421,6 +423,25 @@ const Chat: React.FC = () => {
       console.error('Failed to load team:', err);
     }
   };
+
+  // Deep links from mention notifications: /chat?room=<roomId> or /chat?team=<teamId>
+  const [searchParams] = useSearchParams();
+  const handledDeepLinkRef = useRef<string | null>(null);
+  useEffect(() => {
+    const roomParam = searchParams.get('room');
+    const teamParam = searchParams.get('team');
+    const key = `${roomParam ?? ''}|${teamParam ?? ''}`;
+    if ((!roomParam && !teamParam) || handledDeepLinkRef.current === key) return;
+    if (roomParam && rooms.length) {
+      handledDeepLinkRef.current = key;
+      const room = rooms.find((r) => r.id === roomParam);
+      if (room) selectRoom(room);
+    } else if (teamParam && teams.length) {
+      handledDeepLinkRef.current = key;
+      const team = teams.find((t) => t.id === teamParam);
+      if (team) void selectTeam(team);
+    }
+  }, [searchParams, rooms, teams]);
 
   const handleCreateTeam = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -956,16 +977,17 @@ const Chat: React.FC = () => {
                   <form onSubmit={sendMessage} className="flex min-w-0 gap-2">
                     <div className="relative min-w-0 flex-1">
                       <input
+                        {...mention.fieldProps}
                         id="hub-chat-message"
                         name="chatMessage"
                         type="text"
                         value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        placeholder="Type your message..."
+                        placeholder="Type a message, @ to mention someone..."
                         className="w-full px-4 py-2 border border-gray-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                         disabled={sending}
                         autoComplete="off"
                       />
+                      {mention.list}
                       <div className="absolute right-2 top-2 flex space-x-1">
                         <button type="button" className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
                           <FiSmile className="h-4 w-4" />

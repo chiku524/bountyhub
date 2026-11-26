@@ -1,5 +1,7 @@
+import type React from 'react'
 import { useId, useState } from 'react'
 import { Markdown } from './Markdown'
+import { useMentionAutocomplete } from '../hooks/useMentionAutocomplete'
 
 interface MarkdownEditorProps {
   id?: string
@@ -10,6 +12,8 @@ interface MarkdownEditorProps {
   disabled?: boolean
   required?: boolean
   className?: string
+  /** Suggest usernames after `@` and render mentions in the preview. */
+  mentions?: boolean
 }
 
 /** Textarea with Write / Preview tabs for Markdown content (posts and answers). */
@@ -22,8 +26,10 @@ export function MarkdownEditor({
   disabled,
   required,
   className = '',
+  mentions = false,
 }: MarkdownEditorProps) {
   const [tab, setTab] = useState<'write' | 'preview'>('write')
+  const mention = useMentionAutocomplete({ value, onChange, enabled: mentions })
   const autoId = useId()
   const textareaId = id ?? autoId
 
@@ -46,23 +52,26 @@ export function MarkdownEditor({
           </button>
         </div>
         <span className="text-xs text-neutral-400 dark:text-neutral-500">
-          Markdown supported: **bold**, `code`, ```fences```, [links](https://…)
+          Markdown supported: **bold**, `code`, ```fences```, [links](https://…){mentions ? ', @mentions' : ''}
         </span>
       </div>
       {tab === 'write' ? (
+        <div className="relative">
         <textarea
+          {...(mentions ? mention.fieldProps : { onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => onChange(e.target.value) })}
           id={textareaId}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           rows={rows}
           disabled={disabled}
           required={required}
           className="block w-full resize-y rounded-b-lg border-0 bg-transparent p-3 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-hidden focus:ring-2 focus:ring-inset focus:ring-violet-500 dark:text-white dark:placeholder-gray-500 @sm/main:text-base"
         />
+        {mention.list}
+        </div>
       ) : (
         <div className="min-h-32 p-3" aria-live="polite">
-          {value.trim() ? <Markdown>{value}</Markdown> : <p className="text-sm text-neutral-400">Nothing to preview yet.</p>}
+          {value.trim() ? <Markdown mentions={mentions}>{value}</Markdown> : <p className="text-sm text-neutral-400">Nothing to preview yet.</p>}
         </div>
       )}
     </div>

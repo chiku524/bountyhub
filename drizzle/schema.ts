@@ -369,7 +369,7 @@ export const passwordResetTokens = sqliteTable('password_reset_tokens', {
 export const notifications = sqliteTable('notifications', {
   id: text('id').primaryKey(),
   userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  type: text('type', { enum: ['comment', 'vote', 'answer', 'bounty', 'system'] }).notNull(),
+  type: text('type', { enum: ['comment', 'vote', 'answer', 'bounty', 'system', 'mention'] }).notNull(),
   title: text('title').notNull(),
   message: text('message').notNull(),
   read: integer('read', { mode: 'boolean' }).notNull().default(false),

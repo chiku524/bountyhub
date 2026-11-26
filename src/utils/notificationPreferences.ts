@@ -1,7 +1,10 @@
 import { eq } from 'drizzle-orm'
 import { notificationSettings } from '../../drizzle/schema'
 
-export type NotificationType = 'comment' | 'vote' | 'answer' | 'bounty' | 'system'
+/** Notification types a user can switch off in their settings. */
+export type PreferenceNotificationType = 'comment' | 'vote' | 'answer' | 'bounty' | 'system'
+/** Every notification type. Mentions have no setting yet and are always delivered. */
+export type NotificationType = PreferenceNotificationType | 'mention'
 export type DigestFrequency = 'off' | 'daily' | 'weekly'
 
 /** What a user has chosen; this is the shape the settings API reads and writes. */
@@ -25,7 +28,7 @@ export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
 }
 
 const DIGEST_FREQUENCIES: DigestFrequency[] = ['off', 'daily', 'weekly']
-const TYPE_KEYS: NotificationType[] = ['answer', 'comment', 'vote', 'bounty', 'system']
+const TYPE_KEYS: PreferenceNotificationType[] = ['answer', 'comment', 'vote', 'bounty', 'system']
 
 type SettingsRow = typeof notificationSettings.$inferSelect
 
@@ -87,8 +90,9 @@ export async function getNotificationSettingsRow(db: any, userId: string): Promi
 /** True when the user wants in-app alerts of this type. Fails open so a settings lookup error never drops alerts. */
 export async function isNotificationTypeEnabled(db: any, userId: string, type: NotificationType): Promise<boolean> {
   try {
+    if (!TYPE_KEYS.includes(type as PreferenceNotificationType)) return true
     const prefs = preferencesFromRow(await getNotificationSettingsRow(db, userId))
-    return prefs[type]
+    return prefs[type as PreferenceNotificationType]
   } catch (error) {
     console.error('Error reading notification settings:', error)
     return true
